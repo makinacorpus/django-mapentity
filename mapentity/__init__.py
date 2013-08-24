@@ -15,12 +15,22 @@ app_settings = dict({
     'TITLE': "",
     'HISTORY_ITEMS_MAX': 5,
     'CONVERSION_SERVER': '',
+    'JS_SETTINGS_VIEW': 'mapentity:js_settings',
+    'ROOT_URL': '',
     'LANGUAGES': settings.LANGUAGES,
     'LANGUAGE_CODE': settings.LANGUAGE_CODE,
     'TEMP_DIR': getattr(settings, 'TEMP_DIR', '/tmp'),
     'MAP_CAPTURE_SIZE': 800,
     'GEOM_FIELD_NAME': 'geom',
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
+
+
+_MAP_STYLES = {
+    'detail': {'weight': 5, 'opacity': 1, 'color': 'yellow', 'arrowColor': '#FF5E00', 'arrowSize': 8},
+    'others': {'opacity': 0.9, 'fillOpacity': 0.7, 'color': 'yellow'},
+    'filelayer': {'color': 'red', 'opacity': 1.0, 'fillOpacity': 1.0, 'weight': 2, 'radius': 8},
+    'draw': {'color': '#35FF00', 'opacity': 0.8, 'weight': 3},
+}
 
 
 MapEntity = namedtuple('MapEntity', ['menu', 'label', 'icon', 'icon_small', 'modelname', 'url_list'])

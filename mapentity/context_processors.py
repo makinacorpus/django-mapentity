@@ -8,5 +8,6 @@ def settings(request):
         TITLE=app_settings['TITLE'],
         DEBUG=settings_.DEBUG,
         VERSION=getattr(settings_, 'VERSION', 'unknown'),
+        JS_SETTINGS_VIEW=app_settings['JS_SETTINGS_VIEW'],
         registry=registry,
     )

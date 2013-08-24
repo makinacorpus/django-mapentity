@@ -12,6 +12,7 @@ from django.db.models.query import QuerySet
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseNotFound, HttpResponseServerError)
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -36,7 +37,7 @@ from djappypod.response import OdtTemplateResponse
 from screamshot.decorators import login_required_capturable
 from screamshot.utils import casperjs_capture
 
-from . import app_settings
+from . import app_settings, _MAP_STYLES
 from . import models as mapentity_models
 from .decorators import save_history
 from .serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
@@ -192,6 +193,28 @@ def handler500(request, template_name='500.html'):
     context['stack'] = "\n".join(traceback.format_tb(tb))
     t = loader.get_template('500.html')
     return HttpResponseServerError(t.render(context))
+
+
+class JSSettings(JSONResponseMixin, TemplateView):
+    """
+    Javascript settings, in JSON format.
+    Likely to be overriden. Contains only necessary stuff
+    for mapentity.
+    """
+    def get_context_data(self):
+        dictsettings = {}
+        dictsettings['map'] = dict(
+            extent=getattr(settings, 'LEAFLET_CONFIG', {}).get('SPATIAL_EXTENT'),
+            styles=_MAP_STYLES,
+        )
+        root_url = app_settings['ROOT_URL']
+        dictsettings['server'] = root_url if root_url.endswith('/') else root_url + '/'
+        # Useful for JS calendars
+        dictsettings['date_format'] = settings.DATE_INPUT_FORMATS[0].replace('%Y', 'yyyy').replace('%m', 'mm').replace('%d', 'dd')
+        # Languages
+        dictsettings['languages'] = dict(available=dict(app_settings['LANGUAGES']),
+                                         default=app_settings['LANGUAGE_CODE'])
+        return dictsettings
 
 
 @csrf_exempt
