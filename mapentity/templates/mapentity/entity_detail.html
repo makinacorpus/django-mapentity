@@ -19,9 +19,7 @@
             <ul class="nav nav-tabs">
                 <li id="tab-properties" class="{% if activetab != "attachments" %}active{% endif %}">
                     <a href="#properties" data-toggle="tab"><i class="icon-tasks"></i> {% trans "Properties" %}
-                    {% if object.structure %}
-                        <span class="label" title="{% trans "Structure" %}">{{ object.structure }}</span>
-                    {% endif %}
+                    {% smart_include "propertiestab" %}
                     </a>
                 </li>
                 <li id="tab-attachments" class="{% if activetab == "attachments" %}active{% endif %}">
