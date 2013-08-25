@@ -22,13 +22,23 @@
     {% leaflet_css %}
     <link rel="stylesheet" href="{% static "mapentity/Leaflet.draw/leaflet.draw.css" %}"></link>
     <link rel="stylesheet" href="{% static "mapentity/Leaflet.label/leaflet.label.css" %}"></link>
-    <link rel="stylesheet" href="{% static "style.css" %}" />
-    <link rel="stylesheet" href="{% static "mapentity/style.css" %}" />
-    {% if not DEBUG %}
+
     <style>
+    {% for entity in registry.entities %}
+        .form-panel.{{ entity.modelname }}, .details-panel.{{ entity.modelname }} {
+            background: url({% static entity.icon_big %}) no-repeat;
+        }
+        li.history.{{ entity.modelname }} > a, li.history.{{ entity.modelname }} button:first-child {
+            background-image: url({% static entity.icon_small %});
+        }
+    {% endfor %}
+    {% if not DEBUG %}
         .map-error { border: 0px;}
-    </style>
     {% endif %}
+    </style>
+    <link rel="stylesheet" href="{% static "mapentity/style.css" %}" />
+    {# Overriden styles #}
+    <link rel="stylesheet" href="{% static "style.css" %}" />
 
     {% block extracss %}
     {% endblock extracss %}
