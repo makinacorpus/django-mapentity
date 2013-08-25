@@ -1,13 +1,10 @@
 {% load i18n static mapentity leaflet_tags geojson_tags %}
 
-{% leaflet_map "detailmap"  fitextent=False %}
+{% leaflet_map "detailmap"  fitextent=False callback="detailmapInit" %}
 <script type="text/javascript">
 function detailmapInit(map, bounds) {
-    {% smart_include "mapinit" %}
-    
-    {% block mapinit %}
-    {% endblock mapinit %}
-    
+    {% smart_include "mapinit" %}   // Each app can add layers etc.
+
     {% if readonly %}
         // Set map readonly
         map.dragging.disable();
@@ -59,11 +56,11 @@ function detailmapInit(map, bounds) {
                                  attributes: {'fill': DETAIL_STYLE.arrowColor, 'font-size': DETAIL_STYLE.arrowSize}});
     });
 
-    // Restore map context, only for screenshoting purposing
+    // Restore map context, only for screenshoting purpose
     var context = getURLParameter('context');
     if (context && typeof context == 'object') {
-        delete context.mapview;
-        delete context.maplayers;
+        delete context.mapview;    // keep objects bounds
+        delete context.maplayers;  // keep default layers
         MapEntity.Context.restoreFullContext(map, context);
     }
 
@@ -75,5 +72,3 @@ function detailmapInit(map, bounds) {
     });
 }
 </script>
-
-{% block extra %}{% endblock extra %}
