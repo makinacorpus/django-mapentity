@@ -76,7 +76,7 @@ L.Handler.MarkerSnapping = L.Handler.extend({
 });
 
 
-L.Handler.SnappedEdit = L.Handler.PolyEdit.extend({
+L.Handler.SnappedEdit = L.Edit.Poly.extend({
 
     initialize: function (map, poly, options) {
         L.Handler.PolyEdit.prototype.initialize.call(this, poly, options);

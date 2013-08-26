@@ -1,4 +1,4 @@
-L.Polyline.Measure = L.Polyline.Draw.extend({
+L.Polyline.Measure = L.Draw.Polyline.extend({
     addHooks: function() {
         L.Handler.Draw.prototype.addHooks.call(this);
         if (this._map) {
@@ -36,7 +36,7 @@ L.Polyline.Measure = L.Polyline.Draw.extend({
 
         this._container.style.cursor = 'crosshair';
 
-        this._updateLabelText(this._getLabelText());
+        this._updateTooltip();
         this._map.on('mousemove', this._onMouseMove, this);
     },
 
@@ -45,7 +45,7 @@ L.Polyline.Measure = L.Polyline.Draw.extend({
 
         this._cleanUpShape();
 
-        this._updateLabelText(this._getLabelText());
+        this._updateTooltip();
 
         this._map.off('mousemove', this._onMouseMove);
         this._clearGuides();
@@ -63,13 +63,14 @@ L.Polyline.Measure = L.Polyline.Draw.extend({
         if (!this._drawing) {
             this._removeShape();
             this._startShape();
+            return;
         }
 
-        L.Polyline.Draw.prototype._onClick.call(this, e);
+        L.Draw.Polyline.prototype._onClick.call(this, e);
     },
 
-    _getLabelText: function() {
-        var labelText = L.Polyline.Draw.prototype._getLabelText.call(this);
+    _getTooltipText: function() {
+        var labelText = L.Draw.Polyline.prototype._getTooltipText.call(this);
         if (!this._drawing) {
             labelText.text = '';
         }
@@ -102,7 +103,7 @@ L.Control.Measurement = L.Control.extend({
     onAdd: function(map) {
         var className = 'leaflet-control-draw';
 
-        this._container = L.DomUtil.create('div', className);
+        this._container = L.DomUtil.create('div', 'leaflet-bar');
 
         this.handler = new L.Polyline.Measure(map, this.options.handler);
 

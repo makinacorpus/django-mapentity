@@ -39,7 +39,7 @@ L.Control.Screenshot = L.Control.extend({
 
     onAdd: function(map) {
         this.map = map;
-        this._container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-control');
+        this._container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-control leaflet-bar');
         var link = L.DomUtil.create('a', 'leaflet-control-zoom-out screenshot-control', this._container);
         link.href = '#';
         link.title = this.options.title;
