@@ -25,13 +25,13 @@ function detailmapInit(map, bounds) {
         indexing: false
     });
     map.addLayer(objectLayer);
-    map.on('layeradd', function () {
-        objectLayer.bringToFront();
+    map.on('layeradd', function (e) {
+        if (objectLayer._map) objectLayer.bringToFront();
     })
 
-    var objectBounds = {{ object|latlngbounds }},
-        mapBounds = objectBounds ? new L.LatLngBounds(objectBounds) : bounds;
+    var mapBounds = {{ object|latlngbounds }} || bounds;
     map.fitBounds(mapBounds);
+    map.resetviewControl.getBounds = function () { return mapBounds; };
 
 
     // Show start and end
