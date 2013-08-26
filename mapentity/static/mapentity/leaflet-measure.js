@@ -80,9 +80,11 @@ L.Polyline.Measure = L.Draw.Polyline.extend({
 
 L.Control.Measurement = L.Control.extend({
 
+    static: {
+        TITLE: 'Measure distances'
+    },
     options: {
         position: 'topleft',
-        title: 'Measure distances',
         handler: {}
     },
 
@@ -109,7 +111,7 @@ L.Control.Measurement = L.Control.extend({
 
         var link = L.DomUtil.create('a', className+'-measure', this._container);
         link.href = '#';
-        link.title = this.options.title;
+        link.title = L.Control.Measurement.TITLE;
 
         L.DomEvent
             .addListener(link, 'click', L.DomEvent.stopPropagation)
