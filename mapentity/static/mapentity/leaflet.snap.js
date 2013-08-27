@@ -1,121 +1,138 @@
-L.Handler.MarkerSnapping = L.Handler.extend({
-    SNAP_DISTANCE: 15,  // snap on marker move
-    TOLERANCE: 0.00005, // snap existing object
+L.Handler.MarkerSnap = L.Handler.extend({
+    statics: {
+        SNAP_DISTANCE: 15  // in pixels
+    },
 
     initialize: function (map, marker) {
         L.Handler.prototype.initialize.call(this, map);
-        this._markers = []
-        
-        // Get necessary distance around mouse in lat/lng from distance in pixels
-        this._buffer = this._map.layerPointToLatLng(new L.Point(0,0)).lat - 
-                       this._map.layerPointToLatLng(new L.Point(this.SNAP_DISTANCE,0)).lat;
+        this._markers = [];
+        this._guides = [];
 
         if (marker) {
             // new markers should be draggable !
             if (!marker.dragging) marker.dragging = new L.Handler.MarkerDrag(marker);
             marker.dragging.enable();
-            this.snapMarker(marker);
+            this.watchMarker(marker);
         }
+
+        // Convert SNAP_DISTANCE in pixels into buffer in degres, for searching around mouse
+        // It changes at each zoom change.
+        function computeBuffer() {
+            this._buffer = map.layerPointToLatLng(new L.Point(0,0)).lat -
+                           map.layerPointToLatLng(new L.Point(L.Handler.MarkerSnap.SNAP_DISTANCE, 0)).lat;
+        }
+        map.on('zoomend', computeBuffer, this);
+        map.whenReady(computeBuffer, this);
+        computeBuffer();
     },
 
     enable: function () {
         this.disable();
         for (var i=0; i<this._markers.length; i++) {
-            this.snapMarker(this._markers[i]);
+            this.watchMarker(this._markers[i]);
         }
     },
 
     disable: function () {
         for (var i=0; i<this._markers.length; i++) {
-            this.unsnapMarker(this._markers[i]);
+            this.unwatchMarker(this._markers[i]);
         }
     },
 
-    snapMarker: function (marker) {
+    watchMarker: function (marker) {
         if (this._markers.indexOf(marker) == -1)
             this._markers.push(marker);
-
         marker.on('move', this._snapMarker, this);
     },
 
-    unsnapMarker: function (marker) {
+    unwatchMarker: function (marker) {
         marker.off('move', this._snapMarker);
+        delete marker['snap'];
     },
 
-    setGuidesLayer: function (guides) {
-        this._guides = guides;
+    addGuideLayer: function (layer) {
+        if ((typeof layer._layers !== undefined) &&
+            (typeof layer.searchBuffer !== 'function')) {
+            // Guide is a layer group and has no L.LayerIndexMixin (from Leaflet.LayerIndex)
+            for (var id in layer._layers) {
+                this.addGuideLayer(layer._layers[id]);
+            }
+        }
+        else {
+            this._guides.push(layer);
+        }
     },
 
     _snapMarker: function(e) {
         var marker = e.target,
-            snaplist = this._guides.searchBuffer(marker.getLatLng(), this._buffer),
-            closest = L.GeometryUtil.closestLayerSnap(this._map, snaplist, marker.getLatLng(), this.SNAP_DISTANCE, true);
-        closest = closest === null ? [null, null] : [closest.layer, closest.latlng];
-        this.updateClosest(marker, closest);
+            latlng = marker.getLatLng(),
+            snaplist = [];
+        for (var i=0, n = this._guides.length; i < n; i++) {
+            var guide = this._guides[i];
+
+            if (typeof guide.searchBuffer === 'function') {
+                // Search snaplist around mouse
+                snaplist = snaplist.concat(guide.searchBuffer(latlng, this._buffer));
+            }
+            else {
+                snaplist.push(guide);
+            }
+        }
+        var closest = L.GeometryUtil.closestLayerSnap(this._map, snaplist, latlng, L.Handler.MarkerSnap.SNAP_DISTANCE, true);
+        closest = closest || {layer: null, latlng: null};
+        this._updateSnap(marker, closest.layer, closest.latlng);
     },
 
-    updateClosest: function (marker, closest) {
-        var chosen = closest[0],
-            point = closest[1];
-        if (chosen) {
-            marker.setLatLng(point);
-            if (marker.snap != chosen) {
-                marker.snap = chosen;
-                $(marker._icon).addClass('marker-snapped');
-                marker.fire('snap', {object:chosen, location: point});
+    _updateSnap: function (marker, layer, latlng) {
+        if (layer && latlng) {
+            marker._latlng = L.latLng(latlng);
+            marker.update();
+            if (marker.snap != layer) {
+                marker.snap = layer;
+                if (marker._icon) L.DomUtil.addClass(marker._icon, 'marker-snapped');
+                marker.fire('snap', {layer:layer, latlng: latlng});
             }
         }
         else {
             if (marker.snap) {
-                $(marker._icon).removeClass('marker-snapped');
-                marker.fire('unsnap', {object:marker.snap});
+                if (marker._icon) L.DomUtil.removeClass(marker._icon, 'marker-snapped');
+                marker.fire('unsnap', {layer:marker.snap});
             }
-            marker.snap = null;
+            delete marker['snap'];
         }
     }
 });
 
 
-L.Handler.SnappedEdit = L.Edit.Poly.extend({
+L.Edit = L.Edit || {};
+L.Edit.Poly = L.Edit.Poly || {};
+
+L.Handler.PolylineSnap = L.Edit.Poly.extend({
 
     initialize: function (map, poly, options) {
-        L.Handler.PolyEdit.prototype.initialize.call(this, poly, options);
-        this._snapper = new L.Handler.MarkerSnapping(map);
+        L.Edit.Poly.prototype.initialize.call(this, poly, options);
+        this._snapper = new L.Handler.MarkerSnap(map);
     },
 
-    setGuidesLayer: function (guides) {
-        this._snapper.setGuidesLayer(guides);
+    addGuideLayer: function (layer) {
+        this._snapper.addGuideLayer(layer);
     },
 
     _createMarker: function (latlng, index) {
-        var marker = L.Handler.PolyEdit.prototype._createMarker.call(this, latlng, index);
-        this._snapper.snapMarker(marker);
-        return marker;
-    },
-});
+        var marker = L.Edit.Poly.prototype._createMarker.call(this, latlng, index);
 
-
-L.SnapObserver = L.Class.extend({
-    initialize: function (map, guidesLayer) {
-        this._map = map;
-        this._guidesLayer = guidesLayer;
-        this._editionLayers = [];
-    },
-    guidesLayer: function () {
-        return this._guidesLayer;
-    },
-    add: function (editionLayer) {
-        if (editionLayer.eachLayer) {
-            editionLayer.eachLayer(function (l) {
-                this.add(l);
+        // Treat middle markers differently
+        var isMiddle = arguments.callee.caller.toString().indexOf('_getMiddleLatLng') != -1;
+        if (isMiddle) {
+            // Snap middle markers, only once they were touched
+            marker.on('dragstart', function () {
+                this._snapper.watchMarker(marker);
             }, this);
         }
         else {
-            this._editionLayers.push(editionLayer);
-            editionLayer.editing.setGuidesLayer(this._guidesLayer);
+            this._snapper.watchMarker(marker);
         }
-    },
-    remove: function (editionLayer) {
-        //TODO
-    },
+        return marker;
+    }
 });
+
