@@ -153,6 +153,9 @@
 {% block extrabody %}
     {{ block.super }}
 
+    {# Global Javascript settings #}
+    <script src="{% url JS_SETTINGS_VIEW %}?callback=window.SETTINGS%3D"></script>
+
     {% compress js %}
 
         {% if DEBUG %}
@@ -175,15 +178,6 @@
         {% if DEBUG %}
             window.DEBUG = true;
         {% endif %}
-        // Global Javascript settings : loaded SYNChronously
-        $.ajax({
-            url: "{% url JS_SETTINGS_VIEW %}",
-            async: false,
-            dataType: 'json',
-            success: function (data) {
-              window.SETTINGS = data;
-            }
-        });
         </script>
 
         {% leaflet_js %}

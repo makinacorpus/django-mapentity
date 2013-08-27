@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 
 class HttpJSONResponse(HttpResponse):
     def __init__(self, content='', **kwargs):
-        kwargs['content_type'] = 'application/json'
+        kwargs['content_type'] = kwargs.get('content_type', 'application/json')
         super(HttpJSONResponse, self).__init__(content, **kwargs)
 
 
@@ -83,7 +83,7 @@ json_django_dumps = curry(json.dumps, cls=DjangoJSONEncoder)
 
 class JSONResponseMixin(object):
     """
-    A mixin that can be used to render a JSON response.
+    A mixin that can be used to render a JSON/JSONP response.
     """
     response_class = HttpJSONResponse
 
@@ -91,10 +91,13 @@ class JSONResponseMixin(object):
         """
         Returns a JSON response, transforming 'context' to make the payload.
         """
-        return self.response_class(
-            self.convert_context_to_json(context),
-            **response_kwargs
-        )
+        json = self.convert_context_to_json(context)
+        # If callback is specified, serve as JSONP
+        callback = self.request.GET.get('callback', None)
+        if callback:
+            response_kwargs['content_type'] = 'application/javascript'
+            json = u"%s(%s);" % (callback, json)
+        return self.response_class(json, **response_kwargs)
 
     def convert_context_to_json(self, context):
         "Convert the context dictionary into a JSON object"
