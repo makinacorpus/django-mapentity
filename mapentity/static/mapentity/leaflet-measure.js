@@ -1,6 +1,6 @@
 L.Polyline.Measure = L.Draw.Polyline.extend({
     addHooks: function() {
-        L.Handler.Draw.prototype.addHooks.call(this);
+        L.Draw.Polyline.prototype.addHooks.call(this);
         if (this._map) {
             this._markerGroup = new L.LayerGroup();
             this._map.addLayer(this._markerGroup);
@@ -12,7 +12,7 @@ L.Polyline.Measure = L.Draw.Polyline.extend({
     },
 
     removeHooks: function () {
-        L.Handler.Draw.prototype.removeHooks.call(this);
+        L.Draw.Polyline.prototype.removeHooks.call(this);
 
         this._clearHideErrorTimeout();
 
@@ -44,15 +44,17 @@ L.Polyline.Measure = L.Draw.Polyline.extend({
         this._drawing = false;
 
         this._cleanUpShape();
+        this._clearGuides();
 
         this._updateTooltip();
 
-        this._map.off('mousemove', this._onMouseMove);
-        this._clearGuides();
+        this._map.off('mousemove', this._onMouseMove, this);
         this._container.style.cursor = '';
     },
 
     _removeShape: function() {
+        if (!this._poly)
+            return;
         this._map.removeLayer(this._poly);
         delete this._poly;
         this._markers.splice(0);
