@@ -115,6 +115,8 @@ class MapEntityMixin(object):
         return Attachment.objects.attachments_for_object(self)
 
     def get_geom_aspect_ratio(self):
+        """ Returns a ratio with/height, limited between 0.5 and 2.
+        """
         geom = self.get_geom()
         if geom:
             xmin, ymin, xmax, ymax = geom.extent
