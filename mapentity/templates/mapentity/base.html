@@ -175,9 +175,6 @@
         {% if request.GET.context %}
             L_DISABLE_3D = true;
         {% endif %}
-        {% if DEBUG %}
-            window.DEBUG = true;
-        {% endif %}
         </script>
 
         {% leaflet_js %}

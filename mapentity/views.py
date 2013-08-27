@@ -206,6 +206,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
     """
     def get_context_data(self):
         dictsettings = {}
+        dictsettings['debug'] = settings.DEBUG
         dictsettings['map'] = dict(
             extent=getattr(settings, 'LEAFLET_CONFIG', {}).get('SPATIAL_EXTENT'),
             styles=_MAP_STYLES,

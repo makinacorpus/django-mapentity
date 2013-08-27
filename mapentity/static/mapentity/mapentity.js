@@ -1,3 +1,14 @@
+/*
+ * MapEntity core tools and classes.
+ */
+
+// Toggable console.debug() function
+console.debug = (function () {
+    if (window.SETTING.debug)
+        console.log(arguments);
+});
+
+
 if (!MapEntity) var MapEntity = {};
 
 L.Control.Screenshot = L.Control.extend({
@@ -218,7 +229,7 @@ MapEntity.Context = new function() {
                 context = self.__loadFullContext($.extend(kwargs, {prefix: prefix}));
             if (!latest || (context && context.timestamp && context.timestamp > latest.timestamp)) {
                 latest = context;
-                if (window.DEBUG) console.log(JSON.stringify(context));
+                console.debug(JSON.stringify(context));
             }
         }
         return self.restoreMapView(map, latest, kwargs);
