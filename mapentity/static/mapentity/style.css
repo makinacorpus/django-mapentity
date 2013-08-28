@@ -198,6 +198,10 @@ img.marker-via.marker-snapped { background-image: url('images/osrm_markers/marke
 /* snap drag */
 img.marker-drag { background-image: url('images/osrm_markers/marker-drag.png') }
 
+.leaflet-control-filelayer i {
+    margin-top: 4px;
+}
+
 .leaflet-control-draw.enabled a, .leaflet-control.enabled a {
  	background-color: #fff;
 }
