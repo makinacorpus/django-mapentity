@@ -198,8 +198,8 @@
         <script type="text/javascript" src="{% static "mapentity/leaflet.textpath.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/leaflet.snap.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/leaflet.geometryutil.js" %}"></script>
+        <script type="text/javascript" src="{% static "mapentity/leaflet.measurecontrol.js" %}"></script>
 
-        <script type="text/javascript" src="{% static "mapentity/leaflet-measure.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/leaflet-objectslayer.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/leaflet-serializers.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/leaflet-controls.js" %}"></script>
@@ -208,7 +208,7 @@
 
         <script type="text/javascript">
             $(document).ready(function (e) {
-                L.Control.Measurement.TITLE = "{% trans "Measure distances" %}";
+                L.Control.MeasureControl.TITLE = "{% trans "Measure distances" %}";
 
                 // Scrollable panels
                 var fillmax = function () {

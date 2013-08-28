@@ -80,7 +80,7 @@ L.Polyline.Measure = L.Draw.Polyline.extend({
     }
 });
 
-L.Control.Measurement = L.Control.extend({
+L.Control.MeasureControl = L.Control.extend({
 
     static: {
         TITLE: 'Measure distances'
@@ -88,10 +88,6 @@ L.Control.Measurement = L.Control.extend({
     options: {
         position: 'topleft',
         handler: {}
-    },
-
-    initialize: function(options) {
-        L.Util.extend(this.options, options);
     },
 
     toggle: function() {
@@ -113,7 +109,7 @@ L.Control.Measurement = L.Control.extend({
 
         var link = L.DomUtil.create('a', className+'-measure', this._container);
         link.href = '#';
-        link.title = L.Control.Measurement.TITLE;
+        link.title = L.Control.MeasureControl.TITLE;
 
         L.DomEvent
             .addListener(link, 'click', L.DomEvent.stopPropagation)
@@ -123,3 +119,21 @@ L.Control.Measurement = L.Control.extend({
         return this._container;
     }
 });
+
+
+L.Map.mergeOptions({
+    measureControl: false
+});
+
+
+L.Map.addInitHook(function () {
+    if (this.options.measureControl) {
+        this.measureControl = L.Control.measureControl().addTo(this);
+    }
+});
+
+
+L.Control.measureControl = function (options) {
+    return new L.Control.MeasureControl(options);
+};
+

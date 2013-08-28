@@ -218,10 +218,6 @@ img.marker-drag { background-image: url('images/osrm_markers/marker-drag.png') }
     font-size: 1.2em;
 }
 
-.leaflet-control-draw-measure {
-	background-image: url(images/measure-control.png);
-}
-
 .multipath-control {
     background-image: url(images/multipath-control.png);
 }
