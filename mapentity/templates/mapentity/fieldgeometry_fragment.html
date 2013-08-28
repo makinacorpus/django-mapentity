@@ -39,7 +39,6 @@ var {{ module }}_settings = {
         'layerStoreElemSelector': '#{{ attrs.id }}',
         'geojson': {{ field|geojsonfeature|safe }},  // If no field, will be null.
         'iconUrl': '{% static "mapentity/images/marker-trans.png" %}',
-        'iconDragUrl': '{% static "mapentity/images/osrm_markers/marker-drag.png" %}',
         'shadowUrl': '{% static "leaflet/images/marker-shadow.png" %}'
     },
 };

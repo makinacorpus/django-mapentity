@@ -43,11 +43,11 @@ function detailmapInit(map, bounds) {
 
         L.marker(layer.getLatLngs()[0],
                  {clickable: false,
-                  icon: new L.Icon.Default({iconUrl: '{% static "mapentity/images/osrm_markers/marker-source.png" %}'})
+                  icon: new L.Icon.Default({iconUrl: '{% static "mapentity/images/marker-source.png" %}'})
                  }).addTo(map);
         L.marker(layer.getLatLngs().slice(-1)[0],
                  {clickable: false,
-                  icon: new L.Icon.Default({iconUrl: '{% static "mapentity/images/osrm_markers/marker-target.png" %}'})
+                  icon: new L.Icon.Default({iconUrl: '{% static "mapentity/images/marker-target.png" %}'})
                  }).addTo(map);
 
         // Also add line orientation

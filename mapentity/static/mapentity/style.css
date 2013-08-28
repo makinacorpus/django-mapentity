@@ -184,23 +184,9 @@ body {
     border: 5px solid red;
 }
 
-div.marker-snapped { background: yellow !important; }
-img.marker-add { background-image: url('images/marker-add.png') }
-img.marker-snapped { background-image: url('images/marker-snap.png') }
-img.marker-source { background-image: url('images/osrm_markers/marker-source.png') }
-img.marker-source.marker-snapped { background-image: url('images/osrm_markers/marker-source-snap.png') }
-img.marker-target { background-image: url('images/osrm_markers/marker-target.png') }
-img.marker-target.marker-snapped { background-image: url('images/osrm_markers/marker-target-snap.png') }
-
-img.marker-via { background-image: url('images/osrm_markers/marker-via.png') }
-img.marker-via.marker-snapped { background-image: url('images/osrm_markers/marker-via-snap.png') }
-
-/* snap drag */
-img.marker-drag { background-image: url('images/osrm_markers/marker-drag.png') }
-
-.leaflet-control-filelayer i {
-    margin-top: 4px;
-}
+img.marker-source { background-image: url('images/marker-source.png') }
+img.marker-target { background-image: url('images/marker-target.png') }
+img.marker-add { background-image: url('images/marker-add.png');}
 
 .leaflet-control-draw.enabled a, .leaflet-control.enabled a {
  	background-color: #fff;
@@ -218,10 +204,6 @@ img.marker-drag { background-image: url('images/osrm_markers/marker-drag.png') }
     font-size: 1.2em;
 }
 
-.multipath-control {
-    background-image: url(images/multipath-control.png);
-}
-
 .screenshot-control {
     background-image: url(images/screenshot-control.png);
 }
@@ -234,6 +216,11 @@ img.marker-drag { background-image: url('images/osrm_markers/marker-drag.png') }
 .leaflet-control-filelayer.leaflet-control-zoom-in {
     background-image: none;
 }
+
+.leaflet-control-filelayer i {
+    margin-top: 4px;
+}
+
 
 /**** Widgets ****/
 

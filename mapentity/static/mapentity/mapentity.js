@@ -3,10 +3,10 @@
  */
 
 // Toggable console.debug() function
-console.debug = (function () {
-    if (window.SETTING.debug)
+console.debug = function () {
+    if (window.SETTING && window.SETTING.debug)
         console.log(arguments);
-});
+};
 
 
 if (!MapEntity) var MapEntity = {};
