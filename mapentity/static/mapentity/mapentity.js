@@ -343,10 +343,12 @@ MapEntity.makeGeoFieldProxy = function($field, layer) {
                     if (layer instanceof L.Polyline) {
                         var n = layer.getLatLngs().length,
                             snaplist = new Array(n);
-                        for (var i=0; i<n; i++) {
-                            var marker = layer.editing._markers[i];
-                            if (marker.snap && marker.snap.properties && marker.snap.properties.pk)
-                                snaplist[i] = marker.snap.properties.pk;
+                        if (layer.editing._markers) {
+		                    for (var i=0; i<n; i++) {
+		                        var marker = layer.editing._markers[i];
+		                        if (marker.snap && marker.snap.properties && marker.snap.properties.pk)
+		                            snaplist[i] = marker.snap.properties.pk;
+		                    }
                         }
                         serialized = {geom: L.Util.getWKT(layer),
                                       snap: snaplist};
