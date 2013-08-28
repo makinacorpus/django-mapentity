@@ -33,6 +33,48 @@ _MAP_STYLES = {
 }
 
 
+_LEAFLET_PLUGINS = OrderedDict([
+    ('leaflet.draw', {
+        'css': 'mapentity/Leaflet.draw/leaflet.draw.css',
+        'js': 'mapentity/Leaflet.draw/leaflet.draw.js',
+    }),
+    ('leaflet.label', {
+        'css': 'mapentity/Leaflet.label/leaflet.label.css',
+        'js': 'mapentity/Leaflet.label/leaflet.label.js'
+    }),
+    ('leaflet.spin', {
+        'js': ['mapentity/spin.js',
+               'mapentity/leaflet.spin.js']
+    }),
+    ('leaflet.layerindex', {
+        'js': ['mapentity/rtree.js',
+               'mapentity/leaflet.layerindex.js']
+    }),
+    ('leaflet.filelayer', {
+        'js': ['mapentity/togeojson.js',
+               'mapentity/leaflet.filelayer.js']
+    }),
+    ('leaflet.textpath', {
+        'js': 'mapentity/leaflet.textpath.js'
+    }),
+    ('leaflet.geometryutil', {
+        'js': 'mapentity/leaflet.geometryutil.js'
+    }),
+    ('leaflet.snap', {
+        'js': 'mapentity/leaflet.snap.js'
+    }),
+    ('leaflet.measurecontrol', {
+        'css': 'mapentity/leaflet.measurecontrol.css',
+        'js': 'mapentity/leaflet.measurecontrol.js'
+    })
+])
+
+_LEAFLET_CONFIG = getattr(settings, 'LEAFLET_CONFIG', {})
+_LEAFLET_PLUGINS.update(_LEAFLET_CONFIG.get('PLUGINS', {}))  # mapentity plugins first
+_LEAFLET_CONFIG['PLUGINS'] = _LEAFLET_PLUGINS
+setattr(settings, 'LEAFLET_CONFIG', _LEAFLET_CONFIG)
+
+
 MapEntity = namedtuple('MapEntity', ['menu', 'label', 'icon', 'icon_small', 'icon_big','modelname', 'url_list'])
 
 
