@@ -33,7 +33,7 @@ _MAP_STYLES = {
 }
 
 
-MapEntity = namedtuple('MapEntity', ['menu', 'label', 'icon', 'icon_small', 'modelname', 'url_list'])
+MapEntity = namedtuple('MapEntity', ['menu', 'label', 'icon', 'icon_small', 'icon_big','modelname', 'url_list'])
 
 
 class Registry(object):
@@ -75,6 +75,7 @@ class Registry(object):
                               modelname=module_name,
                               icon='images/%s.png' % module_name,
                               icon_small='images/%s-16.png' % module_name,
+                              icon_big='images/%s-96.png' % module_name,
                               menu=menu,
                               url_list='%s:%s_%s' % (app_label, module_name, 'list'))
 
