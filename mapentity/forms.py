@@ -71,6 +71,16 @@ class TranslatedModelForm(forms.ModelForm):
                     self.fields[field].initial = getattr(self.instance, field)
 
 
+class SubmitButton(HTML):
+
+    def __init__(self, divid, label):
+        content = ("""
+            <a id="%s" class="btn btn-success pull-right offset1" onclick="javascript:$(this).parents('form').submit();">
+                <i class="icon-white icon-ok-sign"></i> %s
+            </a>""" % (divid, unicode(label)))
+        super(SubmitButton, self).__init__(content)
+
+
 class MapEntityForm(TranslatedModelForm):
 
     pk = forms.Field(required=False, widget=forms.Field.hidden_widget)
@@ -91,13 +101,15 @@ class MapEntityForm(TranslatedModelForm):
         self.user = kwargs.pop('user', None)
         super(MapEntityForm, self).__init__(*args, **kwargs)
 
+        is_creation = self.instance.pk is None
+
         actions = [
-            Submit('save_changes', _('Save changes'), css_class="btn-primary pull-right offset1"),
+            SubmitButton('save_changes', _('Create') if is_creation else _('Save changes')),
             Button('cancel', _('Cancel'), css_class="pull-right offset1"),
         ]
 
         # Generic behaviour
-        if self.instance.pk:
+        if not is_creation:
             self.helper.form_action = self.instance.get_update_url()
             # Put delete url in Delete button
             actions.insert(0, HTML('<a class="btn btn-danger delete" href="%s"><i class="icon-white icon-trash"></i> %s</a>' % (
