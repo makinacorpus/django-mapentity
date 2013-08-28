@@ -41,6 +41,7 @@ class LeafletMapWidget(forms.gis.BaseGeometryWidget):
         context = super(LeafletMapWidget, self).get_context(name, value, attrs, extra_context or {})
         context['update'] = bool(value)
         context['field'] = value
+        context['callback'] = context['module'] + 'Init'
         return context
 
 

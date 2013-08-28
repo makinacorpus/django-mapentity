@@ -1,7 +1,7 @@
 {% load leaflet_tags geojson_tags static mapentity %}
 {% load url from future %}
 
-{% leaflet_map module fitextent=False %}
+{% leaflet_map module fitextent=False callback=callback %}
 
 <div style="{% if not display_wkt %}display:none{% endif %}">
     {% include "floppyforms/textarea.html" %}
@@ -46,7 +46,7 @@ var {{ module }}_settings = {
 {% endblock settings %}
 
 // Django Leaflet callback
-{{ module }}Init = function (map, bounds) {
+{{ callback }} = function (map, bounds) {
     {% smart_include "mapinit" %}
 
     var module = {{ module }};
