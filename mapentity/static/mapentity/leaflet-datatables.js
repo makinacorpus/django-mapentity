@@ -24,7 +24,7 @@ L.MapListSync = L.Class.extend({
             sName: 'user',
         });
         
-        this.layer.on('click', this._onObjectClick.bind(this));
+        this.layer.on('mouseintent', this._onObjectOver.bind(this));
         
         this._loading = false;
         this.map.on('moveend', this._onMapViewChanged, this);
@@ -74,7 +74,7 @@ L.MapListSync = L.Class.extend({
         this.layer.updateFromPks(Object.keys(this.layer._objects));
     },
 
-    _onObjectClick: function (e) {
+    _onObjectOver: function (e) {
         var self = this;
         var search_pk = e.layer.properties.pk;
         JQDataTable.goToPage(this.dt,

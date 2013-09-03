@@ -34,6 +34,9 @@ _MAP_STYLES = {
 
 
 _LEAFLET_PLUGINS = OrderedDict([
+    ('leaflet.overintent', {
+        'js': 'mapentity/leaflet.overintent.js',
+    }),
     ('leaflet.draw', {
         'css': 'mapentity/Leaflet.draw/leaflet.draw.css',
         'js': 'mapentity/Leaflet.draw/leaflet.draw.js',

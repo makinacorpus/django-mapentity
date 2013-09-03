@@ -52,7 +52,7 @@ L.ObjectsLayer = L.GeoJSON.extend({
 
         // Optionnaly make them clickable
         if (this.options.objectUrl) {
-            this.on('dblclick', function(e) {
+            this.on('click', function(e) {
                 window.location = this.options.objectUrl(e.layer.properties, e.layer);
             }, this);
         }
