@@ -148,7 +148,7 @@ def download_to_stream(url, stream, silent=False):
             raise
 
     if source is None:
-        return
+        return source
 
     try:
         stream.write(source.content)
@@ -163,6 +163,8 @@ def download_to_stream(url, stream, silent=False):
         # Copy headers
         for header, value in source.headers.items():
             stream[header] = value
+
+    return source
 
 
 def convertit_url(url, from_type=None, to_type=None, proxy=False):

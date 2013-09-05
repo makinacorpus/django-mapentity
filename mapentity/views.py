@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import sys
 import urllib2
 import logging
@@ -266,7 +267,9 @@ def convert(request):
     format = request.GET.get('to')
     url = convertit_url(source, to_type=format)
     response = HttpResponse()
-    download_to_stream(url, response, silent=True)
+    received = download_to_stream(url, response, silent=True)
+    filename = os.path.basename(received.url)
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
     return response
 
 
