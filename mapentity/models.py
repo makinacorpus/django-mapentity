@@ -29,10 +29,6 @@ ENTITY_KINDS = (
 )
 
 
-class MapImageError(Exception):
-    pass
-
-
 class MapEntityMixin(object):
 
     @classmethod

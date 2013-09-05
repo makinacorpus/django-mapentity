@@ -17,8 +17,9 @@ from django.test.testcases import to_list
 
 from django.utils import html
 
-from mapentity.helpers import smart_urljoin
-from mapentity.forms import MapEntityForm
+from . import app_settings
+from .helpers import smart_urljoin, capture_url
+from .forms import MapEntityForm
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
@@ -276,3 +277,29 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertFalse(os.path.exists(obj.get_map_image_path()))
         obj.prepare_map_image(self.live_server_url)
         self.assertTrue(os.path.exists(obj.get_map_image_path()))
+
+
+class MapEntityCaptureHelpersTest(TestCase):
+
+    def test_capture_url_uses_setting(self):
+        app_settings['CAPTURE_SERVER'] = 'https://vlan'
+        url = capture_url('')
+        self.assertTrue(url.startswith('https://vlan'))
+
+    def test_capture_url_is_escaped(self):
+        url = capture_url('http://geotrek.fr')
+        self.assertIn('http%3A//geotrek.fr', url)
+
+    def test_capture_url_with_no_params(self):
+        url = capture_url('http://geotrek.fr')
+        self.assertNotIn('width', url)
+        self.assertNotIn('height', url)
+        self.assertNotIn('selector', url)
+
+    def test_capture_url_with_width_params(self):
+        url = capture_url('http://geotrek.fr', width=800)
+        self.assertIn('width=800', url)
+
+    def test_capture_url_with_selector_params(self):
+        url = capture_url('http://geotrek.fr', selector="#bazinga")
+        self.assertIn('%23bazinga', url)

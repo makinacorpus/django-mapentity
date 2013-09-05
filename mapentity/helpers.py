@@ -15,7 +15,6 @@ from django.contrib.gis.geos import GEOSException, fromstr
 
 import bs4
 import requests
-from screamshot.utils import casperjs_capture, CaptureError
 
 from . import app_settings
 
@@ -131,6 +130,27 @@ def is_file_newer(path, date_update, delete_empty=True):
     return modified > date_update
 
 
+def download_to_stream(url, stream):
+    """ Download url and writes response to stream.
+    """
+    try:
+        logger.info("Request to: %s" % url)
+        source = requests.get(url)
+        assert source.status_code == 200, 'Request failed (status=%s)' % source.status_code
+        assert len(source.content) > 0, 'Request returned empty content'
+    except (AssertionError, requests.exceptions.RequestException) as e:
+        logger.exception(e)
+        if hasattr(source, 'content'):
+            logger.error(source.content[:150])
+        raise
+    try:
+        stream.write(source.content)
+        stream.flush()
+    except IOError as e:
+        logger.exception(e)
+        raise
+
+
 def convertit_url(request, sourceurl, from_type=None, to_type='application/pdf', add_host=True):
     mimetype = to_type
     if '/' not in mimetype:
@@ -166,22 +186,31 @@ def convertit_download(request, source, destination, from_type=None, to_type='ap
         return
 
     url = convertit_url(request, source, from_type, to_type)
-    try:
-        logger.info("Request to Convertit server: %s" % url)
-        source = requests.get(url)
-        assert source.status_code == 200, 'Conversion failed (status=%s)' % source.status_code
-    except (AssertionError, requests.exceptions.RequestException) as e:
-        logger.exception(e)
-        if hasattr(source, 'content'):
-            logger.error(source.content[:150])
-        raise
-    # Write locally
-    try:
-        fd = open(destination, 'wb') if isinstance(destination, basestring) else destination
-        fd.write(source.content)
-    except IOError as e:
-        logger.exception(e)
-        raise
+    fd = open(destination, 'wb') if isinstance(destination, basestring) else destination
+    download_to_stream(url, fd)
+
+
+def capture_url(url, width=None, height=None, selector=None):
+    """Return URL to request a capture from Screamshotter
+    """
+    server = app_settings['CAPTURE_SERVER']
+    width = ('&width=%s' % width) if width else ''
+    height = ('&height=%s' % height) if height else ''
+    selector = ('&selector=%s' % urllib.quote(selector)) if selector else ''
+    params = '{width}{height}{selector}'.format(width=width,
+                                                height=height,
+                                                selector=selector)
+    capture_url = '{server}/?url={url}{params}'.format(server=server,
+                                                       url=urllib.quote(url),
+                                                       params=params)
+    return capture_url
+
+
+def capture_image(url, stream, **kwargs):
+    """Capture url to stream.
+    """
+    url = capture_url(url, **kwargs)
+    download_to_stream(url, stream)
 
 
 def capture_map_image(url, destination, size=None, aspect=1.0):
@@ -189,8 +218,6 @@ def capture_map_image(url, destination, size=None, aspect=1.0):
 
     It relies on JS code in MapEntity.Context
     """
-    from .models import MapImageError
-
     # Control aspect of captured images
     if size is None:
         size = app_settings['MAP_CAPTURE_SIZE']
@@ -201,20 +228,11 @@ def capture_map_image(url, destination, size=None, aspect=1.0):
     printcontext = dict(mapsize=mapsize)
     printcontext['print'] = True
     serialized = json.dumps(printcontext)
-    try:
-        # Run head-less capture (takes time)
-        url += '?context=' + urllib2.quote(serialized)
-        with open(destination, 'wb') as f:
-            casperjs_capture(f, url, selector='.map-panel')  # see templates/entity_detail.html
-    except CaptureError as e:
-        raise MapImageError(e)
+    # Run head-less capture (takes time)
+    url += '?context=' + urllib2.quote(serialized)
 
-    # If image is empty or missing, raise error
-    if not os.path.exists(destination):
-        raise MapImageError("No image captured from %s into %s" % (url, destination))
-    elif os.path.getsize(destination) == 0:
-        os.remove(destination)
-        raise MapImageError("Image captured from %s into %s is empty" % (url, destination))
+    with open(destination, 'wb') as fd:
+        capture_image(url, fd, selector='.map-panel')
 
 
 def extract_attributes_html(url):

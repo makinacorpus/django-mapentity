@@ -35,13 +35,12 @@ from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
 from screamshot.decorators import login_required_capturable
-from screamshot.utils import casperjs_capture
 
 from . import app_settings, _MAP_STYLES
 from . import models as mapentity_models
 from .decorators import save_history
 from .serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
-from .helpers import convertit_url
+from .helpers import convertit_url, capture_image
 
 
 logger = logging.getLogger(__name__)
@@ -225,7 +224,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
 @login_required
 def map_screenshot(request):
     """
-    This view allows to take screenshots, via django-screamshot, of
+    This view allows to take screenshots, via a django-screamshot service, of
     the map **currently viewed by the user**.
 
     - A context full of information is built on client-side and posted here.
@@ -250,9 +249,10 @@ def map_screenshot(request):
         # Capture image and return it
         width = context.get('viewport', {}).get('width')
         height = context.get('viewport', {}).get('height')
+
         response = HttpResponse(mimetype='image/png')
         response['Content-Disposition'] = 'attachment; filename=%s.png' % datetime.now().strftime('%Y%m%d-%H%M%S')
-        casperjs_capture(response, map_url, width=width, height=height, selector='#mainmap')
+        capture_image(map_url, response, width=width, height=height, selector='#mainmap')
         return response
 
     except Exception, e:
@@ -496,7 +496,7 @@ class MapEntityMapImage(ModelMetaMixin, DetailView):
             with open(obj.get_map_image_path(), 'rb') as f:
                 response.write(f.read())
             return response
-        except mapentity_models.MapImageError as e:
+        except Exception as e:
             logger.exception(e)
             return HttpResponseServerError(repr(e))
 

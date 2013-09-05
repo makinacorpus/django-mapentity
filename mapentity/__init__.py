@@ -15,6 +15,7 @@ app_settings = dict({
     'TITLE': "",
     'HISTORY_ITEMS_MAX': 5,
     'CONVERSION_SERVER': '',
+    'CAPTURE_SERVER': '',
     'JS_SETTINGS_VIEW': 'mapentity:js_settings',
     'ROOT_URL': '',
     'LANGUAGES': settings.LANGUAGES,
