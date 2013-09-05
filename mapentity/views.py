@@ -29,8 +29,6 @@ from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.template import RequestContext, Context, loader
 
-import requests
-
 from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
@@ -40,7 +38,7 @@ from . import app_settings, _MAP_STYLES
 from . import models as mapentity_models
 from .decorators import save_history
 from .serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
-from .helpers import convertit_url, capture_image
+from .helpers import convertit_url, capture_image, download_to_stream
 
 
 logger = logging.getLogger(__name__)
@@ -154,17 +152,8 @@ class DocumentConvert(DetailView):
 
     def render_to_response(self, context):
         url = convertit_url(self.request, self.source_url(), to_type=self.format)
-        try:
-            source = requests.get(url)
-            if source.status_code != 200:
-                logger.error("Failed to convert %s (status: %s)" % (url, source.status_code))
-            response = HttpResponse(source.content, status=source.status_code)
-        except requests.exceptions.RequestException as e:
-            logger.exception(e)
-            raise
-        # Copy headers
-        for header, value in source.headers.items():
-            response[header] = value
+        response = HttpResponse()
+        download_to_stream(url, response, silent=True)
         return response
 
 

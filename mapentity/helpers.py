@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.gis.gdal.error import OGRException
 from django.contrib.gis.geos import GEOSException, fromstr
+from django.http import HttpResponse
 
 import bs4
 import requests
@@ -130,7 +131,7 @@ def is_file_newer(path, date_update, delete_empty=True):
     return modified > date_update
 
 
-def download_to_stream(url, stream):
+def download_to_stream(url, stream, silent=False):
     """ Download url and writes response to stream.
     """
     try:
@@ -142,13 +143,22 @@ def download_to_stream(url, stream):
         logger.exception(e)
         if hasattr(source, 'content'):
             logger.error(source.content[:150])
-        raise
+        if not silent:
+            raise
+
     try:
         stream.write(source.content)
         stream.flush()
     except IOError as e:
         logger.exception(e)
-        raise
+        if not silent:
+            raise
+
+    if isinstance(stream, HttpResponse):
+        stream.status = source.status_code
+        # Copy headers
+        for header, value in source.headers.items():
+            stream[header] = value
 
 
 def convertit_url(request, sourceurl, from_type=None, to_type='application/pdf', add_host=True):
