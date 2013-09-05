@@ -27,9 +27,9 @@ setup(
         'django-compressor == 1.2',
         'django-filter == 0.5.4',
         'django-tinymce == 1.5.1',
+        'django-screamshot == 0.3.0',
         # Under development at makinacorpus
         'django-appypod',
-        'django-screamshot',
         'django-leaflet',
         'django-geojson',
         'paperclip',
