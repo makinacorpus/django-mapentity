@@ -151,7 +151,8 @@ class DocumentConvert(DetailView):
         raise NotImplementedError
 
     def render_to_response(self, context):
-        url = convertit_url(self.request, self.source_url(), to_type=self.format)
+        source = self.request.build_absolute_uri(self.source_url())
+        url = convertit_url(source, to_type=self.format)
         response = HttpResponse()
         download_to_stream(url, response, silent=True)
         return response
@@ -239,9 +240,9 @@ def map_screenshot(request):
         width = context.get('viewport', {}).get('width')
         height = context.get('viewport', {}).get('height')
 
-        response = HttpResponse(mimetype='image/png')
-        response['Content-Disposition'] = 'attachment; filename=%s.png' % datetime.now().strftime('%Y%m%d-%H%M%S')
+        response = HttpResponse()
         capture_image(map_url, response, width=width, height=height, selector='#mainmap')
+        response['Content-Disposition'] = 'attachment; filename=%s.png' % datetime.now().strftime('%Y%m%d-%H%M%S')
         return response
 
     except Exception, e:

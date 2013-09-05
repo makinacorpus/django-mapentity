@@ -161,24 +161,12 @@ def download_to_stream(url, stream, silent=False):
             stream[header] = value
 
 
-def convertit_url(sourceurl, from_type=None, to_type='application/pdf', proxy=False):
-    """Return URL to request a conversion from ConvertIt
-    """
+def convertit_url(url, from_type=None, to_type='application/pdf', proxy=False):
     mimetype = to_type
     if '/' not in mimetype:
         extension = '.' + mimetype if not mimetype.startswith('.') else mimetype
         mimetype = types_map[extension]
 
-    #
-    # If reverse proxy with prefix :  /prefix --> http://geotrek.geobi.loc/
-    #
-    #    sourceurl: /prefix/path/to/document.odt  (reverse() adds FORCE_SCRIPT_NAME)
-    #    request.get_host():  geotrek.geobi.loc
-    #    fullurl must be: http://geotrek.geobi.loc/path/to/document.odt
-    #    and http://geotrek.geobi.loc/prefix/path/to/document.odt
-    #
-    sourceurl = sourceurl.replace(settings.ROOT_URL, '')
-    fullurl = request.build_absolute_uri(sourceurl)
     fromparam = ("&from=%s" % urllib.quote(from_type)) if from_type is not None else ''
     params = 'url={url}{fromparam}&to={to}'.format(url=urllib.quote(url),
                                                    fromparam=fromparam,
@@ -188,13 +176,13 @@ def convertit_url(sourceurl, from_type=None, to_type='application/pdf', proxy=Fa
     return url
 
 
-def convertit_download(request, source, destination, from_type=None, to_type='application/pdf'):
+def convertit_download(url, destination, from_type=None, to_type='application/pdf'):
     # Mock for tests
     if getattr(settings, 'TEST', False):
         open(destination, 'wb').write("Mock\n")
         return
 
-    url = convertit_url(request, source, from_type, to_type)
+    url = convertit_url(url, from_type, to_type)
     fd = open(destination, 'wb') if isinstance(destination, basestring) else destination
     download_to_stream(url, fd)
 

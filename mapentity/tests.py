@@ -18,7 +18,7 @@ from django.test.testcases import to_list
 from django.utils import html
 
 from . import app_settings
-from .helpers import smart_urljoin, capture_url
+from .helpers import smart_urljoin, capture_url, convertit_url
 from .forms import MapEntityForm
 
 
