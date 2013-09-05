@@ -249,6 +249,25 @@ def map_screenshot(request):
         return HttpResponseBadRequest(e)
 
 
+@login_required
+def convert(request):
+    """ A stupid proxy to Convertit.
+
+    Was done by Nginx before, but this is the first step of
+    authenticated document conversion.
+    """
+    source = request.GET.get('url')
+    if source is None:
+        return HttpResponseBadRequest('url parameter missing')
+    source = request.build_absolute_uri(source)
+
+    format = request.GET.get('to')
+    url = convertit_url(source, to_type=format)
+    response = HttpResponse()
+    download_to_stream(url, response, silent=True)
+    return response
+
+
 @require_http_methods(["POST"])
 @csrf_exempt
 @login_required

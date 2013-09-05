@@ -161,7 +161,9 @@ def download_to_stream(url, stream, silent=False):
             stream[header] = value
 
 
-def convertit_url(request, sourceurl, from_type=None, to_type='application/pdf', add_host=True):
+def convertit_url(sourceurl, from_type=None, to_type='application/pdf', proxy=False):
+    """Return URL to request a conversion from ConvertIt
+    """
     mimetype = to_type
     if '/' not in mimetype:
         extension = '.' + mimetype if not mimetype.startswith('.') else mimetype
@@ -178,14 +180,11 @@ def convertit_url(request, sourceurl, from_type=None, to_type='application/pdf',
     sourceurl = sourceurl.replace(settings.ROOT_URL, '')
     fullurl = request.build_absolute_uri(sourceurl)
     fromparam = ("&from=%s" % urllib.quote(from_type)) if from_type is not None else ''
-    url = "%s?url=%s%s&to=%s" % (app_settings['CONVERSION_SERVER'],
-                                 urllib.quote(fullurl),
-                                 fromparam,
-                                 urllib.quote(mimetype))
-    if add_host and not url.startswith('http'):
-        url = '%s://%s%s' % (request.is_secure() and 'https' or 'http',
-                             request.get_host(),
-                             url)
+    params = 'url={url}{fromparam}&to={to}'.format(url=urllib.quote(url),
+                                                   fromparam=fromparam,
+                                                   to=urllib.quote(mimetype))
+    url = '{server}/?{params}'.format(server=app_settings['CONVERSION_SERVER'],
+                                      params=params)
     return url
 
 

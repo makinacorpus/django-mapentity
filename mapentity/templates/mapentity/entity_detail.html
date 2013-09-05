@@ -1,5 +1,5 @@
 {% extends "mapentity/base.html" %}
-{% load i18n static field_verbose_name mapentity leaflet_tags geojson_tags convert_tags attachments_tags %}
+{% load i18n static field_verbose_name mapentity leaflet_tags geojson_tags attachments_tags %}
 
 
 {% block mainpanel %}
@@ -9,8 +9,8 @@
             <div class="btn-group pull-right">
                 {% block download %}
                 <a class="btn btn-mini" href="{{ object.get_document_url }}"><img src="{% static "paperclip/fileicons/odt.png" %}"/> {% trans "ODT" %}</a>
-                <a class="btn btn-mini" href="{% convert_url request object.get_document_url format="doc" %}"><img src="{% static "paperclip/fileicons/doc.png" %}"/> {% trans "DOC" %}</a>
-                <a class="btn btn-mini" href="{% convert_url request object.get_document_url %}"><img src="{% static "paperclip/fileicons/pdf.png" %}"/> {% trans "PDF" %}</a>
+                <a class="btn btn-mini" href="{% url "mapentity:convert" %}?url={{ object.get_document_url|urlencode }}&to=doc"><img src="{% static "paperclip/fileicons/doc.png" %}"/> {% trans "DOC" %}</a>
+                <a class="btn btn-mini" href="{% url "mapentity:convert" %}?url={{ object.get_document_url|urlencode }}"><img src="{% static "paperclip/fileicons/pdf.png" %}"/> {% trans "PDF" %}</a>
                 {% endblock download %}
             </div>
         </div>
