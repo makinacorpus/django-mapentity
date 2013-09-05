@@ -161,7 +161,9 @@ def download_to_stream(url, stream, silent=False):
             stream[header] = value
 
 
-def convertit_url(url, from_type=None, to_type='application/pdf', proxy=False):
+def convertit_url(url, from_type=None, to_type=None, proxy=False):
+    if not to_type:
+        to_type = 'application/pdf'
     mimetype = to_type
     if '/' not in mimetype:
         extension = '.' + mimetype if not mimetype.startswith('.') else mimetype

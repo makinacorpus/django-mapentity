@@ -319,6 +319,8 @@ class MapEntityConvertHelpersTest(TestCase):
     def test_convert_url_default_is_pdf(self):
         url = convertit_url('')
         self.assertIn('to=application/pdf', url)
+        url = convertit_url('', to_type=None)
+        self.assertIn('to=application/pdf', url)
 
     def test_convert_url_default_no_from(self):
         url = convertit_url('')
