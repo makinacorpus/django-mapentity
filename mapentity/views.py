@@ -250,6 +250,7 @@ def map_screenshot(request):
         return HttpResponseBadRequest(e)
 
 
+@require_http_methods(["GET"])
 @login_required
 def convert(request):
     """ A stupid proxy to Convertit.

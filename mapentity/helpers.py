@@ -135,6 +135,7 @@ def download_to_stream(url, stream, silent=False):
     """ Download url and writes response to stream.
     """
     try:
+        source = None
         logger.info("Request to: %s" % url)
         source = requests.get(url)
         assert source.status_code == 200, 'Request failed (status=%s)' % source.status_code
@@ -145,6 +146,9 @@ def download_to_stream(url, stream, silent=False):
             logger.error(source.content[:150])
         if not silent:
             raise
+
+    if source is None:
+        return
 
     try:
         stream.write(source.content)
