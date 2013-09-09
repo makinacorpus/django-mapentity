@@ -5,8 +5,8 @@ import time
 import shutil
 import StringIO
 import csv
+import urllib2
 
-import requests
 from django.conf import settings
 from django.utils.http import http_date
 from django.utils.translation import ugettext_lazy as _
@@ -14,8 +14,9 @@ from django.utils.encoding import force_unicode
 from django.test import TestCase, LiveServerTestCase
 from django.test.utils import override_settings
 from django.test.testcases import to_list
-
 from django.utils import html
+from mock import patch
+import requests
 
 from . import app_settings
 from .helpers import smart_urljoin, capture_url, convertit_url
@@ -266,17 +267,30 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(md5sum, md5.new(response.content).digest())
 
-
-    def test_map_image(self):
+    @patch('mapentity.helpers.requests')
+    def test_map_image(self, mock_requests):
         if self.model is None:
             return  # Abstract test should not run
 
         obj = self.modelfactory.create()
 
         # Initially, map image does not exists
-        self.assertFalse(os.path.exists(obj.get_map_image_path()))
+        image_path = obj.get_map_image_path()
+        if os.path.exists(image_path):
+            os.remove(image_path)
+        self.assertFalse(os.path.exists(image_path))
+
+        # Move Screenshot response
+        mock_requests.get.return_value.status_code = 200
+        mock_requests.get.return_value.content = '*' * 100
+
         obj.prepare_map_image(self.live_server_url)
-        self.assertTrue(os.path.exists(obj.get_map_image_path()))
+        self.assertTrue(os.path.exists(image_path))
+
+        mapimage_url = '%s%s?context' % (self.live_server_url, obj.get_detail_url())
+        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % urllib2.quote(mapimage_url)
+        url_called = mock_requests.get.call_args_list[0]
+        self.assertTrue(url_called.startswith(screenshot_url))
 
 
 class MapEntityCaptureHelpersTest(TestCase):

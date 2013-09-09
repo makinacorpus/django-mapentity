@@ -3,6 +3,9 @@ from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 
+test_requires = ['mock']
+
+
 setup(
     name='mapentity',
     version='0.1.0',
@@ -33,7 +36,8 @@ setup(
         'django-leaflet',
         'django-geojson',
         'paperclip',
-    ],
+    ] + test_requires,
+    tests_requires=test_requires,
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
