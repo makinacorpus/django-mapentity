@@ -34,7 +34,6 @@ from django.template import RequestContext, Context, loader
 from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
-from screamshot.decorators import login_required_capturable
 
 from . import app_settings, _MAP_STYLES
 from . import models as mapentity_models
@@ -189,7 +188,7 @@ def handler500(request, template_name='500.html'):
     return HttpResponseServerError(t.render(context))
 
 
-@login_required_capturable()
+@login_required()
 def serve_secure_media(request, path):
     """
     Serve media/ for authenticated users only, since it can contain sensitive
@@ -385,7 +384,7 @@ class MapEntityList(ModelMetaMixin, ListView):
         self._filterform = self.filterform(self.request.GET or None, queryset=queryset)
         return self._filterform.qs
 
-    @method_decorator(login_required_capturable)
+    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # Save last list visited in session
         request.session['last_list'] = request.path
@@ -489,7 +488,7 @@ class MapEntityDetail(ModelMetaMixin, DetailView):
     def get_title(self):
         return unicode(self.get_object())
 
-    @method_decorator(login_required_capturable)
+    @method_decorator(login_required)
     @save_history()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityDetail, self).dispatch(*args, **kwargs)
