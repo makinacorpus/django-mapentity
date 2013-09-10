@@ -18,6 +18,7 @@ try:
 except User.DoesNotExist:
     internal_user = User(username=app_settings['INTERNAL_USER'], password=settings.SECRET_KEY)
     internal_user.is_active = False
+    internal_user.is_staff = False
     internal_user.save()
 
 

@@ -2,10 +2,14 @@ from django.conf import settings
 from django.test import TestCase
 from django.test.client import RequestFactory
 
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 
 from .. import middleware
 from ..middleware import AutoLoginMiddleware, internal_user
+
+
+User = get_user_model()
 
 
 class AutoLoginTest(TestCase):
