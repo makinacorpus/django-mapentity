@@ -134,7 +134,7 @@ class MapEntityMixin(object):
     def get_map_image_path(self):
         basefolder = os.path.join(settings.MEDIA_ROOT, 'maps')
         if not os.path.exists(basefolder):
-            os.mkdir(basefolder)
+            os.makedirs(basefolder)
         return os.path.join(basefolder, '%s-%s.png' % (self._meta.module_name, self.pk))
 
     @property
