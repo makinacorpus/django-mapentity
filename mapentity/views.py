@@ -17,6 +17,7 @@ from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
+from django.views import static
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_unicode
 from django.utils.functional import Promise, curry
@@ -186,6 +187,20 @@ def handler500(request, template_name='500.html'):
     context['stack'] = "\n".join(traceback.format_tb(tb))
     t = loader.get_template('500.html')
     return HttpResponseServerError(t.render(context))
+
+
+@login_required_capturable()
+def serve_secure_media(request, path):
+    """
+    Serve media/ for authenticated users only, since it can contain sensitive
+    information (uploaded documents, map screenshots, ...)
+    """
+    if settings.DEBUG:
+        return static.serve(request, path, settings.MEDIA_ROOT)
+
+    response = HttpResponse()
+    response['X-Accel-Redirect'] = settings.MEDIA_URL_SECURE + path
+    return response
 
 
 class JSSettings(JSONResponseMixin, TemplateView):
