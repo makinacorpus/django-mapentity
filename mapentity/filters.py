@@ -57,11 +57,12 @@ class YearBetweenFilter(YearFilter):
 
 
 class PolygonFilter(Filter):
+    widget = HiddenGeometryWidget
+
     field_class = forms.gis.PolygonField
 
 
 class PythonPolygonFilter(PolygonFilter):
-    widget = HiddenGeometryWidget
 
     def filter(self, qs, value):
         if not value:
