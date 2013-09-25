@@ -117,11 +117,11 @@
                   {% endif %}
                   <li class="{% block nav-logbook %}disabled{% endblock nav-logbook %}"><a href="#">{% trans "Logbook" %}</a></li>
                   <li class="divider"></li>
-                  
+
                   <li><a href="{% url 'logout' %}"><i class="icon-off"></i> {% trans "Logout" %}</a></li>
                </ul>
             </li>
-            {% endif %}  
+            {% endif %}
           </ul>
       </div>
     </div>
@@ -171,6 +171,7 @@
         {% leaflet_js plugins="ALL" %}
         <script type="text/javascript">
             L.Icon.Default.imagePath = '{% static "leaflet/images/" %}';
+            L.Control.MeasureControl.TITLE = "{% trans "Measure distances" %}";
         </script>
 
         <script type="text/javascript" src="{% static "mapentity/jquery.deserialize.js" %}"></script>
@@ -186,9 +187,8 @@
         <script type="text/javascript" src="{% static "mapentity/mapentity.js" %}"></script>
 
         <script type="text/javascript">
-            L.Control.MeasureControl.TITLE = "{% trans "Measure distances" %}";
-
             $(document).ready(function (e) {
+
                 // Scrollable panels
                 var fillmax = function () {
                     $('.scrollable').each(function () {
@@ -196,7 +196,7 @@
                             height = $(window).height() - top - parseFloat($(this).css('margin-top'))
                                                               - parseFloat($(this).css('margin-bottom'));
                         $(this).css('max-height', height + 'px');
-                        
+
                     });
                 }
                 setTimeout(fillmax, 0);
@@ -219,7 +219,7 @@
                     function() { $(this).children(".autohide").show(); },
                     function() { $(this).children(".autohide").hide(); }
                 );
-            })
+            });
         </script>
 
         {% block extrajs %}

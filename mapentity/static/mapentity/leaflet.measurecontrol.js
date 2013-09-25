@@ -23,10 +23,6 @@ L.Polyline.Measure = L.Draw.Polyline.extend({
 
         this._removeShape();
 
-        this._map.removeLayer(this._markerGroup);
-        delete this._markerGroup;
-        delete this._markers;
-
         this._map.off('click', this._onClick);
     },
 
@@ -82,7 +78,7 @@ L.Polyline.Measure = L.Draw.Polyline.extend({
 
 L.Control.MeasureControl = L.Control.extend({
 
-    static: {
+    statics: {
         TITLE: 'Measure distances'
     },
     options: {
@@ -93,10 +89,8 @@ L.Control.MeasureControl = L.Control.extend({
     toggle: function() {
         if (this.handler.enabled()) {
             this.handler.disable.call(this.handler);
-            L.DomUtil.removeClass(this._container, 'enabled');
         } else {
             this.handler.enable.call(this.handler);
-            L.DomUtil.addClass(this._container, 'enabled');
         }
     },
 
@@ -106,6 +100,14 @@ L.Control.MeasureControl = L.Control.extend({
         this._container = L.DomUtil.create('div', 'leaflet-bar');
 
         this.handler = new L.Polyline.Measure(map, this.options.handler);
+
+        this.handler.on('enabled', function () {
+            L.DomUtil.addClass(this._container, 'enabled');
+        }, this);
+
+        this.handler.on('disabled', function () {
+            L.DomUtil.removeClass(this._container, 'enabled');
+        }, this);
 
         var link = L.DomUtil.create('a', className+'-measure', this._container);
         link.href = '#';
