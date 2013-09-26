@@ -10,45 +10,45 @@ from .models import (
 frommodel = lambda model: model.__name__.lower()
 
 
-def url_layer(kind, model):
+def url_layer(model):
     model_str = frommodel(model)
     return r'^api/{0}/{1}.geojson$'.format(model_str, model_str)
 
 
-def url_list(kind, model):
+def url_list(model):
     return r'^{0}/list/$'.format(frommodel(model))
 
 
-def url_json_list(kind, model):
+def url_json_list(model):
     model_str = frommodel(model)
     return r'^api/{0}/{1}s.json$'.format(model_str, model_str)
 
 
-def url_format_list(kind, model):
+def url_format_list(model):
     return r'^{0}/list/export/$'.format(frommodel(model))
 
 
-def url_detail(kind, model):
+def url_detail(model):
     return r'^{0}/(?P<pk>\d+)/$'.format(frommodel(model))
 
 
-def url_mapimage(kind, model):
+def url_mapimage(model):
     return r'^image/{0}-(?P<pk>\d+).png$'.format(frommodel(model))
 
 
-def url_document(kind, model):
+def url_document(model):
     return r'^document/{0}-(?P<pk>\d+).odt$'.format(frommodel(model))
 
 
-def url_create(kind, model):
+def url_create(model):
     return r'^{0}/add/$'.format(frommodel(model))
 
 
-def url_update(kind, model):
+def url_update(model):
     return r'^{0}/edit/(?P<pk>\d+)/$'.format(frommodel(model))
 
 
-def url_delete(kind, model):
+def url_delete(model):
     return r'^{0}/delete/(?P<pk>\d+)$'.format(frommodel(model))
 
 
@@ -75,7 +75,7 @@ def view_class_to_url(view_class):
 
     model = view_class.model or view_class.queryset.model
     url_name = model.get_url_name_for_registration(kind)
-    url_path = kind_to_urlpath[kind](kind, model)
+    url_path = kind_to_urlpath[kind](model)
     return url(url_path, view_class.as_view(), name=url_name)
 
 
