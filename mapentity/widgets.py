@@ -5,7 +5,7 @@ from django.forms import widgets as django_widgets
 from leaflet.forms.widgets import LeafletWidget
 import floppyforms as forms
 
-from .helpers import transform_wkt, wkt_to_geom
+from .helpers import wkt_to_geom
 
 
 class MapWidget(LeafletWidget):
@@ -13,7 +13,6 @@ class MapWidget(LeafletWidget):
 
 
 class HiddenGeometryWidget(django_widgets.HiddenInput):
-    # hidden by default
 
     def value_from_datadict(self, data, files, name):
         """
@@ -29,68 +28,6 @@ class HiddenGeometryWidget(django_widgets.HiddenInput):
         if value and not isinstance(value, basestring):
             value.transform(settings.API_SRID)
         return value
-
-
-"""
-
-Floppyforms widgets
-
-"""
-
-
-class LeafletMapWidget(forms.gis.BaseGeometryWidget):
-    template_name = 'mapentity/fieldgeometry_fragment.html'
-    display_wkt = settings.DEBUG
-
-    def get_context(self, name, value, attrs=None, extra_context=None):
-        context = super(LeafletMapWidget, self).get_context(name, value, attrs, extra_context or {})
-        context['update'] = bool(value)
-        context['field'] = value
-        context['callback'] = context['module'] + 'Init'
-        return context
-
-
-class GeometryWidget(LeafletMapWidget):
-    dim = 3
-
-    def value_from_datadict(self, data, files, name):
-        """
-        From WKT to post-processed WKT (TODO: should be done in Field clean())
-        """
-        wkt = super(GeometryWidget, self).value_from_datadict(data, files, name)
-        return None if not wkt else transform_wkt(wkt, settings.API_SRID, settings.SRID, self.dim)
-
-    def get_context(self, name, value, attrs=None, extra_context=None):
-        """
-        Before serialization, reprojects to API_SRID. But handles the form validation error, where
-        value is a string.
-        TODO: There should be a simpler way.
-        TODO: This fails if WKT is invalid.
-        """
-        context = super(GeometryWidget, self).get_context(name, value, attrs, extra_context or {})
-        # Be careful, on form error, value is not a GEOSGeometry
-        if value:
-            if isinstance(value, basestring):
-                value = transform_wkt(value, settings.SRID, settings.API_SRID, self.dim)
-                context['field'] = wkt_to_geom(value)
-            else:
-                value.transform(settings.API_SRID)
-        return context
-
-
-class PointWidget(GeometryWidget,
-                  forms.gis.PointWidget):
-    pass
-
-
-class Point2DWidget(GeometryWidget,
-                    forms.gis.PointWidget):
-    dim = 2
-
-
-class LineStringWidget(GeometryWidget,
-                       forms.gis.LineStringWidget):
-    pass
 
 
 class SelectMultipleWithPop(forms.SelectMultiple):
