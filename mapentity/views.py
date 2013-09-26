@@ -41,6 +41,7 @@ from . import models as mapentity_models
 from .decorators import save_history
 from .serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from .helpers import convertit_url, capture_image, download_to_stream
+from .urlizor import url_layer
 
 
 logger = logging.getLogger(__name__)
@@ -219,8 +220,15 @@ class JSSettings(JSONResponseMixin, TemplateView):
             extent=getattr(settings, 'LEAFLET_CONFIG', {}).get('SPATIAL_EXTENT'),
             styles=_MAP_STYLES,
         )
+
+        # URLs
         root_url = app_settings['ROOT_URL']
-        dictsettings['server'] = root_url if root_url.endswith('/') else root_url + '/'
+        root_url = root_url if root_url.endswith('/') else root_url + '/'
+        dictsettings['urls'] = {}
+        dictsettings['urls']['root'] = root_url
+        class ModelName: pass
+        dictsettings['urls']['layer'] = root_url + url_layer(ModelName)[1:-1]
+
         # Useful for JS calendars
         dictsettings['date_format'] = settings.DATE_INPUT_FORMATS[0].replace('%Y', 'yyyy').replace('%m', 'mm').replace('%d', 'dd')
         # Languages

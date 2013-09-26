@@ -380,7 +380,7 @@ MapEntity.History = L.Control.extend({
     },
 
     remove: function (path) {
-        $.post(window.SETTINGS.server + 'history/delete/', {path: path}, function() {
+        $.post(window.SETTINGS.urls.root + 'history/delete/', {path: path}, function() {
             var entries = $("#historylist > li")
               , entry = $("#historylist li a[href='" + path + "']").parents('li')
               , closeCurrent = String(window.location).indexOf(path, window.location.length - path.length) !== -1;
