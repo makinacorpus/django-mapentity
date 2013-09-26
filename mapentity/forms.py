@@ -1,7 +1,9 @@
 import copy
 
+from django.db.models.fields import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django import forms as django_forms
+from django.contrib.gis.db.models.fields import GeometryField
 
 import floppyforms as forms
 from crispy_forms.helper import FormHelper
@@ -12,6 +14,7 @@ from modeltranslation.translator import translator, NotRegistered
 
 
 from . import app_settings
+from .widgets import MapWidget
 
 
 class TranslatedModelForm(forms.ModelForm):
@@ -101,6 +104,33 @@ class MapEntityForm(TranslatedModelForm):
         self.user = kwargs.pop('user', None)
         super(MapEntityForm, self).__init__(*args, **kwargs)
 
+        self.fields['pk'].initial = self.instance.pk
+        self.fields['model'].initial = self.instance._meta.module_name
+
+        # Default widgets
+        for fieldname, formfield in self.fields.items():
+            # Custom code because formfield_callback does not work with inherited forms
+            if formfield:
+                # Assign map widget to all geometry fields
+                try:
+                    formmodel = self._meta.model
+                    modelfield = formmodel._meta.get_field(fieldname)
+                    if isinstance(modelfield, GeometryField):
+                        formfield.widget = MapWidget()
+                        formfield.widget.attrs['geom_type'] = formfield.geom_type
+                except FieldDoesNotExist:
+                    pass
+
+                # Bypass widgets that inherit textareas, such as geometry fields
+                if formfield.widget.__class__ in (forms.widgets.Textarea,
+                                                  django_forms.widgets.Textarea):
+                    formfield.widget = TinyMCE()
+
+        self._init_layout()
+
+    def _init_layout(self):
+        """ Setup form buttons, submit URL, layout
+        """
         is_creation = self.instance.pk is None
 
         actions = [
@@ -117,9 +147,6 @@ class MapEntityForm(TranslatedModelForm):
                 unicode(_("Delete")))))
         else:
             self.helper.form_action = self.instance.get_add_url()
-
-        self.fields['pk'].initial = self.instance.pk
-        self.fields['model'].initial = self.instance._meta.module_name
 
         # Check if fieldslayout is defined, otherwise use Meta.fields
         fieldslayout = self.fieldslayout
@@ -158,12 +185,6 @@ class MapEntityForm(TranslatedModelForm):
             ),
             FormActions(*actions, css_class="form-actions"),
         )
-
-        # formfield_callback sucks and does not work with inherited fields
-        for formfield in self.fields.values():
-            if formfield and formfield.widget.__class__ in (forms.widgets.Textarea,
-                                                            django_forms.widgets.Textarea):
-                formfield.widget = TinyMCE()
 
     def __replace_translatable_fields(self, fieldslayout):
         newlayout = []

@@ -2,9 +2,14 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.forms import widgets as django_widgets
 
+from leaflet.forms.widgets import LeafletWidget
 import floppyforms as forms
 
 from .helpers import transform_wkt, wkt_to_geom
+
+
+class MapWidget(LeafletWidget):
+    pass
 
 
 class HiddenGeometryWidget(django_widgets.HiddenInput):
