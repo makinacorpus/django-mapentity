@@ -175,6 +175,8 @@
         <script type="text/javascript">
             L.Icon.Default.imagePath = '{% static "leaflet/images/" %}';
             L.Control.MeasureControl.TITLE = "{% trans "Measure distances" %}";
+            L.Control.FileLayerLoad.LABEL = '<i class="icon-folder-open"></i>';
+            L.GeometryField.unsavedText = "{% trans "Map geometry is unsaved" %}";
         </script>
 
         <script type="text/javascript" src="{% static "mapentity/jquery.deserialize.js" %}"></script>

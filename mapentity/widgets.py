@@ -9,7 +9,10 @@ from .helpers import wkt_to_geom
 
 
 class MapWidget(LeafletWidget):
-    pass
+    def render(self, name, value, attrs=None):
+        attrs = attrs or {}
+        attrs.update(geometry_field_class='MapEntity.GeometryField')
+        return super(MapWidget, self).render(name, value, attrs)
 
 
 class HiddenGeometryWidget(django_widgets.HiddenInput):
