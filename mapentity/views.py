@@ -13,6 +13,7 @@ from django.db.models.query import QuerySet
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseNotFound, HttpResponseServerError)
 from django.utils.translation import ugettext_lazy as _
+from django.views.defaults import page_not_found
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -165,8 +166,11 @@ class DocumentConvert(DetailView):
 
 """
 
+def handler404(request, template_name='mapentity/404.html'):
+    return page_not_found(request, template_name)
 
-def handler500(request, template_name='500.html'):
+
+def handler500(request, template_name='mapentity/500.html'):
     """
     500 error handler which tries to use a RequestContext - unless an error
     is raised, in which a normal Context is used with just the request
@@ -184,7 +188,7 @@ def handler500(request, template_name='500.html'):
     e, name, tb = sys.exc_info()
     context['exception'] = repr(name)
     context['stack'] = "\n".join(traceback.format_tb(tb))
-    t = loader.get_template('500.html')
+    t = loader.get_template(template_name)
     return HttpResponseServerError(t.render(context))
 
 
@@ -379,7 +383,6 @@ class MapEntityList(ModelMetaMixin, ListView):
 
     def get_queryset(self):
         queryset = super(MapEntityList, self).get_queryset()
-        queryset = queryset.select_related(depth=1)
         # Filter queryset from possible serialized form
         self._filterform = self.filterform(self.request.GET or None, queryset=queryset)
         return self._filterform.qs

@@ -1,8 +1,9 @@
-{% extends "base.html" %}
 {% load static i18n leaflet_tags compress mapentity %}
 {% load url from future %}
-
-
+<!DOCTYPE html>
+<html>
+<head>
+<!-- version {{ VERSION }} -->
 {% block head %}
 
   <title>{% block title %}{{ TITLE }}{% endblock title %}</title>
@@ -42,17 +43,18 @@
     {% endblock extracss %}
   {% endcompress %}
 
-    {% if DEBUG %}
-        <script type="text/javascript" src="{% static "mapentity/jquery.js" %}"></script>
-    {% else %}
-        <script type="text/javascript" src="{% static "mapentity/jquery.min.js" %}"></script>
-    {% endif %}
-
+  {% if DEBUG %}
+      <script type="text/javascript" src="{% static "mapentity/jquery.js" %}"></script>
+  {% else %}
+      <script type="text/javascript" src="{% static "mapentity/jquery.min.js" %}"></script>
+  {% endif %}
 {% endblock head %}
 
-
-
-{% block content %}
+{% block extrahead %}
+{% endblock extrahead %}
+</head>
+<body>
+  {% block content %}
     {% block navbar %}
     <div class="navbar">
       <div class="navbar-inner">
@@ -146,9 +148,10 @@
         </div><!--/row-->
     </div><!--/container-->
     {% endblock container %}
-{% endblock content %}
+  {% endblock content %}
 
-{% block extrabody %}
+
+  {% block extrabody %}
     {{ block.super }}
 
     {# Global Javascript settings #}
@@ -227,4 +230,7 @@
 
     {% endcompress %}
 
-{% endblock extrabody %}
+  {% endblock extrabody %}
+</body>
+</html>
+
