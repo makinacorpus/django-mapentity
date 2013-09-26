@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import url
+from django.conf.urls import url
 
 from .models import (
     ENTITY_LAYER, ENTITY_LIST, ENTITY_JSON_LIST,
