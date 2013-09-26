@@ -20,7 +20,4 @@
     {{ block.super }}
     <script src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
     <script src="{% static "mapentity/jquery.formset-patched.js" %}"></script>
-    {% for m in form.MEDIA_JS %}
-        <script type="text/javascript" src="{% static m %}"></script>
-    {% endfor %}
 {% endblock extrajs %}

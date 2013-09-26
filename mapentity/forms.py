@@ -7,7 +7,7 @@ from django.contrib.gis.db.models.fields import GeometryField
 
 import floppyforms as forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Div, Button, HTML
+from crispy_forms.layout import Layout, Div, Button, HTML
 from crispy_forms.bootstrap import FormActions
 from tinymce.widgets import TinyMCE
 from modeltranslation.translator import translator, NotRegistered
@@ -95,10 +95,6 @@ class MapEntityForm(TranslatedModelForm):
 
     class Meta:
         fields = ['pk', 'model']
-
-    # TODO: this is obvisouly wrong MapEntity should not depend on core
-    # TODO: Django inserts Media in <head> https://code.djangoproject.com/ticket/13978
-    MEDIA_JS = ("core/formfield.js",)
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
