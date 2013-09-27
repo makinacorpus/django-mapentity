@@ -38,10 +38,6 @@ _LEAFLET_PLUGINS = OrderedDict([
     ('leaflet.overintent', {
         'js': 'mapentity/leaflet.overintent.js',
     }),
-    ('leaflet.draw', {
-        'css': 'mapentity/Leaflet.draw/leaflet.draw.css',
-        'js': 'mapentity/Leaflet.draw/leaflet.draw.js',
-    }),
     ('leaflet.label', {
         'css': 'mapentity/Leaflet.label/leaflet.label.css',
         'js': 'mapentity/Leaflet.label/leaflet.label.js'
