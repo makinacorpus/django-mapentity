@@ -9,7 +9,7 @@ console.debug = function () {
 };
 
 
-if (!MapEntity) var MapEntity = {};
+if (!window.MapEntity) window.MapEntity = {};
 
 L.Control.Screenshot = L.Control.extend({
     includes: L.Mixin.Events,
