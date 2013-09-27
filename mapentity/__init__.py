@@ -36,36 +36,36 @@ _MAP_STYLES = {
 
 _LEAFLET_PLUGINS = OrderedDict([
     ('leaflet.overintent', {
-        'js': 'mapentity/leaflet.overintent.js',
+        'js': 'mapentity/Leaflet.OverIntent/leaflet.overintent.js',
     }),
     ('leaflet.label', {
-        'css': 'mapentity/Leaflet.label/leaflet.label.css',
-        'js': 'mapentity/Leaflet.label/leaflet.label.js'
+        'css': 'mapentity/Leaflet.label/dist/leaflet.label.css',
+        'js': 'mapentity/Leaflet.label/dist/leaflet.label.js'
     }),
     ('leaflet.spin', {
-        'js': ['mapentity/spin.js',
-               'mapentity/leaflet.spin.js']
+        'js': ['mapentity/spin.js/dist/spin.js',
+               'mapentity/Leaflet.Spin/leaflet.spin.js']
     }),
     ('leaflet.layerindex', {
-        'js': ['mapentity/rtree.js',
-               'mapentity/leaflet.layerindex.js']
+        'js': ['mapentity/RTree/src/rtree.js',
+               'mapentity/Leaflet.LayerIndex/leaflet.layerindex.js']
     }),
     ('leaflet.filelayer', {
-        'js': ['mapentity/togeojson.js',
-               'mapentity/leaflet.filelayer.js']
+        'js': ['mapentity/togeojson/togeojson.js',
+               'mapentity/Leaflet.FileLayer/leaflet.filelayer.js']
     }),
     ('leaflet.textpath', {
-        'js': 'mapentity/leaflet.textpath.js'
+        'js': 'mapentity/Leaflet.TextPath/leaflet.textpath.js'
     }),
     ('leaflet.geometryutil', {
-        'js': 'mapentity/leaflet.geometryutil.js'
+        'js': 'mapentity/Leaflet.GeometryUtil/dist/leaflet.geometryutil.js'
     }),
     ('leaflet.snap', {
-        'js': 'mapentity/leaflet.snap.js'
+        'js': 'mapentity/Leaflet.Snap/leaflet.snap.js'
     }),
     ('leaflet.measurecontrol', {
-        'css': 'mapentity/leaflet.measurecontrol.css',
-        'js': 'mapentity/leaflet.measurecontrol.js'
+        'css': 'mapentity/Leaflet.MeasureControl/leaflet.measurecontrol.css',
+        'js': 'mapentity/Leaflet.MeasureControl/leaflet.measurecontrol.js'
     }),
     ('mapentity.forms', {
         'js': 'mapentity/mapentity.form.js'
