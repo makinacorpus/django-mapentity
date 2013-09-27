@@ -1,3 +1,5 @@
+if (!window.MapEntity) window.MapEntity = {};
+
 MapEntity.GeometryField = L.GeometryField.extend({
 
     initialize: function () {
