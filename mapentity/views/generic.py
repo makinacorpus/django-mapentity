@@ -1,321 +1,35 @@
-# -*- coding: utf-8 -*-
-import os
-import sys
-import urllib2
 import logging
-import traceback
 from datetime import datetime
-import json
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.db.models.query import QuerySet
 from django.http import (HttpResponse, HttpResponseBadRequest,
-                         HttpResponseNotFound, HttpResponseServerError)
+                         HttpResponseServerError)
 from django.utils.translation import ugettext_lazy as _
-from django.views.defaults import page_not_found
-from django.views.generic.base import TemplateView
+from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
-from django.views import static
-from django.utils.decorators import method_decorator
-from django.utils.encoding import force_unicode
-from django.utils.functional import Promise, curry
-from django.contrib import messages
-from django.views.decorators.http import require_http_methods, last_modified as cache_last_modified
-from django.views.decorators.csrf import csrf_exempt
-from django.core.serializers import serialize
-from django.core.serializers.json import DateTimeAwareJSONEncoder
+from django.views.decorators.http import last_modified as cache_last_modified
 from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
-from django.template import RequestContext, Context, loader
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
 
-from . import app_settings, _MAP_STYLES
-from . import models as mapentity_models
-from .decorators import save_history
-from .serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
-from .helpers import convertit_url, capture_image, download_to_stream
-from .urlizor import url_layer
+from .. import app_settings
+from .. import models as mapentity_models
+from ..helpers import convertit_url, download_to_stream
+from ..decorators import save_history
+from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
+from .base import history_delete
+from .mixins import ModelMetaMixin, JSONResponseMixin
 
 
 logger = logging.getLogger(__name__)
-
-
-"""
-
-    Reusables
-
-"""
-
-
-class HttpJSONResponse(HttpResponse):
-    def __init__(self, content='', **kwargs):
-        kwargs['content_type'] = kwargs.get('content_type', 'application/json')
-        super(HttpJSONResponse, self).__init__(content, **kwargs)
-
-
-class DjangoJSONEncoder(DateTimeAwareJSONEncoder):
-    """
-    Taken (slightly modified) from:
-    http://stackoverflow.com/questions/2249792/json-serializing-django-models-with-simplejson
-    """
-    def default(self, obj):
-        # https://docs.djangoproject.com/en/dev/topics/serialization/#id2
-        if isinstance(obj, Promise):
-            return force_unicode(obj)
-        if isinstance(obj, QuerySet):
-            # `default` must return a python serializable
-            # structure, the easiest way is to load the JSON
-            # string produced by `serialize` and return it
-            return json.loads(serialize('json', obj))
-        return super(DjangoJSONEncoder, self).default(obj)
-
-# partial function, we can now use dumps(my_dict) instead
-# of dumps(my_dict, cls=DjangoJSONEncoder)
-json_django_dumps = curry(json.dumps, cls=DjangoJSONEncoder)
-
-
-class JSONResponseMixin(object):
-    """
-    A mixin that can be used to render a JSON/JSONP response.
-    """
-    response_class = HttpJSONResponse
-
-    def render_to_response(self, context, **response_kwargs):
-        """
-        Returns a JSON response, transforming 'context' to make the payload.
-        """
-        json = self.convert_context_to_json(context)
-        # If callback is specified, serve as JSONP
-        callback = self.request.GET.get('callback', None)
-        if callback:
-            response_kwargs['content_type'] = 'application/javascript'
-            json = u"%s(%s);" % (callback, json)
-        return self.response_class(json, **response_kwargs)
-
-    def convert_context_to_json(self, context):
-        "Convert the context dictionary into a JSON object"
-        return json_django_dumps(context)
-
-
-class LastModifiedMixin(object):
-    def dispatch(self, *args, **kwargs):
-        qs = self.queryset or self.model.objects
-        model = self.model or self.queryset.model
-        try:
-            obj = qs.get(pk=kwargs['pk'])
-        except (KeyError, model.DoesNotExist):
-            return HttpResponseNotFound()
-
-        @cache_last_modified(lambda request, pk: obj.date_update)
-        def _dispatch(*args, **kwargs):
-            return super(LastModifiedMixin, self).dispatch(*args, **kwargs)
-        return _dispatch(*args, **kwargs)
-
-
-class ModelMetaMixin(object):
-    """
-    Add model meta information in context data
-    """
-
-    def get_entity_kind(self):
-        return None
-
-    def get_title(self):
-        return None
-
-    def get_context_data(self, **kwargs):
-        context = super(ModelMetaMixin, self).get_context_data(**kwargs)
-        context['view'] = self.get_entity_kind()
-        context['title'] = self.get_title()
-
-        model = self.model or self.queryset.model
-        if model:
-            context['model'] = model
-            context['appname'] = model._meta.app_label.lower()
-            context['modelname'] = model._meta.object_name.lower()
-            context['objectsname'] = model._meta.verbose_name_plural
-        return context
-
-
-class DocumentConvert(DetailView):
-    """
-    A proxy view to conversion server.
-    """
-    format = 'pdf'
-
-    def source_url(self):
-        raise NotImplementedError
-
-    def render_to_response(self, context):
-        source = self.request.build_absolute_uri(self.source_url())
-        url = convertit_url(source, to_type=self.format)
-        response = HttpResponse()
-        download_to_stream(url, response, silent=True)
-        return response
-
-
-"""
-
-    Concrete views
-
-"""
-
-def handler404(request, template_name='mapentity/404.html'):
-    return page_not_found(request, template_name)
-
-
-def handler500(request, template_name='mapentity/500.html'):
-    """
-    500 error handler which tries to use a RequestContext - unless an error
-    is raised, in which a normal Context is used with just the request
-    available.
-
-    Templates: `500.html`
-    Context: None
-    """
-    # Try returning using a RequestContext
-    try:
-        context = RequestContext(request)
-    except:
-        logger.warn('Error getting RequestContext for ServerError page.')
-        context = Context({'request': request})
-    e, name, tb = sys.exc_info()
-    context['exception'] = repr(name)
-    context['stack'] = "\n".join(traceback.format_tb(tb))
-    t = loader.get_template(template_name)
-    return HttpResponseServerError(t.render(context))
-
-
-@login_required()
-def serve_secure_media(request, path):
-    """
-    Serve media/ for authenticated users only, since it can contain sensitive
-    information (uploaded documents, map screenshots, ...)
-    """
-    if settings.DEBUG:
-        return static.serve(request, path, settings.MEDIA_ROOT)
-
-    response = HttpResponse()
-    response['X-Accel-Redirect'] = settings.MEDIA_URL_SECURE + path
-    return response
-
-
-class JSSettings(JSONResponseMixin, TemplateView):
-    """
-    Javascript settings, in JSON format.
-    Likely to be overriden. Contains only necessary stuff
-    for mapentity.
-    """
-    def get_context_data(self):
-        dictsettings = {}
-        dictsettings['debug'] = settings.DEBUG
-        dictsettings['map'] = dict(
-            extent=getattr(settings, 'LEAFLET_CONFIG', {}).get('SPATIAL_EXTENT'),
-            styles=_MAP_STYLES,
-        )
-
-        # URLs
-        root_url = app_settings['ROOT_URL']
-        root_url = root_url if root_url.endswith('/') else root_url + '/'
-        dictsettings['urls'] = {}
-        dictsettings['urls']['root'] = root_url
-        class ModelName: pass
-        dictsettings['urls']['layer'] = root_url + url_layer(ModelName)[1:-1]
-
-        # Useful for JS calendars
-        dictsettings['date_format'] = settings.DATE_INPUT_FORMATS[0].replace('%Y', 'yyyy').replace('%m', 'mm').replace('%d', 'dd')
-        # Languages
-        dictsettings['languages'] = dict(available=dict(app_settings['LANGUAGES']),
-                                         default=app_settings['LANGUAGE_CODE'])
-        return dictsettings
-
-
-@csrf_exempt
-@login_required
-def map_screenshot(request):
-    """
-    This view allows to take screenshots, via a django-screamshot service, of
-    the map **currently viewed by the user**.
-
-    - A context full of information is built on client-side and posted here.
-    - We reproduce this context, via headless browser, and take a capture
-    - We return the resulting image as attachment.
-
-    This seems overkill ? Please look around and find a better way.
-    """
-    try:
-        printcontext = request.POST['printcontext']
-        assert len(printcontext) < 512, "Print context is way too big."
-
-        # Prepare context, extract and add infos
-        context = json.loads(printcontext)
-        map_url = context.pop('url').split('?', 1)[0]
-        context['print'] = True
-        printcontext = json.dumps(context)
-        contextencoded = urllib2.quote(printcontext)
-        map_url += '?context=%s' % contextencoded
-        logger.debug("Capture %s" % map_url)
-
-        # Capture image and return it
-        width = context.get('viewport', {}).get('width')
-        height = context.get('viewport', {}).get('height')
-
-        response = HttpResponse()
-        capture_image(map_url, response, width=width, height=height, selector='#mainmap')
-        response['Content-Disposition'] = 'attachment; filename=%s.png' % datetime.now().strftime('%Y%m%d-%H%M%S')
-        return response
-
-    except Exception, e:
-        logger.exception(e)
-        return HttpResponseBadRequest(e)
-
-
-@require_http_methods(["GET"])
-@login_required
-def convert(request):
-    """ A stupid proxy to Convertit.
-
-    Was done by Nginx before, but this is the first step of
-    authenticated document conversion.
-    """
-    source = request.GET.get('url')
-    if source is None:
-        return HttpResponseBadRequest('url parameter missing')
-    source = request.build_absolute_uri(source)
-
-    format = request.GET.get('to')
-    url = convertit_url(source, to_type=format)
-    response = HttpResponse()
-    received = download_to_stream(url, response, silent=True)
-    filename = os.path.basename(received.url)
-    response['Content-Disposition'] = 'attachment; filename=%s' % filename
-    return response
-
-
-@require_http_methods(["POST"])
-@csrf_exempt
-@login_required
-def history_delete(request, path=None):
-    path = request.POST.get('path', path)
-    if path:
-        history = request.session['history']
-        history = [h for h in history if h.path != path]
-        request.session['history'] = history
-    return HttpResponse()
-
-
-"""
-
-    Generic views
-
-"""
 
 
 class MapEntityLayer(GeoJSONLayerView):
@@ -412,8 +126,7 @@ class MapEntityList(ModelMetaMixin, ListView):
 
 class MapEntityJsonList(JSONResponseMixin, MapEntityList):
     """
-    Return path related datas (belonging to the current user) as a JSON
-    that will populate a dataTable.
+    Return objects list as a JSON that will populate the Jquery.dataTables.
     """
 
     @classmethod
@@ -491,31 +204,6 @@ class MapEntityFormat(MapEntityList):
         return response
 
 
-class MapEntityDetail(ModelMetaMixin, DetailView):
-    @classmethod
-    def get_entity_kind(cls):
-        return mapentity_models.ENTITY_DETAIL
-
-    def get_title(self):
-        return unicode(self.get_object())
-
-    @method_decorator(login_required)
-    @save_history()
-    def dispatch(self, *args, **kwargs):
-        return super(MapEntityDetail, self).dispatch(*args, **kwargs)
-
-    def can_edit(self):
-        return False
-
-    def get_context_data(self, **kwargs):
-        context = super(MapEntityDetail, self).get_context_data(**kwargs)
-        context['activetab'] = self.request.GET.get('tab')
-        context['can_edit'] = self.can_edit()
-        context['can_add_attachment'] = self.can_edit()
-        context['can_delete_attachment'] = self.can_edit()
-        return context
-
-
 class MapEntityMapImage(ModelMetaMixin, DetailView):
     """
     A static file view, that serves the up-to-date map image (detail screenshot)
@@ -586,6 +274,30 @@ class MapEntityDocument(DetailView):
         return context
 
 
+class DocumentConvert(DetailView):
+    """
+    A proxy view to conversion server.
+    """
+    format = 'pdf'
+
+    def source_url(self):
+        raise NotImplementedError
+
+    def render_to_response(self, context):
+        source = self.request.build_absolute_uri(self.source_url())
+        url = convertit_url(source, to_type=self.format)
+        response = HttpResponse()
+        download_to_stream(url, response, silent=True)
+        return response
+
+
+"""
+
+    CRUD
+
+"""
+
+
 class MapEntityCreate(ModelMetaMixin, CreateView):
     @classmethod
     def get_entity_kind(cls):
@@ -618,6 +330,31 @@ class MapEntityCreate(ModelMetaMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityCreate, self).get_context_data(**kwargs)
+        return context
+
+
+class MapEntityDetail(ModelMetaMixin, DetailView):
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_DETAIL
+
+    def get_title(self):
+        return unicode(self.get_object())
+
+    @method_decorator(login_required)
+    @save_history()
+    def dispatch(self, *args, **kwargs):
+        return super(MapEntityDetail, self).dispatch(*args, **kwargs)
+
+    def can_edit(self):
+        return False
+
+    def get_context_data(self, **kwargs):
+        context = super(MapEntityDetail, self).get_context_data(**kwargs)
+        context['activetab'] = self.request.GET.get('tab')
+        context['can_edit'] = self.can_edit()
+        context['can_add_attachment'] = self.can_edit()
+        context['can_delete_attachment'] = self.can_edit()
         return context
 
 
