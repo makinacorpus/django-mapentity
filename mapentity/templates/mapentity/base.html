@@ -190,42 +190,10 @@
         <script type="text/javascript" src="{% static "mapentity/leaflet-controls.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/leaflet-datatables.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/mapentity.js" %}"></script>
-
-        <script type="text/javascript">
-            $(document).ready(function (e) {
-
-                // Scrollable panels
-                var fillmax = function () {
-                    $('.scrollable').each(function () {
-                        var top = $(this).offset().top,
-                            height = $(window).height() - top - parseFloat($(this).css('margin-top'))
-                                                              - parseFloat($(this).css('margin-bottom'));
-                        $(this).css('max-height', height + 'px');
-
-                    });
-                }
-                setTimeout(fillmax, 0);
-                $(window).resize(fillmax);
-
-                // Chosen-ify elements
-                $(".chzn-select").chosen();
-
-                // Top-navigation tabs
-                MapEntity.history.render();
-
-                // Fade out success/infos messages
-                $('.alert-info, .alert-success').delay(2000).fadeOut('slow');
-
-                // Form Cancel buttons
-                $('#button-id-cancel').click(function (){ window.history.go(-1); });
-
-                // Auto-hide elements
-                $('.autohide').parents().hover(
-                    function() { $(this).children(".autohide").show(); },
-                    function() { $(this).children(".autohide").hide(); }
-                );
-            });
-        </script>
+        <script type="text/javascript" src="{% static "mapentity/mapentity.history.js" %}"></script>
+        <script type="text/javascript" src="{% static "mapentity/mapentity.map.js" %}"></script>
+        <script type="text/javascript" src="{% static "mapentity/mapentity.context.js" %}"></script>
+        <script type="text/javascript" src="{% static "mapentity/mapentity.filter.js" %}"></script>
 
         {% block extrajs %}
         {% endblock extrajs %}
