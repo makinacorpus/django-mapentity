@@ -71,8 +71,9 @@ _LEAFLET_PLUGINS = OrderedDict([
         'css': 'mapentity/leaflet.measurecontrol.css',
         'js': 'mapentity/leaflet.measurecontrol.js'
     }),
-    ('mapentity.forms', {
-        'js': 'mapentity/mapentity.forms.js'
+    ('mapentity', {
+        'js': ['mapentity/mapentity.js',
+               'mapentity/mapentity.forms.js'],
     })
 ])
 
