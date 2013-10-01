@@ -9,9 +9,11 @@ from .helpers import wkt_to_geom
 
 
 class MapWidget(LeafletWidget):
+    geometry_field_class = 'MapEntity.GeometryField'
+
     def render(self, name, value, attrs=None):
         attrs = attrs or {}
-        attrs.update(geometry_field_class='MapEntity.GeometryField')
+        attrs.update(geometry_field_class=self.geometry_field_class)
         return super(MapWidget, self).render(name, value, attrs)
 
 

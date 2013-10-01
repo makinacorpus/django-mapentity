@@ -111,7 +111,8 @@ class MapEntityForm(TranslatedModelForm):
                 try:
                     formmodel = self._meta.model
                     modelfield = formmodel._meta.get_field(fieldname)
-                    if isinstance(modelfield, GeometryField):
+                    if isinstance(modelfield, GeometryField) and \
+                       not isinstance(formfield.widget, MapWidget):
                         formfield.widget = MapWidget()
                         formfield.widget.attrs['geom_type'] = formfield.geom_type
                 except FieldDoesNotExist:
