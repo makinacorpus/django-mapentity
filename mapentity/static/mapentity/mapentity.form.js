@@ -26,11 +26,11 @@ MapEntity.GeometryField = L.GeometryField.extend({
     addTo: function (map) {
         L.GeometryField.prototype.addTo.call(this, map);
 
-        this._addExtraControls();
-        this._addExtraLayers();
+        this._addExtraControls(map);
+        this._addExtraLayers(map);
     },
 
-    _addExtraControls: function () {
+    _addExtraControls: function (map) {
         map.removeControl(map.attributionControl);
         map.addControl(new L.Control.ResetView(this._getResetBounds.bind(this)));
         map.addControl(new L.Control.MeasureControl());
@@ -58,14 +58,18 @@ MapEntity.GeometryField = L.GeometryField.extend({
         map.addControl(filecontrol);
     },
 
-    _addExtraLayers: function () {
+    _addExtraLayers: function (map) {
         // Layer with objects of same type
         var objectsLayer = this.buildObjectsLayer();
         map.addLayer(objectsLayer);
 
-        var modelname = this.getModelName(),
-            url = window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), modelname);
+        var url = this.modelLayerUrl();
         objectsLayer.load(url);
+    },
+
+    modelLayerUrl: function (modelname) {
+        modelname = modelname || this.getModelName();
+        return window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), modelname);
     },
 
     buildObjectsLayer: function () {
@@ -107,7 +111,7 @@ MapEntity.GeometryField = L.GeometryField.extend({
             L.GeometryField.prototype._setView.call(this);
         }
 
-        this._initialBounds = map.getBounds();
+        this._initialBounds = this._map.getBounds();
         this._resetBounds = this._initialBounds;
     },
 
