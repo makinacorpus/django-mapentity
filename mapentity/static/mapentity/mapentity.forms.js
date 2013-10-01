@@ -103,7 +103,7 @@ MapEntity.GeometryField = L.GeometryField.extend({
         var setView = true;
         var geometry = this.store.load();
         if (!geometry) {
-            if (MapEntity.Context.restoreLatestMapView(map, ['detail', 'list'])) {
+            if (MapEntity.Context.restoreLatestMapView(this._map, ['detail', 'list'])) {
                 setView = false;
             }
         }
