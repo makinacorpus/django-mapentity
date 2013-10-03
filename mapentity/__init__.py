@@ -80,7 +80,8 @@ _LEAFLET_CONFIG['PLUGINS'] = _LEAFLET_PLUGINS
 setattr(settings, 'LEAFLET_CONFIG', _LEAFLET_CONFIG)
 
 
-MapEntity = namedtuple('MapEntity', ['menu', 'label', 'icon', 'icon_small', 'icon_big','modelname', 'url_list'])
+MapEntity = namedtuple('MapEntity', ['menu', 'label', 'modelname', 'url_list',
+                                     'icon', 'icon_small', 'icon_big'])
 
 
 class Registry(object):

@@ -86,7 +86,10 @@ class JSSettings(JSONResponseMixin, TemplateView):
         root_url = root_url if root_url.endswith('/') else root_url + '/'
         dictsettings['urls'] = {}
         dictsettings['urls']['root'] = root_url
-        class ModelName: pass
+
+        class ModelName:
+            pass
+
         dictsettings['urls']['layer'] = root_url + url_layer(ModelName)[1:-1]
 
         # Useful for JS calendars

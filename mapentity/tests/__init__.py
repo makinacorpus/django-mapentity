@@ -1,4 +1,4 @@
-from .test_functional import *
-from .test_middleware import *
-from .test_views import *
-from .test_helpers import *
+from .test_functional import *  # noqa
+from .test_middleware import *  # noqa
+from .test_views import *  # noqa
+from .test_helpers import *  # noqa

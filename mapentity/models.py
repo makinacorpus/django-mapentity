@@ -9,7 +9,6 @@ from . import app_settings
 from .helpers import smart_urljoin, is_file_newer, capture_map_image, extract_attributes_html
 
 
-
 # Used to create the matching url name
 ENTITY_LAYER = "layer"
 ENTITY_LIST = "list"

@@ -10,6 +10,17 @@ from django.utils.encoding import smart_str
 from django.utils.html import strip_tags
 
 
+__all__ = ['plain_text',
+           'smart_plain_text',
+           'field_as_string',
+           'CSVSerializer',
+           'GPXSerializer',
+           'DatatablesSerializer',
+           'ZipShapeSerializer',
+           'DjangoJSONEncoder',
+           'json_django_dumps']
+
+
 def plain_text(html):
     h = HTMLParser()
     return h.unescape(strip_tags(html))
@@ -28,10 +39,10 @@ def smart_plain_text(s, ascii=False):
         return smart_str(s)
 
 
-from .commasv import *
-from .gpx import *
-from .datatables import *
-from .shapefile import *
+from .commasv import field_as_string, CSVSerializer
+from .gpx import GPXSerializer
+from .datatables import DatatablesSerializer
+from .shapefile import ZipShapeSerializer
 
 
 class DjangoJSONEncoder(DateTimeAwareJSONEncoder):

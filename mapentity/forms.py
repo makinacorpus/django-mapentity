@@ -1,11 +1,11 @@
 import copy
 
+from django import forms
 from django.db.models.fields import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
-from django import forms as django_forms
 from django.contrib.gis.db.models.fields import GeometryField
 
-import floppyforms as forms
+import floppyforms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Button, HTML
 from crispy_forms.bootstrap import FormActions
@@ -111,8 +111,9 @@ class MapEntityForm(TranslatedModelForm):
                 try:
                     formmodel = self._meta.model
                     modelfield = formmodel._meta.get_field(fieldname)
-                    if isinstance(modelfield, GeometryField) and \
-                       not isinstance(formfield.widget, MapWidget):
+                    needs_replace_widget = (isinstance(modelfield, GeometryField)
+                                            and not isinstance(formfield.widget, MapWidget))
+                    if needs_replace_widget:
                         formfield.widget = MapWidget()
                         formfield.widget.attrs['geom_type'] = formfield.geom_type
                 except FieldDoesNotExist:
@@ -120,7 +121,7 @@ class MapEntityForm(TranslatedModelForm):
 
                 # Bypass widgets that inherit textareas, such as geometry fields
                 if formfield.widget.__class__ in (forms.widgets.Textarea,
-                                                  django_forms.widgets.Textarea):
+                                                  floppyforms.widgets.Textarea):
                     formfield.widget = TinyMCE()
 
         self._init_layout()

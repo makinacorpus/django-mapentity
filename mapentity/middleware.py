@@ -34,8 +34,9 @@ class AutoLoginMiddleware(object):
         if user and user.is_anonymous():
             remoteip = request.META.get('REMOTE_ADDR')
             remotehost = request.META.get('REMOTE_HOST')
-            if (remoteip and remoteip in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST)) or \
-               (remotehost and remotehost in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST)):
-               logger.debug("Auto-login for %s/%s" % (remoteip, remotehost))
-               request.user = internal_user
+            is_allowed = ((remoteip and remoteip in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST)) or
+                          (remotehost and remotehost in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST)))
+            if is_allowed:
+                logger.debug("Auto-login for %s/%s" % (remoteip, remotehost))
+                request.user = internal_user
         return None

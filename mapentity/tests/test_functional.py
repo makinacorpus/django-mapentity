@@ -90,16 +90,16 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
         params = '?bbox=POLYGON((5+44+0%2C5+45+0%2C6+45+0%2C6+44+0%2C5+44+0))'
         # If no objects exist, should not fail.
-        response = self.client.get(self.model.get_jsonlist_url()+params)
+        response = self.client.get(self.model.get_jsonlist_url() + params)
         self.assertEqual(response.status_code, 200)
         # If object exists, either :)
         self.modelfactory.create()
-        response = self.client.get(self.model.get_jsonlist_url()+params)
+        response = self.client.get(self.model.get_jsonlist_url() + params)
         self.assertEqual(response.status_code, 200)
         # If bbox is invalid, it should return all
         allresponse = self.client.get(self.model.get_jsonlist_url())
         params = '?bbox=POLYGON(prout)'
-        response = self.client.get(self.model.get_jsonlist_url()+params)
+        response = self.client.get(self.model.get_jsonlist_url() + params)
         self.assertEqual(response.status_code, 200)
         response.content = allresponse.content
 
@@ -222,10 +222,10 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.session = requests.Session()
         response = self.session.get(self.live_server_url)
         csrftoken = response.cookies.get('csrftoken', '')
-        response = self.session.post(self.url_for('/login/'), 
-                                    {'username': user.username,
-                                     'password': 'booh',
-                                     'csrfmiddlewaretoken': csrftoken})
+        response = self.session.post(self.url_for('/login/'),
+                                     {'username': user.username,
+                                      'password': 'booh',
+                                      'csrfmiddlewaretoken': csrftoken})
 
     def test_geojson_cache(self):
         if self.model is None:

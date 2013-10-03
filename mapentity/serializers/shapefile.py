@@ -5,7 +5,7 @@ import tempfile
 try:
     from cStringIO import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from StringIO import StringIO  # noqa
 from collections import OrderedDict
 
 from django.core.serializers.base import Serializer
@@ -57,7 +57,7 @@ class ZipShapeSerializer(Serializer):
         stream.write(buffr.getvalue())
         buffr.close()
 
-    def _create_shape(self, queryset,  model, columns, filename):
+    def _create_shape(self, queryset, model, columns, filename):
         """Split a shapes into one or more shapes (one for point and one for linestring)
         """
         geo_field = geo_field_from_model(model, app_settings['GEOM_FIELD_NAME'])
