@@ -3,7 +3,7 @@
  */
 
 
-if (!MapEntity) var MapEntity = {};
+if (!window.MapEntity) window.MapEntity = {};
 
 
 // Toggable console.debug() function

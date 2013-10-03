@@ -1,0 +1,36 @@
+[submodule "mapentity/static/mapentity/Leaflet.label"]
+	path = mapentity/static/mapentity/Leaflet.label
+	url = https://github.com/Leaflet/Leaflet.label.git
+[submodule "mapentity/static/mapentity/Leaflet.Spin"]
+	path = mapentity/static/mapentity/Leaflet.Spin
+	url = https://github.com/makinacorpus/Leaflet.Spin.git
+[submodule "mapentity/static/mapentity/spin.js"]
+	path = mapentity/static/mapentity/spin.js
+	url = https://github.com/fgnass/spin.js.git
+[submodule "mapentity/static/mapentity/Leaflet.Snap"]
+	path = mapentity/static/mapentity/Leaflet.Snap
+	url = https://github.com/makinacorpus/Leaflet.Snap.git
+[submodule "mapentity/static/mapentity/Leaflet.TextPath"]
+	path = mapentity/static/mapentity/Leaflet.TextPath
+	url = https://github.com/makinacorpus/Leaflet.TextPath.git
+[submodule "mapentity/static/mapentity/Leaflet.GeometryUtil"]
+	path = mapentity/static/mapentity/Leaflet.GeometryUtil
+	url = https://github.com/makinacorpus/Leaflet.GeometryUtil.git
+[submodule "mapentity/static/mapentity/Leaflet.MeasureControl"]
+	path = mapentity/static/mapentity/Leaflet.MeasureControl
+	url = https://github.com/makinacorpus/Leaflet.MeasureControl.git
+[submodule "mapentity/static/mapentity/Leaflet.OverIntent"]
+	path = mapentity/static/mapentity/Leaflet.OverIntent
+	url = https://github.com/makinacorpus/Leaflet.OverIntent.git
+[submodule "mapentity/static/mapentity/Leaflet.LayerIndex"]
+	path = mapentity/static/mapentity/Leaflet.LayerIndex
+	url = https://github.com/makinacorpus/Leaflet.LayerIndex.git
+[submodule "mapentity/static/mapentity/RTree"]
+	path = mapentity/static/mapentity/RTree
+	url = https://github.com/imbcmdth/RTree.git
+[submodule "mapentity/static/mapentity/togeojson"]
+	path = mapentity/static/mapentity/togeojson
+	url = https://github.com/mapbox/togeojson.git
+[submodule "mapentity/static/mapentity/Leaflet.FileLayer"]
+	path = mapentity/static/mapentity/Leaflet.FileLayer
+	url = https://github.com/makinacorpus/Leaflet.FileLayer.git
