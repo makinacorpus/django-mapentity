@@ -1,2 +1,5 @@
 *.pyc
 *.egg*/
+*.sw?
+build/
+dist/
