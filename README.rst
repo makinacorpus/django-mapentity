@@ -1,6 +1,6 @@
-====================================================
-MapEntity - A CRUD interface for geospatial entities
-====================================================
+=========
+MapEntity
+=========
 
 MapEntity is a CRUD interface for geospatial entities built with Django.
 
