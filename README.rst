@@ -5,16 +5,14 @@ MapEntity
 MapEntity is a CRUD interface for geospatial entities built with Django.
 
 
-System requirements
-===================
+Installation
+============
 
-Install GDAL with its development files. For example, on Debian:
+Install GDAL with its development files. For example, on Debian::
 
     $ sudo apt-get install libgdal-dev
 
-
-Installation
-============
+Then install the Python packages::
 
     $ pip install -r requirements.txt
     $ python setup.py install
