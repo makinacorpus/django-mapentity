@@ -2,6 +2,7 @@ import os
 
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import FieldError
 
 from paperclip.models import Attachment
 
@@ -40,7 +41,7 @@ class MapEntityMixin(object):
     def latest_updated(cls):
         try:
             return cls.objects.latest("date_update").date_update
-        except cls.DoesNotExist:
+        except (cls.DoesNotExist, FieldError):
             return None
 
     def get_geom(self):
