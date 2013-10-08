@@ -8,6 +8,7 @@ from django.contrib.gis.geos import GEOSGeometry, Point
 register = template.Library()
 
 from .. import app_settings
+from .. import API_SRID
 
 
 class SmartIncludeNode(template.Node):
@@ -56,7 +57,7 @@ def latlngbounds(obj, fieldname=None):
         obj = getattr(obj, fieldname)
     if obj is None:
         return 'null'
-    obj.transform(settings.API_SRID)
+    obj.transform(API_SRID)
     if isinstance(obj, Point):
         extent = [obj.x - 0.005, obj.y - 0.005, obj.x + 0.005, obj.y + 0.005]
     else:
