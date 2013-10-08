@@ -4,6 +4,8 @@ python:
   - 2.7
 
 install:
+ - sudo apt-get install libgdal-dev
+
    # This is a dependency of our Django quicktest script
  - pip install argparse --use-mirrors
 
