@@ -10,6 +10,12 @@ install:
  - sudo apt-get update -qq
  - sudo apt-get install libgdal-dev
 
+ - pip install --no-install GDAL==1.9.1
+ - pushd /home/travis/virtualenv/python2.7/build/GDAL
+ - python setup.py build_ext --include-dirs=/usr/include/gdal
+ - pip install --no-download GDAL
+ - popd
+
    # This is a dependency of our Django quicktest script
  - pip install argparse --use-mirrors
 
