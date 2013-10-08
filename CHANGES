@@ -6,3 +6,9 @@ CHANGELOG
 ==================
 
 * Initial working version
+
+Breaking changes:
+
+* Make API_SRID a constant hardcoded to 4326
+* Make SRID an app setting so must appears as MAPENTITY_SRID in your project's
+  settings
