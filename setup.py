@@ -11,7 +11,7 @@ setup(
     version='0.1.0',
     author='Makina Corpus',
     author_email='geobi@makina-corpus.com',
-    url='https://github.com/makinacorpus/Geotrek',
+    url='https://github.com/makinacorpus/django-mapentity',
     download_url="http://pypi.python.org/pypi/mapentity/",
     description="Generic CRUD with maps",
     long_description=open(os.path.join(here, 'README.rst')).read() + '\n\n' +
