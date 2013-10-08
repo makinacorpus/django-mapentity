@@ -57,9 +57,14 @@ class YearBetweenFilter(YearFilter):
 
 
 class PolygonFilter(Filter):
-    widget = HiddenGeometryWidget
 
     field_class = forms.gis.PolygonField
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('name', app_settings['GEOM_FIELD_NAME'])
+        kwargs.setdefault('widget', HiddenGeometryWidget)
+        kwargs.setdefault('lookup_type', 'intersects')
+        super(PolygonFilter, self).__init__(*args, **kwargs)
 
 
 class PythonPolygonFilter(PolygonFilter):
@@ -67,12 +72,14 @@ class PythonPolygonFilter(PolygonFilter):
     def filter(self, qs, value):
         if not value:
             return qs
+        if not value.srid:
+            value.srid = settings.API_SRID
         value.transform(settings.SRID)
         filtered = []
         for o in qs.all():
             geom = getattr(o, self.name)
             if geom and geom.valid and not geom.empty:
-                if geom.intersects(value):
+                if getattr(geom, self.lookup_type)(value):
                     filtered.append(o.pk)
             else:
                 filtered.append(o.pk)
@@ -80,8 +87,7 @@ class PythonPolygonFilter(PolygonFilter):
 
 
 class MapEntityFilterSet(FilterSet):
-    bbox = PolygonFilter(name=app_settings['GEOM_FIELD_NAME'],
-                         lookup_type='intersects', widget=HiddenGeometryWidget)
+    bbox = PolygonFilter()
 
     class Meta:
         fields = ['bbox']
