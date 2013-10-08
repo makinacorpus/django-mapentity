@@ -109,7 +109,6 @@ class MapEntityList(ModelMetaMixin, ListView):
         self._filterform = self.filterform(self.request.GET or None, queryset=queryset)
         return self._filterform.qs
 
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # Save last list visited in session
         request.session['last_list'] = request.path
