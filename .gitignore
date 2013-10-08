@@ -3,3 +3,5 @@
 *.sw?
 build/
 dist/
+docs/_build/
+README.html
