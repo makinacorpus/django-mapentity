@@ -17,3 +17,8 @@ Then install the Python packages::
 
 (Yes we need to do both because requirements.txt lists dependencies that are
 not yet on PyPI.)
+
+Install static assets as git submodules::
+
+    $ git submodule init
+    $ git submodule update
