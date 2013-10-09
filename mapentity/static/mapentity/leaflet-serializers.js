@@ -1,7 +1,7 @@
 L.Util.getWKT = function(layer) {
     coord2str = function (obj) {
-        if(obj.lng) return obj.lng + ' ' + obj.lat + ' 0.0';
-        if(obj.length == 0) return null;
+        if(obj.lng) return obj.lng + ' ' + obj.lat;
+        if(obj.length === 0) return null;
         var n, c, wkt = [];
         for (n in obj) {
             c = coord2str(obj[n]);
