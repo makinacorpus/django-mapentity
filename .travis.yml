@@ -8,12 +8,22 @@ install:
  - sudo apt-add-repository -y ppa:git-core/ppa
  - sudo apt-add-repository -y ppa:ubuntugis/ppa
  - sudo apt-get update -qq
- - sudo apt-get install libgdal-dev
 
+   # GDAL
+ - sudo apt-get install libgdal-dev
  - pip install --no-install GDAL==1.9.1
  - pushd /home/travis/virtualenv/python2.7/build/GDAL
  - python setup.py build_ext --include-dirs=/usr/include/gdal
  - pip install --no-download GDAL
+ - popd
+
+   # Spatialiate
+ - sudo apt-get install -y libproj-dev libgeos-dev libspatialite-dev
+ - wget http://pysqlite.googlecode.com/files/pysqlite-2.6.3.tar.gz
+ - tar -zxvf pysqlite-2.6.3.tar.gz
+ - pushd pysqlite-2.6.3
+ - sed -i "s/define=SQLITE_OMIT_LOAD_EXTENSION//g" setup.cfg
+ - python setup.py install
  - popd
 
    # This is a dependency of our Django quicktest script
