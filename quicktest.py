@@ -30,6 +30,8 @@ class QuickDjangoTest(object):
         """
         Fire up the Django test suite developed for version 1.2
         """
+        apps = [app for app in self.apps]
+        apps += ['%s.tests' % app for app in self.apps]
         settings.configure(
             DATABASES={
                 'default': {
@@ -41,7 +43,7 @@ class QuickDjangoTest(object):
                     'PORT': '',
                 }
             },
-            INSTALLED_APPS=self.INSTALLED_APPS + self.apps,
+            INSTALLED_APPS=self.INSTALLED_APPS + tuple(apps),
         )
         from django.test.simple import DjangoTestSuiteRunner
         failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
