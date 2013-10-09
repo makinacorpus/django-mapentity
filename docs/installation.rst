@@ -10,6 +10,12 @@ Requirements:
 
     $ sudo apt-get install libgdal-dev
 
+You might need to set a couple of environement variables to make sure the
+install process can find GDAL headers::
+
+    $ export CPLUS_INCLUDE_PATH=/usr/include/gdal
+    $ export C_INCLUDE_PATH=/usr/include/gdal
+
 Then install the Python packages::
 
     $ pip install -r requirements.txt
