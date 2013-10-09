@@ -141,6 +141,9 @@
             });
             map.addLayer(objectsLayer);
 
+            if (map.layerscontrol === undefined) {
+                map.layerscontrol = L.control.layers().addTo(map);
+            }
             map.layerscontrol.addOverlay(objectsLayer, '{{ objectsname }}');
             objectsLayer.load("{{ model.get_layer_url }}", true);
 

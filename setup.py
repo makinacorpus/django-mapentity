@@ -31,7 +31,7 @@ setup(
         'django-filter == 0.5.4',
         'django-tinymce',
         # Under development at makinacorpus
-        'django-appypod',
+        'django-appypod>=0.0.2',
         'django-leaflet',
         'django-geojson',
         'paperclip',
