@@ -130,7 +130,9 @@ MapEntity.Context = new function() {
                     }
                 });
             }
-            map.layerscontrol._onInputClick();
+            if (map.layerscontrol !== undefined) {
+                map.layerscontrol._onInputClick();
+            }
         }
 
         if (context.print) {

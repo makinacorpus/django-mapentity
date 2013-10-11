@@ -28,12 +28,12 @@ setup(
         'django-floppyforms == 1.1',
         'django-crispy-forms == 1.2.3',
         'django-compressor == 1.3',
-        'django-filter == 0.5',
-        'django-leaflet == 0.8',
-        'django-geojson == 2.1',
-        # Obtained via requirements.txt
-        'django-appypod',
+        'django-filter == 0.5.4',
         'django-tinymce',
+        # Under development at makinacorpus
+        'django-appypod>=0.0.2',
+        'django-leaflet',
+        'django-geojson',
         'paperclip',
     ] + test_requires,
     tests_requires=test_requires,
