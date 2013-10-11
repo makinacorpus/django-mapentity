@@ -1,4 +1,3 @@
-from django.core.management import call_command
 from django.db.models import loading
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
@@ -22,4 +21,3 @@ class WeatherStation(models.Model):
 
 
 loading.cache.loaded = False
-call_command('syncdb', verbosity=0)

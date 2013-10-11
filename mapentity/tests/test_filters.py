@@ -3,6 +3,7 @@ from django.contrib.gis.geos import GEOSGeometry
 
 from .models import MushroomSpot, WeatherStation
 from ..filters import PythonPolygonFilter, PolygonFilter
+from .. import API_SRID
 from django.conf import settings
 
 
@@ -32,7 +33,7 @@ class PolygonFilterTest(TestCase):
 
     def test_should_consider_filter_shape_by_geom(self):
         shape = GEOSGeometry('POLYGON((0 -1, 4 -1, 4 1, 0 1, 0 -1))', srid=2154)
-        shape.transform(settings.API_SRID)
+        shape.transform(API_SRID)
         result = self.filter.filter(WeatherStation.objects.all(), shape)
         self.assertEqual(1, len(result))
 

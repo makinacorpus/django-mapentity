@@ -3,9 +3,11 @@ import sys
 import argparse
 from django.conf import settings
 
+
 class QuickDjangoTest(object):
     """
-    A quick way to run the Django test suite without a fully-configured project.
+    A quick way to run the Django test suite without a fully-configured
+    project.
 
     Example usage:
 
@@ -48,7 +50,7 @@ class QuickDjangoTest(object):
             ROOT_URLCONF='mapentity.tests.urls',
             MEDIA_URL='/media/',
             MEDIA_URL_SECURE='/media_secure/',
-            MIDDLEWARE_CLASSES = (
+            MIDDLEWARE_CLASSES=(
                 'django.middleware.common.CommonMiddleware',
                 'django.contrib.sessions.middleware.SessionMiddleware',
                 'django.middleware.locale.LocaleMiddleware',
