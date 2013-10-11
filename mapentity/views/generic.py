@@ -20,6 +20,7 @@ from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
 
+from .. import API_SRID
 from .. import app_settings
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream
@@ -38,7 +39,7 @@ class MapEntityLayer(GeoJSONLayerView):
     """
 
     force2d = True
-    srid = settings.API_SRID
+    srid = API_SRID
 
     def __init__(self, *args, **kwargs):
         super(MapEntityLayer, self).__init__(*args, **kwargs)
@@ -106,10 +107,10 @@ class MapEntityList(ModelMetaMixin, ListView):
     def get_queryset(self):
         queryset = super(MapEntityList, self).get_queryset()
         # Filter queryset from possible serialized form
-        self._filterform = self.filterform(self.request.GET or None, queryset=queryset)
+        self._filterform = self.filterform(self.request.GET or None,
+                                           queryset=queryset)
         return self._filterform.qs
 
-    @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # Save last list visited in session
         request.session['last_list'] = request.path

@@ -10,6 +10,9 @@ from django.conf.urls import patterns
 __all__ = ['app_settings', 'registry']
 
 
+API_SRID = 4326
+
+
 app_settings = dict({
     'TITLE': "",
     'HISTORY_ITEMS_MAX': 5,

@@ -11,12 +11,12 @@ setup(
     version='0.1.0',
     author='Makina Corpus',
     author_email='geobi@makina-corpus.com',
-    url='https://github.com/makinacorpus/Geotrek',
+    url='https://github.com/makinacorpus/django-mapentity',
     download_url="http://pypi.python.org/pypi/mapentity/",
     description="Generic CRUD with maps",
     long_description=open(os.path.join(here, 'README.rst')).read() + '\n\n' +
                      open(os.path.join(here, 'CHANGES')).read(),
-    license='LPGL, see LICENSE file.',
+    license='BSD, see LICENSE file.',
     install_requires=[
         'Django >= 1.4',
         'GDAL == 1.9.1',
@@ -31,7 +31,7 @@ setup(
         'django-filter == 0.5.4',
         'django-tinymce',
         # Under development at makinacorpus
-        'django-appypod',
+        'django-appypod>=0.0.2',
         'django-leaflet',
         'django-geojson',
         'paperclip',
