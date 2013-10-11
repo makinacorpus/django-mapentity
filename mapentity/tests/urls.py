@@ -10,5 +10,3 @@ urlpatterns = patterns(
     url(r'^paperclip/', include('paperclip.urls')),
     #url(r'^admin/', include(admin.site.urls)),
 )
-
-
