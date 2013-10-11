@@ -44,9 +44,23 @@ class QuickDjangoTest(object):
                 }
             },
             INSTALLED_APPS=self.INSTALLED_APPS + tuple(apps),
+            STATIC_URL='/static/',
+            ROOT_URLCONF='mapentity.tests.urls',
+            MEDIA_URL='/media/',
+            MEDIA_URL_SECURE='/media_secure/',
+            MIDDLEWARE_CLASSES = (
+                'django.middleware.common.CommonMiddleware',
+                'django.contrib.sessions.middleware.SessionMiddleware',
+                'django.middleware.locale.LocaleMiddleware',
+                'django.middleware.csrf.CsrfViewMiddleware',
+                'django.contrib.auth.middleware.AuthenticationMiddleware',
+                'django.contrib.messages.middleware.MessageMiddleware',
+                'mapentity.middleware.AutoLoginMiddleware'
+            ),
         )
         from django.test.simple import DjangoTestSuiteRunner
-        failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)
+        runner = DjangoTestSuiteRunner()
+        failures = runner.run_tests(self.apps, verbosity=1)
         if failures:  # pragma: no cover
             sys.exit(failures)
 
