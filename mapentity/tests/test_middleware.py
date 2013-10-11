@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 
 from .. import middleware
-from ..middleware import AutoLoginMiddleware, internal_user
+from ..middleware import AutoLoginMiddleware, get_internal_user
 
 
 User = get_user_model()
@@ -18,9 +18,12 @@ class AutoLoginTest(TestCase):
         self.request = RequestFactory()
         self.request.user = AnonymousUser()  # usually set by other middleware
         self.request.META = {'REMOTE_ADDR': '6.6.6.6'}
+        self.internal_user = get_internal_user()
 
     def test_internal_user_cannot_login(self):
-        success = self.client.login(username=internal_user.username, password=settings.SECRET_KEY)
+        success = self.client.login(
+            username=self.internal_user.username,
+            password=settings.SECRET_KEY)
         self.assertFalse(success)
 
     def test_login_still_required_works(self):
@@ -47,7 +50,7 @@ class AutoLoginTest(TestCase):
         self.assertTrue(self.request.user.is_anonymous())
         self.middleware.process_request(self.request)
         self.assertFalse(self.request.user.is_anonymous())
-        self.assertEqual(self.request.user, internal_user)
+        self.assertEqual(self.request.user, self.internal_user)
 
     def test_auto_login_for_capture(self):
         middleware.CAPTURE_SERVER_HOST = '4.5.6.7'
@@ -56,7 +59,7 @@ class AutoLoginTest(TestCase):
         self.assertTrue(self.request.user.is_anonymous())
         self.middleware.process_request(self.request)
         self.assertFalse(self.request.user.is_anonymous())
-        self.assertEqual(self.request.user, internal_user)
+        self.assertEqual(self.request.user, self.internal_user)
 
     def test_auto_login_for_conversion_host(self):
         middleware.CONVERSION_SERVER_HOST = 'convertit.makina.com'
@@ -65,7 +68,7 @@ class AutoLoginTest(TestCase):
         self.assertTrue(self.request.user.is_anonymous())
         self.middleware.process_request(self.request)
         self.assertFalse(self.request.user.is_anonymous())
-        self.assertEqual(self.request.user, internal_user)
+        self.assertEqual(self.request.user, self.internal_user)
 
     def test_auto_login_for_capture_host(self):
         middleware.CAPTURE_SERVER_HOST = 'capture.makina.com'
@@ -74,4 +77,4 @@ class AutoLoginTest(TestCase):
         self.assertTrue(self.request.user.is_anonymous())
         self.middleware.process_request(self.request)
         self.assertFalse(self.request.user.is_anonymous())
-        self.assertEqual(self.request.user, internal_user)
+        self.assertEqual(self.request.user, self.internal_user)

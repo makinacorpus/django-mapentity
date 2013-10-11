@@ -17,7 +17,7 @@ from django.http import HttpResponse
 import bs4
 import requests
 
-from . import app_settings
+from . import app_settings, API_SRID
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +67,8 @@ def api_bbox(bbox, srid=None, buffer=0.0):
     wkt_box = 'POLYGON(({0} {1}, {2} {1}, {2} {3}, {0} {3}, {0} {1}))'
     wkt = wkt_box.format(*bbox)
     native = wkt_to_geom(wkt, srid_from=srid)
-    if srid != settings.API_SRID:
-        native.transform(settings.API_SRID)
+    if srid != API_SRID:
+        native.transform(API_SRID)
     if buffer > 0:
         extent = native.extent
         width = extent[2] - extent[0]
@@ -78,7 +78,7 @@ def api_bbox(bbox, srid=None, buffer=0.0):
 
 def wkt_to_geom(wkt, srid_from=None, silent=False):
     if srid_from is None:
-        srid_from = settings.API_SRID
+        srid_from = API_SRID
     try:
         return fromstr(wkt, srid=srid_from)
     except (OGRException, GEOSException) as e:
@@ -92,7 +92,7 @@ def transform_wkt(wkt, srid_from=None, srid_to=None, dim=3):
     Changes SRID, and returns 3D wkt
     """
     if srid_from is None:
-        srid_from = settings.API_SRID
+        srid_from = API_SRID
     if srid_to is None:
         srid_to = settings.SRID
     try:

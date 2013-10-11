@@ -1,10 +1,10 @@
-from django.conf import settings
 from django.template.loader import render_to_string
 from django.forms import widgets as django_widgets
 
 from leaflet.forms.widgets import LeafletWidget
 import floppyforms as forms
 
+from . import API_SRID
 from .helpers import wkt_to_geom
 
 
@@ -31,7 +31,7 @@ class HiddenGeometryWidget(django_widgets.HiddenInput):
         Before serialization, reprojects to API_SRID
         """
         if value and not isinstance(value, basestring):
-            value.transform(settings.API_SRID)
+            value.transform(API_SRID)
         return value
 
 
