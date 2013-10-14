@@ -73,7 +73,7 @@
         {% endblock mainmap %}
         </div>
     </div>
-    
+
     </div>
 {% endblock container %}
 
@@ -89,7 +89,7 @@
                 wrapper = nTable.parents('.dataTables_wrapper').first(),
                 extraHead = 30 + nTable.position().top - wrapper.position().top,
                 rowHeight = nTable.find('tbody tr').height();
-            
+
             var displayLength = Math.floor((wrapper.height() - extraHead) / rowHeight);
             dTable.fnSettings()._iDisplayLength = Math.max(1, displayLength -1); //<thead>
             dTable.fnDraw(false);
@@ -133,7 +133,7 @@
                 //TODO use nice JS url rewriting
                 return "{{ model.get_generic_detail_url }}".replace('0', properties.pk);
             };
-            
+
             var objectsLayer = new L.ObjectsLayer(null, {
                 objectUrl: getUrl,
                 style: window.SETTINGS.map.styles.others,
