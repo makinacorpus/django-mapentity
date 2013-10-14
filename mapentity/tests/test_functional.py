@@ -208,6 +208,12 @@ class MapEntityTest(TestCase):
         response = self.client.get(obj.get_update_url())
         self.assertEqual(response.status_code, 302)
 
+    def test_formfilter_in_list_context(self):
+        if self.model is None:
+            return  # Abstract test should not run
+        response = self.client.get(self.model.get_list_url())
+        self.assertTrue(response.context['filterform'] is not None)
+
 
 class MapEntityLiveTest(LiveServerTestCase):
     model = None
