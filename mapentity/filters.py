@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, Filter, ChoiceFilter
 import floppyforms as forms
 
-from . import app_settings
+from . import app_settings, API_SRID
 from .widgets import HiddenGeometryWidget
 
 
@@ -73,7 +73,7 @@ class PythonPolygonFilter(PolygonFilter):
         if not value:
             return qs
         if not value.srid:
-            value.srid = settings.API_SRID
+            value.srid = API_SRID
         value.transform(settings.SRID)
         filtered = []
         for o in qs.all():
