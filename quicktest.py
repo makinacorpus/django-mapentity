@@ -59,6 +59,7 @@ class QuickDjangoTest(object):
                 'django.contrib.messages.middleware.MessageMiddleware',
                 'mapentity.middleware.AutoLoginMiddleware'
             ),
+            SRID=3857
         )
         from django.test.simple import DjangoTestSuiteRunner
         runner = DjangoTestSuiteRunner()
