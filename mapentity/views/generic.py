@@ -371,9 +371,13 @@ class MapEntityUpdate(ModelMetaMixin, UpdateView):
     def dispatch(self, *args, **kwargs):
         return super(MapEntityUpdate, self).dispatch(*args, **kwargs)
 
+    def can_delete(self):
+        return True
+
     def get_form_kwargs(self):
         kwargs = super(MapEntityUpdate, self).get_form_kwargs()
         kwargs['user'] = self.request.user
+        kwargs['can_delete'] = self.can_delete()
         return kwargs
 
     def form_valid(self, form):
