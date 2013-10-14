@@ -104,6 +104,9 @@ class MapEntityList(ModelMetaMixin, ListView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_LIST
 
+    def can_add(self):
+        return False
+
     def get_queryset(self):
         queryset = super(MapEntityList, self).get_queryset()
         # Filter queryset from possible serialized form
@@ -118,6 +121,7 @@ class MapEntityList(ModelMetaMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityList, self).get_context_data(**kwargs)
+        context['can_add'] = self.can_add()
         context['datatables_ajax_url'] = self.model.get_jsonlist_url()
         context['filterform'] = self._filterform
         context['columns'] = self.columns

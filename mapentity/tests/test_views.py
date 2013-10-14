@@ -2,9 +2,12 @@ import os
 import shutil
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
+
+from mapentity.models import MapEntityMixin
+from mapentity.views.generic import MapEntityList
 
 
 User = get_user_model()
@@ -56,3 +59,30 @@ class MediaTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
         self.assertEqual(response['X-Accel-Redirect'], '%s%s' % (settings.MEDIA_URL_SECURE, 'file.pdf'))
+
+
+def setup_view(view, request, *args, **kwargs):
+       """*args and **kwargs you could pass to ``reverse()``."""
+       view.request = request
+       view.args = args
+       view.kwargs = kwargs
+       return view
+
+
+class FakeModel(MapEntityMixin, User):
+        @classmethod
+        def get_jsonlist_url(self):
+            return ''
+        @classmethod
+        def get_generic_detail_url(self):
+            return ''
+
+
+class ListViewTest(TestCase):
+
+    def test_list_should_have_can_add_in_context(self):
+        view = setup_view(MapEntityList(model=FakeModel),
+                          RequestFactory().get('/fake-path'))
+        context = view.get_context_data(object_list=[])
+        self.assertEqual(context['can_add'], view.can_add())
+        self.assertEqual(context['can_export'], view.can_export())

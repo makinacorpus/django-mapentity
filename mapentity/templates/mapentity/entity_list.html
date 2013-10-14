@@ -23,16 +23,21 @@
         </div>
 
         <div id="list-panel">
-            
+
             <div class="btn-toolbar">
                 {% block mainactions %}
+                    {% if can_add %}
+                        <a class="btn btn-success" href="{{ model.get_add_url }}"><i class="icon-plus icon-white"></i> {% trans "Add" %}</a>
+                    {% else %}
+                        <span class="btn disabled" href="#"><i class="icon-plus icon-white"></i> {% trans "Add" %}</span>
+                    {% endif %}
                 {% endblock mainactions %}
-                
+
                 {% smart_include "listactions" %}
-                
+
                 {% include "mapentity/entity_list_filter_fragment.html" %}
             </div>
-            
+
             {% block mainlist %}
                 <table id="objects-list" class="table table-striped table-bordered">
                     <thead>
