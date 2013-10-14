@@ -21,7 +21,7 @@ class PolygonFilterTest(TestCase):
         result = self.filter.filter(WeatherStation.objects.all(), None)
         self.assertEqual(3, len(result))
 
-    def test_should_not_return_any_if_null_geometry(self):
+    def test_should_not_include_null_geometry_in_search_results(self):
         shape = GEOSGeometry('POLYGON((20 20, 40 20, 40 40, 20 40, 20 20))')
         result = self.filter.filter(WeatherStation.objects.all(), shape)
         self.assertEqual(0, len(result))
@@ -31,7 +31,7 @@ class PolygonFilterTest(TestCase):
         result = self.filter.filter(WeatherStation.objects.all(), shape)
         self.assertEqual(0, len(result))
 
-    def test_should_consider_filter_shape_by_geom(self):
+    def test_should_filter_queryset_intersecting_shape(self):
         shape = GEOSGeometry('POLYGON((0 -1, 4 -1, 4 1, 0 1, 0 -1))', srid=2154)
         shape.transform(API_SRID)
         result = self.filter.filter(WeatherStation.objects.all(), shape)
@@ -52,7 +52,7 @@ class PythonPolygonFilterTest(object):
         result = self.filter.filter(MushroomSpot.objects.all(), None)
         self.assertEqual(3, len(result))
 
-    def test_should_return_all_with_null_geometry(self):
+    def test_should_include_null_geometry_in_search_results(self):
         shape = GEOSGeometry('POLYGON((20 20, 40 20, 40 40, 20 40, 20 20))')
         result = self.filter.filter(MushroomSpot.objects.all(), shape)
         self.assertEqual(1, len(result))
@@ -62,7 +62,7 @@ class PythonPolygonFilterTest(object):
         result = self.filter.filter(MushroomSpot.objects.all(), shape)
         self.assertEqual(1, len(result))  # one of them is None
 
-    def test_should_consider_filter_shape_by_geom(self):
+    def test_should_filter_queryset_intersecting_shape(self):
         shape = GEOSGeometry('POLYGON((0 -1, 4 -1, 4 1, 0 1, 0 -1))', srid=2154)
         shape.transform(settings.API_SRID)
         result = self.filter.filter(MushroomSpot.objects.all(), shape)
