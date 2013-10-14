@@ -28,6 +28,10 @@ body {
     z-index: 9999;
 }
 
+.btn-group.disabled .btn img {
+    opacity: 0.5;
+}
+
 /***** Chosen override ******/
 
 .chzn-container-active .chzn-choices {
