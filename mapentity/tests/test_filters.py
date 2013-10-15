@@ -26,7 +26,6 @@ class PolygonTest(object):
     def test_should_filter_queryset_intersecting_shape(self):
         shape = GEOSGeometry('POLYGON((0 -1, 4 -1, 4 1, 0 1, 0 -1))', srid=settings.SRID)
         shape.transform(API_SRID)
-        print [o.geom for o in self.model.objects.all()], shape
         result = self.filter.filter(self.model.objects.all(), shape)
         self.assertEqual(2, len(result))
 
