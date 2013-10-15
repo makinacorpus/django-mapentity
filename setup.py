@@ -28,7 +28,7 @@ setup(
         'django-floppyforms == 1.1',
         'django-crispy-forms == 1.2.3',
         'django-compressor == 1.3',
-        'django-filter == 0.5.4',
+        'django-filter == 0.7',
         'django-tinymce',
         # Under development at makinacorpus
         'django-appypod>=0.0.2',
