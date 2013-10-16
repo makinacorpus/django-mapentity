@@ -10,11 +10,11 @@ that powers `Geotrek <http://geotrek.fr>`_.
 .. image:: https://pypip.in/d/django-mapentity/badge.png
         :target: https://pypi.python.org/pypi/django-mapentity
 
-.. image:: https://travis-ci.org/makinacorpus/django-mapentity.png
-    :target: https://travis-ci.org/makinacorpus/django-mapentity
+.. image:: https://travis-ci.org/makinacorpus/django-mapentity.png?branch=develop
+    :target: https://travis-ci.org/makinacorpus/django-mapentity?branch=develop
 
-.. image:: https://coveralls.io/repos/makinacorpus/django-mapentity/badge.png
-    :target: https://coveralls.io/r/makinacorpus/django-mapentity
+.. image:: https://coveralls.io/repos/makinacorpus/django-mapentity/badge.png?branch=develop
+    :target: https://coveralls.io/r/makinacorpus/django-mapentity?branch=develop
 
 =======
 INSTALL
