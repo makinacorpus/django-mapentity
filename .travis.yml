@@ -19,12 +19,7 @@ install:
 
    # Spatialiate
  - sudo apt-get install -y libproj-dev libgeos-dev libspatialite-dev
- - wget http://pysqlite.googlecode.com/files/pysqlite-2.6.3.tar.gz
- - tar -zxvf pysqlite-2.6.3.tar.gz
- - pushd pysqlite-2.6.3
- - sed -i "s/define=SQLITE_OMIT_LOAD_EXTENSION//g" setup.cfg
- - python setup.py install
- - popd
+ - pip install git+git://github.com/tinio/pysqlite.git@extension-enabled#egg=pysqlite
 
    # This is a dependency of our Django quicktest script
  - pip install argparse --use-mirrors
