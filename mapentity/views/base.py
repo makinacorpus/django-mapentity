@@ -8,6 +8,7 @@ from datetime import datetime
 import json
 
 from django.conf import settings
+from django.db import connection
 from django.contrib.auth.decorators import login_required
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
@@ -40,6 +41,8 @@ def handler500(request, template_name='mapentity/500.html'):
     Templates: `500.html`
     Context: None
     """
+    # Abort transactions, if any
+    connection.close()
     # Try returning using a RequestContext
     try:
         context = RequestContext(request)
