@@ -22,7 +22,9 @@ class QuickDjangoTest(object):
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.admin',
+        'paperclip',
         'leaflet',
+        'djgeojson',
         'compressor'
     )
 

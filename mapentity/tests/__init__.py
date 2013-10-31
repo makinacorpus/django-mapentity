@@ -4,3 +4,4 @@ from .test_views import *  # noqa
 from .test_helpers import *  # noqa
 from .test_filters import *  # noqa
 from .test_forms import *  # noqa
+from .test_attachments import *  # noqa
