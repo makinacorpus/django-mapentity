@@ -104,6 +104,12 @@ class MapEntityList(ModelMetaMixin, ListView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_LIST
 
+    def can_add(self):
+        return False
+
+    def can_export(self):
+        return False
+
     def get_queryset(self):
         queryset = super(MapEntityList, self).get_queryset()
         # Filter queryset from possible serialized form
@@ -118,6 +124,8 @@ class MapEntityList(ModelMetaMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityList, self).get_context_data(**kwargs)
+        context['can_add'] = self.can_add()
+        context['can_export'] = self.can_export()
         context['datatables_ajax_url'] = self.model.get_jsonlist_url()
         context['filterform'] = self._filterform
         context['columns'] = self.columns
@@ -154,7 +162,7 @@ class MapEntityFormat(MapEntityList):
         return mapentity_models.ENTITY_FORMAT_LIST
 
     def dispatch(self, *args, **kwargs):
-        return super(ListView, self).dispatch(*args, **kwargs)  # Bypass session
+        return super(ListView, self).dispatch(*args, **kwargs)  # Bypass session save_history
 
     def get_context_data(self, **kwargs):
         return {}
@@ -371,9 +379,13 @@ class MapEntityUpdate(ModelMetaMixin, UpdateView):
     def dispatch(self, *args, **kwargs):
         return super(MapEntityUpdate, self).dispatch(*args, **kwargs)
 
+    def can_delete(self):
+        return True
+
     def get_form_kwargs(self):
         kwargs = super(MapEntityUpdate, self).get_form_kwargs()
         kwargs['user'] = self.request.user
+        kwargs['can_delete'] = self.can_delete()
         return kwargs
 
     def form_valid(self, form):

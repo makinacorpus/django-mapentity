@@ -98,6 +98,7 @@ class MapEntityForm(TranslatedModelForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+        self.can_delete = kwargs.pop('can_delete', True)
         super(MapEntityForm, self).__init__(*args, **kwargs)
 
         self.fields['pk'].initial = self.instance.pk
@@ -140,8 +141,9 @@ class MapEntityForm(TranslatedModelForm):
         if not is_creation:
             self.helper.form_action = self.instance.get_update_url()
             # Put delete url in Delete button
-            actions.insert(0, HTML('<a class="btn btn-danger delete" href="%s"><i class="icon-white icon-trash"></i> %s</a>' % (
-                self.instance.get_delete_url(),
+            actions.insert(0, HTML('<a class="btn %s delete" href="%s"><i class="icon-white icon-trash"></i> %s</a>' % (
+                'btn-danger' if self.can_delete else 'disabled',
+                self.instance.get_delete_url() if self.can_delete else '#',
                 unicode(_("Delete")))))
         else:
             self.helper.form_action = self.instance.get_add_url()

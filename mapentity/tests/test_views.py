@@ -2,9 +2,12 @@ import os
 import shutil
 
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
+
+from mapentity.views.generic import MapEntityList
+from .models import DummyModel
 
 
 User = get_user_model()
@@ -56,3 +59,37 @@ class MediaTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
         self.assertEqual(response['X-Accel-Redirect'], '%s%s' % (settings.MEDIA_URL_SECURE, 'file.pdf'))
+
+
+def setup_view(view, request, *args, **kwargs):
+    """*args and **kwargs you could pass to ``reverse()``."""
+    view.request = request
+    view.args = args
+    view.kwargs = kwargs
+    return view
+
+
+class DummyFilterForm(object):
+    def __init__(self, params, queryset):
+        self.qs = queryset
+
+
+class ListViewTest(TestCase):
+
+    def test_list_should_have_some_perms_in_context(self):
+        view = MapEntityList(model=DummyModel)
+        context = view.get_context_data(object_list=[])
+        self.assertEqual(context['can_add'], view.can_add())
+        self.assertEqual(context['can_export'], view.can_export())
+
+    def test_list_should_render_some_perms_in_template(self):
+        request = RequestFactory().get('/fake-path')
+        request.session = {}
+        view = MapEntityList.as_view(model=DummyModel,
+                                     filterform=DummyFilterForm,
+                                     template_name="mapentity/entity_list.html")
+        response = view(request)
+        html = unicode(response.render())
+
+        self.assertTrue('can_export = false;' in html)
+        self.assertTrue('Add</span>' in html)

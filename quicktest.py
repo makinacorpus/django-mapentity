@@ -13,7 +13,7 @@ class QuickDjangoTest(object):
 
         >>> QuickDjangoTest('app1', 'app2')
 
-    Based on a script published by Lukasz Dziedzia at: 
+    Based on a script published by Lukasz Dziedzia at:
     http://stackoverflow.com/questions/3841725/how-to-launch-tests-for-django-reusable-app
     """
     DIRNAME = os.path.dirname(__file__)
@@ -22,6 +22,8 @@ class QuickDjangoTest(object):
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.admin',
+        'leaflet',
+        'compressor'
     )
 
     def __init__(self, *args, **kwargs):
@@ -59,7 +61,8 @@ class QuickDjangoTest(object):
                 'django.contrib.messages.middleware.MessageMiddleware',
                 'mapentity.middleware.AutoLoginMiddleware'
             ),
-            SRID=3857
+            SRID=3857,
+            COMPRESS_ENABLED=False,
         )
         from django.test.simple import DjangoTestSuiteRunner
         runner = DjangoTestSuiteRunner()
