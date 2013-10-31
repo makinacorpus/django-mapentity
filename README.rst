@@ -16,11 +16,13 @@ that powers `Geotrek <http://geotrek.fr>`_.
 .. image:: https://coveralls.io/repos/makinacorpus/django-mapentity/badge.png?branch=develop
     :target: https://coveralls.io/r/makinacorpus/django-mapentity?branch=develop
 
+`See the full documentation <http://docs.mapentity.org/>`_.
+
 =======
 INSTALL
 =======
 
-( * under development * )
+( *under development* )
 
 ::
 
