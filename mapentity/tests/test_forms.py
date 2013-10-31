@@ -3,6 +3,7 @@ from django.test import TestCase
 from mapentity.forms import MapEntityForm
 from .models import DummyModel
 
+
 class DummyForm(MapEntityForm):
     class Meta(MapEntityForm.Meta):
         model = DummyModel

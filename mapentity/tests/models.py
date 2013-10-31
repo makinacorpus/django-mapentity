@@ -23,20 +23,26 @@ class WeatherStation(models.Model):
 
 
 class DummyModel(MapEntityMixin, models.Model):
+
     @classmethod
     def get_jsonlist_url(self):
         return ''
+
     @classmethod
     def get_generic_detail_url(self):
         return ''
+
     @classmethod
     def get_add_url(self):
         return ''
+
     @classmethod
     def get_update_url(self):
         return ''
+
     @classmethod
     def get_delete_url(self):
         return ''
+
 
 loading.cache.loaded = False
