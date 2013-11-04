@@ -22,9 +22,10 @@ class MushroomSpot(models.Model):
             return None
         return GEOSGeometry(self.serialized)
 
-    @geom.setter
+    @geom.setter  # NOQA
     def geom(self, value):
         self._geom = value
+
 
 class WeatherStation(models.Model):
     geom = models.PointField(null=True, default=None, srid=2154)
