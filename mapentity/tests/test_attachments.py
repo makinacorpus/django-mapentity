@@ -18,6 +18,12 @@ class EntityAttachmentTestCase(TestCase):
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
         self.object = DummyModel.objects.create()
 
+    def createRequest(self):
+        request = RequestFactory().get('/dummy')
+        request.session = {}
+        request.user = self.user
+        return request
+
     def createAttachment(self, obj):
         uploaded = SimpleUploadedFile('file.odt',
                                       '*' * 128,
@@ -35,10 +41,7 @@ class EntityAttachmentTestCase(TestCase):
 
     def test_list_attachments_in_details(self):
         self.createAttachment(self.object)
-
-        request = RequestFactory().get('/dummy')
-        request.session = {}
-        request.user = self.user
+        request = self.createRequest()
         view = MapEntityDetail.as_view(model=DummyModel,
                                        template_name="mapentity/entity_detail.html")
         response = view(request, pk=self.object.pk)
@@ -47,8 +50,22 @@ class EntityAttachmentTestCase(TestCase):
 
         self.assertEqual(1, len(Attachment.objects.attachments_for_object(self.object)))
 
+        self.assertFalse("Upload attachment" in html)
+
         for attachment in Attachment.objects.attachments_for_object(self.object):
             self.assertTrue(attachment.legend in html)
             self.assertTrue(attachment.title in html)
             self.assertTrue(attachment.attachment_file.url in html)
             self.assertTrue('paperclip/fileicons/odt.png')
+
+    def test_upload_form_in_details_if_perms(self):
+        subclass = type('DummyDetail', (MapEntityDetail,), {'can_edit': lambda x: True})
+        view = subclass.as_view(model=DummyModel,
+                                template_name="mapentity/entity_detail.html")
+
+        request = self.createRequest()
+        response = view(request, pk=self.object.pk)
+        html = unicode(response.render())
+        self.assertTrue("Upload attachment" in html)
+        self.assertTrue("""<form method="post" enctype="multipart/form-data"
+      action="/paperclip/add-for/tests/dummymodel/1/""" in html)
