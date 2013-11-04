@@ -6,6 +6,7 @@ from mapentity.models import MapEntityMixin
 
 
 class MushroomSpot(models.Model):
+    name = models.CharField(max_length=100, default='Empty')
     serialized = models.CharField(max_length=200, null=True, default=None)
 
     """geom as python attribute"""
