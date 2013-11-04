@@ -69,3 +69,53 @@ class EntityAttachmentTestCase(TestCase):
         self.assertTrue("Upload attachment" in html)
         self.assertTrue("""<form method="post" enctype="multipart/form-data"
       action="/paperclip/add-for/tests/dummymodel/1/""" in html)
+
+
+class UploadAttachmentTestCase(TestCase):
+
+    def setUp(self):
+        self.object = DummyModel.objects.create()
+        user = User.objects.create_user('aah', 'email@corp.com', 'booh')
+        success = self.client.login(username=user.username, password='booh')
+        self.assertTrue(success)
+
+    def attachmentPostData(self):
+        filetype = FileType.objects.create()
+        uploaded = SimpleUploadedFile('face.jpg',
+                                      '*' * 128,
+                                      content_type='image/jpeg')
+        data = {
+            'filetype': filetype.pk,
+            'title': 'A title',
+            'legend': 'A legend',
+            'attachment_file': uploaded,
+            'next': self.object.get_detail_url()
+        }
+        return data
+
+    def test_upload_redirects_to_dummy_detail_url(self):
+        response = self.client.post(add_url_for_obj(self.object),
+                                    data=self.attachmentPostData())
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], 'http://testserver/dummy-detail')
+
+    def test_upload_creates_attachment(self):
+        data = self.attachmentPostData()
+        self.client.post(add_url_for_obj(self.object), data=data)
+        att = Attachment.objects.attachments_for_object(self.object).get()
+        self.assertEqual(att.title, data['title'])
+        self.assertEqual(att.legend, data['legend'])
+        self.assertEqual(att.filetype.pk, data['filetype'])
+
+    def test_title_gives_name_to_file(self):
+        data = self.attachmentPostData()
+        self.client.post(add_url_for_obj(self.object), data=data)
+        att = Attachment.objects.attachments_for_object(self.object).get()
+        self.assertTrue('a-title' in att.attachment_file.name)
+
+    def test_filename_is_used_if_no_title(self):
+        data = self.attachmentPostData()
+        data['title'] = ''
+        self.client.post(add_url_for_obj(self.object), data=data)
+        att = Attachment.objects.attachments_for_object(self.object).get()
+        self.assertTrue('face' in att.attachment_file.name)
