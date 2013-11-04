@@ -27,8 +27,8 @@ class EntityAttachmentTestCase(TestCase):
             'object_id': obj.pk,
             'filetype': FileType.objects.create(),
             'creator': self.user,
-            'title': "Title",
-            'legend': "Legend",
+            'title': "Attachment title",
+            'legend': "Attachment legend",
             'attachment_file': uploaded
         }
         return Attachment.objects.create(**kwargs)
@@ -42,7 +42,13 @@ class EntityAttachmentTestCase(TestCase):
         view = MapEntityDetail.as_view(model=DummyModel,
                                        template_name="mapentity/entity_detail.html")
         response = view(request, pk=self.object.pk)
-        response.render()
+        html = unicode(response.render())
         self.assertTemplateUsed(response, template_name='paperclip/details.html')
-        self.assertItemsEqual(Attachment.objects.attachments_for_object(self.object),
-                              response.context['attachments_list'], )
+
+        self.assertEqual(1, len(Attachment.objects.attachments_for_object(self.object)))
+
+        for attachment in Attachment.objects.attachments_for_object(self.object):
+            self.assertTrue(attachment.legend in html)
+            self.assertTrue(attachment.title in html)
+            self.assertTrue(attachment.attachment_file.url in html)
+            self.assertTrue('paperclip/fileicons/odt.png')
