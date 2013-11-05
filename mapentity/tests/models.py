@@ -6,14 +6,25 @@ from mapentity.models import MapEntityMixin
 
 
 class MushroomSpot(models.Model):
+    name = models.CharField(max_length=100, default='Empty')
     serialized = models.CharField(max_length=200, null=True, default=None)
+
+    def __init__(self, *args, **kwargs):
+        super(MushroomSpot, self).__init__(*args, **kwargs)
+        self._geom = None
 
     """geom as python attribute"""
     @property
     def geom(self):
+        if self._geom is not None:
+            return self._geom
         if self.serialized is None:
             return None
         return GEOSGeometry(self.serialized)
+
+    @geom.setter  # NOQA
+    def geom(self, value):
+        self._geom = value
 
 
 class WeatherStation(models.Model):
