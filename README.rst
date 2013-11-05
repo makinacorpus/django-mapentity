@@ -29,7 +29,7 @@ INSTALL
     pip install -e git+https://github.com/makinacorpus/django-mapentity.git@develop#egg=django-mapentity
 
 
-Install GDAL with its development files. For example, on Debian::
+Install GDAL with its development files. For example, on Ubuntu/Debian::
 
     $ sudo apt-get install libgdal-dev
 
