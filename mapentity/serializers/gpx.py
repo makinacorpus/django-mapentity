@@ -31,10 +31,10 @@ class GPXSerializer(Serializer):
             objtype = unicode(obj.__class__._meta.verbose_name)
             name = '[%s] %s' % (objtype, unicode(obj))
 
-            description = ''
+            description = getattr(obj, 'description', '')
             objupdate = getattr(obj, 'date_update')
             if objupdate:
-                description = _('Modified') + ': ' + humanize_timesince(objupdate)
+                description += _('Modified') + ': ' + humanize_timesince(objupdate)
             if geom:
                 assert geom.srid == settings.SRID, "Invalid srid"
                 self.geomToGPX(geom, name, description)
