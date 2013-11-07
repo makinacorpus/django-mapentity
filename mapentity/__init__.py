@@ -29,6 +29,25 @@ app_settings = dict({
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 
+TINYMCE_DEFAULT_CONFIG = {
+    'theme': 'advanced',
+    'theme_advanced_buttons1': 'bold,italic,forecolor,separator,bullist,numlist,link,media,separator,undo,redo,separator,cleanup,code',
+    'theme_advanced_buttons2': '',
+    'theme_advanced_buttons3': '',
+    'theme_advanced_statusbar_location' : 'bottom',
+    'theme_advanced_toolbar_location' : 'top',
+    'theme_advanced_toolbar_align' : 'center',
+    'theme_advanced_resizing' : True,
+    'theme_advanced_resize_horizontal': False,
+    'plugins': 'media',
+    'width' : '95%',
+    'resize': "both",
+    'valid_elements': "img,p,a,em/i,strong/b,div[align],br,ul,li,ol,iframe[src|frameborder=0|alt|title|width|height|align|name]",
+}
+TINYMCE_DEFAULT_CONFIG.update(getattr(settings, 'TINYMCE_DEFAULT_CONFIG', {}))
+setattr(settings, 'TINYMCE_DEFAULT_CONFIG', TINYMCE_DEFAULT_CONFIG)
+
+
 _MAP_STYLES = {
     'detail': {'weight': 5, 'opacity': 1, 'color': 'yellow', 'arrowColor': '#FF5E00', 'arrowSize': 8},
     'others': {'opacity': 0.9, 'fillOpacity': 0.7, 'color': 'yellow'},
