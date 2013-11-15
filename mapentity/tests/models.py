@@ -48,6 +48,10 @@ class DummyModel(MapEntityMixin, models.Model):
         return ''
 
     @classmethod
+    def get_detail_url(self):
+        return '/dummy-detail'
+
+    @classmethod
     def get_update_url(self):
         return ''
 

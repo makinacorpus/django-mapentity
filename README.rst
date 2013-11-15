@@ -18,6 +18,7 @@ that powers `Geotrek <http://geotrek.fr>`_.
 
 `See the full documentation <http://docs.mapentity.org/>`_.
 
+
 =======
 INSTALL
 =======
