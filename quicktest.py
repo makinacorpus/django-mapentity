@@ -22,8 +22,13 @@ class QuickDjangoTest(object):
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.admin',
+        'paperclip',
         'leaflet',
-        'compressor'
+        'djgeojson',
+        'compressor',
+        'easy_thumbnails',
+        'crispy_forms',
+        'floppyforms',
     )
 
     def __init__(self, *args, **kwargs):
@@ -60,6 +65,17 @@ class QuickDjangoTest(object):
                 'django.contrib.auth.middleware.AuthenticationMiddleware',
                 'django.contrib.messages.middleware.MessageMiddleware',
                 'mapentity.middleware.AutoLoginMiddleware'
+            ),
+            TEMPLATE_CONTEXT_PROCESSORS = (
+                "django.contrib.auth.context_processors.auth",
+                "django.core.context_processors.debug",
+                "django.core.context_processors.i18n",
+                "django.core.context_processors.media",
+                "django.core.context_processors.static",
+                "django.core.context_processors.tz",
+                "django.contrib.messages.context_processors.messages",
+                "django.core.context_processors.request",
+                "mapentity.context_processors.settings",
             ),
             SRID=3857,
             COMPRESS_ENABLED=False,

@@ -29,6 +29,7 @@ setup(
         'django-crispy-forms == 1.2.3',
         'django-compressor == 1.3',
         'django-filter == 0.7',
+        'easy-thumbnails == 1.1',
         'django-tinymce',
         # Under development at makinacorpus
         'django-appypod>=0.0.2',
