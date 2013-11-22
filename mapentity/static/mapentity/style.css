@@ -32,6 +32,10 @@ body {
     opacity: 0.5;
 }
 
+select[multiple] {
+    min-height: 180px;
+}
+
 /***** Chosen override ******/
 
 .chzn-container-active .chzn-choices {
