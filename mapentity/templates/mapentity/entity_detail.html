@@ -27,6 +27,8 @@
                 </li>
                 {% if can_edit %}
                     <a class="btn btn-primary pull-right" href="{{ object.get_update_url }}"><i class="icon-pencil icon-white"></i> {% trans "Update" %}</a>
+                {% else %}
+                    <span class="btn disabled pull-right" href="#"><i class="icon-pencil"></i> {% trans "Update" %}</span>
                 {% endif %}
             </ul>
             <div class="tab-content scrollable">
