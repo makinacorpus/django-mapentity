@@ -11,7 +11,7 @@
 {% block mainpanel %}
     <div class="form-panel {{ modelname }}">
         {% block mainform %}
-        {% crispy form %}
+        {% crispy form form.helper %}
         {% endblock mainform %}
     </div>
 {% endblock mainpanel %}

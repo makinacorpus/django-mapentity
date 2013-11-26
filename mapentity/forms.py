@@ -89,7 +89,6 @@ class MapEntityForm(TranslatedModelForm):
     pk = forms.Field(required=False, widget=forms.Field.hidden_widget)
     model = forms.Field(required=False, widget=forms.Field.hidden_widget)
 
-    helper = FormHelper()
     fieldslayout = None
     geomfields = []
 
@@ -100,6 +99,9 @@ class MapEntityForm(TranslatedModelForm):
         self.user = kwargs.pop('user', None)
         self.can_delete = kwargs.pop('can_delete', True)
         super(MapEntityForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_tag = True
 
         self.fields['pk'].initial = self.instance.pk
         self.fields['model'].initial = self.instance._meta.module_name
