@@ -535,22 +535,96 @@ body.screamshot .leaflet-control-scale {
     margin-bottom: 55px;
 }
 
-.form-panel .tab-content .nav { 
+.form-panel .tab-content .nav {
     margin-bottom: 5px;
 }
 
-.form-panel .nav li:first-child {
-    margin-left: 160px;
+.form-panel .nav-tabs .error {
+    color: #B94A48;
 }
+
+label.requiredField {
+    font-weight: bold;
+}
+
+label.requiredField .asteriskField {
+    color: red;
+}
+
+.help-inline {
+    font-size: 0.7em;
+}
+
+.form-horizontal .control-group {
+    margin-bottom: 5px;
+}
+
+@media (max-width: 1280px) {
+
+    .form-horizontal .control-label {
+        width: 95px;
+    }
+
+    .form-horizontal .controls {
+        margin-left: 100px;
+    }
+}
+
+
+/*
+ * Form tabs Main/Advanced
+ */
+
+.form-horizontal .nav-tabs:first-child {
+    margin-left: 80px;
+}
+
+.form-panel .nav-tabs:first-child li:first-child {
+    margin-left: 100px;
+}
+
+@media (max-width: 1280px) {
+    .form-panel .nav-tabs:first-child li:first-child {
+        margin-left: 22px;
+    }
+}
+
+
+/*
+ * Multilang pills
+ */
 
 .form-panel .tab-content .nav-pills li a {
     padding-top: 2px;
     padding-bottom: 2px;
 }
 
-.form-panel .nav-tabs .error {
-    color: #B94A48;
+.form-panel .nav-pills {
+    margin-left: 180px;
 }
+
+@media (max-width: 1280px) {
+
+    .form-horizontal .nav-pills {
+        margin-left: 100px;
+    }
+}
+
+
+/*
+ * Many-to-many fields
+ */
+.form-row.inline.controls {
+    border: solid 1px lightgray;
+    padding: 5px;
+    margin: 1px;
+}
+
+.form-row.inline.controls:last-of-type {
+    border: none;
+}
+
+
 
 #geomfield {
     position: absolute;
@@ -562,6 +636,7 @@ body.screamshot .leaflet-control-scale {
 #geomfield .control-group,
 #geomfield .controls {
     height: 100%;
+    margin-left: 0;
 }
 
 #geomfield .control-group.error .help-block {
@@ -569,7 +644,7 @@ body.screamshot .leaflet-control-scale {
     position: absolute;
 }
 
-/* Tired of bootstrap ? 
+/* Tired of bootstrap ?
 TODO: please help;
  */
 #modelfields.span4 {
@@ -577,14 +652,6 @@ TODO: please help;
 }
 #geomfield.span8 {
     width: 66%;
-}
-
-.form-horizontal #modelfields .nav-tabs {
-    margin-left: 80px;
-}
-
-.form-horizontal #geomfield .controls {
-    margin-left: 0px;
 }
 
 #geomfield label.control-label {
@@ -596,26 +663,4 @@ TODO: please help;
     top: 5px;
     left: 5px;
     width: auto;
-}
-
-label.requiredField {
-    font-weight: bold;
-}
-
-.help-inline {
-    font-size: 0.7em;
-}
-
-.form-horizontal .control-group {
-    margin-bottom: 5px;
-}
-
-.form-row.inline.controls {
-    border: solid 1px lightgray;
-    padding: 5px;
-    margin: 1px;
-}
-
-.form-row.inline.controls:last-of-type {
-    border: none;
 }
