@@ -260,6 +260,12 @@ tr.selected-row td {
     height: 95%;
 }
 
+@media (max-width: 1280px) {
+    #list-panel {
+        margin-left: 34px;
+    }
+}
+
 #list-panel .table th,
 #list-panel .table td {
     padding: 5px;
@@ -282,12 +288,21 @@ tr.selected-row td {
     text-decoration: underline;
 }
 
+
+
+
 /* Left menu */
 #entitylist {
     position: absolute;
     top: 0px;
     left: 0;
     width: 60px;
+}
+
+@media (max-width: 1280px) {
+    #entitylist {
+        width: 32px;
+    }
 }
 
 #entitylist li img {
@@ -324,9 +339,14 @@ tr.selected-row td {
 }
 
 #entitylist .nav-pills > li > a > img  {
-	padding-bottom: 4px;
+    padding-bottom: 4px;
 }
 
+@media (max-width: 1280px) {
+    #entitylist .nav-pills > li > a > img  {
+        width: 30px;
+    }
+}
 
 
 
@@ -358,6 +378,14 @@ div.dataTables_paginate {
 #objects-list_filter {
     left: 160px;
 }
+
+@media (max-width: 1280px) {
+    #objects-list_filter {
+        left: 130px;
+    }
+}
+
+
 
 
 /* Filters popover */
