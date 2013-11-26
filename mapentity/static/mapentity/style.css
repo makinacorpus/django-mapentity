@@ -652,6 +652,10 @@ label.requiredField .asteriskField {
     border: none;
 }
 
+fieldset.formset .form-row:last-of-type a.delete-row {
+    display: none;
+}
+
 
 
 #geomfield {
