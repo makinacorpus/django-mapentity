@@ -44,7 +44,7 @@ select[multiple] {
 
 .chzn-container .chzn-results .highlighted {
     background-color: #919191;
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#919191', endColorstr='#747474', GradientType=0 );  
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#919191', endColorstr='#747474', GradientType=0 );
     background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(20%, #919191), color-stop(90%, #747474));
     background-image: -webkit-linear-gradient(top, #919191 20%, #747474 90%);
     background-image: -moz-linear-gradient(top, #919191 20%, #747474 90%);
@@ -107,10 +107,10 @@ select[multiple] {
 /***** Alerts ******/
 
 #alert-box {
-	position: absolute; 
-	top: 3px; 
-	left: 50%; 
-	width: 50%; 
+	position: absolute;
+	top: 3px;
+	left: 50%;
+	width: 50%;
 	margin: 0 0 0 -25%;
 	z-index: 1000;
 }
@@ -169,7 +169,7 @@ select[multiple] {
 .navbar .nav > li.history > a,
 .navbar .nav > li.history button:first-child {
     background-position-x: 2px;
-    background-position-y: 50%; 
+    background-position-y: 50%;
     background-repeat: no-repeat;
 }
 
@@ -260,7 +260,7 @@ tr.selected-row td {
     height: 95%;
 }
 
-#list-panel .table th, 
+#list-panel .table th,
 #list-panel .table td {
     padding: 5px;
     white-space: nowrap;
@@ -316,7 +316,7 @@ tr.selected-row td {
 	background-color: #F3F3F3;
 }
 
-#entitylist .nav-pills > .active > a, 
+#entitylist .nav-pills > .active > a,
 #entitylist .nav-pills > .active > a:hover {
     border-right: 1px solid #fff;
     background-color: #fff;
@@ -337,13 +337,13 @@ tr.selected-row td {
     height: inherit;
 }
 
-#list-download-toolbar, 
-#objects-list_filter, 
-div.dataTables_paginate { 
+#list-download-toolbar,
+#objects-list_filter,
+div.dataTables_paginate {
     position: absolute;
     bottom: 5px;
 }
-div.dataTables_paginate { 
+div.dataTables_paginate {
     bottom: 0px;
 }
 
@@ -430,8 +430,8 @@ span.filter-info {
     padding-left: 40px;
 }
 
-.details-panel .table { 
-    table-layout: fixed; 
+.details-panel .table {
+    table-layout: fixed;
     margin-right: 10px;
 }
 
