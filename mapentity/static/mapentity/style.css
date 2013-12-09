@@ -587,6 +587,15 @@ label.requiredField .asteriskField {
     margin-bottom: 5px;
 }
 
+
+.form-horizontal .control-label {
+    width: 140px;
+}
+
+.form-horizontal .controls {
+    margin-left: 145px;
+}
+
 @media (max-width: 1280px) {
 
     .form-horizontal .control-label {
@@ -628,7 +637,7 @@ label.requiredField .asteriskField {
 }
 
 .form-panel .nav-pills {
-    margin-left: 180px;
+    margin-left: 145px;
 }
 
 @media (max-width: 1280px) {
