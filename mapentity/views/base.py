@@ -41,8 +41,6 @@ def handler500(request, template_name='mapentity/500.html'):
     Templates: `500.html`
     Context: None
     """
-    # Abort transactions, if any
-    connection.close()
     # Try returning using a RequestContext
     try:
         context = RequestContext(request)
@@ -53,7 +51,11 @@ def handler500(request, template_name='mapentity/500.html'):
     context['exception'] = repr(name)
     context['stack'] = "\n".join(traceback.format_tb(tb))
     t = loader.get_template(template_name)
-    return HttpResponseServerError(t.render(context))
+    # Abort transactions, if any
+    request.user.__dict__['profile'] = None
+    connection.close()
+    response = t.render(context)
+    return HttpResponseServerError(response)
 
 
 @login_required()
@@ -172,6 +174,6 @@ def history_delete(request, path=None):
     path = request.POST.get('path', path)
     if path:
         history = request.session['history']
-        history = [h for h in history if h.path != path]
+        history = [h for h in history if h[1] != path]
         request.session['history'] = history
     return HttpResponse()
