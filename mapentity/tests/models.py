@@ -44,6 +44,14 @@ class DummyModel(MapEntityMixin, models.Model):
         return ''
 
     @classmethod
+    def get_format_list_url(self):
+        return ''
+
+    @classmethod
+    def get_document_url(self):
+        return ''
+
+    @classmethod
     def get_add_url(self):
         return ''
 
@@ -57,6 +65,10 @@ class DummyModel(MapEntityMixin, models.Model):
 
     @classmethod
     def get_delete_url(self):
+        return ''
+
+    @classmethod
+    def get_layer_url(self):
         return ''
 
 

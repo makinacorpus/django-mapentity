@@ -96,7 +96,7 @@ class MapEntityList(ModelMetaMixin, ListView):
 
     def __init__(self, *args, **kwargs):
         super(MapEntityList, self).__init__(*args, **kwargs)
-        self._filterform = None
+        self._filterform = self.filterform(None, self.queryset)
         if self.model is None:
             self.model = self.queryset.model
 
@@ -231,7 +231,7 @@ class MapEntityMapImage(ModelMetaMixin, DetailView):
             with open(obj.get_map_image_path(), 'rb') as f:
                 response.write(f.read())
             return response
-        except Exception as e:
+        except mapentity_models.MapImageError as e:
             logger.exception(e)
             return HttpResponseServerError(repr(e))
 

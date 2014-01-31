@@ -44,7 +44,7 @@ class MediaTest(TestCase):
         self.login()
         response = self.download(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('*********', response.content)
+        self.assertContains(response, '*********')
 
     def test_404_if_file_is_missing(self):
         os.remove(self.file)
@@ -77,8 +77,9 @@ class DummyFilterForm(object):
 class ListViewTest(TestCase):
 
     def test_list_should_have_some_perms_in_context(self):
-        view = MapEntityList(model=DummyModel)
-        context = view.get_context_data(object_list=[])
+        view = MapEntityList(model=DummyModel, filterform=DummyFilterForm)
+        view.object_list = []
+        context = view.get_context_data()
         self.assertEqual(context['can_add'], view.can_add())
         self.assertEqual(context['can_export'], view.can_export())
 
