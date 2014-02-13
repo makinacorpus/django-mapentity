@@ -6,7 +6,11 @@ from .views import (map_screenshot, convert, history_delete,
                     serve_secure_media, JSSettings)
 
 
-_MEDIA_URL = settings.MEDIA_URL.replace(app_settings['ROOT_URL'], '')[1:]
+_MEDIA_URL = settings.MEDIA_URL.replace(app_settings['ROOT_URL'], '')
+if _MEDIA_URL.startswith('/'):
+    _MEDIA_URL = _MEDIA_URL[1:]
+if _MEDIA_URL.endswith('/'):
+    _MEDIA_URL = _MEDIA_URL[:-1]
 
 
 urlpatterns = patterns(
