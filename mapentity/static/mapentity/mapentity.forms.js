@@ -43,9 +43,8 @@ MapEntity.GeometryField = L.GeometryField.extend({
          * Allow to load files locally.
          */
         var pointToLayer = function (feature, latlng) {
-                return L.circle(latlng,
-                                window.SETTINGS.map.styles.filelayer.radius,
-                                {style: window.SETTINGS.map.styles.filelayer});
+                return L.circleMarker(latlng, {style: window.SETTINGS.map.styles.filelayer})
+                        .setRadius(window.SETTINGS.map.styles.filelayer.radius);
             },
             onEachFeature = function (feature, layer) {
                 if (feature.properties.name) {

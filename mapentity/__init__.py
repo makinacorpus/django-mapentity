@@ -51,7 +51,7 @@ setattr(settings, 'TINYMCE_DEFAULT_CONFIG', TINYMCE_DEFAULT_CONFIG)
 _MAP_STYLES = {
     'detail': {'weight': 5, 'opacity': 1, 'color': 'yellow', 'arrowColor': '#FF5E00', 'arrowSize': 8},
     'others': {'opacity': 0.9, 'fillOpacity': 0.7, 'color': 'yellow'},
-    'filelayer': {'color': 'red', 'opacity': 1.0, 'fillOpacity': 1.0, 'weight': 2, 'radius': 8},
+    'filelayer': {'color': 'red', 'opacity': 1.0, 'fillOpacity': 0.9, 'weight': 2, 'radius': 5},
     'draw': {'color': '#35FF00', 'opacity': 0.8, 'weight': 3},
 }
 
