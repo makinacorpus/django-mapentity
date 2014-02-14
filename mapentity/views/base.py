@@ -121,7 +121,8 @@ def map_screenshot(request):
 
         # Prepare context, extract and add infos
         context = json.loads(printcontext)
-        map_url = context.pop('url').split('?', 1)[0]
+        map_url = context.pop('url')
+        map_url = request.build_absolute_uri(map_url)
         context['print'] = True
         printcontext = json.dumps(context)
         contextencoded = urllib2.quote(printcontext)

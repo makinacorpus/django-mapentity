@@ -29,7 +29,8 @@ MapEntity.Context = new function() {
         }
 
         // Extra-info, not restored so far but can be useful for screenshoting
-        context['url'] = window.location.toString();
+        context['fullurl'] = window.location.toString();
+        context['url'] = window.location.pathname.toString();
         context['viewport'] = {'width': $(window).width(), 'height': $(window).height()};
         context['mapsize'] = {'width': $('.map-panel').width(), 'height': $('.map-panel').height()};
 
