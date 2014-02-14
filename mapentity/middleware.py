@@ -25,7 +25,7 @@ def get_internal_user():
             internal_user.is_active = False
             internal_user.is_staff = False
             internal_user.save()
-            get_internal_user.instance = internal_user
+        get_internal_user.instance = internal_user
     return get_internal_user.instance
 
 
@@ -34,21 +34,20 @@ class AutoLoginMiddleware(object):
     This middleware enables auto-login for Conversion and Capture servers.
 
     We could have deployed implemented authentication in ConvertIt and
-    django-screamshot, or deployed OpenId, or whatever. But this was a lot
-    easier.
+    django-screamshot, or deployed OpenId, or whatever. But this was a lot easier.
     """
     def process_request(self, request):
         user = getattr(request, 'user', None)
         if user and user.is_anonymous():
             remoteip = request.META.get('REMOTE_ADDR')
             remotehost = request.META.get('REMOTE_HOST')
-            is_allowed = (
-                (remoteip and remoteip in (CONVERSION_SERVER_HOST,
-                                           CAPTURE_SERVER_HOST))
-                or
-                (remotehost and remotehost in (CONVERSION_SERVER_HOST,
-                                               CAPTURE_SERVER_HOST)))
-            if is_allowed:
-                logger.debug("Auto-login for %s/%s" % (remoteip, remotehost))
-                request.user = get_internal_user()
+            is_localhost = remoteip == '127.0.0.1' or remotehost == 'localhost'
+            is_auto_allowed = (is_localhost or
+                               (remoteip and remoteip in (CONVERSION_SERVER_HOST,
+                                                          CAPTURE_SERVER_HOST)) or
+                               (remotehost and remotehost in (CONVERSION_SERVER_HOST,
+                                                              CAPTURE_SERVER_HOST)))
+            if is_auto_allowed:
+               logger.debug("Auto-login for %s/%s" % (remoteip, remotehost))
+               request.user = get_internal_user()
         return None
