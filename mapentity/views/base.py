@@ -51,9 +51,6 @@ def handler500(request, template_name='mapentity/500.html'):
     context['exception'] = repr(name)
     context['stack'] = "\n".join(traceback.format_tb(tb))
     t = loader.get_template(template_name)
-    # Abort transactions, if any
-    request.user.__dict__['profile'] = None
-    connection.close()
     response = t.render(context)
     return HttpResponseServerError(response)
 
