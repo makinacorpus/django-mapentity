@@ -158,8 +158,9 @@ def convert(request):
         return HttpResponseBadRequest('url parameter missing')
     source = request.build_absolute_uri(source)
 
+    fromtype = request.GET.get('from')
     format = request.GET.get('to')
-    url = convertit_url(source, to_type=format)
+    url = convertit_url(source, from_type=fromtype, to_type=format)
     response = HttpResponse()
     received = download_to_stream(url, response, silent=True)
     filename = os.path.basename(received.url)
