@@ -184,35 +184,29 @@
              * Assemble components
              * .......................
              */
-            if (!(mapViewContext && mapViewContext.print == true)) {
-                // If this piece of code runs with phantomJS, it will
-                // just fail. So we bypass it for map printing.
-                // Issue #597
-                // TODO: find out why :)
-                var mapsync = new L.MapListSync(dt,
-                                                map,
-                                                objectsLayer, {
-                                                    filter: {
-                                                        form: $('#mainfilter'),
-                                                        submitbutton: $('#filter'),
-                                                        resetbutton: $('#reset'),
-                                                        bboxfield: $('#id_bbox'),
-                                                    }
-                                                });
-                mapsync.on('reloaded', function (data) {
-                    // Show and save number of results
-                    MapEntity.history.saveListInfo({model:'{{ modelname }}',
-                                                    nb: data.nbrecords});
-                    // Show layer info
-                    objectsLayer.fire('info', {info : (data.nbrecords + ' ' + '{% trans "results" %}')});
-                });
+            var mapsync = new L.MapListSync(dt,
+                                            map,
+                                            objectsLayer, {
+                                                filter: {
+                                                    form: $('#mainfilter'),
+                                                    submitbutton: $('#filter'),
+                                                    resetbutton: $('#reset'),
+                                                    bboxfield: $('#id_bbox'),
+                                                }
+                                            });
+            mapsync.on('reloaded', function (data) {
+                // Show and save number of results
+                MapEntity.history.saveListInfo({model:'{{ modelname }}',
+                                                nb: data.nbrecords});
+                // Show layer info
+                objectsLayer.fire('info', {info : (data.nbrecords + ' ' + '{% trans "results" %}')});
+            });
 
-                // Main filter
-                var t = new MapEntity.TogglableFilter();
-                mapsync.on('reloaded', function (data) {
-                    t.setsubmit();
-                });
-            }
+            // Main filter
+            var t = new MapEntity.TogglableFilter();
+            mapsync.on('reloaded', function (data) {
+                t.setsubmit();
+            });
 
             // Map screenshot button
             var screenshot = new L.Control.Screenshot('{% url 'mapentity:map_screenshot' %}', function () {
