@@ -11,24 +11,26 @@ MapEntity.GeometryField = L.GeometryField.extend({
     _controlDrawOptions: function () {
         // Set drawn shapes style
         var options = L.GeometryField.prototype._controlDrawOptions.call(this);
-        if (options.polyline) {
-            options.polyline = {shapeOptions: window.SETTINGS.map.styles.draw};
+        if (options.draw.polyline === true) {
+            options.draw.polyline = {shapeOptions: window.SETTINGS.map.styles.draw};
         }
+        options.edit = options.edit || {};
+        options.edit.edit = options.edit.edit || {};
+        options.edit.edit.selectedPathOptions = L.Util.extend({dashArray: '10 10'},
+                                                              window.SETTINGS.map.styles.draw);
         return options;
     },
 
-    _editionLayer: function () {
-        // Set instance layer style
-        var layer = L.GeometryField.prototype._editionLayer.call(this);
-        var style = L.Util.extend(window.SETTINGS.map.styles.draw, {clickable: true});
-        layer.setStyle(style);
-        return layer;
+    load: function () {
+        var geometry = L.GeometryField.prototype.load.apply(this, arguments),
+            style = L.Util.extend({clickable: true}, window.SETTINGS.map.styles.draw);
+        geometry.setStyle(style);
+        return geometry;
     },
 
     addTo: function (map) {
-        L.GeometryField.prototype.addTo.call(this, map);
-
         this._addExtraControls(map);
+        L.GeometryField.prototype.addTo.call(this, map);
         this._addExtraLayers(map);
     },
 
@@ -71,7 +73,8 @@ MapEntity.GeometryField = L.GeometryField.extend({
 
     modelLayerUrl: function (modelname) {
         modelname = modelname || this.getModelName();
-        return window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), modelname);
+        return window.SETTINGS.urls.layer
+                     .replace(new RegExp('modelname', 'g'), modelname);
     },
 
     buildObjectsLayer: function () {
@@ -85,8 +88,8 @@ MapEntity.GeometryField = L.GeometryField.extend({
         }
 
         // Start loading all objects, readonly
-        var style = window.SETTINGS.map.styles.others;
-        style = L.Util.extend(style, {weight: 4, clickable: true});
+        var style = L.Util.extend({weight: 4, clickable: true},
+                                  window.SETTINGS.map.styles.others);
         var objectsLayer = new L.ObjectsLayer(null, {
             style: style,
             filter: exclude_current_object,
