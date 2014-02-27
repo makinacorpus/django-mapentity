@@ -82,10 +82,10 @@ _LEAFLET_PLUGINS = OrderedDict([
     ('leaflet.geometryutil', {
         'js': 'mapentity/Leaflet.GeometryUtil/dist/leaflet.geometryutil.js'
     }),
+    ('forms', {}),
     ('leaflet.snap', {
         'js': 'mapentity/Leaflet.Snap/leaflet.snap.js'
     }),
-    ('forms', {}),
     ('leaflet.measurecontrol', {
         'css': 'mapentity/Leaflet.MeasureControl/leaflet.measurecontrol.css',
         'js': 'mapentity/Leaflet.MeasureControl/leaflet.measurecontrol.js'
