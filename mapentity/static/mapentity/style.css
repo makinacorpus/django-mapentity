@@ -204,6 +204,22 @@ select[multiple] {
     background-image: url(images/screenshot-control.png);
 }
 
+.leaflet-draw.leaflet-control {
+    margin-top: 35px;
+}
+
+.leaflet-draw.leaflet-control:before{
+    content: "";
+    position: absolute;
+    display: block;
+    left: -5px;
+    right: -5px;
+    top: -5px;
+    bottom: -5px;
+    border: 1px solid white;
+    z-index: -1;
+}
+
 .leaflet-control-filelayer .leaflet-bar-part {
     text-align: center;
     margin-bottom: 0px;
