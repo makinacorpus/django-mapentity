@@ -8,7 +8,6 @@ from datetime import datetime
 import json
 
 from django.conf import settings
-from django.db import connection
 from django.contrib.auth.decorators import login_required
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)

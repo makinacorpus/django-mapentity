@@ -53,7 +53,7 @@ class AutoLoginMiddleware(object):
                                (remotehost and remotehost in (CONVERSION_SERVER_HOST,
                                                               CAPTURE_SERVER_HOST)))
             if is_auto_allowed and not is_running_tests:
-               logger.debug("Auto-login for %s/%s" % (remoteip, remotehost))
-               request.user = get_internal_user()
-               user_logged_in.send(self, user=request.user, request=request)
+                logger.debug("Auto-login for %s/%s" % (remoteip, remotehost))
+                request.user = get_internal_user()
+                user_logged_in.send(self, user=request.user, request=request)
         return None
