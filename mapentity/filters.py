@@ -118,6 +118,7 @@ class MapEntityFilterSet(FilterSet):
                 self.__set_placeholder(field, field.widget)
 
     def __set_placeholder(self, field, widget):
+        field.help_text = ''  # Hide help text
         widget.attrs['placeholder'] = field.label
         widget.attrs['data-placeholder'] = field.label
         widget.attrs['title'] = field.label
