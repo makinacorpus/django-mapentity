@@ -213,7 +213,7 @@ class MapEntityForm(TranslatedModelForm):
         layout = Div(
             HTML("""
             <ul class="nav nav-pills">
-            {% for lang in LANGUAGES %}
+            {% for lang in TRANSLATED_LANGUAGES %}
                 <li {% if lang.0 == LANGUAGE_CODE %}class="active"{% endif %}><a href="#%s_{{ lang.0 }}" data-toggle="tab">{{ lang.0 }}</a></li>
             {% endfor %}
             </ul>

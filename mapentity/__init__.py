@@ -22,6 +22,7 @@ app_settings = dict({
     'JS_SETTINGS_VIEW': 'mapentity:js_settings',
     'ROOT_URL': '',
     'LANGUAGES': settings.LANGUAGES,
+    'TRANSLATED_LANGUAGES': settings.LANGUAGES,
     'LANGUAGE_CODE': settings.LANGUAGE_CODE,
     'TEMP_DIR': getattr(settings, 'TEMP_DIR', '/tmp'),
     'MAP_CAPTURE_SIZE': 800,

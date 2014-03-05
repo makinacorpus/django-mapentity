@@ -9,5 +9,6 @@ def settings(request):
         DEBUG=settings_.DEBUG,
         VERSION=getattr(settings_, 'VERSION', 'unknown'),
         JS_SETTINGS_VIEW=app_settings['JS_SETTINGS_VIEW'],
+        TRANSLATED_LANGUAGES=app_settings['TRANSLATED_LANGUAGES'],
         registry=registry,
     )
