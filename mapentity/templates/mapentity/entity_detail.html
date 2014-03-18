@@ -47,7 +47,7 @@
 
                     <div class="file-attachment file-attachment-detail">
                         <h3>{% trans "Attached files" %}</h3>
-                        {% with object=object can_delete_attachment=can_delete_attachment attachment_delete_next=object.get_detail_url %}
+                        {% with object=object can_delete_attachment=can_delete_attachment attachment_delete_next=object.get_detail_url|add:'?tab=attachments' %}
                             {% include 'paperclip/details.html' %}
                         {% endwith %}
                     </div>
@@ -55,7 +55,7 @@
                     {% if can_add_attachment %}
                     <div class="file-attachment-update">
                         <h4>{% trans "New file attachment" %}</h4>
-                        {% attachment_form object %}
+                        {% attachment_form object object.get_detail_url|add:'?tab=attachments' %}
                     </div>
                     {% endif %}
                 </div>
