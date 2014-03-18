@@ -1,12 +1,8 @@
 from functools import wraps
-from collections import namedtuple
 
 from django.utils.decorators import available_attrs
 
 from . import app_settings
-
-
-HistoryItem = namedtuple('HistoryItem', ['title', 'path', 'modelname'])
 
 
 def save_history():
@@ -22,15 +18,12 @@ def save_history():
             # Stack list of request paths
             history = request.session.get('history', [])
             # Remove previous visits of this page
-            try:
-                history = [h for h in history if h.path != request.path]
-            except AttributeError:
-                pass  # Manage legacy history items, which were simple tuples
+            history = [h for h in history if h['path'] != request.path]
             # Add this one and remove extras
             model = self.model or self.queryset.model
-            history.insert(0, HistoryItem(unicode(self.get_title()),
-                                          request.path,
-                                          unicode(model._meta.object_name.lower())))
+            history.insert(0, dict(title=unicode(self.get_title()),
+                                   path=request.path,
+                                   modelname=unicode(model._meta.object_name.lower())))
             if len(history) > app_settings['HISTORY_ITEMS_MAX']:
                 history.pop()
             request.session['history'] = history

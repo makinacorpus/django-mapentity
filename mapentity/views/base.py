@@ -174,6 +174,6 @@ def history_delete(request, path=None):
     path = request.POST.get('path', path)
     if path:
         history = request.session['history']
-        history = [h for h in history if h[1] != path]
+        history = [h for h in history if h['path'] != path]
         request.session['history'] = history
     return HttpResponse()
