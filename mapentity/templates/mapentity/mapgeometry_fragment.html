@@ -14,7 +14,7 @@ function detailmapInit(map, bounds) {
         map.boxZoom.disable();
     {% endif %}
     map.removeControl(map.zoomControl);
-    map.removeControl(map.attributionControl);
+    map.attributionControl.setPrefix('');
 
     var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
 

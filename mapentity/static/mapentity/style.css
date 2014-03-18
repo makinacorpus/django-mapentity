@@ -547,6 +547,10 @@ span.filter-info {
     margin-left: 10px;
 }
 
+.map-panel .leaflet-control-attribution {
+    display: none;
+}
+
 .map-panel p.nomap {
     color: lightgray;
     font-size: 2em;
@@ -569,13 +573,24 @@ body.screamshot .leaflet-control-scale {
     display: block;
 }
 
-body.screamshot .leaflet-control-scale .leaflet-control-scale-line {
-    border-left: 3px solid black;
-    border-right: 3px solid black;
-    border-bottom: 3px solid black;
-    background: rgba(255, 255, 255, 0.8);
-    font-size: 20px;
+body.screamshot .leaflet-control-attribution {
+    display: block;
+    text-shadow: 1px 0 0 #fff, -1px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+    background: none;
+    font-size: 15px;
     color: black;
+}
+
+
+body.screamshot .leaflet-control-scale .leaflet-control-scale-line {
+    border: 3px solid black;
+    border-top: none;
+    box-shadow: 2px 2px 0 white;
+    background: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: black;
+    text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
 }
 
 /***** Entity form ******/
