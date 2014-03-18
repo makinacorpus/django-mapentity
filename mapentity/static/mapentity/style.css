@@ -569,6 +569,14 @@ body.screamshot .leaflet-control-scale {
     display: block;
 }
 
+body.screamshot .leaflet-control-scale .leaflet-control-scale-line {
+    border-left: 3px solid black;
+    border-right: 3px solid black;
+    border-bottom: 3px solid black;
+    background: rgba(255, 255, 255, 0.8);
+    font-size: 20px;
+    color: black;
+}
 
 /***** Entity form ******/
 
