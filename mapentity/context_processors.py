@@ -10,5 +10,6 @@ def settings(request):
         VERSION=getattr(settings_, 'VERSION', 'unknown'),
         JS_SETTINGS_VIEW=app_settings['JS_SETTINGS_VIEW'],
         TRANSLATED_LANGUAGES=app_settings['TRANSLATED_LANGUAGES'],
+        MAP_BACKGROUND_FOGGED=app_settings['MAP_BACKGROUND_FOGGED'],
         registry=registry,
     )

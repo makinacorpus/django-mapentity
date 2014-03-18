@@ -27,6 +27,7 @@ app_settings = dict({
     'TEMP_DIR': getattr(settings, 'TEMP_DIR', '/tmp'),
     'MAP_CAPTURE_SIZE': 800,
     'GEOM_FIELD_NAME': 'geom',
+    'MAP_BACKGROUND_FOGGED': False,
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 
