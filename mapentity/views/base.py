@@ -98,7 +98,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
         # Useful for JS calendars
         dictsettings['date_format'] = settings.DATE_INPUT_FORMATS[0].replace('%Y', 'yyyy').replace('%m', 'mm').replace('%d', 'dd')
         # Languages
-        dictsettings['languages'] = dict(available=dict(app_settings['LANGUAGES']),
+        dictsettings['languages'] = dict(available=dict(app_settings['TRANSLATED_LANGUAGES']),
                                          default=app_settings['LANGUAGE_CODE'])
         return dictsettings
 

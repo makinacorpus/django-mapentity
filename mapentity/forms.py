@@ -43,7 +43,7 @@ class TranslatedModelForm(forms.ModelForm):
             # Remove form native field (e.g. `name`)
             native = self.fields.pop(modelfield)
             # Add translated fields (e.g. `name_fr`, `name_en`...)
-            for l in app_settings['LANGUAGES']:
+            for l in app_settings['TRANSLATED_LANGUAGES']:
                 lang = l[0]
                 name = '%s_%s' % (modelfield, lang)
                 # Add to form.fields{}
