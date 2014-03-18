@@ -195,16 +195,18 @@ def convertit_download(url, destination, from_type=None, to_type='application/pd
     download_to_stream(url, fd)
 
 
-def capture_url(url, width=None, height=None, selector=None):
+def capture_url(url, width=None, height=None, selector=None, waitfor=None):
     """Return URL to request a capture from Screamshotter
     """
     server = app_settings['CAPTURE_SERVER']
     width = ('&width=%s' % width) if width else ''
     height = ('&height=%s' % height) if height else ''
     selector = ('&selector=%s' % urllib.quote(selector)) if selector else ''
-    params = '{width}{height}{selector}'.format(width=width,
-                                                height=height,
-                                                selector=selector)
+    waitfor = ('&waitfor=%s' % urllib.quote(waitfor)) if waitfor else ''
+    params = '{width}{height}{selector}{waitfor}'.format(width=width,
+                                                         height=height,
+                                                         selector=selector,
+                                                         waitfor=waitfor)
     capture_url = '{server}/?url={url}{params}'.format(server=server,
                                                        url=urllib.quote(url),
                                                        params=params)
@@ -237,7 +239,9 @@ def capture_map_image(url, destination, size=None, aspect=1.0):
     url += '?context=' + urllib2.quote(serialized)
 
     with open(destination, 'wb') as fd:
-        capture_image(url, fd, selector='.map-panel')
+        capture_image(url, fd,
+                      selector='.map-panel',
+                      waitfor='.leaflet-tile-loaded')
 
 
 def extract_attributes_html(url):
