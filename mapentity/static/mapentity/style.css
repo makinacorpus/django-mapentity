@@ -565,6 +565,10 @@ body.screamshot #maphead {
     display: none;
 }
 
+body.screamshot .map-fogged .leaflet-tile.leaflet-tile-loaded {
+    opacity: 1.0;
+}
+
 body.screamshot .leaflet-control {
     display: none;
 }
