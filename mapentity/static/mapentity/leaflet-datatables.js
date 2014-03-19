@@ -40,14 +40,18 @@ L.MapListSync = L.Class.extend({
         var self = this;
         $(this.dt.fnSettings().oInstance).on('filter', function (e) {
             var filterTxt = $(".dataTables_filter input[type='text']").val();
-            if ((self._searched && filterTxt === '') || 
+            var results = self.dt.fnGetColumnData(0);
+            if ((self._searched && filterTxt === '') ||
                 (!self._searched && filterTxt !== '')) {
-                self.layer.updateFromPks(self.dt.fnGetColumnData(0));
+                self.layer.updateFromPks(results);
                 self._searched = true;
             }
             else {
                 self._searched = false;
             }
+            self.fire('reloaded', {
+                nbrecords: results.length,
+            });
         });
     },
 
