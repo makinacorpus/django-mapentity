@@ -551,6 +551,10 @@ span.filter-info {
     display: none;
 }
 
+.map-panel .leaflet-control-information {
+    display: block;
+}
+
 .map-panel p.nomap {
     color: lightgray;
     font-size: 2em;
