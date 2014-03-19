@@ -110,15 +110,19 @@ class MapEntityMixin(object):
     def attachments(self):
         return Attachment.objects.attachments_for_object(self)
 
-    def get_geom_aspect_ratio(self):
-        """ Returns a ratio with/height, limited between 0.5 and 2.
+    def get_geom_aspect_ratio(self, maximum=None):
+        """ Returns a ratio with/height, bounded to a maximum aspect.
         """
         geom = self.get_geom()
         if geom:
             xmin, ymin, xmax, ymax = geom.extent
             try:
                 aspect = (xmax - xmin) / (ymax - ymin)
-                return max(min(2, aspect), 0.5)
+                if maximum is None:
+                    maximum = app_settings['MAP_CAPTURE_MAX_RATIO']
+                if maximum > 0:
+                    aspect = max(min(maximum, aspect), 1.0/maximum)
+                return aspect
             except ZeroDivisionError:
                 pass
         return 1.0
