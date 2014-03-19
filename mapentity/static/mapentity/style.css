@@ -581,16 +581,23 @@ body.screamshot .leaflet-control-attribution {
     color: black;
 }
 
-
-body.screamshot .leaflet-control-scale .leaflet-control-scale-line {
+body.screamshot .leaflet-control-scale {
     border: 3px solid black;
     border-top: none;
     box-shadow: 2px 2px 0 white;
-    background: none;
-    font-size: 20px;
-    font-weight: bold;
     color: black;
     text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+    max-height: 7px;
+}
+
+body.screamshot .leaflet-control-scale-line {
+    border: none;
+    background: none;
+    font-size: 15px;
+    font-weight: bold;
+    overflow: auto;
+    margin-top: -12px;
+    text-align: center;
 }
 
 /***** Entity form ******/
