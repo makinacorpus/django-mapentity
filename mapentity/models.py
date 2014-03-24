@@ -121,7 +121,7 @@ class MapEntityMixin(object):
                 if maximum is None:
                     maximum = app_settings['MAP_CAPTURE_MAX_RATIO']
                 if maximum > 0:
-                    aspect = max(min(maximum, aspect), 1.0/maximum)
+                    aspect = max(min(maximum, aspect), 1.0 / maximum)
                 return aspect
             except ZeroDivisionError:
                 pass
