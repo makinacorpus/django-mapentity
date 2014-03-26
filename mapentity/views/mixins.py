@@ -3,6 +3,7 @@ import logging
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
 from ..serializers import json_django_dumps
+from .. import models as mapentity_models
 
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,22 @@ class ModelMetaMixin(object):
     Add model meta information in context data
     """
 
+    @classmethod
+    def get_view_perm(cls):
+        operations = {
+            mapentity_models.ENTITY_CREATE: 'add',
+            mapentity_models.ENTITY_UPDATE: 'change',
+            mapentity_models.ENTITY_DELETE: 'delete'
+        }
+        operation = operations.get(cls.get_entity_kind(),
+                                   cls.get_entity_kind())
+        model = cls.model or cls.queryset.model
+        opts = model._meta
+        return '%s.%s_%s' % (opts.app_label.lower(),
+                             operation,
+                             opts.object_name.lower())
+
+    @classmethod
     def get_entity_kind(self):
         return None
 

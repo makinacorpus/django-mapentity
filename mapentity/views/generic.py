@@ -24,7 +24,7 @@ from .. import API_SRID
 from .. import app_settings
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream
-from ..decorators import save_history
+from ..decorators import save_history, user_has_view_perm
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from .base import history_delete
 from .mixins import ModelMetaMixin, JSONResponseMixin
@@ -319,6 +319,7 @@ class MapEntityCreate(ModelMetaMixin, CreateView):
         return _(u"Add a new %s" % name.lower())
 
     @method_decorator(login_required)
+    @user_has_view_perm()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityCreate, self).dispatch(*args, **kwargs)
 
@@ -375,6 +376,7 @@ class MapEntityUpdate(ModelMetaMixin, UpdateView):
         return _("Edit %s") % self.get_object()
 
     @method_decorator(login_required)
+    @user_has_view_perm()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityUpdate, self).dispatch(*args, **kwargs)
 
@@ -405,6 +407,7 @@ class MapEntityDelete(ModelMetaMixin, DeleteView):
         return mapentity_models.ENTITY_DELETE
 
     @method_decorator(login_required)
+    @user_has_view_perm()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityDelete, self).dispatch(*args, **kwargs)
 
