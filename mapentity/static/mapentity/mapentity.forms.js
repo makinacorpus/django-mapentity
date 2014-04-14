@@ -22,9 +22,12 @@ MapEntity.GeometryField = L.GeometryField.extend({
     },
 
     load: function () {
-        var geometry = L.GeometryField.prototype.load.apply(this, arguments),
-            style = L.Util.extend({clickable: true}, window.SETTINGS.map.styles.draw);
-        geometry.setStyle(style);
+        var geometry = L.GeometryField.prototype.load.apply(this, arguments);
+        // On creation, geometry is null. And marker don't have setStyle()
+        if (geometry && typeof(geometry.setStyle) == 'function') {
+            var style = L.Util.extend({clickable: true}, window.SETTINGS.map.styles.draw);
+            geometry.setStyle(style);
+        }
         return geometry;
     },
 
