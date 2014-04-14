@@ -56,16 +56,15 @@ class MapEntityMixin(object):
             os.unlink(image_path)
         super(MapEntityMixin, self).delete(*args, **kwargs)
 
-    # List all different kind of views
     @classmethod
     def get_url_name(cls, kind):
-        if not kind in ENTITY_KINDS:
+        if kind not in ENTITY_KINDS:
             return None
         return '%s:%s_%s' % (cls._meta.app_label, cls._meta.module_name, kind)
 
     @classmethod
     def get_url_name_for_registration(cls, kind):
-        if not kind in ENTITY_KINDS:
+        if kind not in ENTITY_KINDS:
             return None
         return '%s_%s' % (cls._meta.module_name, kind)
 
@@ -110,15 +109,19 @@ class MapEntityMixin(object):
     def attachments(self):
         return Attachment.objects.attachments_for_object(self)
 
-    def get_geom_aspect_ratio(self):
-        """ Returns a ratio with/height, limited between 0.5 and 2.
+    def get_geom_aspect_ratio(self, maximum=None):
+        """ Returns a ratio with/height, bounded to a maximum aspect.
         """
         geom = self.get_geom()
         if geom:
             xmin, ymin, xmax, ymax = geom.extent
             try:
                 aspect = (xmax - xmin) / (ymax - ymin)
-                return max(min(2, aspect), 0.5)
+                if maximum is None:
+                    maximum = app_settings['MAP_CAPTURE_MAX_RATIO']
+                if maximum > 0:
+                    aspect = max(min(maximum, aspect), 1.0 / maximum)
+                return aspect
             except ZeroDivisionError:
                 pass
         return 1.0

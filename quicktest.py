@@ -22,6 +22,7 @@ class QuickDjangoTest(object):
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.admin',
+        'django.contrib.staticfiles',
         'paperclip',
         'leaflet',
         'djgeojson',
@@ -53,6 +54,7 @@ class QuickDjangoTest(object):
                 }
             },
             INSTALLED_APPS=self.INSTALLED_APPS + tuple(apps),
+            STATIC_ROOT='.',
             STATIC_URL='/static/',
             ROOT_URLCONF='mapentity.tests.urls',
             MEDIA_URL='/media/',

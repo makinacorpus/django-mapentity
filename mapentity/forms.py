@@ -43,7 +43,7 @@ class TranslatedModelForm(forms.ModelForm):
             # Remove form native field (e.g. `name`)
             native = self.fields.pop(modelfield)
             # Add translated fields (e.g. `name_fr`, `name_en`...)
-            for l in app_settings['LANGUAGES']:
+            for l in app_settings['TRANSLATED_LANGUAGES']:
                 lang = l[0]
                 name = '%s_%s' % (modelfield, lang)
                 # Add to form.fields{}
@@ -89,7 +89,6 @@ class MapEntityForm(TranslatedModelForm):
     pk = forms.Field(required=False, widget=forms.Field.hidden_widget)
     model = forms.Field(required=False, widget=forms.Field.hidden_widget)
 
-    helper = FormHelper()
     fieldslayout = None
     geomfields = []
 
@@ -100,6 +99,9 @@ class MapEntityForm(TranslatedModelForm):
         self.user = kwargs.pop('user', None)
         self.can_delete = kwargs.pop('can_delete', True)
         super(MapEntityForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_tag = True
 
         self.fields['pk'].initial = self.instance.pk
         self.fields['model'].initial = self.instance._meta.module_name
@@ -211,7 +213,7 @@ class MapEntityForm(TranslatedModelForm):
         layout = Div(
             HTML("""
             <ul class="nav nav-pills">
-            {% for lang in LANGUAGES %}
+            {% for lang in TRANSLATED_LANGUAGES %}
                 <li {% if lang.0 == LANGUAGE_CODE %}class="active"{% endif %}><a href="#%s_{{ lang.0 }}" data-toggle="tab">{{ lang.0 }}</a></li>
             {% endfor %}
             </ul>

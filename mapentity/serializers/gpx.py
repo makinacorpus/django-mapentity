@@ -13,10 +13,14 @@ from ..templatetags.timesince import humanize_timesince
 class GPXSerializer(Serializer):
     """
     GPX serializer class. Very rough implementation, but better than inline code.
+
+    :note:
+
+        TODO : this should definitely respect Serializer abstraction :
+        LineString -> Route with Point
+        Collection -> One route/waypoint per item
+
     """
-    # TODO : this should definitely respect Serializer abstraction :
-    # LineString -> Route with Point
-    # Collection -> One route/waypoint per item
     def __init__(self, *args, **kwargs):
         self.gpx = None
 
@@ -31,10 +35,10 @@ class GPXSerializer(Serializer):
             objtype = unicode(obj.__class__._meta.verbose_name)
             name = '[%s] %s' % (objtype, unicode(obj))
 
-            description = ''
+            description = getattr(obj, 'description', '')
             objupdate = getattr(obj, 'date_update')
             if objupdate:
-                description = _('Modified') + ': ' + humanize_timesince(objupdate)
+                description += _('Modified') + ': ' + humanize_timesince(objupdate)
             if geom:
                 assert geom.srid == settings.SRID, "Invalid srid"
                 self.geomToGPX(geom, name, description)

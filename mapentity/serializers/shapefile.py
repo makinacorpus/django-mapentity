@@ -127,7 +127,6 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
 
     transform = lambda ogr_geom: ogr_geom
 
-    # omg.. will not work for 3D coords
     if native_srs != output_srs:
         ct = osr.CoordinateTransformation(native_srs, output_srs)
 
@@ -156,7 +155,14 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
 
 
 def create_shape_format_layer(fieldnames, geom_type, srid, srid_out=None):
-    # Create temp file
+    """Creates a Shapefile layer definition, that will later be filled with data.
+
+    :note:
+
+        All attributes fields have type `String`.
+
+    """
+    # Create temp file
     tmp = tempfile.NamedTemporaryFile(suffix='.shp', mode='w+b', dir=app_settings['TEMP_DIR'])
     # we must close the file for GDAL to be able to open and write to it
     tmp.close()
@@ -182,7 +188,7 @@ def create_shape_format_layer(fieldnames, geom_type, srid, srid_out=None):
     if layer is None:
         raise ValueError('Could not create layer (type=%s, srs=%s)' % (geom_type, output_srs))
 
-    # Create other fields
+    # Create other fields
     for fieldname in fieldnames:
         field_defn = ogr.FieldDefn(str(fieldname[:10]), ogr.OFTString)
         field_defn.SetWidth(255)
@@ -203,7 +209,7 @@ def geo_field_from_model(model, default_geo_field_name=None):
     fields = model._meta.fields
     geo_fields = [f for f in fields if isinstance(f, GeometryField)]
 
-    # Used for error case
+    # Used for error case
     geo_fields_names = lambda: ', '.join([f.name for f in geo_fields])
 
     if len(geo_fields) > 1:

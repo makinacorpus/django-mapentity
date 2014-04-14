@@ -50,7 +50,8 @@ def handler500(request, template_name='mapentity/500.html'):
     context['exception'] = repr(name)
     context['stack'] = "\n".join(traceback.format_tb(tb))
     t = loader.get_template(template_name)
-    return HttpResponseServerError(t.render(context))
+    response = t.render(context)
+    return HttpResponseServerError(response)
 
 
 @login_required()
@@ -62,8 +63,13 @@ def serve_secure_media(request, path):
     if settings.DEBUG:
         return static.serve(request, path, settings.MEDIA_ROOT)
 
+    if path.startswith('/'):
+        path = path[1:]
+
     response = HttpResponse()
-    response['X-Accel-Redirect'] = settings.MEDIA_URL_SECURE + path
+    response['X-Accel-Redirect'] = os.path.join(settings.MEDIA_URL_SECURE, path)
+    response['Content-Disposition'] = "attachment; filename={0}".format(
+        os.path.basename(path))
     return response
 
 
@@ -95,7 +101,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
         # Useful for JS calendars
         dictsettings['date_format'] = settings.DATE_INPUT_FORMATS[0].replace('%Y', 'yyyy').replace('%m', 'mm').replace('%d', 'dd')
         # Languages
-        dictsettings['languages'] = dict(available=dict(app_settings['LANGUAGES']),
+        dictsettings['languages'] = dict(available=dict(app_settings['TRANSLATED_LANGUAGES']),
                                          default=app_settings['LANGUAGE_CODE'])
         return dictsettings
 
@@ -119,7 +125,8 @@ def map_screenshot(request):
 
         # Prepare context, extract and add infos
         context = json.loads(printcontext)
-        map_url = context.pop('url').split('?', 1)[0]
+        map_url = context.pop('url')
+        map_url = request.build_absolute_uri(map_url)
         context['print'] = True
         printcontext = json.dumps(context)
         contextencoded = urllib2.quote(printcontext)
@@ -153,8 +160,9 @@ def convert(request):
         return HttpResponseBadRequest('url parameter missing')
     source = request.build_absolute_uri(source)
 
+    fromtype = request.GET.get('from')
     format = request.GET.get('to')
-    url = convertit_url(source, to_type=format)
+    url = convertit_url(source, from_type=fromtype, to_type=format)
     response = HttpResponse()
     received = download_to_stream(url, response, silent=True)
     filename = os.path.basename(received.url)
@@ -169,6 +177,6 @@ def history_delete(request, path=None):
     path = request.POST.get('path', path)
     if path:
         history = request.session['history']
-        history = [h for h in history if h.path != path]
+        history = [h for h in history if h['path'] != path]
         request.session['history'] = history
     return HttpResponse()

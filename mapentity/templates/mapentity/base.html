@@ -141,7 +141,7 @@
     {% endif %}
 
     {% block container %}
-    <div id="container" class="container-fluid">
+    <div id="container" class="container-fluid {% if MAP_BACKGROUND_FOGGED %}map-fogged{% endif %}">
         <div class="row-fluid">
             {% block mainpanel %}
             {% endblock mainpanel %}

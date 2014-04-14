@@ -33,22 +33,17 @@ L.MapListSync = L.Class.extend({
             this.options.filter.submitbutton.click(this._onFormSubmit.bind(this));
             this.options.filter.resetbutton.click(this._onFormReset.bind(this));
         }
-        
-        // Keep track of searched records, and refresh map.
-        // Do not do it if event is received with no search 
-        this._searched = false;
-        var self = this;
-        $(this.dt.fnSettings().oInstance).on('filter', function (e) {
-            var filterTxt = $(".dataTables_filter input[type='text']").val();
-            if ((self._searched && filterTxt === '') || 
-                (!self._searched && filterTxt !== '')) {
-                self.layer.updateFromPks(self.dt.fnGetColumnData(0));
-                self._searched = true;
-            }
-            else {
-                self._searched = false;
-            }
+
+        $(this.dt.fnSettings().oInstance).on('filter', this._onListFilter.bind(this));
+    },
+
+    _onListFilter: function () {
+        var filterTxt = $(".dataTables_filter input[type='text']").val();
+        var results = this.dt.fnGetColumnData(0);
+        this.fire('reloaded', {
+            nbrecords: results.length,
         });
+        this.layer.updateFromPks(results);
     },
 
     _onMapViewChanged: function (e) {
@@ -132,6 +127,7 @@ L.MapListSync = L.Class.extend({
             if (refreshLayer || (nbrecords > nbonmap)) {
                 var updateLayerObjects = function () {
                     self.layer.updateFromPks(callback_args.map_obj_pk);
+                    self._onListFilter();
                 };
 
                 if (self.layer.loading) {

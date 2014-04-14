@@ -70,9 +70,9 @@ MapEntity.showLineLabel = function (layer, options) {
     var __layerShowLabel = layer._showLabel;
     layer._showLabel = function () {
         __layerShowLabel.call(layer, {latlng: midLatLng(layer)});
-        layer._label._container.title = options.title;
-        layer._label._container.style.backgroundColor = 'rgba('+rgb.join(',')+ ',0.8)';
-        layer._label._container.style.borderColor = 'rgba('+rgb.join(',')+ ',0.6)';
+        layer.label._container.title = options.title;
+        layer.label._container.style.backgroundColor = 'rgba('+rgb.join(',')+ ',0.8)';
+        layer.label._container.style.borderColor = 'rgba('+rgb.join(',')+ ',0.6)';
     };
 
     function hideOnZoomOut() {
