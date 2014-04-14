@@ -5,6 +5,7 @@ from subprocess import check_output
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
+from django.db import DatabaseError
 
 from . import app_settings
 
@@ -53,7 +54,11 @@ class AutoLoginMiddleware(object):
                                (remotehost and remotehost in (CONVERSION_SERVER_HOST,
                                                               CAPTURE_SERVER_HOST)))
             if is_auto_allowed and not is_running_tests:
-                logger.debug("Auto-login for %s/%s" % (remoteip, remotehost))
-                request.user = get_internal_user()
-                user_logged_in.send(self, user=request.user, request=request)
+                logger.info("Auto-login for %s/%s" % (remoteip, remotehost))
+                user = get_internal_user()
+                try:
+                    user_logged_in.send(self, user=user, request=request)
+                except DatabaseError:
+                    logger.error("Could not update last-login field of internal user")
+                request.user = user
         return None
