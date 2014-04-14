@@ -56,16 +56,15 @@ class MapEntityMixin(object):
             os.unlink(image_path)
         super(MapEntityMixin, self).delete(*args, **kwargs)
 
-    # List all different kind of views
     @classmethod
     def get_url_name(cls, kind):
-        if not kind in ENTITY_KINDS:
+        if kind not in ENTITY_KINDS:
             return None
         return '%s:%s_%s' % (cls._meta.app_label, cls._meta.module_name, kind)
 
     @classmethod
     def get_url_name_for_registration(cls, kind):
-        if not kind in ENTITY_KINDS:
+        if kind not in ENTITY_KINDS:
             return None
         return '%s_%s' % (cls._meta.module_name, kind)
 

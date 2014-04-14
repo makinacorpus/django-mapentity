@@ -13,10 +13,14 @@ from ..templatetags.timesince import humanize_timesince
 class GPXSerializer(Serializer):
     """
     GPX serializer class. Very rough implementation, but better than inline code.
+
+    :note:
+
+        TODO : this should definitely respect Serializer abstraction :
+        LineString -> Route with Point
+        Collection -> One route/waypoint per item
+
     """
-    # TODO : this should definitely respect Serializer abstraction :
-    # LineString -> Route with Point
-    # Collection -> One route/waypoint per item
     def __init__(self, *args, **kwargs):
         self.gpx = None
 

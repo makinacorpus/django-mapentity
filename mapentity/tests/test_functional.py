@@ -125,15 +125,15 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get('Content-Type'), 'text/csv')
 
-        # Read the csv
+        # Read the csv
         lines = list(csv.reader(StringIO.StringIO(response.content), delimiter=','))
 
-        # There should be one more line in the csv than in the items: this is the header line
+        # There should be one more line in the csv than in the items: this is the header line
         self.assertEqual(len(lines), self.model.objects.all().count() + 1)
 
         for line in lines:
             for col in line:
-                # the col should not contains any html tags
+                # the col should not contains any html tags
                 self.assertEquals(force_unicode(col), html.strip_tags(col))
 
     def _post_form(self, url):
