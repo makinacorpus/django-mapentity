@@ -2,8 +2,14 @@ import os
 
 from django.db import models
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError
 from django.contrib import auth
+from django.contrib.admin.models import LogEntry, ADDITION
+from django.contrib.contenttypes.models import ContentType
+
+
+
 
 from paperclip.models import Attachment
 
@@ -211,3 +217,25 @@ class MapEntityMixin(object):
     def get_attributes_html(self, rooturl):
         url = smart_urljoin(rooturl, self.get_detail_url())
         return extract_attributes_html(url)
+
+    @classmethod
+    def get_content_type_id(cls):
+        return ContentType.objects.get_for_model(cls).pk
+
+    @property
+    def creator(self):
+        log_entry = LogEntry.objects.get(
+            content_type_id=self.get_content_type_id(),
+            object_id=self.pk,
+            action_flag=ADDITION)
+        return log_entry.user
+
+    @property
+    def authors(self):
+        return auth.get_user_model().objects.filter(
+            logentry__content_type_id=self.get_content_type_id(),
+            logentry__object_id=self.pk)
+
+    @property
+    def last_author(self):
+        return self.authors.order_by('logentry__pk').last()

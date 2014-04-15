@@ -6,6 +6,7 @@ from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
 from django.utils.translation import ugettext_lazy as _
 
+from django.utils.encoding import force_text
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -13,6 +14,7 @@ from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.contrib import messages
+from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
 from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
@@ -29,6 +31,16 @@ from .mixins import ModelViewMixin, JSONResponseMixin
 
 
 logger = logging.getLogger(__name__)
+
+
+def log_action(request, object, action_flag):
+    LogEntry.objects.log_action(
+        user_id=request.user.pk,
+        content_type_id=object.get_content_type_id(),
+        object_id=object.pk,
+        object_repr=force_text(object),
+        action_flag=action_flag
+    )
 
 
 class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
@@ -347,8 +359,10 @@ class MapEntityCreate(ModelViewMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
+        response = super(MapEntityCreate, self).form_valid(form)
         messages.success(self.request, _("Created"))
-        return super(MapEntityCreate, self).form_valid(form)
+        log_action(self.request, self.object, ADDITION)
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request, _("Your form contains errors"))
@@ -415,8 +429,10 @@ class MapEntityUpdate(ModelViewMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
+        response = super(MapEntityUpdate, self).form_valid(form)
         messages.success(self.request, _("Saved"))
-        return super(MapEntityUpdate, self).form_valid(form)
+        log_action(self.request, self.object, CHANGE)
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request, _("Your form contains errors"))
@@ -439,8 +455,10 @@ class MapEntityDelete(ModelViewMixin, DeleteView):
         return super(MapEntityDelete, self).dispatch(*args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        log_action(self.request, self.object, DELETION)
         # Remove entry from history
-        history_delete(request, path=self.get_object().get_detail_url())
+        history_delete(request, path=self.object.get_detail_url())
         return super(MapEntityDelete, self).delete(request, *args, **kwargs)
 
     def get_success_url(self):
