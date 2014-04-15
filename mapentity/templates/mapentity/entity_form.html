@@ -1,6 +1,8 @@
 {% extends "mapentity/base.html" %}
 {% load i18n static crispy_forms_tags %}
 
+{% block title %}{{ title }} | {{ block.super }}{% endblock title %}
+
 {% block extrahead %}
     {{ block.super }}
     {{ form.media }}

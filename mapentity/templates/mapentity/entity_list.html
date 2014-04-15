@@ -2,6 +2,7 @@
 {% load i18n static leaflet_tags mapentity field_verbose_name %}
 {% load url from future %}
 
+{% block title %}{{ objectsname }} | {{ block.super }}{% endblock title %}
 
 {% block container %}
     <div id="container">

@@ -1,6 +1,7 @@
 {% extends "mapentity/base.html" %}
 {% load i18n static field_verbose_name mapentity leaflet_tags geojson_tags attachments_tags %}
 
+{% block title %}{{ object }} | {{ block.super }}{% endblock title %}
 
 {% block mainpanel %}
     <div class="details-panel detail span7 {{ modelname }}">
