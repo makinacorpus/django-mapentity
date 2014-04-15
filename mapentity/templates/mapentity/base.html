@@ -53,7 +53,11 @@
 {% block extrahead %}
 {% endblock extrahead %}
 </head>
-<body>
+<body data-view="{{ view }}"
+      data-model="{{ appname }}"
+      data-modelname="{{ modelname }}"
+      data-objectsname="{{ objectsname }}">
+
   {% block content %}
     {% block navbar %}
     <div class="navbar">

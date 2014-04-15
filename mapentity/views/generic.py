@@ -400,7 +400,7 @@ class MapEntityUpdate(ModelMetaMixin, UpdateView):
         return self.get_object().get_detail_url()
 
 
-class MapEntityDelete(DeleteView):
+class MapEntityDelete(ModelMetaMixin, DeleteView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DELETE

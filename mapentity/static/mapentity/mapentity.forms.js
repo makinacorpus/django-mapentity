@@ -69,6 +69,9 @@ MapEntity.GeometryField = L.GeometryField.extend({
         var objectsLayer = this.buildObjectsLayer();
         map.addLayer(objectsLayer);
 
+        var objectsname = $('body').data('objectsname');
+        map.layerscontrol.addOverlay(objectsLayer, objectsname);
+
         var url = this.modelLayerUrl();
         objectsLayer.load(url);
     },
