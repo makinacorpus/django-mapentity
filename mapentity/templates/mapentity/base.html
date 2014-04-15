@@ -188,6 +188,11 @@
             L.Control.Screenshot.TITLE = "{% trans "Save map as image" %}";
             L.Control.FileLayerLoad.LABEL = '<i class="icon-folder-open"></i>';
             L.GeometryField.unsavedText = "{% trans "Map geometry is unsaved" %}";
+
+            MapEntity.i18n = {
+              'Search': "{% trans "Search" %}",
+              'results': "{% trans "results" %}",
+            };
         </script>
 
         <script type="text/javascript" src="{% static "mapentity/jquery.deserialize.js" %}"></script>
