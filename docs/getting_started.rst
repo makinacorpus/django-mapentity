@@ -54,15 +54,17 @@ Edit your Django settings to point to your PostGIS database::
 
 
 
-Add these entries to your ``INSTALLED_APPS``:
+Add these entries to your ``INSTALLED_APPS``::
 
-* easy_thumbnails
-* djgeojson
-* leaflet
-* mapentity
-* paperclip
-* compressor
-* main (the app you just created)
+    'easy_thumbnails',
+    'djgeojson',
+    'leaflet',
+    'mapentity',
+    'paperclip',
+    'compressor',
+    'floppyforms',
+    'crispy_forms',
+    'main',  # the app you just created
 
 Add ``django.middleware.locale.LocaleMiddleware`` to your ``MIDDLEWARE_CLASSES``.
 
@@ -77,8 +79,12 @@ Specify a media URL::
 
     MEDIA_URL = 'media/'
 
+Specify a static root::
 
-Add MapEntity context processor to the list of default context processors::
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+Add MapEntity and request context processors to the list of default context
+processors::
 
     TEMPLATE_CONTEXT_PROCESSORS = (
         "django.contrib.auth.context_processors.auth",
@@ -88,9 +94,9 @@ Add MapEntity context processor to the list of default context processors::
         "django.core.context_processors.static",
         "django.core.context_processors.tz",
         "django.contrib.messages.context_processors.messages",
-        'mapentity.context_processors.settings',
+        "django.core.context_processors.request",
+        "mapentity.context_processors.settings",
     )
-
 
 Specify cache backends::
 
@@ -118,7 +124,7 @@ you'll need to add a special manager::
 
 
     class Museum(MapEntityMixin, models.Model):
-        
+
         geom = models.PointField()
         name = models.CharField(max_length=80)
 
@@ -136,10 +142,24 @@ geographical data. Create a file ``filters.py`` in your app::
 
 
     class MuseumFilter(MapEntityFilterSet):
-
         class Meta:
             model = Museum
-            fields = ('name', 'atmosphere')
+            fields = ('name', )
+
+
+Forms
+-----
+
+Create a form for your Museum model::
+
+    from mapentity.forms import MapEntityForm
+    from .models import Museum
+
+
+    class MuseumForm(MapEntityForm):
+        class Meta(MapEntityForm.Meta):
+            model = Museum
+            fields =  MapEntityForm.Meta.fields + ['name', 'geom']
 
 
 Views
@@ -147,25 +167,33 @@ Views
 
 Create a set of class-based views referring to your model and your filter::
 
-
-    from mapentity.views.generic import MapEntityList
-    from mapentity.views.generic import MapEntityLayer
-    from mapentity.views.generic import MapEntityJsonList
-    from mapentity.views.generic import MapEntityDetail
-    from mapentity.views.generic import MapEntityFormat
+    from django.shortcuts import redirect
+    from mapentity.views.generic import (
+        MapEntityList, MapEntityLayer, MapEntityJsonList, MapEntityDetail,
+        MapEntityFormat, MapEntityCreate, MapEntityUpdate, MapEntityDocument,
+        MapEntityDelete)
     from .models import Museum
     from .filters import MuseumFilter
+    from .forms import MuseumForm
+
+
+    def home(request):
+        return redirect('museum_list')
 
 
     class MuseumList(MapEntityList):
-
         model = Museum
         filterform = MuseumFilter
-        columns = ['id', 'name', 'atmosphere']
+        columns = ['id', 'name']
+
+        def can_add(self):
+            return True
+
+        def can_export(self):
+            return True
 
 
     class MuseumLayer(MapEntityLayer):
-
         model = Museum
 
 
@@ -174,12 +202,32 @@ Create a set of class-based views referring to your model and your filter::
 
 
     class MuseumDetail(MapEntityDetail):
-
         model = Museum
+
+        def can_edit(self):
+            return True
 
 
     class MuseumFormat(MapEntityFormat):
+        filterform = MuseumFilter
+        model = Museum
 
+
+    class MuseumCreate(MapEntityCreate):
+        model = Museum
+        form_class = MuseumForm
+
+
+    class MuseumUpdate(MapEntityUpdate):
+        model = Museum
+        form_class = MuseumForm
+
+
+    class MuseumDocument(MapEntityDocument):
+        model = Museum
+
+
+    class MuseumDelete(MapEntityDelete):
         model = Museum
 
 
@@ -219,11 +267,14 @@ Then glue everything together in your project's ``urls.py``::
 
     urlpatterns = patterns(
         '',
+        url(r'^$', 'main.views.home', name='home'),
+        url(r'^login/$',  'django.contrib.auth.views.login', name='login'),
+        url(r'^logout/$', 'django.contrib.auth.views.logout', name='logout',),
         url(r'', include('mapentity.urls', namespace='mapentity',
-                         app_name='mapentity')),
+                        app_name='mapentity')),
         url(r'^paperclip/', include('paperclip.urls')),
         url(r'', include('main.urls', namespace='main',
-                         app_name='main')),
+                        app_name='main')),
         url(r'^admin/', include(admin.site.urls)),
     )
 
@@ -233,13 +284,32 @@ Template
 
 Create a couple of templates inside  ``main/templates/main``.
 
-``museum_list.html`` should just contain::
+``museum_list.html`` should be just::
 
     {% extends "mapentity/entity_list.html" %}
 
-``museum_detail`` should be just::
+``museum_detail.html`` should contain::
 
     {% extends "mapentity/entity_detail.html" %}
+    {% load i18n field_verbose_name %}
+
+    {% block detailspanel %}
+        {{ block.super }}
+        <table class="table-striped table-bordered table">
+            <tr>
+                <th>{{ object|verbose:"name" }}</th>
+                <td>{{ object.name }}</td>
+            </tr>
+        </table>
+    {% endblock detailspanel %}
+
+``museum_form.html`` should be just::
+
+    {% extends "mapentity/entity_form.html" %}
+
+``museum_confirm_delete.html`` should be just::
+
+    {% extends "mapentity/entity_confirm_delete.html" %}
 
 
 Initialize the database
