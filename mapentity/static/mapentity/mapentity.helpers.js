@@ -1,7 +1,11 @@
 // Toggable console.debug() function
 console.debug = function () {
-    if (window.SETTING && window.SETTING.debug)
-        console.log(arguments);
+    if (window.SETTINGS && window.SETTINGS.debug) {
+        if (arguments.length > 1)
+            console.log(arguments);
+        else
+            console.log(arguments[0]);
+    }
 };
 
 if (!Function.prototype.bind) {
