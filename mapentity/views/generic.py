@@ -126,10 +126,8 @@ class MapEntityList(ModelMetaMixin, ListView):
         context = super(MapEntityList, self).get_context_data(**kwargs)
         context['can_add'] = self.can_add()
         context['can_export'] = self.can_export()
-        context['datatables_ajax_url'] = self.model.get_jsonlist_url()
         context['filterform'] = self._filterform
         context['columns'] = self.columns
-        context['generic_detail_url'] = self.model.get_generic_detail_url()
         return context
 
 

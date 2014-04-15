@@ -34,4 +34,18 @@ $(document).ready(function (e) {
         function() { $(this).children(".autohide").show(); },
         function() { $(this).children(".autohide").hide(); }
     );
+
+
+    // Views
+    var context = $('body').data();
+    console.debug('View ', context.modelname, context.view);
+    $(window).trigger('entity:view:' + context.view, [context]);
+
+    // Maps
+    $(window).on('map:init', function (e) {
+        var data = e.originalEvent.detail;
+        $.extend(data, context);
+        $(window).trigger('entity:map', [data]);
+        $(window).trigger('entity:map:' + context.view, [data]);
+    });
 });

@@ -54,7 +54,7 @@
 {% endblock extrahead %}
 </head>
 <body data-view="{{ view }}"
-      data-model="{{ appname }}"
+      data-appname="{{ appname }}"
       data-modelname="{{ modelname }}"
       data-objectsname="{{ objectsname }}">
 
@@ -177,6 +177,8 @@
 
         {% leaflet_js plugins="ALL" %}
 
+        <script type="text/javascript" src="{% static "mapentity/mapentity.helpers.js" %}"></script>
+        <script type="text/javascript" src="{% static "mapentity/mapentity.views.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/mapentity.history.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/mapentity.map.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/mapentity.context.js" %}"></script>
@@ -192,6 +194,8 @@
             MapEntity.i18n = {
               'Search': "{% trans "Search" %}",
               'results': "{% trans "results" %}",
+              'Current criteria': "{% trans "Current criteria" %}",
+              'No filter': "{% trans "No filter" %}",
             };
         </script>
 
