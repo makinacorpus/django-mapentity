@@ -2,7 +2,9 @@ L.Control.Screenshot = L.Control.extend({
     includes: L.Mixin.Events,
     options: {
         position: 'topleft',
-        title: 'Screenshot'
+    },
+    statics: {
+        TITLE:  'Screenshot'
     },
 
     initialize: function (url, getcontext) {
@@ -29,7 +31,7 @@ L.Control.Screenshot = L.Control.extend({
         this._container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-control leaflet-bar');
         var link = L.DomUtil.create('a', 'leaflet-control-zoom-out screenshot-control', this._container);
         link.href = '#';
-        link.title = this.options.title;
+        link.title = L.Control.Screenshot.TITLE;
 
         L.DomEvent
             .addListener(link, 'click', L.DomEvent.stopPropagation)

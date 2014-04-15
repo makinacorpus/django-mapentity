@@ -176,9 +176,16 @@
         {% endfor %}
 
         {% leaflet_js plugins="ALL" %}
+
+        <script type="text/javascript" src="{% static "mapentity/mapentity.history.js" %}"></script>
+        <script type="text/javascript" src="{% static "mapentity/mapentity.map.js" %}"></script>
+        <script type="text/javascript" src="{% static "mapentity/mapentity.context.js" %}"></script>
+        <script type="text/javascript" src="{% static "mapentity/mapentity.filter.js" %}"></script>
+
         <script type="text/javascript">
             L.Icon.Default.imagePath = '{% static "leaflet/images/" %}';
             L.Control.MeasureControl.TITLE = "{% trans "Measure distances" %}";
+            L.Control.Screenshot.TITLE = "{% trans "Save map as image" %}";
             L.Control.FileLayerLoad.LABEL = '<i class="icon-folder-open"></i>';
             L.GeometryField.unsavedText = "{% trans "Map geometry is unsaved" %}";
         </script>
@@ -194,13 +201,11 @@
         <script type="text/javascript" src="{% static "mapentity/leaflet-datatables.js" %}"></script>
         <script type="text/javascript" src="{% static "mapentity/leaflet.informationcontrol.js" %}"></script>
 
-        <script type="text/javascript" src="{% static "mapentity/mapentity.history.js" %}"></script>
-        <script type="text/javascript" src="{% static "mapentity/mapentity.map.js" %}"></script>
-        <script type="text/javascript" src="{% static "mapentity/mapentity.context.js" %}"></script>
-        <script type="text/javascript" src="{% static "mapentity/mapentity.filter.js" %}"></script>
+        <!-- Forms -->
+        <script src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
+        <script src="{% static "mapentity/jquery.formset-patched.js" %}"></script>
 
-        {% block extrajs %}
-        {% endblock extrajs %}
+        {% smart_include "extrabody" %}
 
     {% endcompress %}
 
