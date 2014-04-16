@@ -1,4 +1,5 @@
 import re
+import logging
 import inspect
 from collections import namedtuple, OrderedDict
 
@@ -7,7 +8,10 @@ from django.utils.importlib import import_module
 from django.views.generic.base import View
 from django.conf.urls import patterns
 
-__all__ = ['app_settings', 'registry']
+__all__ = ['app_settings', 'registry', 'logger']
+
+
+logger = logging.getLogger(__name__)
 
 
 API_SRID = 4326
