@@ -3,7 +3,6 @@ import logging
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
 from ..serializers import json_django_dumps
-from .. import models as mapentity_models
 
 
 logger = logging.getLogger(__name__)

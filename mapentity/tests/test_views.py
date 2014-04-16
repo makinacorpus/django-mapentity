@@ -88,8 +88,10 @@ class ListViewTest(BaseTest):
 
     def setUp(self):
         self.user = User.objects.create_user('aah', 'email@corp.com', 'booh')
+
         def user_perms(p):
             return {'tests.export_dummymodel': False}.get(p, True)
+
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
 
     def test_list_should_have_some_perms_in_context(self):

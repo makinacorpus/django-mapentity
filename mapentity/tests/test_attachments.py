@@ -17,8 +17,10 @@ User = get_user_model()
 class EntityAttachmentTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
+
         def user_perms(p):
             return {'tests.change_dummymodel': False}.get(p, True)
+
         self.user.is_anonymous = mock.MagicMock(return_value=False)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
         self.object = DummyModel.objects.create()
