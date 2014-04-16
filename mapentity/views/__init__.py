@@ -12,7 +12,7 @@ from .generic import (MapEntityLayer,
 from .mixins import (HttpJSONResponse,
                      JSONResponseMixin,
                      LastModifiedMixin,
-                     ModelMetaMixin)
+                     ModelViewMixin)
 from .base import (handler404,
                    handler500,
                    serve_secure_media,
@@ -37,7 +37,7 @@ __all__ = ['MapEntityLayer',
            'HttpJSONResponse',
            'JSONResponseMixin',
            'LastModifiedMixin',
-           'ModelMetaMixin',
+           'ModelViewMixin',
 
            'handler404',
            'handler500',

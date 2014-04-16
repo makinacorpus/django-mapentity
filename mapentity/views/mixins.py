@@ -53,7 +53,7 @@ class LastModifiedMixin(object):
         return _dispatch(*args, **kwargs)
 
 
-class ModelMetaMixin(object):
+class ModelViewMixin(object):
     """
     Add model meta information in context data
     """
@@ -86,7 +86,7 @@ class ModelMetaMixin(object):
         return None
 
     def get_context_data(self, **kwargs):
-        context = super(ModelMetaMixin, self).get_context_data(**kwargs)
+        context = super(ModelViewMixin, self).get_context_data(**kwargs)
         context['view'] = self.get_entity_kind()
         context['title'] = self.get_title()
 

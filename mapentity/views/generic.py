@@ -25,13 +25,13 @@ from ..helpers import convertit_url, download_to_stream
 from ..decorators import save_history, view_permission_required
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from .base import history_delete
-from .mixins import ModelMetaMixin, JSONResponseMixin
+from .mixins import ModelViewMixin, JSONResponseMixin
 
 
 logger = logging.getLogger(__name__)
 
 
-class MapEntityLayer(ModelMetaMixin, GeoJSONLayerView):
+class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
     """
     Take a class attribute `model` with a `latest_updated` method used for caching.
     """
@@ -83,7 +83,7 @@ class MapEntityLayer(ModelMetaMixin, GeoJSONLayerView):
         return response
 
 
-class MapEntityList(ModelMetaMixin, ListView):
+class MapEntityList(ModelViewMixin, ListView):
     """
 
     A generic view list web page.
@@ -213,7 +213,7 @@ class MapEntityFormat(MapEntityList):
         return response
 
 
-class MapEntityMapImage(ModelMetaMixin, DetailView):
+class MapEntityMapImage(ModelViewMixin, DetailView):
     """
     A static file view, that serves the up-to-date map image (detail screenshot)
     On error, returns 404 status.
@@ -315,7 +315,7 @@ class DocumentConvert(DetailView):
 """
 
 
-class MapEntityCreate(ModelMetaMixin, CreateView):
+class MapEntityCreate(ModelViewMixin, CreateView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_CREATE
@@ -350,7 +350,7 @@ class MapEntityCreate(ModelMetaMixin, CreateView):
         return context
 
 
-class MapEntityDetail(ModelMetaMixin, DetailView):
+class MapEntityDetail(ModelViewMixin, DetailView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DETAIL
@@ -376,7 +376,7 @@ class MapEntityDetail(ModelMetaMixin, DetailView):
         return context
 
 
-class MapEntityUpdate(ModelMetaMixin, UpdateView):
+class MapEntityUpdate(ModelViewMixin, UpdateView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_UPDATE
@@ -409,7 +409,7 @@ class MapEntityUpdate(ModelMetaMixin, UpdateView):
         return self.get_object().get_detail_url()
 
 
-class MapEntityDelete(ModelMetaMixin, DeleteView):
+class MapEntityDelete(ModelViewMixin, DeleteView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DELETE
