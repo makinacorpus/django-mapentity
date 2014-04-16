@@ -362,6 +362,7 @@ class MapEntityDetail(ModelMetaMixin, DetailView):
         context['can_edit'] = self.can_edit()
         context['can_add_attachment'] = self.can_edit()
         context['can_delete_attachment'] = self.can_edit()
+        context['empty_map_message'] = _("No map available for this object.")
         return context
 
 

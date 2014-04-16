@@ -91,9 +91,92 @@ MapEntity.showLineLabel = function (layer, options) {
 };
 
 
-$(window).on('entity:map', function () {
+$(window).on('entity:map', function (e, data) {
+    var map = data.map,
+        $container = $(map._container),
+        readonly = $container.data('readonly');
 
+    if (readonly) {
+        // Set map readonly
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
+        map.boxZoom.disable();
+    }
+
+    map.attributionControl.setPrefix('');
+
+    var mapBounds = $container.data('mapextent');
+    if (mapBounds) {
+        map.fitBounds(mapBounds);
+        map.resetviewControl.getBounds = function () { return mapBounds; };
+    }
+
+    var $singleObject = $container.find('.geojsonfeature');
+    if ($singleObject.length > 0) {
+        showSingleObject(JSON.parse($singleObject.text()));
+    }
+
+    if (data.view == 'detail') {
+        // Give room for the map !
+        map.removeControl(map.zoomControl);
+
+        // Restore map context, only for screenshoting purpose
+        var context = getURLParameter('context');
+        if (context && typeof context == 'object') {
+            delete context.mapview;    // keep objects bounds
+            delete context.maplayers;  // keep default layers
+            MapEntity.Context.restoreFullContext(map, context);
+        }
+
+        // Save map context : will be restored on next form (e.g. interventions, ref story #182)
+        $(window).unload(function () {
+            MapEntity.Context.saveFullContext(map, {prefix: 'detail'});
+        });
+
+        $(window).trigger('detailmap:ready', {map:map});
+    }
+
+
+    function showSingleObject(geojson) {
+        var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
+
+        // Add layers
+        var objectLayer = new L.ObjectsLayer(geojson, {
+            style: DETAIL_STYLE,
+            indexing: false
+        });
+        map.addLayer(objectLayer);
+        map.on('layeradd', function (e) {
+            if (objectLayer._map) objectLayer.bringToFront();
+        });
+
+        // Show start and end
+        objectLayer.eachLayer(function (layer) {
+            if (layer instanceof L.MultiPolyline)
+                return;
+            if (typeof layer.getLatLngs != 'function')  // points
+                return;
+
+            L.marker(layer.getLatLngs()[0],
+                     {clickable: false,
+                      icon: new L.Icon.Default({iconUrl: window.SETTINGS.urls.static + "mapentity/images/marker-source.png"})
+                     }).addTo(map);
+            L.marker(layer.getLatLngs().slice(-1)[0],
+                     {clickable: false,
+                      icon: new L.Icon.Default({iconUrl: window.SETTINGS.urls.static + "mapentity/images/marker-target.png"})
+                     }).addTo(map);
+
+            // Also add line orientation
+            layer.setText('>     ', {repeat:true,
+                                     offset: DETAIL_STYLE.weight,
+                                     attributes: {'fill': DETAIL_STYLE.arrowColor, 'font-size': DETAIL_STYLE.arrowSize}});
+        });
+    }
 });
+
+
 
 $(window).on('entity:map:list', function (e, data) {
     var map = data.map,

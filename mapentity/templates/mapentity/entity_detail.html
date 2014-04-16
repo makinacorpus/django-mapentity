@@ -67,9 +67,9 @@
     <div class="map-panel detail span5">
         {% block mappanel %}
         {% if object.get_geom %}
-            {% include "mapentity/mapgeometry_fragment.html" %}
+            {% include "mapentity/mapgeometry_fragment.html" with mapname="detailmap" %}
         {% else %}
-            <p class="nomap">{% trans "No map available for this object." %}</p>
+            <p class="nomap">{{ empty_map_message }}</p>
         {% endif %}
         {% endblock mappanel %}
     </div><!-- span5 -->
