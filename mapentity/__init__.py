@@ -121,6 +121,7 @@ class Registry(object):
     def __init__(self):
         self.registry = OrderedDict()
         self.apps = {}
+        self.content_type_ids = []
 
     def register(self, model, name='', menu=True):
         """ Register model and returns URL patterns
@@ -165,6 +166,7 @@ class Registry(object):
         self.registry[model] = mapentity
         post_register.send(sender=self, app_label=app_label, model=model)
 
+        self.content_type_ids.append(model.get_content_type_id())
         # Returns Django URL patterns
         return patterns(name, *view_classes_to_url(*picked))
 

@@ -2,8 +2,10 @@ from django.conf import settings
 from django.conf.urls import patterns, url
 
 from . import app_settings
+from . import registry
 from .views import (map_screenshot, convert, history_delete,
                     serve_secure_media, JSSettings)
+from .models import LogEntry
 
 
 _MEDIA_URL = settings.MEDIA_URL.replace(app_settings['ROOT_URL'], '')
@@ -23,3 +25,5 @@ urlpatterns = patterns(
     # Will be overriden, most probably.
     url(r'^api/settings.json$', JSSettings.as_view(), name='js_settings'),
 )
+
+urlpatterns += registry.register(LogEntry, menu=False)

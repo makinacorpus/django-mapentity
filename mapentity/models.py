@@ -5,12 +5,11 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError
 from django.contrib import auth
-from django.contrib.admin.models import LogEntry, ADDITION
+from django.contrib.admin.models import LogEntry as BaseLogEntry
+from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.contrib.contenttypes.models import ContentType
-
-
-
-
+from django.utils.formats import localize
+from django.utils.translation import ugettext_lazy as _
 from paperclip.models import Attachment
 
 from . import app_settings
@@ -239,3 +238,29 @@ class MapEntityMixin(object):
     @property
     def last_author(self):
         return self.authors.order_by('logentry__pk').last()
+
+
+class LogEntry(MapEntityMixin, BaseLogEntry):
+    geom = None
+    object_verbose_name = _("object")
+
+    class Meta:
+        proxy = True
+
+    @property
+    def action_flag_display(self):
+        return {
+            ADDITION: _("Added"),
+            CHANGE: _("Changed"),
+            DELETION: _("Deleted"),
+        }[self.action_flag]
+
+    @property
+    def action_time_display(self):
+        return localize(self.action_time)
+
+    @property
+    def object_display(self):
+        obj = self.get_edited_object()
+        return u'<a data-pk="%s" href="%s" >%s %s</a>' % (
+            obj.pk, obj.get_detail_url(), obj._meta.verbose_name.title(), unicode(obj))

@@ -86,14 +86,9 @@ class PythonPolygonFilter(PolygonFilter):
         return qs.filter(pk__in=filtered)
 
 
-class MapEntityFilterSet(FilterSet):
-    bbox = PolygonFilter()
-
-    class Meta:
-        fields = ['bbox']
-
+class BaseMapEntityFilterSet(FilterSet):
     def __init__(self, *args, **kwargs):
-        super(MapEntityFilterSet, self).__init__(*args, **kwargs)
+        super(BaseMapEntityFilterSet, self).__init__(*args, **kwargs)
         self.__bypass_labels()
 
     def __bypass_labels(self):
@@ -123,3 +118,10 @@ class MapEntityFilterSet(FilterSet):
         widget.attrs['data-placeholder'] = field.label
         widget.attrs['title'] = field.label
         widget.attrs['data-label'] = field.label
+
+
+class MapEntityFilterSet(BaseMapEntityFilterSet):
+    bbox = PolygonFilter()
+
+    class Meta:
+        fields = ['bbox']
