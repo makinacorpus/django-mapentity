@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
 from django.core.urlresolvers import reverse
-from django.views.defaults import page_not_found
+from django.views.defaults import page_not_found, permission_denied
 from django.views.generic.base import TemplateView
 from django.views import static
 from django.views.decorators.http import require_http_methods
@@ -26,6 +26,10 @@ from .mixins import JSONResponseMixin
 
 
 logger = logging.getLogger(__name__)
+
+
+def handler403(request, template_name='mapentity/403.html'):
+    return permission_denied(request, template_name)
 
 
 def handler404(request, template_name='mapentity/404.html'):

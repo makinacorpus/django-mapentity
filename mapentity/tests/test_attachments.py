@@ -1,3 +1,4 @@
+import mock
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -16,6 +17,7 @@ User = get_user_model()
 class EntityAttachmentTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
+        self.user.has_perm = mock.MagicMock(return_value=True)
         self.object = DummyModel.objects.create()
 
     def createRequest(self):

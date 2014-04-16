@@ -58,16 +58,24 @@ class ModelMetaMixin(object):
     Add model meta information in context data
     """
 
-    @classmethod
-    def get_view_perm(cls):
+    def get_view_perm(self):
         operations = {
             mapentity_models.ENTITY_CREATE: 'add',
             mapentity_models.ENTITY_UPDATE: 'change',
-            mapentity_models.ENTITY_DELETE: 'delete'
+            mapentity_models.ENTITY_DELETE: 'delete',
+
+            mapentity_models.ENTITY_DETAIL: 'read',
+            mapentity_models.ENTITY_LAYER: 'read',
+            mapentity_models.ENTITY_LIST: 'read',
+            mapentity_models.ENTITY_JSON_LIST: 'read',
+
+            mapentity_models.ENTITY_FORMAT_LIST: 'export',
+            mapentity_models.ENTITY_MAPIMAGE: 'export',
+            mapentity_models.ENTITY_DOCUMENT: 'export',
         }
-        operation = operations.get(cls.get_entity_kind(),
-                                   cls.get_entity_kind())
-        model = cls.model or cls.queryset.model
+        operation = operations.get(self.get_entity_kind(),
+                                   self.get_entity_kind())
+        model = self.model or self.queryset.model
         opts = model._meta
         return '%s.%s_%s' % (opts.app_label.lower(),
                              operation,

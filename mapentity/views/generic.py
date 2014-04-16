@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
 from django.utils.translation import ugettext_lazy as _
-from django.utils.decorators import method_decorator
+
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -14,8 +14,6 @@ from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-
 from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
@@ -24,7 +22,7 @@ from .. import API_SRID
 from .. import app_settings
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream
-from ..decorators import save_history, user_has_view_perm
+from ..decorators import save_history, view_permission_required
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from .base import history_delete
 from .mixins import ModelMetaMixin, JSONResponseMixin
@@ -33,7 +31,7 @@ from .mixins import ModelMetaMixin, JSONResponseMixin
 logger = logging.getLogger(__name__)
 
 
-class MapEntityLayer(GeoJSONLayerView):
+class MapEntityLayer(ModelMetaMixin, GeoJSONLayerView):
     """
     Take a class attribute `model` with a `latest_updated` method used for caching.
     """
@@ -57,6 +55,7 @@ class MapEntityLayer(GeoJSONLayerView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_LAYER
 
+    @view_permission_required()
     def dispatch(self, *args, **kwargs):
         # Use lambda to bound self and to avoid passing request, *args, **kwargs as the decorator would do
         # TODO: we should be storing cache_latest and cache_latest_dispatch for reuse
@@ -117,6 +116,7 @@ class MapEntityList(ModelMetaMixin, ListView):
                                            queryset=queryset)
         return self._filterform.qs
 
+    @view_permission_required()
     def dispatch(self, request, *args, **kwargs):
         # Save last list visited in session
         request.session['last_list'] = request.path
@@ -140,8 +140,9 @@ class MapEntityJsonList(JSONResponseMixin, MapEntityList):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_JSON_LIST
 
+    @view_permission_required()
     def dispatch(self, *args, **kwargs):
-        return super(ListView, self).dispatch(*args, **kwargs)  # Bypass login_required
+        return super(ListView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """
@@ -159,8 +160,9 @@ class MapEntityFormat(MapEntityList):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_FORMAT_LIST
 
+    @view_permission_required()
     def dispatch(self, *args, **kwargs):
-        return super(ListView, self).dispatch(*args, **kwargs)  # Bypass session save_history
+        return super(ListView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         return {}
@@ -220,6 +222,10 @@ class MapEntityMapImage(ModelMetaMixin, DetailView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_MAPIMAGE
 
+    @view_permission_required()
+    def dispatch(self, *args, **kwargs):
+        return super(MapEntityMapImage, self).dispatch(*args, **kwargs)
+
     def render_to_response(self, context, **response_kwargs):
         try:
             obj = self.get_object()
@@ -264,6 +270,10 @@ class MapEntityDocument(DetailView):
         if not found:
             raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), ''))
         self.template_name = found
+
+    @view_permission_required()
+    def dispatch(self, *args, **kwargs):
+        return super(MapEntityDocument, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         rooturl = self.request.build_absolute_uri('/')
@@ -318,8 +328,7 @@ class MapEntityCreate(ModelMetaMixin, CreateView):
         # Whole "add" phrase translatable, but not catched  by makemessages
         return _(u"Add a new %s" % name.lower())
 
-    @method_decorator(login_required)
-    @user_has_view_perm()
+    @view_permission_required()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityCreate, self).dispatch(*args, **kwargs)
 
@@ -349,7 +358,7 @@ class MapEntityDetail(ModelMetaMixin, DetailView):
     def get_title(self):
         return unicode(self.get_object())
 
-    @method_decorator(login_required)
+    @view_permission_required()
     @save_history()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityDetail, self).dispatch(*args, **kwargs)
@@ -375,8 +384,7 @@ class MapEntityUpdate(ModelMetaMixin, UpdateView):
     def get_title(self):
         return _("Edit %s") % self.get_object()
 
-    @method_decorator(login_required)
-    @user_has_view_perm()
+    @view_permission_required()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityUpdate, self).dispatch(*args, **kwargs)
 
@@ -406,8 +414,7 @@ class MapEntityDelete(ModelMetaMixin, DeleteView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DELETE
 
-    @method_decorator(login_required)
-    @user_has_view_perm()
+    @view_permission_required()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityDelete, self).dispatch(*args, **kwargs)
 

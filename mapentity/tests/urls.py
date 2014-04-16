@@ -5,6 +5,8 @@ from django.views.generic import RedirectView
 
 admin.autodiscover()
 
+handler403 = 'mapentity.views.handler403'
+
 urlpatterns = patterns(
     '',
     url(r'', include('mapentity.urls', namespace='mapentity',

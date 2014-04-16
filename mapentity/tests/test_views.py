@@ -1,6 +1,7 @@
 import os
 import shutil
 
+import mock
 from django.conf import settings
 from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
@@ -13,8 +14,16 @@ from .models import DummyModel
 User = get_user_model()
 
 
+class BaseTest(TestCase):
+    def login(self):
+        user = User.objects.create_user('aah', 'email@corp.com', 'booh')
+        success = self.client.login(username=user.username, password='booh')
+        self.assertTrue(success)
+        return user
+
+
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media', DEBUG=True)
-class MediaTest(TestCase):
+class MediaTest(BaseTest):
 
     def setUp(self):
         if os.path.exists(settings.MEDIA_ROOT):
@@ -26,11 +35,6 @@ class MediaTest(TestCase):
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
-
-    def login(self):
-        user = User.objects.create_user('aah', 'email@corp.com', 'booh')
-        success = self.client.login(username=user.username, password='booh')
-        self.assertTrue(success)
 
     def download(self, url):
         return self.client.get(url, REMOTE_ADDR="6.6.6.6")
@@ -74,10 +78,20 @@ class DummyFilterForm(object):
         self.qs = queryset
 
 
-class ListViewTest(TestCase):
+class DummyList(MapEntityList):
+    model = DummyModel
+    filterform = DummyFilterForm
+    template_name = 'mapentity/entity_list.html'
+
+
+class ListViewTest(BaseTest):
+
+    def setUp(self):
+        self.user = User.objects.create_user('aah', 'email@corp.com', 'booh')
+        self.user.has_perm = mock.MagicMock(return_value=True)
 
     def test_list_should_have_some_perms_in_context(self):
-        view = MapEntityList(model=DummyModel, filterform=DummyFilterForm)
+        view = DummyList()
         view.object_list = []
         context = view.get_context_data()
         self.assertEqual(context['can_add'], view.can_add())
@@ -85,12 +99,17 @@ class ListViewTest(TestCase):
 
     def test_list_should_render_some_perms_in_template(self):
         request = RequestFactory().get('/fake-path')
+        request.user = self.user
         request.session = {}
-        view = MapEntityList.as_view(model=DummyModel,
-                                     filterform=DummyFilterForm,
-                                     template_name="mapentity/entity_list.html")
+        view = DummyList.as_view()
         response = view(request)
         html = unicode(response.render())
 
         self.assertTrue('btn-group disabled' in html)
         self.assertTrue('Add</span>' in html)
+
+
+class ViewPermissionsTest(TestCase):
+    def test_views_name_depend_on_model(self):
+        view = DummyList()
+        self.assertEqual(view.get_view_perm(), 'tests.read_dummymodel')

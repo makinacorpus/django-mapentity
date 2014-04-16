@@ -29,6 +29,7 @@ app_settings = dict({
     'MAP_CAPTURE_MAX_RATIO': 1.25,
     'GEOM_FIELD_NAME': 'geom',
     'MAP_BACKGROUND_FOGGED': False,
+    'ANONYMOUS_VIEWS_PERMS': tuple(),
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 
