@@ -126,10 +126,8 @@ class MapEntityList(ModelMetaMixin, ListView):
         context = super(MapEntityList, self).get_context_data(**kwargs)
         context['can_add'] = self.can_add()
         context['can_export'] = self.can_export()
-        context['datatables_ajax_url'] = self.model.get_jsonlist_url()
         context['filterform'] = self._filterform
         context['columns'] = self.columns
-        context['generic_detail_url'] = self.model.get_generic_detail_url()
         return context
 
 
@@ -364,6 +362,7 @@ class MapEntityDetail(ModelMetaMixin, DetailView):
         context['can_edit'] = self.can_edit()
         context['can_add_attachment'] = self.can_edit()
         context['can_delete_attachment'] = self.can_edit()
+        context['empty_map_message'] = _("No map available for this object.")
         return context
 
 
@@ -400,7 +399,7 @@ class MapEntityUpdate(ModelMetaMixin, UpdateView):
         return self.get_object().get_detail_url()
 
 
-class MapEntityDelete(DeleteView):
+class MapEntityDelete(ModelMetaMixin, DeleteView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DELETE

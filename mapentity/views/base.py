@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
+from django.core.urlresolvers import reverse
 from django.views.defaults import page_not_found
 from django.views.generic.base import TemplateView
 from django.views import static
@@ -20,7 +21,7 @@ from django.template import RequestContext, Context, loader
 
 from .. import app_settings, _MAP_STYLES
 from ..helpers import convertit_url, capture_image, download_to_stream
-from ..urlizor import url_layer
+from .. import urlizor
 from .mixins import JSONResponseMixin
 
 
@@ -96,7 +97,11 @@ class JSSettings(JSONResponseMixin, TemplateView):
         class ModelName:
             pass
 
-        dictsettings['urls']['layer'] = root_url + url_layer(ModelName)[1:-1]
+        dictsettings['urls']['static'] = settings.STATIC_URL
+        dictsettings['urls']['layer'] = root_url + urlizor.url_layer(ModelName)[1:-1]
+        dictsettings['urls']['detail'] = root_url + 'modelname/0/'
+        dictsettings['urls']['format_list'] = root_url + urlizor.url_format_list(ModelName)[1:-1]
+        dictsettings['urls']['screenshot'] = reverse("mapentity:map_screenshot")
 
         # Useful for JS calendars
         dictsettings['date_format'] = settings.DATE_INPUT_FORMATS[0].replace('%Y', 'yyyy').replace('%m', 'mm').replace('%d', 'dd')

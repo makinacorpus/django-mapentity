@@ -2,7 +2,9 @@ L.Control.Screenshot = L.Control.extend({
     includes: L.Mixin.Events,
     options: {
         position: 'topleft',
-        title: 'Screenshot'
+    },
+    statics: {
+        TITLE:  'Screenshot'
     },
 
     initialize: function (url, getcontext) {
@@ -29,7 +31,7 @@ L.Control.Screenshot = L.Control.extend({
         this._container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-control leaflet-bar');
         var link = L.DomUtil.create('a', 'leaflet-control-zoom-out screenshot-control', this._container);
         link.href = '#';
-        link.title = this.options.title;
+        link.title = L.Control.Screenshot.TITLE;
 
         L.DomEvent
             .addListener(link, 'click', L.DomEvent.stopPropagation)
@@ -87,3 +89,191 @@ MapEntity.showLineLabel = function (layer, options) {
         return L.latLng(line.getLatLngs()[mid]);
     }
 };
+
+
+$(window).on('entity:map', function (e, data) {
+    var map = data.map,
+        $container = $(map._container),
+        readonly = $container.data('readonly');
+
+    if (readonly) {
+        // Set map readonly
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
+        map.boxZoom.disable();
+    }
+
+    map.attributionControl.setPrefix('');
+
+    var mapBounds = $container.data('mapextent');
+    if (mapBounds) {
+        map.fitBounds(mapBounds);
+        map.resetviewControl.getBounds = function () { return mapBounds; };
+    }
+
+    var $singleObject = $container.find('.geojsonfeature');
+    if ($singleObject.length > 0) {
+        showSingleObject(JSON.parse($singleObject.text()));
+    }
+
+    if (data.view == 'detail') {
+        // Give room for the map !
+        map.removeControl(map.zoomControl);
+
+        // Restore map context, only for screenshoting purpose
+        var context = getURLParameter('context');
+        if (context && typeof context == 'object') {
+            delete context.mapview;    // keep objects bounds
+            delete context.maplayers;  // keep default layers
+            MapEntity.Context.restoreFullContext(map, context);
+        }
+
+        // Save map context : will be restored on next form (e.g. interventions, ref story #182)
+        $(window).unload(function () {
+            MapEntity.Context.saveFullContext(map, {prefix: 'detail'});
+        });
+
+        $(window).trigger('detailmap:ready', {map:map});
+    }
+
+
+    function showSingleObject(geojson) {
+        var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
+
+        // Add layers
+        var objectLayer = new L.ObjectsLayer(geojson, {
+            style: DETAIL_STYLE,
+            indexing: false
+        });
+        map.addLayer(objectLayer);
+        map.on('layeradd', function (e) {
+            if (objectLayer._map) objectLayer.bringToFront();
+        });
+
+        // Show start and end
+        objectLayer.eachLayer(function (layer) {
+            if (layer instanceof L.MultiPolyline)
+                return;
+            if (typeof layer.getLatLngs != 'function')  // points
+                return;
+
+            L.marker(layer.getLatLngs()[0],
+                     {clickable: false,
+                      icon: new L.Icon.Default({iconUrl: window.SETTINGS.urls.static + "mapentity/images/marker-source.png"})
+                     }).addTo(map);
+            L.marker(layer.getLatLngs().slice(-1)[0],
+                     {clickable: false,
+                      icon: new L.Icon.Default({iconUrl: window.SETTINGS.urls.static + "mapentity/images/marker-target.png"})
+                     }).addTo(map);
+
+            // Also add line orientation
+            layer.setText('>     ', {repeat:true,
+                                     offset: DETAIL_STYLE.weight,
+                                     attributes: {'fill': DETAIL_STYLE.arrowColor, 'font-size': DETAIL_STYLE.arrowSize}});
+        });
+    }
+});
+
+
+
+$(window).on('entity:map:list', function (e, data) {
+    var map = data.map,
+        bounds = L.latLngBounds(data.options.extent);
+
+    map.removeControl(map.attributionControl);
+    map.doubleClickZoom.disable();
+
+    map.addControl(new L.Control.Information());
+    map.addControl(new L.Control.ResetView(bounds));
+    map.addControl(new L.Control.MeasureControl());
+
+    /*
+     * Objects Layer
+     * .......................
+     */
+    function getUrl(properties, layer) {
+        return window.SETTINGS.urls.detail.replace(new RegExp('modelname', 'g'), data.modelname)
+                                          .replace('0', properties.pk);
+    }
+
+    var objectsLayer = new L.ObjectsLayer(null, {
+        objectUrl: getUrl,
+        style: window.SETTINGS.map.styles.others,
+        onEachFeature: function (geojson, layer) {
+            if (geojson.properties.name) layer.bindLabel(geojson.properties.name);
+        }
+    });
+    objectsLayer.on('highlight select', function (e) {
+        if (e.layer._map !== null) e.layer.bringToFront();
+    });
+    map.addLayer(objectsLayer);
+
+    if (map.layerscontrol === undefined) {
+        map.layerscontrol = L.control.layers().addTo(map);
+    }
+    map.layerscontrol.addOverlay(objectsLayer, data.objectsname);
+    objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname), true);
+
+
+    var dt = MapEntity.mainDatatable;
+
+    /*
+     * Assemble components
+     * .......................
+     */
+    var mapsync = new L.MapListSync(dt,
+                                    map,
+                                    objectsLayer, {
+                                        filter: {
+                                            form: $('#mainfilter'),
+                                            submitbutton: $('#filter'),
+                                            resetbutton: $('#reset'),
+                                            bboxfield: $('#id_bbox'),
+                                        }
+                                    });
+    mapsync.on('reloaded', function (data) {
+        // Show and save number of results
+        MapEntity.history.saveListInfo({model: data.modelname,
+                                        nb: data.nbrecords});
+        // Show layer info
+        objectsLayer.fire('info', {info : (data.nbrecords + ' ' + tr("results"))});
+    });
+
+    // Main filter
+    var t = new MapEntity.TogglableFilter();
+    mapsync.on('reloaded', function (data) {
+        t.setsubmit();
+    });
+
+    // Map screenshot button
+    var screenshot = new L.Control.Screenshot(window.SETTINGS.urls.screenshot, function () {
+        return MapEntity.Context.serializeFullContext(map, '#mainfilter', dt);
+    });
+    map.addControl(screenshot);
+
+    // Restore map view, layers and filter from any available context
+    // Get context from URL parameter, if any
+    var mapViewContext = getURLParameter('context');
+    MapEntity.Context.restoreFullContext(map,
+        // From URL param
+        mapViewContext,
+        // Parameters
+        {
+            filter: '#mainfilter',
+            datatable: dt,
+            objectsname: data.objectsname,
+            // We can have several contexts in the application (mainly 'detail' and 'list')
+            // Using prefixes is a way to manage this.
+            prefix: 'list',
+        }
+    );
+    $(window).unload(function () {
+        MapEntity.Context.saveFullContext(map, {
+            filter: '#mainfilter',
+            datatable: dt,
+            prefix: 'list',
+        });
+    });
+});
