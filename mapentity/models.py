@@ -28,6 +28,20 @@ ENTITY_KINDS = (
     ENTITY_UPDATE, ENTITY_DELETE
 )
 
+ENTITY_PERMISSION_CREATE = 'add'
+ENTITY_PERMISSION_READ = 'read'
+ENTITY_PERMISSION_UPDATE = 'change'
+ENTITY_PERMISSION_DELETE = 'delete'
+ENTITY_PERMISSION_EXPORT = 'export'
+
+ENTITY_PERMISSIONS = (
+    ENTITY_PERMISSION_CREATE,
+    ENTITY_PERMISSION_READ,
+    ENTITY_PERMISSION_UPDATE,
+    ENTITY_PERMISSION_DELETE,
+    ENTITY_PERMISSION_EXPORT
+)
+
 
 class MapEntityMixin(object):
 
@@ -36,6 +50,14 @@ class MapEntityMixin(object):
         if hasattr(cls, name):
             return  # ignore
         setattr(cls, name, property(func))
+
+    @classmethod
+    def get_permission_name(cls, perm):
+        assert perm in ENTITY_PERMISSIONS
+        opts = cls._meta
+        return '%s.%s_%s' % (opts.app_label.lower(),
+                             perm,
+                             opts.object_name.lower())
 
     @classmethod
     def latest_updated(cls):
