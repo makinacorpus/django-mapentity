@@ -12,7 +12,7 @@ class ViewPermissionRequiredTestCase(TestCase):
     def setUp(self):
         # Fake request and its positional and keywords arguments.
         self.request = mock.MagicMock()
-        self.request.user.is_authenticated = mock.MagicMock(return_value=True)
+        self.request.user.is_anonymous = mock.MagicMock(return_value=False)
         self.request_args = ['fake_arg']
         self.request_kwargs = {'fake': 'kwarg'}
         self.mocked_view = mock.MagicMock()
@@ -27,7 +27,7 @@ class ViewPermissionRequiredTestCase(TestCase):
                               **self.request_kwargs)
 
     def test_anonymous_are_redirected_to_login(self):
-        self.request.user.is_authenticated.return_value = False
+        self.request.user.is_anonymous.return_value = True
         self.request.user.has_perm.return_value = False
         response = self.run_decorated_view()
         self.assertEqual(response.status_code, 302)

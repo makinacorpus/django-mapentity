@@ -5,16 +5,15 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
 
 from . import app_settings
+from .helpers import user_has_perm
 
 
 def view_permission_required(login_url=None, raise_exception=True):
     def check_perms(user, perm):
-        # First check if the user has the permission (even anon users)
-        if user.has_perm(perm):
+        # Check both authenticated and anonymous
+        if user_has_perm(user, perm):
             return True
-        if user.is_anonymous():
-            return perm in app_settings['ANONYMOUS_VIEWS_PERMS']
-        if raise_exception:
+        if not user.is_anonymous() and raise_exception:
             raise PermissionDenied
         # As the last resort, show the login form
         return False
@@ -22,9 +21,9 @@ def view_permission_required(login_url=None, raise_exception=True):
     def decorator(view_func):
         def _wrapped_view(self, request, *args, **kwargs):
             perm = self.get_view_perm()
-            user_has_perm = user_passes_test(lambda u: check_perms(u, perm),
-                                             login_url=login_url)
-            cbv_user_has_perm = method_decorator(user_has_perm)
+            has_perm_decorator = user_passes_test(lambda u: check_perms(u, perm),
+                                                  login_url=login_url)
+            cbv_user_has_perm = method_decorator(has_perm_decorator)
 
             @cbv_user_has_perm
             def decorated(self, request, *args, **kwargs):
