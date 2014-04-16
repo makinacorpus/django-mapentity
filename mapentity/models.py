@@ -3,6 +3,7 @@ import os
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import FieldError
+from django.contrib.auth import get_permission_codename
 
 from paperclip.models import Attachment
 
@@ -52,7 +53,7 @@ class MapEntityMixin(object):
         setattr(cls, name, property(func))
 
     @classmethod
-    def get_permission_name(cls, entity_kind):
+    def get_permission_codename(cls, entity_kind):
         operations = {
             ENTITY_CREATE: ENTITY_PERMISSION_CREATE,
             ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
@@ -70,9 +71,8 @@ class MapEntityMixin(object):
         perm = operations.get(entity_kind, entity_kind)
         assert perm in ENTITY_PERMISSIONS
         opts = cls._meta
-        return '%s.%s_%s' % (opts.app_label.lower(),
-                             perm,
-                             opts.object_name.lower())
+        return '%s.%s' % (opts.app_label.lower(),
+                          get_permission_codename(perm, opts))
 
     @classmethod
     def latest_updated(cls):

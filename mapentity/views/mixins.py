@@ -60,7 +60,7 @@ class ModelViewMixin(object):
 
     def get_view_perm(self):
         model = self.model or self.queryset.model
-        return model.get_permission_name(self.get_entity_kind())
+        return model.get_permission_codename(self.get_entity_kind())
 
     @classmethod
     def get_entity_kind(self):

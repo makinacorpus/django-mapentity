@@ -121,11 +121,11 @@ class MapEntityList(ModelViewMixin, ListView):
         context['filterform'] = self._filterform
         context['columns'] = self.columns
 
-        perm_create = self.model.get_permission_name(mapentity_models.ENTITY_CREATE)
+        perm_create = self.model.get_permission_codename(mapentity_models.ENTITY_CREATE)
         can_add = user_has_perm(self.request.user, perm_create)
         context['can_add'] = can_add
 
-        perm_export = self.model.get_permission_name(mapentity_models.ENTITY_FORMAT_LIST)
+        perm_export = self.model.get_permission_codename(mapentity_models.ENTITY_FORMAT_LIST)
         can_export = user_has_perm(self.request.user, perm_export)
         context['can_export'] = can_export
 
@@ -369,7 +369,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         context['activetab'] = self.request.GET.get('tab')
         context['empty_map_message'] = _("No map available for this object.")
 
-        perm_update = self.model.get_permission_name(mapentity_models.ENTITY_UPDATE)
+        perm_update = self.model.get_permission_codename(mapentity_models.ENTITY_UPDATE)
         can_edit = user_has_perm(self.request.user, perm_update)
         context['can_edit'] = can_edit
         context['can_add_attachment'] = can_edit
@@ -394,7 +394,7 @@ class MapEntityUpdate(ModelViewMixin, UpdateView):
         kwargs = super(MapEntityUpdate, self).get_form_kwargs()
         kwargs['user'] = self.request.user
 
-        perm_delete = self.model.get_permission_name(mapentity_models.ENTITY_DELETE)
+        perm_delete = self.model.get_permission_codename(mapentity_models.ENTITY_DELETE)
         can_delete = user_has_perm(self.request.user, perm_delete)
         kwargs['can_delete'] = can_delete
         return kwargs
