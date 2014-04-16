@@ -92,5 +92,5 @@ class ListViewTest(TestCase):
         response = view(request)
         html = unicode(response.render())
 
-        self.assertTrue('can_export = false;' in html)
+        self.assertTrue('btn-group disabled' in html)
         self.assertTrue('Add</span>' in html)
