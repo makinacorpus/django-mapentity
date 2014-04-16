@@ -21,7 +21,7 @@ from djappypod.response import OdtTemplateResponse
 from .. import API_SRID
 from .. import app_settings
 from .. import models as mapentity_models
-from ..helpers import convertit_url, download_to_stream
+from ..helpers import convertit_url, download_to_stream, user_has_perm
 from ..decorators import save_history, view_permission_required
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from .base import history_delete
@@ -103,12 +103,6 @@ class MapEntityList(ModelViewMixin, ListView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_LIST
 
-    def can_add(self):
-        return False
-
-    def can_export(self):
-        return False
-
     def get_queryset(self):
         queryset = super(MapEntityList, self).get_queryset()
         # Filter queryset from possible serialized form
@@ -124,10 +118,17 @@ class MapEntityList(ModelViewMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityList, self).get_context_data(**kwargs)
-        context['can_add'] = self.can_add()
-        context['can_export'] = self.can_export()
         context['filterform'] = self._filterform
         context['columns'] = self.columns
+
+        perm_create = self.model.get_permission_name(mapentity_models.ENTITY_CREATE)
+        can_add = user_has_perm(self.request.user, perm_create)
+        context['can_add'] = can_add
+
+        perm_export = self.model.get_permission_name(mapentity_models.ENTITY_FORMAT_LIST)
+        can_export = user_has_perm(self.request.user, perm_export)
+        context['can_export'] = can_export
+
         return context
 
 
@@ -363,16 +364,17 @@ class MapEntityDetail(ModelViewMixin, DetailView):
     def dispatch(self, *args, **kwargs):
         return super(MapEntityDetail, self).dispatch(*args, **kwargs)
 
-    def can_edit(self):
-        return False
-
     def get_context_data(self, **kwargs):
         context = super(MapEntityDetail, self).get_context_data(**kwargs)
         context['activetab'] = self.request.GET.get('tab')
-        context['can_edit'] = self.can_edit()
-        context['can_add_attachment'] = self.can_edit()
-        context['can_delete_attachment'] = self.can_edit()
         context['empty_map_message'] = _("No map available for this object.")
+
+        perm_update = self.model.get_permission_name(mapentity_models.ENTITY_UPDATE)
+        can_edit = user_has_perm(self.request.user, perm_update)
+        context['can_edit'] = can_edit
+        context['can_add_attachment'] = can_edit
+        context['can_delete_attachment'] = can_edit
+
         return context
 
 
@@ -388,13 +390,13 @@ class MapEntityUpdate(ModelViewMixin, UpdateView):
     def dispatch(self, *args, **kwargs):
         return super(MapEntityUpdate, self).dispatch(*args, **kwargs)
 
-    def can_delete(self):
-        return True
-
     def get_form_kwargs(self):
         kwargs = super(MapEntityUpdate, self).get_form_kwargs()
         kwargs['user'] = self.request.user
-        kwargs['can_delete'] = self.can_delete()
+
+        perm_delete = self.model.get_permission_name(mapentity_models.ENTITY_DELETE)
+        can_delete = user_has_perm(self.request.user, perm_delete)
+        kwargs['can_delete'] = can_delete
         return kwargs
 
     def form_valid(self, form):

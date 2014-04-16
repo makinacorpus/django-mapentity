@@ -88,14 +88,18 @@ class ListViewTest(BaseTest):
 
     def setUp(self):
         self.user = User.objects.create_user('aah', 'email@corp.com', 'booh')
-        self.user.has_perm = mock.MagicMock(return_value=True)
+        def user_perms(p):
+            return {'tests.export_dummymodel': False}.get(p, True)
+        self.user.has_perm = mock.MagicMock(side_effect=user_perms)
 
     def test_list_should_have_some_perms_in_context(self):
         view = DummyList()
         view.object_list = []
+        view.request = RequestFactory().get('/fake-path')
+        view.request.user = self.user
         context = view.get_context_data()
-        self.assertEqual(context['can_add'], view.can_add())
-        self.assertEqual(context['can_export'], view.can_export())
+        self.assertEqual(context['can_add'], True)
+        self.assertEqual(context['can_export'], False)
 
     def test_list_should_render_some_perms_in_template(self):
         request = RequestFactory().get('/fake-path')
@@ -106,7 +110,7 @@ class ListViewTest(BaseTest):
         html = unicode(response.render())
 
         self.assertTrue('btn-group disabled' in html)
-        self.assertTrue('Add</span>' in html)
+        self.assertTrue('Add</a>' in html)
 
 
 class ViewPermissionsTest(TestCase):

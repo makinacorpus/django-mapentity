@@ -52,7 +52,22 @@ class MapEntityMixin(object):
         setattr(cls, name, property(func))
 
     @classmethod
-    def get_permission_name(cls, perm):
+    def get_permission_name(cls, entity_kind):
+        operations = {
+            ENTITY_CREATE: ENTITY_PERMISSION_CREATE,
+            ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
+            ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
+
+            ENTITY_DETAIL: ENTITY_PERMISSION_READ,
+            ENTITY_LAYER: ENTITY_PERMISSION_READ,
+            ENTITY_LIST: ENTITY_PERMISSION_READ,
+            ENTITY_JSON_LIST: ENTITY_PERMISSION_READ,
+
+            ENTITY_FORMAT_LIST: ENTITY_PERMISSION_EXPORT,
+            ENTITY_MAPIMAGE: ENTITY_PERMISSION_EXPORT,
+            ENTITY_DOCUMENT: ENTITY_PERMISSION_EXPORT,
+        }
+        perm = operations.get(entity_kind, entity_kind)
         assert perm in ENTITY_PERMISSIONS
         opts = cls._meta
         return '%s.%s_%s' % (opts.app_label.lower(),

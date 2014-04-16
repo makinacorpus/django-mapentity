@@ -17,7 +17,10 @@ User = get_user_model()
 class EntityAttachmentTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
-        self.user.has_perm = mock.MagicMock(return_value=True)
+        def user_perms(p):
+            return {'tests.change_dummymodel': False}.get(p, True)
+        self.user.is_anonymous = mock.MagicMock(return_value=False)
+        self.user.has_perm = mock.MagicMock(side_effect=user_perms)
         self.object = DummyModel.objects.create()
 
     def createRequest(self):
@@ -61,9 +64,9 @@ class EntityAttachmentTestCase(TestCase):
             self.assertTrue('paperclip/fileicons/odt.png')
 
     def test_upload_form_in_details_if_perms(self):
-        subclass = type('DummyDetail', (MapEntityDetail,), {'can_edit': lambda x: True})
-        view = subclass.as_view(model=DummyModel,
-                                template_name="mapentity/entity_detail.html")
+        self.user.has_perm = mock.MagicMock(return_value=True)
+        view = MapEntityDetail.as_view(model=DummyModel,
+                                       template_name="mapentity/entity_detail.html")
 
         request = self.createRequest()
         response = view(request, pk=self.object.pk)

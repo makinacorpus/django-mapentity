@@ -59,24 +59,8 @@ class ModelViewMixin(object):
     """
 
     def get_view_perm(self):
-        operations = {
-            mapentity_models.ENTITY_CREATE: mapentity_models.ENTITY_PERMISSION_CREATE,
-            mapentity_models.ENTITY_UPDATE: mapentity_models.ENTITY_PERMISSION_UPDATE,
-            mapentity_models.ENTITY_DELETE: mapentity_models.ENTITY_PERMISSION_DELETE,
-
-            mapentity_models.ENTITY_DETAIL: mapentity_models.ENTITY_PERMISSION_READ,
-            mapentity_models.ENTITY_LAYER: mapentity_models.ENTITY_PERMISSION_READ,
-            mapentity_models.ENTITY_LIST: mapentity_models.ENTITY_PERMISSION_READ,
-            mapentity_models.ENTITY_JSON_LIST: mapentity_models.ENTITY_PERMISSION_READ,
-
-            mapentity_models.ENTITY_FORMAT_LIST: mapentity_models.ENTITY_PERMISSION_EXPORT,
-            mapentity_models.ENTITY_MAPIMAGE: mapentity_models.ENTITY_PERMISSION_EXPORT,
-            mapentity_models.ENTITY_DOCUMENT: mapentity_models.ENTITY_PERMISSION_EXPORT,
-        }
-        operation = operations.get(self.get_entity_kind(),
-                                   self.get_entity_kind())
         model = self.model or self.queryset.model
-        return model.get_permission_name(operation)
+        return model.get_permission_name(self.get_entity_kind())
 
     @classmethod
     def get_entity_kind(self):
