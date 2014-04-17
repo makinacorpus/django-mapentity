@@ -36,11 +36,9 @@
     {% endif %}
     </style>
     <link rel="stylesheet" href="{% static "mapentity/style.css" %}" />
-    {# Overriden styles #}
-    <link rel="stylesheet" href="{% static "style.css" %}" />
 
-    {% block extracss %}
-    {% endblock extracss %}
+    {% smart_include "extracss" %}
+
   {% endcompress %}
 
   {% if DEBUG %}
