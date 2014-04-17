@@ -17,9 +17,10 @@ class ViewPermissionRequiredTestCase(TestCase):
         self.request_kwargs = {'fake': 'kwarg'}
         self.mocked_view = mock.MagicMock()
 
-    def run_decorated_view(self):
+    def run_decorated_view(self, raise_exception=True):
         """Setup, decorate and call view, then return response."""
-        decorated_view = view_permission_required()(self.mocked_view)
+        decorator = view_permission_required(raise_exception=raise_exception)
+        decorated_view = decorator(self.mocked_view)
         # Return response.
         return decorated_view(self.mocked_view,
                               self.request,
@@ -50,3 +51,10 @@ class ViewPermissionRequiredTestCase(TestCase):
         app_settings['ANONYMOUS_VIEWS_PERMS'] = ('view-perm',)
         response = self.run_decorated_view()
         self.assertNotEqual(response.status_code, 200)
+
+    def test_a_message_is_show_when_user_is_redirected(self):
+        self.request.user.has_perm.return_value = False
+        with mock.patch('django.contrib.messages.warning') as patched:
+            self.run_decorated_view(raise_exception=False)
+            patched.assert_called_once_with(self.request,
+                                            u'Access to the requested resource is restricted. You have been redirected.')

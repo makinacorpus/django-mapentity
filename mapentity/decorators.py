@@ -1,27 +1,32 @@
 from functools import wraps
 
 from django.utils.decorators import available_attrs, method_decorator
+from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib import messages
 
 from . import app_settings
 from .helpers import user_has_perm
 
 
 def view_permission_required(login_url=None, raise_exception=True):
-    def check_perms(user, perm):
+    def check_perms(request, user, perm):
         # Check both authenticated and anonymous
         if user_has_perm(user, perm):
             return True
         if not user.is_anonymous() and raise_exception:
             raise PermissionDenied
-        # As the last resort, show the login form
+
+        # As the last resort, redirects
+        msg = _(u'Access to the requested resource is restricted. You have been redirected.')
+        messages.warning(request, unicode(msg))
         return False
 
     def decorator(view_func):
         def _wrapped_view(self, request, *args, **kwargs):
             perm = self.get_view_perm()
-            has_perm_decorator = user_passes_test(lambda u: check_perms(u, perm),
+            has_perm_decorator = user_passes_test(lambda u: check_perms(request, u, perm),
                                                   login_url=login_url)
             cbv_user_has_perm = method_decorator(has_perm_decorator)
 
