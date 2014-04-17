@@ -1,6 +1,7 @@
 import os
 
 from django.db import models
+from django.db.utils import OperationalError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError
@@ -219,7 +220,10 @@ class MapEntityMixin(object):
 
     @classmethod
     def get_content_type_id(cls):
-        return ContentType.objects.get_for_model(cls).pk
+        try:
+            return ContentType.objects.get_for_model(cls).pk
+        except OperationalError:  # table is not yet created
+            return None
 
     @property
     def creator(self):
