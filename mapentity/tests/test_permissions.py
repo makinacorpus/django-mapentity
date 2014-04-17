@@ -3,6 +3,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
 from mapentity import registry
+from mapentity.middleware import get_internal_user
 
 from .models import DummyModel
 
@@ -12,9 +13,6 @@ class ModelPermissionsTest(TestCase):
     def setUp(self):
         self.ctype = ContentType.objects.get_for_model(DummyModel)
 
-    def tearDown(self):
-        del registry.registry[DummyModel]
-
     def test_model_permissions_were_created(self):
         permissions = Permission.objects.filter(content_type=self.ctype)
         all_codenames = permissions.values_list('codename', flat=True)
@@ -23,3 +21,9 @@ class ModelPermissionsTest(TestCase):
                                               u'delete_dummymodel',
                                               u'export_dummymodel',
                                               u'read_dummymodel'])
+
+    def test_internal_user_has_necessary_permissions(self):
+        internal_user = get_internal_user()
+        all_codenames = internal_user.user_permissions.all().values_list('codename', flat=True)
+        self.assertItemsEqual(all_codenames, [u'read_dummymodel',
+                                              u'export_dummymodel'])

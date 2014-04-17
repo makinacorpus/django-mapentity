@@ -6,6 +6,7 @@ from django.contrib.auth.models import Permission
 from django.utils.translation import ugettext as _
 
 from mapentity import models as mapentity_models
+from mapentity.middleware import get_internal_user
 from mapentity import logger, registry
 
 
@@ -45,6 +46,21 @@ def create_mapentity_models_permissions(sender, **kwargs):
                                                          content_type=ctype)
                 if created:
                     logger.info("Permission '%s' created." % codename)
+
+
+            internal_user = get_internal_user()
+            logger.info("Add necessary permissions to internal user %s" % internal_user)
+
+            for view_kind in (mapentity_models.ENTITY_LIST,
+                              mapentity_models.ENTITY_DOCUMENT):
+                perm = model.get_entity_kind_permission(view_kind)
+                codename = auth.get_permission_codename(perm, model._meta)
+
+                internal_user_permission = internal_user.user_permissions.filter(codename=codename, content_type=ctype)
+
+                if internal_user_permission.count() == 0:
+                    permission = perms_manager.get(codename=codename, content_type=ctype)
+                    internal_user.user_permissions.add(permission)
 
 
 post_syncdb.connect(create_mapentity_models_permissions,
