@@ -562,6 +562,10 @@ span.filter-info {
     margin-top: 2em;
 }
 
+#history .btn {
+    float: right;
+    margin-top: 10px;
+}
 
 /* Map capture */
 

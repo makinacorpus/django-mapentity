@@ -14,7 +14,6 @@ from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.contrib import messages
-from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
 from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
@@ -24,6 +23,7 @@ from .. import app_settings
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream, user_has_perm
 from ..decorators import save_history, view_permission_required, view_cache_latest
+from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from ..filters import MapEntityFilterSet
 from .base import history_delete
@@ -391,8 +391,15 @@ class MapEntityDetail(ModelViewMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityDetail, self).get_context_data(**kwargs)
+        logentries_max = app_settings['ACTION_HISTORY_LENGTH']
+        logentries = LogEntry.objects.filter(
+            content_type_id=self.object.get_content_type_id(),
+            object_id=self.object.pk
+        ).order_by('-id')
         context['activetab'] = self.request.GET.get('tab')
         context['empty_map_message'] = _("No map available for this object.")
+        context['logentries'] = logentries[:logentries_max]
+        context['logentries_hellip'] = logentries.count() > logentries_max
 
         perm_update = self.model.get_permission_codename(mapentity_models.ENTITY_UPDATE)
         can_edit = user_has_perm(self.request.user, perm_update)

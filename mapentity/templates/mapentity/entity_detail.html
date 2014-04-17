@@ -26,6 +26,9 @@
                 <li id="tab-attachments" class="{% if activetab == "attachments" %}active{% endif %}">
                     <a href="#attachments" data-toggle="tab"><i class="icon-file"></i> {% trans "Attached files" %}</a>
                 </li>
+                <li id="tab-history">
+                    <a href="#history" data-toggle="tab"><i class="icon-time"></i> {% trans "History" %}</a>
+                </li>
                 {% if can_edit %}
                     <a class="btn btn-primary pull-right" href="{{ object.get_update_url }}"><i class="icon-pencil icon-white"></i> {% trans "Update" %}</a>
                 {% else %}
@@ -64,6 +67,35 @@
                         {% attachment_form object object.get_detail_url|add:'?tab=attachments' %}
                     </div>
                     {% endif %}
+                </div>
+
+                <div id="history" class="tab-pane">
+                    <table id="logentries-list" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Date" %}</th>
+                                <th>{% trans "User" %}</th>
+                                <th>{% trans "Action" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for logentry in logentries %}
+                                <tr>
+                                    <td>{{ logentry.action_time }}</td>
+                                    <td>{{ logentry.user }}</td>
+                                    <td>{{ logentry.action_flag_display }}</td>
+                                </tr>
+                            {% endfor %}
+                            {% if logentries_hellip %}
+                                <tr>
+                                    <td>&hellip;</td>
+                                    <td>&hellip;</td>
+                                    <td>&hellip;</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <a href="{% url 'mapentity:logentry_list' %}?content_type={{ object.get_content_type_id }}&object_id={{ object.pk }}" class="btn btn-default">{% trans "Historique complet" %}</a>
                 </div>
             </div>
         </div>

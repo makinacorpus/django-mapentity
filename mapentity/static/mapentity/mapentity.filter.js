@@ -128,7 +128,10 @@ MapEntity.TogglableFilter = L.Class.extend({
             set = val !== '' && val != [''];
 
         // Consider a value set if it is not the first option selected
-        if ($(field).is('select[multiple]')) {
+        if ($(field).is('input[type=hidden]')) {
+            set = false;
+        }
+        else if ($(field).is('select[multiple]')) {
             set = val !== null;
         }
         else if ($(field).is('select')) {

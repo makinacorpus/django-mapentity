@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import django_filters
+from django import forms
 from .generic import (MapEntityList, MapEntityJsonList, MapEntityDetail,
                       MapEntityFormat, MapEntityLayer)
 from ..filters import BaseMapEntityFilterSet
@@ -7,9 +9,11 @@ from .. import registry
 
 
 class LogEntryFilter(BaseMapEntityFilterSet):
+    content_type = django_filters.NumberFilter(widget=forms.HiddenInput)
+    object_id = django_filters.NumberFilter(widget=forms.HiddenInput)
     class Meta:
         model = LogEntry
-        fields = ('user', )
+        fields = ('user', 'content_type', 'object_id')
 
 
 class LogEntryList(MapEntityList):
