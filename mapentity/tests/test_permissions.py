@@ -25,4 +25,5 @@ class ModelPermissionsTest(TestCase):
         internal_user = get_internal_user()
         all_codenames = internal_user.user_permissions.all().values_list('codename', flat=True)
         self.assertItemsEqual(all_codenames, [u'read_dummymodel',
-                                              u'export_dummymodel'])
+                                              u'export_dummymodel',
+                                              u'read_attachment'])

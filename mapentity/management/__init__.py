@@ -9,6 +9,8 @@ from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
 from mapentity import logger, registry
 
+from paperclip import models as paperclip_models
+
 
 def create_mapentity_models_permissions(sender, **kwargs):
     """ Create `Permission` objects for each model registered
@@ -29,6 +31,9 @@ def create_mapentity_models_permissions(sender, **kwargs):
 
         logger.info("Synchronize migrations of MapEntity models")
 
+        internal_user = get_internal_user()
+        perms_manager = Permission.objects.using(db)
+
         for model in registry.registry.keys():
 
             permissions = set()
@@ -38,7 +43,6 @@ def create_mapentity_models_permissions(sender, **kwargs):
                 name = "Can %s %s" % (perm, model._meta.verbose_name_raw)
                 permissions.add((codename, _(name)))
 
-            perms_manager = Permission.objects.using(db)
             ctype = ContentType.objects.db_manager(db).get_for_model(model)
             for (codename, name) in permissions:
                 p, created = perms_manager.get_or_create(codename=codename,
@@ -46,9 +50,6 @@ def create_mapentity_models_permissions(sender, **kwargs):
                                                          content_type=ctype)
                 if created:
                     logger.info("Permission '%s' created." % codename)
-
-            internal_user = get_internal_user()
-            logger.info("Add necessary permissions to internal user %s" % internal_user)
 
             for view_kind in (mapentity_models.ENTITY_LIST,
                               mapentity_models.ENTITY_DOCUMENT):
@@ -61,6 +62,13 @@ def create_mapentity_models_permissions(sender, **kwargs):
                     permission = perms_manager.get(codename=codename, content_type=ctype)
                     internal_user.user_permissions.add(permission)
                     logger.info("Added permission %s to internal user %s" % (codename, internal_user))
+
+        attachmenttype = ContentType.objects.db_manager(db).get_for_model(paperclip_models.Attachment)
+        read_perm = dict(codename='read_attachment', content_type=attachmenttype)
+        if internal_user.user_permissions.filter(**read_perm).count() == 0:
+            permission = perms_manager.get(**read_perm)
+            internal_user.user_permissions.add(permission)
+            logger.info("Added permission %s to internal user %s" % (permission.codename, internal_user))
 
 
 post_syncdb.connect(create_mapentity_models_permissions,

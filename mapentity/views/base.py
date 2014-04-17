@@ -8,7 +8,7 @@ from datetime import datetime
 import json
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
 from django.core.urlresolvers import reverse
@@ -59,7 +59,8 @@ def handler500(request, template_name='mapentity/500.html'):
     return HttpResponseServerError(response)
 
 
-@login_required()
+@permission_required('paperclip.read_attachment',
+                     raise_exception=True)
 def serve_secure_media(request, path):
     """
     Serve media/ for authenticated users only, since it can contain sensitive

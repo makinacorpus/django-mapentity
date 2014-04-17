@@ -49,7 +49,7 @@ class MediaTest(BaseTest):
     def test_media_are_protected(self):
         self.logout()
         response = self.download(self.url)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 403)
 
     def test_authenticated_user_can_access(self):
         self.login()

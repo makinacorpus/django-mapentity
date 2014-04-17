@@ -19,7 +19,7 @@ class EntityAttachmentTestCase(TestCase):
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
 
         def user_perms(p):
-            return {'tests.change_dummymodel': False}.get(p, True)
+            return {'add_attachment': False}.get(p, True)
 
         self.user.is_anonymous = mock.MagicMock(return_value=False)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
@@ -83,6 +83,8 @@ class UploadAttachmentTestCase(TestCase):
     def setUp(self):
         self.object = DummyModel.objects.create()
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')
+        user.is_superuser = True
+        user.save()
         success = self.client.login(username=user.username, password='booh')
         self.assertTrue(success)
 
