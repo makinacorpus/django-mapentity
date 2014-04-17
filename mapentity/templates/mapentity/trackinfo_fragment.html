@@ -5,4 +5,13 @@
 </tr><tr>
     <th>{{ object|verbose:"date_update" }}</th>
     <td>{{ object.date_update }} ({{ object.date_update|timesince }})</td>
+</tr><tr>
+    <th>Creator</th>
+    <td>{{ object.creator }}</td>
+</tr><tr>
+    <th>Authors</th>
+    <td>{{ object.authors|join:", " }}</td>
+</tr><tr>
+    <th>Last author</th>
+    <td>{{ object.last_author|default:"" }}</td>
 </tr>
