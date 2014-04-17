@@ -8,14 +8,12 @@ from django.utils.importlib import import_module
 from django.views.generic.base import View
 from django.conf.urls import patterns
 
-__all__ = ['app_settings', 'registry', 'logger']
 
+__all__ = ['app_settings', 'registry', 'logger']
 
 logger = logging.getLogger(__name__)
 
-
 API_SRID = 4326
-
 
 app_settings = dict({
     'TITLE': "",

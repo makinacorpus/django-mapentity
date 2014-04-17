@@ -47,7 +47,6 @@ def create_mapentity_models_permissions(sender, **kwargs):
                 if created:
                     logger.info("Permission '%s' created." % codename)
 
-
             internal_user = get_internal_user()
             logger.info("Add necessary permissions to internal user %s" % internal_user)
 

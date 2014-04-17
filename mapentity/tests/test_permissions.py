@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
-from mapentity import registry
 from mapentity.middleware import get_internal_user
 
 from .models import DummyModel

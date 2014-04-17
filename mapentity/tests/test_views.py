@@ -6,7 +6,6 @@ from django.conf import settings
 from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
 
 from mapentity.views.generic import MapEntityList
 from .models import DummyModel
@@ -21,7 +20,6 @@ class BaseTest(TestCase):
             user = User.objects.create_user(self.__class__.__name__,
                                             'email@corp.com', 'booh')
             setattr(self, 'user', user)
-            #user.user_permissions.all().delete()
         self.logout()
         success = self.client.login(username=self.user.username, password='booh')
         self.assertTrue(success)
