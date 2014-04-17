@@ -61,6 +61,7 @@ def create_mapentity_models_permissions(sender, **kwargs):
                 if internal_user_permission.count() == 0:
                     permission = perms_manager.get(codename=codename, content_type=ctype)
                     internal_user.user_permissions.add(permission)
+                    logger.info("Added permission %s to internal user %s" % (codename, internal_user))
 
 
 post_syncdb.connect(create_mapentity_models_permissions,

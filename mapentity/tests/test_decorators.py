@@ -17,7 +17,7 @@ class ViewPermissionRequiredTestCase(TestCase):
         self.request_kwargs = {'fake': 'kwarg'}
         self.mocked_view = mock.MagicMock()
 
-    def run_decorated_view(self, raise_exception=True, login_url=None):
+    def run_decorated_view(self, raise_exception=None, login_url=None):
         """Setup, decorate and call view, then return response."""
         decorator = view_permission_required(raise_exception=raise_exception,
                                              login_url=login_url)
@@ -39,6 +39,12 @@ class ViewPermissionRequiredTestCase(TestCase):
         self.request.user.is_anonymous.return_value = False
         self.request.user.has_perm.return_value = False
         self.assertRaises(PermissionDenied, self.run_decorated_view)
+
+    def test_unauthorized_is_not_rendered_if_login_url_is_provided(self):
+        self.request.user.is_anonymous.return_value = False
+        self.request.user.has_perm.return_value = False
+        response = self.run_decorated_view(login_url='login')
+        self.assertEqual(response.status_code, 302)
 
     def test_permission_is_taken_from_view(self):
         self.request.user.is_anonymous.return_value = False

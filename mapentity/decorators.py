@@ -5,16 +5,24 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
+from django.views.generic.edit import BaseUpdateView
+from django.views.generic.detail import BaseDetailView
 
 from . import app_settings
 from .helpers import user_has_perm
+from . import models as mapentity_models
 
 
-def view_permission_required(login_url=None, raise_exception=True):
+def view_permission_required(login_url=None, raise_exception=None):
+
+    if raise_exception is None:
+        raise_exception = (login_url is None)
+
     def check_perms(request, user, perm):
         # Check both authenticated and anonymous
         if user_has_perm(user, perm):
             return True
+
         if not user.is_anonymous() and raise_exception:
             raise PermissionDenied
 
@@ -26,8 +34,19 @@ def view_permission_required(login_url=None, raise_exception=True):
     def decorator(view_func):
         def _wrapped_view(self, request, *args, **kwargs):
             perm = self.get_view_perm()
+
+            redirect_url = login_url
+            if login_url in mapentity_models.ENTITY_KINDS:
+                is_handle_object = issubclass(self.__class__, (BaseDetailView, BaseUpdateView))
+                if is_handle_object:
+                    view_subject = self.get_object()
+                else:
+                    view_subject = self.get_model()
+                get_url_method = getattr(view_subject, 'get_{0}_url'.format(login_url))
+                redirect_url = get_url_method()
+
             has_perm_decorator = user_passes_test(lambda u: check_perms(request, u, perm),
-                                                  login_url=login_url)
+                                                  login_url=redirect_url)
             cbv_user_has_perm = method_decorator(has_perm_decorator)
 
             @cbv_user_has_perm

@@ -57,10 +57,6 @@ class ModelViewMixin(object):
     Add model meta information in context data
     """
 
-    def get_view_perm(self):
-        model = self.model or self.queryset.model
-        return model.get_permission_codename(self.get_entity_kind())
-
     @classmethod
     def get_entity_kind(self):
         return None
@@ -68,12 +64,19 @@ class ModelViewMixin(object):
     def get_title(self):
         return None
 
+    def get_model(self):
+        return self.model or self.queryset.model
+
+    def get_view_perm(self):
+        model = self.get_model()
+        return model.get_permission_codename(self.get_entity_kind())
+
     def get_context_data(self, **kwargs):
         context = super(ModelViewMixin, self).get_context_data(**kwargs)
         context['view'] = self.get_entity_kind()
         context['title'] = self.get_title()
 
-        model = self.model or self.queryset.model
+        model = self.get_model()
         if model:
             context['model'] = model
             context['appname'] = model._meta.app_label.lower()

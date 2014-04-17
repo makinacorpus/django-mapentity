@@ -6,6 +6,7 @@ from django.conf import settings
 from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse
 
 from mapentity.views.generic import MapEntityList
 from .models import DummyModel
@@ -16,10 +17,18 @@ User = get_user_model()
 
 class BaseTest(TestCase):
     def login(self):
-        user = User.objects.create_user('aah', 'email@corp.com', 'booh')
-        success = self.client.login(username=user.username, password='booh')
+        if getattr(self, 'user', None) is None:
+            user = User.objects.create_user(self.__class__.__name__,
+                                            'email@corp.com', 'booh')
+            setattr(self, 'user', user)
+            #user.user_permissions.all().delete()
+        self.logout()
+        success = self.client.login(username=self.user.username, password='booh')
         self.assertTrue(success)
-        return user
+        return self.user
+
+    def logout(self):
+        self.client.logout()
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media', DEBUG=True)
@@ -40,7 +49,7 @@ class MediaTest(BaseTest):
         return self.client.get(url, REMOTE_ADDR="6.6.6.6")
 
     def test_media_are_protected(self):
-        self.client.logout()
+        self.logout()
         response = self.download(self.url)
         self.assertEqual(response.status_code, 302)
 
@@ -115,7 +124,43 @@ class ListViewTest(BaseTest):
         self.assertTrue('Add</a>' in html)
 
 
-class ViewPermissionsTest(TestCase):
+class ViewPermissionsTest(BaseTest):
+    def setUp(self):
+        self.login()
+        self.user.user_permissions.all().delete()  # WTF ?
+        self.object = DummyModel.objects.create()
+
+    def tearDown(self):
+        self.logout()
+
     def test_views_name_depend_on_model(self):
         view = DummyList()
         self.assertEqual(view.get_view_perm(), 'tests.read_dummymodel')
+
+    def test_unauthorized_list_view_redirects_to_login(self):
+        response = self.client.get('/dummymodel/list/')
+        self.assertRedirects(response, 'http://testserver/login/?next=/dummymodel/list/')
+
+    def test_unauthorized_detail_view_redirects_to_list(self):
+        detail_url = '/dummymodel/%s/' % self.object.pk
+        response = self.client.get(detail_url)
+        self.assertRedirects(response, 'http://testserver/dummymodel/list/?next=%s' % detail_url,
+                             target_status_code=302)  # --> login
+
+    def test_unauthorized_add_view_redirects_to_list(self):
+        add_url = '/dummymodel/add/'
+        response = self.client.get(add_url)
+        self.assertRedirects(response, 'http://testserver/dummymodel/list/?next=%s' % add_url,
+                             target_status_code=302)  # --> login
+
+    def test_unauthorized_update_view_redirects_to_detail(self):
+        edit_url = '/dummymodel/edit/%s/' % self.object.pk
+        response = self.client.get(edit_url)
+        self.assertRedirects(response, 'http://testserver/dummymodel/%s/?next=%s' % (self.object.pk, edit_url),
+                             target_status_code=302)  # --> login
+
+    def test_unauthorized_delete_view_redirects_to_detail(self):
+        delete_url = '/dummymodel/delete/%s' % self.object.pk
+        response = self.client.get('/dummymodel/delete/%s' % self.object.pk)
+        self.assertRedirects(response, 'http://testserver/dummymodel/%s/?next=%s' % (self.object.pk, delete_url),
+                             target_status_code=302)  # --> login

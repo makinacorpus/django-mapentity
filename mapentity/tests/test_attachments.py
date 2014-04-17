@@ -104,7 +104,8 @@ class UploadAttachmentTestCase(TestCase):
         response = self.client.post(add_url_for_obj(self.object),
                                     data=self.attachmentPostData())
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], 'http://testserver/dummy-detail')
+        self.assertEqual(response['location'],
+                         'http://testserver/dummymodel/%s/' % self.object.pk)
 
     def test_upload_creates_attachment(self):
         data = self.attachmentPostData()

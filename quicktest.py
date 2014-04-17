@@ -81,6 +81,7 @@ class QuickDjangoTest(object):
             ),
             SRID=3857,
             COMPRESS_ENABLED=False,
+            TEST=True
         )
         from django.test.simple import DjangoTestSuiteRunner
         runner = DjangoTestSuiteRunner()

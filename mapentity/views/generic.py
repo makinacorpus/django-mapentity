@@ -24,6 +24,7 @@ from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream, user_has_perm
 from ..decorators import save_history, view_permission_required
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
+from ..filters import MapEntityFilterSet
 from .base import history_delete
 from .mixins import ModelViewMixin, JSONResponseMixin
 
@@ -95,9 +96,16 @@ class MapEntityList(ModelViewMixin, ListView):
 
     def __init__(self, *args, **kwargs):
         super(MapEntityList, self).__init__(*args, **kwargs)
-        self._filterform = self.filterform(None, self.queryset)
+
         if self.model is None:
             self.model = self.queryset.model
+
+        if self.filterform is None:
+            class filterklass(MapEntityFilterSet):
+                class Meta:
+                    model = self.model
+            self.filterform = filterklass
+        self._filterform = self.filterform(None, self.queryset)
 
     @classmethod
     def get_entity_kind(cls):
@@ -110,7 +118,7 @@ class MapEntityList(ModelViewMixin, ListView):
                                            queryset=queryset)
         return self._filterform.qs
 
-    @view_permission_required()
+    @view_permission_required(login_url='login')
     def dispatch(self, request, *args, **kwargs):
         # Save last list visited in session
         request.session['last_list'] = request.path
@@ -329,7 +337,7 @@ class MapEntityCreate(ModelViewMixin, CreateView):
         # Whole "add" phrase translatable, but not catched  by makemessages
         return _(u"Add a new %s" % name.lower())
 
-    @view_permission_required()
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
     def dispatch(self, *args, **kwargs):
         return super(MapEntityCreate, self).dispatch(*args, **kwargs)
 
@@ -359,7 +367,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
     def get_title(self):
         return unicode(self.get_object())
 
-    @view_permission_required()
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
     @save_history()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityDetail, self).dispatch(*args, **kwargs)
@@ -386,7 +394,7 @@ class MapEntityUpdate(ModelViewMixin, UpdateView):
     def get_title(self):
         return _("Edit %s") % self.get_object()
 
-    @view_permission_required()
+    @view_permission_required(login_url=mapentity_models.ENTITY_DETAIL)
     def dispatch(self, *args, **kwargs):
         return super(MapEntityUpdate, self).dispatch(*args, **kwargs)
 
@@ -416,7 +424,7 @@ class MapEntityDelete(ModelViewMixin, DeleteView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DELETE
 
-    @view_permission_required()
+    @view_permission_required(login_url=mapentity_models.ENTITY_DETAIL)
     def dispatch(self, *args, **kwargs):
         return super(MapEntityDelete, self).dispatch(*args, **kwargs)
 

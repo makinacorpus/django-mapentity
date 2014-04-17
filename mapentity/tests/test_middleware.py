@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.test import TestCase
 from django.test.client import RequestFactory
+from django.test.utils import override_settings
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -12,6 +13,7 @@ from ..middleware import AutoLoginMiddleware, get_internal_user
 User = get_user_model()
 
 
+@override_settings(TEST=False)
 class AutoLoginTest(TestCase):
     def setUp(self):
         self.middleware = AutoLoginMiddleware()
