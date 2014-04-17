@@ -2,8 +2,6 @@ from django.test import TestCase
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
-from mapentity.management import create_mapentity_models_permissions
-from mapentity import models as mapentity_models
 from mapentity import registry
 
 from .models import DummyModel
@@ -12,8 +10,6 @@ from .models import DummyModel
 class ModelPermissionsTest(TestCase):
 
     def setUp(self):
-        registry.registry[DummyModel] = 'foo'
-        create_mapentity_models_permissions(None, app=mapentity_models)
         self.ctype = ContentType.objects.get_for_model(DummyModel)
 
     def tearDown(self):
