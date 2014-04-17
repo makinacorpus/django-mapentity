@@ -5,7 +5,8 @@ from . import app_settings
 from . import registry
 from .views import (map_screenshot, convert, history_delete,
                     serve_secure_media, JSSettings)
-from .models import LogEntry
+if app_settings['ACTION_HISTORY_ENABLED']:
+    from .models import LogEntry
 
 
 _MEDIA_URL = settings.MEDIA_URL.replace(app_settings['ROOT_URL'], '')
@@ -26,4 +27,5 @@ urlpatterns = patterns(
     url(r'^api/settings.json$', JSSettings.as_view(), name='js_settings'),
 )
 
-urlpatterns += registry.register(LogEntry, menu=False)
+if app_settings['ACTION_HISTORY_ENABLED']:
+    urlpatterns += registry.register(LogEntry, menu=False)

@@ -34,6 +34,8 @@ logger = logging.getLogger(__name__)
 
 
 def log_action(request, object, action_flag):
+    if not app_settings['ACTION_HISTORY_ENABLED']:
+        return
     LogEntry.objects.log_action(
         user_id=request.user.pk,
         content_type_id=object.get_content_type_id(),
