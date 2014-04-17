@@ -2,7 +2,7 @@ import mock
 from django.test import TestCase
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-
+from django.core.urlresolvers import reverse
 
 from mapentity import app_settings
 from mapentity.decorators import view_permission_required
@@ -17,9 +17,10 @@ class ViewPermissionRequiredTestCase(TestCase):
         self.request_kwargs = {'fake': 'kwarg'}
         self.mocked_view = mock.MagicMock()
 
-    def run_decorated_view(self, raise_exception=True):
+    def run_decorated_view(self, raise_exception=True, login_url=None):
         """Setup, decorate and call view, then return response."""
-        decorator = view_permission_required(raise_exception=raise_exception)
+        decorator = view_permission_required(raise_exception=raise_exception,
+                                             login_url=login_url)
         decorated_view = decorator(self.mocked_view)
         # Return response.
         return decorated_view(self.mocked_view,
@@ -58,3 +59,11 @@ class ViewPermissionRequiredTestCase(TestCase):
             self.run_decorated_view(raise_exception=False)
             patched.assert_called_once_with(self.request,
                                             u'Access to the requested resource is restricted. You have been redirected.')
+
+    def test_it_redirects_to_the_specified_view(self):
+        self.request.user.has_perm.return_value = False
+        response = self.run_decorated_view(raise_exception=False,
+                                           login_url='tests:dummymodel_list')
+        self.assertEqual(response.status_code, 302)
+        dummylist_url = reverse('tests:dummymodel_list')
+        self.assertTrue(dummylist_url in response['Location'])
