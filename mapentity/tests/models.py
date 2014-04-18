@@ -36,5 +36,7 @@ class WeatherStation(models.Model):
 class DummyModel(MapEntityMixin, models.Model):
     geom = models.PointField(null=True, default=None)
 
+    objects = models.GeoManager()
+
 
 loading.cache.loaded = False

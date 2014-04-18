@@ -250,7 +250,7 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
             return HttpResponseServerError(repr(e))
 
 
-class MapEntityDocument(DetailView):
+class MapEntityDocument(ModelViewMixin, DetailView):
     response_class = OdtTemplateResponse
 
     @classmethod

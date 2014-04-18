@@ -70,7 +70,7 @@ class MapEntityTest(TestCase):
         for i in range(30):
             self.modelfactory.create()
 
-        # JSON layers do not require authent
+        self.login()
         response = self.client.get(self.model.get_layer_url())
         self.assertEqual(response.status_code, 200)
         response = self.client.get(self.model.get_jsonlist_url())
@@ -88,6 +88,7 @@ class MapEntityTest(TestCase):
     def test_bbox_filter(self):
         if self.model is None:
             return  # Abstract test should not run
+        self.login()
         params = '?bbox=POLYGON((5+44+0%2C5+45+0%2C6+45+0%2C6+44+0%2C5+44+0))'
         # If no objects exist, should not fail.
         response = self.client.get(self.model.get_jsonlist_url() + params)
