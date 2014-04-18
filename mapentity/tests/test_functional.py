@@ -220,6 +220,7 @@ class MapEntityTest(TestCase):
 class MapEntityLiveTest(LiveServerTestCase):
     model = None
     userfactory = None
+    modelfactory = None
     session = None
 
     def url_for(self, path):

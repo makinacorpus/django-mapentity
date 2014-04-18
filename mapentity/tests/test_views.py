@@ -2,16 +2,35 @@ import os
 import shutil
 
 import mock
+import factory
 from django.conf import settings
 from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
 
 from mapentity.views.generic import MapEntityList
+from mapentity.factories import SuperUserFactory
 from .models import DummyModel
+from .test_functional import MapEntityTest, MapEntityLiveTest
 
 
 User = get_user_model()
+
+
+class DummyModelFactory(factory.Factory):
+    FACTORY_FOR = DummyModel
+
+
+class DummyModelFunctionalTest(MapEntityTest):
+    userfactory = SuperUserFactory
+    model = DummyModel
+    modelfactory = DummyModelFactory
+
+
+class MapEntityLiveTest(MapEntityLiveTest):
+    userfactory = SuperUserFactory
+    model = DummyModel
+    modelfactory = DummyModelFactory
 
 
 class BaseTest(TestCase):
