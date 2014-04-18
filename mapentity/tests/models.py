@@ -34,26 +34,7 @@ class WeatherStation(models.Model):
 
 
 class DummyModel(MapEntityMixin, models.Model):
-
-    @classmethod
-    def get_jsonlist_url(self):
-        return ''
-
-    @classmethod
-    def get_generic_detail_url(self):
-        return ''
-
-    @classmethod
-    def get_format_list_url(self):
-        return ''
-
-    @classmethod
-    def get_document_url(self):
-        return ''
-
-    @classmethod
-    def get_layer_url(self):
-        return ''
+    geom = models.PointField(null=True, default=None)
 
 
 loading.cache.loaded = False

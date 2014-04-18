@@ -90,6 +90,7 @@ class MapEntityList(ModelViewMixin, ListView):
     A generic view list web page.
 
     """
+    template_name = 'mapentity/entity_list.html'
     model = None
     filterform = None
     columns = []
@@ -325,6 +326,9 @@ class DocumentConvert(DetailView):
 
 
 class MapEntityCreate(ModelViewMixin, CreateView):
+
+    template_name = 'mapentity/entity_form.html'
+
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_CREATE
@@ -360,6 +364,9 @@ class MapEntityCreate(ModelViewMixin, CreateView):
 
 
 class MapEntityDetail(ModelViewMixin, DetailView):
+
+    template_name = 'mapentity/entity_detail.html'
+
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DETAIL
@@ -388,6 +395,9 @@ class MapEntityDetail(ModelViewMixin, DetailView):
 
 
 class MapEntityUpdate(ModelViewMixin, UpdateView):
+
+    template_name = 'mapentity/entity_form.html'
+
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_UPDATE
@@ -421,6 +431,9 @@ class MapEntityUpdate(ModelViewMixin, UpdateView):
 
 
 class MapEntityDelete(ModelViewMixin, DeleteView):
+
+    template_name = 'mapentity/entity_confirm_delete.html'
+
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DELETE
