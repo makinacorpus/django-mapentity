@@ -26,6 +26,8 @@ class DummyModelFunctionalTest(MapEntityTest):
     model = DummyModel
     modelfactory = DummyModelFactory
 
+    def get_good_data(self):
+        return {'geom': '{"type": "Point", "coordinates":[0, 0]}'}
 
 class MapEntityLiveTest(MapEntityLiveTest):
     userfactory = SuperUserFactory
