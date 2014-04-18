@@ -1,6 +1,7 @@
 from functools import wraps
 
 from django.utils.decorators import available_attrs, method_decorator
+from django.views.decorators.http import last_modified as cache_last_modified
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
@@ -50,6 +51,24 @@ def view_permission_required(login_url=None, raise_exception=None):
             cbv_user_has_perm = method_decorator(has_perm_decorator)
 
             @cbv_user_has_perm
+            def decorated(self, request, *args, **kwargs):
+                return view_func(self, request, *args, **kwargs)
+
+            return decorated(self, request, *args, **kwargs)
+
+        return _wrapped_view
+    return decorator
+
+
+def view_cache_latest():
+    def decorator(view_func):
+        def _wrapped_view(self, request, *args, **kwargs):
+            view_model = self.get_model()
+
+            cache_latest = cache_last_modified(lambda x: view_model.latest_updated())
+            cbv_cache_latest = method_decorator(cache_latest)
+
+            @cbv_cache_latest
             def decorated(self, request, *args, **kwargs):
                 return view_func(self, request, *args, **kwargs)
 

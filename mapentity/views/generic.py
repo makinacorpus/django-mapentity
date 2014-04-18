@@ -9,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
-from django.views.decorators.http import last_modified as cache_last_modified
 from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
@@ -22,7 +21,7 @@ from .. import API_SRID
 from .. import app_settings
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream, user_has_perm
-from ..decorators import save_history, view_permission_required
+from ..decorators import save_history, view_permission_required, view_cache_latest
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from ..filters import MapEntityFilterSet
 from .base import history_delete
@@ -57,13 +56,10 @@ class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
         return mapentity_models.ENTITY_LAYER
 
     @view_permission_required()
+    @view_cache_latest()
     def dispatch(self, *args, **kwargs):
-        # Use lambda to bound self and to avoid passing request, *args, **kwargs as the decorator would do
-        # TODO: we should be storing cache_latest and cache_latest_dispatch for reuse
-        # but it triggers other problems (self.cache_latest() - will pass self as an unwanted arg)
-        cache_latest = cache_last_modified(lambda x: self.model.latest_updated())
-        cache_latest_dispatch = cache_latest(super(MapEntityLayer, self).dispatch)
-        return cache_latest_dispatch(*args, **kwargs)
+        return super(MapEntityLayer, self).dispatch(*args, **kwargs)
+
 
     def render_to_response(self, context, **response_kwargs):
         cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
@@ -287,6 +283,7 @@ class MapEntityDocument(ModelViewMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         rooturl = self.request.build_absolute_uri('/')
+
         # Screenshot of object map is required, since present in document
         self.get_object().prepare_map_image(rooturl)
         html = self.get_object().get_attributes_html(rooturl)

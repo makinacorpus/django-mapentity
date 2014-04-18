@@ -256,9 +256,6 @@ def extract_attributes_html(url):
     With this, we save a lot of efforts, since we do have to build specific Appy.pod
     templates for each model.
     """
-    if getattr(settings, 'TEST', False):
-        return '<p>Mock</p>'  # TODO: better run in LiveServerTestCase instead !
-
     r = requests.get(url)
     if r.status_code != 200:
         raise ValueError('Could not reach %s' % url)

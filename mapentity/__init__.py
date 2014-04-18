@@ -18,8 +18,8 @@ API_SRID = 4326
 app_settings = dict({
     'TITLE': "",
     'HISTORY_ITEMS_MAX': 5,
-    'CONVERSION_SERVER': '',
-    'CAPTURE_SERVER': '',
+    'CONVERSION_SERVER': 'http://convertit/',
+    'CAPTURE_SERVER': 'http://screamshotter/',
     'INTERNAL_USER': '__internal__',
     'JS_SETTINGS_VIEW': 'mapentity:js_settings',
     'ROOT_URL': '',
