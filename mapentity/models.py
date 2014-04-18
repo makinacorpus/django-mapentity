@@ -86,6 +86,12 @@ class MapEntityMixin(object):
         except (cls.DoesNotExist, FieldError):
             return None
 
+    def get_date_update(self):
+        try:
+            return self.date_update
+        except AttributeError:
+            return None
+
     def get_geom(self):
         """ Get main geometry field.
         """
@@ -171,7 +177,7 @@ class MapEntityMixin(object):
     def prepare_map_image(self, rooturl):
         path = self.get_map_image_path()
         # Do nothing if image is up-to-date
-        if is_file_newer(path, self.date_update):
+        if is_file_newer(path, self.get_date_update()):
             return
         url = smart_urljoin(rooturl, self.get_detail_url())
         capture_map_image(url, path, aspect=self.get_geom_aspect_ratio())

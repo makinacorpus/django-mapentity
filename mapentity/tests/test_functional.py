@@ -6,6 +6,7 @@ import shutil
 import StringIO
 import csv
 import urllib2
+from datetime import datetime
 
 from django.conf import settings
 from django.utils.http import http_date
@@ -45,7 +46,7 @@ class MapEntityTest(TestCase):
         self.client.logout()
 
     def get_bad_data(self):
-        return {'topology': 'doh!'}, _(u'Topology is not valid.')
+        return {'geom': 'doh!'}, _(u'Invalid geometry value.')
 
     def get_good_data(self):
         raise NotImplementedError()
@@ -70,24 +71,29 @@ class MapEntityTest(TestCase):
         for i in range(30):
             self.modelfactory.create()
 
-        # JSON layers do not require authent
+        self.login()
         response = self.client.get(self.model.get_layer_url())
         self.assertEqual(response.status_code, 200)
         response = self.client.get(self.model.get_jsonlist_url())
         self.assertEqual(response.status_code, 200)
 
-        # Document layer either
+    @patch('mapentity.helpers.requests')
+    def test_document_export(self, mock_requests):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        mock_requests.get.return_value.status_code = 200
+        mock_requests.get.return_value.content = '<p id="properties">Mock</p>'
+
+        self.login()
         obj = self.modelfactory.create()
-        # Will have to mock screenshot, though.
-        with open(obj.get_map_image_path(), 'w') as f:
-            f.write('This is fake PNG file')
         response = self.client.get(obj.get_document_url())
         self.assertEqual(response.status_code, 200)
-        os.remove(obj.get_map_image_path())
 
     def test_bbox_filter(self):
         if self.model is None:
             return  # Abstract test should not run
+        self.login()
         params = '?bbox=POLYGON((5+44+0%2C5+45+0%2C6+45+0%2C6+44+0%2C5+44+0))'
         # If no objects exist, should not fail.
         response = self.client.get(self.model.get_jsonlist_url() + params)
@@ -220,6 +226,7 @@ class MapEntityTest(TestCase):
 class MapEntityLiveTest(LiveServerTestCase):
     model = None
     userfactory = None
+    modelfactory = None
     session = None
 
     def url_for(self, path):
@@ -228,48 +235,62 @@ class MapEntityLiveTest(LiveServerTestCase):
     def login(self):
         user = self.userfactory(password='booh')
         self.session = requests.Session()
-        response = self.session.get(self.live_server_url)
-        csrftoken = response.cookies.get('csrftoken', '')
-        response = self.session.post(self.url_for('/login/'),
+        login_url = self.url_for('/login/')
+        response = self.session.get(login_url,
+                                    allow_redirects=False)
+
+        csrftoken = response.cookies['csrftoken']
+        response = self.session.post(login_url,
                                      {'username': user.username,
                                       'password': 'booh',
-                                      'csrfmiddlewaretoken': csrftoken})
+                                      'csrfmiddlewaretoken': csrftoken},
+                                     allow_redirects=False)
+        self.assertEqual(response.status_code, 302)
 
-    def test_geojson_cache(self):
+    @patch('mapentity.models.MapEntityMixin.latest_updated')
+    def test_geojson_cache(self, latest_updated):
         if self.model is None:
             return  # Abstract test should not run
+
         self.login()
-        obj = self.modelfactory()
-        response = self.session.get(self.url_for(obj.get_layer_url()))
+        self.modelfactory.create()
+        latest_updated.return_value = datetime.now()
+
+        latest = self.model.latest_updated()
+        geojson_layer_url = self.url_for(self.model.get_layer_url())
+
+        response = self.session.get(geojson_layer_url, allow_redirects=False)
         self.assertEqual(response.status_code, 200)
+
         # Without headers to cache
-        latest = obj.latest_updated()
         lastmodified = response.headers.get('Last-Modified')
         md5sum = md5.new(response.content).digest()
         self.assertNotEqual(lastmodified, None)
 
         # Try again, check that nothing changed
-        response = self.session.get(self.url_for(obj.get_layer_url()))
+        response = self.session.get(geojson_layer_url)
         self.assertEqual(lastmodified, response.headers.get('Last-Modified'))
         self.assertEqual(md5sum, md5.new(response.content).digest())
 
         # Create a new object
         time.sleep(1)  # wait some time, last-modified has precision in seconds
-        self.modelfactory()
-        self.assertNotEqual(latest, obj.latest_updated())
-        response = self.session.get(self.url_for(obj.get_layer_url()))
+        self.modelfactory.create()
+        latest_updated.return_value = datetime.now()
+
+        self.assertNotEqual(latest, self.model.latest_updated())
+        response = self.session.get(geojson_layer_url)
         # Check that last modified and content changed
         self.assertNotEqual(lastmodified, response.headers.get('Last-Modified'))
         self.assertNotEqual(md5sum, md5.new(response.content).digest())
 
         # Ask again with headers, and expect a 304 status (not changed)
         lastmodified = response.headers.get('Last-Modified')
-        response = self.session.get(self.url_for(obj.get_layer_url()),
+        response = self.session.get(geojson_layer_url,
                                     headers={'if-modified-since': lastmodified})
         self.assertEqual(response.status_code, 304)
 
         # Ask again with headers in the past, and expect a 200
-        response = self.session.get(self.url_for(obj.get_layer_url()),
+        response = self.session.get(geojson_layer_url,
                                     headers={'if-modified-since': http_date(1000)})
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(md5sum, md5.new(response.content).digest())
@@ -287,7 +308,7 @@ class MapEntityLiveTest(LiveServerTestCase):
             os.remove(image_path)
         self.assertFalse(os.path.exists(image_path))
 
-        # Move Screenshot response
+        # Mock Screenshot response
         mock_requests.get.return_value.status_code = 200
         mock_requests.get.return_value.content = '*' * 100
 
