@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 
 test_requires = [
-    'mock'
+    'mock',
     'factory_boy == 1.1.5',
 ]
 
