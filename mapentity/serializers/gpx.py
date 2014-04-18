@@ -36,7 +36,7 @@ class GPXSerializer(Serializer):
             name = '[%s] %s' % (objtype, unicode(obj))
 
             description = getattr(obj, 'description', '')
-            objupdate = getattr(obj, 'date_update')
+            objupdate = obj.get_date_update()
             if objupdate:
                 description += _('Modified') + ': ' + humanize_timesince(objupdate)
             if geom:
