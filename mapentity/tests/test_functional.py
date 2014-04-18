@@ -244,14 +244,13 @@ class MapEntityLiveTest(LiveServerTestCase):
                                      {'username': user.username,
                                       'password': 'booh',
                                       'csrfmiddlewaretoken': csrftoken},
-                                      allow_redirects=False)
+                                     allow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
     @patch('mapentity.models.MapEntityMixin.latest_updated')
     def test_geojson_cache(self, latest_updated):
         if self.model is None:
             return  # Abstract test should not run
-
 
         self.login()
         self.modelfactory.create()
