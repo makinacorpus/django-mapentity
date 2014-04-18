@@ -3,6 +3,7 @@ import os
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import FieldError
+from django.contrib import auth
 
 from paperclip.models import Attachment
 
@@ -28,6 +29,20 @@ ENTITY_KINDS = (
     ENTITY_UPDATE, ENTITY_DELETE
 )
 
+ENTITY_PERMISSION_CREATE = 'add'
+ENTITY_PERMISSION_READ = 'read'
+ENTITY_PERMISSION_UPDATE = 'change'
+ENTITY_PERMISSION_DELETE = 'delete'
+ENTITY_PERMISSION_EXPORT = 'export'
+
+ENTITY_PERMISSIONS = (
+    ENTITY_PERMISSION_CREATE,
+    ENTITY_PERMISSION_READ,
+    ENTITY_PERMISSION_UPDATE,
+    ENTITY_PERMISSION_DELETE,
+    ENTITY_PERMISSION_EXPORT
+)
+
 
 class MapEntityMixin(object):
 
@@ -36,6 +51,33 @@ class MapEntityMixin(object):
         if hasattr(cls, name):
             return  # ignore
         setattr(cls, name, property(func))
+
+    @classmethod
+    def get_entity_kind_permission(cls, entity_kind):
+        operations = {
+            ENTITY_CREATE: ENTITY_PERMISSION_CREATE,
+            ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
+            ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
+
+            ENTITY_DETAIL: ENTITY_PERMISSION_READ,
+            ENTITY_LAYER: ENTITY_PERMISSION_READ,
+            ENTITY_LIST: ENTITY_PERMISSION_READ,
+            ENTITY_JSON_LIST: ENTITY_PERMISSION_READ,
+
+            ENTITY_FORMAT_LIST: ENTITY_PERMISSION_EXPORT,
+            ENTITY_MAPIMAGE: ENTITY_PERMISSION_EXPORT,
+            ENTITY_DOCUMENT: ENTITY_PERMISSION_EXPORT,
+        }
+        perm = operations.get(entity_kind, entity_kind)
+        assert perm in ENTITY_PERMISSIONS
+        return perm
+
+    @classmethod
+    def get_permission_codename(cls, entity_kind):
+        perm = cls.get_entity_kind_permission(entity_kind)
+        opts = cls._meta
+        return '%s.%s' % (opts.app_label.lower(),
+                          auth.get_permission_codename(perm, opts))
 
     @classmethod
     def latest_updated(cls):

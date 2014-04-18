@@ -1,3 +1,4 @@
+import mock
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -16,6 +17,12 @@ User = get_user_model()
 class EntityAttachmentTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
+
+        def user_perms(p):
+            return {'add_attachment': False}.get(p, True)
+
+        self.user.is_anonymous = mock.MagicMock(return_value=False)
+        self.user.has_perm = mock.MagicMock(side_effect=user_perms)
         self.object = DummyModel.objects.create()
 
     def createRequest(self):
@@ -59,9 +66,9 @@ class EntityAttachmentTestCase(TestCase):
             self.assertTrue('paperclip/fileicons/odt.png')
 
     def test_upload_form_in_details_if_perms(self):
-        subclass = type('DummyDetail', (MapEntityDetail,), {'can_edit': lambda x: True})
-        view = subclass.as_view(model=DummyModel,
-                                template_name="mapentity/entity_detail.html")
+        self.user.has_perm = mock.MagicMock(return_value=True)
+        view = MapEntityDetail.as_view(model=DummyModel,
+                                       template_name="mapentity/entity_detail.html")
 
         request = self.createRequest()
         response = view(request, pk=self.object.pk)
@@ -76,6 +83,8 @@ class UploadAttachmentTestCase(TestCase):
     def setUp(self):
         self.object = DummyModel.objects.create()
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')
+        user.is_superuser = True
+        user.save()
         success = self.client.login(username=user.username, password='booh')
         self.assertTrue(success)
 
@@ -97,7 +106,8 @@ class UploadAttachmentTestCase(TestCase):
         response = self.client.post(add_url_for_obj(self.object),
                                     data=self.attachmentPostData())
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], 'http://testserver/dummy-detail')
+        self.assertEqual(response['location'],
+                         'http://testserver/dummymodel/%s/' % self.object.pk)
 
     def test_upload_creates_attachment(self):
         data = self.attachmentPostData()

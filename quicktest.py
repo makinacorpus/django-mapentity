@@ -59,6 +59,7 @@ class QuickDjangoTest(object):
             ROOT_URLCONF='mapentity.tests.urls',
             MEDIA_URL='/media/',
             MEDIA_URL_SECURE='/media_secure/',
+            MEDIA_ROOT='/tmp/',
             MIDDLEWARE_CLASSES=(
                 'django.middleware.common.CommonMiddleware',
                 'django.contrib.sessions.middleware.SessionMiddleware',
@@ -81,6 +82,7 @@ class QuickDjangoTest(object):
             ),
             SRID=3857,
             COMPRESS_ENABLED=False,
+            TEST=True
         )
         from django.test.simple import DjangoTestSuiteRunner
         runner = DjangoTestSuiteRunner()

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
 from django.utils.translation import ugettext_lazy as _
-from django.utils.decorators import method_decorator
+
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -14,8 +14,6 @@ from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-
 from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
@@ -23,17 +21,18 @@ from djappypod.response import OdtTemplateResponse
 from .. import API_SRID
 from .. import app_settings
 from .. import models as mapentity_models
-from ..helpers import convertit_url, download_to_stream
-from ..decorators import save_history
+from ..helpers import convertit_url, download_to_stream, user_has_perm
+from ..decorators import save_history, view_permission_required
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
+from ..filters import MapEntityFilterSet
 from .base import history_delete
-from .mixins import ModelMetaMixin, JSONResponseMixin
+from .mixins import ModelViewMixin, JSONResponseMixin
 
 
 logger = logging.getLogger(__name__)
 
 
-class MapEntityLayer(GeoJSONLayerView):
+class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
     """
     Take a class attribute `model` with a `latest_updated` method used for caching.
     """
@@ -57,6 +56,7 @@ class MapEntityLayer(GeoJSONLayerView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_LAYER
 
+    @view_permission_required()
     def dispatch(self, *args, **kwargs):
         # Use lambda to bound self and to avoid passing request, *args, **kwargs as the decorator would do
         # TODO: we should be storing cache_latest and cache_latest_dispatch for reuse
@@ -84,7 +84,7 @@ class MapEntityLayer(GeoJSONLayerView):
         return response
 
 
-class MapEntityList(ModelMetaMixin, ListView):
+class MapEntityList(ModelViewMixin, ListView):
     """
 
     A generic view list web page.
@@ -96,19 +96,20 @@ class MapEntityList(ModelMetaMixin, ListView):
 
     def __init__(self, *args, **kwargs):
         super(MapEntityList, self).__init__(*args, **kwargs)
-        self._filterform = self.filterform(None, self.queryset)
+
         if self.model is None:
             self.model = self.queryset.model
+
+        if self.filterform is None:
+            class filterklass(MapEntityFilterSet):
+                class Meta:
+                    model = self.model
+            self.filterform = filterklass
+        self._filterform = self.filterform(None, self.queryset)
 
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_LIST
-
-    def can_add(self):
-        return False
-
-    def can_export(self):
-        return False
 
     def get_queryset(self):
         queryset = super(MapEntityList, self).get_queryset()
@@ -117,6 +118,7 @@ class MapEntityList(ModelMetaMixin, ListView):
                                            queryset=queryset)
         return self._filterform.qs
 
+    @view_permission_required(login_url='login')
     def dispatch(self, request, *args, **kwargs):
         # Save last list visited in session
         request.session['last_list'] = request.path
@@ -124,10 +126,17 @@ class MapEntityList(ModelMetaMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityList, self).get_context_data(**kwargs)
-        context['can_add'] = self.can_add()
-        context['can_export'] = self.can_export()
         context['filterform'] = self._filterform
         context['columns'] = self.columns
+
+        perm_create = self.model.get_permission_codename(mapentity_models.ENTITY_CREATE)
+        can_add = user_has_perm(self.request.user, perm_create)
+        context['can_add'] = can_add
+
+        perm_export = self.model.get_permission_codename(mapentity_models.ENTITY_FORMAT_LIST)
+        can_export = user_has_perm(self.request.user, perm_export)
+        context['can_export'] = can_export
+
         return context
 
 
@@ -140,8 +149,9 @@ class MapEntityJsonList(JSONResponseMixin, MapEntityList):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_JSON_LIST
 
+    @view_permission_required()
     def dispatch(self, *args, **kwargs):
-        return super(ListView, self).dispatch(*args, **kwargs)  # Bypass login_required
+        return super(ListView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """
@@ -159,8 +169,9 @@ class MapEntityFormat(MapEntityList):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_FORMAT_LIST
 
+    @view_permission_required()
     def dispatch(self, *args, **kwargs):
-        return super(ListView, self).dispatch(*args, **kwargs)  # Bypass session save_history
+        return super(ListView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         return {}
@@ -211,7 +222,7 @@ class MapEntityFormat(MapEntityList):
         return response
 
 
-class MapEntityMapImage(ModelMetaMixin, DetailView):
+class MapEntityMapImage(ModelViewMixin, DetailView):
     """
     A static file view, that serves the up-to-date map image (detail screenshot)
     On error, returns 404 status.
@@ -219,6 +230,10 @@ class MapEntityMapImage(ModelMetaMixin, DetailView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_MAPIMAGE
+
+    @view_permission_required()
+    def dispatch(self, *args, **kwargs):
+        return super(MapEntityMapImage, self).dispatch(*args, **kwargs)
 
     def render_to_response(self, context, **response_kwargs):
         try:
@@ -265,6 +280,10 @@ class MapEntityDocument(DetailView):
             raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), ''))
         self.template_name = found
 
+    @view_permission_required()
+    def dispatch(self, *args, **kwargs):
+        return super(MapEntityDocument, self).dispatch(*args, **kwargs)
+
     def get_context_data(self, **kwargs):
         rooturl = self.request.build_absolute_uri('/')
         # Screenshot of object map is required, since present in document
@@ -305,7 +324,7 @@ class DocumentConvert(DetailView):
 """
 
 
-class MapEntityCreate(ModelMetaMixin, CreateView):
+class MapEntityCreate(ModelViewMixin, CreateView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_CREATE
@@ -318,7 +337,7 @@ class MapEntityCreate(ModelMetaMixin, CreateView):
         # Whole "add" phrase translatable, but not catched  by makemessages
         return _(u"Add a new %s" % name.lower())
 
-    @method_decorator(login_required)
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
     def dispatch(self, *args, **kwargs):
         return super(MapEntityCreate, self).dispatch(*args, **kwargs)
 
@@ -340,7 +359,7 @@ class MapEntityCreate(ModelMetaMixin, CreateView):
         return context
 
 
-class MapEntityDetail(ModelMetaMixin, DetailView):
+class MapEntityDetail(ModelViewMixin, DetailView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DETAIL
@@ -348,25 +367,27 @@ class MapEntityDetail(ModelMetaMixin, DetailView):
     def get_title(self):
         return unicode(self.get_object())
 
-    @method_decorator(login_required)
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
     @save_history()
     def dispatch(self, *args, **kwargs):
         return super(MapEntityDetail, self).dispatch(*args, **kwargs)
 
-    def can_edit(self):
-        return False
-
     def get_context_data(self, **kwargs):
         context = super(MapEntityDetail, self).get_context_data(**kwargs)
         context['activetab'] = self.request.GET.get('tab')
-        context['can_edit'] = self.can_edit()
-        context['can_add_attachment'] = self.can_edit()
-        context['can_delete_attachment'] = self.can_edit()
         context['empty_map_message'] = _("No map available for this object.")
+
+        perm_update = self.model.get_permission_codename(mapentity_models.ENTITY_UPDATE)
+        can_edit = user_has_perm(self.request.user, perm_update)
+        context['can_edit'] = can_edit
+        context['can_read_attachment'] = user_has_perm(self.request.user, 'read_attachment')
+        context['can_add_attachment'] = user_has_perm(self.request.user, 'add_attachment')
+        context['can_delete_attachment'] = user_has_perm(self.request.user, 'delete_attachment')
+
         return context
 
 
-class MapEntityUpdate(ModelMetaMixin, UpdateView):
+class MapEntityUpdate(ModelViewMixin, UpdateView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_UPDATE
@@ -374,17 +395,17 @@ class MapEntityUpdate(ModelMetaMixin, UpdateView):
     def get_title(self):
         return _("Edit %s") % self.get_object()
 
-    @method_decorator(login_required)
+    @view_permission_required(login_url=mapentity_models.ENTITY_DETAIL)
     def dispatch(self, *args, **kwargs):
         return super(MapEntityUpdate, self).dispatch(*args, **kwargs)
-
-    def can_delete(self):
-        return True
 
     def get_form_kwargs(self):
         kwargs = super(MapEntityUpdate, self).get_form_kwargs()
         kwargs['user'] = self.request.user
-        kwargs['can_delete'] = self.can_delete()
+
+        perm_delete = self.model.get_permission_codename(mapentity_models.ENTITY_DELETE)
+        can_delete = user_has_perm(self.request.user, perm_delete)
+        kwargs['can_delete'] = can_delete
         return kwargs
 
     def form_valid(self, form):
@@ -399,12 +420,12 @@ class MapEntityUpdate(ModelMetaMixin, UpdateView):
         return self.get_object().get_detail_url()
 
 
-class MapEntityDelete(ModelMetaMixin, DeleteView):
+class MapEntityDelete(ModelViewMixin, DeleteView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DELETE
 
-    @method_decorator(login_required)
+    @view_permission_required(login_url=mapentity_models.ENTITY_DETAIL)
     def dispatch(self, *args, **kwargs):
         return super(MapEntityDelete, self).dispatch(*args, **kwargs)
 

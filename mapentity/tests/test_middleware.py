@@ -1,17 +1,21 @@
 from django.conf import settings
 from django.test import TestCase
 from django.test.client import RequestFactory
+from django.test.utils import override_settings
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 
 from .. import middleware
+import mock
+
 from ..middleware import AutoLoginMiddleware, get_internal_user
 
 
 User = get_user_model()
 
 
+@override_settings(TEST=False)
 class AutoLoginTest(TestCase):
     def setUp(self):
         self.middleware = AutoLoginMiddleware()
@@ -26,12 +30,13 @@ class AutoLoginTest(TestCase):
             password=settings.SECRET_KEY)
         self.assertFalse(success)
 
-    def test_login_still_required_works(self):
+    def test_auto_login_happens_by_remote_addr(self):
         middleware.CONVERSION_SERVER_HOST = '1.2.3.4'
         response = self.client.get('/media/file.pdf', REMOTE_ADDR='1.2.3.5')
-        self.assertEqual(302, response.status_code)
-        response = self.client.get('/media/file.pdf', REMOTE_ADDR='1.2.3.4')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(response.status_code, 403)
+        with mock.patch('django.contrib.auth.models._user_has_perm', return_value=True):
+            response = self.client.get('/media/file.pdf', REMOTE_ADDR='1.2.3.4')
+        self.assertEqual(response.status_code, 200)
 
     def test_auto_login_do_not_change_current_user(self):
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')

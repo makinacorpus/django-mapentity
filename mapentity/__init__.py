@@ -1,4 +1,5 @@
 import re
+import logging
 import inspect
 from collections import namedtuple, OrderedDict
 
@@ -7,11 +8,12 @@ from django.utils.importlib import import_module
 from django.views.generic.base import View
 from django.conf.urls import patterns
 
-__all__ = ['app_settings', 'registry']
 
+__all__ = ['app_settings', 'registry', 'logger']
+
+logger = logging.getLogger(__name__)
 
 API_SRID = 4326
-
 
 app_settings = dict({
     'TITLE': "",
@@ -29,6 +31,7 @@ app_settings = dict({
     'MAP_CAPTURE_MAX_RATIO': 1.25,
     'GEOM_FIELD_NAME': 'geom',
     'MAP_BACKGROUND_FOGGED': False,
+    'ANONYMOUS_VIEWS_PERMS': tuple(),
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 

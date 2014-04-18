@@ -1,7 +1,8 @@
+import mock
 from django.test import TestCase
 
 from .. import app_settings
-from ..helpers import capture_url, convertit_url
+from ..helpers import capture_url, convertit_url, user_has_perm
 
 
 class MapEntityCaptureHelpersTest(TestCase):
@@ -58,3 +59,12 @@ class MapEntityConvertHelpersTest(TestCase):
     def test_convert_url_from_is_escaped(self):
         url = convertit_url('', from_type="application/#bb")
         self.assertIn('from=application/%23bb', url)
+
+
+class UserHasPermTest(TestCase):
+    def setUp(self):
+        self.user = mock.MagicMock()
+
+    def test_return_true_if_anonymous_has_perm(self):
+        app_settings['ANONYMOUS_VIEWS_PERMS'] = ('view-perm',)
+        self.assertTrue(user_has_perm(self.user, 'view-perm'))
