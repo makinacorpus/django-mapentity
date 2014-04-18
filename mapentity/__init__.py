@@ -32,6 +32,7 @@ app_settings = dict({
     'GEOM_FIELD_NAME': 'geom',
     'MAP_BACKGROUND_FOGGED': False,
     'ANONYMOUS_VIEWS_PERMS': tuple(),
+    'GEOJSON_LAYERS_CACHE_BACKEND': 'default'
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 

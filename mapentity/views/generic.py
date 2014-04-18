@@ -66,7 +66,7 @@ class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
         return cache_latest_dispatch(*args, **kwargs)
 
     def render_to_response(self, context, **response_kwargs):
-        cache = get_cache('fat')
+        cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
         key = '%s_%s_layer_json' % (self.request.LANGUAGE_CODE,
                                     self.model._meta.module_name)
 
