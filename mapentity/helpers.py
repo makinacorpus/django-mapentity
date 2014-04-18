@@ -121,6 +121,9 @@ def is_file_newer(path, date_update, delete_empty=True):
     if not os.path.exists(path):
         return False
 
+    if date_update is None:
+        return False
+
     if os.path.getsize(path) == 0:
         if delete_empty:
             os.remove(path)
