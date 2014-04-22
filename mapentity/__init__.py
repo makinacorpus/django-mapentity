@@ -126,6 +126,7 @@ class Registry(object):
         """ Register model and returns URL patterns
         """
         from .urlizor import view_classes_to_url
+        from .signals import post_register
 
         # Ignore models from not installed apps
         if not model._meta.installed:
@@ -133,6 +134,7 @@ class Registry(object):
         # Register once only
         if model in self.registry:
             return ()
+
         # Obtain app's views module from Model
         views_module_name = re.sub('models.*', 'views', model.__module__)
         views_module = import_module(views_module_name)
@@ -161,6 +163,8 @@ class Registry(object):
                               url_list='%s:%s_%s' % (app_label, module_name, 'list'))
 
         self.registry[model] = mapentity
+        post_register.send(sender=self, app_label=app_label, model=model)
+
         # Returns Django URL patterns
         return patterns(name, *view_classes_to_url(*picked))
 

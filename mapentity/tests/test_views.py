@@ -10,6 +10,8 @@ from django.contrib.auth import get_user_model
 
 from mapentity.views.generic import MapEntityList
 from mapentity.factories import SuperUserFactory
+from mapentity.management import create_mapentity_models_permissions
+
 from .models import DummyModel
 from .test_functional import MapEntityTest, MapEntityLiveTest
 
@@ -55,6 +57,8 @@ class BaseTest(TestCase):
 class MediaTest(BaseTest):
 
     def setUp(self):
+        create_mapentity_models_permissions(None, model=DummyModel)
+
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
         os.makedirs(settings.MEDIA_ROOT)

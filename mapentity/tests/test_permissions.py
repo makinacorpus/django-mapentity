@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
+from mapentity.management import create_mapentity_models_permissions
 from mapentity.middleware import get_internal_user
 
 from .models import DummyModel
@@ -10,6 +11,7 @@ from .models import DummyModel
 class ModelPermissionsTest(TestCase):
 
     def setUp(self):
+        create_mapentity_models_permissions(None, model=DummyModel)
         self.ctype = ContentType.objects.get_for_model(DummyModel)
 
     def test_model_permissions_were_created(self):
