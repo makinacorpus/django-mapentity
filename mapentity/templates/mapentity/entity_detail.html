@@ -1,5 +1,5 @@
 {% extends "mapentity/base.html" %}
-{% load i18n static field_verbose_name mapentity leaflet_tags geojson_tags attachments_tags %}
+{% load i18n static field_verbose_name mapentity leaflet_tags geojson_tags attachments_tags timesince %}
 
 {% block title %}{{ object }} | {{ block.super }}{% endblock title %}
 
@@ -84,7 +84,7 @@
                             <tbody>
                                 {% for logentry in logentries %}
                                     <tr>
-                                        <td>{{ logentry.action_time }}</td>
+                                        <td>{{ logentry.action_time }} ({{ logentry.action_time|timesince }})</td>
                                         <td>{{ logentry.user }}</td>
                                         <td>{{ logentry.action_flag_display }}</td>
                                     </tr>
