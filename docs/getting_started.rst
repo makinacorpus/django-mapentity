@@ -32,12 +32,12 @@ Create your django Project and your main app::
 
    $ django-admin.py startproject museum
    $ cd museum/
-   $ python manage.py startapp main  
-   
+   $ python manage.py startapp main
+
 If you use PostgreSQL, also install psycopg2::
 
    $ pip install psycopg2
-    
+
 
 Edit your Django settings to point to your PostGIS database::
 
@@ -103,10 +103,6 @@ Specify cache backends::
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        },
-        # The fat backend is used to store big chunk of data (>1 Mo)
-        'fat': {
-            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         }
     }
 
@@ -115,7 +111,7 @@ Model
 -----
 
 Create a GeoDjango model which also inherits from ``MapEntityMixin``. Note that
-you'll need to add a special manager::
+you'll need to add a special manager (as for *GeoDjango*) ::
 
 
     from django.contrib.gis.db import models
@@ -186,12 +182,6 @@ Create a set of class-based views referring to your model and your filter::
         filterform = MuseumFilter
         columns = ['id', 'name']
 
-        def can_add(self):
-            return True
-
-        def can_export(self):
-            return True
-
 
     class MuseumLayer(MapEntityLayer):
         model = Museum
@@ -203,9 +193,6 @@ Create a set of class-based views referring to your model and your filter::
 
     class MuseumDetail(MapEntityDetail):
         model = Museum
-
-        def can_edit(self):
-            return True
 
 
     class MuseumFormat(MapEntityFormat):
@@ -234,8 +221,9 @@ Create a set of class-based views referring to your model and your filter::
 Admin
 -----
 
-Create a file admin.py in your main app directory and register your model
-against the admin registry::
+Create a file ``admin.py`` in your main app directory and register your model
+against the admin registry ::
+
 
     from django.contrib import admin
     from leaflet.admin import LeafletGeoAdmin
@@ -279,16 +267,13 @@ Then glue everything together in your project's ``urls.py``::
     )
 
 
-Template
---------
+Templates
+---------
 
 Create a couple of templates inside  ``main/templates/main``.
 
-``museum_list.html`` should be just::
 
-    {% extends "mapentity/entity_list.html" %}
-
-``museum_detail.html`` should contain::
+``museum_detail.html`` can contain::
 
     {% extends "mapentity/entity_detail.html" %}
     {% load i18n field_verbose_name %}
@@ -302,14 +287,6 @@ Create a couple of templates inside  ``main/templates/main``.
             </tr>
         </table>
     {% endblock detailspanel %}
-
-``museum_form.html`` should be just::
-
-    {% extends "mapentity/entity_form.html" %}
-
-``museum_confirm_delete.html`` should be just::
-
-    {% extends "mapentity/entity_confirm_delete.html" %}
 
 
 Initialize the database
