@@ -8,7 +8,6 @@ from django.core.exceptions import FieldError
 from django.contrib import auth
 from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
-from django.contrib.contenttypes.models import ContentType
 from django.utils.formats import localize
 from django.utils.translation import ugettext_lazy as _
 from paperclip.models import Attachment

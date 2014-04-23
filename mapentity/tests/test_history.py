@@ -17,7 +17,7 @@ class TestActionsHistory(TestCase):
         self.client.login(username='test', password='booh')
 
     def test_create_view_logs_addition(self):
-        response = self.client.post('/dummymodel/add/', data={
+        self.client.post('/dummymodel/add/', data={
             'geom': '{"type": "Point", "coordinates": [0, 0]}',
             'model': 'dummymodel',
         })
@@ -30,7 +30,7 @@ class TestActionsHistory(TestCase):
 
     def test_update_view_logs_change(self):
         obj = DummyModel.objects.create()
-        response = self.client.post('/dummymodel/edit/{0}/'.format(obj.pk), data={
+        self.client.post('/dummymodel/edit/{0}/'.format(obj.pk), data={
             'geom': '{"type": "Point", "coordinates": [0, 0]}',
             'model': 'dummymodel',
         })
@@ -42,7 +42,7 @@ class TestActionsHistory(TestCase):
 
     def test_delete_view_logs_deletion(self):
         obj = DummyModel.objects.create()
-        response = self.client.post('/dummymodel/delete/{0}/'.format(obj.pk))
+        self.client.post('/dummymodel/delete/{0}/'.format(obj.pk))
         self.assertEqual(LogEntry.objects.count(), 1)
         entry = LogEntry.objects.get()
         self.assertEqual(entry.object_id, str(obj.pk))

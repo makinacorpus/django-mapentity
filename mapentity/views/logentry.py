@@ -11,6 +11,7 @@ from .. import registry
 class LogEntryFilter(BaseMapEntityFilterSet):
     content_type = django_filters.NumberFilter(widget=forms.HiddenInput)
     object_id = django_filters.NumberFilter(widget=forms.HiddenInput)
+
     class Meta:
         model = LogEntry
         fields = ('user', 'content_type', 'object_id')
