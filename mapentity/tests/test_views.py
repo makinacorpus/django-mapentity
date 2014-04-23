@@ -121,7 +121,7 @@ class ListViewTest(BaseTest):
         listview = DummyList()
         listview.object_list = []
         self.assertEqual(listview.get_template_names(),
-                         ['mapentity/entity_list.html'])
+                         ['mapentity/mapentity_list.html'])
 
     def test_list_should_have_some_perms_in_context(self):
         view = DummyList()
@@ -157,7 +157,7 @@ class DetailViewTest(BaseTest):
         detailview.object = self.object
         self.assertEqual(detailview.get_template_names(),
                          ['tests/dummymodel_detail.html',
-                          'mapentity/entity_detail.html'])
+                          'mapentity/mapentity_detail.html'])
 
     def test_properties_shown_in_extended_template(self):
         self.login()

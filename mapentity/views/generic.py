@@ -104,7 +104,7 @@ class MapEntityList(ModelViewMixin, ListView):
 
     def get_template_names(self):
         default = super(MapEntityList, self).get_template_names()
-        return default + ['mapentity/entity_list.html']
+        return default + ['mapentity/mapentity_list.html']
 
     @classmethod
     def get_entity_kind(cls):
@@ -266,7 +266,7 @@ class MapEntityDocument(ModelViewMixin, DetailView):
 
         def smart_get_template():
             for appname, modelname in [(self.model._meta.app_label, self.model._meta.object_name.lower()),
-                                       ("mapentity", "entity")]:
+                                       ("mapentity", "mapentity")]:
                 for lang in langs:
                     try:
                         template_name = name_for(appname, modelname, lang)
@@ -334,7 +334,7 @@ class MapEntityCreate(ModelViewMixin, CreateView):
 
     def get_template_names(self):
         default = super(MapEntityCreate, self).get_template_names()
-        return default + ['mapentity/entity_form.html']
+        return default + ['mapentity/mapentity_form.html']
 
     @classmethod
     def get_title(cls):
@@ -370,7 +370,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
 
     def get_template_names(self):
         default = super(MapEntityDetail, self).get_template_names()
-        return default + ['mapentity/entity_detail.html']
+        return default + ['mapentity/mapentity_detail.html']
 
     def get_title(self):
         return unicode(self.get_object())
@@ -403,7 +403,7 @@ class MapEntityUpdate(ModelViewMixin, UpdateView):
 
     def get_template_names(self):
         default = super(MapEntityUpdate, self).get_template_names()
-        return default + ['mapentity/entity_form.html']
+        return default + ['mapentity/mapentity_form.html']
 
     def get_title(self):
         return _("Edit %s") % self.get_object()
@@ -441,7 +441,7 @@ class MapEntityDelete(ModelViewMixin, DeleteView):
 
     def get_template_names(self):
         default = super(MapEntityDelete, self).get_template_names()
-        return default + ['mapentity/entity_confirm_delete.html']
+        return default + ['mapentity/mapentity_confirm_delete.html']
 
     @view_permission_required(login_url=mapentity_models.ENTITY_DETAIL)
     def dispatch(self, *args, **kwargs):
