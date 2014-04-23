@@ -74,8 +74,9 @@ def serve_secure_media(request, path):
 
     response = HttpResponse()
     response['X-Accel-Redirect'] = os.path.join(settings.MEDIA_URL_SECURE, path)
-    response['Content-Disposition'] = "attachment; filename={0}".format(
-        os.path.basename(path))
+    if app_settings['SERVE_MEDIA_AS_ATTACHMENT']:
+        response['Content-Disposition'] = "attachment; filename={0}".format(
+            os.path.basename(path))
     return response
 
 
