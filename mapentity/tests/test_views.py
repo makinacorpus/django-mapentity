@@ -184,7 +184,7 @@ class ViewPermissionsTest(BaseTest):
                              target_status_code=302)  # --> login
 
     def test_unauthorized_delete_view_redirects_to_detail(self):
-        delete_url = '/dummymodel/delete/%s' % self.object.pk
-        response = self.client.get('/dummymodel/delete/%s' % self.object.pk)
+        delete_url = '/dummymodel/delete/%s/' % self.object.pk
+        response = self.client.get(delete_url)
         self.assertRedirects(response, 'http://testserver/dummymodel/%s/?next=%s' % (self.object.pk, delete_url),
                              target_status_code=302)  # --> login
