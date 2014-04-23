@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-04-16 09:18+0000\n"
+"POT-Creation-Date: 2014-04-23 14:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
+
+#: decorators.py:31
+msgid ""
+"Access to the requested resource is restricted. You have been redirected."
+msgstr ""
+"L'accès à la ressource demandée est restreint. Vous avez été redirigé."
 
 #: filters.py:21
 msgid "Any year"
@@ -37,15 +43,19 @@ msgstr "Annuler"
 msgid "Delete"
 msgstr "Supprimer"
 
-#: models.py:200
+#: models.py:250
+msgid "object"
+msgstr "objet"
+
+#: models.py:258
 msgid "Added"
 msgstr "Ajouté"
 
-#: models.py:201
+#: models.py:259
 msgid "Changed"
 msgstr "Modifié"
 
-#: models.py:202
+#: models.py:260
 msgid "Deleted"
 msgstr "Supprimé"
 
@@ -58,21 +68,49 @@ msgstr "Aucun(e)"
 msgid "Modified"
 msgstr "Modifié"
 
-#: templates/mapentity/base.html:66
+#: templates/mapentity/base.html:68
 msgid "List"
 msgstr "Liste"
 
-#: templates/mapentity/base.html:117
+#: templates/mapentity/base.html:119
 msgid "Admin"
 msgstr "Admin"
 
-#: templates/mapentity/base.html:120
+#: templates/mapentity/base.html:123
 msgid "Logbook"
 msgstr "Journal"
 
-#: templates/mapentity/base.html:123
+#: templates/mapentity/base.html:127
 msgid "Logout"
 msgstr "Déconnexion"
+
+#: templates/mapentity/base.html:189
+msgid "Measure distances"
+msgstr "Mesurer les distances"
+
+#: templates/mapentity/base.html:190
+msgid "Save map as image"
+msgstr "Sauvegarder l'image"
+
+#: templates/mapentity/base.html:192
+msgid "Map geometry is unsaved"
+msgstr "La géométrie n'a pas été sauvegardée"
+
+#: templates/mapentity/base.html:195
+msgid "Search"
+msgstr "Rechercher"
+
+#: templates/mapentity/base.html:196
+msgid "results"
+msgstr "résultats"
+
+#: templates/mapentity/base.html:197
+msgid "Current criteria"
+msgstr "Critères choisis"
+
+#: templates/mapentity/base.html:198
+msgid "No filter"
+msgstr "Aucun filtre"
 
 #: templates/mapentity/entity_confirm_delete.html:17
 #, python-format
@@ -87,58 +125,94 @@ msgstr "Oui, supprimer"
 msgid "No, back to edit view"
 msgstr "Non, retour à la vue d'édition"
 
-#: templates/mapentity/entity_detail.html:11
+#: templates/mapentity/entity_detail.html:12
 msgid "ODT"
 msgstr "ODT"
 
 #: templates/mapentity/entity_detail.html:13
+msgid "DOC"
+msgstr "DOC"
+
+#: templates/mapentity/entity_detail.html:14
 msgid "PDF"
 msgstr "PDF"
 
-#: templates/mapentity/entity_detail.html:21
+#: templates/mapentity/entity_detail.html:22
 msgid "Properties"
 msgstr "Propriétés"
 
-#: templates/mapentity/entity_detail.html:26
-#: templates/mapentity/entity_detail.html:49
+#: templates/mapentity/entity_detail.html:27
+#: templates/mapentity/entity_detail.html:55
 msgid "Attached files"
 msgstr "Fichiers liés"
 
-#: templates/mapentity/entity_detail.html:29
 #: templates/mapentity/entity_detail.html:31
+msgid "History"
+msgstr "Historique"
+
+#: templates/mapentity/entity_detail.html:35
+#: templates/mapentity/entity_detail.html:37
 msgid "Update"
 msgstr "Modifier"
 
-#: templates/mapentity/entity_detail.html:57
+#: templates/mapentity/entity_detail.html:62
+msgid "You are not allowed to see attachments."
+msgstr "Vous n'êtes pas autorisé à voir les pièces jointes."
+
+#: templates/mapentity/entity_detail.html:68
 msgid "New file attachment"
 msgstr "Nouveau fichier lié"
 
-#: templates/mapentity/entity_detail.html:71
-msgid "No map available for this object."
-msgstr "Pas de carte disponible pour cet objet."
+#: templates/mapentity/entity_detail.html:79
+msgid "Date"
+msgstr "Date"
 
-#: templates/mapentity/entity_list.html:30
+#: templates/mapentity/entity_detail.html:80
+msgid "User"
+msgstr "utilisateur"
+
+#: templates/mapentity/entity_detail.html:81
+msgid "Action"
+msgstr "Action"
+
+#: templates/mapentity/entity_detail.html:101
+msgid "Full history"
+msgstr "Historique complet"
+
 #: templates/mapentity/entity_list.html:32
+#: templates/mapentity/entity_list.html:34
 #: templates/mapentity/popupplus.html:8
 msgid "Add"
 msgstr "Ajouter"
 
-#: templates/mapentity/entity_list.html:115
-msgid "Save map as image"
-msgstr "Sauvegarder l'image"
+#: templates/mapentity/entity_list.html:58
+msgid "CSV"
+msgstr "CSV"
 
-#: templates/mapentity/entity_list.html:180
-msgid "Search"
-msgstr "Rechercher"
+#: templates/mapentity/entity_list.html:59
+msgid "Shapefile"
+msgstr "Shapefile"
 
-#: templates/mapentity/entity_list.html:202
-msgid "results"
-msgstr "résultats"
+#: templates/mapentity/entity_list.html:60
+msgid "GPX"
+msgstr "GPX"
 
 #: templates/mapentity/entity_list_filter_fragment.html:3
 #: templates/mapentity/entity_list_filter_fragment.html:17
 msgid "Filter"
 msgstr "Filtrer"
+
+#: templates/mapentity/trackinfo_fragment.html:9
+msgid "Last author"
+msgstr "Dernier auteur"
+
+#: templates/mapentity/trackinfo_fragment.html:12
+msgid "Creator"
+msgstr "Créateur"
+
+#: templates/mapentity/trackinfo_fragment.html:15
+msgid "Authors"
+msgstr "Auteurs"
 
 #: templatetags/timesince.py:21
 #, python-format
@@ -179,64 +253,32 @@ msgstr[1] "%d minutes"
 msgid "just a few seconds ago"
 msgstr "quelques secondes"
 
-#: tests/test_functional.py:48
-msgid "Topology is not valid."
-msgstr "Topologie invalide"
+#: tests/test_functional.py:49
+msgid "Invalid geometry value."
+msgstr "Géométrie invalide"
 
-#: views/generic.py:334
+#: views/generic.py:352
 #, python-format
 msgid "Add a new %s"
 msgstr "Ajouter un nouveau %s"
 
-#: views/generic.py:347
+#: views/generic.py:365
 msgid "Created"
 msgstr "Créé"
 
-#: views/generic.py:352 views/generic.py:413
+#: views/generic.py:370 views/generic.py:447
 msgid "Your form contains errors"
 msgstr "Le formulaire contient des erreurs"
 
-#: views/generic.py:391
+#: views/generic.py:402
+msgid "No map available for this object."
+msgstr "Pas de carte disponible pour cet objet."
+
+#: views/generic.py:425
 #, python-format
 msgid "Edit %s"
 msgstr "Éditer %s"
 
-#: views/generic.py:408
+#: views/generic.py:442
 msgid "Saved"
 msgstr "Sauvegardé"
-
-#~ msgid "Path"
-#~ msgstr "Tronçon"
-
-#~ msgid "Intervention"
-#~ msgstr "Intervention"
-
-#~ msgid "Project"
-#~ msgstr "Chantier"
-
-#~ msgid "Signage"
-#~ msgstr "Signalétique"
-
-#~ msgid "Infrastructure"
-#~ msgstr "Aménagement"
-
-#~ msgid "Trek"
-#~ msgstr "Itinéraire"
-
-#~ msgid "POI"
-#~ msgstr "POI"
-
-#~ msgid "Structure"
-#~ msgstr "Aménagement"
-
-#~ msgid "Unknown serialization format '%s'"
-#~ msgstr "Format de sérialization inconnnu '%s'"
-
-#~ msgid "Existing file attachment"
-#~ msgstr "Fichiers liés existant"
-
-#~ msgid "Current criteria"
-#~ msgstr "Critères choisis"
-
-#~ msgid "No filter"
-#~ msgstr "Aucun filtre"
