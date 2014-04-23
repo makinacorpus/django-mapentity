@@ -8,11 +8,11 @@ from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
 
-from mapentity.views.generic import MapEntityList
 from mapentity.factories import SuperUserFactory
 from mapentity.management import create_mapentity_models_permissions
 
 from .models import DummyModel
+from .views import DummyList, DummyDetail
 from .test_functional import MapEntityTest, MapEntityLiveTest
 
 
@@ -21,6 +21,7 @@ User = get_user_model()
 
 class DummyModelFactory(factory.Factory):
     FACTORY_FOR = DummyModel
+    name = ''
 
 
 class DummyModelFunctionalTest(MapEntityTest):
@@ -32,7 +33,7 @@ class DummyModelFunctionalTest(MapEntityTest):
         return {'geom': '{"type": "Point", "coordinates":[0, 0]}'}
 
 
-class MapEntityLiveTest(MapEntityLiveTest):
+class DummyModelLiveTest(MapEntityLiveTest):
     userfactory = SuperUserFactory
     model = DummyModel
     modelfactory = DummyModelFactory
@@ -41,7 +42,7 @@ class MapEntityLiveTest(MapEntityLiveTest):
 class BaseTest(TestCase):
     def login(self):
         if getattr(self, 'user', None) is None:
-            user = User.objects.create_user(self.__class__.__name__,
+            user = User.objects.create_user(self.__class__.__name__ + 'User',
                                             'email@corp.com', 'booh')
             setattr(self, 'user', user)
         self.logout()
@@ -106,17 +107,6 @@ def setup_view(view, request, *args, **kwargs):
     return view
 
 
-class DummyFilterForm(object):
-    def __init__(self, params, queryset):
-        self.qs = queryset
-
-
-class DummyList(MapEntityList):
-    model = DummyModel
-    filterform = DummyFilterForm
-    template_name = 'mapentity/entity_list.html'
-
-
 class ListViewTest(BaseTest):
 
     def setUp(self):
@@ -126,6 +116,12 @@ class ListViewTest(BaseTest):
             return {'tests.export_dummymodel': False}.get(p, True)
 
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
+
+    def test_mapentity_template_is_last_candidate(self):
+        listview = DummyList()
+        listview.object_list = []
+        self.assertEqual(listview.get_template_names(),
+                         ['mapentity/entity_list.html'])
 
     def test_list_should_have_some_perms_in_context(self):
         view = DummyList()
@@ -146,6 +142,29 @@ class ListViewTest(BaseTest):
 
         self.assertTrue('btn-group disabled' in html)
         self.assertTrue('Add</a>' in html)
+
+
+class DetailViewTest(BaseTest):
+    def setUp(self):
+        self.login()
+        self.user.is_superuser = True
+        self.user.save()
+        self.logout()
+        self.object = DummyModelFactory.create(name='dumber')
+
+    def test_mapentity_template_is_last_candidate(self):
+        detailview = DummyDetail()
+        detailview.object = self.object
+        self.assertEqual(detailview.get_template_names(),
+                         ['tests/dummymodel_detail.html',
+                          'mapentity/entity_detail.html'])
+
+    def test_properties_shown_in_extended_template(self):
+        self.login()
+        response = self.client.get(self.object.get_detail_url())
+        self.assertTemplateUsed(response,
+                                template_name='tests/dummymodel_detail.html')
+        self.assertContains(response, 'dumber')
 
 
 class ViewPermissionsTest(BaseTest):
