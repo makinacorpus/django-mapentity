@@ -50,7 +50,7 @@ class EntityAttachmentTestCase(TestCase):
         self.createAttachment(self.object)
         request = self.createRequest()
         view = MapEntityDetail.as_view(model=DummyModel,
-                                       template_name="mapentity/entity_detail.html")
+                                       template_name="mapentity/mapentity_detail.html")
         response = view(request, pk=self.object.pk)
         html = unicode(response.render())
         self.assertTemplateUsed(response, template_name='paperclip/details.html')
@@ -68,7 +68,7 @@ class EntityAttachmentTestCase(TestCase):
     def test_upload_form_in_details_if_perms(self):
         self.user.has_perm = mock.MagicMock(return_value=True)
         view = MapEntityDetail.as_view(model=DummyModel,
-                                       template_name="mapentity/entity_detail.html")
+                                       template_name="mapentity/mapentity_detail.html")
 
         request = self.createRequest()
         response = view(request, pk=self.object.pk)

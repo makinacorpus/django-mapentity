@@ -1,6 +1,7 @@
 from django.db.models import loading
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
+from django.utils.translation import ugettext_lazy as _
 
 from mapentity.models import MapEntityMixin
 
@@ -34,9 +35,12 @@ class WeatherStation(models.Model):
 
 
 class DummyModel(MapEntityMixin, models.Model):
+    name = models.CharField(blank=True, default='', max_length=128)
     geom = models.PointField(null=True, default=None)
 
     objects = models.GeoManager()
 
+    class Meta:
+        verbose_name = _(u"Dummy Model")
 
 loading.cache.loaded = False

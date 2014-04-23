@@ -60,6 +60,14 @@ class MapEntityMixin(object):
         setattr(cls, name, property(func))
 
     @classmethod
+    def get_create_label(cls):
+        name = cls._meta.verbose_name
+        if hasattr(name, '_proxy____args'):
+            name = name._proxy____args[0]  # untranslated
+        # Whole "add" phrase translatable, but not catched  by makemessages
+        return _(u"Add a new %s" % name.lower())
+
+    @classmethod
     def get_entity_kind_permission(cls, entity_kind):
         operations = {
             ENTITY_CREATE: ENTITY_PERMISSION_CREATE,

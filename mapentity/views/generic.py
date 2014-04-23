@@ -99,7 +99,6 @@ class MapEntityList(ModelViewMixin, ListView):
     A generic view list web page.
 
     """
-    template_name = 'mapentity/entity_list.html'
     model = None
     filterform = None
     columns = []
@@ -116,6 +115,10 @@ class MapEntityList(ModelViewMixin, ListView):
                     model = self.model
             self.filterform = filterklass
         self._filterform = self.filterform(None, self.queryset)
+
+    def get_template_names(self):
+        default = super(MapEntityList, self).get_template_names()
+        return default + ['mapentity/mapentity_list.html']
 
     @classmethod
     def get_entity_kind(cls):
@@ -138,6 +141,8 @@ class MapEntityList(ModelViewMixin, ListView):
         context = super(MapEntityList, self).get_context_data(**kwargs)
         context['filterform'] = self._filterform
         context['columns'] = self.columns
+
+        context['create_label'] = self.get_model().get_create_label()
 
         perm_create = self.model.get_permission_codename(mapentity_models.ENTITY_CREATE)
         can_add = user_has_perm(self.request.user, perm_create)
@@ -275,7 +280,7 @@ class MapEntityDocument(ModelViewMixin, DetailView):
 
         def smart_get_template():
             for appname, modelname in [(self.model._meta.app_label, self.model._meta.object_name.lower()),
-                                       ("mapentity", "entity")]:
+                                       ("mapentity", "mapentity")]:
                 for lang in langs:
                     try:
                         template_name = name_for(appname, modelname, lang)
@@ -337,19 +342,17 @@ class DocumentConvert(DetailView):
 
 class MapEntityCreate(ModelViewMixin, CreateView):
 
-    template_name = 'mapentity/entity_form.html'
-
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_CREATE
 
+    def get_template_names(self):
+        default = super(MapEntityCreate, self).get_template_names()
+        return default + ['mapentity/mapentity_form.html']
+
     @classmethod
     def get_title(cls):
-        name = cls.model._meta.verbose_name
-        if hasattr(name, '_proxy____args'):
-            name = name._proxy____args[0]  # untranslated
-        # Whole "add" phrase translatable, but not catched  by makemessages
-        return _(u"Add a new %s" % name.lower())
+        return cls.model.get_create_label()
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
     def dispatch(self, *args, **kwargs):
@@ -377,11 +380,13 @@ class MapEntityCreate(ModelViewMixin, CreateView):
 
 class MapEntityDetail(ModelViewMixin, DetailView):
 
-    template_name = 'mapentity/entity_detail.html'
-
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DETAIL
+
+    def get_template_names(self):
+        default = super(MapEntityDetail, self).get_template_names()
+        return default + ['mapentity/mapentity_detail.html']
 
     def get_title(self):
         return unicode(self.get_object())
@@ -403,7 +408,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         context['logentries'] = logentries[:logentries_max]
         context['logentries_hellip'] = logentries.count() > logentries_max
 
-        perm_update = self.model.get_permission_codename(mapentity_models.ENTITY_UPDATE)
+        perm_update = self.get_model().get_permission_codename(mapentity_models.ENTITY_UPDATE)
         can_edit = user_has_perm(self.request.user, perm_update)
         context['can_edit'] = can_edit
         context['can_read_attachment'] = user_has_perm(self.request.user, 'read_attachment')
@@ -415,11 +420,13 @@ class MapEntityDetail(ModelViewMixin, DetailView):
 
 class MapEntityUpdate(ModelViewMixin, UpdateView):
 
-    template_name = 'mapentity/entity_form.html'
-
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_UPDATE
+
+    def get_template_names(self):
+        default = super(MapEntityUpdate, self).get_template_names()
+        return default + ['mapentity/mapentity_form.html']
 
     def get_title(self):
         return _("Edit %s") % self.get_object()
@@ -432,7 +439,7 @@ class MapEntityUpdate(ModelViewMixin, UpdateView):
         kwargs = super(MapEntityUpdate, self).get_form_kwargs()
         kwargs['user'] = self.request.user
 
-        perm_delete = self.model.get_permission_codename(mapentity_models.ENTITY_DELETE)
+        perm_delete = self.get_model().get_permission_codename(mapentity_models.ENTITY_DELETE)
         can_delete = user_has_perm(self.request.user, perm_delete)
         kwargs['can_delete'] = can_delete
         return kwargs
@@ -453,11 +460,13 @@ class MapEntityUpdate(ModelViewMixin, UpdateView):
 
 class MapEntityDelete(ModelViewMixin, DeleteView):
 
-    template_name = 'mapentity/entity_confirm_delete.html'
-
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DELETE
+
+    def get_template_names(self):
+        default = super(MapEntityDelete, self).get_template_names()
+        return default + ['mapentity/mapentity_confirm_delete.html']
 
     @view_permission_required(login_url=mapentity_models.ENTITY_DETAIL)
     def dispatch(self, *args, **kwargs):
@@ -471,4 +480,4 @@ class MapEntityDelete(ModelViewMixin, DeleteView):
         return super(MapEntityDelete, self).delete(request, *args, **kwargs)
 
     def get_success_url(self):
-        return self.model.get_list_url()
+        return self.get_model().get_list_url()

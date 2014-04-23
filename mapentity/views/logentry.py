@@ -25,11 +25,6 @@ class LogEntryList(MapEntityList):
         queryset = super(LogEntryList, self).get_queryset()
         return queryset.filter(content_type_id__in=registry.content_type_ids)
 
-    def get_context_data(self, **kwargs):
-        context = super(LogEntryList, self).get_context_data(**kwargs)
-        context['can_add'] = False  # There is no LogEntryCreate view
-        return context
-
 
 class LogEntryJsonList(MapEntityJsonList, LogEntryList):
     pass
