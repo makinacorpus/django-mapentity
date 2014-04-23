@@ -29,9 +29,9 @@
             <div class="btn-toolbar">
                 {% block mainactions %}
                     {% if can_add %}
-                        <a class="btn btn-success" href="{{ model.get_add_url }}"><i class="icon-plus icon-white"></i> {% trans "Add" %}</a>
+                        <a class="btn btn-success" href="{{ model.get_add_url }}"><i class="icon-plus icon-white"></i> {{ create_label }}</a>
                     {% else %}
-                        <span class="btn disabled" href="#"><i class="icon-plus icon-white"></i> {% trans "Add" %}</span>
+                        <span class="btn disabled" href="#"><i class="icon-plus icon-white"></i> {{ create_label }}</span>
                     {% endif %}
                 {% endblock mainactions %}
 

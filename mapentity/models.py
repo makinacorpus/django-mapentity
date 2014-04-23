@@ -4,6 +4,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import FieldError
 from django.contrib import auth
+from django.utils.translation import ugettext_lazy as _
 
 from paperclip.models import Attachment
 
@@ -51,6 +52,14 @@ class MapEntityMixin(object):
         if hasattr(cls, name):
             return  # ignore
         setattr(cls, name, property(func))
+
+    @classmethod
+    def get_create_label(cls):
+        name = cls._meta.verbose_name
+        if hasattr(name, '_proxy____args'):
+            name = name._proxy____args[0]  # untranslated
+        # Whole "add" phrase translatable, but not catched  by makemessages
+        return _(u"Add a new %s" % name.lower())
 
     @classmethod
     def get_entity_kind_permission(cls, entity_kind):

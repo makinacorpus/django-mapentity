@@ -128,6 +128,8 @@ class MapEntityList(ModelViewMixin, ListView):
         context['filterform'] = self._filterform
         context['columns'] = self.columns
 
+        context['create_label'] = self.get_model().get_create_label()
+
         perm_create = self.model.get_permission_codename(mapentity_models.ENTITY_CREATE)
         can_add = user_has_perm(self.request.user, perm_create)
         context['can_add'] = can_add
@@ -336,11 +338,7 @@ class MapEntityCreate(ModelViewMixin, CreateView):
 
     @classmethod
     def get_title(cls):
-        name = cls.model._meta.verbose_name
-        if hasattr(name, '_proxy____args'):
-            name = name._proxy____args[0]  # untranslated
-        # Whole "add" phrase translatable, but not catched  by makemessages
-        return _(u"Add a new %s" % name.lower())
+        return cls.model.get_create_label()
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
     def dispatch(self, *args, **kwargs):

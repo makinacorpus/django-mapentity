@@ -1,6 +1,7 @@
 from django.db.models import loading
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
+from django.utils.translation import ugettext_lazy as _
 
 from mapentity.models import MapEntityMixin
 
@@ -39,5 +40,7 @@ class DummyModel(MapEntityMixin, models.Model):
 
     objects = models.GeoManager()
 
+    class Meta:
+        verbose_name = _(u"Dummy Model")
 
 loading.cache.loaded = False

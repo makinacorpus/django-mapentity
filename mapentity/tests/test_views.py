@@ -141,7 +141,7 @@ class ListViewTest(BaseTest):
         html = unicode(response.render())
 
         self.assertTrue('btn-group disabled' in html)
-        self.assertTrue('Add</a>' in html)
+        self.assertTrue('Add a new dummy model</a>' in html)
 
 
 class DetailViewTest(BaseTest):
