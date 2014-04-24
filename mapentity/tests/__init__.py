@@ -8,3 +8,4 @@ from .test_attachments import *  # noqa
 from .test_serializers import *  # noqa
 from .test_decorators import *  # noqa
 from .test_permissions import *  # noqa
+from .test_history import *  # noqa

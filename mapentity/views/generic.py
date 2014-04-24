@@ -6,6 +6,7 @@ from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
 from django.utils.translation import ugettext_lazy as _
 
+from django.utils.encoding import force_text
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -22,6 +23,7 @@ from .. import app_settings
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream, user_has_perm
 from ..decorators import save_history, view_permission_required, view_cache_latest
+from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from ..filters import MapEntityFilterSet
 from .base import history_delete
@@ -29,6 +31,18 @@ from .mixins import ModelViewMixin, JSONResponseMixin
 
 
 logger = logging.getLogger(__name__)
+
+
+def log_action(request, object, action_flag):
+    if not app_settings['ACTION_HISTORY_ENABLED']:
+        return
+    LogEntry.objects.log_action(
+        user_id=request.user.pk,
+        content_type_id=object.get_content_type_id(),
+        object_id=object.pk,
+        object_repr=force_text(object),
+        action_flag=action_flag
+    )
 
 
 class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
@@ -350,8 +364,10 @@ class MapEntityCreate(ModelViewMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
+        response = super(MapEntityCreate, self).form_valid(form)
         messages.success(self.request, _("Created"))
-        return super(MapEntityCreate, self).form_valid(form)
+        log_action(self.request, self.object, ADDITION)
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request, _("Your form contains errors"))
@@ -382,8 +398,15 @@ class MapEntityDetail(ModelViewMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityDetail, self).get_context_data(**kwargs)
+        logentries_max = app_settings['ACTION_HISTORY_LENGTH']
+        logentries = LogEntry.objects.filter(
+            content_type_id=self.object.get_content_type_id(),
+            object_id=self.object.pk
+        ).order_by('-id')
         context['activetab'] = self.request.GET.get('tab')
         context['empty_map_message'] = _("No map available for this object.")
+        context['logentries'] = logentries[:logentries_max]
+        context['logentries_hellip'] = logentries.count() > logentries_max
 
         perm_update = self.get_model().get_permission_codename(mapentity_models.ENTITY_UPDATE)
         can_edit = user_has_perm(self.request.user, perm_update)
@@ -422,8 +445,10 @@ class MapEntityUpdate(ModelViewMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
+        response = super(MapEntityUpdate, self).form_valid(form)
         messages.success(self.request, _("Saved"))
-        return super(MapEntityUpdate, self).form_valid(form)
+        log_action(self.request, self.object, CHANGE)
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request, _("Your form contains errors"))
@@ -448,8 +473,10 @@ class MapEntityDelete(ModelViewMixin, DeleteView):
         return super(MapEntityDelete, self).dispatch(*args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        log_action(self.request, self.object, DELETION)
         # Remove entry from history
-        history_delete(request, path=self.get_object().get_detail_url())
+        history_delete(request, path=self.object.get_detail_url())
         return super(MapEntityDelete, self).delete(request, *args, **kwargs)
 
     def get_success_url(self):

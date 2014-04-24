@@ -49,7 +49,7 @@ def url_update(model):
 
 
 def url_delete(model):
-    return r'^{0}/delete/(?P<pk>\d+)$'.format(frommodel(model))
+    return r'^{0}/delete/(?P<pk>\d+)/$'.format(frommodel(model))
 
 
 kind_to_urlpath = {

@@ -1,13 +1,18 @@
 import os
 
 from django.db import models
+from django.db.utils import OperationalError
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError
 from django.contrib import auth
+from django.contrib.admin.models import LogEntry as BaseLogEntry
+from django.contrib.admin.models import ADDITION, CHANGE, DELETION
+from django.utils.formats import localize
 from django.utils.translation import ugettext_lazy as _
-
 from paperclip.models import Attachment
 
+from mapentity.templatetags.timesince import humanize_timesince
 from . import app_settings
 from .helpers import smart_urljoin, is_file_newer, capture_map_image, extract_attributes_html
 
@@ -220,3 +225,55 @@ class MapEntityMixin(object):
     def get_attributes_html(self, rooturl):
         url = smart_urljoin(rooturl, self.get_detail_url())
         return extract_attributes_html(url)
+
+    @classmethod
+    def get_content_type_id(cls):
+        try:
+            return ContentType.objects.get_for_model(cls).pk
+        except OperationalError:  # table is not yet created
+            return None
+
+    @property
+    def creator(self):
+        log_entry = LogEntry.objects.get(
+            content_type_id=self.get_content_type_id(),
+            object_id=self.pk,
+            action_flag=ADDITION)
+        return log_entry.user
+
+    @property
+    def authors(self):
+        return auth.get_user_model().objects.filter(
+            logentry__content_type_id=self.get_content_type_id(),
+            logentry__object_id=self.pk)
+
+    @property
+    def last_author(self):
+        return self.authors.order_by('logentry__pk').last()
+
+
+class LogEntry(MapEntityMixin, BaseLogEntry):
+    geom = None
+    object_verbose_name = _("object")
+
+    class Meta:
+        proxy = True
+
+    @property
+    def action_flag_display(self):
+        return {
+            ADDITION: _("Added"),
+            CHANGE: _("Changed"),
+            DELETION: _("Deleted"),
+        }[self.action_flag]
+
+    @property
+    def action_time_display(self):
+        return u'{0} ({1})'.format(localize(self.action_time),
+                                   humanize_timesince(self.action_time))
+
+    @property
+    def object_display(self):
+        obj = self.get_edited_object()
+        return u'<a data-pk="%s" href="%s" >%s %s</a>' % (
+            obj.pk, obj.get_detail_url(), obj._meta.verbose_name.title(), unicode(obj))

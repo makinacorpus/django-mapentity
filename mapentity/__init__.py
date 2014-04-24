@@ -31,6 +31,8 @@ app_settings = dict({
     'MAP_CAPTURE_MAX_RATIO': 1.25,
     'GEOM_FIELD_NAME': 'geom',
     'MAP_BACKGROUND_FOGGED': False,
+    'ACTION_HISTORY_ENABLED': True,
+    'ACTION_HISTORY_LENGTH': 20,
     'ANONYMOUS_VIEWS_PERMS': tuple(),
     'GEOJSON_LAYERS_CACHE_BACKEND': 'default'
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
@@ -121,6 +123,7 @@ class Registry(object):
     def __init__(self):
         self.registry = OrderedDict()
         self.apps = {}
+        self.content_type_ids = []
 
     def register(self, model, name='', menu=True):
         """ Register model and returns URL patterns
@@ -165,6 +168,7 @@ class Registry(object):
         self.registry[model] = mapentity
         post_register.send(sender=self, app_label=app_label, model=model)
 
+        self.content_type_ids.append(model.get_content_type_id())
         # Returns Django URL patterns
         return patterns(name, *view_classes_to_url(*picked))
 

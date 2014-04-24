@@ -21,6 +21,11 @@ from .base import (handler403,
                    map_screenshot,
                    convert,
                    history_delete)
+from .logentry import (LogEntryList,
+                       LogEntryJsonList,
+                       LogEntryDetail,
+                       LogEntryFormat,
+                       LogEntryLayer)
 
 
 __all__ = ['MapEntityLayer',
@@ -47,4 +52,10 @@ __all__ = ['MapEntityLayer',
            'JSSettings',
            'map_screenshot',
            'convert',
-           'history_delete']
+           'history_delete',
+
+           'LogEntryList',
+           'LogEntryJsonList',
+           'LogEntryDetail',
+           'LogEntryFormat',
+           'LogEntryLayer']

@@ -11,5 +11,6 @@ def settings(request):
         JS_SETTINGS_VIEW=app_settings['JS_SETTINGS_VIEW'],
         TRANSLATED_LANGUAGES=app_settings['TRANSLATED_LANGUAGES'],
         MAP_BACKGROUND_FOGGED=app_settings['MAP_BACKGROUND_FOGGED'],
+        ACTION_HISTORY_ENABLED=app_settings['ACTION_HISTORY_ENABLED'],
         registry=registry,
     )

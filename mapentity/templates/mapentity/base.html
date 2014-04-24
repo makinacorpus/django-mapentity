@@ -119,8 +119,10 @@
                     <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
                     <li class="divider"></li>
                   {% endif %}
-                  <li class="{% block nav-logbook %}disabled{% endblock nav-logbook %}"><a href="#">{% trans "Logbook" %}</a></li>
-                  <li class="divider"></li>
+                  {% if ACTION_HISTORY_ENABLED %}
+                    <li class="{% block nav-logbook %}{% endblock nav-logbook %}"><a href="{% url 'mapentity:logentry_list' %}">{% trans "Logbook" %}</a></li>
+                    <li class="divider"></li>
+                  {% endif %}
 
                   <li><a href="{% url 'logout' %}"><i class="icon-off"></i> {% trans "Logout" %}</a></li>
                </ul>
