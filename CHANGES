@@ -5,10 +5,20 @@ CHANGELOG
 0.1.0 (unreleased)
 ==================
 
-* Initial working version
+** New features **
 
-Breaking changes:
+* Track objects creations, changes and deletions
+* Rely on Django permissions to control access to detail, list and exports
+* Got rid of inline JavaScript blocks, now rely on stupid-simple events
+
+** Internal changes **
 
 * Make API_SRID a constant hardcoded to 4326
-* Make SRID an app setting so must appears as MAPENTITY_SRID in your project's
+* Make SRID an app setting so must appears in ``MAPENTITY_CONFIG`` in your project's
   settings
+
+
+0.1.0 (unreleased)
+==================
+
+* Internal version of Geotrek < 0.23
