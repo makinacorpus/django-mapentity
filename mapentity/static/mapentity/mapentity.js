@@ -43,7 +43,8 @@ $(document).ready(function (e) {
 
     // Maps
     $(window).on('map:init', function (e) {
-        var data = e.originalEvent.detail;
+        var data = e.originalEvent ?
+                   e.originalEvent.detail : e.detail;
         $.extend(data, context);
         $(window).trigger('entity:map', [data]);
         $(window).trigger('entity:map:' + context.view, [data]);
