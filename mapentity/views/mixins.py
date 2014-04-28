@@ -2,6 +2,7 @@ import logging
 
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
+from ..forms import MapEntityForm
 from ..serializers import json_django_dumps
 
 
@@ -83,3 +84,19 @@ class ModelViewMixin(object):
             context['modelname'] = model._meta.object_name.lower()
             context['objectsname'] = model._meta.verbose_name_plural
         return context
+
+
+class FormViewMixin(object):
+    """
+    Dynamically create form if not specified
+    """
+
+    def get_form_class(self):
+        if not self.form_class:
+            _model = self.model
+
+            class MapEntityAutoForm(MapEntityForm):
+                class Meta:
+                    model = _model
+            self.form_class = MapEntityAutoForm
+        return self.form_class

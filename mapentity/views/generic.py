@@ -27,7 +27,7 @@ from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from ..filters import MapEntityFilterSet
 from .base import history_delete
-from .mixins import ModelViewMixin, JSONResponseMixin
+from .mixins import ModelViewMixin, JSONResponseMixin, FormViewMixin
 
 
 logger = logging.getLogger(__name__)
@@ -340,7 +340,7 @@ class DocumentConvert(DetailView):
 """
 
 
-class MapEntityCreate(ModelViewMixin, CreateView):
+class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
 
     @classmethod
     def get_entity_kind(cls):
@@ -418,7 +418,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         return context
 
 
-class MapEntityUpdate(ModelViewMixin, UpdateView):
+class MapEntityUpdate(ModelViewMixin, FormViewMixin, UpdateView):
 
     @classmethod
     def get_entity_kind(cls):
