@@ -264,8 +264,11 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         # Without headers to cache
         lastmodified = response.headers.get('Last-Modified')
+        expires = response.headers.get('Expires')
         md5sum = md5.new(response.content).digest()
         self.assertNotEqual(lastmodified, None)
+        self.assertNotEqual(expires, None)
+        self.assertEqual(expires, lastmodified)
 
         # Try again, check that nothing changed
         response = self.session.get(geojson_layer_url)

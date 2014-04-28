@@ -1,6 +1,7 @@
 from functools import wraps
 
 from django.utils.decorators import available_attrs, method_decorator
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import last_modified as cache_last_modified
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
@@ -68,7 +69,10 @@ def view_cache_latest():
             cache_latest = cache_last_modified(lambda x: view_model.latest_updated())
             cbv_cache_latest = method_decorator(cache_latest)
 
+            # The first decorator allows browser's cache revalidation.
+            # The second one forces browser's cache revalidation.
             @cbv_cache_latest
+            @method_decorator(never_cache)
             def decorated(self, request, *args, **kwargs):
                 return view_func(self, request, *args, **kwargs)
 
