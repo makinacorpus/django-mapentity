@@ -5,9 +5,8 @@ from .models import DummyModel
 
 
 class DummyForm(mapentity_forms.MapEntityForm):
-    class Meta(mapentity_forms.MapEntityForm.Meta):
+    class Meta:
         model = DummyModel
-        fields = mapentity_forms.MapEntityForm.Meta.fields + ['geom']
 
 
 class DummyList(mapentity_views.MapEntityList):

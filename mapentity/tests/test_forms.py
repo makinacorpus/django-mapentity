@@ -5,7 +5,7 @@ from .models import DummyModel
 
 
 class DummyForm(MapEntityForm):
-    class Meta(MapEntityForm.Meta):
+    class Meta:
         model = DummyModel
 
 
