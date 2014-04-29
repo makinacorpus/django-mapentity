@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import django_filters
 from django import forms
-from .generic import (MapEntityList, MapEntityJsonList, MapEntityDetail,
-                      MapEntityFormat, MapEntityLayer)
+from .generic import (MapEntityList, MapEntityJsonList, MapEntityFormat)
 from ..filters import BaseMapEntityFilterSet
 from ..models import LogEntry
 from .. import registry
@@ -31,14 +30,6 @@ class LogEntryJsonList(MapEntityJsonList, LogEntryList):
     pass
 
 
-class LogEntryDetail(MapEntityDetail):
-    model = LogEntry
-
-
 class LogEntryFormat(MapEntityFormat):
     model = LogEntry
     filterform = LogEntryFilter
-
-
-class LogEntryLayer(MapEntityLayer):
-    model = LogEntry

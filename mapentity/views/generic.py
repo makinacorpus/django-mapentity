@@ -490,3 +490,17 @@ class MapEntityDelete(ModelViewMixin, DeleteView):
 
     def get_success_url(self):
         return self.get_model().get_list_url()
+
+
+MAPENTITY_GENERIC_VIEWS = [
+    MapEntityLayer,
+    MapEntityList,
+    MapEntityJsonList,
+    MapEntityFormat,
+    MapEntityMapImage,
+    MapEntityDocument,
+    MapEntityCreate,
+    MapEntityDetail,
+    MapEntityUpdate,
+    MapEntityDelete,
+]

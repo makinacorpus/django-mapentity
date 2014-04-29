@@ -128,6 +128,7 @@ class Registry(object):
     def register(self, model, name='', menu=True):
         """ Register model and returns URL patterns
         """
+        from .views.generic import MAPENTITY_GENERIC_VIEWS
         from .urlizor import view_classes_to_url
         from .signals import post_register
 
@@ -153,6 +154,15 @@ class Registry(object):
                     else:
                         if view_model is model:
                             picked.append(view)
+
+        _model = model
+
+        # Dynamically define missing views
+        for generic_view in MAPENTITY_GENERIC_VIEWS:
+            if not any([issubclass(view, generic_view) for view in picked]):
+                class dynamic_view(generic_view):
+                    model = _model
+                picked.append(dynamic_view)
 
         module_name = model._meta.module_name
         app_label = model._meta.app_label
