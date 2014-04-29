@@ -4,7 +4,7 @@ from django.db import models
 from django.db.utils import OperationalError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import FieldError
+from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.contrib import auth
 from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
@@ -274,6 +274,11 @@ class LogEntry(MapEntityMixin, BaseLogEntry):
 
     @property
     def object_display(self):
-        obj = self.get_edited_object()
-        return u'<a data-pk="%s" href="%s" >%s %s</a>' % (
-            obj.pk, obj.get_detail_url(), obj._meta.verbose_name.title(), unicode(obj))
+        model_str = unicode(self.content_type)
+        try:
+            obj = self.get_edited_object()
+        except ObjectDoesNotExist:
+            return u'%s %s' % (model_str, self.object_repr)
+        else:
+            return u'<a data-pk="%s" href="%s" >%s %s</a>' % (
+                obj.pk, obj.get_detail_url(), model_str, self.object_repr)
