@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import django_filters
 from django import forms
-from .generic import (MapEntityList, MapEntityJsonList, MapEntityFormat)
+from .generic import MapEntityList
 from ..filters import BaseMapEntityFilterSet
 from ..models import LogEntry
 from .. import registry
@@ -24,12 +24,3 @@ class LogEntryList(MapEntityList):
     def get_queryset(self):
         queryset = super(LogEntryList, self).get_queryset()
         return queryset.filter(content_type_id__in=registry.content_type_ids)
-
-
-class LogEntryJsonList(MapEntityJsonList, LogEntryList):
-    pass
-
-
-class LogEntryFormat(MapEntityFormat):
-    model = LogEntry
-    filterform = LogEntryFilter

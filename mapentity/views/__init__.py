@@ -28,11 +28,7 @@ from .base import (
     convert,
     history_delete,
 )
-from .logentry import (
-    LogEntryList,
-    LogEntryJsonList,
-    LogEntryFormat,
-)
+from .logentry import LogEntryList
 
 __all__ = MAPENTITY_GENERIC_VIEWS + [
     'DocumentConvert',
@@ -52,6 +48,4 @@ __all__ = MAPENTITY_GENERIC_VIEWS + [
     'history_delete',
 
     'LogEntryList',
-    'LogEntryJsonList',
-    'LogEntryFormat',
 ]
