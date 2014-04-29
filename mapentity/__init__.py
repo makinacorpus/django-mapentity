@@ -125,9 +125,10 @@ class Registry(object):
         self.apps = {}
         self.content_type_ids = []
 
-    def register(self, model, name='', menu=True):
+    def register(self, model, name='', menu=True, dynamic_views=None):
         """ Register model and returns URL patterns
         """
+        from .views import generic as mapentity_views
         from .views.generic import (
             MAPENTITY_GENERIC_VIEWS,
             MapEntityList,
@@ -165,8 +166,14 @@ class Registry(object):
 
         _model = model
 
+        if dynamic_views is None:
+            generic_views = MAPENTITY_GENERIC_VIEWS
+        else:
+            generic_views = [getattr(mapentity_views, 'MapEntity%s' % name)
+                             for name in dynamic_views]
+
         # Dynamically define missing views
-        for generic_view in MAPENTITY_GENERIC_VIEWS:
+        for generic_view in generic_views:
             if not any([issubclass(view, generic_view) for view in picked]):
                 if list_view and generic_view in (MapEntityJsonList, MapEntityFormat):
                     # JsonList and Format view depend on List view

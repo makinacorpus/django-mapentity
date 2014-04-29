@@ -28,4 +28,5 @@ urlpatterns = patterns(
 )
 
 if app_settings['ACTION_HISTORY_ENABLED']:
-    urlpatterns += registry.register(LogEntry, menu=False)
+    urlpatterns += registry.register(
+        LogEntry, menu=False, dynamic_views=['List', 'JsonList', 'Layer'])
