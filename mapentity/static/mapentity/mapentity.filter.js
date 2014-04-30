@@ -66,8 +66,11 @@ MapEntity.TogglableFilter = L.Class.extend({
     __reposition: function (tip) {
         // Adjust position nicely along filter button
         var btnleft = $(this.button).position().left,
-            btnwidth = $(this.button).width();
+            btnwidth = $(this.button).width(),
+            btntop = $(this.button).position().top,
+            btnheight = $(this.button).height();
         tip.css('left', btnleft + btnwidth/2 - tip.width()/2);
+        tip.css('top', btntop + btnheight + 10);
     },
 
     showinfo: function () {
