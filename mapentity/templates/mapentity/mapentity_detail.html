@@ -24,7 +24,7 @@
                     </a>
                 </li>
                 <li id="tab-attachments" class="{% if activetab == "attachments" %}active{% endif %}">
-                    <a href="#attachments" data-toggle="tab"><i class="icon-file"></i> {% trans "Attached files" %}</a>
+                    <a href="#attachments" data-toggle="tab"><i class="icon-file"></i> {% trans "Attached files" %} ({{ object.attachments.count }})</a>
                 </li>
                 {% if ACTION_HISTORY_ENABLED %}
                     <li id="tab-history">
