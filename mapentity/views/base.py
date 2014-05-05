@@ -6,6 +6,7 @@ import logging
 import traceback
 from datetime import datetime
 import json
+import mimetypes
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
@@ -66,16 +67,22 @@ def serve_secure_media(request, path):
     Serve media/ for authenticated users only, since it can contain sensitive
     information (uploaded documents, map screenshots, ...)
     """
-    if settings.DEBUG:
-        return static.serve(request, path, settings.MEDIA_ROOT)
-
     if path.startswith('/'):
         path = path[1:]
 
-    response = HttpResponse()
-    response['X-Accel-Redirect'] = os.path.join(settings.MEDIA_URL_SECURE, path)
-    response['Content-Disposition'] = "attachment; filename={0}".format(
-        os.path.basename(path))
+    content_type, encoding = mimetypes.guess_type(path)
+
+    if settings.DEBUG:
+        response = static.serve(request, path, settings.MEDIA_ROOT)
+    else:
+        response = HttpResponse()
+        response['X-Accel-Redirect'] = os.path.join(settings.MEDIA_URL_SECURE, path)
+    response["Content-Type"] = content_type or 'application/octet-stream'
+    if encoding:
+        response["Content-Encoding"] = encoding
+    if app_settings['SERVE_MEDIA_AS_ATTACHMENT']:
+        response['Content-Disposition'] = "attachment; filename={0}".format(
+            os.path.basename(path))
     return response
 
 

@@ -34,7 +34,8 @@ app_settings = dict({
     'ACTION_HISTORY_ENABLED': True,
     'ACTION_HISTORY_LENGTH': 20,
     'ANONYMOUS_VIEWS_PERMS': tuple(),
-    'GEOJSON_LAYERS_CACHE_BACKEND': 'default'
+    'GEOJSON_LAYERS_CACHE_BACKEND': 'default',
+    'SERVE_MEDIA_AS_ATTACHMENT': True,
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 
