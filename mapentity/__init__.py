@@ -125,9 +125,16 @@ class Registry(object):
         self.apps = {}
         self.content_type_ids = []
 
-    def register(self, model, name='', menu=True):
+    def register(self, model, name='', menu=True, dynamic_views=None):
         """ Register model and returns URL patterns
         """
+        from .views import generic as mapentity_views
+        from .views.generic import (
+            MAPENTITY_GENERIC_VIEWS,
+            MapEntityList,
+            MapEntityJsonList,
+            MapEntityFormat,
+        )
         from .urlizor import view_classes_to_url
         from .signals import post_register
 
@@ -143,6 +150,7 @@ class Registry(object):
         views_module = import_module(views_module_name)
         # Filter to views inherited from MapEntity base views
         picked = []
+        list_view = None
         for name, view in inspect.getmembers(views_module):
             if inspect.isclass(view) and issubclass(view, View):
                 if hasattr(view, 'get_entity_kind'):
@@ -153,6 +161,29 @@ class Registry(object):
                     else:
                         if view_model is model:
                             picked.append(view)
+                            if issubclass(view, MapEntityList):
+                                list_view = view
+
+        _model = model
+
+        if dynamic_views is None:
+            generic_views = MAPENTITY_GENERIC_VIEWS
+        else:
+            generic_views = [getattr(mapentity_views, 'MapEntity%s' % name)
+                             for name in dynamic_views]
+
+        # Dynamically define missing views
+        for generic_view in generic_views:
+            if not any([issubclass(view, generic_view) for view in picked]):
+                if list_view and generic_view in (MapEntityJsonList, MapEntityFormat):
+                    # JsonList and Format view depend on List view
+                    class dynamic_view(generic_view, list_view):
+                        pass
+                else:
+                    # General case
+                    class dynamic_view(generic_view):
+                        model = _model
+                picked.append(dynamic_view)
 
         module_name = model._meta.module_name
         app_label = model._meta.app_label

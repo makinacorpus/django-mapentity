@@ -86,14 +86,8 @@ class SubmitButton(HTML):
 
 class MapEntityForm(TranslatedModelForm):
 
-    pk = forms.Field(required=False, widget=forms.Field.hidden_widget)
-    model = forms.Field(required=False, widget=forms.Field.hidden_widget)
-
     fieldslayout = None
     geomfields = []
-
-    class Meta:
-        fields = ['pk', 'model']
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -103,8 +97,10 @@ class MapEntityForm(TranslatedModelForm):
         self.helper = FormHelper()
         self.helper.form_tag = True
 
-        self.fields['pk'].initial = self.instance.pk
-        self.fields['model'].initial = self.instance._meta.module_name
+        self.fields['pk'] = forms.Field(required=False, widget=forms.Field.hidden_widget,
+                                        initial=self.instance.pk)
+        self.fields['model'] = forms.Field(required=False, widget=forms.Field.hidden_widget,
+                                           initial=self.instance._meta.module_name)
 
         # Default widgets
         for fieldname, formfield in self.fields.items():
@@ -154,7 +150,7 @@ class MapEntityForm(TranslatedModelForm):
         fieldslayout = self.fieldslayout
         if not fieldslayout:
             # Remove geomfields from left part
-            fieldslayout = [fl for fl in self._meta.fields if fl not in self.geomfields]
+            fieldslayout = [fl for fl in self.fields.keys() if fl not in self.geomfields]
         # Replace native fields in Crispy layout by translated fields
         fieldslayout = self.__replace_translatable_fields(fieldslayout)
 

@@ -10,6 +10,7 @@ from django.utils.encoding import force_text
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
+from django.contrib.gis.db.models import GeometryField
 from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
@@ -27,7 +28,7 @@ from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from ..filters import MapEntityFilterSet
 from .base import history_delete
-from .mixins import ModelViewMixin, JSONResponseMixin
+from .mixins import ModelViewMixin, JSONResponseMixin, FormViewMixin
 
 
 logger = logging.getLogger(__name__)
@@ -101,7 +102,7 @@ class MapEntityList(ModelViewMixin, ListView):
     """
     model = None
     filterform = None
-    columns = []
+    columns = None
 
     def __init__(self, *args, **kwargs):
         super(MapEntityList, self).__init__(*args, **kwargs)
@@ -115,6 +116,14 @@ class MapEntityList(ModelViewMixin, ListView):
                     model = self.model
             self.filterform = filterklass
         self._filterform = self.filterform(None, self.queryset)
+
+        if self.columns is None:
+            # All model fields except geometries
+            self.columns = [field.name for field in self.model._meta.fields
+                            if not isinstance(field, GeometryField)]
+            # Id column should be the first one
+            self.columns.remove('id')
+            self.columns.insert(0, 'id')
 
     def get_template_names(self):
         default = super(MapEntityList, self).get_template_names()
@@ -340,7 +349,7 @@ class DocumentConvert(DetailView):
 """
 
 
-class MapEntityCreate(ModelViewMixin, CreateView):
+class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
 
     @classmethod
     def get_entity_kind(cls):
@@ -418,7 +427,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         return context
 
 
-class MapEntityUpdate(ModelViewMixin, UpdateView):
+class MapEntityUpdate(ModelViewMixin, FormViewMixin, UpdateView):
 
     @classmethod
     def get_entity_kind(cls):
@@ -481,3 +490,17 @@ class MapEntityDelete(ModelViewMixin, DeleteView):
 
     def get_success_url(self):
         return self.get_model().get_list_url()
+
+
+MAPENTITY_GENERIC_VIEWS = [
+    MapEntityLayer,
+    MapEntityList,
+    MapEntityJsonList,
+    MapEntityFormat,
+    MapEntityMapImage,
+    MapEntityDocument,
+    MapEntityCreate,
+    MapEntityDetail,
+    MapEntityUpdate,
+    MapEntityDelete,
+]
