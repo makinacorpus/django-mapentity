@@ -30,13 +30,24 @@ from .base import (
 )
 from .logentry import LogEntryList
 
-__all__ = MAPENTITY_GENERIC_VIEWS + [
+__all__ = [
+    'MapEntityLayer',
+    'MapEntityList',
+    'MapEntityJsonList',
+    'MapEntityFormat',
+    'MapEntityMapImage',
+    'MapEntityDocument',
     'DocumentConvert',
+    'MapEntityCreate',
+    'MapEntityDetail',
+    'MapEntityUpdate',
+    'MapEntityDelete',
 
     'HttpJSONResponse',
     'JSONResponseMixin',
     'LastModifiedMixin',
     'ModelViewMixin',
+    'MAPENTITY_GENERIC_VIEWS',
 
     'handler403',
     'handler404',
