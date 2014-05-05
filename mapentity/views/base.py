@@ -67,16 +67,16 @@ def serve_secure_media(request, path):
     Serve media/ for authenticated users only, since it can contain sensitive
     information (uploaded documents, map screenshots, ...)
     """
-    if settings.DEBUG:
-        return static.serve(request, path, settings.MEDIA_ROOT)
-
     if path.startswith('/'):
         path = path[1:]
 
     content_type, encoding = mimetypes.guess_type(path)
 
-    response = HttpResponse()
-    response['X-Accel-Redirect'] = os.path.join(settings.MEDIA_URL_SECURE, path)
+    if settings.DEBUG:
+        response = static.serve(request, path, settings.MEDIA_ROOT)
+    else:
+        response = HttpResponse()
+        response['X-Accel-Redirect'] = os.path.join(settings.MEDIA_URL_SECURE, path)
     response["Content-Type"] = content_type or 'application/octet-stream'
     if encoding:
         response["Content-Encoding"] = encoding
