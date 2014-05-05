@@ -9,6 +9,7 @@ import urllib2
 from datetime import datetime
 
 from django.conf import settings
+from django.utils.timezone import utc
 from django.utils.http import http_date
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_unicode
@@ -238,7 +239,6 @@ class MapEntityLiveTest(LiveServerTestCase):
         login_url = self.url_for('/login/')
         response = self.session.get(login_url,
                                     allow_redirects=False)
-
         csrftoken = response.cookies['csrftoken']
         response = self.session.post(login_url,
                                      {'username': user.username,
@@ -254,7 +254,7 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         self.login()
         self.modelfactory.create()
-        latest_updated.return_value = datetime.now()
+        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
 
         latest = self.model.latest_updated()
         geojson_layer_url = self.url_for(self.model.get_layer_url())
@@ -278,7 +278,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         # Create a new object
         time.sleep(1)  # wait some time, last-modified has precision in seconds
         self.modelfactory.create()
-        latest_updated.return_value = datetime.now()
+        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
 
         self.assertNotEqual(latest, self.model.latest_updated())
         response = self.session.get(geojson_layer_url)
