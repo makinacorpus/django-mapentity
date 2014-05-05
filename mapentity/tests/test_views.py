@@ -11,6 +11,8 @@ from django.contrib.auth import get_user_model
 from mapentity.factories import SuperUserFactory
 from mapentity.management import create_mapentity_models_permissions
 
+from .. import app_settings
+from ..views import serve_secure_media
 from .models import DummyModel
 from .views import DummyList, DummyDetail
 from .test_functional import MapEntityTest, MapEntityLiveTest
@@ -54,7 +56,7 @@ class BaseTest(TestCase):
         self.client.logout()
 
 
-@override_settings(MEDIA_ROOT='/tmp/mapentity-media', DEBUG=True)
+@override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class MediaTest(BaseTest):
 
     def setUp(self):
@@ -78,25 +80,41 @@ class MediaTest(BaseTest):
         response = self.download(self.url)
         self.assertEqual(response.status_code, 403)
 
+    @override_settings(DEBUG=True)
     def test_authenticated_user_can_access(self):
         self.login()
         response = self.download(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '*********')
 
+    @override_settings(DEBUG=True)
     def test_404_if_file_is_missing(self):
         os.remove(self.file)
         self.login()
         response = self.download(self.url)
         self.assertEqual(response.status_code, 404)
 
-    def test_nginx_accel_if_not_debug(self):
-        settings.DEBUG = False
-        self.login()
-        response = self.download(self.url)
+    def test_http_headers_attachment(self):
+        request = RequestFactory().get('/fake-path')
+        request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
+        response = serve_secure_media(request, 'file.pdf')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
-        self.assertEqual(response['X-Accel-Redirect'], '%s%s' % (settings.MEDIA_URL_SECURE, 'file.pdf'))
+        self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertEqual(response['Content-Disposition'], 'attachment; filename=file.pdf')
+
+    def test_http_headers_inline(self):
+        app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = False
+        request = RequestFactory().get('/fake-path')
+        request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
+        response = serve_secure_media(request, 'file.pdf')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, '')
+        self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertFalse('Content-Disposition' in response)
+        app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = True
 
 
 def setup_view(view, request, *args, **kwargs):
