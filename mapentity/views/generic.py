@@ -336,25 +336,26 @@ class Convert(View):
     http_method_names = ['get']
 
     def source_url(self):
-        source = self.request.GET.get('url')
-        if source is None:
-            return HttpResponseBadRequest('url parameter missing')
-        return source
+        return self.request.GET.get('url')
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(Convert, self).dispatch(*args, **kwargs)
 
-    def render_to_response(self, context):
-        source = self.request.build_absolute_uri(self.source_url())
-        fromtype = self.request.GET.get('from')
-        format = self.request.GET.get('to', self.format)
+    def get(self, request, *args, **kwargs):
+        source = self.source_url()
+        if source is None:
+            return HttpResponseBadRequest('url parameter missing')
+
+        fromtype = request.GET.get('from')
+        format = request.GET.get('to', self.format)
         url = convertit_url(source, from_type=fromtype, to_type=format)
 
         response = HttpResponse()
-        received = download_to_stream(url, response, silent=True, headers=self.request.headers)
-        filename = os.path.basename(received.url)
-        response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        received = download_to_stream(url, response, silent=True, headers=self.request.META['headers'])
+        if received:
+            filename = os.path.basename(received.url)
+            response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
 
@@ -363,7 +364,7 @@ class DocumentConvert(Convert, DetailView):
     Convert the object's document to PDF
     """
     def source_url(self):
-        return self.get_object().get_document_url()
+        return self.request.build_absolute_uri(self.get_object().get_document_url())
 
 
 """

@@ -1,8 +1,15 @@
+import os
+
 import mock
 from django.test import TestCase
 
 from .. import app_settings
-from ..helpers import capture_url, convertit_url, user_has_perm
+from ..helpers import (
+    capture_url,
+    convertit_url,
+    user_has_perm,
+    download_to_stream
+)
 
 
 class MapEntityCaptureHelpersTest(TestCase):
@@ -68,3 +75,12 @@ class UserHasPermTest(TestCase):
     def test_return_true_if_anonymous_has_perm(self):
         app_settings['ANONYMOUS_VIEWS_PERMS'] = ('view-perm',)
         self.assertTrue(user_has_perm(self.user, 'view-perm'))
+
+
+class DownloadStreamTest(TestCase):
+
+    @mock.patch('mapentity.helpers.requests.get')
+    def test_headers_can_be_specified_for_download(self, get_mocked):
+        # Required to specified language for example
+        download_to_stream('http://google.com', open(os.devnull), silent=True, headers={'Accept-language': 'fr'})
+        get_mocked.assert_called_with('http://google.com', headers={'Accept-language': 'fr'})
