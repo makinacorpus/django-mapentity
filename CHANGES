@@ -6,6 +6,7 @@ CHANGELOG
 ==================
 
 * Include SVG files in package data
+* Fix original headers not being transmitted to *ConvertIt*.
 
 
 1.1.2 (2014-05-06)
