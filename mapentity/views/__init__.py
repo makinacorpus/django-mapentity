@@ -1,4 +1,5 @@
 from .generic import (
+    Convert,
     MapEntityLayer,
     MapEntityList,
     MapEntityJsonList,
@@ -25,12 +26,12 @@ from .base import (
     serve_secure_media,
     JSSettings,
     map_screenshot,
-    convert,
     history_delete,
 )
 from .logentry import LogEntryList
 
 __all__ = [
+    'Convert',
     'MapEntityLayer',
     'MapEntityList',
     'MapEntityJsonList',

@@ -134,13 +134,13 @@ def is_file_newer(path, date_update, delete_empty=True):
     return modified > date_update
 
 
-def download_to_stream(url, stream, silent=False):
+def download_to_stream(url, stream, silent=False, headers=None):
     """ Download url and writes response to stream.
     """
     try:
         source = None
         logger.info("Request to: %s" % url)
-        source = requests.get(url)
+        source = requests.get(url, headers=headers)
         assert source.status_code == 200, 'Request failed (status=%s)' % source.status_code
         assert len(source.content) > 0, 'Request returned empty content'
     except (AssertionError, requests.exceptions.RequestException) as e:
