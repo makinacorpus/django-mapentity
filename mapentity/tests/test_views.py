@@ -56,6 +56,30 @@ class BaseTest(TestCase):
         self.client.logout()
 
 
+class ConvertTest(BaseTest):
+    def test_convert_view_is_protected_by_login(self):
+        response = self.client.get('/convert/')
+        self.assertEqual(response.status_code, 302)
+
+    def test_convert_view_complains_if_no_url_is_provided(self):
+        self.login()
+        response = self.client.get('/convert/')
+        self.assertEqual(response.status_code, 400)
+
+    def test_convert_view_only_supports_get(self):
+        self.login()
+        response = self.client.head('/convert/')
+        self.assertEqual(response.status_code, 405)
+
+    @mock.patch('mapentity.helpers.requests.get')
+    def test_convert_view_uses_original_request_headers(self, get_mocked):
+        self.login()
+        self.client.get('/convert/?url=geotrek.fr',
+                        headers={'Accept-language': 'it'})
+        get_mocked.assert_called_with('http://convertit//?url=geotrek.fr&to=application/pdf',
+                                      headers={'Accept-language': 'it'})
+
+
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class MediaTest(BaseTest):
 
@@ -115,14 +139,6 @@ class MediaTest(BaseTest):
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertFalse('Content-Disposition' in response)
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = True
-
-
-def setup_view(view, request, *args, **kwargs):
-    """*args and **kwargs you could pass to ``reverse()``."""
-    view.request = request
-    view.args = args
-    view.kwargs = kwargs
-    return view
 
 
 class ListViewTest(BaseTest):

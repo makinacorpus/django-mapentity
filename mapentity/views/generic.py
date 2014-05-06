@@ -1,3 +1,4 @@
+import os
 import logging
 from datetime import datetime
 
@@ -5,9 +6,10 @@ from django.conf import settings
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
 from django.utils.translation import ugettext_lazy as _
-
+from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
 from django.views.generic.detail import DetailView
+from django.views.generic import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.gis.db.models import GeometryField
@@ -15,6 +17,7 @@ from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
@@ -325,21 +328,43 @@ class MapEntityDocument(ModelViewMixin, DetailView):
         return context
 
 
-class DocumentConvert(DetailView):
+class Convert(View):
     """
     A proxy view to conversion server.
     """
     format = 'pdf'
+    http_method_names = ['get']
 
     def source_url(self):
-        raise NotImplementedError
+        return self.request.GET.get('url')
 
-    def render_to_response(self, context):
-        source = self.request.build_absolute_uri(self.source_url())
-        url = convertit_url(source, to_type=self.format)
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(Convert, self).dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        source = self.source_url()
+        if source is None:
+            return HttpResponseBadRequest('url parameter missing')
+
+        fromtype = request.GET.get('from')
+        format = request.GET.get('to', self.format)
+        url = convertit_url(source, from_type=fromtype, to_type=format)
+
         response = HttpResponse()
-        download_to_stream(url, response, silent=True)
+        received = download_to_stream(url, response, silent=True, headers=self.request.META['headers'])
+        if received:
+            filename = os.path.basename(received.url)
+            response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
+
+
+class DocumentConvert(Convert, DetailView):
+    """
+    Convert the object's document to PDF
+    """
+    def source_url(self):
+        return self.request.build_absolute_uri(self.get_object().get_document_url())
 
 
 """
