@@ -4,3 +4,4 @@ recursive-include mapentity/templates *.html
 recursive-include mapentity/static *.js
 recursive-include mapentity/static *.css
 recursive-include mapentity/static *.png
+recursive-include mapentity/static *.svg
