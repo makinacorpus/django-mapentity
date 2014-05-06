@@ -5,7 +5,21 @@ CHANGELOG
 1.0.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+** New features **
+
+* Show number of attached files in tab (fixes #39)
+* Define missing classes dynamically during register (fixes #17)
+* Add a setting to serve media as attachment (default: True) (fixes #37)
+
+** Bug fixes **
+
+* Force browser's cache revalidation of geojson data (fixes #38)
+* Fix action history (no link to deleted objects)
+* Fix map views JS event attributes
+
+** Breaking changes **
+
+* No more `Meta` in `MapEntityForm` (see `commit notes <https://github.com/makinacorpus/django-mapentity/commit/3362bfd834e3b538f1377e63f7935fb3128a63d1>`_)
 
 
 1.0.0 (2014-04-26)
