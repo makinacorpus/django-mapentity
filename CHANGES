@@ -5,7 +5,7 @@ CHANGELOG
 1.1.2 (unreleased)
 ==================
 
-- Nothing changed yet.
+* Fix regression on permissions creation after using exists()
 
 
 1.1.1 (2014-05-06)

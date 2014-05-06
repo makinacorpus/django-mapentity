@@ -55,14 +55,14 @@ def create_mapentity_models_permissions(sender, **kwargs):
 
         internal_user_permission = internal_user.user_permissions.filter(codename=codename, content_type=ctype)
 
-        if internal_user_permission.exists():
+        if not internal_user_permission.exists():
             permission = perms_manager.get(codename=codename, content_type=ctype)
             internal_user.user_permissions.add(permission)
             logger.info("Added permission %s to internal user %s" % (codename, internal_user))
 
     attachmenttype = ContentType.objects.db_manager(db).get_for_model(paperclip_models.Attachment)
     read_perm = dict(codename='read_attachment', content_type=attachmenttype)
-    if internal_user.user_permissions.filter(**read_perm).exists():
+    if not internal_user.user_permissions.filter(**read_perm).exists():
         permission = perms_manager.get(**read_perm)
         internal_user.user_permissions.add(permission)
         logger.info("Added permission %s to internal user %s" % (permission.codename, internal_user))
