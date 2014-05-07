@@ -26,7 +26,7 @@ def get_internal_user():
         except User.DoesNotExist:
             internal_user = User(username=username,
                                  password=settings.SECRET_KEY)
-            internal_user.is_active = False
+            internal_user.is_active = True
             internal_user.is_staff = False
             internal_user.save()
         get_internal_user.instance = internal_user

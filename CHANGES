@@ -5,7 +5,7 @@ CHANGELOG
 1.2.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+* Fix internal user not being given permission if inactive
 
 
 1.2.0 (2014-05-06)
