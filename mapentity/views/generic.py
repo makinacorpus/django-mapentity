@@ -271,7 +271,7 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
             with open(obj.get_map_image_path(), 'rb') as f:
                 response.write(f.read())
             return response
-        except mapentity_models.MapImageError as e:
+        except Exception as e:
             logger.exception(e)
             return HttpResponseServerError(repr(e))
 
