@@ -52,6 +52,16 @@ class BaseTest(TestCase):
         self.assertTrue(success)
         return self.user
 
+    def login_as_superuser(self):
+        if getattr(self, 'superuser', None) is None:
+            superuser = User.objects.create_superuser(self.__class__.__name__ + 'Superuser',
+                                                      'email@corp.com', 'booh')
+            setattr(self, 'superuser', superuser)
+        self.logout()
+        success = self.client.login(username=self.superuser.username, password='booh')
+        self.assertTrue(success)
+        return self.superuser
+
     def logout(self):
         self.client.logout()
 
@@ -106,7 +116,7 @@ class MediaTest(BaseTest):
 
     @override_settings(DEBUG=True)
     def test_authenticated_user_can_access(self):
-        self.login()
+        self.login_as_superuser()
         response = self.download(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '*********')
@@ -114,7 +124,7 @@ class MediaTest(BaseTest):
     @override_settings(DEBUG=True)
     def test_404_if_file_is_missing(self):
         os.remove(self.file)
-        self.login()
+        self.login_as_superuser()
         response = self.download(self.url)
         self.assertEqual(response.status_code, 404)
 
