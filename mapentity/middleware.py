@@ -33,6 +33,11 @@ def get_internal_user():
     return get_internal_user.instance
 
 
+def clear_internal_user_cache():
+    if hasattr(get_internal_user, 'instance'):
+        del get_internal_user.instance
+
+
 class AutoLoginMiddleware(object):
     """
     This middleware enables auto-login for Conversion and Capture servers.

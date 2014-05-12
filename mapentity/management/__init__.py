@@ -5,7 +5,7 @@ from django.contrib.auth.models import Permission
 from django.utils.translation import ugettext as _
 
 from mapentity import models as mapentity_models
-from mapentity.middleware import get_internal_user
+from mapentity.middleware import get_internal_user, clear_internal_user_cache
 from mapentity import logger
 from mapentity.signals import post_register
 
@@ -29,6 +29,11 @@ def create_mapentity_models_permissions(sender, **kwargs):
     model = kwargs.get('model')
 
     logger.info("Synchronize migrations of MapEntity models")
+
+    # During tests, the database is flushed so we need to flush caches in order
+    # to correctly recreate all permissions
+    clear_internal_user_cache()
+    ContentType.objects.clear_cache()
 
     internal_user = get_internal_user()
     perms_manager = Permission.objects.using(db)
