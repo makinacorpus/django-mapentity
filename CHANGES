@@ -2,10 +2,10 @@
 CHANGELOG
 =========
 
-1.2.2 (unreleased)
+1.2.2 (2014-05-12)
 ==================
 
-- Nothing changed yet.
+- Flush caches before creating permissions
 
 
 1.2.1 (2014-05-07)
