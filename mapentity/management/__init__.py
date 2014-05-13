@@ -1,4 +1,5 @@
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models.signals import post_syncdb
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import auth
 from django.contrib.auth.models import Permission
@@ -7,12 +8,11 @@ from django.utils.translation import ugettext as _
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user, clear_internal_user_cache
 from mapentity import logger
-from mapentity.signals import post_register
 
 from paperclip import models as paperclip_models
 
 
-def create_mapentity_models_permissions(sender, **kwargs):
+def create_mapentity_models_permissions(created_models, **kwargs):
     """ Create `Permission` objects for each model registered
     in MapEntity.
 
@@ -24,9 +24,6 @@ def create_mapentity_models_permissions(sender, **kwargs):
         * https://code.djangoproject.com/ticket/10686
         * http://stackoverflow.com/a/727956/141895
     """
-    db = DEFAULT_DB_ALIAS
-
-    model = kwargs.get('model')
 
     logger.info("Synchronize migrations of MapEntity models")
 
@@ -34,6 +31,14 @@ def create_mapentity_models_permissions(sender, **kwargs):
     # to correctly recreate all permissions
     clear_internal_user_cache()
     ContentType.objects.clear_cache()
+
+    for model in created_models:
+        if issubclass(model, mapentity_models.MapEntityMixin):
+            create_mapentity_model_permissions(model)
+
+
+def create_mapentity_model_permissions(model):
+    db = DEFAULT_DB_ALIAS
 
     internal_user = get_internal_user()
     perms_manager = Permission.objects.using(db)
@@ -73,5 +78,5 @@ def create_mapentity_models_permissions(sender, **kwargs):
         logger.info("Added permission %s to internal user %s" % (permission.codename, internal_user))
 
 
-post_register.connect(create_mapentity_models_permissions,
-                      dispatch_uid="create_mapentity_models_permissions")
+post_syncdb.connect(create_mapentity_models_permissions,
+                    sender=mapentity_models, dispatch_uid="create_mapentity_models_permissions")

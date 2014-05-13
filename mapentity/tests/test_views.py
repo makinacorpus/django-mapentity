@@ -9,7 +9,6 @@ from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
 
 from mapentity.factories import SuperUserFactory
-from mapentity.management import create_mapentity_models_permissions
 
 from .. import app_settings
 from ..views import serve_secure_media
@@ -94,8 +93,6 @@ class ConvertTest(BaseTest):
 class MediaTest(BaseTest):
 
     def setUp(self):
-        create_mapentity_models_permissions(None, model=DummyModel)
-
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
         os.makedirs(settings.MEDIA_ROOT)
