@@ -3,6 +3,7 @@ import logging
 import inspect
 from collections import namedtuple, OrderedDict
 
+from django.db.utils import ProgrammingError
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.views.generic.base import View
@@ -200,7 +201,10 @@ class Registry(object):
         self.registry[model] = mapentity
         post_register.send(sender=self, app_label=app_label, model=model)
 
-        self.content_type_ids.append(model.get_content_type_id())
+        try:
+            self.content_type_ids.append(model.get_content_type_id())
+        except ProgrammingError:
+            pass  # Content types table is not yet synced
         # Returns Django URL patterns
         return patterns(name, *view_classes_to_url(*picked))
 
