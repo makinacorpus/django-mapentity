@@ -2,10 +2,11 @@
 CHANGELOG
 =========
 
-1.2.4 (unreleased)
+1.2.4 (2014-05-14)
 ==================
 
-- Nothing changed yet.
+- Fix perms creation with south migrations
+- Fix register when database is not yet synced
 
 
 1.2.3 (2014-05-13)
