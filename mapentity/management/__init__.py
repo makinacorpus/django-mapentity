@@ -1,4 +1,5 @@
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models import get_models
 from django.db.models.signals import post_syncdb
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import auth
@@ -12,7 +13,7 @@ from mapentity import logger
 from paperclip import models as paperclip_models
 
 
-def create_mapentity_models_permissions(created_models, **kwargs):
+def create_mapentity_models_permissions(app, **kwargs):
     """ Create `Permission` objects for each model registered
     in MapEntity.
 
@@ -32,7 +33,7 @@ def create_mapentity_models_permissions(created_models, **kwargs):
     clear_internal_user_cache()
     ContentType.objects.clear_cache()
 
-    for model in created_models:
+    for model in get_models(app):
         if issubclass(model, mapentity_models.MapEntityMixin):
             create_mapentity_model_permissions(model)
 
@@ -79,4 +80,4 @@ def create_mapentity_model_permissions(model):
 
 
 post_syncdb.connect(create_mapentity_models_permissions,
-                    sender=mapentity_models, dispatch_uid="create_mapentity_models_permissions")
+                    dispatch_uid="create_mapentity_models_permissions")
