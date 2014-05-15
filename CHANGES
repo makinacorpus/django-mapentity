@@ -5,7 +5,7 @@ CHANGELOG
 1.2.5 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Fix regression on conversion headers
 
 
 1.2.4 (2014-05-14)

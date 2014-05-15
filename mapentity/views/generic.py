@@ -352,11 +352,27 @@ class Convert(View):
         url = convertit_url(source, from_type=fromtype, to_type=format)
 
         response = HttpResponse()
-        received = download_to_stream(url, response, silent=True, headers=self.request.META['headers'])
+        received = download_to_stream(url, response,
+                                      silent=True,
+                                      headers=self.request_headers())
         if received:
             filename = os.path.basename(received.url)
             response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
+
+    def request_headers(self):
+        """Retrieves the original HTTP headers of this view request.
+        Django converts header names to upper-case with underscores.
+
+        See http://stackoverflow.com/questions/3889769/get-all-request-headers-in-django
+        """
+        excluded = ['HTTP_COOKIE']
+        headers = []
+        for name, value in self.request.META.items():
+            if name.startswith('HTTP_') and name not in excluded:
+                realname = name.replace('HTTP_', '').replace('_', '-').title()
+                headers.append((realname, value))
+        return dict(headers)
 
 
 class DocumentConvert(Convert, DetailView):

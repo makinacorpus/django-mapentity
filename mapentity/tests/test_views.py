@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from mapentity.factories import SuperUserFactory
 
 from .. import app_settings
-from ..views import serve_secure_media
+from ..views import serve_secure_media, Convert
 from .models import DummyModel
 from .views import DummyList, DummyDetail
 from .test_functional import MapEntityTest, MapEntityLiveTest
@@ -66,6 +66,13 @@ class BaseTest(TestCase):
 
 
 class ConvertTest(BaseTest):
+    def test_view_headers_are_reverted_to_originals(self):
+        request = mock.MagicMock(META=dict(HTTP_ACCEPT_LANGUAGE='fr',
+                                           HTTP_COOKIE='blah'))
+        view = Convert()
+        view.request = request
+        self.assertEqual(view.request_headers(), {'Accept-Language': 'fr'})
+
     def test_convert_view_is_protected_by_login(self):
         response = self.client.get('/convert/')
         self.assertEqual(response.status_code, 302)
@@ -84,9 +91,9 @@ class ConvertTest(BaseTest):
     def test_convert_view_uses_original_request_headers(self, get_mocked):
         self.login()
         self.client.get('/convert/?url=geotrek.fr',
-                        headers={'Accept-language': 'it'})
+                        HTTP_ACCEPT_LANGUAGE='it')
         get_mocked.assert_called_with('http://convertit//?url=geotrek.fr&to=application/pdf',
-                                      headers={'Accept-language': 'it'})
+                                      headers={'Accept-Language': 'it'})
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
