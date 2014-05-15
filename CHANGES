@@ -2,7 +2,13 @@
 CHANGELOG
 =========
 
-1.2.5 (unreleased)
+1.2.6 (2014-05-15)
+==================
+
+- Do not override HOST HTTP header sent to convertit
+
+
+1.2.5 (2014-05-15)
 ==================
 
 - Fix regression on conversion headers
