@@ -347,6 +347,9 @@ class Convert(View):
         if source is None:
             return HttpResponseBadRequest('url parameter missing')
 
+        if not source.startswith('http'):
+            source = self.request.build_absolute_uri(source)
+
         fromtype = request.GET.get('from')
         format = request.GET.get('to', self.format)
         url = convertit_url(source, from_type=fromtype, to_type=format)
@@ -380,7 +383,7 @@ class DocumentConvert(Convert, DetailView):
     Convert the object's document to PDF
     """
     def source_url(self):
-        return self.request.build_absolute_uri(self.get_object().get_document_url())
+        return self.get_object().get_document_url()
 
 
 """

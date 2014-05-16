@@ -96,10 +96,17 @@ class ConvertTest(BaseTest):
     @mock.patch('mapentity.helpers.requests.get')
     def test_convert_view_uses_original_request_headers(self, get_mocked):
         self.login()
-        self.client.get('/convert/?url=geotrek.fr',
+        self.client.get('/convert/?url=http://geotrek.fr',
                         HTTP_ACCEPT_LANGUAGE='it')
-        get_mocked.assert_called_with('http://convertit//?url=geotrek.fr&to=application/pdf',
+        get_mocked.assert_called_with('http://convertit//?url=http%3A//geotrek.fr&to=application/pdf',
                                       headers={'Accept-Language': 'it'})
+
+    @mock.patch('mapentity.helpers.requests.get')
+    def test_convert_view_builds_absolute_url_from_relative(self, get_mocked):
+        self.login()
+        self.client.get('/convert/?url=/path/1/')
+        get_mocked.assert_called_with('http://convertit//?url=http%3A//testserver/path/1/&to=application/pdf',
+                                      headers={})
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
