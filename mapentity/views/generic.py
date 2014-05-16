@@ -366,7 +366,7 @@ class Convert(View):
 
         See http://stackoverflow.com/questions/3889769/get-all-request-headers-in-django
         """
-        excluded = ['HTTP_COOKIE']
+        excluded = ['HTTP_COOKIE', 'HTTP_HOST']
         headers = []
         for name, value in self.request.META.items():
             if name.startswith('HTTP_') and name not in excluded:
