@@ -67,11 +67,17 @@ class BaseTest(TestCase):
 
 class ConvertTest(BaseTest):
     def test_view_headers_are_reverted_to_originals(self):
-        request = mock.MagicMock(META=dict(HTTP_ACCEPT_LANGUAGE='fr',
-                                           HTTP_COOKIE='blah'))
+        request = mock.MagicMock(META=dict(HTTP_ACCEPT_LANGUAGE='fr'))
         view = Convert()
         view.request = request
         self.assertEqual(view.request_headers(), {'Accept-Language': 'fr'})
+
+    def test_critical_original_headers_are_filtered(self):
+        request = mock.MagicMock(META=dict(HTTP_HOST='originalhost',
+                                           HTTP_COOKIE='blah'))
+        view = Convert()
+        view.request = request
+        self.assertEqual(view.request_headers(), {})
 
     def test_convert_view_is_protected_by_login(self):
         response = self.client.get('/convert/')
