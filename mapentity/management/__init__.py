@@ -26,7 +26,7 @@ def create_mapentity_models_permissions(app, **kwargs):
         * http://stackoverflow.com/a/727956/141895
     """
 
-    logger.info("Synchronize migrations of MapEntity models")
+    logger.info("Synchronize permissions of MapEntity models")
 
     # During tests, the database is flushed so we need to flush caches in order
     # to correctly recreate all permissions
