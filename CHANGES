@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-1.2.7 (unreleased)
+1.2.7 (2014-05-16)
 ==================
 
 - Fix regression about conversion urls that are not absolute
