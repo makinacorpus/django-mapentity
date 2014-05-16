@@ -6,8 +6,10 @@
       {% if request.user.is_authenticated %}
       <li class="history {% if view == "list" %}{{ modelname }} active{% endif %}">
         <div id="entitylist-dropdown" class="btn-group">
-              <button class="btn {% if view == "list" %}disabled{% endif %}" {% if view != "list" %} onclick="javascript:location='{% url 'home' %}';"{% endif %}>{% trans "List" %} <span id="nbresults" class="badge">?</span></button>
-              <button class="btn dropdown-toggle {% if view == "list" %}disabled{% endif %}" data-toggle="dropdown">
+              <button class="btn" onclick="javascript:location='{% url 'home' %}';">
+                {% trans "List" %} <span id="nbresults" class="badge">?</span>
+              </button>
+              <button class="btn dropdown-toggle" data-toggle="dropdown">
                 <span class="caret"></span>
               </button>
               <ul class="dropdown-menu">
