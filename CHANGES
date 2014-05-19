@@ -2,10 +2,11 @@
 CHANGELOG
 =========
 
-1.2.8 (unreleased)
+1.2.8 (2014-05-19)
 ==================
 
-- Nothing changed yet.
+- Pluggable filters
+- Open ODT/DOC/PDF exports in a new tab
 
 
 1.2.7 (2014-05-16)
