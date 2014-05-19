@@ -117,7 +117,8 @@ _LEAFLET_CONFIG['PLUGINS'] = _LEAFLET_PLUGINS
 setattr(settings, 'LEAFLET_CONFIG', _LEAFLET_CONFIG)
 
 
-MapEntity = namedtuple('MapEntity', ['menu', 'label', 'modelname', 'url_list',
+MapEntity = namedtuple('MapEntity', ['menu', 'label', 'modelname',
+                                     'url_list', 'url_add',
                                      'icon', 'icon_small', 'icon_big'])
 
 
@@ -196,7 +197,9 @@ class Registry(object):
                               icon_small='images/%s-16.png' % module_name,
                               icon_big='images/%s-96.png' % module_name,
                               menu=menu,
-                              url_list='%s:%s_%s' % (app_label, module_name, 'list'))
+                              # Can't do reverse right now, URL not setup yet
+                              url_list='%s:%s_%s' % (app_label, module_name, 'list'),
+                              url_add='%s:%s_%s' % (app_label, module_name, 'add'))
 
         self.registry[model] = mapentity
         post_register.send(sender=self, app_label=app_label, model=model)

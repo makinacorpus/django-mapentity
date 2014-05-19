@@ -5,8 +5,9 @@ CHANGELOG
 1.2.9 (unreleased)
 ==================
 
-- Nothing changed yet.
-
+- Add buttons to create records from anypage from within the drop down
+  menu.
+- Drop down menu not disabled in list view
 
 1.2.8 (2014-05-19)
 ==================
