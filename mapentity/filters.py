@@ -1,10 +1,12 @@
 from datetime import datetime
 
 from django import forms as django_forms
+from django.db.models.related import RelatedObject
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from django_filters import FilterSet, Filter, ChoiceFilter
+from django_filters.filterset import get_model_field
 import floppyforms as forms
 
 from . import app_settings, API_SRID
@@ -118,6 +120,22 @@ class BaseMapEntityFilterSet(FilterSet):
         widget.attrs['data-placeholder'] = field.label
         widget.attrs['title'] = field.label
         widget.attrs['data-label'] = field.label
+
+    @classmethod
+    def add_filter(cls, name, filter_=None):
+        field = get_model_field(cls._meta.model, name)
+        if filter_ is None:
+            if isinstance(field, RelatedObject):
+                filter_ = cls.filter_for_reverse_field(field, name)
+            else:
+                filter_ = cls.filter_for_field(field, name)
+        cls.base_filters[name] = filter_
+
+    @classmethod
+    def add_filters(cls, filters):
+        for name, filter_ in filters.items():
+            filter_.name = name
+            cls.add_filter(name, filter_)
 
 
 class MapEntityFilterSet(BaseMapEntityFilterSet):
