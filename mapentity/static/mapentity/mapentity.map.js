@@ -118,6 +118,9 @@ $(window).on('entity:map', function (e, data) {
         showSingleObject(JSON.parse($singleObject.text()));
     }
 
+    // Add full screen control
+    map.addControl(new L.Control.FullScreen());
+
     if (data.view == 'detail') {
         // Give room for the map !
         map.removeControl(map.zoomControl);
