@@ -23,7 +23,8 @@ MapEntity.TogglableFilter = L.Class.extend({
                           });
 
         $(this.button).click(this.toggle.bind(this));
-        $(this.button).hover(this.showinfo.bind(this));
+        $(this.button).mouseenter(this.showinfo.bind(this));
+        $(this.button).mouseleave(this.hideinfo.bind(this));
         var self = this;
         $('#mainfilter').find('select,input').change(function (e) {
             self.setfield(this);
@@ -53,6 +54,8 @@ MapEntity.TogglableFilter = L.Class.extend({
                 $container.removeClass('filter-set');
             }
         });
+        // Filters close
+        $('#filters-close').click(this.toggle.bind(this));
     },
 
     tip: function () {
@@ -77,11 +80,15 @@ MapEntity.TogglableFilter = L.Class.extend({
         // If popover is already visible, do not show hover
         if (this.visible)
             return;
-        this.hover.popover('toggle');
+        this.hover.popover('show');
         // Adjust popover width
         this.htip()
             .width(this.htip().find('.popover-title').outerWidth());
         this.__reposition(this.htip());
+    },
+
+    hideinfo: function () {
+        this.hover.popover('hide');
     },
 
     infos: function () {
@@ -111,6 +118,7 @@ MapEntity.TogglableFilter = L.Class.extend({
         this.visible = !this.visible;
 
         if (this.visible) {
+            this.hideinfo();
             this.tip()
               .empty()
               .append('<div class="arrow"/>')

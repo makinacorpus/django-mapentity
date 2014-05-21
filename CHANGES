@@ -10,6 +10,7 @@ CHANGELOG
 - Add buttons to create records from anypage from within the drop down
   menu.
 - Drop down menu not disabled in list view
+- Add a button to close filters
 
 
 1.2.8 (2014-05-19)
