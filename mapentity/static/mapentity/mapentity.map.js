@@ -118,28 +118,8 @@ $(window).on('entity:map', function (e, data) {
         showSingleObject(JSON.parse($singleObject.text()));
     }
 
-    // Add full screen control
     map.addControl(new L.Control.FullScreen());
-
-    if (data.view == 'detail') {
-        // Give room for the map !
-        map.removeControl(map.zoomControl);
-
-        // Restore map context, only for screenshoting purpose
-        var context = getURLParameter('context');
-        if (context && typeof context == 'object') {
-            delete context.mapview;    // keep objects bounds
-            delete context.maplayers;  // keep default layers
-            MapEntity.Context.restoreFullContext(map, context);
-        }
-
-        // Save map context : will be restored on next form (e.g. interventions, ref story #182)
-        $(window).unload(function () {
-            MapEntity.Context.saveFullContext(map, {prefix: 'detail'});
-        });
-
-        $(window).trigger('detailmap:ready', {map:map});
-    }
+    map.addControl(new L.Control.MeasureControl());
 
 
     function showSingleObject(geojson) {
@@ -180,6 +160,31 @@ $(window).on('entity:map', function (e, data) {
 });
 
 
+$(window).on('entity:map:detail', function (e, data) {
+    var map = data.map;
+
+    // Map screenshot button
+    var screenshot = new L.Control.Screenshot(window.SETTINGS.urls.screenshot, function () {
+        context = MapEntity.Context.getFullContext(map);
+        context['selector'] = '#detailmap';
+        return JSON.stringify(context);
+    });
+    map.addControl(screenshot);
+
+    // Restore map context, only for screenshoting purpose
+    var context = getURLParameter('context');
+    if (context && typeof context == 'object') {
+        MapEntity.Context.restoreFullContext(map, context);
+    }
+
+    // Save map context : will be restored on next form (e.g. interventions, ref story #182)
+    $(window).unload(function () {
+        MapEntity.Context.saveFullContext(map, {prefix: 'detail'});
+    });
+
+    $(window).trigger('detailmap:ready', {map:map});
+});
+
 
 $(window).on('entity:map:list', function (e, data) {
     var map = data.map,
@@ -190,7 +195,6 @@ $(window).on('entity:map:list', function (e, data) {
 
     map.addControl(new L.Control.Information());
     map.addControl(new L.Control.ResetView(bounds));
-    map.addControl(new L.Control.MeasureControl());
 
     /*
      * Objects Layer
@@ -252,7 +256,12 @@ $(window).on('entity:map:list', function (e, data) {
 
     // Map screenshot button
     var screenshot = new L.Control.Screenshot(window.SETTINGS.urls.screenshot, function () {
-        return MapEntity.Context.serializeFullContext(map, '#mainfilter', dt);
+        context = MapEntity.Context.getFullContext(map, {
+            filter: '#mainfilter',
+            datatable: dt
+        });
+        context['selector'] = '#mainmap';
+        return JSON.stringify(context);
     });
     map.addControl(screenshot);
 
