@@ -6,6 +6,7 @@ CHANGELOG
 ==================
 
 - Add fullscreen button on maps
+- Add all controls on detail map
 - Add buttons to create records from anypage from within the drop down
   menu.
 - Drop down menu not disabled in list view
