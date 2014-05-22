@@ -10,7 +10,7 @@ CHANGELOG
 - Add buttons to create records from anypage from within the drop down
   menu.
 - Drop down menu not disabled in list view
-
+- Fix generic document view not being usable with querysets
 
 1.2.8 (2014-05-19)
 ==================
