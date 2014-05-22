@@ -20,7 +20,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.template import RequestContext, Context, loader
 
-from .. import app_settings, _MAP_STYLES
+from ..settings import app_settings, _MAP_STYLES
 from ..helpers import capture_image
 from .. import urlizor
 from .mixins import JSONResponseMixin

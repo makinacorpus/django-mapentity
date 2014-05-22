@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.contrib.gis.geos import GEOSGeometry
 from django.conf import settings
 
-from mapentity import API_SRID
+from mapentity.settings import API_SRID
 from .models import MushroomSpot, WeatherStation
 from ..filters import PythonPolygonFilter, PolygonFilter, MapEntityFilterSet
 
