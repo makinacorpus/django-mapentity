@@ -17,7 +17,7 @@ from django.http import HttpResponse
 import bs4
 import requests
 
-from . import app_settings, API_SRID
+from .settings import app_settings, API_SRID
 
 logger = logging.getLogger(__name__)
 

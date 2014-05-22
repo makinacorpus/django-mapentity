@@ -7,8 +7,7 @@ from django.contrib.gis.geos import GEOSGeometry, Point
 
 register = template.Library()
 
-from .. import app_settings
-from .. import API_SRID
+from ..settings import app_settings, API_SRID
 
 
 class SmartIncludeNode(template.Node):

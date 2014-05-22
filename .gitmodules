@@ -34,3 +34,6 @@
 [submodule "mapentity/static/mapentity/Leaflet.FileLayer"]
 	path = mapentity/static/mapentity/Leaflet.FileLayer
 	url = https://github.com/makinacorpus/Leaflet.FileLayer.git
+[submodule "mapentity/static/mapentity/leaflet.fullscreen"]
+	path = mapentity/static/mapentity/leaflet.fullscreen
+	url = https://github.com/brunob/leaflet.fullscreen.git

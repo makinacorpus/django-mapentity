@@ -20,7 +20,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.template import RequestContext, Context, loader
 
-from .. import app_settings, _MAP_STYLES
+from ..settings import app_settings, _MAP_STYLES
 from ..helpers import capture_image
 from .. import urlizor
 from .mixins import JSONResponseMixin
@@ -142,6 +142,7 @@ def map_screenshot(request):
 
         # Prepare context, extract and add infos
         context = json.loads(printcontext)
+        selector = context.pop('selector')
         map_url = context.pop('url')
         map_url = request.build_absolute_uri(map_url)
         context['print'] = True
@@ -155,7 +156,7 @@ def map_screenshot(request):
         height = context.get('viewport', {}).get('height')
 
         response = HttpResponse()
-        capture_image(map_url, response, width=width, height=height, selector='#mainmap')
+        capture_image(map_url, response, width=width, height=height, selector=selector)
         response['Content-Disposition'] = 'attachment; filename=%s.png' % datetime.now().strftime('%Y%m%d-%H%M%S')
         return response
 

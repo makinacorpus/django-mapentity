@@ -4,7 +4,7 @@ from django.forms import widgets as django_widgets
 from leaflet.forms.widgets import LeafletWidget
 import floppyforms as forms
 
-from . import API_SRID
+from .settings import API_SRID
 from .helpers import wkt_to_geom
 
 

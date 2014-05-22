@@ -129,6 +129,21 @@ select[multiple] {
     margin-right: 5px;
 }
 
+#entitylist-dropdown ul > li {
+    position: relative;
+}
+
+#entitylist-dropdown ul > li > a:first-child {
+    padding-right: 70px;
+    text-align: left;
+}
+
+#entitylist-dropdown ul > li > div.add-btn {
+    position: absolute;
+    right: 8px;
+    top: 2px;
+}
+
 .navbar {
     margin-bottom: 0px;
 }
@@ -470,6 +485,17 @@ div.dataTables_paginate {
 
 #filters-panel form {
     margin-bottom: 0px;
+}
+
+#filters-close {
+    text-align: right;
+    margin-bottom: 5px;
+}
+
+#filters-close a {
+    width: 20px;
+    height: 20px;
+    padding: 4px;
 }
 
 .popover {

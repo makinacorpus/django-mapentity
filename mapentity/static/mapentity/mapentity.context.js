@@ -1,10 +1,10 @@
 MapEntity.Context = new function() {
     var self = this;
 
-    self.serializeFullContext = function(map, kwargs) {
+    self.getFullContext = function(map, kwargs) {
         var context = {},
-            filter = kwargs.filter,
-            datatable = kwargs.datatable;
+            filter = kwargs && kwargs.filter,
+            datatable = kwargs && kwargs.datatable;
 
         // Map view
         context['mapview'] = {'lat': map.getCenter().lat, 'lng': map.getCenter().lng, 'zoom': map.getZoom()};
@@ -37,12 +37,12 @@ MapEntity.Context = new function() {
         // Mark timestamp
         context['timestamp'] = new Date().getTime();
 
-        return JSON.stringify(context);
+        return context;
     },
 
     self.saveFullContext = function(map, kwargs) {
         var prefix = kwargs.prefix || '',
-            serialized = self.serializeFullContext(map, kwargs);
+            serialized = JSON.stringify(self.getFullContext(map, kwargs));
         localStorage.setItem(prefix + 'map-context', serialized);
     };
 
