@@ -9,7 +9,7 @@ from django_filters import FilterSet, Filter, ChoiceFilter
 from django_filters.filterset import get_model_field
 import floppyforms as forms
 
-from . import app_settings, API_SRID
+from .settings import app_settings, API_SRID
 from .widgets import HiddenGeometryWidget
 
 

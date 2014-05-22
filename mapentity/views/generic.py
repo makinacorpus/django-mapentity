@@ -22,8 +22,7 @@ from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
 
-from .. import API_SRID
-from .. import app_settings
+from ..settings import app_settings, API_SRID
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream, user_has_perm
 from ..decorators import save_history, view_permission_required, view_cache_latest
