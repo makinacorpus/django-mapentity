@@ -3,9 +3,21 @@ import inspect
 from collections import namedtuple, OrderedDict
 
 from django.db.utils import ProgrammingError
+from django.db import DEFAULT_DB_ALIAS
 from django.utils.importlib import import_module
+from django.utils.translation import ugettext as _
 from django.views.generic.base import View
 from django.conf.urls import patterns
+from django.contrib.contenttypes.models import ContentType
+from django.contrib import auth
+from django.contrib.auth.models import Permission
+
+from mapentity import models as mapentity_models
+from mapentity.middleware import get_internal_user
+from mapentity import logger
+
+from paperclip import models as paperclip_models
+
 
 
 MapEntity = namedtuple('MapEntity', ['menu', 'label', 'modelname',
@@ -105,3 +117,67 @@ class Registry(object):
     @property
     def entities(self):
         return self.registry.values()
+
+
+def create_mapentity_model_permissions(model):
+    """
+    Create all the necessary permissions for the specified model.
+
+    And give all the required permission to the ``internal_user``, used
+    for screenshotting and document conversion.
+
+    :notes:
+
+        Could have been implemented a metaclass on `MapEntityMixin`. We chose
+        this approach to avoid problems with inheritance of permissions on
+        abstract models.
+
+        See:
+            * https://code.djangoproject.com/ticket/10686
+            * http://stackoverflow.com/a/727956/141895
+    """
+    if not issubclass(model, mapentity_models.MapEntityMixin):
+        return
+
+    db = DEFAULT_DB_ALIAS
+
+    internal_user = get_internal_user()
+    perms_manager = Permission.objects.using(db)
+
+    permissions = set()
+    for view_kind in mapentity_models.ENTITY_KINDS:
+        perm = model.get_entity_kind_permission(view_kind)
+        codename = auth.get_permission_codename(perm, model._meta)
+        name = "Can %s %s" % (perm, model._meta.verbose_name_raw)
+        permissions.add((codename, _(name)))
+
+    ctype = ContentType.objects.db_manager(db).get_for_model(model)
+    for (codename, name) in permissions:
+        p, created = perms_manager.get_or_create(codename=codename,
+                                                 content_type=ctype)
+        if created:
+            p.name = name[:50]
+            p.save()
+            logger.info("Permission '%s' created." % codename)
+
+    for view_kind in (mapentity_models.ENTITY_LIST,
+                      mapentity_models.ENTITY_DOCUMENT):
+        perm = model.get_entity_kind_permission(view_kind)
+        codename = auth.get_permission_codename(perm, model._meta)
+
+        internal_user_permission = internal_user.user_permissions.filter(codename=codename,
+                                                                         content_type=ctype)
+
+        if not internal_user_permission.exists():
+            permission = perms_manager.get(codename=codename, content_type=ctype)
+            internal_user.user_permissions.add(permission)
+            logger.info("Added permission %s to internal user %s" % (codename,
+                                                                     internal_user))
+
+    attachmenttype = ContentType.objects.db_manager(db).get_for_model(paperclip_models.Attachment)
+    read_perm = dict(codename='read_attachment', content_type=attachmenttype)
+    if not internal_user.user_permissions.filter(**read_perm).exists():
+        permission = perms_manager.get(**read_perm)
+        internal_user.user_permissions.add(permission)
+        logger.info("Added permission %s to internal user %s" % (permission.codename,
+                                                                 internal_user))
