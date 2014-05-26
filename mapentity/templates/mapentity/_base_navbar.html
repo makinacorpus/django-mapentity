@@ -34,7 +34,7 @@
             {% if forloop.first and view != "list" %}
                 <li class="{{ modelname }} active history first">
                     <a href="{{ item.path }}">
-                        <span class="content">{% if title %}{{ title }}{% else %}{{ item.title }}{% endif %}</span>
+                        <span class="content">{% if title|lower %}{{ title }}{% else %}{{ item.title }}{% endif %}</span>
                         {% if view == "detail" %}
                            <button class="close hidden">&times;</button>
                         {% endif %}
