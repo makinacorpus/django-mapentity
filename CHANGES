@@ -6,7 +6,7 @@ CHANGELOG
 ==================
 
 - Remove flag ``FrontEndTest`` from User-Agent
-
+- Make sure ``detailspanel`` template block can be fully overriden
 
 1.3.0 (2014-05-22)
 ==================

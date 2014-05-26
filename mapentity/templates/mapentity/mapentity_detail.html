@@ -41,9 +41,8 @@
                 <div id="properties" class="tab-pane {% if activetab != "attachments" %}active{% endif %}">
 
                     {% block detailspanel %}
+                        {% smart_include "detail" %}
                     {% endblock detailspanel %}
-
-                    {% smart_include "detail" %}
                 </div>
 
                 <div id="attachments" class="tab-pane {% if activetab == "attachments" %}active{% endif %}">
