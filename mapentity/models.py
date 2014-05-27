@@ -222,9 +222,8 @@ class MapEntityMixin(object):
     def get_delete_url(self):
         return (self.get_url_name(ENTITY_DELETE), [str(self.pk)])
 
-    def get_attributes_html(self, rooturl):
-        url = smart_urljoin(rooturl, self.get_detail_url())
-        return extract_attributes_html(url)
+    def get_attributes_html(self, request):
+        return extract_attributes_html(self.get_detail_url(), request)
 
     @classmethod
     def get_content_type_id(cls):
