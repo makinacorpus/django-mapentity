@@ -13,7 +13,6 @@ from django.views.generic import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.gis.db.models import GeometryField
-from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.contrib import messages
@@ -25,7 +24,8 @@ from djappypod.response import OdtTemplateResponse
 from ..settings import app_settings, API_SRID
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream, user_has_perm
-from ..decorators import save_history, view_permission_required, view_cache_latest
+from ..decorators import (save_history, view_permission_required,
+                          view_cache_latest, view_cache_response_content)
 from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from ..filters import MapEntityFilterSet
@@ -77,23 +77,9 @@ class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
     def dispatch(self, *args, **kwargs):
         return super(MapEntityLayer, self).dispatch(*args, **kwargs)
 
+    @view_cache_response_content()
     def render_to_response(self, context, **response_kwargs):
-        cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
-        key = '%s_%s_layer_json' % (self.request.LANGUAGE_CODE,
-                                    self.model._meta.module_name)
-
-        result = cache.get(key)
-        latest = self.model.latest_updated()
-
-        if result and latest:
-            cache_latest, content = result
-            # Not empty and still valid
-            if cache_latest and cache_latest >= latest:
-                return self.response_class(content=content, **response_kwargs)
-
-        response = super(MapEntityLayer, self).render_to_response(context, **response_kwargs)
-        cache.set(key, (latest, response.content))
-        return response
+        return super(MapEntityLayer, self).render_to_response(context, **response_kwargs)
 
 
 class MapEntityList(ModelViewMixin, ListView):
