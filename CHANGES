@@ -5,7 +5,9 @@ CHANGELOG
 1.3.2 (unreleased)
 ==================
 
-- Nothing changed yet.
+** Internal changes **
+
+- Allow to override GPX serialization
 
 
 1.3.1 (2014-05-26)
