@@ -69,10 +69,10 @@ def view_cache_latest():
             cache_latest = cache_last_modified(lambda x: view_model.latest_updated())
             cbv_cache_latest = method_decorator(cache_latest)
 
-            # The first decorator allows browser's cache revalidation.
-            # The second one forces browser's cache revalidation.
-            @cbv_cache_latest
+            # The first decorator forces browser's cache revalidation.
+            # The second one allows browser's cache revalidation.
             @method_decorator(never_cache)
+            @cbv_cache_latest
             def decorated(self, request, *args, **kwargs):
                 return view_func(self, request, *args, **kwargs)
 

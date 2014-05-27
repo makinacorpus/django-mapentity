@@ -271,12 +271,14 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertEqual(expires, lastmodified)
 
         # Try again, check that nothing changed
+        time.sleep(1.1)
+        self.assertEqual(latest, self.model.latest_updated())
         response = self.session.get(geojson_layer_url)
         self.assertEqual(lastmodified, response.headers.get('Last-Modified'))
         self.assertEqual(md5sum, md5.new(response.content).digest())
 
         # Create a new object
-        time.sleep(1)  # wait some time, last-modified has precision in seconds
+        time.sleep(1.1)  # wait some time, last-modified has precision in seconds
         self.modelfactory.create()
         latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
 
