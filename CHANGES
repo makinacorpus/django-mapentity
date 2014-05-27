@@ -5,6 +5,10 @@ CHANGELOG
 1.3.2 (unreleased)
 ==================
 
+** New features **
+
+- Show object type in Document export (fixes #36)
+
 ** Internal changes **
 
 - Allow to override GPX serialization

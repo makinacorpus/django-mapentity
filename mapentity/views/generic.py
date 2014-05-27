@@ -324,6 +324,7 @@ class MapEntityDocument(ModelViewMixin, DetailView):
         context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
         context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
         context['attributeshtml'] = html
+        context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon)
         context['_'] = _
         return context
 
