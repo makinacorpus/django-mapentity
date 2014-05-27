@@ -88,22 +88,26 @@ def view_cache_response_content():
         def _wrapped_method(self, *args, **kwargs):
             view_model = self.get_model()
             response_class = self.response_class
+            language = self.request.LANGUAGE_CODE
 
-            cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
-            key = '%s_%s_layer_json' % (self.request.LANGUAGE_CODE,
-                                        self.model._meta.module_name)
+            geojson_cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
+            cache = get_cache('default')
+            geojson_lookup = '%s_%s_layer_json' % (language,
+                                                   view_model._meta.module_name)
+            latest_lookup = geojson_lookup.replace('_json', '_latest')
 
-            result = cache.get(key)
-            latest = view_model.latest_updated()
+            latest_stored = cache.get(latest_lookup)
+            latest_saved = view_model.latest_updated()
 
-            if result and latest:
-                cache_latest, content = result
+            if latest_stored and latest_saved:
                 # Not empty and still valid
-                if cache_latest and cache_latest >= latest:
+                if latest_stored >= latest_saved:
+                    content = geojson_cache.get(geojson_lookup)
                     return response_class(content=content, **kwargs)
 
             response = view_func(self, *args, **kwargs)
-            cache.set(key, (latest, response.content))
+            cache.set(latest_lookup, latest_saved)
+            geojson_cache.set(geojson_lookup, response.content)
             return response
 
         return _wrapped_method
