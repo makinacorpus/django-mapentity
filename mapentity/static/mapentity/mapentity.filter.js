@@ -3,7 +3,9 @@ MapEntity.TogglableFilter = L.Class.extend({
     options: {},
 
     initialize: function () {
-        this.button = '#filters-btn';
+        var self = this;
+
+        this.$button = $('#filters-btn');
 
         this.fields = {};
         this.visible = false;
@@ -22,10 +24,9 @@ MapEntity.TogglableFilter = L.Class.extend({
                               title: tr("Current criteria")
                           });
 
-        $(this.button).click(this.toggle.bind(this));
-        $(this.button).mouseenter(this.showinfo.bind(this));
-        $(this.button).mouseleave(this.hideinfo.bind(this));
-        var self = this;
+        this.$button.mouseenter(this.showinfo.bind(this));
+        this.$button.mouseleave(this.hideinfo.bind(this));
+
         $('#mainfilter').find('select,input').change(function (e) {
             self.setfield(this);
         });
@@ -50,8 +51,37 @@ MapEntity.TogglableFilter = L.Class.extend({
                 $container.removeClass('filter-set');
             }
         });
-        // Filters close
-        $('#filters-close').click(this.toggle.bind(this));
+
+
+        //
+        // Filters open/close
+        //
+
+        // Close button
+        var toggle_func = this.toggle.bind(this);
+        $('#filters-close').click(toggle_func);
+
+
+        this.$button.click(function (e) {
+            e.stopPropagation();
+
+            // Open/Close from button
+            self.toggle();
+
+            // Close when click outside
+            if (self.visible) {
+                $(document).on('click.outside', function close_panel(e) {
+                    if (self.tip().has(e.target).length === 0 &&
+                        self.$button.has(e.target).length === 0) {
+                        self.toggle();
+                    }
+                });
+
+                self.popover.on('hidden', function () {
+                    $(document).off('click.outside');
+                });
+            }
+        });
     },
 
     tip: function () {

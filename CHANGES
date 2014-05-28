@@ -8,6 +8,7 @@ CHANGELOG
 ** New features **
 
 - Show object type in Document export (fixes #36)
+- Close filter form on click outside
 
 ** Bug fixes **
 
