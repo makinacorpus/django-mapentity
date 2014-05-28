@@ -91,12 +91,11 @@ def view_cache_response_content():
             language = self.request.LANGUAGE_CODE
 
             geojson_cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
-            cache = get_cache('default')
             geojson_lookup = '%s_%s_layer_json' % (language,
                                                    view_model._meta.module_name)
             latest_lookup = geojson_lookup.replace('_json', '_latest')
 
-            latest_stored = cache.get(latest_lookup)
+            latest_stored = geojson_cache.get(latest_lookup)
             latest_saved = view_model.latest_updated()
 
             if latest_stored and latest_saved:
@@ -106,7 +105,7 @@ def view_cache_response_content():
                     return response_class(content=content, **kwargs)
 
             response = view_func(self, *args, **kwargs)
-            cache.set(latest_lookup, latest_saved)
+            geojson_cache.set(latest_lookup, latest_saved)
             geojson_cache.set(geojson_lookup, response.content)
             return response
 
