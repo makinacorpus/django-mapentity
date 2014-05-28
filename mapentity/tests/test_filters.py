@@ -99,7 +99,6 @@ class YearFilterTest(TestCase):
         f = YearFilter()
         self.assertEqual((0, 'Any year'), f.get_choices()[0])
 
-
     def test_first_choice_coming_from_label(self):
         f = YearFilter(label='Birth')
         self.assertEqual((0, 'Birth'), f.get_choices()[0])
