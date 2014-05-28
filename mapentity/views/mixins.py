@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
 from ..forms import MapEntityForm
 from ..serializers import json_django_dumps
+from .. import registry
 
 
 logger = logging.getLogger(__name__)
@@ -72,6 +73,9 @@ class ModelViewMixin(object):
         model = self.get_model()
         return model.get_permission_codename(self.get_entity_kind())
 
+    def get_entity(self):
+        return registry.registry[self.get_model()]
+
     def get_context_data(self, **kwargs):
         context = super(ModelViewMixin, self).get_context_data(**kwargs)
         context['view'] = self.get_entity_kind()
@@ -82,6 +86,7 @@ class ModelViewMixin(object):
             context['model'] = model
             context['appname'] = model._meta.app_label.lower()
             context['modelname'] = model._meta.object_name.lower()
+            context['objectname'] = model._meta.verbose_name
             context['objectsname'] = model._meta.verbose_name_plural
         return context
 

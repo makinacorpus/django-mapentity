@@ -302,14 +302,14 @@ class MapEntityDocument(ModelViewMixin, DetailView):
 
         # Screenshot of object map is required, since present in document
         self.get_object().prepare_map_image(rooturl)
-        html = self.get_object().get_attributes_html(rooturl)
 
         context = super(MapEntityDocument, self).get_context_data(**kwargs)
         context['datetime'] = datetime.now()
         context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
         context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
         context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
-        context['attributeshtml'] = html
+        context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
+        context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon)
         context['_'] = _
         return context
 
