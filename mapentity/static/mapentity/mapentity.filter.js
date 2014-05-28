@@ -30,10 +30,6 @@ MapEntity.TogglableFilter = L.Class.extend({
             self.setfield(this);
         });
 
-        // Move all topology-filters to separate tab
-        $('#mainfilter .topology-filter').parent('p')
-                                         .detach().appendTo('#mainfilter > .right');
-
         // Use chosen for multiple values
         // Remove empty value (set with empty_label in Django for all choice fields)
         $('#mainfilter select[multiple] option:first-child').remove();
