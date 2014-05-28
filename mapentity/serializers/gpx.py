@@ -8,6 +8,7 @@ from django.contrib.gis.geos import Point, LineString
 import gpxpy
 
 from ..templatetags.timesince import humanize_timesince
+from .. import app_settings
 
 
 class GPXSerializer(Serializer):
@@ -44,7 +45,7 @@ class GPXSerializer(Serializer):
         if objupdate:
             description += _('Modified') + ': ' + humanize_timesince(objupdate)
 
-        geom_field = self.options.pop('geom_field')
+        geom_field = self.options.pop('geom_field', app_settings['GEOM_FIELD_NAME'])
         geom = getattr(obj, geom_field, None)
         if geom:
             assert geom.srid == settings.SRID, "Invalid SRID (!= %s)" % settings.SRID
