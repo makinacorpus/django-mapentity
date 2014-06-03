@@ -73,7 +73,7 @@ MapEntity.History = L.Class.extend({
                     }
                 });
             });
-        }, 5000);  // Don't stress loading.
+        }, 10000);  // Don't stress loading.
     },
 });
 
