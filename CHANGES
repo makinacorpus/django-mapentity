@@ -8,18 +8,24 @@ CHANGELOG
 ** New features **
 
 - Show object type in Document export (fixes #36)
-- Close filter form on click outside
+- Nicer margins for translated pills form fields
+- Close filters popup when clicking outside
+- Show object type in document export (fixes #36)
+- Better apparence of filters popup close button
 
 ** Bug fixes **
 
 - Fix first value not coming from label for YearFilter
 
+
 ** Internal changes **
 
 - Allow to override GPX serialization
-- Small optimization at reading cache
 - Prevent to use a cycle request/response to extract HTML attributes
-- Allow to control left panel scrollable aspect
+- Allow to control scrollable aspect of left panel when subclassing
+- Add test for never cache decorator of geojson views
+- Split cache keys instead of splitting cached values
+- Prevent to use a cycle request/response on HTML extraction for document
 
 
 1.3.1 (2014-05-26)
