@@ -223,6 +223,6 @@ class MapEntityForm(TranslatedModelForm):
                 *fields,
                 css_class="tab-content"
             ),
-            css_class="tabbable"
+            css_class="translatable tabbable"
         )
         return layout

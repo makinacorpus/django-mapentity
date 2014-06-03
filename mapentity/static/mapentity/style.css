@@ -717,6 +717,9 @@ label.requiredField .asteriskField {
     }
 }
 
+.translatable:hover, .control-group:hover {
+    background-color: rgba(240, 240, 240, 0.5);
+}
 
 /*
  * Form tabs Main/Advanced
@@ -741,18 +744,35 @@ label.requiredField .asteriskField {
  * Multilang pills
  */
 
-.form-panel .tab-content .nav-pills li a {
+.translatable {
+    margin-bottom: 7px;
+}
+
+.form-panel .tab-content .translatable .nav {
+    margin-bottom: 0px;
+}
+
+.tab-content .translatable .nav-pills li a {
     padding-top: 2px;
     padding-bottom: 2px;
 }
 
-.form-panel .nav-pills {
+.translatable .nav-pills {
     margin-left: 145px;
+}
+
+.translatable .controls > .radio:first-child,
+.translatable .controls > .checkbox:first-child {
+    padding-top: 0px;
+}
+
+.form-horizontal .translatable .control-group {
+    margin-bottom: 0px;
 }
 
 @media (max-width: 1280px) {
 
-    .form-horizontal .nav-pills {
+    .translatable .nav-pills {
         margin-left: 100px;
     }
 }
