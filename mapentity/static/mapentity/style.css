@@ -669,7 +669,7 @@ body.screamshot .leaflet-control-scale-line {
     height: 30px;
 }
 
-.form-panel #modelfields {
+.form-panel .scrollable {
     margin-bottom: 55px;
 }
 

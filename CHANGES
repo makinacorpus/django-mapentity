@@ -19,6 +19,7 @@ CHANGELOG
 - Allow to override GPX serialization
 - Small optimization at reading cache
 - Prevent to use a cycle request/response to extract HTML attributes
+- Allow to control left panel scrollable aspect
 
 
 1.3.1 (2014-05-26)
