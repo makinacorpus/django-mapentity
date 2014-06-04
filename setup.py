@@ -22,7 +22,7 @@ setup(
     license='BSD, see LICENSE file.',
     install_requires=[
         'Django >= 1.4',
-        'GDAL == 1.9.1',
+        'GDAL >= 1.9',
         'gpxpy == 0.7.1',
         'BeautifulSoup4 == 4.1.3',
         'requests == 1.1.0',
