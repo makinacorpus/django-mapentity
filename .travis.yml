@@ -14,7 +14,7 @@ install:
 
    # GDAL
  - sudo apt-get install libgdal-dev
- - pip install --no-install GDAL==1.9.1
+ - pip install --no-install GDAL==1.10.0
  - pushd /home/travis/virtualenv/python2.7/build/GDAL
  - python setup.py build_ext --include-dirs=/usr/include/gdal
  - pip install --no-download GDAL
