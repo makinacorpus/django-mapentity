@@ -192,9 +192,10 @@ class MapEntityMixin(object):
         path = self.get_map_image_path()
         # Do nothing if image is up-to-date
         if is_file_newer(path, self.get_date_update()):
-            return
+            return False
         url = smart_urljoin(rooturl, self.get_detail_url())
         capture_map_image(url, path, aspect=self.get_geom_aspect_ratio())
+        return True
 
     def get_map_image_path(self):
         basefolder = os.path.join(settings.MEDIA_ROOT, 'maps')
@@ -222,9 +223,8 @@ class MapEntityMixin(object):
     def get_delete_url(self):
         return (self.get_url_name(ENTITY_DELETE), [str(self.pk)])
 
-    def get_attributes_html(self, rooturl):
-        url = smart_urljoin(rooturl, self.get_detail_url())
-        return extract_attributes_html(url)
+    def get_attributes_html(self, request):
+        return extract_attributes_html(self.get_detail_url(), request)
 
     @classmethod
     def get_content_type_id(cls):

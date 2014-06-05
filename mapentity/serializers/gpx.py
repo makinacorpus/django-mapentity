@@ -8,6 +8,7 @@ from django.contrib.gis.geos import Point, LineString
 import gpxpy
 
 from ..templatetags.timesince import humanize_timesince
+from .. import app_settings
 
 
 class GPXSerializer(Serializer):
@@ -26,23 +27,29 @@ class GPXSerializer(Serializer):
 
     def serialize(self, queryset, **options):
         self.gpx = gpxpy.gpx.GPX()
-
-        stream = options.pop('stream')
-        geom_field = options.pop('geom_field')
+        self.options = options
 
         for obj in queryset:
-            geom = getattr(obj, geom_field)
-            objtype = unicode(obj.__class__._meta.verbose_name)
-            name = '[%s] %s' % (objtype, unicode(obj))
+            self.end_object(obj)
 
-            description = getattr(obj, 'description', '')
-            objupdate = obj.get_date_update()
-            if objupdate:
-                description += _('Modified') + ': ' + humanize_timesince(objupdate)
-            if geom:
-                assert geom.srid == settings.SRID, "Invalid srid"
-                self.geomToGPX(geom, name, description)
+        stream = options.pop('stream')
         stream.write(self.gpx.to_xml())
+
+    def end_object(self, obj):
+        """ Single object serialization.
+        """
+        objtype = unicode(obj.__class__._meta.verbose_name)
+        name = u'[%s] %s' % (objtype, unicode(obj))
+        description = getattr(obj, 'description', '')
+        objupdate = obj.get_date_update()
+        if objupdate:
+            description += _('Modified') + ': ' + humanize_timesince(objupdate)
+
+        geom_field = self.options.pop('geom_field', app_settings['GEOM_FIELD_NAME'])
+        geom = getattr(obj, geom_field, None)
+        if geom:
+            assert geom.srid == settings.SRID, "Invalid SRID (!= %s)" % settings.SRID
+            self.geomToGPX(geom, name, description)
 
     def _point_to_GPX(self, point, klass=gpxpy.gpx.GPXWaypoint):
         if isinstance(point, (tuple, list)):

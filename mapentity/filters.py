@@ -15,12 +15,13 @@ from .widgets import HiddenGeometryWidget
 
 class YearFilter(ChoiceFilter):
     def __init__(self, *args, **kwargs):
+        self.first_choice = kwargs.get('label', _('Any year'))
         kwargs['choices'] = self.get_choices()
         super(YearFilter, self).__init__(*args, **kwargs)
 
     def get_choices(self):
         # idx 0 will not be a year !
-        years_range = [_('Any year')] + self.get_years()
+        years_range = [self.first_choice] + self.get_years()
         return [(idx, year) for idx, year in enumerate(years_range)]
 
     def get_years(self):

@@ -13,6 +13,7 @@ from django.conf import settings
 from django.contrib.gis.gdal.error import OGRException
 from django.contrib.gis.geos import GEOSException, fromstr
 from django.http import HttpResponse
+from django.core.urlresolvers import resolve
 
 import bs4
 import requests
@@ -247,7 +248,7 @@ def capture_map_image(url, destination, size=None, aspect=1.0):
                       waitfor='.leaflet-tile-loaded')
 
 
-def extract_attributes_html(url):
+def extract_attributes_html(url, request):
     """
     The tidy XHTML version of objects attributes.
 
@@ -256,11 +257,11 @@ def extract_attributes_html(url):
     With this, we save a lot of efforts, since we do have to build specific Appy.pod
     templates for each model.
     """
-    r = requests.get(url)
-    if r.status_code != 200:
-        raise ValueError('Could not reach %s' % url)
+    func, args, kwargs = resolve(url)
+    response = func(request, *args, **kwargs)
+    response.render()
 
-    soup = bs4.BeautifulSoup(r.content)
+    soup = bs4.BeautifulSoup(response.content)
     details = soup.find(id="properties")
     if details is None:
         raise ValueError('Content is of detail page is invalid')
