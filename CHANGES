@@ -12,6 +12,7 @@ CHANGELOG
 - Close filters popup when clicking outside
 - Show object type in document export (fixes #36)
 - Better apparence of filters popup close button
+- Command to update all map images
 
 ** Bug fixes **
 
