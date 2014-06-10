@@ -96,6 +96,18 @@ $(window).on('entity:map', function (e, data) {
         $container = $(map._container),
         readonly = $container.data('readonly');
 
+    // Replace default layer switcher with Leaflet.GroupedLayerSwitcher
+    if (map.layerscontrol) {
+        map.layerscontrol.removeFrom(map);
+    }
+    var baseLayers = {};
+    for (var l in map.layerscontrol._layers) {
+        var layer = map.layerscontrol._layers[l];
+        if (!layer.overlay) baseLayers[layer.name] = layer.layer;
+    }
+    var layerscontrol = map.layerscontrol = L.control.groupedLayers(baseLayers, []);
+    layerscontrol.addTo(map);
+
     if (readonly) {
         // Set map readonly
         map.dragging.disable();
@@ -216,13 +228,8 @@ $(window).on('entity:map:list', function (e, data) {
         if (e.layer._map !== null) e.layer.bringToFront();
     });
     map.addLayer(objectsLayer);
-
-    if (map.layerscontrol === undefined) {
-        map.layerscontrol = L.control.layers().addTo(map);
-    }
-    map.layerscontrol.addOverlay(objectsLayer, data.objectsname);
     objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname), true);
-
+    map.layerscontrol.addOverlay(objectsLayer, data.objectsname, tr("Objects"));
 
     var dt = MapEntity.mainDatatable;
 

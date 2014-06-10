@@ -70,7 +70,7 @@ MapEntity.GeometryField = L.GeometryField.extend({
         map.addLayer(objectsLayer);
 
         var objectsname = $('body').data('objectsname');
-        map.layerscontrol.addOverlay(objectsLayer, objectsname);
+        map.layerscontrol.addOverlay(objectsLayer, objectsname, tr("Objects"))
 
         var url = this.modelLayerUrl();
         objectsLayer.load(url);
