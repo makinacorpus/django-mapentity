@@ -46,21 +46,23 @@ class AutoLoginMiddleware(object):
     django-screamshot, or deployed OpenId, or whatever. But this was a lot easier.
     """
     def process_request(self, request):
+        useragent = request.META.get('HTTP_USER_AGENT', '')
+        if useragent:
+            request.META['HTTP_USER_AGENT'] = useragent.replace('FrontendTest', '')
+        is_running_tests = ('FrontendTest' in useragent or
+                            getattr(settings, 'TEST', False))
+
         user = getattr(request, 'user', None)
-        if user and user.is_anonymous():
+        if user and user.is_anonymous() and not is_running_tests:
             remoteip = request.META.get('REMOTE_ADDR')
             remotehost = request.META.get('REMOTE_HOST')
-            useragent = request.META.get('HTTP_USER_AGENT', '')
 
-            is_running_tests = ('FrontendTest' in useragent or
-                                getattr(settings, 'TEST', False))
-            request.META['HTTP_USER_AGENT'] = useragent.replace('FrontendTest', '')
-
-            is_localhost = (remoteip in LOCALHOST or remotehost == 'localhost')
-            is_auto_allowed = not is_running_tests and (
-                is_localhost or
+            is_auto_allowed = (
+                (remoteip in LOCALHOST or remotehost == 'localhost') or
                 (remoteip and remoteip in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST)) or
-                (remotehost and remotehost in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST)))
+                (remotehost and remotehost in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST))
+            )
+
             if is_auto_allowed:
                 logger.info("Auto-login for %s/%s" % (remoteip, remotehost))
                 user = get_internal_user()
