@@ -13,6 +13,7 @@ CHANGELOG
 - Show object type in document export (fixes #36)
 - Better apparence of filters popup close button
 - Command to update all map images
+- Nicer layer switcher, with groups of layers (fixes #61)
 
 ** Bug fixes **
 
