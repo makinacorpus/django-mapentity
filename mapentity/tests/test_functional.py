@@ -268,7 +268,6 @@ class MapEntityLiveTest(LiveServerTestCase):
         md5sum = md5.new(response.content).digest()
         self.assertNotEqual(lastmodified, None)
         self.assertNotEqual(expires, None)
-        self.assertEqual(expires, lastmodified)
 
         # Try again, check that nothing changed
         time.sleep(1.1)
