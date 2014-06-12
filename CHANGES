@@ -18,7 +18,7 @@ CHANGELOG
 ** Bug fixes **
 
 - Fix first value not coming from label for YearFilter
-
+- Fix download buttons from list view
 
 ** Internal changes **
 

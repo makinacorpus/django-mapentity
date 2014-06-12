@@ -26,7 +26,9 @@ $(window).on('entity:view:list', function (e, data) {
     $('#list-download-toolbar button').on('click', function () {
         var can_export = $('#list-download-toolbar .btn-group.disabled').length === 0;
         var format = $(this).attr('name');
-        var url = window.SETTINGS.urls.format_list + '?' +
+
+        var format_url = window.SETTINGS.urls.format_list.replace(new RegExp('modelname', 'g'), data.modelname);
+        var url = format_url + '?' +
                   $('#mainfilter').serialize() + '&format=' + format;
 
         if (can_export)
