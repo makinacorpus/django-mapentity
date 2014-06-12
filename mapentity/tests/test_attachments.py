@@ -19,7 +19,7 @@ class EntityAttachmentTestCase(TestCase):
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
 
         def user_perms(p):
-            return {'add_attachment': False}.get(p, True)
+            return {'paperclip.add_attachment': False}.get(p, True)
 
         self.user.is_anonymous = mock.MagicMock(return_value=False)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
