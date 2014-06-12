@@ -20,6 +20,7 @@ CHANGELOG
 - Fix first value not coming from label for YearFilter
 - Fix download buttons from list view
 - Fix measure control appearing twice in forms
+- Fix permission check on attachments
 
 ** Internal changes **
 
