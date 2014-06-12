@@ -98,6 +98,10 @@ _LEAFLET_PLUGINS = OrderedDict([
         'css': 'mapentity/leaflet.fullscreen/Control.FullScreen.css',
         'js': 'mapentity/leaflet.fullscreen/Control.FullScreen.js'
     }),
+    ('leaflet.groupedlayercontrol', {
+        'css': 'mapentity/Leaflet.groupedlayercontrol/src/leaflet.groupedlayercontrol.css',
+        'js': 'mapentity/Leaflet.groupedlayercontrol/src/leaflet.groupedlayercontrol.js'
+    }),
     ('mapentity', {
         'js': ['mapentity/mapentity.js',
                'mapentity/mapentity.forms.js'],

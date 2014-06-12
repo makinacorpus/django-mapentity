@@ -5,7 +5,32 @@ CHANGELOG
 1.3.3 (unreleased)
 ==================
 
-- Nothing changed yet.
+** New features **
+
+- Show object type in Document export (fixes #36)
+- Nicer margins for translated pills form fields
+- Close filters popup when clicking outside
+- Show object type in document export (fixes #36)
+- Better apparence of filters popup close button
+- Command to update all map images
+- Nicer layer switcher, with groups of layers (fixes #61)
+
+** Bug fixes **
+
+- Fix first value not coming from label for YearFilter
+- Fix download buttons from list view
+- Fix measure control appearing twice in forms
+- Fix permission check on attachments
+
+** Internal changes **
+
+- Allow to override GPX serialization
+- Prevent to use a cycle request/response to extract HTML attributes
+- Allow to control scrollable aspect of left panel when subclassing
+- Add test for never cache decorator of geojson views
+- Split cache keys instead of splitting cached values
+- Prevent to use a cycle request/response on HTML extraction for document
+- Fix behaviour of flag ``FrontEndTest`` in User-Agent
 
 
 1.3.2 (2014-06-04)

@@ -13,7 +13,6 @@ from django.views.generic import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.gis.db.models import GeometryField
-from django.core.cache import get_cache
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.contrib import messages
@@ -25,7 +24,8 @@ from djappypod.response import OdtTemplateResponse
 from ..settings import app_settings, API_SRID
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream, user_has_perm
-from ..decorators import save_history, view_permission_required, view_cache_latest
+from ..decorators import (save_history, view_permission_required,
+                          view_cache_latest, view_cache_response_content)
 from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
 from ..filters import MapEntityFilterSet
@@ -77,23 +77,9 @@ class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
     def dispatch(self, *args, **kwargs):
         return super(MapEntityLayer, self).dispatch(*args, **kwargs)
 
+    @view_cache_response_content()
     def render_to_response(self, context, **response_kwargs):
-        cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
-        key = '%s_%s_layer_json' % (self.request.LANGUAGE_CODE,
-                                    self.model._meta.module_name)
-
-        result = cache.get(key)
-        latest = self.model.latest_updated()
-
-        if result and latest:
-            cache_latest, content = result
-            # Not empty and still valid
-            if cache_latest and cache_latest >= latest:
-                return self.response_class(content=content, **response_kwargs)
-
-        response = super(MapEntityLayer, self).render_to_response(context, **response_kwargs)
-        cache.set(key, (latest, response.content))
-        return response
+        return super(MapEntityLayer, self).render_to_response(context, **response_kwargs)
 
 
 class MapEntityList(ModelViewMixin, ListView):
@@ -316,14 +302,14 @@ class MapEntityDocument(ModelViewMixin, DetailView):
 
         # Screenshot of object map is required, since present in document
         self.get_object().prepare_map_image(rooturl)
-        html = self.get_object().get_attributes_html(rooturl)
 
         context = super(MapEntityDocument, self).get_context_data(**kwargs)
         context['datetime'] = datetime.now()
         context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
         context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
         context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
-        context['attributeshtml'] = html
+        context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
+        context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
         context['_'] = _
         return context
 
@@ -464,9 +450,9 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         perm_update = self.get_model().get_permission_codename(mapentity_models.ENTITY_UPDATE)
         can_edit = user_has_perm(self.request.user, perm_update)
         context['can_edit'] = can_edit
-        context['can_read_attachment'] = user_has_perm(self.request.user, 'read_attachment')
-        context['can_add_attachment'] = user_has_perm(self.request.user, 'add_attachment')
-        context['can_delete_attachment'] = user_has_perm(self.request.user, 'delete_attachment')
+        context['can_read_attachment'] = user_has_perm(self.request.user, 'paperclip.read_attachment')
+        context['can_add_attachment'] = user_has_perm(self.request.user, 'paperclip.add_attachment')
+        context['can_delete_attachment'] = user_has_perm(self.request.user, 'paperclip.delete_attachment')
 
         return context
 

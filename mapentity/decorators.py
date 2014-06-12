@@ -5,6 +5,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import last_modified as cache_last_modified
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
+from django.core.cache import get_cache
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.views.generic.edit import BaseUpdateView
@@ -69,16 +70,46 @@ def view_cache_latest():
             cache_latest = cache_last_modified(lambda x: view_model.latest_updated())
             cbv_cache_latest = method_decorator(cache_latest)
 
-            # The first decorator allows browser's cache revalidation.
-            # The second one forces browser's cache revalidation.
-            @cbv_cache_latest
+            # The first decorator forces browser's cache revalidation.
+            # The second one allows browser's cache revalidation.
             @method_decorator(never_cache)
+            @cbv_cache_latest
             def decorated(self, request, *args, **kwargs):
                 return view_func(self, request, *args, **kwargs)
 
             return decorated(self, request, *args, **kwargs)
 
         return _wrapped_view
+    return decorator
+
+
+def view_cache_response_content():
+    def decorator(view_func):
+        def _wrapped_method(self, *args, **kwargs):
+            view_model = self.get_model()
+            response_class = self.response_class
+            language = self.request.LANGUAGE_CODE
+
+            geojson_cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
+            geojson_lookup = '%s_%s_layer_json' % (language,
+                                                   view_model._meta.module_name)
+            latest_lookup = geojson_lookup.replace('_json', '_latest')
+
+            latest_stored = geojson_cache.get(latest_lookup)
+            latest_saved = view_model.latest_updated()
+
+            if latest_stored and latest_saved:
+                # Not empty and still valid
+                if latest_stored >= latest_saved:
+                    content = geojson_cache.get(geojson_lookup)
+                    return response_class(content=content, **kwargs)
+
+            response = view_func(self, *args, **kwargs)
+            geojson_cache.set(latest_lookup, latest_saved)
+            geojson_cache.set(geojson_lookup, response.content)
+            return response
+
+        return _wrapped_method
     return decorator
 
 

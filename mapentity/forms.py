@@ -88,6 +88,7 @@ class MapEntityForm(TranslatedModelForm):
 
     fieldslayout = None
     geomfields = []
+    leftpanel_scrollable = True
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -155,9 +156,13 @@ class MapEntityForm(TranslatedModelForm):
         fieldslayout = self.__replace_translatable_fields(fieldslayout)
 
         has_geomfield = len(self.geomfields) > 0
+        leftpanel_css = "span" + ('4' if has_geomfield else '12')
+        if self.leftpanel_scrollable:
+            leftpanel_css += " scrollable"
+
         leftpanel = Div(
             *fieldslayout,
-            css_class="scrollable span" + ('4' if has_geomfield else '12'),
+            css_class=leftpanel_css,
             css_id="modelfields"
         )
 
@@ -218,6 +223,6 @@ class MapEntityForm(TranslatedModelForm):
                 *fields,
                 css_class="tab-content"
             ),
-            css_class="tabbable"
+            css_class="translatable tabbable"
         )
         return layout

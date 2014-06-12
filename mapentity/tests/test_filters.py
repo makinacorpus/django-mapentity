@@ -6,7 +6,7 @@ from django.conf import settings
 
 from mapentity.settings import API_SRID
 from .models import MushroomSpot, WeatherStation
-from ..filters import PythonPolygonFilter, PolygonFilter, MapEntityFilterSet
+from ..filters import PythonPolygonFilter, PolygonFilter, MapEntityFilterSet, YearFilter
 
 
 class PolygonTest(object):
@@ -91,3 +91,14 @@ class PluggableFilterSetTest(TestCase):
         self.filterset_class.add_filters({'name': CharFilter()})
         filterset = self.filterset_class({'name': 'Foo'})
         self.assertEqual(filterset.count(), 0)
+
+
+class YearFilterTest(TestCase):
+
+    def test_first_choice_default_value(self):
+        f = YearFilter()
+        self.assertEqual((0, 'Any year'), f.get_choices()[0])
+
+    def test_first_choice_coming_from_label(self):
+        f = YearFilter(label='Birth')
+        self.assertEqual((0, 'Birth'), f.get_choices()[0])
