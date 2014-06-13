@@ -131,7 +131,7 @@ MapEntity.Context = new function() {
                     }
                 });
             }
-            if (map.layerscontrol !== undefined) {
+            if ((map.layerscontrol !== undefined)  && !!map.layerscontrol._map) {
                 map.layerscontrol._onInputClick();
             }
         }
