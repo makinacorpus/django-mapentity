@@ -63,7 +63,7 @@
                     </div>
 
                     {% if can_add_attachment %}
-                    <div class="file-attachment-update">
+                    <div class="file-attachment-update offset2 span6">
                         <h4>{% trans "New file attachment" %}</h4>
                         {% attachment_form object object.get_detail_url|add:'?tab=attachments' %}
                     </div>

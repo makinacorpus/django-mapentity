@@ -835,3 +835,14 @@ TODO: please help;
     left: 48px;
     width: auto;
 }
+
+.file-attachment-update {
+    margin-top: 1.5em;
+    padding-left: 1em;
+    padding-right: 1em;
+    border: solid 1px lightgray;
+}
+
+.file-attachment-update form {
+    margin-bottom: 0px;
+}
