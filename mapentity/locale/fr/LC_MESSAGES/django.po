@@ -92,6 +92,9 @@ msgstr "Mesurer les distances"
 msgid "Save map as image"
 msgstr "Sauvegarder l'image"
 
+msgid "Load local file (GPX, KML, GeoJSON)"
+msgstr "Charger un fichier local (GPX, KML, GeoJSON)"
+
 #: templates/mapentity/base.html:192
 msgid "Map geometry is unsaved"
 msgstr "La géométrie n'a pas été sauvegardée"
