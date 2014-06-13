@@ -39,6 +39,7 @@ TINYMCE_DEFAULT_CONFIG = {
     'theme_advanced_toolbar_align': 'center',
     'theme_advanced_resizing': True,
     'theme_advanced_resize_horizontal': False,
+    'forced_root_block' : False,
     'plugins': 'media',
     'width': '95%',
     'resize': "both",
