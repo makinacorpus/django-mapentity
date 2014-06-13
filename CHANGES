@@ -2,6 +2,13 @@
 CHANGELOG
 =========
 
+1.4.1 (unreleased)
+==================
+
+- Fix missing translation of Load local layer
+- Fix empty paragraphs in TinyMCE
+
+
 1.4.0 (2014-06-13)
 ==================
 
