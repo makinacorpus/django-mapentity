@@ -217,9 +217,10 @@ $(window).on('entity:map:list', function (e, data) {
                                           .replace('0', properties.pk);
     }
 
+    var style = L.Util.extend({}, window.SETTINGS.map.styles.others);
     var objectsLayer = new L.ObjectsLayer(null, {
         objectUrl: getUrl,
-        style: window.SETTINGS.map.styles.others,
+        style: style,
         onEachFeature: function (geojson, layer) {
             if (geojson.properties.name) layer.bindLabel(geojson.properties.name);
         }
@@ -229,7 +230,9 @@ $(window).on('entity:map:list', function (e, data) {
     });
     map.addLayer(objectsLayer);
     objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname), true);
-    map.layerscontrol.addOverlay(objectsLayer, data.objectsname, tr("Objects"));
+
+    var nameHTML = '<span style="color: '+ style['color'] + ';">&#x25A3;</span>&nbsp;' + data.objectsname;
+    map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"));
 
     var dt = MapEntity.mainDatatable;
 
