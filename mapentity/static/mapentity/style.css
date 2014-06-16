@@ -247,6 +247,10 @@ select[multiple] {
     z-index: -1;
 }
 
+.leaflet-control-layers input[type="checkbox"] {
+    margin: -2px 0 0;
+}
+
 .leaflet-control-filelayer .leaflet-bar-part {
     text-align: center;
     margin-bottom: 0px;

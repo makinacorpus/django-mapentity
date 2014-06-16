@@ -8,6 +8,7 @@ CHANGELOG
 - Fix missing translation of Load local layer
 - Fix empty paragraphs in TinyMCE
 - Fix apparence of attachment form
+- Adjust vertical alignment of checkboxes in layer switcher
 
 1.4.0 (2014-06-13)
 ==================
