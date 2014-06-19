@@ -19,7 +19,7 @@ class LogEntryFilter(BaseMapEntityFilterSet):
 class LogEntryList(MapEntityList):
     model = LogEntry
     filterform = LogEntryFilter
-    columns = ('id', 'action_time', 'user', 'object', 'action_flag')
+    columns = ('id', 'action_time', 'user', 'object', 'action')
 
     def get_queryset(self):
         queryset = super(LogEntryList, self).get_queryset()

@@ -260,17 +260,20 @@ class LogEntry(MapEntityMixin, BaseLogEntry):
         proxy = True
 
     @property
-    def action_flag_display(self):
+    def action_time_display(self):
+        return u'{0} ({1})'.format(localize(self.action_time),
+                                   humanize_timesince(self.action_time))
+
+    @property
+    def action_display(self):
+        if self.change_message:
+            return self.change_message
         return {
             ADDITION: _("Added"),
             CHANGE: _("Changed"),
             DELETION: _("Deleted"),
         }[self.action_flag]
-
-    @property
-    def action_time_display(self):
-        return u'{0} ({1})'.format(localize(self.action_time),
-                                   humanize_timesince(self.action_time))
+    action_verbose_name = _("Action")
 
     @property
     def object_display(self):
