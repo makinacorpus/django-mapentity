@@ -285,3 +285,6 @@ msgstr "Éditer %s"
 #: views/generic.py:442
 msgid "Saved"
 msgstr "Sauvegardé"
+
+msgid "Objects"
+msgstr "Objets"
