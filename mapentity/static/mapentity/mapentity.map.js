@@ -277,7 +277,8 @@ $(window).on('entity:map:list', function (e, data) {
 
     // Restore map view, layers and filter from any available context
     // Get context from URL parameter, if any
-    var mapViewContext = getURLParameter('context');
+    var mapViewContext = getURLParameter('context'),
+        layerLabel = $('<div></div>').append(nameHTML).text();
     MapEntity.Context.restoreFullContext(map,
         // From URL param
         mapViewContext,
@@ -285,7 +286,7 @@ $(window).on('entity:map:list', function (e, data) {
         {
             filter: '#mainfilter',
             datatable: dt,
-            objectsname: data.objectsname,
+            objectsname: layerLabel,
             // We can have several contexts in the application (mainly 'detail' and 'list')
             // Using prefixes is a way to manage this.
             prefix: 'list',
