@@ -5,15 +5,18 @@ CHANGELOG
 1.4.1 (unreleased)
 ==================
 
-- Fix missing translation of Load local layer
-- Fix empty paragraphs in TinyMCE
-- Fix apparence of attachment form
-- Adjust vertical alignment of checkboxes in layer switcher
+**New features**
+
 - Show small colored symbols for objects in layer switcher
 
 **Bug fixes**
 
+- Fix empty paragraphs in TinyMCE
+- Fix missing translation of Load local layer
+- Fix apparence of attachment form
+- Adjust vertical alignment of checkboxes in layer switcher
 - Fix object layer not being shown by default
+- Fix multiple occurences of same author in detail view
 
 1.4.0 (2014-06-13)
 ==================
