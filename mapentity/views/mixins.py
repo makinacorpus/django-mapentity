@@ -78,7 +78,7 @@ class ModelViewMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(ModelViewMixin, self).get_context_data(**kwargs)
-        context['view'] = self.get_entity_kind()
+        context['viewname'] = self.get_entity_kind()
         context['title'] = self.get_title()
 
         model = self.get_model()

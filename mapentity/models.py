@@ -245,7 +245,7 @@ class MapEntityMixin(object):
     def authors(self):
         return auth.get_user_model().objects.filter(
             logentry__content_type_id=self.get_content_type_id(),
-            logentry__object_id=self.pk)
+            logentry__object_id=self.pk).distinct()
 
     @property
     def last_author(self):

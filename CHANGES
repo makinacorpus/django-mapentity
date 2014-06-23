@@ -2,19 +2,24 @@
 CHANGELOG
 =========
 
-1.4.2 (unreleased)
+1.5.0 (unreleased)
 ==================
 
-- Nothing changed yet.
+**New features**
+
+- Show small colored symbols for objects in layer switcher
+
+**Bug fixes**
+
+- Fix empty paragraphs in TinyMCE
+- Fix missing translation of Load local layer
+- Fix apparence of attachment form
+- Adjust vertical alignment of checkboxes in layer switcher
+- Fix object layer not being shown by default
+- Fix multiple occurences of same author in detail view
 
 
 1.4.2 (2014-06-19)
-==================
-
-- Nothing changed yet.
-
-
-1.4.1 (2014-06-19)
 ==================
 
 - Fix missing translation of Load local layer

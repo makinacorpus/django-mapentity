@@ -247,6 +247,10 @@ select[multiple] {
     z-index: -1;
 }
 
+.leaflet-control-layers input[type="checkbox"] {
+    margin: -2px 0 0;
+}
+
 .leaflet-control-filelayer .leaflet-bar-part {
     text-align: center;
     margin-bottom: 0px;
@@ -834,4 +838,15 @@ TODO: please help;
     top: 9px;
     left: 48px;
     width: auto;
+}
+
+.file-attachment-update {
+    margin-top: 1.5em;
+    padding-left: 1em;
+    padding-right: 1em;
+    border: solid 1px lightgray;
+}
+
+.file-attachment-update form {
+    margin-bottom: 0px;
 }

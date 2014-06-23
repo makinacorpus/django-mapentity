@@ -51,7 +51,7 @@
 {% block extrahead %}
 {% endblock extrahead %}
 </head>
-<body data-view="{{ view }}"
+<body data-viewname="{{ viewname }}"
       data-appname="{{ appname }}"
       data-modelname="{{ modelname }}"
       data-objectsname="{{ objectsname }}">
@@ -117,6 +117,7 @@
             L.Control.MeasureControl.TITLE = "{% trans "Measure distances" %}";
             L.Control.Screenshot.TITLE = "{% trans "Save map as image" %}";
             L.Control.FileLayerLoad.LABEL = '<i class="icon-folder-open"></i>';
+            L.Control.FileLayerLoad.TITLE = "{% trans "Load local file (GPX, KML, GeoJSON)" %}";
             L.GeometryField.unsavedText = "{% trans "Map geometry is unsaved" %}";
 
             MapEntity.i18n = {

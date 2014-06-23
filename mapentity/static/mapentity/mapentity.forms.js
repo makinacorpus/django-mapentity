@@ -66,10 +66,15 @@ MapEntity.GeometryField = L.GeometryField.extend({
     _addExtraLayers: function (map) {
         // Layer with objects of same type
         var objectsLayer = this.buildObjectsLayer();
+
+        // TODO remember state
+        // see https://github.com/makinacorpus/Geotrek/issues/1108
         map.addLayer(objectsLayer);
 
+        var style = objectsLayer.options.style;
         var objectsname = $('body').data('objectsname');
-        map.layerscontrol.addOverlay(objectsLayer, objectsname, tr("Objects"))
+        var nameHTML = '<span style="color: '+ style['color'] + ';">&#x25A3;</span>&nbsp;' + objectsname;
+        map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"))
 
         var url = this.modelLayerUrl();
         objectsLayer.load(url);

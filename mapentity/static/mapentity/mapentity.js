@@ -38,8 +38,8 @@ $(document).ready(function (e) {
 
     // Views
     var context = $('body').data();
-    console.debug('View ', context.modelname, context.view);
-    $(window).trigger('entity:view:' + context.view, [context]);
+    console.debug('View ', context.modelname, context.viewname);
+    $(window).trigger('entity:view:' + context.viewname, [context]);
 
     // Maps
     $(window).on('map:init', function (e) {
@@ -47,6 +47,6 @@ $(document).ready(function (e) {
                    e.originalEvent.detail : e.detail;
         $.extend(data, context);
         $(window).trigger('entity:map', [data]);
-        $(window).trigger('entity:map:' + context.view, [data]);
+        $(window).trigger('entity:map:' + context.viewname, [data]);
     });
 });
