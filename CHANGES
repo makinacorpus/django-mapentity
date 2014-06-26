@@ -8,7 +8,7 @@ CHANGELOG
 **Minor changes**
 
 - Ordered Log entries by date descending
-
+- Fix tab "None" being shown in list view
 
 1.5.0 (2014-06-23)
 ==================
