@@ -86,23 +86,32 @@ def view_cache_latest():
 def view_cache_response_content():
     def decorator(view_func):
         def _wrapped_method(self, *args, **kwargs):
-            view_model = self.get_model()
             response_class = self.response_class
-            language = self.request.LANGUAGE_CODE
+            response_kwargs = dict()
+
+            if hasattr(self, 'view_cache_key'):
+                geojson_lookup = self.view_cache_key()
+            else:
+                view_model = self.get_model()
+                language = self.request.LANGUAGE_CODE
+                geojson_lookup = '%s_%s_json_layer' % (language,
+                                                       view_model._meta.module_name)
+
+            if hasattr(self, 'latest_updated'):
+                latest_saved = self.latest_updated()
+            else:
+                latest_saved = view_model.latest_updated()
 
             geojson_cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
-            geojson_lookup = '%s_%s_layer_json' % (language,
-                                                   view_model._meta.module_name)
-            latest_lookup = geojson_lookup.replace('_json', '_latest')
-
+            latest_lookup = geojson_lookup + '_latest'
             latest_stored = geojson_cache.get(latest_lookup)
-            latest_saved = view_model.latest_updated()
 
             if latest_stored and latest_saved:
                 # Not empty and still valid
                 if latest_stored >= latest_saved:
                     content = geojson_cache.get(geojson_lookup)
-                    return response_class(content=content, **kwargs)
+                    return response_class(content=content,
+                                          **response_kwargs)
 
             response = view_func(self, *args, **kwargs)
             geojson_cache.set(latest_lookup, latest_saved)

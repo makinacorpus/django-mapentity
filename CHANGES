@@ -5,7 +5,7 @@ CHANGELOG
 1.5.2 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Added parameters to view_cache_response_content decorator
 
 
 1.5.1 (2014-06-26)
