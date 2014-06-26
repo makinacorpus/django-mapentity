@@ -5,7 +5,9 @@ CHANGELOG
 1.5.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+**Minor changes**
+
+- Ordered Log entries by date descending
 
 
 1.5.0 (2014-06-23)
