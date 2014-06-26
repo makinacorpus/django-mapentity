@@ -17,7 +17,7 @@ class LogEntryFilter(BaseMapEntityFilterSet):
 
 
 class LogEntryList(MapEntityList):
-    model = LogEntry
+    queryset = LogEntry.objects.order_by('-action_time')
     filterform = LogEntryFilter
     columns = ('id', 'action_time', 'user', 'object', 'action_flag')
 

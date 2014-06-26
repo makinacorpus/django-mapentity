@@ -4,7 +4,7 @@
 
     <ul id="historylist" class="nav">
       {% if request.user.is_authenticated %}
-      <li class="history {% if view == "list" %}{{ modelname }} active{% endif %}">
+      <li class="history {% if viewname == "list" %}{{ modelname }} active{% endif %}">
         <div id="entitylist-dropdown" class="btn-group">
               <button class="btn" onclick="javascript:location='{% url 'home' %}';">
                 {% trans "List" %} <span id="nbresults" class="badge">?</span>
@@ -31,11 +31,11 @@
       {% endif %}
       {% block toolbar %}
         {% for item in request.session.history %}
-            {% if forloop.first and view != "list" %}
+            {% if forloop.first and viewname != "list" %}
                 <li class="{{ modelname }} active history first">
                     <a href="{{ item.path }}">
                         <span class="content">{% if title|lower %}{{ title }}{% else %}{{ item.title }}{% endif %}</span>
-                        {% if view == "detail" %}
+                        {% if viewname == "detail" %}
                            <button class="close hidden">&times;</button>
                         {% endif %}
                     </a>
