@@ -91,8 +91,11 @@ class MapEntityMixin(object):
     def get_permission_codename(cls, entity_kind):
         perm = cls.get_entity_kind_permission(entity_kind)
         opts = cls._meta
-        return '%s.%s' % (opts.app_label.lower(),
-                          auth.get_permission_codename(perm, opts))
+        appname = opts.app_label.lower()
+        if opts.proxy:
+            proxied = opts.proxy_for_model._meta
+            appname = proxied.app_label.lower()
+        return '%s.%s' % (appname, auth.get_permission_codename(perm, opts))
 
     @classmethod
     def latest_updated(cls):

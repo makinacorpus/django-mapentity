@@ -9,6 +9,7 @@ CHANGELOG
 - Limit height of layer switcher on small screens
 - Get rid of next parameter when redirecting to login when permission missing
 - Removed history links for proxied models
+- Fix permission code name when model is proxied
 
 1.5.1 (2014-06-26)
 ==================
