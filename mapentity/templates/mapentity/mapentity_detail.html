@@ -87,6 +87,10 @@
                                         <td>{{ logentry.user }}</td>
                                         <td>{{ logentry.action_flag_display }}</td>
                                     </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="3">{% trans "None" %}</td>
+                                    </tr>
                                 {% endfor %}
                                 {% if logentries_hellip %}
                                     <tr>
