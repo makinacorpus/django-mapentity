@@ -63,15 +63,22 @@
               <b class="caret"></b>
            </a>
            <ul class="dropdown-menu">
+
               {% if request.user.is_staff %}
-                <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-                <li class="divider"></li>
-              {% endif %}
-              {% if ACTION_HISTORY_ENABLED %}
-                <li class="{% block nav-logbook %}{% endblock nav-logbook %}"><a href="{% url 'mapentity:logentry_list' %}">{% trans "Logbook" %}</a></li>
-                <li class="divider"></li>
+              <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
+              {% else %}
+              <li class="disabled"><a href="#">{% trans "Admin" %}</a></li>
               {% endif %}
 
+              {% if ACTION_HISTORY_ENABLED %}
+                {% if 'admin.read_logentry' in perms %}
+                <li><a class="{% block nav-logbook %}{% endblock nav-logbook %}" href="{% url 'mapentity:logentry_list' %}">{% trans "Logbook" %}</a></li>
+                {% else %}
+                <li class="disabled"><a href="#">{% trans "Logbook" %}</a></li>
+                {% endif %}
+              {% endif %}
+
+              <li class="divider"></li>
               <li><a href="{% url 'logout' %}"><i class="icon-off"></i> {% trans "Logout" %}</a></li>
            </ul>
         </li>

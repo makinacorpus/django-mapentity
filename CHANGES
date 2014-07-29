@@ -10,6 +10,7 @@ CHANGELOG
 - Get rid of next parameter when redirecting to login when permission missing
 - Removed history links for proxied models
 - Fix permission code name when model is proxied
+- Fix apparence of main menu when permissions are missing to view logbook and admin
 
 1.5.1 (2014-06-26)
 ==================
