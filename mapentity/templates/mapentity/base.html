@@ -56,21 +56,23 @@
       data-modelname="{{ modelname }}"
       data-objectsname="{{ objectsname }}">
 
+  {% if messages %}
+  <ul id="alert-box">
+      {% for message in messages %}
+      <li class="alert {{ message.tags }}">
+          {{ message }}
+          {% if 'warning' in message.tags or 'error' in message.tags %}
+          <button class="close" data-dismiss="alert">×</button>
+          {% endif %}
+      </li>
+      {% endfor %}
+  </ul>
+  {% endif %}
+
   {% block content %}
     {% block navbar %}
         {% include "mapentity/_base_navbar.html" %}
     {% endblock navbar %}
-
-    {% if messages %}
-    <ul id="alert-box">
-        {% for message in messages %}
-        <li class="alert {{ message.tags }}">
-            {{ message }}
-            {% if 'warning' in message.tags or 'error' in message.tags %}<button class="close" data-dismiss="alert">×</button>{% endif %}
-        </li>
-        {% endfor %}
-    </ul>
-    {% endif %}
 
     {% block container %}
     <div id="container" class="container-fluid {% if MAP_BACKGROUND_FOGGED %}map-fogged{% endif %}">
