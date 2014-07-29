@@ -49,7 +49,8 @@ def view_permission_required(login_url=None, raise_exception=None):
                 redirect_url = get_url_method()
 
             has_perm_decorator = user_passes_test(lambda u: check_perms(request, u, perm),
-                                                  login_url=redirect_url)
+                                                  login_url=redirect_url,
+                                                  redirect_field_name=None)
             cbv_user_has_perm = method_decorator(has_perm_decorator)
 
             @cbv_user_has_perm
