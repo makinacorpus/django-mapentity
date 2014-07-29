@@ -5,6 +5,7 @@ from django.db.utils import OperationalError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist
+from django.core.urlresolvers import NoReverseMatch
 from django.contrib import auth
 from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
@@ -277,8 +278,9 @@ class LogEntry(MapEntityMixin, BaseLogEntry):
         model_str = unicode(self.content_type)
         try:
             obj = self.get_edited_object()
-        except ObjectDoesNotExist:
+            obj_url = obj.get_detail_url()
+        except (ObjectDoesNotExist, NoReverseMatch):
             return u'%s %s' % (model_str, self.object_repr)
         else:
             return u'<a data-pk="%s" href="%s" >%s %s</a>' % (
-                obj.pk, obj.get_detail_url(), model_str, self.object_repr)
+                obj.pk, obj_url, model_str, self.object_repr)
