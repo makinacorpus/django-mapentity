@@ -6,7 +6,7 @@ CHANGELOG
 ==================
 
 - Added parameters to view_cache_response_content decorator
-
+- Limit height of layer switcher on small screens
 
 1.5.1 (2014-06-26)
 ==================
