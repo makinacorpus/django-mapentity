@@ -36,7 +36,7 @@ setup(
         'django-tinymce == 1.5.1',
         # Under development at makinacorpus
         'django-appypod>=0.0.2',
-        'django-leaflet',
+        'django-leaflet>=0.14',
         'django-geojson',
         'paperclip',
     ] + test_requires,

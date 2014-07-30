@@ -38,7 +38,9 @@ MapEntity.GeometryField = L.GeometryField.extend({
     },
 
     _addExtraControls: function (map) {
-        map.removeControl(map.attributionControl);
+        if (map.attributionControl._map) {
+            map.removeControl(map.attributionControl);
+        }
         map.addControl(new L.Control.ResetView(this._getResetBounds.bind(this)));
 
         /*
