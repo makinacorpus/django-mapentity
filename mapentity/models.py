@@ -13,7 +13,7 @@ from django.utils.formats import localize
 from django.utils.translation import ugettext_lazy as _
 from paperclip.models import Attachment
 
-from mapentity.templatetags.timesince import humanize_timesince
+from mapentity.templatetags.mapentity_tags import humanize_timesince
 from . import app_settings
 from .helpers import smart_urljoin, is_file_newer, capture_map_image, extract_attributes_html
 

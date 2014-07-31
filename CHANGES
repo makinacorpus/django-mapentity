@@ -5,6 +5,12 @@ CHANGELOG
 1.5.2 (unreleased)
 ==================
 
+**Breaking changes**
+
+- Removed ``fied_verbose_name`` and ``timesince`` template tag librairies
+- Now all grouped inside ``mapentity_tags``
+
+
 - Added parameters to view_cache_response_content decorator
 - Limit height of layer switcher on small screens
 - Get rid of next parameter when redirecting to login when permission missing

@@ -1,13 +1,18 @@
 import os
+import datetime
 
 from django import template
 from django.conf import settings
 from django.template.base import TemplateDoesNotExist
 from django.contrib.gis.geos import GEOSGeometry, Point
-
-register = template.Library()
+from django.db.models.fields.related import FieldDoesNotExist
+from django.utils.timezone import utc
+from django.utils.translation import ugettext, ungettext
 
 from ..settings import app_settings, API_SRID
+
+
+register = template.Library()
 
 
 class SmartIncludeNode(template.Node):
@@ -64,8 +69,51 @@ def latlngbounds(obj, fieldname=None):
     return [[extent[1], extent[0]], [extent[3], extent[2]]]
 
 
+@register.tag(name='verbose')
+def field_verbose_name(obj, field):
+    """Usage: {{ object|get_object_field }}"""
+    try:
+        return obj._meta.get_field(field).verbose_name
+    except FieldDoesNotExist:
+        a = getattr(obj, '%s_verbose_name' % field)
+        if a is None:
+            raise
+        return unicode(a)
+
+
 @register.simple_tag()
 def media_static_fallback(media_file, static_file, *args, **kwarg):
     if os.path.exists(os.path.join(settings.MEDIA_ROOT, media_file)):
         return os.path.join(settings.MEDIA_URL, media_file)
     return os.path.join(settings.STATIC_URL, static_file)
+
+
+@register.filter(name='timesince')
+def humanize_timesince(date):
+    """
+    http://djangosnippets.org/snippets/2275/
+    Humanized and localized version of built-in timesince template filter.
+    Based on Joey Bratton's idea.
+    """
+    delta = datetime.datetime.utcnow().replace(tzinfo=utc) - date
+
+    num_years = delta.days / 365
+    if (num_years > 0):
+        return ungettext(u"%d year ago", u"%d years ago", num_years) % num_years
+
+    num_weeks = delta.days / 7
+    if (num_weeks > 0):
+        return ungettext(u"%d week ago", u"%d weeks ago", num_weeks) % num_weeks
+
+    if (delta.days > 0):
+        return ungettext(u"%d day ago", u"%d days ago", delta.days) % delta.days
+
+    num_hours = delta.seconds / 3600
+    if (num_hours > 0):
+        return ungettext(u"%d hour ago", u"%d hours ago", num_hours) % num_hours
+
+    num_minutes = delta.seconds / 60
+    if (num_minutes > 0):
+        return ungettext(u"%d minute ago", u"%d minutes ago", num_minutes) % num_minutes
+
+    return ugettext(u"just a few seconds ago")
