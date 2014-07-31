@@ -271,6 +271,18 @@ select[multiple] {
     margin-top: 4px;
 }
 
+.enumeration-icon {
+    background-color: #000042 !important;
+    text-align: center;
+    vertical-align: middle;
+    width: 16px !important;
+    height: 16px !important;
+    line-height: 16px;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+}
+
 
 /**** Widgets ****/
 

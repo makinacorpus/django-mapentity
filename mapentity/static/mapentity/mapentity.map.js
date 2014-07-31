@@ -175,6 +175,19 @@ $(window).on('entity:map:detail', function (e, data) {
         map.on('layeradd', function (e) {
             if (objectLayer._map) objectLayer.bringToFront();
         });
+
+        // Show objects enumeration
+        var sublayers = objectLayer.getLayers();
+        if (sublayers.length === 1) {
+            // Single layer, but multi-* or geometrycollection
+            if (typeof sublayers[0].getLayers === 'function') {
+                sublayers[0].showEnumeration();
+            }
+        }
+        else {
+            objectLayer.showEnumeration();
+        }
+
         return objectLayer;
     }
 });
