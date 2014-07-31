@@ -20,6 +20,7 @@ CHANGELOG
 - Fix status code of ConvertIt being lost in Convert views
 - Display messages in login page too (useful for redirections)
 - Support edition of several fields on the same map, via django-leaflet new feature (fixes #53)
+- Show objects numbering on print detail maps (fixes #35)
 
 1.5.1 (2014-06-26)
 ==================

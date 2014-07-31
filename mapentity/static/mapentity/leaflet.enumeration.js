@@ -12,9 +12,10 @@
 
         //
         // Override addLayer() to keep track of group's layers order.
-        __layerArray: [],
-
         addLayer: function (layer) {
+            if (this.__layerArray === undefined){
+                this.__layerArray = [];
+            }
             __addLayer.call(this, layer);
             this.__layerArray.push(layer);
         },
