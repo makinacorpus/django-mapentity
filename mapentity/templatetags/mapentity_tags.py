@@ -1,6 +1,5 @@
 import os
 import datetime
-import string
 
 from django import template
 from django.conf import settings
@@ -11,6 +10,7 @@ from django.utils.timezone import utc
 from django.utils.translation import ugettext, ungettext
 
 from ..settings import app_settings, API_SRID
+from ..helpers import alphabet_enumeration
 
 
 register = template.Library()
@@ -137,15 +137,12 @@ def valuelist(items, field=None, enumeration=False):
         display = lambda v: getattr(v, '%s_display' % field, getattr(v, field))
         items = [display(v) for v in items]
 
-    valuelist = []
-    alphabet = string.lowercase.upper()
-    for i, item in enumerate(items):
-        # Compute enum : A, B, ... Z, AA, AB, ...
-        enum = '' if i < 26 else alphabet[(i // 26) - 1]
-        enum += alphabet[i % 26]
+    letters = alphabet_enumeration(len(items))
 
+    valuelist = []
+    for i, item in enumerate(items):
         valuelist.append({
-            'enumeration': enum if enumeration else False,
+            'enumeration': letters[i] if enumeration else False,
             'text': item
         })
 

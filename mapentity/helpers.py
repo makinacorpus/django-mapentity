@@ -7,6 +7,7 @@ import urllib
 from mimetypes import types_map
 from datetime import datetime
 import json
+import string
 
 from django.utils import timezone
 from django.conf import settings
@@ -291,3 +292,17 @@ def user_has_perm(user, perm):
     if user.is_anonymous():
         return perm in app_settings['ANONYMOUS_VIEWS_PERMS']
     return False
+
+
+def alphabet_enumeration(length):
+    """
+    Return list of letters : A, B, ... Z, AA, AB, ...
+    See mapentity/leaflet.enumeration.js
+    """
+    enums = []
+    alphabet = string.lowercase.upper()
+    for i in range(length):
+        enum = '' if i < 26 else alphabet[(i // 26) - 1]
+        enum += alphabet[i % 26]
+        enums.append(enum)
+    return enums
