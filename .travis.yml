@@ -12,9 +12,13 @@ install:
  - sudo apt-add-repository -y ppa:ubuntugis/ppa
  - sudo apt-get update -qq
 
-   # GDAL
- - sudo apt-get install libgdal-dev
- - pip install --no-install GDAL==1.10.0
+ # GDAL-fix -- packaging is miserable, no way to obtain libgdal-dev for libgdal1 when libgdal1h available
+ - sudo apt-get download -y libgdal-dev
+ - sudo dpkg-deb -x libgdal-dev*.deb /
+ - sudo ln -sf /usr/lib/libgdal.so.1 /usr/lib/libgdal.so
+ - sudo ldconfig
+ # GDAL for python... not better
+ - pip install --no-install GDAL==1.9.1
  - pushd /home/travis/virtualenv/python2.7/build/GDAL
  - python setup.py build_ext --include-dirs=/usr/include/gdal
  - pip install --no-download GDAL
