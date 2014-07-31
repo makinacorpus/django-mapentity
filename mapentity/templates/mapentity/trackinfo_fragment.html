@@ -1,4 +1,4 @@
-{% load field_verbose_name timesince i18n %}
+{% load mapentity_tags i18n %}
 <tr>
     <th>{{ object|verbose:"date_insert" }}</th>
     <td>{{ object.date_insert }} ({{ object.date_insert|timesince }})</td>

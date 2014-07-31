@@ -119,7 +119,7 @@ Create a couple of templates inside  ``main/templates/main``.
 ``museum_detail.html`` can contain::
 
     {% extends "mapentity/mapentity_detail.html" %}
-    {% load i18n field_verbose_name %}
+    {% load i18n mapentity_tags %}
 
     {% block detailspanel %}
         {{ block.super }}

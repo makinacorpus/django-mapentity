@@ -272,6 +272,35 @@ select[multiple] {
 }
 
 
+/*
+ * Show enumeration values and map icons, only in print mode.
+ * (in document export, values will appear too since HTML is put in doc)
+ * See https://github.com/makinacorpus/django-mapentity/issues/35
+ */
+.enumeration-icon, .enumeration-value {
+    display: none;
+}
+
+body.screamshot .enumeration-icon,
+body.screamshot .enumeration-value {
+    display: inline-block;
+}
+
+.enumeration-icon {
+    background-color: #000042 !important;
+    text-align: center;
+    vertical-align: middle;
+    width: 16px !important;
+    height: 16px !important;
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+    line-height: 16px;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+}
+
+
 /**** Widgets ****/
 
 .axislabel {

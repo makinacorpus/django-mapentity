@@ -125,55 +125,14 @@ $(window).on('entity:map', function (e, data) {
         map.resetviewControl.getBounds = function () { return mapBounds; };
     }
 
-    var $singleObject = $container.find('.geojsonfeature');
-    if ($singleObject.length > 0) {
-        showSingleObject(JSON.parse($singleObject.text()));
-    }
-
     map.addControl(new L.Control.FullScreen());
     map.addControl(new L.Control.MeasureControl());
-
-
-    function showSingleObject(geojson) {
-        var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
-
-        // Add layers
-        var objectLayer = new L.ObjectsLayer(geojson, {
-            style: DETAIL_STYLE,
-            indexing: false
-        });
-        map.addLayer(objectLayer);
-        map.on('layeradd', function (e) {
-            if (objectLayer._map) objectLayer.bringToFront();
-        });
-
-        // Show start and end
-        objectLayer.eachLayer(function (layer) {
-            if (layer instanceof L.MultiPolyline)
-                return;
-            if (typeof layer.getLatLngs != 'function')  // points
-                return;
-
-            L.marker(layer.getLatLngs()[0],
-                     {clickable: false,
-                      icon: new L.Icon.Default({iconUrl: window.SETTINGS.urls.static + "mapentity/images/marker-source.png"})
-                     }).addTo(map);
-            L.marker(layer.getLatLngs().slice(-1)[0],
-                     {clickable: false,
-                      icon: new L.Icon.Default({iconUrl: window.SETTINGS.urls.static + "mapentity/images/marker-target.png"})
-                     }).addTo(map);
-
-            // Also add line orientation
-            layer.setText('>     ', {repeat:true,
-                                     offset: DETAIL_STYLE.weight,
-                                     attributes: {'fill': DETAIL_STYLE.arrowColor, 'font-size': DETAIL_STYLE.arrowSize}});
-        });
-    }
 });
 
 
 $(window).on('entity:map:detail', function (e, data) {
-    var map = data.map;
+    var map = data.map,
+        $container = $(map._container);
 
     // Map screenshot button
     var screenshot = new L.Control.Screenshot(window.SETTINGS.urls.screenshot, function () {
@@ -194,7 +153,43 @@ $(window).on('entity:map:detail', function (e, data) {
         MapEntity.Context.saveFullContext(map, {prefix: 'detail'});
     });
 
-    $(window).trigger('detailmap:ready', {map:map});
+    // Show object geometry in detail map
+    var $singleObject = $container.find('.geojsonfeature'),
+        objectLayer = null;
+    if ($singleObject.length > 0) {
+        objectLayer = _showSingleObject(JSON.parse($singleObject.text()));
+    }
+
+    $(window).trigger('detailmap:ready', {map: map, layer: objectLayer});
+
+
+    function _showSingleObject(geojson) {
+        var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
+
+        // Add layers
+        var objectLayer = new L.ObjectsLayer(geojson, {
+            style: DETAIL_STYLE,
+            indexing: false
+        });
+        map.addLayer(objectLayer);
+        map.on('layeradd', function (e) {
+            if (objectLayer._map) objectLayer.bringToFront();
+        });
+
+        // Show objects enumeration
+        var sublayers = objectLayer.getLayers();
+        if (sublayers.length === 1) {
+            // Single layer, but multi-* or geometrycollection
+            if (typeof sublayers[0].getLayers === 'function') {
+                sublayers[0].showEnumeration();
+            }
+        }
+        else {
+            objectLayer.showEnumeration();
+        }
+
+        return objectLayer;
+    }
 });
 
 

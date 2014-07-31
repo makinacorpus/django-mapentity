@@ -7,7 +7,7 @@ from django.contrib.gis.geos import Point, LineString
 
 import gpxpy
 
-from ..templatetags.timesince import humanize_timesince
+from ..templatetags.mapentity_tags import humanize_timesince
 from .. import app_settings
 
 
