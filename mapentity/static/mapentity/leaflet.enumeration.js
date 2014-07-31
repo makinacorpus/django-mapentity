@@ -57,7 +57,6 @@
                         className: 'enumeration-icon',
                         html: enumeration
                     });
-                    console.log(enumeration)
                     L.marker(position, {
                         clickable: false,
                         icon: icon

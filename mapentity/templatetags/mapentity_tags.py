@@ -1,5 +1,6 @@
 import os
 import datetime
+import string
 
 from django import template
 from django.conf import settings
@@ -120,10 +121,34 @@ def humanize_timesince(date):
 
 
 @register.inclusion_tag('mapentity/_detail_valuelist_fragment.html')
-def valuelist(items, field=None):
+def valuelist(items, field=None, enumeration=False):
+    """
+    Common template tag to show a list of values in detail pages.
+
+    :param field: Use this attribute on each item instead of their unicode representation
+    :param enumeration: Show enumerations, useful to match those shown by ``mapentity/leaflet.enumeration.js``
+
+    See https://github.com/makinacorpus/django-mapentity/issues/35
+        https://github.com/makinacorpus/Geotrek/issues/960
+        https://github.com/makinacorpus/Geotrek/issues/214
+        https://github.com/makinacorpus/Geotrek/issues/871
+    """
     if field:
         display = lambda v: getattr(v, '%s_display' % field, getattr(v, field))
         items = [display(v) for v in items]
+
+    valuelist = []
+    alphabet = string.lowercase.upper()
+    for i, item in enumerate(items):
+        # Compute enum : A, B, ... Z, AA, AB, ...
+        enum = '' if i < 26 else alphabet[(i // 26) - 1]
+        enum += alphabet[i % 26]
+
+        valuelist.append({
+            'enumeration': enum if enumeration else False,
+            'text': item
+        })
+
     return {
-        'valuelist': items
+        'valuelist': valuelist
     }

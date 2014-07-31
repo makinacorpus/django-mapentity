@@ -32,3 +32,15 @@ class ValueListTest(TestCase):
             'items': [obj]
         }))
         self.assertEqual(out.strip(), """<ul>\n    <li>blah</li>\n    </ul>""")
+
+    def test_can_specify_an_enumeration(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{% valuelist items enumeration=True %}'
+        ).render(Context({
+            'items': range(1, 30)
+        }))
+        self.assertIn('<li><span class="enumeration-value">A.&nbsp;</span>1</li>', out)
+        self.assertIn('<li><span class="enumeration-value">Z.&nbsp;</span>26</li>', out)
+        self.assertIn('<li><span class="enumeration-value">AA.&nbsp;</span>27</li>', out)
+        self.assertIn('<li><span class="enumeration-value">AB.&nbsp;</span>28</li>', out)
