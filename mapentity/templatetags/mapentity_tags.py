@@ -69,7 +69,7 @@ def latlngbounds(obj, fieldname=None):
     return [[extent[1], extent[0]], [extent[3], extent[2]]]
 
 
-@register.tag(name='verbose')
+@register.filter(name='verbose')
 def field_verbose_name(obj, field):
     """Usage: {{ object|get_object_field }}"""
     try:
@@ -117,3 +117,13 @@ def humanize_timesince(date):
         return ungettext(u"%d minute ago", u"%d minutes ago", num_minutes) % num_minutes
 
     return ugettext(u"just a few seconds ago")
+
+
+@register.inclusion_tag('mapentity/_detail_valuelist_fragment.html')
+def valuelist(items, field=None):
+    if field:
+        display = lambda v: getattr(v, '%s_display' % field, getattr(v, field))
+        items = [display(v) for v in items]
+    return {
+        'valuelist': items
+    }
