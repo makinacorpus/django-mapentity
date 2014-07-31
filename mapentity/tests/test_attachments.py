@@ -60,10 +60,10 @@ class EntityAttachmentTestCase(TestCase):
         self.assertFalse("Upload attachment" in html)
 
         for attachment in Attachment.objects.attachments_for_object(self.object):
-            self.assertTrue(attachment.legend in html)
-            self.assertTrue(attachment.title in html)
-            self.assertTrue(attachment.attachment_file.url in html)
-            self.assertTrue('paperclip/fileicons/odt.png')
+            self.assertIn(attachment.legend, html)
+            self.assertIn(attachment.title, html)
+            self.assertIn(attachment.attachment_file.url, html)
+            self.assertIn('paperclip/fileicons/odt.png', html)
 
     def test_upload_form_in_details_if_perms(self):
         self.user.has_perm = mock.MagicMock(return_value=True)
