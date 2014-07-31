@@ -11,6 +11,7 @@ CHANGELOG
 - Removed history links for proxied models
 - Fix permission code name when model is proxied
 - Fix apparence of main menu when permissions are missing to view logbook and admin
+- Fix status code of ConvertIt being lost in Convert views
 - Display messages in login page too (useful for redirections)
 - Support edition of several fields on the same map, via django-leaflet new feature (fixes #53)
 
