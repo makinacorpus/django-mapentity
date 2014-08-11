@@ -38,7 +38,7 @@ class Registry(object):
             MAPENTITY_GENERIC_VIEWS,
             MapEntityList,
             MapEntityJsonList,
-            MapEntityFormat,
+            MapEntityFormat
         )
         from .urlizor import view_classes_to_url
         from .signals import post_register

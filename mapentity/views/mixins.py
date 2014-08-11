@@ -3,6 +3,7 @@ import logging
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
 from ..forms import MapEntityForm
+from ..filters import MapEntityFilterSet
 from ..serializers import json_django_dumps
 from .. import registry
 
@@ -105,3 +106,29 @@ class FormViewMixin(object):
                     model = _model
             self.form_class = MapEntityAutoForm
         return self.form_class
+
+
+
+class FilterListMixin(object):
+
+    filterform = None
+
+    def __init__(self):
+
+        _model = self.model
+        if _model is None:
+            _model = self.queryset.model
+
+        if self.filterform is None:
+            class filterklass(MapEntityFilterSet):
+                class Meta:
+                    model = _model
+            self.filterform = filterklass
+        self._filterform = self.filterform(None, self.queryset)
+
+    def get_queryset(self):
+        queryset = super(FilterListMixin, self).get_queryset()
+        # Filter queryset from possible serialized form
+        self._filterform = self.filterform(self.request.GET or None,
+                                           queryset=queryset)
+        return self._filterform.qs
