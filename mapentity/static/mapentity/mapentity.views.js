@@ -44,3 +44,23 @@ $(window).on('entity:view:list', function (e, data) {
     $('#objects-list_filter label').contents().filter(function() {return this.nodeType === 3;/*Node.TEXT_NODE*/}).remove();
 
 });
+
+
+$(window).on('entity:view:detail', function (e, data) {
+    //
+    // Throw event when record is hovered
+    // (used in Leaflet.ObjectLayer and below)
+    $('.hoverable').hoverIntent(
+        function on() {
+            var modelname = $(this).data('modelname');
+            var pk = $(this).data('pk');
+            $(window).trigger('entity:mouseover', {pk: pk, modelname: modelname});
+        },
+        function off() {
+            var modelname = $(this).data('modelname');
+            var pk = $(this).data('pk');
+            $(window).trigger('entity:mouseout', {pk: pk, modelname: modelname});
+        }
+    );
+
+});

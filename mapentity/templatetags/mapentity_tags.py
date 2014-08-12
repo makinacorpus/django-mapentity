@@ -169,19 +169,24 @@ def valuetable(items, columns='', enumeration=False):
 
         records.append({
             'enumeration': letters[i] if enumeration else False,
-            'attrs': attrs
+            'attrs': attrs,
+            'pk': getattr(item, 'pk', None)
         })
 
     if len(items) > 0:
+        oneitem = items[0]
         columns_titles = []
         for column in columns:
             columns_titles.append({'name': column,
-                                   'text': field_verbose_name(items[0], column)})
+                                   'text': field_verbose_name(oneitem, column)})
+        model = oneitem._meta.object_name.lower()
     else:
+        model = None
         columns_titles = None
 
     return {
         'nbcolumns': len(columns),
         'columns': columns_titles,
-        'records': records
+        'records': records,
+        'model': model
     }
