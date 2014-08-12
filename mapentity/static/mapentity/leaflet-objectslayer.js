@@ -39,16 +39,31 @@ L.ObjectsLayer = L.GeoJSON.extend({
         this.options.styles = L.Util.extend({}, this.options.styles);
         this.options.styles['default'] = L.Util.extend({}, this.options.style);
 
-        // Highlight on mouse over
+
+        // Highlight on mouse over, using global events
         if (this.options.highlight) {
             this.on('mouseover', function(e) {
-                this.highlight(this.getPk(e.layer));
+                var pk = this.getPk(e.layer);
+                $(window).trigger('entity:mouseover', {pk: pk, modelname: options.modelname});
             }, this);
             this.on('mouseout', function(e) {
-                if (e.layer.properties)
-                    this.highlight(this.getPk(e.layer), false);
+                var pk = this.getPk(e.layer);
+                $(window).trigger('entity:mouseout', {pk: pk, modelname: options.modelname});
             }, this);
         }
+        // Listen to external events, such as those fired from this layer, and
+        // from DOM (in detail pages, see ``hoverable`` CSS selector)
+        $(window).on('entity:mouseover', L.Util.bind(function (e, data) {
+            if (data.modelname == options.modelname) {
+                this.highlight(data.pk, true);
+            }
+        }, this));
+        $(window).on('entity:mouseout', L.Util.bind(function (e, data) {
+            if (data.modelname == options.modelname) {
+                this.highlight(data.pk, false);
+            }
+        }, this));
+
 
         // Optionnaly make them clickable
         if (this.options.objectUrl) {

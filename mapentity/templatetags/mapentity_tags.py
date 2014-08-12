@@ -135,17 +135,68 @@ def valuelist(items, field=None, enumeration=False):
     """
     if field:
         display = lambda v: getattr(v, '%s_display' % field, getattr(v, field))
-        items = [display(v) for v in items]
+        itemslist = [display(v) for v in items]
+    else:
+        itemslist = items
 
     letters = alphabet_enumeration(len(items))
 
     valuelist = []
-    for i, item in enumerate(items):
+    for i, item in enumerate(itemslist):
         valuelist.append({
             'enumeration': letters[i] if enumeration else False,
+            'pk': getattr(items[i], 'pk', None),
             'text': item
         })
 
+    modelname = None
+    if len(items) > 0:
+        oneitem = items[0]
+        if hasattr(oneitem, '_meta'):
+            modelname = oneitem._meta.object_name.lower()
+
     return {
-        'valuelist': valuelist
+        'valuelist': valuelist,
+        'modelname': modelname
+    }
+
+
+@register.inclusion_tag('mapentity/_detail_valuetable_fragment.html')
+def valuetable(items, columns='', enumeration=False):
+    """
+    Common template tag to show a table with columns in detail pages.
+
+    :param enumeration: Show enumerations, see ``valuelist`` template tag.
+    """
+
+    columns = columns.split(',')
+    letters = alphabet_enumeration(len(items))
+
+    records = []
+    for i, item in enumerate(items):
+        display = lambda column: getattr(item, '%s_display' % column, getattr(item, column))
+        attrs = [display(column) for column in columns]
+
+        records.append({
+            'enumeration': letters[i] if enumeration else False,
+            'attrs': attrs,
+            'pk': getattr(item, 'pk', None)
+        })
+
+    if len(items) > 0:
+        oneitem = items[0]
+        columns_titles = []
+        for column in columns:
+            columns_titles.append({'name': column,
+                                   'text': field_verbose_name(oneitem, column)})
+        modelname = oneitem._meta.object_name.lower()
+    else:
+        modelname = None
+        columns_titles = None
+
+    return {
+        'nbcolumns': len(columns),
+        'columns': columns_titles,
+        'records': records,
+        'modelname': modelname
     }
