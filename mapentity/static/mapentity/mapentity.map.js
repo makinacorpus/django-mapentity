@@ -169,7 +169,8 @@ $(window).on('entity:map:detail', function (e, data) {
         // Add layers
         var objectLayer = new L.ObjectsLayer(geojson, {
             style: DETAIL_STYLE,
-            indexing: false
+            indexing: false,
+            modelname: data.modelname
         });
         map.addLayer(objectLayer);
         map.on('layeradd', function (e) {
@@ -216,6 +217,7 @@ $(window).on('entity:map:list', function (e, data) {
     var objectsLayer = new L.ObjectsLayer(null, {
         objectUrl: getUrl,
         style: style,
+        modelname: data.modelname,
         onEachFeature: function (geojson, layer) {
             if (geojson.properties.name) layer.bindLabel(geojson.properties.name);
         }

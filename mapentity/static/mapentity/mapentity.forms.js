@@ -103,6 +103,7 @@ MapEntity.GeometryField = L.GeometryField.extend({
                                   window.SETTINGS.map.styles.others);
         var objectsLayer = new L.ObjectsLayer(null, {
             style: style,
+            modelname: this.getModelName(),
             filter: exclude_current_object,
             onEachFeature: function (geojson, layer) {
                 if (geojson.properties.name) layer.bindLabel(geojson.properties.name);
