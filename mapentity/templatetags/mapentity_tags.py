@@ -135,19 +135,29 @@ def valuelist(items, field=None, enumeration=False):
     """
     if field:
         display = lambda v: getattr(v, '%s_display' % field, getattr(v, field))
-        items = [display(v) for v in items]
+        itemslist = [display(v) for v in items]
+    else:
+        itemslist = items
 
     letters = alphabet_enumeration(len(items))
 
     valuelist = []
-    for i, item in enumerate(items):
+    for i, item in enumerate(itemslist):
         valuelist.append({
             'enumeration': letters[i] if enumeration else False,
+            'pk': getattr(items[i], 'pk', None),
             'text': item
         })
 
+    if len(items) > 0:
+        oneitem = items[0]
+        modelname = oneitem._meta.object_name.lower()
+    else:
+        modelname = None
+
     return {
-        'valuelist': valuelist
+        'valuelist': valuelist,
+        'modelname': modelname
     }
 
 
@@ -179,14 +189,14 @@ def valuetable(items, columns='', enumeration=False):
         for column in columns:
             columns_titles.append({'name': column,
                                    'text': field_verbose_name(oneitem, column)})
-        model = oneitem._meta.object_name.lower()
+        modelname = oneitem._meta.object_name.lower()
     else:
-        model = None
+        modelname = None
         columns_titles = None
 
     return {
         'nbcolumns': len(columns),
         'columns': columns_titles,
         'records': records,
-        'model': model
+        'modelname': modelname
     }

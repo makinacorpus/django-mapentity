@@ -10,7 +10,7 @@
         </thead>
     <tbody>
     {% for record in records %}
-        <tr class="hoverable" data-modelname="{{ model }}" data-pk="{{ record.pk }}">
+        <tr class="hoverable" data-modelname="{{ modelname }}" data-pk="{{ record.pk }}">
             {% for attr in record.attrs %}
             <td>
                 {% if forloop.first and record.enumeration %}

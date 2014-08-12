@@ -599,7 +599,7 @@ span.filter-info {
 }
 
 .details-panel .hover {
-    background-color: #75E376;
+    background-color: rgba(240, 240, 240, 0.5);
 }
 
 .download-group {
