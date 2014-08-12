@@ -63,4 +63,18 @@ $(window).on('entity:view:detail', function (e, data) {
         }
     );
 
+    //
+    // Highlight (e.g. table rows) when record is hovered
+    $(window).on('entity:mouseover', function (e, data) {
+        var modelname = data.modelname;
+        var pk = data.pk;
+        var $item = $("[data-modelname='" + modelname + "'][data-pk='" + pk + "']");
+        $item.addClass('hover');
+    });
+    $(window).on('entity:mouseout', function (e, data) {
+        var modelname = data.modelname;
+        var pk = data.pk;
+        var $item = $("[data-modelname='" + modelname + "'][data-pk='" + pk + "']");
+        $item.removeClass('hover');
+    });
 });

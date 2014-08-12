@@ -598,6 +598,10 @@ span.filter-info {
     margin: 0px;
 }
 
+.details-panel .hover {
+    background-color: #75E376;
+}
+
 .download-group {
     clear: both;
     line-height: 35px;
