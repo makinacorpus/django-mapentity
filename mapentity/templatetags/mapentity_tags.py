@@ -149,3 +149,39 @@ def valuelist(items, field=None, enumeration=False):
     return {
         'valuelist': valuelist
     }
+
+
+@register.inclusion_tag('mapentity/_detail_valuetable_fragment.html')
+def valuetable(items, columns='', enumeration=False):
+    """
+    Common template tag to show a table with columns in detail pages.
+
+    :param enumeration: Show enumerations, see ``valuelist`` template tag.
+    """
+
+    columns = columns.split(',')
+    letters = alphabet_enumeration(len(items))
+
+    records = []
+    for i, item in enumerate(items):
+        display = lambda column: getattr(item, '%s_display' % column, getattr(item, column))
+        attrs = [display(column) for column in columns]
+
+        records.append({
+            'enumeration': letters[i] if enumeration else False,
+            'attrs': attrs
+        })
+
+    if len(items) > 0:
+        columns_titles = []
+        for column in columns:
+            columns_titles.append({'name': column,
+                                   'text': field_verbose_name(items[0], column)})
+    else:
+        columns_titles = None
+
+    return {
+        'nbcolumns': len(columns),
+        'columns': columns_titles,
+        'records': records
+    }
