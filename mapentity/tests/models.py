@@ -37,6 +37,7 @@ class WeatherStation(models.Model):
 class DummyModel(MapEntityMixin, models.Model):
     name = models.CharField(blank=True, default='', max_length=128)
     geom = models.PointField(null=True, default=None)
+    date_update = models.DateTimeField(auto_now=True)
 
     objects = models.GeoManager()
 

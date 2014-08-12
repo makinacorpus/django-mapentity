@@ -90,6 +90,13 @@ def view_cache_response_content():
             response_class = self.response_class
             response_kwargs = dict()
 
+            # Do not (re)store cache if filters presents
+            params = self.request.GET.keys()
+            with_filters = all([not p.startswith('_') for p in params])
+            if len(params) > 0 and with_filters:
+                return view_func(self, *args, **kwargs)
+
+            # Otherwise, restore from cache or store view result
             if hasattr(self, 'view_cache_key'):
                 geojson_lookup = self.view_cache_key()
             else:

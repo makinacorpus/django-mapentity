@@ -28,9 +28,9 @@ from ..decorators import (save_history, view_permission_required,
                           view_cache_latest, view_cache_response_content)
 from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
-from ..filters import MapEntityFilterSet
 from .base import history_delete
-from .mixins import ModelViewMixin, JSONResponseMixin, FormViewMixin
+from .mixins import (ModelViewMixin, JSONResponseMixin, FormViewMixin,
+                     FilterListMixin)
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ def log_action(request, object, action_flag):
     )
 
 
-class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
+class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
     """
     Take a class attribute `model` with a `latest_updated` method used for caching.
     """
@@ -58,8 +58,6 @@ class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
 
     def __init__(self, *args, **kwargs):
         super(MapEntityLayer, self).__init__(*args, **kwargs)
-        if self.model is None:
-            self.model = self.queryset.model
         # Backward compatibility with django-geojson 1.X
         # for JS ObjectsLayer and rando-trekking application
         # TODO: remove when migrated
@@ -82,36 +80,32 @@ class MapEntityLayer(ModelViewMixin, GeoJSONLayerView):
         return super(MapEntityLayer, self).render_to_response(context, **response_kwargs)
 
 
-class MapEntityList(ModelViewMixin, ListView):
+class BaseListView(FilterListMixin, ModelViewMixin):
+
+    columns = None
+
+    def __init__(self, *args, **kwargs):
+        super(BaseListView, self).__init__(*args, **kwargs)
+
+        if self.columns is None:
+            # All model fields except geometries
+            self.columns = [field.name for field in self.get_model()._meta.fields
+                            if not isinstance(field, GeometryField)]
+            # Id column should be the first one
+            self.columns.remove('id')
+            self.columns.insert(0, 'id')
+
+    @view_permission_required()
+    def dispatch(self, *args, **kwargs):
+        return super(BaseListView, self).dispatch(*args, **kwargs)
+
+
+class MapEntityList(BaseListView, ListView):
     """
 
     A generic view list web page.
 
     """
-    model = None
-    filterform = None
-    columns = None
-
-    def __init__(self, *args, **kwargs):
-        super(MapEntityList, self).__init__(*args, **kwargs)
-
-        if self.model is None:
-            self.model = self.queryset.model
-
-        if self.filterform is None:
-            class filterklass(MapEntityFilterSet):
-                class Meta:
-                    model = self.model
-            self.filterform = filterklass
-        self._filterform = self.filterform(None, self.queryset)
-
-        if self.columns is None:
-            # All model fields except geometries
-            self.columns = [field.name for field in self.model._meta.fields
-                            if not isinstance(field, GeometryField)]
-            # Id column should be the first one
-            self.columns.remove('id')
-            self.columns.insert(0, 'id')
 
     def get_template_names(self):
         default = super(MapEntityList, self).get_template_names()
@@ -121,13 +115,6 @@ class MapEntityList(ModelViewMixin, ListView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_LIST
 
-    def get_queryset(self):
-        queryset = super(MapEntityList, self).get_queryset()
-        # Filter queryset from possible serialized form
-        self._filterform = self.filterform(self.request.GET or None,
-                                           queryset=queryset)
-        return self._filterform.qs
-
     @view_permission_required(login_url='login')
     def dispatch(self, request, *args, **kwargs):
         # Save last list visited in session
@@ -136,23 +123,24 @@ class MapEntityList(ModelViewMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityList, self).get_context_data(**kwargs)
-        context['filterform'] = self._filterform
-        context['columns'] = self.columns
+        context['filterform'] = self._filterform  # From FilterListMixin
+        context['columns'] = self.columns  # From BaseListView
 
         context['create_label'] = self.get_model().get_create_label()
 
-        perm_create = self.model.get_permission_codename(mapentity_models.ENTITY_CREATE)
+        model = self.get_model()
+        perm_create = model.get_permission_codename(mapentity_models.ENTITY_CREATE)
         can_add = user_has_perm(self.request.user, perm_create)
         context['can_add'] = can_add
 
-        perm_export = self.model.get_permission_codename(mapentity_models.ENTITY_FORMAT_LIST)
+        perm_export = model.get_permission_codename(mapentity_models.ENTITY_FORMAT_LIST)
         can_export = user_has_perm(self.request.user, perm_export)
         context['can_export'] = can_export
 
         return context
 
 
-class MapEntityJsonList(JSONResponseMixin, MapEntityList):
+class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
     """
     Return objects list as a JSON that will populate the Jquery.dataTables.
     """
@@ -161,32 +149,23 @@ class MapEntityJsonList(JSONResponseMixin, MapEntityList):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_JSON_LIST
 
-    @view_permission_required()
-    def dispatch(self, *args, **kwargs):
-        return super(ListView, self).dispatch(*args, **kwargs)
-
     def get_context_data(self, **kwargs):
         """
         Override the most important part of JSONListView... (paginator)
         """
         serializer = DatatablesSerializer()
-        return serializer.serialize(self.get_queryset(), fields=self.columns, model=self.model)
+        return serializer.serialize(self.get_queryset(),
+                                    fields=self.columns,
+                                    model=self.get_model())
 
 
-class MapEntityFormat(MapEntityList):
+class MapEntityFormat(BaseListView, ListView):
     """Make it  extends your EntityList"""
     DEFAULT_FORMAT = 'csv'
 
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_FORMAT_LIST
-
-    @view_permission_required()
-    def dispatch(self, *args, **kwargs):
-        return super(ListView, self).dispatch(*args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        return {}
 
     def render_to_response(self, context, **response_kwargs):
         """Delegate to the fmt view function found at dispatch time"""
