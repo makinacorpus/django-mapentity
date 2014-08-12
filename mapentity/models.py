@@ -10,6 +10,7 @@ from django.contrib import auth
 from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.utils.formats import localize
+from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from paperclip.models import Attachment
 
@@ -100,13 +101,13 @@ class MapEntityMixin(object):
     @classmethod
     def latest_updated(cls):
         try:
-            return cls.objects.latest("date_update").date_update
+            return cls.objects.latest("date_update").get_date_update()
         except (cls.DoesNotExist, FieldError):
             return None
 
     def get_date_update(self):
         try:
-            return self.date_update
+            return self.date_update.replace(tzinfo=utc)
         except AttributeError:
             return None
 

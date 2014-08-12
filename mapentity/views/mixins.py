@@ -108,7 +108,6 @@ class FormViewMixin(object):
         return self.form_class
 
 
-
 class FilterListMixin(object):
 
     filterform = None

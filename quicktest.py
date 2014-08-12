@@ -53,6 +53,12 @@ class QuickDjangoTest(object):
                     'PORT': '',
                 }
             },
+            CACHES={
+                'default': {
+                    'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+                    'LOCATION': 'my_cache_table',
+                }
+            },
             INSTALLED_APPS=self.INSTALLED_APPS + tuple(apps),
             STATIC_ROOT='.',
             STATIC_URL='/static/',
