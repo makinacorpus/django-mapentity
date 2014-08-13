@@ -58,6 +58,7 @@ _MAP_STYLES = {
     'others': {'opacity': 0.9, 'fillOpacity': 0.7, 'color': 'yellow'},
     'filelayer': {'color': 'red', 'opacity': 1.0, 'fillOpacity': 0.9, 'weight': 2, 'radius': 5},
     'draw': {'color': '#35FF00', 'opacity': 0.8, 'weight': 3},
+    'print': {},
 }
 
 

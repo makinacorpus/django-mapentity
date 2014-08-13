@@ -160,11 +160,22 @@ $(window).on('entity:map:detail', function (e, data) {
         objectLayer = _showSingleObject(JSON.parse($singleObject.text()));
     }
 
-    $(window).trigger('detailmap:ready', {map: map, layer: objectLayer});
+    $(window).trigger('detailmap:ready', {map: map,
+                                          layer: objectLayer,
+                                          context: context,
+                                          modelname: data.modelname});
 
 
     function _showSingleObject(geojson) {
         var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
+
+        // Apparence of geometry for export can be controlled via setting
+        if (context && context.print) {
+            var specified = window.SETTINGS.map.styles.print[data.modelname];
+            if (specified) {
+                DETAIL_STYLE = L.Util.extend(DETAIL_STYLE, specified);
+            }
+        }
 
         // Add layers
         var objectLayer = new L.ObjectsLayer(geojson, {
