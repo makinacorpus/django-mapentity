@@ -5,7 +5,9 @@ CHANGELOG
 1.7.2 (unreleased)
 ==================
 
-- Nothing changed yet.
+**Bug fixes**
+
+- Fix export views when only queryset is specified in view class
 
 
 1.7.1 (2014-08-21)

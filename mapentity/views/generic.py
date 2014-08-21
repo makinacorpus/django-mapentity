@@ -186,7 +186,7 @@ class MapEntityFormat(BaseListView, ListView):
             return HttpResponseBadRequest()
 
         filename = '%s-%s-list' % (datetime.now().strftime('%Y%m%d-%H%M'),
-                                   str(slugify(unicode(self.model._meta.verbose_name))))
+                                   str(slugify(unicode(self.get_model()._meta.verbose_name))))
         filename += '.%s' % extensions.get(fmt_str, fmt_str)
         response = formatter(request=self.request, context=context, **response_kwargs)
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
@@ -196,13 +196,13 @@ class MapEntityFormat(BaseListView, ListView):
         serializer = CSVSerializer()
         response = HttpResponse(mimetype='text/csv')
         serializer.serialize(queryset=self.get_queryset(), stream=response,
-                             model=self.model, fields=self.columns, ensure_ascii=True)
+                             model=self.get_model(), fields=self.columns, ensure_ascii=True)
         return response
 
     def shape_view(self, request, context, **kwargs):
         serializer = ZipShapeSerializer()
         response = HttpResponse(mimetype='application/zip')
-        serializer.serialize(queryset=self.get_queryset(), model=self.model,
+        serializer.serialize(queryset=self.get_queryset(), model=self.get_model(),
                              stream=response, fields=self.columns)
         response['Content-length'] = str(len(response.content))
         return response
@@ -210,7 +210,7 @@ class MapEntityFormat(BaseListView, ListView):
     def gpx_view(self, request, context, **kwargs):
         serializer = GPXSerializer()
         response = HttpResponse(mimetype='application/gpx+xml')
-        serializer.serialize(self.get_queryset(), model=self.model, stream=response,
+        serializer.serialize(self.get_queryset(), model=self.get_model(), stream=response,
                              geom_field=app_settings['GEOM_FIELD_NAME'])
         return response
 
