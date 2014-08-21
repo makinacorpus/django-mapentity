@@ -5,7 +5,22 @@ CHANGELOG
 1.6.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+**Breaking changes**
+
+- ``registry.register()`` takes a class instead of keyword-args for options
+
+**New features**
+
+- Ability to configure apparence of objets in print exports (fixes #86)
+- GeoJSON layers can now be filtered as other list views
+- New template tag to show a list of record as a table
+- New events ``entity:mouseout`` and ``entity:mouseover`` emitted when
+  objects are hovered on maps and in detail pages
+- Interaction between maps and detail tables or lists of values
+
+** Internal changes **
+
+- Refactor of class inheritance for lists views
 
 
 1.6.0 (2014-08-01)
