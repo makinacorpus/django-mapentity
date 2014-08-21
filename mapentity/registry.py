@@ -107,7 +107,7 @@ class Registry(object):
         self.apps = {}
         self.content_type_ids = []
 
-    def register(self, model, options=None):
+    def register(self, model, options=None, menu=None):
         """ Register model and returns URL patterns
         """
         from .signals import post_register
@@ -123,6 +123,11 @@ class Registry(object):
             options = MapEntityOptions(model)
         else:
             options = options(model)
+
+        # Smoother upgrade for Geotrek
+        if menu is not None:
+            # Deprecated :)
+            options.menu = menu
 
         self.registry[model] = options
         post_register.send(sender=self, app_label=options.app_label, model=model)

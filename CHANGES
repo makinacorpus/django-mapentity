@@ -8,6 +8,7 @@ CHANGELOG
 **Bug fixes**
 
 - Do not save last list in session if JSON or format list
+- Support of ``menu`` option in MapEntity register
 
 
 1.7.0 (2014-08-21)
