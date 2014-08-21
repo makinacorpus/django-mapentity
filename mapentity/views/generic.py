@@ -118,7 +118,9 @@ class MapEntityList(BaseListView, ListView):
     @view_permission_required(login_url='login')
     def dispatch(self, request, *args, **kwargs):
         # Save last list visited in session
-        request.session['last_list'] = request.path
+        # (only if viewing a true list, not an inherited ENTITY_JSON_LIST for ex.)
+        if self.__class__.get_entity_kind() == mapentity_models.ENTITY_LIST:
+            request.session['last_list'] = request.path
         return super(MapEntityList, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
