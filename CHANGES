@@ -5,7 +5,10 @@ CHANGELOG
 1.7.3 (unreleased)
 ==================
 
-- Nothing changed yet.
+**Bug fixes**
+
+- Fix list of values DOM error, preventing document attributes export
+  and list vertical display
 
 
 1.7.2 (unreleased)
