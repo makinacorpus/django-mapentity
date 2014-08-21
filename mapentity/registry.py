@@ -1,6 +1,6 @@
 import re
 import inspect
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 
 from django.db.utils import ProgrammingError
 from django.db import DEFAULT_DB_ALIAS
@@ -19,19 +19,33 @@ from mapentity import logger
 from paperclip import models as paperclip_models
 
 
-MapEntity = namedtuple('MapEntity', ['menu', 'label', 'modelname',
-                                     'url_list', 'url_add',
-                                     'icon', 'icon_small', 'icon_big'])
+class MapEntityOptions(object):
+    menu = True
+    label = ''
+    modelname = ''
+    url_list = ''
+    url_add = ''
+    icon = ''
+    icon_small = ''
+    icon_big = ''
+    dynamic_views = None
 
+    def __init__(self, model):
+        self.model = model
+        self.label = model._meta.verbose_name_plural
+        self.app_label = model._meta.app_label
+        self.module_name = model._meta.module_name
+        self.modelname = self.module_name
+        self.icon = 'images/%s.png' % self.module_name
+        self.icon_small = 'images/%s-16.png' % self.module_name
+        self.icon_big = 'images/%s-96.png' % self.module_name
+        # Can't do reverse right now, URL not setup yet
+        self.url_list = '%s:%s_%s' % (self.app_label, self.module_name, 'list')
+        self.url_add = '%s:%s_%s' % (self.app_label, self.module_name, 'add')
 
-class Registry(object):
-    def __init__(self):
-        self.registry = OrderedDict()
-        self.apps = {}
-        self.content_type_ids = []
-
-    def register(self, model, name='', menu=True, dynamic_views=None):
-        """ Register model and returns URL patterns
+    def scan_views(self):
+        """
+        Returns the list of URLs/views.
         """
         from .views import generic as mapentity_views
         from .views.generic import (
@@ -41,17 +55,9 @@ class Registry(object):
             MapEntityFormat
         )
         from .urlizor import view_classes_to_url
-        from .signals import post_register
-
-        # Ignore models from not installed apps
-        if not model._meta.installed:
-            return ()
-        # Register once only
-        if model in self.registry:
-            return ()
 
         # Obtain app's views module from Model
-        views_module_name = re.sub('models.*', 'views', model.__module__)
+        views_module_name = re.sub('models.*', 'views', self.model.__module__)
         views_module = import_module(views_module_name)
         # Filter to views inherited from MapEntity base views
         picked = []
@@ -64,24 +70,25 @@ class Registry(object):
                     except AttributeError:
                         pass
                     else:
-                        if view_model is model:
+                        if view_model is self.model:
                             picked.append(view)
                             if issubclass(view, MapEntityList):
                                 list_view = view
 
-        _model = model
+        _model = self.model
 
-        if dynamic_views is None:
+        if self.dynamic_views is None:
             generic_views = MAPENTITY_GENERIC_VIEWS
         else:
             generic_views = [getattr(mapentity_views, 'MapEntity%s' % name)
-                             for name in dynamic_views]
+                             for name in self.dynamic_views]
 
         # Dynamically define missing views
         for generic_view in generic_views:
-            if not any([issubclass(view, generic_view) for view in picked]):
+            already_defined = any([issubclass(view, generic_view) for view in picked])
+            if not already_defined:
                 if list_view and generic_view in (MapEntityJsonList, MapEntityFormat):
-                    # JsonList and Format view depend on List view
+                    # List view depends on JsonList and Format view
                     class dynamic_view(generic_view, list_view):
                         pass
                 else:
@@ -90,28 +97,42 @@ class Registry(object):
                         model = _model
                 picked.append(dynamic_view)
 
-        module_name = model._meta.module_name
-        app_label = model._meta.app_label
+        # Returns Django URL patterns
+        return patterns('', *view_classes_to_url(*picked))
 
-        mapentity = MapEntity(label=model._meta.verbose_name_plural,
-                              modelname=module_name,
-                              icon='images/%s.png' % module_name,
-                              icon_small='images/%s-16.png' % module_name,
-                              icon_big='images/%s-96.png' % module_name,
-                              menu=menu,
-                              # Can't do reverse right now, URL not setup yet
-                              url_list='%s:%s_%s' % (app_label, module_name, 'list'),
-                              url_add='%s:%s_%s' % (app_label, module_name, 'add'))
 
-        self.registry[model] = mapentity
-        post_register.send(sender=self, app_label=app_label, model=model)
+class Registry(object):
+    def __init__(self):
+        self.registry = OrderedDict()
+        self.apps = {}
+        self.content_type_ids = []
+
+    def register(self, model, options=None):
+        """ Register model and returns URL patterns
+        """
+        from .signals import post_register
+
+        # Ignore models from not installed apps
+        if not model._meta.installed:
+            return ()
+        # Register once only
+        if model in self.registry:
+            return ()
+
+        if options is None:
+            options = MapEntityOptions(model)
+        else:
+            options = options(model)
+
+        self.registry[model] = options
+        post_register.send(sender=self, app_label=options.app_label, model=model)
 
         try:
             self.content_type_ids.append(model.get_content_type_id())
         except ProgrammingError:
             pass  # Content types table is not yet synced
-        # Returns Django URL patterns
-        return patterns(name, *view_classes_to_url(*picked))
+
+        return options.scan_views()
 
     @property
     def entities(self):
