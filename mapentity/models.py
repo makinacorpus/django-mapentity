@@ -101,13 +101,15 @@ class MapEntityMixin(object):
     @classmethod
     def latest_updated(cls):
         try:
-            return cls.objects.latest("date_update").get_date_update()
+            fname = app_settings['DATE_UPDATE_FIELD_NAME']
+            return cls.objects.latest(fname).get_date_update()
         except (cls.DoesNotExist, FieldError):
             return None
 
     def get_date_update(self):
         try:
-            return self.date_update.replace(tzinfo=utc)
+            fname = app_settings['DATE_UPDATE_FIELD_NAME']
+            return getattr(self, fname).replace(tzinfo=utc)
         except AttributeError:
             return None
 

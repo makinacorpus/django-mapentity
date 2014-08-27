@@ -136,6 +136,7 @@ def valuelist(items, field=None, enumeration=False):
     if field:
         display = lambda v: getattr(v, '%s_display' % field, getattr(v, field))
         itemslist = [display(v) for v in items]
+        print field, itemslist
     else:
         itemslist = items
 

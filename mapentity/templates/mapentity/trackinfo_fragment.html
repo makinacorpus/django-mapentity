@@ -4,7 +4,7 @@
     <td>{{ object.date_insert }} ({{ object.date_insert|timesince }})</td>
 </tr><tr>
     <th>{{ object|verbose:"date_update" }}</th>
-    <td>{{ object.date_update }} ({{ object.date_update|timesince }})</td>
+    <td>{{ object.get_date_update }} ({{ object.get_date_update|timesince }})</td>
 </tr><tr>
     <th>{% trans "Last author" %}</th>
     <td>{{ object.last_author|default:"" }}</td>
