@@ -6,7 +6,8 @@ CHANGELOG
 ==================
 
 - Prevent colors to be cleaned from text fields
-
+- Limit fit zoom on small objects (fixes #91).
+  Introduced new setting ``MAP_FIT_MAX_ZOOM``, default to 18.
 
 1.7.3 (2014-08-21)
 ==================

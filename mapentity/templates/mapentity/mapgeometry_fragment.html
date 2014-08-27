@@ -1,7 +1,9 @@
 {% load i18n static mapentity_tags leaflet_tags geojson_tags %}
 
-<div id="{{ mapname }}" data-mapextent="{{ object|latlngbounds }}"
-                    data-readonly="{% if readonly %}readonly{% endif %}">
+<div id="{{ mapname }}"
+     data-fitmaxzoom="{{ MAP_FIT_MAX_ZOOM }}"
+     data-mapextent="{{ object|latlngbounds }}"
+     data-readonly="{% if readonly %}readonly{% endif %}">
     <script type="application/json" class="geojsonfeature">
         {{ object|geojsonfeature|safe }}
     </script>

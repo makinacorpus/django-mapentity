@@ -21,6 +21,7 @@ app_settings = dict({
     'MAP_CAPTURE_MAX_RATIO': 1.25,
     'GEOM_FIELD_NAME': 'geom',
     'MAP_BACKGROUND_FOGGED': False,
+    'MAP_FIT_MAX_ZOOM': 18,
     'ACTION_HISTORY_ENABLED': True,
     'ACTION_HISTORY_LENGTH': 20,
     'ANONYMOUS_VIEWS_PERMS': tuple(),

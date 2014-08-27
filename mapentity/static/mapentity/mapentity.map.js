@@ -122,6 +122,10 @@ $(window).on('entity:map', function (e, data) {
     var mapBounds = $container.data('mapextent');
     if (mapBounds) {
         map.fitBounds(mapBounds);
+        var maxZoom = $container.data('fitmaxzoom');
+        if (map.getZoom() > maxZoom) {
+            map.setZoom(maxZoom);
+        }
         map.resetviewControl.getBounds = function () { return mapBounds; };
     }
 
