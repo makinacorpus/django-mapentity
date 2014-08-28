@@ -24,6 +24,9 @@
         // Helper to iterate layers in order
         enumerateLayers: function (fn, context) {
             var layers = this.__layerArray;
+            if (layers !== undefined) {
+                // No layer added yet.
+            }
             for (var i=0, n=layers.length; i<n; i++) {
                 fn.call(context, layers[i], i);
             }
