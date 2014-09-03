@@ -1,1 +1,16 @@
 -e git://github.com/makinacorpus/django-paperclip#egg=paperclip
+gpxpy==0.7.1
+BeautifulSoup4==4.1.3
+requests==1.1.0
+django-modeltranslation==0.7.3
+django-shapes==0.2.0
+django-floppyforms==1.1.1
+django-crispy-forms==1.2.3
+django-compressor==1.3
+django-filter==0.7
+easy-thumbnails==1.4
+django-tinymce==1.5.1'
+django-appypod>=0.0.2
+django-leaflet>=0.14
+django-geojson==2.6.0
+paperclip
