@@ -94,6 +94,8 @@ class QuickDjangoTest(object):
             TEST=True
         )
         from django.test.simple import DjangoTestSuiteRunner
+        import django
+        django.setup()
         runner = DjangoTestSuiteRunner()
         failures = runner.run_tests(self.apps, verbosity=1)
         if failures:  # pragma: no cover
