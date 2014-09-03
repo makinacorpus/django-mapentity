@@ -1,8 +1,6 @@
 from .generic import (
     Convert,
-    MapEntityLayer,
     MapEntityList,
-    MapEntityJsonList,
     MapEntityFormat,
     MapEntityMapImage,
     MapEntityDocument,
@@ -11,8 +9,26 @@ from .generic import (
     MapEntityDetail,
     MapEntityUpdate,
     MapEntityDelete,
-    MAPENTITY_GENERIC_VIEWS,
 )
+from .api import (
+    MapEntityLayer,
+    MapEntityJsonList,
+)
+
+
+MAPENTITY_GENERIC_VIEWS = [
+    MapEntityLayer,
+    MapEntityList,
+    MapEntityJsonList,
+    MapEntityFormat,
+    MapEntityMapImage,
+    MapEntityDocument,
+    MapEntityCreate,
+    MapEntityDetail,
+    MapEntityUpdate,
+    MapEntityDelete,
+]
+
 from .mixins import (
     HttpJSONResponse,
     JSONResponseMixin,

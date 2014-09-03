@@ -10,6 +10,7 @@ import mimetypes
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.gis.db.models import GeometryField
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError)
 from django.core.urlresolvers import reverse
@@ -20,10 +21,11 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.template import RequestContext, Context, loader
 
+from ..decorators import view_permission_required
 from ..settings import app_settings, _MAP_STYLES
 from ..helpers import capture_image
 from .. import urlizor
-from .mixins import JSONResponseMixin
+from .mixins import JSONResponseMixin, FilterListMixin, ModelViewMixin
 
 
 logger = logging.getLogger(__name__)
@@ -121,6 +123,26 @@ class JSSettings(JSONResponseMixin, TemplateView):
         dictsettings['languages'] = dict(available=dict(app_settings['TRANSLATED_LANGUAGES']),
                                          default=app_settings['LANGUAGE_CODE'])
         return dictsettings
+
+
+class BaseListView(FilterListMixin, ModelViewMixin):
+
+    columns = None
+
+    def __init__(self, *args, **kwargs):
+        super(BaseListView, self).__init__(*args, **kwargs)
+
+        if self.columns is None:
+            # All model fields except geometries
+            self.columns = [field.name for field in self.get_model()._meta.fields
+                            if not isinstance(field, GeometryField)]
+            # Id column should be the first one
+            self.columns.remove('id')
+            self.columns.insert(0, 'id')
+
+    @view_permission_required()
+    def dispatch(self, *args, **kwargs):
+        return super(BaseListView, self).dispatch(*args, **kwargs)
 
 
 @csrf_exempt

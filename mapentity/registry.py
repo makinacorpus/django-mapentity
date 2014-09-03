@@ -47,13 +47,7 @@ class MapEntityOptions(object):
         """
         Returns the list of URLs/views.
         """
-        from .views import generic as mapentity_views
-        from .views.generic import (
-            MAPENTITY_GENERIC_VIEWS,
-            MapEntityList,
-            MapEntityJsonList,
-            MapEntityFormat
-        )
+        from . import views as mapentity_views
         from .urlizor import view_classes_to_url
 
         # Obtain app's views module from Model
@@ -72,13 +66,13 @@ class MapEntityOptions(object):
                     else:
                         if view_model is self.model:
                             picked.append(view)
-                            if issubclass(view, MapEntityList):
+                            if issubclass(view, mapentity_views.MapEntityList):
                                 list_view = view
 
         _model = self.model
 
         if self.dynamic_views is None:
-            generic_views = MAPENTITY_GENERIC_VIEWS
+            generic_views = mapentity_views.MAPENTITY_GENERIC_VIEWS
         else:
             generic_views = [getattr(mapentity_views, 'MapEntity%s' % name)
                              for name in self.dynamic_views]
@@ -87,7 +81,9 @@ class MapEntityOptions(object):
         for generic_view in generic_views:
             already_defined = any([issubclass(view, generic_view) for view in picked])
             if not already_defined:
-                if list_view and generic_view in (MapEntityJsonList, MapEntityFormat):
+                list_dependencies = (mapentity_views.MapEntityJsonList,
+                                     mapentity_views.MapEntityFormat)
+                if list_view and generic_view in list_dependencies:
                     # List view depends on JsonList and Format view
                     class dynamic_view(generic_view, list_view):
                         pass
@@ -137,7 +133,10 @@ class Registry(object):
         except ProgrammingError:
             pass  # Content types table is not yet synced
 
-        return options.scan_views()
+        try:
+            return options.scan_views()
+        except Exception as e:
+            print e
 
     @property
     def entities(self):
