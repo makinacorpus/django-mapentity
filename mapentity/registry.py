@@ -7,7 +7,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.utils.importlib import import_module
 from django.utils.translation import ugettext as _
 from django.views.generic.base import View
-from django.conf.urls import patterns
+from django.conf.urls import patterns, url
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import auth
 from django.contrib.auth.models import Permission
@@ -48,7 +48,6 @@ class MapEntityOptions(object):
         Returns the list of URLs/views.
         """
         from . import views as mapentity_views
-        from .urlizor import view_classes_to_url
 
         # Obtain app's views module from Model
         views_module_name = re.sub('models.*', 'views', self.model.__module__)
@@ -94,7 +93,41 @@ class MapEntityOptions(object):
                 picked.append(dynamic_view)
 
         # Returns Django URL patterns
-        return patterns('', *view_classes_to_url(*picked))
+        return patterns('', *self.__view_classes_to_url(*picked))
+
+    def _url_path(self, view_kind):
+        kind_to_urlpath = {
+            mapentity_models.ENTITY_LAYER: r'^api/{modelname}/{modelname}.geojson$',
+            mapentity_models.ENTITY_LIST: r'^{modelname}/list/$',
+            mapentity_models.ENTITY_JSON_LIST: r'^api/{modelname}/{modelname}s.json$',
+            mapentity_models.ENTITY_FORMAT_LIST: r'^{modelname}/list/export/$',
+            mapentity_models.ENTITY_DETAIL: r'^{modelname}/(?P<pk>\d+)/$',
+            mapentity_models.ENTITY_MAPIMAGE: r'^image/{modelname}-(?P<pk>\d+).png$',
+            mapentity_models.ENTITY_DOCUMENT: r'^document/{modelname}-(?P<pk>\d+).odt$',
+            mapentity_models.ENTITY_CREATE: r'^{modelname}/add/$',
+            mapentity_models.ENTITY_UPDATE: r'^{modelname}/edit/(?P<pk>\d+)/$',
+            mapentity_models.ENTITY_DELETE: r'^{modelname}/delete/(?P<pk>\d+)/$',
+        }
+        url_path = kind_to_urlpath[view_kind]
+        url_path = url_path.format(modelname=self.modelname)
+        return url_path
+
+    def url_for(self, view_class):
+        view_kind = view_class.get_entity_kind()
+        url_path = self._url_path(view_kind)
+        url_name = self.url_shortname(view_kind)
+        return url(url_path, view_class.as_view(), name=url_name)
+
+    def __view_classes_to_url(self, *view_classes):
+        return [self.url_for(view_class) for view_class in view_classes]
+
+    def url_shortname(self, kind):
+        assert kind in mapentity_models.ENTITY_KINDS
+        return '%s_%s' % (self.module_name, kind)
+
+    def url_name(self, kind):
+        assert kind in mapentity_models.ENTITY_KINDS
+        return '%s:%s' % (self.app_label, self.url_shortname(kind))
 
 
 class Registry(object):
@@ -119,6 +152,8 @@ class Registry(object):
             options = MapEntityOptions(model)
         else:
             options = options(model)
+
+        setattr(model, '_entity', options)
 
         # Smoother upgrade for Geotrek
         if menu is not None:

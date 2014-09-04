@@ -48,7 +48,6 @@ class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
         return super(MapEntityLayer, self).render_to_response(context, **response_kwargs)
 
 
-
 class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
     """
     Return objects list as a JSON that will populate the Jquery.dataTables.

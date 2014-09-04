@@ -24,7 +24,6 @@ from django.template import RequestContext, Context, loader
 from ..decorators import view_permission_required
 from ..settings import app_settings, _MAP_STYLES
 from ..helpers import capture_image
-from .. import urlizor
 from .mixins import JSONResponseMixin, FilterListMixin, ModelViewMixin
 
 
@@ -108,13 +107,19 @@ class JSSettings(JSONResponseMixin, TemplateView):
         dictsettings['urls'] = {}
         dictsettings['urls']['root'] = root_url
 
-        class ModelName:
+        from mapentity import models as mapentity_models
+        from django.db import models
+        from mapentity.registry import MapEntityOptions
+
+        class ModelName(mapentity_models.MapEntityMixin, models.Model):
             pass
 
+        options = MapEntityOptions(ModelName)
+
         dictsettings['urls']['static'] = settings.STATIC_URL
-        dictsettings['urls']['layer'] = root_url + urlizor.url_layer(ModelName)[1:-1]
+        dictsettings['urls']['layer'] = root_url + options._url_path(mapentity_models.ENTITY_LAYER)[1:-1]
         dictsettings['urls']['detail'] = root_url + 'modelname/0/'
-        dictsettings['urls']['format_list'] = root_url + urlizor.url_format_list(ModelName)[1:-1]
+        dictsettings['urls']['format_list'] = root_url + options._url_path(mapentity_models.ENTITY_FORMAT_LIST)[1:-1]
         dictsettings['urls']['screenshot'] = reverse("mapentity:map_screenshot")
 
         # Useful for JS calendars
