@@ -7,11 +7,12 @@ from django.db import DEFAULT_DB_ALIAS
 from django.utils.importlib import import_module
 from django.utils.translation import ugettext as _
 from django.views.generic.base import View
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import auth
 from django.contrib.auth.models import Permission
 
+from rest_framework import routers
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
 from mapentity import logger
@@ -39,6 +40,9 @@ class MapEntityOptions(object):
         self.icon = 'images/%s.png' % self.module_name
         self.icon_small = 'images/%s-16.png' % self.module_name
         self.icon_big = 'images/%s-96.png' % self.module_name
+
+        self.rest_router = routers.DefaultRouter()
+
         # Can't do reverse right now, URL not setup yet
         self.url_list = '%s:%s_%s' % (self.app_label, self.module_name, 'list')
         self.url_add = '%s:%s_%s' % (self.app_label, self.module_name, 'add')
@@ -55,6 +59,7 @@ class MapEntityOptions(object):
         # Filter to views inherited from MapEntity base views
         picked = []
         list_view = None
+
         for name, view in inspect.getmembers(views_module):
             if inspect.isclass(view) and issubclass(view, View):
                 if hasattr(view, 'get_entity_kind'):
@@ -67,6 +72,10 @@ class MapEntityOptions(object):
                             picked.append(view)
                             if issubclass(view, mapentity_views.MapEntityList):
                                 list_view = view
+
+                if any([getattr(view, 'model', False), getattr(view, 'queryset', False)]) and \
+                   issubclass(view, mapentity_views.MapEntityViewSet):
+                    self.rest_router.register(self.modelname + 's', view)
 
         _model = self.model
 
@@ -119,7 +128,8 @@ class MapEntityOptions(object):
         return url(url_path, view_class.as_view(), name=url_name)
 
     def __view_classes_to_url(self, *view_classes):
-        return [self.url_for(view_class) for view_class in view_classes]
+        return [self.url_for(view_class) for view_class in view_classes] + \
+               [url(r'api/', include(self.rest_router.urls))]
 
     def url_shortname(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS

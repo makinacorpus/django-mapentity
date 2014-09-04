@@ -13,6 +13,7 @@ from .generic import (
 from .api import (
     MapEntityLayer,
     MapEntityJsonList,
+    MapEntityViewSet
 )
 
 
@@ -48,9 +49,7 @@ from .logentry import LogEntryList
 
 __all__ = [
     'Convert',
-    'MapEntityLayer',
     'MapEntityList',
-    'MapEntityJsonList',
     'MapEntityFormat',
     'MapEntityMapImage',
     'MapEntityDocument',
@@ -59,6 +58,10 @@ __all__ = [
     'MapEntityDetail',
     'MapEntityUpdate',
     'MapEntityDelete',
+
+    'MapEntityLayer',
+    'MapEntityJsonList',
+    'MapEntityViewSet',
 
     'HttpJSONResponse',
     'JSONResponseMixin',

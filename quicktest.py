@@ -30,6 +30,7 @@ class QuickDjangoTest(object):
         'easy_thumbnails',
         'crispy_forms',
         'floppyforms',
+        'rest_framework',
     )
 
     def __init__(self, *args, **kwargs):

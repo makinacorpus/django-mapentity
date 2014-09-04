@@ -175,7 +175,6 @@ class SettingsViewTest(BaseTest):
     def test_js_settings_urls(self):
         view = JSSettings()
         view.request = RequestFactory().get('/fake-path')
-        #view.request.user = self.user
         context = view.get_context_data()
         self.assertDictEqual(context['urls'], {
             "layer": "/api/modelname/modelname.geojson",

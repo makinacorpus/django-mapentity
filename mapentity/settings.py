@@ -55,6 +55,21 @@ TINYMCE_DEFAULT_CONFIG.update(getattr(settings, 'TINYMCE_DEFAULT_CONFIG', {}))
 setattr(settings, 'TINYMCE_DEFAULT_CONFIG', TINYMCE_DEFAULT_CONFIG)
 
 
+REST_FRAMEWORK_DEFAULT_CONFIG = {
+    # Use hyperlinked styles by default.
+    # Only used if the `serializer_class` attribute is not set on a view.
+    'DEFAULT_MODEL_SERIALIZER_CLASS': 'rest_framework.serializers.HyperlinkedModelSerializer',
+
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'mapentity.models.MapEntityRestPermissions'
+    ]
+}
+REST_FRAMEWORK_DEFAULT_CONFIG.update(getattr(settings, 'REST_FRAMEWORK', {}))
+setattr(settings, 'REST_FRAMEWORK', REST_FRAMEWORK_DEFAULT_CONFIG)
+
+
 _MAP_STYLES = {
     'detail': {'weight': 5, 'opacity': 1, 'color': 'yellow', 'arrowColor': '#FF5E00', 'arrowSize': 8},
     'others': {'opacity': 0.9, 'fillOpacity': 0.7, 'color': 'yellow'},

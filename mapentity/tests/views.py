@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from mapentity import views as mapentity_views
 
 from .models import DummyModel
@@ -37,3 +38,13 @@ class DummyUpdate(mapentity_views.MapEntityUpdate):
 
 class DummyDelete(mapentity_views.MapEntityDelete):
     model = DummyModel
+
+
+class DummySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DummyModel
+
+
+class DummyViewSet(mapentity_views.MapEntityViewSet):
+    model = DummyModel
+    serializer_class = DummySerializer

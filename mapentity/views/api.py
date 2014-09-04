@@ -3,6 +3,8 @@ import logging
 from django.views.generic.list import ListView
 
 from djgeojson.views import GeoJSONLayerView
+from rest_framework import viewsets
+
 from mapentity import models as mapentity_models
 from ..settings import API_SRID
 from ..decorators import (view_cache_response_content, view_cache_latest,
@@ -65,3 +67,7 @@ class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
         return serializer.serialize(self.get_queryset(),
                                     fields=self.columns,
                                     model=self.get_model())
+
+
+class MapEntityViewSet(viewsets.ModelViewSet):
+    pass
