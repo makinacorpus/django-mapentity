@@ -12,7 +12,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib import auth
 from django.contrib.auth.models import Permission
 
-from rest_framework import routers
+from rest_framework import routers as rest_routers
+from rest_framework import serializers as rest_serializers
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
 from mapentity import logger
@@ -41,7 +42,7 @@ class MapEntityOptions(object):
         self.icon_small = 'images/%s-16.png' % self.module_name
         self.icon_big = 'images/%s-96.png' % self.module_name
 
-        self.rest_router = routers.DefaultRouter()
+        self.rest_router = rest_routers.DefaultRouter()
 
         # Can't do reverse right now, URL not setup yet
         self.url_list = '%s:%s_%s' % (self.app_label, self.module_name, 'list')
@@ -58,10 +59,12 @@ class MapEntityOptions(object):
         views_module = import_module(views_module_name)
         # Filter to views inherited from MapEntity base views
         picked = []
+        rest_viewset = None
         list_view = None
 
         for name, view in inspect.getmembers(views_module):
             if inspect.isclass(view) and issubclass(view, View):
+                # Pick-up views
                 if hasattr(view, 'get_entity_kind'):
                     try:
                         view_model = view.model or view.queryset.model
@@ -73,9 +76,11 @@ class MapEntityOptions(object):
                             if issubclass(view, mapentity_views.MapEntityList):
                                 list_view = view
 
-                if any([getattr(view, 'model', False), getattr(view, 'queryset', False)]) and \
-                   issubclass(view, mapentity_views.MapEntityViewSet):
-                    self.rest_router.register(self.modelname + 's', view)
+                # Pick-up Django REST framework ViewSet
+                is_viewset = issubclass(view, mapentity_views.MapEntityViewSet)
+                has_queryset = any([getattr(view, 'model', False), getattr(view, 'queryset', False)])
+                if is_viewset and has_queryset:
+                    rest_viewset = view
 
         _model = self.model
 
@@ -101,8 +106,29 @@ class MapEntityOptions(object):
                         model = _model
                 picked.append(dynamic_view)
 
+        # Dynamically define REST missing viewset
+        if rest_viewset is None:
+            _queryset = self.get_queryset()
+            _serializer = self.get_serializer()
+            class dynamic_viewset(mapentity_views.MapEntityViewSet):
+                queryset = _queryset
+                serializer_class = _serializer
+            rest_viewset = dynamic_viewset
+
+        self.rest_router.register(self.modelname + 's', rest_viewset)
+
         # Returns Django URL patterns
         return patterns('', *self.__view_classes_to_url(*picked))
+
+    def get_serializer(self):
+        _model = self.model
+        class Serializer(rest_serializers.ModelSerializer):
+            class Meta:
+                model = _model
+        return Serializer
+
+    def get_queryset(self):
+        return self.model.objects.all()
 
     def _url_path(self, view_kind):
         kind_to_urlpath = {
@@ -178,10 +204,7 @@ class Registry(object):
         except ProgrammingError:
             pass  # Content types table is not yet synced
 
-        try:
-            return options.scan_views()
-        except Exception as e:
-            print e
+        return options.scan_views()
 
     @property
     def entities(self):
