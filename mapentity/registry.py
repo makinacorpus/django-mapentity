@@ -110,6 +110,7 @@ class MapEntityOptions(object):
         if rest_viewset is None:
             _queryset = self.get_queryset()
             _serializer = self.get_serializer()
+
             class dynamic_viewset(mapentity_views.MapEntityViewSet):
                 queryset = _queryset
                 serializer_class = _serializer
@@ -122,9 +123,11 @@ class MapEntityOptions(object):
 
     def get_serializer(self):
         _model = self.model
+
         class Serializer(rest_serializers.ModelSerializer):
             class Meta:
                 model = _model
+
         return Serializer
 
     def get_queryset(self):

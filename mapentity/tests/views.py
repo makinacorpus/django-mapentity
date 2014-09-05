@@ -1,4 +1,3 @@
-from rest_framework import serializers
 from mapentity import views as mapentity_views
 
 from .models import DummyModel
