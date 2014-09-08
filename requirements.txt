@@ -1,3 +1,4 @@
+Django==1.6.7
 -e git://github.com/makinacorpus/django-paperclip#egg=paperclip
 djangorestframework==2.4.2
 gpxpy==0.7.1
