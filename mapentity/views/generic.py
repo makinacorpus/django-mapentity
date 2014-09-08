@@ -12,25 +12,21 @@ from django.views.generic.detail import DetailView
 from django.views.generic import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
-from django.contrib.gis.db.models import GeometryField
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from djgeojson.views import GeoJSONLayerView
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
 
-from ..settings import app_settings, API_SRID
+from ..settings import app_settings
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream, user_has_perm
-from ..decorators import (save_history, view_permission_required,
-                          view_cache_latest, view_cache_response_content)
+from ..decorators import save_history, view_permission_required
 from ..models import LogEntry, ADDITION, CHANGE, DELETION
-from ..serializers import GPXSerializer, CSVSerializer, DatatablesSerializer, ZipShapeSerializer
-from .base import history_delete
-from .mixins import (ModelViewMixin, JSONResponseMixin, FormViewMixin,
-                     FilterListMixin)
+from .. import serializers as mapentity_serializers
+from .base import history_delete, BaseListView
+from .mixins import (ModelViewMixin, FormViewMixin)
 
 
 logger = logging.getLogger(__name__)
@@ -46,58 +42,6 @@ def log_action(request, object, action_flag):
         object_repr=force_text(object),
         action_flag=action_flag
     )
-
-
-class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
-    """
-    Take a class attribute `model` with a `latest_updated` method used for caching.
-    """
-
-    force2d = True
-    srid = API_SRID
-
-    def __init__(self, *args, **kwargs):
-        super(MapEntityLayer, self).__init__(*args, **kwargs)
-        # Backward compatibility with django-geojson 1.X
-        # for JS ObjectsLayer and rando-trekking application
-        # TODO: remove when migrated
-        properties = dict([(k, k) for k in self.properties])
-        if 'id' not in self.properties:
-            properties['id'] = 'pk'
-        self.properties = properties
-
-    @classmethod
-    def get_entity_kind(cls):
-        return mapentity_models.ENTITY_LAYER
-
-    @view_permission_required()
-    @view_cache_latest()
-    def dispatch(self, *args, **kwargs):
-        return super(MapEntityLayer, self).dispatch(*args, **kwargs)
-
-    @view_cache_response_content()
-    def render_to_response(self, context, **response_kwargs):
-        return super(MapEntityLayer, self).render_to_response(context, **response_kwargs)
-
-
-class BaseListView(FilterListMixin, ModelViewMixin):
-
-    columns = None
-
-    def __init__(self, *args, **kwargs):
-        super(BaseListView, self).__init__(*args, **kwargs)
-
-        if self.columns is None:
-            # All model fields except geometries
-            self.columns = [field.name for field in self.get_model()._meta.fields
-                            if not isinstance(field, GeometryField)]
-            # Id column should be the first one
-            self.columns.remove('id')
-            self.columns.insert(0, 'id')
-
-    @view_permission_required()
-    def dispatch(self, *args, **kwargs):
-        return super(BaseListView, self).dispatch(*args, **kwargs)
 
 
 class MapEntityList(BaseListView, ListView):
@@ -142,27 +86,12 @@ class MapEntityList(BaseListView, ListView):
         return context
 
 
-class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
-    """
-    Return objects list as a JSON that will populate the Jquery.dataTables.
-    """
-
-    @classmethod
-    def get_entity_kind(cls):
-        return mapentity_models.ENTITY_JSON_LIST
-
-    def get_context_data(self, **kwargs):
-        """
-        Override the most important part of JSONListView... (paginator)
-        """
-        serializer = DatatablesSerializer()
-        return serializer.serialize(self.get_queryset(),
-                                    fields=self.columns,
-                                    model=self.get_model())
-
-
 class MapEntityFormat(BaseListView, ListView):
-    """Make it  extends your EntityList"""
+    """
+
+    Export the list to a particular format.
+
+    """
     DEFAULT_FORMAT = 'csv'
 
     @classmethod
@@ -193,14 +122,14 @@ class MapEntityFormat(BaseListView, ListView):
         return response
 
     def csv_view(self, request, context, **kwargs):
-        serializer = CSVSerializer()
+        serializer = mapentity_serializers.CSVSerializer()
         response = HttpResponse(mimetype='text/csv')
         serializer.serialize(queryset=self.get_queryset(), stream=response,
                              model=self.get_model(), fields=self.columns, ensure_ascii=True)
         return response
 
     def shape_view(self, request, context, **kwargs):
-        serializer = ZipShapeSerializer()
+        serializer = mapentity_serializers.ZipShapeSerializer()
         response = HttpResponse(mimetype='application/zip')
         serializer.serialize(queryset=self.get_queryset(), model=self.get_model(),
                              stream=response, fields=self.columns)
@@ -208,7 +137,7 @@ class MapEntityFormat(BaseListView, ListView):
         return response
 
     def gpx_view(self, request, context, **kwargs):
-        serializer = GPXSerializer()
+        serializer = mapentity_serializers.GPXSerializer()
         response = HttpResponse(mimetype='application/gpx+xml')
         serializer.serialize(self.get_queryset(), model=self.get_model(), stream=response,
                              geom_field=app_settings['GEOM_FIELD_NAME'])
@@ -501,17 +430,3 @@ class MapEntityDelete(ModelViewMixin, DeleteView):
 
     def get_success_url(self):
         return self.get_model().get_list_url()
-
-
-MAPENTITY_GENERIC_VIEWS = [
-    MapEntityLayer,
-    MapEntityList,
-    MapEntityJsonList,
-    MapEntityFormat,
-    MapEntityMapImage,
-    MapEntityDocument,
-    MapEntityCreate,
-    MapEntityDetail,
-    MapEntityUpdate,
-    MapEntityDelete,
-]

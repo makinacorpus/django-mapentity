@@ -7,11 +7,13 @@ from django.db import DEFAULT_DB_ALIAS
 from django.utils.importlib import import_module
 from django.utils.translation import ugettext as _
 from django.views.generic.base import View
-from django.conf.urls import patterns
+from django.conf.urls import patterns, url, include
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import auth
 from django.contrib.auth.models import Permission
 
+from rest_framework import routers as rest_routers
+from rest_framework import serializers as rest_serializers
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
 from mapentity import logger
@@ -39,6 +41,9 @@ class MapEntityOptions(object):
         self.icon = 'images/%s.png' % self.module_name
         self.icon_small = 'images/%s-16.png' % self.module_name
         self.icon_big = 'images/%s-96.png' % self.module_name
+
+        self.rest_router = rest_routers.DefaultRouter()
+
         # Can't do reverse right now, URL not setup yet
         self.url_list = '%s:%s_%s' % (self.app_label, self.module_name, 'list')
         self.url_add = '%s:%s_%s' % (self.app_label, self.module_name, 'add')
@@ -47,23 +52,19 @@ class MapEntityOptions(object):
         """
         Returns the list of URLs/views.
         """
-        from .views import generic as mapentity_views
-        from .views.generic import (
-            MAPENTITY_GENERIC_VIEWS,
-            MapEntityList,
-            MapEntityJsonList,
-            MapEntityFormat
-        )
-        from .urlizor import view_classes_to_url
+        from . import views as mapentity_views
 
         # Obtain app's views module from Model
         views_module_name = re.sub('models.*', 'views', self.model.__module__)
         views_module = import_module(views_module_name)
         # Filter to views inherited from MapEntity base views
         picked = []
+        rest_viewset = None
         list_view = None
+
         for name, view in inspect.getmembers(views_module):
             if inspect.isclass(view) and issubclass(view, View):
+                # Pick-up views
                 if hasattr(view, 'get_entity_kind'):
                     try:
                         view_model = view.model or view.queryset.model
@@ -72,13 +73,19 @@ class MapEntityOptions(object):
                     else:
                         if view_model is self.model:
                             picked.append(view)
-                            if issubclass(view, MapEntityList):
+                            if issubclass(view, mapentity_views.MapEntityList):
                                 list_view = view
+
+                # Pick-up Django REST framework ViewSet
+                is_viewset = issubclass(view, mapentity_views.MapEntityViewSet)
+                has_queryset = any([getattr(view, 'model', False), getattr(view, 'queryset', False)])
+                if is_viewset and has_queryset:
+                    rest_viewset = view
 
         _model = self.model
 
         if self.dynamic_views is None:
-            generic_views = MAPENTITY_GENERIC_VIEWS
+            generic_views = mapentity_views.MAPENTITY_GENERIC_VIEWS
         else:
             generic_views = [getattr(mapentity_views, 'MapEntity%s' % name)
                              for name in self.dynamic_views]
@@ -87,7 +94,9 @@ class MapEntityOptions(object):
         for generic_view in generic_views:
             already_defined = any([issubclass(view, generic_view) for view in picked])
             if not already_defined:
-                if list_view and generic_view in (MapEntityJsonList, MapEntityFormat):
+                list_dependencies = (mapentity_views.MapEntityJsonList,
+                                     mapentity_views.MapEntityFormat)
+                if list_view and generic_view in list_dependencies:
                     # List view depends on JsonList and Format view
                     class dynamic_view(generic_view, list_view):
                         pass
@@ -97,8 +106,67 @@ class MapEntityOptions(object):
                         model = _model
                 picked.append(dynamic_view)
 
+        # Dynamically define REST missing viewset
+        if rest_viewset is None:
+            _queryset = self.get_queryset()
+            _serializer = self.get_serializer()
+
+            class dynamic_viewset(mapentity_views.MapEntityViewSet):
+                queryset = _queryset
+                serializer_class = _serializer
+            rest_viewset = dynamic_viewset
+
+        self.rest_router.register(self.modelname + 's', rest_viewset)
+
         # Returns Django URL patterns
-        return patterns('', *view_classes_to_url(*picked))
+        return patterns('', *self.__view_classes_to_url(*picked))
+
+    def get_serializer(self):
+        _model = self.model
+
+        class Serializer(rest_serializers.ModelSerializer):
+            class Meta:
+                model = _model
+
+        return Serializer
+
+    def get_queryset(self):
+        return self.model.objects.all()
+
+    def _url_path(self, view_kind):
+        kind_to_urlpath = {
+            mapentity_models.ENTITY_LAYER: r'^api/{modelname}/{modelname}.geojson$',
+            mapentity_models.ENTITY_LIST: r'^{modelname}/list/$',
+            mapentity_models.ENTITY_JSON_LIST: r'^api/{modelname}/{modelname}s.json$',
+            mapentity_models.ENTITY_FORMAT_LIST: r'^{modelname}/list/export/$',
+            mapentity_models.ENTITY_DETAIL: r'^{modelname}/(?P<pk>\d+)/$',
+            mapentity_models.ENTITY_MAPIMAGE: r'^image/{modelname}-(?P<pk>\d+).png$',
+            mapentity_models.ENTITY_DOCUMENT: r'^document/{modelname}-(?P<pk>\d+).odt$',
+            mapentity_models.ENTITY_CREATE: r'^{modelname}/add/$',
+            mapentity_models.ENTITY_UPDATE: r'^{modelname}/edit/(?P<pk>\d+)/$',
+            mapentity_models.ENTITY_DELETE: r'^{modelname}/delete/(?P<pk>\d+)/$',
+        }
+        url_path = kind_to_urlpath[view_kind]
+        url_path = url_path.format(modelname=self.modelname)
+        return url_path
+
+    def url_for(self, view_class):
+        view_kind = view_class.get_entity_kind()
+        url_path = self._url_path(view_kind)
+        url_name = self.url_shortname(view_kind)
+        return url(url_path, view_class.as_view(), name=url_name)
+
+    def __view_classes_to_url(self, *view_classes):
+        return [self.url_for(view_class) for view_class in view_classes] + \
+               [url(r'api/', include(self.rest_router.urls))]
+
+    def url_shortname(self, kind):
+        assert kind in mapentity_models.ENTITY_KINDS
+        return '%s_%s' % (self.module_name, kind)
+
+    def url_name(self, kind):
+        assert kind in mapentity_models.ENTITY_KINDS
+        return '%s:%s' % (self.app_label, self.url_shortname(kind))
 
 
 class Registry(object):
@@ -123,6 +191,8 @@ class Registry(object):
             options = MapEntityOptions(model)
         else:
             options = options(model)
+
+        setattr(model, '_entity', options)
 
         # Smoother upgrade for Geotrek
         if menu is not None:

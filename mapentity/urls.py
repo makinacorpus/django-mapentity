@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 
 from . import app_settings
 from . import registry
@@ -22,6 +22,7 @@ urlpatterns = patterns(
     url(r'^map_screenshot/$', map_screenshot, name='map_screenshot'),
     url(r'^convert/$', Convert.as_view(), name='convert'),
     url(r'^history/delete/$', history_delete, name='history_delete'),
+    url(r'^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
     # See default value in app_settings.JS_SETTINGS.
     # Will be overriden, most probably.
     url(r'^api/settings.json$', JSSettings.as_view(), name='js_settings'),

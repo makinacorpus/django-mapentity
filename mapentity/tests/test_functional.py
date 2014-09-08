@@ -6,6 +6,7 @@ import shutil
 import StringIO
 import csv
 import urllib2
+import json
 from datetime import datetime
 
 from django.conf import settings
@@ -222,6 +223,37 @@ class MapEntityTest(TestCase):
         response = self.client.get(self.model.get_list_url())
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['filterform'] is not None)
+
+    """
+
+        REST API
+
+    """
+
+    def test_api_list_for_model(self):
+        if self.model is None:
+            return  # Abstract test should not run
+        self.login()
+
+        obj = self.modelfactory()
+        list_url = '/api/{modelname}s/'.format(modelname=self.model._meta.module_name)
+        response = self.client.get(list_url)
+        self.assertEqual(response.status_code, 200)
+        first_result = json.loads(response.content)[0]
+        self.assertEqual(first_result['id'], obj.pk)
+
+    def test_api_detail_for_model(self):
+        if self.model is None:
+            return  # Abstract test should not run
+        self.login()
+
+        obj = self.modelfactory()
+        detail_url = '/api/{modelname}s/{id}/'.format(modelname=self.model._meta.module_name,
+                                                      id=obj.pk)
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.content)
+        self.assertEqual(result['id'], obj.pk)
 
 
 class MapEntityLiveTest(LiveServerTestCase):

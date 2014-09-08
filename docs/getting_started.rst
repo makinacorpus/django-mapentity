@@ -64,6 +64,7 @@ Add these entries to your ``INSTALLED_APPS``::
     'compressor',
     'floppyforms',
     'crispy_forms',
+    'rest_framework',
     'main',  # the app you just created
 
 Add ``django.middleware.locale.LocaleMiddleware`` to your ``MIDDLEWARE_CLASSES``.
@@ -138,7 +139,7 @@ against the admin registry ::
 URLs
 ----
 
-Register your MapEntiry views in your main app ``urls.py``::
+Register your MapEntity views in your main app ``urls.py``::
 
     from main.models import Museum
     from mapentity import registry

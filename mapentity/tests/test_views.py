@@ -11,8 +11,9 @@ from django.contrib.auth import get_user_model
 
 from mapentity.factories import SuperUserFactory
 
-from .. import app_settings
-from ..views import serve_secure_media, Convert
+from mapentity import app_settings
+from mapentity.views import serve_secure_media, Convert, JSSettings
+
 from .models import DummyModel
 from .views import DummyList, DummyDetail
 from .test_functional import MapEntityTest, MapEntityLiveTest
@@ -167,6 +168,22 @@ class MediaTest(BaseTest):
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertFalse('Content-Disposition' in response)
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = True
+
+
+class SettingsViewTest(BaseTest):
+
+    def test_js_settings_urls(self):
+        view = JSSettings()
+        view.request = RequestFactory().get('/fake-path')
+        context = view.get_context_data()
+        self.assertDictEqual(context['urls'], {
+            "layer": "/api/modelname/modelname.geojson",
+            "screenshot": "/map_screenshot/",
+            "detail": "/modelname/0/",
+            "format_list": "/modelname/list/export/",
+            "static": "/static/",
+            "root": "/"
+        })
 
 
 class ListViewTest(BaseTest):

@@ -13,6 +13,7 @@ from django.utils.formats import localize
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from paperclip.models import Attachment
+from rest_framework import permissions as rest_permissions
 
 from mapentity.templatetags.mapentity_tags import humanize_timesince
 from . import app_settings
@@ -52,7 +53,21 @@ ENTITY_PERMISSIONS = (
 )
 
 
+class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
+    perms_map = {
+        'GET': ['%(app_label)s.read_%(model_name)s'],
+        'OPTIONS': ['%(app_label)s.read_%(model_name)s'],
+        'HEAD': ['%(app_label)s.read_%(model_name)s'],
+        'POST': ['%(app_label)s.add_%(model_name)s'],
+        'PUT': ['%(app_label)s.change_%(model_name)s'],
+        'PATCH': ['%(app_label)s.change_%(model_name)s'],
+        'DELETE': ['%(app_label)s.delete_%(model_name)s'],
+    }
+
+
 class MapEntityMixin(object):
+
+    _entity = None
 
     @classmethod
     def add_property(cls, name, func):
@@ -126,41 +141,29 @@ class MapEntityMixin(object):
         super(MapEntityMixin, self).delete(*args, **kwargs)
 
     @classmethod
-    def get_url_name(cls, kind):
-        if kind not in ENTITY_KINDS:
-            return None
-        return '%s:%s_%s' % (cls._meta.app_label, cls._meta.module_name, kind)
-
-    @classmethod
-    def get_url_name_for_registration(cls, kind):
-        if kind not in ENTITY_KINDS:
-            return None
-        return '%s_%s' % (cls._meta.module_name, kind)
-
-    @classmethod
     @models.permalink
     def get_layer_url(cls):
-        return (cls.get_url_name(ENTITY_LAYER), )
+        return (cls._entity.url_name(ENTITY_LAYER), )
 
     @classmethod
     @models.permalink
     def get_list_url(cls):
-        return (cls.get_url_name(ENTITY_LIST), )
+        return (cls._entity.url_name(ENTITY_LIST), )
 
     @classmethod
     @models.permalink
     def get_jsonlist_url(cls):
-        return (cls.get_url_name(ENTITY_JSON_LIST), )
+        return (cls._entity.url_name(ENTITY_JSON_LIST), )
 
     @classmethod
     @models.permalink
     def get_format_list_url(cls):
-        return (cls.get_url_name(ENTITY_FORMAT_LIST), )
+        return (cls._entity.url_name(ENTITY_FORMAT_LIST), )
 
     @classmethod
     @models.permalink
     def get_add_url(cls):
-        return (cls.get_url_name(ENTITY_CREATE), )
+        return (cls._entity.url_name(ENTITY_CREATE), )
 
     def get_absolute_url(self):
         return self.get_detail_url()
@@ -168,11 +171,31 @@ class MapEntityMixin(object):
     @classmethod
     @models.permalink
     def get_generic_detail_url(cls):
-        return (cls.get_url_name(ENTITY_DETAIL), [str(0)])
+        return (cls._entity.url_name(ENTITY_DETAIL), [str(0)])
 
     @models.permalink
     def get_detail_url(self):
-        return (self.get_url_name(ENTITY_DETAIL), [str(self.pk)])
+        return (self._entity.url_name(ENTITY_DETAIL), [str(self.pk)])
+
+    @property
+    def map_image_url(self):
+        return self.get_map_image_url()
+
+    @models.permalink
+    def get_map_image_url(self):
+        return (self._entity.url_name(ENTITY_MAPIMAGE), [str(self.pk)])
+
+    @models.permalink
+    def get_document_url(self):
+        return (self._entity.url_name(ENTITY_DOCUMENT), [str(self.pk)])
+
+    @models.permalink
+    def get_update_url(self):
+        return (self._entity.url_name(ENTITY_UPDATE), [str(self.pk)])
+
+    @models.permalink
+    def get_delete_url(self):
+        return (self._entity.url_name(ENTITY_DELETE), [str(self.pk)])
 
     @property
     def attachments(self):
@@ -209,26 +232,6 @@ class MapEntityMixin(object):
         if not os.path.exists(basefolder):
             os.makedirs(basefolder)
         return os.path.join(basefolder, '%s-%s.png' % (self._meta.module_name, self.pk))
-
-    @property
-    def map_image_url(self):
-        return self.get_map_image_url()
-
-    @models.permalink
-    def get_map_image_url(self):
-        return (self.get_url_name(ENTITY_MAPIMAGE), [str(self.pk)])
-
-    @models.permalink
-    def get_document_url(self):
-        return (self.get_url_name(ENTITY_DOCUMENT), [str(self.pk)])
-
-    @models.permalink
-    def get_update_url(self):
-        return (self.get_url_name(ENTITY_UPDATE), [str(self.pk)])
-
-    @models.permalink
-    def get_delete_url(self):
-        return (self.get_url_name(ENTITY_DELETE), [str(self.pk)])
 
     def get_attributes_html(self, request):
         return extract_attributes_html(self.get_detail_url(), request)
