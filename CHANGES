@@ -5,7 +5,9 @@ CHANGELOG
 1.8.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+**Bug fixes**
+
+- Prevent error if only queryset is used for ``LastModifiedMixin``
 
 
 1.8.0 (2014-09-08)
