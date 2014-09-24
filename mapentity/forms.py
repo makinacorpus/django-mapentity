@@ -61,8 +61,7 @@ class TranslatedModelForm(forms.ModelForm):
         for fields in self._translated.values():
             for field in fields:
                 value = self.cleaned_data.get(field)
-                if value:
-                    setattr(self.instance, field, value)
+                setattr(self.instance, field, value)
         return super(TranslatedModelForm, self).save(*args, **kwargs)
 
     def populate_fields(self):
