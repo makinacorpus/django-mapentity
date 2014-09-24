@@ -31,6 +31,7 @@ class TranslatedModelForm(forms.ModelForm):
         self.populate_fields()
 
     def replace_orig_fields(self):
+        self.orig_fields = self.fields.keys()
         # Expand i18n fields
         try:
             # Obtain model translation options
@@ -151,7 +152,7 @@ class MapEntityForm(TranslatedModelForm):
         fieldslayout = self.fieldslayout
         if not fieldslayout:
             # Remove geomfields from left part
-            fieldslayout = [fl for fl in self.fields.keys() if fl not in self.geomfields]
+            fieldslayout = [fl for fl in self.orig_fields if fl not in self.geomfields]
         # Replace native fields in Crispy layout by translated fields
         fieldslayout = self.__replace_translatable_fields(fieldslayout)
 
