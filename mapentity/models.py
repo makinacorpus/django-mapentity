@@ -245,11 +245,11 @@ class MapEntityMixin(object):
 
     @property
     def creator(self):
-        log_entry = LogEntry.objects.get(
+        log_entry = LogEntry.objects.filter(
             content_type_id=self.get_content_type_id(),
             object_id=self.pk,
-            action_flag=ADDITION)
-        return log_entry.user
+            action_flag=ADDITION).order_by('pk').last()
+        return log_entry and log_entry.user
 
     @property
     def authors(self):
