@@ -2,8 +2,24 @@
 CHANGELOG
 =========
 
-1.7.4 (unreleased)
+1.8.2 (unreleased)
 ==================
+
+- Nothing changed yet.
+
+
+1.8.1 (2014-09-09)
+==================
+
+**Bug fixes**
+
+- Prevent error if only queryset is used for ``LastModifiedMixin``
+
+
+1.8.0 (2014-09-08)
+==================
+
+**Bug fixes**
 
 - Prevent colors to be cleaned from text fields
 - Limit fit zoom on small objects (fixes #91).
@@ -13,6 +29,16 @@ CHANGELOG
 **Bug fixes**
 
 - Safety check for showing layer enumeration if layer has no item
+
+**New features**
+
+- Added Django Rest Framework REST views. Activated by default on every
+  registered models
+
+** Internal changes **
+
+- Moved versions of dependencies from setup to ``requirements.txt``
+- Refactor of URLs initialization
 
 
 1.7.3 (2014-08-21)

@@ -42,8 +42,8 @@ class JSONResponseMixin(object):
 
 class LastModifiedMixin(object):
     def dispatch(self, *args, **kwargs):
-        qs = self.queryset or self.model.objects
-        model = self.model or self.queryset.model
+        qs = self.queryset if self.queryset is not None else self.model.objects
+        model = self.model if self.model is not None else self.queryset.model
         try:
             obj = qs.get(pk=kwargs['pk'])
         except (KeyError, model.DoesNotExist):
