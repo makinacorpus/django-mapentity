@@ -142,7 +142,7 @@ class MapEntityTest(TestCase):
         for line in lines:
             for col in line:
                 # the col should not contains any html tags
-                self.assertEquals(force_unicode(col), html.strip_tags(col))
+                self.assertEquals(force_unicode(col), html.strip_tags(force_unicode(col)))
 
     def _post_form(self, url):
         # no data
