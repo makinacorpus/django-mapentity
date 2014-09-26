@@ -5,7 +5,13 @@ CHANGELOG
 1.8.2 (unreleased)
 ==================
 
-- Nothing changed yet.
+**Bug fixes**
+
+- Do not crash when getting object creator with an inconsistent history
+- Create tabs for translatable fields when crispy form layout is not specified
+- Apply styles for translatable fields when there are not in a tab
+- Fix save of form field falsy value
+- Fix test_no_html_in_csv test with non-ascii field verbose names
 
 
 1.8.1 (2014-09-09)
