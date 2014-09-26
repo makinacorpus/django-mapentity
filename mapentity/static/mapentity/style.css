@@ -792,11 +792,11 @@ label.requiredField .asteriskField {
     margin-bottom: 7px;
 }
 
-.form-panel .tab-content .translatable .nav {
+.form-panel .translatable .nav {
     margin-bottom: 0px;
 }
 
-.tab-content .translatable .nav-pills li a {
+.translatable .nav-pills li a {
     padding-top: 2px;
     padding-bottom: 2px;
 }
