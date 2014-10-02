@@ -123,8 +123,8 @@ $(window).on('entity:map', function (e, data) {
     if (mapBounds) {
         map.fitBounds(mapBounds);
         var maxZoom = $container.data('fitmaxzoom');
-        console.log(maxZoom, map.getZoom() > maxZoom);
         if (map.getZoom() > maxZoom) {
+            console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
             map.setZoom(maxZoom);
         }
         map.resetviewControl.getBounds = function () { return mapBounds; };
