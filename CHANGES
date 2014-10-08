@@ -7,7 +7,8 @@ CHANGELOG
 
 **Bug fixes**
 
-- Fix enumeration when no item in layer 
+- Fix enumeration when no item in layer
+- Fix highlight in list when geometries are multi-part
 
 
 1.8.2 (2014-09-26)

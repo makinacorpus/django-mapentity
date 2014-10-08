@@ -23,7 +23,9 @@ L.ObjectsLayer = L.GeoJSON.extend({
 
         var onFeatureParse = function (geojson, layer) {
             this._mapObjects(geojson, layer);
-            if (this._onEachFeature) this._onEachFeature(geojson, layer);
+            if (this._onEachFeature) {
+                this._onEachFeature(geojson, layer);
+            }
         };
         var pointToLayer = function (geojson, latlng) {
             if (this._pointToLayer) return this._pointToLayer(geojson, latlng);
@@ -94,6 +96,14 @@ L.ObjectsLayer = L.GeoJSON.extend({
         this._objects[pk] = this._current_objects[pk] = layer;
         layer.properties = geojson.properties;
         this.indexLayer(layer);
+
+        // Fix highlighting of multi-part geometries:
+        // Propagate GeoJSON properties to sub-layers
+        if (typeof layer.eachLayer == 'function') {
+            layer.eachLayer(function (l) {
+                l.properties = geojson.properties;
+            });
+        }
     },
 
     load: function (url, force) {
