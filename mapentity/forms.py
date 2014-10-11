@@ -98,11 +98,6 @@ class MapEntityForm(TranslatedModelForm):
         self.helper = FormHelper()
         self.helper.form_tag = True
 
-        self.fields['pk'] = forms.Field(required=False, widget=forms.Field.hidden_widget,
-                                        initial=self.instance.pk)
-        self.fields['model'] = forms.Field(required=False, widget=forms.Field.hidden_widget,
-                                           initial=self.instance._meta.module_name)
-
         # Default widgets
         for fieldname, formfield in self.fields.items():
             # Custom code because formfield_callback does not work with inherited forms

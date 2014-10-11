@@ -149,16 +149,12 @@ MapEntity.GeometryField = L.GeometryField.extend({
     },
 
     getModelName: function () {
-        var m = $('form input[name="model"]').val() || null;
-        if (!m)
-            throw "No model name in form";
-        return m;
+        return $('body').data('modelname');
     },
 
     getInstancePk: function (e) {
-        // TODO: $('form') => fails if there are more than one form
         // On creation, this should be null
-        return $('form input[name="pk"]').val() || null;
+        return $('body').data('pk') || null;
     },
 
 });
