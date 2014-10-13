@@ -5,8 +5,9 @@ CHANGELOG
 1.8.4 (unreleased)
 ==================
 
-- Nothing changed yet.
+**Bug fixes**
 
+- Fix forms not passing extra fields (backport from PNR PACA hotfix in Geotrek 0.27)
 
 1.8.3 (2014-10-08)
 ==================
