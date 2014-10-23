@@ -38,11 +38,11 @@ select[multiple] {
 
 /***** Chosen override ******/
 
-.chzn-container-active .chzn-choices {
+.chosen-container-active .chosen-choices {
     border: 1px solid #AAA;
 }
 
-.chzn-container .chzn-results .highlighted {
+.chosen-container .chosen-results .highlighted {
     background-color: #919191;
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#919191', endColorstr='#747474', GradientType=0 );
     background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(20%, #919191), color-stop(90%, #747474));
@@ -53,7 +53,7 @@ select[multiple] {
     color: #fff;
 }
 
-.chzn-container .chzn-choices {
+.chosen-container .chosen-choices {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
@@ -61,7 +61,7 @@ select[multiple] {
 
 /* Bootstrap style */
 
-.chzn-container .chzn-single {
+.chosen-container .chosen-single {
     background-image: none;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
@@ -83,7 +83,7 @@ select[multiple] {
     border-radius: 4px;
 }
 
-.chzn-container-single .chzn-single div b {
+.chosen-container-single .chosen-single div b {
     background-position-y: 5px;
 }
 
