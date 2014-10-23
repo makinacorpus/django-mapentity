@@ -65,7 +65,7 @@
                                     <tr>
                                         <td>{{ logentry.action_time }} ({{ logentry.action_time|timesince }})</td>
                                         <td>{{ logentry.user }}</td>
-                                        <td>{{ logentry.action_flag_display }}</td>
+                                        <td>{{ logentry.action_flag_display }}{% if logentry.change_message %} - {{ logentry.change_message }}{% endif %}</td>
                                     </tr>
                                 {% empty %}
                                     <tr>

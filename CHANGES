@@ -11,6 +11,7 @@ CHANGELOG
 
 **Bug fixes**
 
+- Clearer action message in object history table
 - Remove top messages only (fixes `a Geotrek bug <https://github.com/makinacorpus/Geotrek/issues/1225>`_)
 
 **Internal changes**
