@@ -1,17 +1,26 @@
 import mock
+
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.urlresolvers import reverse
 
 from paperclip.models import Attachment, FileType
-from paperclip.views import add_url_for_obj
-
 from mapentity.views.generic import MapEntityDetail
+
 from .models import DummyModel
 
 
 User = get_user_model()
+
+
+def add_url_for_obj(obj):
+    return reverse('add_attachment', kwargs={
+        'app_label': obj._meta.app_label,
+        'module_name': obj._meta.module_name,
+        'pk': obj.pk
+    })
 
 
 class EntityAttachmentTestCase(TestCase):
@@ -53,11 +62,11 @@ class EntityAttachmentTestCase(TestCase):
                                        template_name="mapentity/mapentity_detail.html")
         response = view(request, pk=self.object.pk)
         html = unicode(response.render())
-        self.assertTemplateUsed(response, template_name='paperclip/details.html')
+        self.assertTemplateUsed(response, template_name='paperclip/attachment_list.html')
 
         self.assertEqual(1, len(Attachment.objects.attachments_for_object(self.object)))
 
-        self.assertFalse("Upload attachment" in html)
+        self.assertNotIn("Submit attachment", html)
 
         for attachment in Attachment.objects.attachments_for_object(self.object):
             self.assertIn(attachment.legend, html)
@@ -69,13 +78,11 @@ class EntityAttachmentTestCase(TestCase):
         self.user.has_perm = mock.MagicMock(return_value=True)
         view = MapEntityDetail.as_view(model=DummyModel,
                                        template_name="mapentity/mapentity_detail.html")
-
         request = self.createRequest()
         response = view(request, pk=self.object.pk)
         html = unicode(response.render())
-        self.assertTrue("Upload attachment" in html)
-        self.assertTrue("""<form method="post" enctype="multipart/form-data"
-      action="/paperclip/add-for/tests/dummymodel/1/""" in html)
+        self.assertIn("Submit attachment", html)
+        self.assertIn("""<form  action="/paperclip/add-for/tests/dummymodel/1/""", html)
 
 
 class UploadAttachmentTestCase(TestCase):
