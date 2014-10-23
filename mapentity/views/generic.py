@@ -360,9 +360,6 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         perm_update = self.get_model().get_permission_codename(mapentity_models.ENTITY_UPDATE)
         can_edit = user_has_perm(self.request.user, perm_update)
         context['can_edit'] = can_edit
-        context['can_read_attachment'] = user_has_perm(self.request.user, 'paperclip.read_attachment')
-        context['can_add_attachment'] = user_has_perm(self.request.user, 'paperclip.add_attachment')
-        context['can_delete_attachment'] = user_has_perm(self.request.user, 'paperclip.delete_attachment')
 
         return context
 

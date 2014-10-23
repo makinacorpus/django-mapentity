@@ -5,6 +5,10 @@ CHANGELOG
 1.8.5 (unreleased)
 ==================
 
+**New features**
+
+- Ability to edit attachments directly in detail pages
+
 **Bug fixes**
 
 - Remove top messages only (fixes `a Geotrek bug <https://github.com/makinacorpus/Geotrek/issues/1225>`_)
