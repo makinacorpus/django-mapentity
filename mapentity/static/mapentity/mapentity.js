@@ -24,7 +24,7 @@ $(document).ready(function (e) {
     MapEntity.history.render();
 
     // Fade out success/infos messages
-    $('.alert-info, .alert-success').delay(2000).fadeOut('slow');
+    $('#alert-box .alert').delay(2000).fadeOut('slow');
 
     // Form Cancel buttons
     $('#button-id-cancel').click(function (){ window.history.go(-1); });
