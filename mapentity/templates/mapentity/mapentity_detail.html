@@ -1,5 +1,5 @@
 {% extends "mapentity/base.html" %}
-{% load i18n static mapentity_tags leaflet_tags geojson_tags attachments_tags %}
+{% load i18n static mapentity_tags leaflet_tags geojson_tags %}
 
 {% block title %}{{ object }} | {{ block.super }}{% endblock title %}
 
@@ -39,35 +39,15 @@
             </ul>
             <div class="tab-content scrollable">
                 <div id="properties" class="tab-pane {% if activetab != "attachments" %}active{% endif %}">
-
                     {% block detailspanel %}
                         {% smart_include "detail" %}
                     {% endblock detailspanel %}
                 </div>
 
                 <div id="attachments" class="tab-pane {% if activetab == "attachments" %}active{% endif %}">
-
                     {% block attachmentspanel %}
+                        {% include 'paperclip/attachment_list.html' with attachment_form_next=object.get_detail_url|add:'?tab=attachments' %}
                     {% endblock attachmentspanel %}
-
-                    <div class="file-attachment file-attachment-detail">
-                        <h3>{% trans "Attached files" %}</h3>
-
-                        {% if can_read_attachment %}
-                            {% with object=object can_delete_attachment=can_delete_attachment attachment_delete_next=object.get_detail_url|add:'?tab=attachments' %}
-                                {% include 'paperclip/details.html' %}
-                            {% endwith %}
-                        {% else %}
-                            {% trans "You are not allowed to see attachments." %}
-                        {% endif %}
-                    </div>
-
-                    {% if can_add_attachment %}
-                    <div class="file-attachment-update offset2 span6">
-                        <h4>{% trans "New file attachment" %}</h4>
-                        {% attachment_form object object.get_detail_url|add:'?tab=attachments' %}
-                    </div>
-                    {% endif %}
                 </div>
 
                 {% if ACTION_HISTORY_ENABLED %}
@@ -85,7 +65,7 @@
                                     <tr>
                                         <td>{{ logentry.action_time }} ({{ logentry.action_time|timesince }})</td>
                                         <td>{{ logentry.user }}</td>
-                                        <td>{{ logentry.action_flag_display }}</td>
+                                        <td>{{ logentry.action_flag_display }}{% if logentry.change_message %} - {{ logentry.change_message }}{% endif %}</td>
                                     </tr>
                                 {% empty %}
                                     <tr>
