@@ -5,7 +5,9 @@ CHANGELOG
 1.8.5 (unreleased)
 ==================
 
-- Nothing changed yet.
+**Internal changes**
+
+- Upgraded Chosen from 0.9.12 to 1.2.0 (used in comboxboxes and multiselect forms fields)
 
 
 1.8.4 (2014-10-13)
