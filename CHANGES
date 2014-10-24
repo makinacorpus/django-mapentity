@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-1.9.1 (unreleased)
+1.9.1 (2014-10-24)
 ==================
 
 - Fix overlay layers being lost in grouped layers control
