@@ -101,12 +101,16 @@ $(window).on('entity:map', function (e, data) {
         map.layerscontrol.removeFrom(map);
     }
     var baseLayers = {};
+    var overlaysLayers = {};
     for (var l in map.layerscontrol._layers) {
         var layer = map.layerscontrol._layers[l];
-        if (!layer.overlay) baseLayers[layer.name] = layer.layer;
+        if (layer.overlay)
+            overlaysLayers[layer.name] = layer.layer;
+        else
+            baseLayers[layer.name] = layer.layer;
     }
-    var layerscontrol = map.layerscontrol = L.control.groupedLayers(baseLayers, []);
-    layerscontrol.addTo(map);
+    var layerscontrol = L.control.groupedLayers(baseLayers, {'': overlaysLayers});
+    map.layerscontrol = layerscontrol.addTo(map);
 
     if (readonly) {
         // Set map readonly
