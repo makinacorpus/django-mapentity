@@ -1,62 +1,13 @@
-from datetime import datetime
-
 from django import forms as django_forms
 from django.db.models.related import RelatedObject
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
 
-from django_filters import FilterSet, Filter, ChoiceFilter
+from django_filters import FilterSet, Filter
 from django_filters.filterset import get_model_field
 import floppyforms as forms
 
 from .settings import app_settings, API_SRID
 from .widgets import HiddenGeometryWidget
-
-
-class YearFilter(ChoiceFilter):
-    def __init__(self, *args, **kwargs):
-        self.first_choice = kwargs.get('label', _('Any year'))
-        kwargs['choices'] = self.get_choices()
-        super(YearFilter, self).__init__(*args, **kwargs)
-
-    def get_choices(self):
-        # idx 0 will not be a year !
-        years_range = [self.first_choice] + self.get_years()
-        return [(idx, year) for idx, year in enumerate(years_range)]
-
-    def get_years(self):
-        return range(datetime.today().year, 1979, -1)
-
-    def do_filter(self, qs, year):
-        return qs.filter(**{
-            '%s__year' % self.name: year,
-        })
-
-    def filter(self, qs, value):
-        try:
-            idx = int(value)
-        except (ValueError, TypeError):
-            idx = 0
-
-        if idx == 0:
-            return qs
-        else:
-            year = self.get_years()[idx - 1]
-            return self.do_filter(qs, year)
-
-
-class YearBetweenFilter(YearFilter):
-
-    def __init__(self, *args, **kwargs):
-        assert len(kwargs['name']) == 2
-        super(YearBetweenFilter, self).__init__(*args, **kwargs)
-
-    def do_filter(self, qs, year):
-        begin, end = self.name
-        return qs.filter(**{
-            '%s__lte' % begin: year,
-            '%s__gte' % end: year,
-        })
 
 
 class PolygonFilter(Filter):
