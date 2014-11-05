@@ -38,7 +38,7 @@ MapEntity.Context = new function() {
         context['timestamp'] = new Date().getTime();
 
         return context;
-    },
+    };
 
     self.saveFullContext = function(map, kwargs) {
         var prefix = kwargs.prefix || '',
@@ -104,15 +104,17 @@ MapEntity.Context = new function() {
             map.invalidateSize();
         }
 
-        self.restoreMapView(map, context, kwargs);
-
         if (filter && context.filter) {
             $(filter).deserialize(context.filter);
             $(filter).find('select').trigger("liszt:updated");
         }
+
         if (datatable && context.sortcolumns) {
             datatable.fnSort(context.sortcolumns);
         }
+
+        // This map view change will refresh the list
+        self.restoreMapView(map, context, kwargs);
 
         // Show layers by their name
         if (context.maplayers) {
