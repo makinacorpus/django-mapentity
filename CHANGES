@@ -5,7 +5,13 @@ CHANGELOG
 1.9.2 (unreleased)
 ==================
 
-- Nothing changed yet.
+**Breaking changes**
+
+- Got rid of Year filters.
+
+**Bug fixes**
+
+- Fix list filter restore (see https://github.com/makinacorpus/Geotrek/issues/1236)
 
 
 1.9.1 (2014-10-24)

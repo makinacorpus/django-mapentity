@@ -15,20 +15,20 @@ L.MapListSync = L.Class.extend({
         this.map = map;
         this.layer = objectsLayer;
         L.Util.setOptions(this, options);
-        
+
         this.selectorOnce = this.__initSelectorOnce(); // TODO: rename this and refactor
         this._dtcontainer = this.dt.fnSettings().nTableWrapper;
-        
+
         this.dt.fnSettings()['aoRowCreatedCallback'].push({
             fn: this._onRowCreated.bind(this),
             sName: 'user',
         });
-        
+
         this.layer.on('mouseintent', this._onObjectOver.bind(this));
-        
+
         this._loading = false;
         this.map.on('moveend', this._onMapViewChanged, this);
-        
+
         if (this.options.filter) {
             this.options.filter.submitbutton.click(this._onFormSubmit.bind(this));
             this.options.filter.resetbutton.click(this._onFormReset.bind(this));
@@ -107,7 +107,7 @@ L.MapListSync = L.Class.extend({
             return;
         this._loading = true;
         var spinner = new Spinner().spin(this._dtcontainer);
-        
+
         // on JSON load, return the json used by dataTable
         // Update also the map given the layer's pk
         var self = this;
@@ -147,7 +147,7 @@ L.MapListSync = L.Class.extend({
             spinner.stop();
             self._loading = false;  // loading done.
         };
-        
+
         var url = this.options.url;
         if (this.options.filter) {
             url = this.options.filter.form.attr("action") + '?' + this.options.filter.form.serialize();
@@ -159,7 +159,7 @@ L.MapListSync = L.Class.extend({
     _formSetBounds: function () {
         if (!this.options.filter)
             return;
-        
+
         if (!this.map._loaded) {
             console.warn("Map view not set, cannot get bounds.");
             return;
