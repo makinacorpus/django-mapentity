@@ -287,8 +287,9 @@ class LogEntry(MapEntityMixin, BaseLogEntry):
         model_str = unicode(self.content_type)
         try:
             obj = self.get_edited_object()
+            assert obj._entity, 'Unregistered model %s' % model_str
             obj_url = obj.get_detail_url()
-        except (ObjectDoesNotExist, NoReverseMatch):
+        except (ObjectDoesNotExist, NoReverseMatch, AssertionError):
             return u'%s %s' % (model_str, self.object_repr)
         else:
             return u'<a data-pk="%s" href="%s" >%s %s</a>' % (

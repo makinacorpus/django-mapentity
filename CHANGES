@@ -5,7 +5,9 @@ CHANGELOG
 1.10.1 (unreleased)
 ===================
 
-- Nothing changed yet.
+**Bug fixes**
+
+- Fixes crash when a change on proxy model is stored (fixes #104)
 
 
 1.10.0 (2014-11-05)
