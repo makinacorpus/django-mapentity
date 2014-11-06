@@ -8,6 +8,7 @@ CHANGELOG
 **Bug fixes**
 
 - Fixes crash when a change on proxy model is stored (fixes #104)
+- Prevent email to be sent twice on conversion error. Use info instead.
 
 
 1.10.0 (2014-11-05)
