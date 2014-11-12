@@ -1,11 +1,29 @@
 Development
 ===========
 
-Install development packages::
+Follow installation procedure, and then install development packages::
 
     $ pip install -r dev-requirements.txt
 
-Install static assets as git submodules::
 
-    $ git submodule init
-    $ git submodule update
+Release
+-------
+
+We use *zest.releaser*, but since we have git submodules, we can't use the ``fullrelease``
+command. Follow those step to release:
+
+Update version and changelog release date:
+
+::
+
+    prerelease
+
+::
+
+    git tag -a X.Y.Z
+
+    python setup.py sdist register upload
+
+::
+
+    postrelease
