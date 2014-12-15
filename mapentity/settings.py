@@ -84,7 +84,7 @@ _LEAFLET_PLUGINS = OrderedDict([
         'js': 'mapentity/Leaflet.label/dist/leaflet.label.js'
     }),
     ('leaflet.spin', {
-        'js': ['mapentity/spin.js/dist/spin.js',
+        'js': ['paperclip/spin.min.js',
                'mapentity/Leaflet.Spin/leaflet.spin.js']
     }),
     ('leaflet.layerindex', {
