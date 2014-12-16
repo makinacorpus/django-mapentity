@@ -13,6 +13,7 @@ CHANGELOG
 
 - Clearer action message in object history table
 - Remove top messages only (fixes `a Geotrek bug <https://github.com/makinacorpus/Geotrek/issues/1225>`_)
+- Fix zoom level for map captures (fixes #108)
 
 **Internal changes**
 
