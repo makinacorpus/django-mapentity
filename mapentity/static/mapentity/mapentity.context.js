@@ -75,6 +75,11 @@ MapEntity.Context = new function() {
             return true;
         } else {
             map.fitBounds(map.resetviewControl.getBounds());
+            var maxZoom = $(map._container).data('fitmaxzoom');
+            if (map.getZoom() > maxZoom) {
+                console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
+                map.setZoom(maxZoom);
+            }
         }
         return false;
     };
