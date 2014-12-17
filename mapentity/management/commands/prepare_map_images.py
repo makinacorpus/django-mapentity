@@ -24,11 +24,14 @@ class Command(NoArgsCommand):
         # For all models registered
         return registry.registry.keys()
 
+    def get_instances(self, model):
+        return model.objects.all()
+
     def handle_noargs(self, **options):
         self.options = options
         for model in self.get_models():
             logger.info(self.start_model_msg % model)
-            for instance in model.objects.all():
+            for instance in self.get_instances(model):
                 self.handle_instance(instance)
         logger.info("Done.")
 
