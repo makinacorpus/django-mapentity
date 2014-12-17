@@ -14,6 +14,7 @@ CHANGELOG
 - Clearer action message in object history table
 - Remove top messages only (fixes `a Geotrek bug <https://github.com/makinacorpus/Geotrek/issues/1225>`_)
 - Fix zoom level for map captures (fixes #108)
+- Don't try (and fail) to prepare map images when geom is absent
 
 **Internal changes**
 

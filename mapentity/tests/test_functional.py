@@ -336,7 +336,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         if self.model is None:
             return  # Abstract test should not run
 
-        obj = self.modelfactory.create()
+        obj = self.modelfactory.create(geom='POINT(0 0)')
 
         # Initially, map image does not exists
         image_path = obj.get_map_image_path()
