@@ -73,6 +73,8 @@ MapEntity.Context = new function() {
         if (context && context.mapview) {
             map.setView(L.latLng(context.mapview.lat, context.mapview.lng), context.mapview.zoom);
             return true;
+        } else {
+            map.fitBounds(map.resetviewControl.getBounds());
         }
         return false;
     };
