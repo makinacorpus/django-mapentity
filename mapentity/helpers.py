@@ -143,12 +143,19 @@ def download_to_stream(url, stream, silent=False, headers=None):
         source = None
         logger.info("Request to: %s" % url)
         source = requests.get(url, headers=headers)
-        assert source.status_code == 200, 'Request failed (status=%s)' % source.status_code
-        assert len(source.content) > 0, 'Request returned empty content'
+
+        status_error = 'Request on %s failed (status=%s)' % (url, source.status_code)
+        assert source.status_code == 200, status_error
+
+        content_error = 'Request on %s returned empty content' % url
+        assert len(source.content) > 0, content_error
+
     except (AssertionError, requests.exceptions.RequestException) as e:
         logger.exception(e)
+        logger.info('Headers sent: %s' % headers)
         if hasattr(source, 'content'):
-            logger.error(source.content[:150])
+            logger.info('Response: %s' % source.content[:150])
+
         if not silent:
             raise
 

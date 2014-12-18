@@ -4,27 +4,6 @@ Getting started
 In this short tutorial, we'll see how to create an app to manage museum
 locations.
 
-
-Database
---------
-
-In order to use MapEntity you'll need to create a geospatial database. Feel
-free to skip this section if you already know how to do this. Here is how you
-can create a PostGIS database::
-
-As user postgres, create a PostgreSQL database::
-
-    $ createuser -PSRD museum
-    Enter password for new role:
-    Enter it again:
-    $ createdb -O museum museum
-
-Now enable PostGIS extension for your new database::
-
-    $ psql -q museum
-    museum=# CREATE EXTENSION postgis;
-
-
 Settings
 --------
 
@@ -34,18 +13,14 @@ Create your django Project and your main app::
    $ cd museum/
    $ python manage.py startapp main
 
-If you use PostgreSQL, also install psycopg2::
-
-   $ pip install psycopg2
-
 
 Edit your Django settings to point to your PostGIS database::
 
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
-            'NAME': 'museum',
-            'USER': 'museum',
+            'NAME': 'spatialdb',
+            'USER': 'dbuser',
             'PASSWORD': 's3cr3t',
             'HOST': 'localhost',
             'PORT': '',
@@ -82,6 +57,8 @@ Specify a media URL::
 
 Specify a static root::
 
+    import os
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 Add MapEntity and request context processors to the list of default context
@@ -104,8 +81,9 @@ Model
 -----
 
 Create a GeoDjango model which also inherits from ``MapEntityMixin``. Note that
-you'll need to add a special manager (as for *GeoDjango*) ::
+you'll need to specify the *GeoDjango* manager, as below:
 
+..code-block :: python
 
     from django.contrib.gis.db import models
 
@@ -123,8 +101,10 @@ you'll need to add a special manager (as for *GeoDjango*) ::
 Admin
 -----
 
-Create a file ``admin.py`` in your main app directory and register your model
-against the admin registry ::
+Create a file ``admin.py`` in the ``main`` directory and register your model
+against the admin registry:
+
+..code-block :: python
 
 
     from django.contrib import admin
@@ -139,7 +119,9 @@ against the admin registry ::
 URLs
 ----
 
-Register your MapEntity views in your main app ``urls.py``::
+Register your MapEntity views in ``main/urls.py``:
+
+..code-block :: python
 
     from main.models import Museum
     from mapentity import registry
@@ -148,7 +130,9 @@ Register your MapEntity views in your main app ``urls.py``::
     urlpatterns = registry.register(Museum)
 
 
-Then glue everything together in your project's ``urls.py``::
+Then glue everything together in your project's ``urls.py``:
+
+..code-block :: python
 
     from django.conf.urls import patterns, include, url
     from django.contrib import admin
@@ -161,10 +145,10 @@ Then glue everything together in your project's ``urls.py``::
         url(r'^login/$',  'django.contrib.auth.views.login', name='login'),
         url(r'^logout/$', 'django.contrib.auth.views.logout', name='logout',),
         url(r'', include('mapentity.urls', namespace='mapentity',
-                        app_name='mapentity')),
+                         app_name='mapentity')),
         url(r'^paperclip/', include('paperclip.urls')),
         url(r'', include('main.urls', namespace='main',
-                        app_name='main')),
+                         app_name='main')),
         url(r'^admin/', include(admin.site.urls)),
     )
 
@@ -175,6 +159,10 @@ Initialize the database
 Create a database schema based on your models::
 
     $ python manage.py syncdb
+
+Create all permission objects with this command::
+
+    $ python manage.py update_permissions
 
 
 Start the app

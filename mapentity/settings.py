@@ -48,7 +48,7 @@ TINYMCE_DEFAULT_CONFIG = {
     'valid_elements': ('@[id|class|style|title|dir<ltr?rtl|lang|xml::lang],'
                        'a[rel|rev|charset|hreflang|tabindex|accesskey|type|name|href|target|title|class],'
                        'img[longdesc|usemap|src|border|alt=|title|hspace|vspace|width|height|align],'
-                       'p,em/i,strong/b,div[align],br,ul,li,ol,span,'
+                       'p,em/i,strong/b,div[align],br,ul,li,ol,span[style],'
                        'iframe[src|frameborder=0|alt|title|width|height|align|name]'),
 }
 TINYMCE_DEFAULT_CONFIG.update(getattr(settings, 'TINYMCE_DEFAULT_CONFIG', {}))

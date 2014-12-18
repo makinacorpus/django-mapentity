@@ -16,31 +16,8 @@ that powers `Geotrek <http://geotrek.fr>`_.
 .. image:: https://coveralls.io/repos/makinacorpus/django-mapentity/badge.png?branch=develop
     :target: https://coveralls.io/r/makinacorpus/django-mapentity?branch=develop
 
-`See the full documentation <http://docs.mapentity.org/>`_.
 
-
-=======
-INSTALL
-=======
-
-( *under development* )
-
-::
-
-    pip install -e git+https://github.com/makinacorpus/django-mapentity.git@develop#egg=django-mapentity
-
-
-Install GDAL with its development files. For example, on Ubuntu/Debian::
-
-    $ sudo apt-get install libgdal-dev
-
-Then install the Python packages::
-
-    $ pip install -r requirements.txt
-    $ python setup.py install
-
-Yes we need to do both because requirements.txt lists dependencies that are
-not yet on PyPI.
+`See the full documentation <http://django-mapentity.readthedocs.org/>`_.
 
 
 =======

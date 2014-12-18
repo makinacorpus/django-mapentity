@@ -2,7 +2,56 @@
 CHANGELOG
 =========
 
-1.8.5 (unreleased)
+1.10.3 (unreleased)
+===================
+
+**Bug fixes**
+
+- Fix zoom level for map captures (fixes #108)
+- Don't try (and fail) to prepare map images when geom is absent
+
+**Internal changes**
+
+- Upgrade paperclip to 0.2.3
+
+
+1.10.2 (2014-11-21)
+===================
+
+**Bug fixes**
+
+- Fix TinyMCE config to keep colors
+- Fix apparence of add buttons with popup
+
+
+1.10.1 (2014-11-07)
+===================
+
+**Bug fixes**
+
+- Fixes crash when a change on proxy model is stored (fixes #104)
+- Prevent email to be sent twice on conversion error. Use info instead.
+
+
+1.10.0 (2014-11-05)
+===================
+
+**Breaking changes**
+
+- Got rid of Year filters.
+
+**Bug fixes**
+
+- Fix list filter restore (see https://github.com/makinacorpus/Geotrek/issues/1236)
+
+
+1.9.1 (2014-10-24)
+==================
+
+- Fix overlay layers being lost in grouped layers control
+
+
+1.9.0 (2014-10-23)
 ==================
 
 **New features**
@@ -13,8 +62,6 @@ CHANGELOG
 
 - Clearer action message in object history table
 - Remove top messages only (fixes `a Geotrek bug <https://github.com/makinacorpus/Geotrek/issues/1225>`_)
-- Fix zoom level for map captures (fixes #108)
-- Don't try (and fail) to prepare map images when geom is absent
 
 **Internal changes**
 
