@@ -11,7 +11,7 @@ test_requires = [
 
 setup(
     name='mapentity',
-    version='1.10.3',
+    version='1.10.4dev',
     author='Makina Corpus',
     author_email='geobi@makina-corpus.com',
     url='https://github.com/makinacorpus/django-mapentity',
