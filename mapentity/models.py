@@ -219,6 +219,8 @@ class MapEntityMixin(object):
         return 1.0
 
     def prepare_map_image(self, rooturl):
+        if self.get_geom() is None:
+            return True
         path = self.get_map_image_path()
         # Do nothing if image is up-to-date
         if is_file_newer(path, self.get_date_update()):
