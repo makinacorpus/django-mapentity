@@ -65,22 +65,20 @@ class MapEntityOptions(object):
         for name, view in inspect.getmembers(views_module):
             if inspect.isclass(view) and issubclass(view, View):
                 # Pick-up views
-                if hasattr(view, 'get_entity_kind'):
+                if hasattr(view, 'get_entity_kind') or issubclass(view, mapentity_views.MapEntityViewSet):
                     try:
                         view_model = view.model or view.queryset.model
                     except AttributeError:
                         pass
                     else:
                         if view_model is self.model:
-                            picked.append(view)
-                            if issubclass(view, mapentity_views.MapEntityList):
+                            if issubclass(view, mapentity_views.MapEntityViewSet):
+                                rest_viewset = view
+                            elif issubclass(view, mapentity_views.MapEntityList):
+                                picked.append(view)
                                 list_view = view
-
-                # Pick-up Django REST framework ViewSet
-                is_viewset = issubclass(view, mapentity_views.MapEntityViewSet)
-                has_queryset = any([getattr(view, 'model', False), getattr(view, 'queryset', False)])
-                if is_viewset and has_queryset:
-                    rest_viewset = view
+                            else:
+                                picked.append(view)
 
         _model = self.model
 
