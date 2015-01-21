@@ -2,8 +2,12 @@
 CHANGELOG
 =========
 
-1.10.4 (unreleased)
+1.10.4 (2015-01-21)
 ===================
+
+**Bug fixes**
+
+- Pick up the ViewSet only if its model matches
 
 
 1.10.3 (2014-12-18)
