@@ -17,6 +17,7 @@ from rest_framework import serializers as rest_serializers
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
 from mapentity import logger
+from mapentity import app_settings
 
 from paperclip import models as paperclip_models
 
@@ -125,6 +126,7 @@ class MapEntityOptions(object):
         class Serializer(rest_serializers.ModelSerializer):
             class Meta:
                 model = _model
+                geo_field = app_settings['GEOM_FIELD_NAME']
 
         return Serializer
 

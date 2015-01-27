@@ -4,6 +4,7 @@ from django.views.generic.list import ListView
 
 from djgeojson.views import GeoJSONLayerView
 from rest_framework import viewsets
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mapentity import models as mapentity_models
 from ..settings import API_SRID
@@ -70,4 +71,11 @@ class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
 
 
 class MapEntityViewSet(viewsets.ModelViewSet):
-    pass
+    def get_serializer_class(self):
+        serializer = super(MapEntityViewSet, self).get_serializer_class()
+        renderer, media_type = self.perform_content_negotiation(self.request)
+        if getattr(renderer, 'format') == 'geojson':
+            class Serializer(serializer, GeoFeatureModelSerializer):
+                pass
+            return Serializer
+        return serializer

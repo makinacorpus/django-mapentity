@@ -235,25 +235,68 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
         self.login()
 
-        obj = self.modelfactory()
+        obj = self.modelfactory.create(geom='POINT(0 0)', name='name')
         list_url = '/api/{modelname}s/'.format(modelname=self.model._meta.module_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200)
-        first_result = json.loads(response.content)[0]
+        result = json.loads(response.content)
+        self.assertEqual(len(result), 1)
+        first_result = result[0]
+        self.assertItemsEqual(first_result.keys(), ('id', 'name', 'geom', 'date_update'))
         self.assertEqual(first_result['id'], obj.pk)
+        self.assertEqual(first_result['name'], 'name')
+        self.assertEqual(first_result['geom'], 'POINT (0.0000000000000000 0.0000000000000000)')
+
+    def test_api_geojson_list_for_model(self):
+        if self.model is None:
+            return  # Abstract test should not run
+        self.login()
+
+        obj = self.modelfactory.create(geom='POINT(0 0)', name='name')
+        list_url = '/api/{modelname}s/.geojson'.format(modelname=self.model._meta.module_name)
+        response = self.client.get(list_url)
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.content)
+        self.assertEqual(result['type'], 'FeatureCollection')
+        self.assertEqual(len(result['features']), 1)
+        first_result = result['features'][0]
+        self.assertEqual(first_result['id'], obj.pk)
+        self.assertEqual(first_result['type'], 'Feature')
+        self.assertEqual(first_result['geometry']['type'], 'Point')
+        self.assertEqual(first_result['geometry']['coordinates'], [0, 0])
+        self.assertEqual(first_result['properties']['name'], 'name')
 
     def test_api_detail_for_model(self):
         if self.model is None:
             return  # Abstract test should not run
         self.login()
 
-        obj = self.modelfactory()
+        obj = self.modelfactory.create(geom='POINT(0 0)', name='name')
         detail_url = '/api/{modelname}s/{id}/'.format(modelname=self.model._meta.module_name,
                                                       id=obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
+        self.assertItemsEqual(result.keys(), ('id', 'name', 'geom', 'date_update'))
         self.assertEqual(result['id'], obj.pk)
+        self.assertEqual(result['name'], 'name')
+        self.assertEqual(result['geom'], 'POINT (0.0000000000000000 0.0000000000000000)')
+
+    def test_api_geojson_detail_for_model(self):
+        if self.model is None:
+            return  # Abstract test should not run
+        self.login()
+
+        obj = self.modelfactory.create(geom='POINT(0 0)', name='name')
+        detail_url = '/api/{modelname}s/{id}/.geojson'.format(modelname=self.model._meta.module_name,
+                                                              id=obj.pk)
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.content)
+        self.assertEqual(result['id'], obj.pk)
+        self.assertEqual(result['geometry']['type'], 'Point')
+        self.assertEqual(result['geometry']['coordinates'], [0, 0])
+        self.assertEqual(result['properties']['name'], 'name')
 
 
 class MapEntityLiveTest(LiveServerTestCase):

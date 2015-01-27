@@ -2,10 +2,12 @@
 CHANGELOG
 =========
 
-1.10.6.dev (unreleased)
+1.11.0.dev (unreleased)
 ===================
 
--
+**New features**
+
+- Add geojson support to REST API
 
 
 1.10.5 (2015-01-21)
