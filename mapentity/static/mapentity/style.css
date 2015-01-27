@@ -392,6 +392,10 @@ tr.selected-row td {
     }
 }
 
+#entitylist ul {
+    margin-bottom: 0;
+}
+
 #entitylist li img {
     opacity: 0.3;
 }
