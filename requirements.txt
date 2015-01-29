@@ -15,3 +15,4 @@ django-tinymce==1.5.1
 django-appypod>=0.0.2
 django-leaflet>=0.14
 django-geojson==2.6.0
+djangorestframework-gis==0.7
