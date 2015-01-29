@@ -35,6 +35,7 @@ setup(
         'easy-thumbnails',
         'django-tinymce',
         'djangorestframework',
+        'djangorestframework-gis',
         'django-appypod>=0.0.2',
         'django-leaflet>=0.14',
         'django-geojson>=2',
