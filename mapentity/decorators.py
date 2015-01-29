@@ -102,28 +102,26 @@ def view_cache_response_content():
             else:
                 view_model = self.get_model()
                 language = self.request.LANGUAGE_CODE
-                geojson_lookup = '%s_%s_json_layer' % (language,
-                                                       view_model._meta.module_name)
-
-            if hasattr(self, 'latest_updated'):
-                latest_saved = self.latest_updated()
-            else:
                 latest_saved = view_model.latest_updated()
+                if latest_saved:
+                    geojson_lookup = '%s_%s_%s_json_layer' % (
+                        language,
+                        view_model._meta.module_name,
+                        latest_saved.strftime('%y%m%d%H%M%S%f')
+                    )
+                else:
+                    geojson_lookup = None
 
             geojson_cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
-            latest_lookup = geojson_lookup + '_latest'
-            latest_stored = geojson_cache.get(latest_lookup)
 
-            if latest_stored and latest_saved:
-                # Not empty and still valid
-                if latest_stored >= latest_saved:
-                    content = geojson_cache.get(geojson_lookup)
-                    return response_class(content=content,
-                                          **response_kwargs)
+            if geojson_lookup:
+                content = geojson_cache.get(geojson_lookup)
+                if content:
+                    return response_class(content=content, **response_kwargs)
 
             response = view_func(self, *args, **kwargs)
-            geojson_cache.set(latest_lookup, latest_saved)
-            geojson_cache.set(geojson_lookup, response.content)
+            if geojson_lookup:
+                geojson_cache.set(geojson_lookup, response.content)
             return response
 
         return _wrapped_method
