@@ -5,6 +5,10 @@ CHANGELOG
 Unreleased
 ==========
 
+**Bug fixes**
+
+- Fix tests derived from MapEntityTest
+
 
 1.11.0 (2015-01-29)
 ===================

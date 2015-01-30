@@ -127,6 +127,7 @@ class MapEntityOptions(object):
             class Meta:
                 model = _model
                 geo_field = app_settings['GEOM_FIELD_NAME']
+                id_field = 'id'
 
         return Serializer
 
