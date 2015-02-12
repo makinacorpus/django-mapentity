@@ -9,10 +9,11 @@ import json
 import mimetypes
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.gis.db.models import GeometryField
 from django.http import (HttpResponse, HttpResponseBadRequest,
-                         HttpResponseServerError)
+                         HttpResponseServerError, Http404)
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.views.defaults import page_not_found, permission_denied
 from django.views.generic.base import TemplateView
@@ -20,11 +21,15 @@ from django.views import static
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.template import RequestContext, Context, loader
+from django.shortcuts import get_object_or_404
+from django.db.models.loading import get_model
 
 from ..decorators import view_permission_required
 from ..settings import app_settings, _MAP_STYLES
 from ..helpers import capture_image
 from .mixins import JSONResponseMixin, FilterListMixin, ModelViewMixin
+
+from mapentity import models as mapentity_models
 
 
 logger = logging.getLogger(__name__)
@@ -61,15 +66,24 @@ def handler500(request, template_name='mapentity/500.html'):
     return HttpResponseServerError(response)
 
 
-@permission_required('paperclip.read_attachment',
-                     raise_exception=True)
-def serve_secure_media(request, path):
+def serve_attachment(request, path, app_label, model_name, pk):
     """
-    Serve media/ for authenticated users only, since it can contain sensitive
-    information (uploaded documents, map screenshots, ...)
+    Serve media/ for authorized users only, since it can contain sensitive
+    information (uploaded documents)
     """
-    if path.startswith('/'):
-        path = path[1:]
+    model = get_model(app_label, model_name)
+    if not model:
+        raise Http404
+    if not issubclass(model, mapentity_models.MapEntityMixin):
+        raise Http404
+    obj = get_object_or_404(model, pk=pk)
+    if not obj.is_public():
+        if not request.user.is_authenticated():
+            raise PermissionDenied
+        if not request.user.has_perm('paperclip.read_attachment'):
+            raise PermissionDenied
+        if not request.user.has_perm('%s.read_%s' % (app_label, model_name)):
+            raise PermissionDenied
 
     content_type, encoding = mimetypes.guess_type(path)
 
@@ -107,7 +121,6 @@ class JSSettings(JSONResponseMixin, TemplateView):
         dictsettings['urls'] = {}
         dictsettings['urls']['root'] = root_url
 
-        from mapentity import models as mapentity_models
         from django.db import models
         from mapentity.registry import MapEntityOptions
 

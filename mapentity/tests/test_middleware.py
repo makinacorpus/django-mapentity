@@ -10,6 +10,7 @@ from .. import middleware
 import mock
 
 from ..middleware import AutoLoginMiddleware, get_internal_user
+from .test_views import DummyModelFactory
 
 
 User = get_user_model()
@@ -31,11 +32,12 @@ class AutoLoginTest(TestCase):
         self.assertFalse(success)
 
     def test_auto_login_happens_by_remote_addr(self):
+        DummyModelFactory.create()
         middleware.CONVERSION_SERVER_HOST = '1.2.3.4'
-        response = self.client.get('/media/file.pdf', REMOTE_ADDR='1.2.3.5')
+        response = self.client.get('/media/paperclip/tests_dummymodel/1/file.pdf', REMOTE_ADDR='1.2.3.5')
         self.assertEqual(response.status_code, 403)
         with mock.patch('django.contrib.auth.models._user_has_perm', return_value=True):
-            response = self.client.get('/media/file.pdf', REMOTE_ADDR='1.2.3.4')
+            response = self.client.get('/media/paperclip/tests_dummymodel/1/file.pdf', REMOTE_ADDR='1.2.3.4')
         self.assertEqual(response.status_code, 200)
 
     def test_auto_login_do_not_change_current_user(self):

@@ -5,9 +5,15 @@ CHANGELOG
 Unreleased
 ==========
 
+**New features**
+
+- Allow anonymous users to access media attached to public objects
+- Check read permission of related model when serving attached media
+
 **Bug fixes**
 
 - Fix tests derived from MapEntityTest
+- Allow serving media other than attachments if not having read_attachment perm
 
 
 1.11.0 (2015-01-29)
