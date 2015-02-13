@@ -5,7 +5,9 @@ CHANGELOG
 1.12.1.dev
 ===================
 
-- 
+**New features**
+
+- Allow to specify headers to convertit_download() helper
 
 
 1.12.0 (2015-02-13)

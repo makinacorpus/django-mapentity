@@ -196,7 +196,7 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False):
     return url
 
 
-def convertit_download(url, destination, from_type=None, to_type='application/pdf'):
+def convertit_download(url, destination, from_type=None, to_type='application/pdf', headers=None):
     # Mock for tests
     if getattr(settings, 'TEST', False):
         open(destination, 'wb').write("Mock\n")
@@ -204,7 +204,7 @@ def convertit_download(url, destination, from_type=None, to_type='application/pd
 
     url = convertit_url(url, from_type, to_type)
     fd = open(destination, 'wb') if isinstance(destination, basestring) else destination
-    download_to_stream(url, fd)
+    download_to_stream(url, fd, headers=headers)
 
 
 def capture_url(url, width=None, height=None, selector=None, waitfor=None):
