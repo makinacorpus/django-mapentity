@@ -9,6 +9,10 @@ CHANGELOG
 
 - Allow to specify headers to convertit_download() helper
 
+**Bug fixes**
+
+- Fix logging in management commands
+
 
 1.12.0 (2015-02-13)
 ===================
