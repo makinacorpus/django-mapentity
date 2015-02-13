@@ -5,9 +5,16 @@ CHANGELOG
 Unreleased
 ==========
 
+**New features**
+
+- Create/update map images on the fly when calling corresponding URLs
+- Check read permission of related model when serving media (attachment, map)
+- Allow anonymous users to access media attached to public objects
+
 **Bug fixes**
 
 - Fix tests derived from MapEntityTest
+- Allow serving media other than attachments if not having read_attachment perm
 
 
 1.11.0 (2015-01-29)

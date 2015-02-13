@@ -23,6 +23,7 @@ import requests
 
 from ..helpers import smart_urljoin
 from ..forms import MapEntityForm
+from ..factories import SuperUserFactory
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
@@ -367,6 +368,9 @@ class MapEntityLiveTest(LiveServerTestCase):
         if self.model is None:
             return  # Abstract test should not run
 
+        SuperUserFactory.create(username='Superuser', password='booh')
+        self.client.login(username='Superuser', password='booh')
+
         obj = self.modelfactory.create(geom='POINT(0 0)')
 
         # Initially, map image does not exists
@@ -379,10 +383,20 @@ class MapEntityLiveTest(LiveServerTestCase):
         mock_requests.get.return_value.status_code = 200
         mock_requests.get.return_value.content = '*' * 100
 
-        obj.prepare_map_image(self.live_server_url)
+        response = self.client.get(obj.map_image_url)
+        self.assertEqual(response.status_code, 200)
         self.assertTrue(os.path.exists(image_path))
 
         mapimage_url = '%s%s?context' % (self.live_server_url, obj.get_detail_url())
         screenshot_url = 'http://0.0.0.0:8001/?url=%s' % urllib2.quote(mapimage_url)
         url_called = mock_requests.get.call_args_list[0]
         self.assertTrue(url_called.startswith(screenshot_url))
+
+    def test_map_image_as_anonymous_user(self):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        obj = self.modelfactory.create(geom='POINT(0 0)')
+
+        response = self.client.get(obj.map_image_url)
+        self.assertEqual(response.status_code, 302)

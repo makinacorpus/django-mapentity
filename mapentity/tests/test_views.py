@@ -8,11 +8,12 @@ from django.conf import settings
 from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 
 from mapentity.factories import SuperUserFactory
 
 from mapentity import app_settings
-from mapentity.views import serve_secure_media, Convert, JSSettings
+from mapentity.views import serve_attachment, Convert, JSSettings
 
 from .models import DummyModel
 from .views import DummyList, DummyDetail
@@ -112,14 +113,15 @@ class ConvertTest(BaseTest):
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
-class MediaTest(BaseTest):
+class AttachmentTest(BaseTest):
 
     def setUp(self):
+        self.obj = DummyModelFactory.create()
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
-        os.makedirs(settings.MEDIA_ROOT)
-        self.file = os.path.join(settings.MEDIA_ROOT, 'file.pdf')
-        self.url = '/media/file.pdf'
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/tests_dummymodel/1'))
+        self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/tests_dummymodel/1/file.pdf')
+        self.url = '/media/paperclip/tests_dummymodel/1/file.pdf'
         open(self.file, 'wb').write('*' * 300)
 
     def tearDown(self):
@@ -128,10 +130,59 @@ class MediaTest(BaseTest):
     def download(self, url):
         return self.client.get(url, REMOTE_ADDR="6.6.6.6")
 
-    def test_media_are_protected(self):
-        self.logout()
-        response = self.download(self.url)
+    def test_access_to_public_attachment(self):
+        self.obj.public = True
+        self.obj.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_anonymous_access_to_not_published_attachment(self):
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
+
+    def test_unauthorized_access_to_attachment(self):
+        self.login()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_authorized_access_to_attachment(self):
+        self.login()
+        perm1 = Permission.objects.get(codename='read_attachment')
+        self.user.user_permissions.add(perm1)
+        perm2 = Permission.objects.get(codename='read_dummymodel')
+        self.user.user_permissions.add(perm2)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_anonymous_access_to_deleted_object(self):
+        self.obj.delete()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_authorized_access_to_deleted_object(self):
+        self.obj.delete()
+        self.login_as_superuser()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_access_to_not_existing_app(self):
+        response = self.client.get('/media/paperclip/xxx_dummymodel/1/file.pdf')
+        self.assertEqual(response.status_code, 404)
+
+    def test_access_to_not_existing_model(self):
+        response = self.client.get('/media/paperclip/tests_yyy/1/file.pdf')
+        self.assertEqual(response.status_code, 404)
+
+    def test_access_to_not_existing_object(self):
+        response = self.client.get('/media/paperclip/tests_dummymodel/2/file.pdf')
+        self.assertEqual(response.status_code, 404)
+
+    @override_settings(DEBUG=True)
+    def test_access_to_not_existing_file(self):
+        os.remove(self.file)
+        self.login_as_superuser()
+        response = self.download(self.url)
+        self.assertEqual(response.status_code, 404)
 
     @override_settings(DEBUG=True)
     def test_authenticated_user_can_access(self):
@@ -140,17 +191,10 @@ class MediaTest(BaseTest):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '*********')
 
-    @override_settings(DEBUG=True)
-    def test_404_if_file_is_missing(self):
-        os.remove(self.file)
-        self.login_as_superuser()
-        response = self.download(self.url)
-        self.assertEqual(response.status_code, 404)
-
     def test_http_headers_attachment(self):
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_secure_media(request, 'file.pdf')
+        response = serve_attachment(request, 'file.pdf', 'tests', 'dummymodel', '1')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
         self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
@@ -161,7 +205,7 @@ class MediaTest(BaseTest):
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = False
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_secure_media(request, 'file.pdf')
+        response = serve_attachment(request, 'file.pdf', 'tests', 'dummymodel', '1')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
         self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')

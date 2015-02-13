@@ -263,6 +263,10 @@ class MapEntityMixin(object):
     def last_author(self):
         return self.authors.order_by('logentry__pk').last()
 
+    def is_public(self):
+        "Override this method to allow unauthenticated access to attachments"
+        return False
+
 
 class LogEntry(MapEntityMixin, BaseLogEntry):
     geom = None
