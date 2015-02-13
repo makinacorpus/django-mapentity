@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-1.11.1 (2015-01-30)
+1.12.0 (2015-02-13)
 ===================
 
 **New features**
@@ -13,8 +13,15 @@ CHANGELOG
 
 **Bug fixes**
 
-- Fix tests derived from MapEntityTest
 - Allow serving media other than attachments if not having read_attachment perm
+
+
+1.11.1 (2015-01-30)
+===================
+
+**Bug fixes**
+
+- Fix tests derived from MapEntityTest
 
 
 1.11.0 (2015-01-29)
