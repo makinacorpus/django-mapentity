@@ -6,18 +6,7 @@ from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.fields.related import ForeignKey, ManyToManyField, FieldDoesNotExist
 
-from . import smart_plain_text
-
-
-def field_as_string(obj, field, ascii=False):
-    value = getattr(obj, field + '_csv_display', None)
-    if value is None:
-        value = getattr(obj, field + '_display', None)
-        if value is None:
-            value = getattr(obj, field)
-    if hasattr(value, '__iter__'):
-        return ','.join([smart_plain_text(item, ascii) for item in value])
-    return smart_plain_text(value, ascii)
+from .helpers import smart_plain_text, field_as_string
 
 
 class CSVSerializer(Serializer):

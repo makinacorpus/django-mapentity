@@ -15,21 +15,6 @@ from .api import (
     MapEntityJsonList,
     MapEntityViewSet
 )
-
-
-MAPENTITY_GENERIC_VIEWS = [
-    MapEntityLayer,
-    MapEntityList,
-    MapEntityJsonList,
-    MapEntityFormat,
-    MapEntityMapImage,
-    MapEntityDocument,
-    MapEntityCreate,
-    MapEntityDetail,
-    MapEntityUpdate,
-    MapEntityDelete,
-]
-
 from .mixins import (
     HttpJSONResponse,
     JSONResponseMixin,
@@ -46,6 +31,20 @@ from .base import (
     history_delete,
 )
 from .logentry import LogEntryList
+
+
+MAPENTITY_GENERIC_VIEWS = [
+    MapEntityLayer,
+    MapEntityList,
+    MapEntityJsonList,
+    MapEntityFormat,
+    MapEntityMapImage,
+    MapEntityDocument,
+    MapEntityCreate,
+    MapEntityDetail,
+    MapEntityUpdate,
+    MapEntityDelete,
+]
 
 __all__ = [
     'Convert',

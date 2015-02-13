@@ -134,7 +134,8 @@ def valuelist(items, field=None, enumeration=False):
         https://github.com/makinacorpus/Geotrek/issues/871
     """
     if field:
-        display = lambda v: getattr(v, '%s_display' % field, getattr(v, field))
+        def display(v):
+            return getattr(v, '%s_display' % field, getattr(v, field))
         itemslist = [display(v) for v in items]
     else:
         itemslist = items
@@ -174,7 +175,8 @@ def valuetable(items, columns='', enumeration=False):
 
     records = []
     for i, item in enumerate(items):
-        display = lambda column: getattr(item, '%s_display' % column, getattr(item, column))
+        def display(column):
+            return getattr(item, '%s_display' % column, getattr(item, column))
         attrs = [display(column) for column in columns]
 
         records.append({

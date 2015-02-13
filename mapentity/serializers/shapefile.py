@@ -18,6 +18,7 @@ from django.contrib.gis.db.models.fields import (GeometryField, GeometryCollecti
 
 from osgeo import ogr, osr
 
+from .helpers import field_as_string
 from .. import app_settings
 
 
@@ -119,19 +120,19 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
     """
     Write tempfile with shape layer.
     """
-    from . import field_as_string
 
     tmp_file, layer, ds, native_srs, output_srs = create_shape_format_layer(columns, geom_type, srid, srid_out)
 
     feature_def = layer.GetLayerDefn()
-
-    transform = lambda ogr_geom: ogr_geom
 
     if native_srs != output_srs:
         ct = osr.CoordinateTransformation(native_srs, output_srs)
 
         def transform(ogr_geom):
             ogr_geom.Transform(ct)
+            return ogr_geom
+    else:
+        def transform(ogr_geom):
             return ogr_geom
 
     for item in iterable:
@@ -210,7 +211,8 @@ def geo_field_from_model(model, default_geo_field_name=None):
     geo_fields = [f for f in fields if isinstance(f, GeometryField)]
 
     # Used for error case
-    geo_fields_names = lambda: ', '.join([f.name for f in geo_fields])
+    def geo_fields_names():
+        return ', '.join([f.name for f in geo_fields])
 
     if len(geo_fields) > 1:
         if not default_geo_field_name:
@@ -234,7 +236,8 @@ def info_from_geo_field(geo_field):
 
     geo_field_name = geo_field.name
 
-    get_geom = lambda obj: getattr(obj, geo_field_name)
+    def get_geom(obj):
+        return getattr(obj, geo_field_name)
 
     if hasattr(geo_field, 'geom_type'):
         geom_type = geo_field.geom_type

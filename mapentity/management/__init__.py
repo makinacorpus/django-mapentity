@@ -1,10 +1,14 @@
+import logging
+
 from django.db.models import get_models
 from django.db.models.signals import post_syncdb
 from django.contrib.contenttypes.models import ContentType
 
 from mapentity.middleware import clear_internal_user_cache
-from mapentity import logger
 from mapentity.registry import create_mapentity_model_permissions
+
+
+logger = logging.getLogger(__name__)
 
 
 def create_mapentity_models_permissions(app, **kwargs):

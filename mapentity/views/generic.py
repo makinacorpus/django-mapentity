@@ -182,9 +182,11 @@ class MapEntityDocument(ModelViewMixin, DetailView):
         super(MapEntityDocument, self).__init__(*args, **kwargs)
         # Try to load template for each lang and object detail
         model = self.get_model()
-        name_for = lambda app, modelname, lang: "%s/%s%s%s.odt" % (app, modelname, lang, self.template_name_suffix)
         langs = ['_%s' % lang for lang, langname in app_settings['LANGUAGES']]
         langs.append('')   # Will also try without lang
+
+        def name_for(app, modelname, lang):
+            return "%s/%s%s%s.odt" % (app, modelname, lang, self.template_name_suffix)
 
         def smart_get_template():
             for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
