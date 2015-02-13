@@ -38,8 +38,12 @@ class DummyModel(MapEntityMixin, models.Model):
     name = models.CharField(blank=True, default='', max_length=128)
     geom = models.PointField(null=True, default=None)
     date_update = models.DateTimeField(auto_now=True)
+    public = models.BooleanField(default=False)
 
     objects = models.GeoManager()
+
+    def is_public(self):
+        return self.public
 
     class Meta:
         verbose_name = _(u"Dummy Model")

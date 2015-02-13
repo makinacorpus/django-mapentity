@@ -3,8 +3,8 @@ from django.conf.urls import patterns, url, include
 
 from . import app_settings
 from . import registry
-from .views import (map_screenshot, history_delete,
-                    serve_secure_media, JSSettings, Convert)
+from .views import (map_screenshot, history_delete, serve_map_image,
+                    serve_attachment, JSSettings, Convert)
 if app_settings['ACTION_HISTORY_ENABLED']:
     from .models import LogEntry
 
@@ -18,7 +18,8 @@ if _MEDIA_URL.endswith('/'):
 
 urlpatterns = patterns(
     '',
-    url(r'^%s(?P<path>.*?)$' % _MEDIA_URL, serve_secure_media),
+    url(r'^%s/(?P<path>paperclip/(?P<app_label>.+)_(?P<model_name>.+)/(?P<pk>\d+)/.+)$' % _MEDIA_URL, serve_attachment),
+    url(r'^%s/maps/(?P<app_label>.+)/(?P<model_name>.+)-(?P<pk>\d+).png$' % _MEDIA_URL, serve_map_image),
     url(r'^map_screenshot/$', map_screenshot, name='map_screenshot'),
     url(r'^convert/$', Convert.as_view(), name='convert'),
     url(r'^history/delete/$', history_delete, name='history_delete'),

@@ -15,6 +15,23 @@ from .api import (
     MapEntityJsonList,
     MapEntityViewSet
 )
+from .mixins import (
+    HttpJSONResponse,
+    JSONResponseMixin,
+    LastModifiedMixin,
+    ModelViewMixin,
+)
+from .base import (
+    handler403,
+    handler404,
+    handler500,
+    serve_attachment,
+    serve_map_image,
+    JSSettings,
+    map_screenshot,
+    history_delete,
+)
+from .logentry import LogEntryList
 
 
 MAPENTITY_GENERIC_VIEWS = [
@@ -29,23 +46,6 @@ MAPENTITY_GENERIC_VIEWS = [
     MapEntityUpdate,
     MapEntityDelete,
 ]
-
-from .mixins import (
-    HttpJSONResponse,
-    JSONResponseMixin,
-    LastModifiedMixin,
-    ModelViewMixin,
-)
-from .base import (
-    handler403,
-    handler404,
-    handler500,
-    serve_secure_media,
-    JSSettings,
-    map_screenshot,
-    history_delete,
-)
-from .logentry import LogEntryList
 
 __all__ = [
     'Convert',
@@ -72,7 +72,8 @@ __all__ = [
     'handler403',
     'handler404',
     'handler500',
-    'serve_secure_media',
+    'serve_attachment',
+    'serve_map_image',
     'JSSettings',
     'map_screenshot',
     'convert',

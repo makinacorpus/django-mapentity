@@ -1,5 +1,6 @@
 import re
 import inspect
+import logging
 from collections import OrderedDict
 
 from django.db.utils import ProgrammingError
@@ -16,10 +17,12 @@ from rest_framework import routers as rest_routers
 from rest_framework import serializers as rest_serializers
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
-from mapentity import logger
 from mapentity import app_settings
 
 from paperclip import models as paperclip_models
+
+
+logger = logging.getLogger(__name__)
 
 
 class MapEntityOptions(object):
