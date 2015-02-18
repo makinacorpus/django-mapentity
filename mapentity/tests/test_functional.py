@@ -392,11 +392,16 @@ class MapEntityLiveTest(LiveServerTestCase):
         url_called = mock_requests.get.call_args_list[0]
         self.assertTrue(url_called.startswith(screenshot_url))
 
-    def test_map_image_as_anonymous_user(self):
+    @patch('mapentity.helpers.requests')
+    def test_map_image_as_anonymous_user(self, mock_requests):
         if self.model is None:
             return  # Abstract test should not run
 
         obj = self.modelfactory.create(geom='POINT(0 0)')
+
+        # Mock Screenshot response
+        mock_requests.get.return_value.status_code = 200
+        mock_requests.get.return_value.content = '*' * 100
 
         response = self.client.get(obj.map_image_url)
         self.assertEqual(response.status_code, 200 if obj.is_public() else 403)

@@ -5,7 +5,9 @@ CHANGELOG
 1.14.1.dev0
 ===================
 
--
+**Bug fixes**
+
+- Fix MapEntityLiveTest (mock screamshot)
 
 
 1.14.0 (2015-02-18)
