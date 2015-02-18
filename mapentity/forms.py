@@ -106,8 +106,8 @@ class MapEntityForm(TranslatedModelForm):
                 try:
                     formmodel = self._meta.model
                     modelfield = formmodel._meta.get_field(fieldname)
-                    needs_replace_widget = (isinstance(modelfield, GeometryField)
-                                            and not isinstance(formfield.widget, MapWidget))
+                    needs_replace_widget = (isinstance(modelfield, GeometryField) and
+                                            not isinstance(formfield.widget, MapWidget))
                     if needs_replace_widget:
                         formfield.widget = MapWidget()
                         formfield.widget.attrs['geom_type'] = formfield.geom_type
