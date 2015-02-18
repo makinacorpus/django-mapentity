@@ -8,6 +8,7 @@ from django.http import (HttpResponse, HttpResponseBadRequest,
 from django.utils.translation import ugettext_lazy as _
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
+from django.views import static
 from django.views.generic.detail import DetailView
 from django.views.generic import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -16,6 +17,7 @@ from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
 
@@ -153,22 +155,21 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_MAPIMAGE
 
-    @view_permission_required()
-    def dispatch(self, *args, **kwargs):
-        return super(MapEntityMapImage, self).dispatch(*args, **kwargs)
-
     def render_to_response(self, context, **response_kwargs):
-        try:
-            obj = self.get_object()
-            obj.prepare_map_image(self.request.build_absolute_uri('/'))
+        obj = self.get_object()
+        if not obj.is_public():
+            if not self.request.user.is_authenticated():
+                raise PermissionDenied
+            if not self.request.user.has_perm('%s.read_%s' % (obj._meta.app_label, obj._meta.model_name)):
+                raise PermissionDenied
+        obj.prepare_map_image(self.request.build_absolute_uri('/'))
+        path = obj.get_map_image_path().replace(settings.MEDIA_ROOT, '').lstrip('/')
+        if settings.DEBUG or not app_settings['SENDFILE_HTTP_HEADER']:
+            response = static.serve(self.request, path, settings.MEDIA_ROOT)
+        else:
             response = HttpResponse(mimetype='image/png')
-            # Open image file, and writes to response
-            with open(obj.get_map_image_path(), 'rb') as f:
-                response.write(f.read())
-            return response
-        except Exception as e:
-            logger.exception(e)
-            return HttpResponseServerError(repr(e))
+            response[app_settings['SENDFILE_HTTP_HEADER']] = os.path.join(settings.MEDIA_URL_SECURE, path)
+        return response
 
 
 class MapEntityDocument(ModelViewMixin, DetailView):

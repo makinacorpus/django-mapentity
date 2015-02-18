@@ -399,4 +399,4 @@ class MapEntityLiveTest(LiveServerTestCase):
         obj = self.modelfactory.create(geom='POINT(0 0)')
 
         response = self.client.get(obj.map_image_url)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200 if obj.is_public() else 403)

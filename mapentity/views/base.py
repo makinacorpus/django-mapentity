@@ -101,30 +101,6 @@ def serve_attachment(request, path, app_label, model_name, pk):
     return response
 
 
-def serve_map_image(request, app_label, model_name, pk):
-    model = get_model(app_label, model_name)
-    if not model:
-        raise Http404
-    if not issubclass(model, mapentity_models.MapEntityMixin):
-        raise Http404
-    obj = get_object_or_404(model, pk=pk)
-    if not obj.is_public():
-        if not request.user.is_authenticated():
-            raise PermissionDenied
-        if not request.user.has_perm('%s.read_%s' % (app_label, model_name)):
-            raise PermissionDenied
-    obj.prepare_map_image(request.build_absolute_uri('/'))
-    path = obj.get_map_image_path().replace(settings.MEDIA_ROOT, '').lstrip('/')
-
-    if settings.DEBUG:
-        response = static.serve(request, path, settings.MEDIA_ROOT)
-    else:
-        response = HttpResponse()
-        response['X-Accel-Redirect'] = os.path.join(settings.MEDIA_URL_SECURE, path)
-    response["Content-Type"] = 'image/png'
-    return response
-
-
 class JSSettings(JSONResponseMixin, TemplateView):
     """
     Javascript settings, in JSON format.

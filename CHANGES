@@ -7,6 +7,7 @@ CHANGELOG
 
 **New features**
 
+- Allow anonymous users to access map image attached to public objects
 - Allow to configure X-Accel-Redirect/X-Sendfile HTTP header
 
 
@@ -27,7 +28,6 @@ CHANGELOG
 
 **New features**
 
-- Create/update map images on the fly when calling corresponding URLs
 - Check read permission of related model when serving media (attachment, map)
 - Allow anonymous users to access media attached to public objects
 
