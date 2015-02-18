@@ -3,8 +3,7 @@ import logging
 from datetime import datetime
 
 from django.conf import settings
-from django.http import (HttpResponse, HttpResponseBadRequest,
-                         HttpResponseServerError)
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.utils.translation import ugettext_lazy as _
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_text
