@@ -116,6 +116,7 @@ class ConvertTest(BaseTest):
 class AttachmentTest(BaseTest):
 
     def setUp(self):
+        app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         self.obj = DummyModelFactory.create()
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
@@ -126,6 +127,7 @@ class AttachmentTest(BaseTest):
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
+        app_settings['SENDFILE_HTTP_HEADER'] = None
 
     def download(self, url):
         return self.client.get(url, REMOTE_ADDR="6.6.6.6")
@@ -192,6 +194,7 @@ class AttachmentTest(BaseTest):
         self.assertContains(response, '*********')
 
     def test_http_headers_attachment(self):
+        app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
         response = serve_attachment(request, 'file.pdf', 'tests', 'dummymodel', '1')
@@ -200,6 +203,7 @@ class AttachmentTest(BaseTest):
         self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertEqual(response['Content-Disposition'], 'attachment; filename=file.pdf')
+        app_settings['SENDFILE_HTTP_HEADER'] = None
 
     def test_http_headers_inline(self):
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = False
@@ -208,7 +212,6 @@ class AttachmentTest(BaseTest):
         response = serve_attachment(request, 'file.pdf', 'tests', 'dummymodel', '1')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
-        self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertFalse('Content-Disposition' in response)
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = True

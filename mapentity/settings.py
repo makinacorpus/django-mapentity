@@ -28,6 +28,7 @@ app_settings = dict({
     'ANONYMOUS_VIEWS_PERMS': tuple(),
     'GEOJSON_LAYERS_CACHE_BACKEND': 'default',
     'SERVE_MEDIA_AS_ATTACHMENT': True,
+    'SENDFILE_HTTP_HEADER': None,
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 

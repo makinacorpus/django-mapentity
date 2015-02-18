@@ -5,7 +5,9 @@ CHANGELOG
 1.13.1.dev
 ===================
 
--
+**New features**
+
+- Allow to configure X-Accel-Redirect/X-Sendfile HTTP header
 
 
 1.13.0 (2015-02-13)

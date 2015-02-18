@@ -91,7 +91,7 @@ def serve_attachment(request, path, app_label, model_name, pk):
         response = static.serve(request, path, settings.MEDIA_ROOT)
     else:
         response = HttpResponse()
-        response['X-Accel-Redirect'] = os.path.join(settings.MEDIA_URL_SECURE, path)
+        response[app_settings['SENDFILE_HTTP_HEADER']] = os.path.join(settings.MEDIA_URL_SECURE, path)
     response["Content-Type"] = content_type or 'application/octet-stream'
     if encoding:
         response["Content-Encoding"] = encoding
