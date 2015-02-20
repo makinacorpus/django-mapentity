@@ -4,10 +4,12 @@ from HTMLParser import HTMLParser
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.core.serializers import serialize
 from django.db.models.query import QuerySet
+from django.utils.formats import number_format
 from django.utils.functional import Promise, curry
 from django.utils.encoding import force_unicode
 from django.utils.encoding import smart_str
 from django.utils.html import strip_tags
+from django.utils.translation import ugettext_lazy as _
 
 
 def field_as_string(obj, field, ascii=False):
@@ -16,6 +18,10 @@ def field_as_string(obj, field, ascii=False):
         value = getattr(obj, field + '_display', None)
         if value is None:
             value = getattr(obj, field)
+        if isinstance(value, bool):
+            value = (_('no'), _('yes'))[value]
+        if isinstance(value, float) or isinstance(value, int):
+            value = number_format(value)
     if hasattr(value, '__iter__'):
         return ','.join([smart_plain_text(item, ascii) for item in value])
     return smart_plain_text(value, ascii)

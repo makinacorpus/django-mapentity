@@ -5,7 +5,9 @@ CHANGELOG
 1.14.2.dev0
 ===================
 
--
+**Bug fixes**
+
+- Fix formating of float and boolean values in CSV/Shapefile exports
 
 
 1.14.1 (2015-02-18)

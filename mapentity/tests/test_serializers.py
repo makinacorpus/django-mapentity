@@ -1,11 +1,14 @@
 import os
+from StringIO import StringIO
 
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis import gdal
+from django.test.utils import override_settings
+from django.utils import translation
 
-from mapentity.serializers import ZipShapeSerializer
+from mapentity.serializers import ZipShapeSerializer, CSVSerializer
 from mapentity.serializers.shapefile import shapefile_files
 
 from .models import MushroomSpot
@@ -22,7 +25,7 @@ class ShapefileSerializer(TestCase):
         self.serializer = ZipShapeSerializer()
         devnull = open(os.devnull, "wb")
         self.serializer.serialize(MushroomSpot.objects.all(), stream=devnull,
-                                  fields=['id', 'name'], delete=False)
+                                  fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
 
     def tearDown(self):
         for layer_file in self.serializer.layers.values():
@@ -51,7 +54,7 @@ class ShapefileSerializer(TestCase):
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():
             self.assertEquals(layer.srs.name, 'RGF93_Lambert_93')
-            self.assertItemsEqual(layer.fields, ['id', 'name'])
+            self.assertItemsEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean'])
 
     def test_geometries_come_from_records(self):
         layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
@@ -66,3 +69,26 @@ class ShapefileSerializer(TestCase):
         feature = layer_point[0]
         self.assertEquals(str(feature['id']), str(self.point1.pk))
         self.assertTrue(feature.geom.geos.equals(self.point1.geom))
+
+
+class CSVSerializerTests(TestCase):
+    def setUp(self):
+        self.point = MushroomSpot.objects.create()
+        self.serializer = CSVSerializer()
+        self.stream = StringIO()
+
+    def tearDown(self):
+        self.stream.close()
+
+    def test_content(self):
+        self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
+                                  fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
+        self.assertEquals(self.stream.getvalue(), 'ID,name,number,size,boolean\r\n1,Empty,42,3.14159,yes\r\n')
+
+    @override_settings(USE_L10N=True)
+    def test_content_fr(self):
+        translation.activate('fr-fr')
+        self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
+                                  fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
+        self.assertEquals(self.stream.getvalue(), 'ID,name,number,size,boolean\r\n1,Empty,42,"3,14159",oui\r\n')
+        translation.deactivate()
