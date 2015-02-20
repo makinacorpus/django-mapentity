@@ -70,12 +70,6 @@ class MapEntityMixin(object):
     _entity = None
 
     @classmethod
-    def add_property(cls, name, func):
-        if hasattr(cls, name):
-            return  # ignore
-        setattr(cls, name, property(func))
-
-    @classmethod
     def get_create_label(cls):
         name = cls._meta.verbose_name
         if hasattr(name, '_proxy____args'):
