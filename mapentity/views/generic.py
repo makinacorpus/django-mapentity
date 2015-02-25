@@ -173,6 +173,7 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
 
 class MapEntityDocument(ModelViewMixin, DetailView):
     response_class = OdtTemplateResponse
+    with_html_attributes = True
 
     @classmethod
     def get_entity_kind(cls):
@@ -220,7 +221,8 @@ class MapEntityDocument(ModelViewMixin, DetailView):
         context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
         context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
         context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
-        context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
+        if self.with_html_attributes:
+            context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
         context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
         context['_'] = _
         return context

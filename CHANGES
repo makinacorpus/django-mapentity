@@ -5,6 +5,10 @@ CHANGELOG
 1.14.3.dev0
 ===================
 
+**New features**
+
+- Allow to disable html attributes in MapEntityDocument context
+
 
 1.14.2 (2015-02-20)
 ===================
