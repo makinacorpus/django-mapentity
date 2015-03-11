@@ -10,6 +10,7 @@ import json
 from datetime import datetime
 
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import utc
 from django.utils.http import http_date
 from django.utils.translation import ugettext_lazy as _
@@ -293,6 +294,11 @@ class MapEntityLiveTest(LiveServerTestCase):
     userfactory = None
     modelfactory = None
     session = None
+
+    def _pre_setup(self):
+        # Workaround https://code.djangoproject.com/ticket/10827
+        ContentType.objects.clear_cache()
+        return super(MapEntityLiveTest, self)._pre_setup()
 
     def url_for(self, path):
         return smart_urljoin(self.live_server_url, path)

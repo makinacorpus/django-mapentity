@@ -5,7 +5,9 @@ CHANGELOG
 1.15.2.dev0
 ===================
 
--
+**Bug fixes**
+
+- Workaround a bug in django test framework
 
 
 1.15.1 (2015-03-11)
