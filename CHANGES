@@ -5,7 +5,9 @@ CHANGELOG
 1.15.1.dev0
 ===================
 
--
+**Bug fixes**
+
+- Allow to delete a field in TranslatedModelForm.__init__()
 
 
 1.15.0 (2015-02-25)
