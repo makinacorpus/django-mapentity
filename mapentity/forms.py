@@ -41,7 +41,7 @@ class TranslatedModelForm(forms.ModelForm):
             return
         # For each translated model field
         for modelfield in mto.fields:
-            if not modelfield in self.fields:
+            if modelfield not in self.fields:
                 continue
             # Remove form native field (e.g. `name`)
             native = self.fields.pop(modelfield)
