@@ -82,7 +82,7 @@ class EntityAttachmentTestCase(TestCase):
         response = view(request, pk=self.object.pk)
         html = unicode(response.render())
         self.assertIn("Submit attachment", html)
-        self.assertIn("""<form  action="/paperclip/add-for/tests/dummymodel/1/""", html)
+        self.assertIn("""<form action="/paperclip/add-for/tests/dummymodel/1/""", html)
 
 
 class UploadAttachmentTestCase(TestCase):

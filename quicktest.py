@@ -31,6 +31,7 @@ class QuickDjangoTest(object):
         'crispy_forms',
         'floppyforms',
         'rest_framework',
+        'embed_video',
     )
 
     def __init__(self, *args, **kwargs):

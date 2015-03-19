@@ -7,10 +7,11 @@ from django.contrib.gis.db.models.fields import GeometryField
 
 import floppyforms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Button, HTML
+from crispy_forms.layout import Layout, Div, Button, HTML, Submit
 from crispy_forms.bootstrap import FormActions
 from tinymce.widgets import TinyMCE
 from modeltranslation.translator import translator, NotRegistered
+from paperclip.forms import AttachmentForm as BaseAttachmentForm
 
 
 from . import app_settings
@@ -223,3 +224,31 @@ class MapEntityForm(TranslatedModelForm):
             css_class="translatable tabbable"
         )
         return layout
+
+
+class AttachmentForm(BaseAttachmentForm):
+    def __init__(self, *args, **kwargs):
+        super(AttachmentForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(form=self)
+        self.helper.form_tag = True
+        self.helper.form_class = 'attachment form-horizontal'
+        self.helper.help_text_inline = True
+
+        if self.is_creation:
+            form_actions = [
+                Submit('submit_attachment',
+                       _('Submit attachment'),
+                       css_class="btn-primary offset1")
+            ]
+        else:
+            form_actions = [
+                Button('cancel', _('Cancel'), css_class=""),
+                Submit('submit_attachment',
+                       _('Update attachment'),
+                       css_class="btn-primary offset1")
+            ]
+
+        self.helper.form_action = self.form_url
+        self.helper.layout.fields.append(
+            FormActions(*form_actions, css_class="form-actions"))

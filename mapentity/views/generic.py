@@ -24,6 +24,7 @@ from ..settings import app_settings
 from .. import models as mapentity_models
 from ..helpers import convertit_url, download_to_stream, user_has_perm
 from ..decorators import save_history, view_permission_required
+from ..forms import AttachmentForm
 from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from .. import serializers as mapentity_serializers
 from .base import history_delete, BaseListView
@@ -364,6 +365,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         perm_update = self.get_model().get_permission_codename(mapentity_models.ENTITY_UPDATE)
         can_edit = user_has_perm(self.request.user, perm_update)
         context['can_edit'] = can_edit
+        context['attachment_form_class'] = AttachmentForm
 
         return context
 

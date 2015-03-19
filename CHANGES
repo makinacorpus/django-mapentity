@@ -5,7 +5,9 @@ CHANGELOG
 1.15.3.dev0
 ===================
 
--
+**New features**
+
+- Upgrade paperclip to version 0.4.1
 
 
 1.15.2 (2015-03-11)
