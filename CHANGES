@@ -5,7 +5,9 @@ CHANGELOG
 1.16.1.dev0
 ===================
 
--
+**Bug fixes**
+
+- Fix LastModifiedMixin to handle all dispatch() parameters
 
 
 1.16.0 (2015-03-20)

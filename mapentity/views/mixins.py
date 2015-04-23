@@ -49,7 +49,7 @@ class LastModifiedMixin(object):
         except (KeyError, model.DoesNotExist):
             return HttpResponseNotFound()
 
-        @cache_last_modified(lambda request, pk: obj.get_date_update())
+        @cache_last_modified(lambda request, *args, **kwargs: obj.get_date_update())
         def _dispatch(*args, **kwargs):
             return super(LastModifiedMixin, self).dispatch(*args, **kwargs)
         return _dispatch(*args, **kwargs)
