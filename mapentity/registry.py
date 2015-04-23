@@ -46,7 +46,7 @@ class MapEntityOptions(object):
         self.icon_small = 'images/%s-16.png' % self.module_name
         self.icon_big = 'images/%s-96.png' % self.module_name
 
-        self.rest_router = rest_routers.DefaultRouter()
+        self.rest_router = rest_routers.DefaultRouter(trailing_slash=False)
 
         # Can't do reverse right now, URL not setup yet
         self.url_list = '%s:%s_%s' % (self.app_label, self.module_name, 'list')

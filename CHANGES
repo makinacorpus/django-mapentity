@@ -5,6 +5,10 @@ CHANGELOG
 1.16.1.dev0
 ===================
 
+**Breaking changes**
+
+- Remove trailing slash from API URLs (/api/models.json instead of /api/models/)
+
 **Bug fixes**
 
 - Fix LastModifiedMixin to handle all dispatch() parameters

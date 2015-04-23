@@ -238,7 +238,7 @@ class MapEntityTest(TestCase):
         self.login()
 
         obj = self.modelfactory.create()
-        list_url = '/api/{modelname}s/'.format(modelname=self.model._meta.module_name)
+        list_url = '/api/{modelname}s.json'.format(modelname=self.model._meta.module_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
@@ -252,7 +252,7 @@ class MapEntityTest(TestCase):
         self.login()
 
         obj = self.modelfactory.create()
-        list_url = '/api/{modelname}s/.geojson'.format(modelname=self.model._meta.module_name)
+        list_url = '/api/{modelname}s.geojson'.format(modelname=self.model._meta.module_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
@@ -268,8 +268,8 @@ class MapEntityTest(TestCase):
         self.login()
 
         obj = self.modelfactory.create()
-        detail_url = '/api/{modelname}s/{id}/'.format(modelname=self.model._meta.module_name,
-                                                      id=obj.pk)
+        detail_url = '/api/{modelname}s/{id}'.format(modelname=self.model._meta.module_name,
+                                                     id=obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
@@ -281,8 +281,8 @@ class MapEntityTest(TestCase):
         self.login()
 
         obj = self.modelfactory.create()
-        detail_url = '/api/{modelname}s/{id}/.geojson'.format(modelname=self.model._meta.module_name,
-                                                              id=obj.pk)
+        detail_url = '/api/{modelname}s/{id}.geojson'.format(modelname=self.model._meta.module_name,
+                                                             id=obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
