@@ -162,7 +162,7 @@ class MapEntityOptions(object):
 
     def __view_classes_to_url(self, *view_classes):
         return [self.url_for(view_class) for view_class in view_classes] + \
-               [url(r'api/', include(self.rest_router.urls))]
+               [url(app_settings['DRF_API_URL_PREFIX'], include(self.rest_router.urls))]
 
     def url_shortname(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS

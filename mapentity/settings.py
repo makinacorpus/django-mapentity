@@ -29,6 +29,7 @@ app_settings = dict({
     'GEOJSON_LAYERS_CACHE_BACKEND': 'default',
     'SERVE_MEDIA_AS_ATTACHMENT': True,
     'SENDFILE_HTTP_HEADER': None,
+    'DRF_API_URL_PREFIX': r'^api/',
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 
