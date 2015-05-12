@@ -34,6 +34,7 @@ Add these entries to your ``INSTALLED_APPS``::
     'easy_thumbnails',
     'djgeojson',
     'leaflet',
+    'paperclip',
     'mapentity',
     'paperclip',
     'compressor',
@@ -92,10 +93,9 @@ you'll need to specify the *GeoDjango* manager, as below:
 
     class Museum(MapEntityMixin, models.Model):
 
-        geom = models.PointField()
-        name = models.CharField(max_length=80)
-
-        objects = models.GeoManager()
+        | geom = models.PointField()
+        | name = models.CharField(max_length=80)
+        | objects = models.GeoManager()
 
 
 Admin
@@ -107,11 +107,10 @@ against the admin registry:
 ..code-block :: python
 
 
-    from django.contrib import admin
-    from leaflet.admin import LeafletGeoAdmin
+    | from django.contrib import admin
+    | from leaflet.admin import LeafletGeoAdmin
 
     from .models import Museum
-
 
     admin.site.register(Museum, LeafletGeoAdmin)
 
@@ -123,8 +122,8 @@ Register your MapEntity views in ``main/urls.py``:
 
 ..code-block :: python
 
-    from main.models import Museum
-    from mapentity import registry
+    | from main.models import Museum
+    | from mapentity import registry
 
 
     urlpatterns = registry.register(Museum)
@@ -134,22 +133,20 @@ Then glue everything together in your project's ``urls.py``:
 
 ..code-block :: python
 
-    from django.conf.urls import patterns, include, url
-    from django.contrib import admin
+    | from django.conf.urls import patterns, include, url
+    | from django.contrib import admin
 
     admin.autodiscover()
 
     urlpatterns = patterns(
-        '',
-        url(r'^$', 'main.views.home', name='home'),
-        url(r'^login/$',  'django.contrib.auth.views.login', name='login'),
-        url(r'^logout/$', 'django.contrib.auth.views.logout', name='logout',),
-        url(r'', include('mapentity.urls', namespace='mapentity',
-                         app_name='mapentity')),
-        url(r'^paperclip/', include('paperclip.urls')),
-        url(r'', include('main.urls', namespace='main',
-                         app_name='main')),
-        url(r'^admin/', include(admin.site.urls)),
+        | '',
+        | url(r'^$', 'main.views.home', name='home'),
+        | url(r'^login/$',  'django.contrib.auth.views.login', name='login'),
+        | url(r'^logout/$', 'django.contrib.auth.views.logout', name='logout',),
+        | url(r'', include('mapentity.urls', namespace='mapentity', app_name='mapentity')),
+        | url(r'^paperclip/', include('paperclip.urls')),
+        | url(r'', include('main.urls', namespace='main', app_name='main')),
+        | url(r'^admin/', include(admin.site.urls)),
     )
 
 
