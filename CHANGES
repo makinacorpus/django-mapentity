@@ -5,6 +5,10 @@ CHANGELOG
 2.1.1.dev0
 ==================
 
+**New features**
+
+- Auto cleanup of HTML markup when pasting into TinyMCE
+
 
 2.1.0 (2015-04-28)
 ==================

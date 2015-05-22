@@ -44,7 +44,8 @@ TINYMCE_DEFAULT_CONFIG = {
     'theme_advanced_resizing': True,
     'theme_advanced_resize_horizontal': False,
     'forced_root_block': False,
-    'plugins': 'media',
+    'plugins': 'media,paste',
+    'paste_auto_cleanup_on_paste': True,
     'width': '95%',
     'resize': "both",
     'valid_elements': ('@[id|class|style|title|dir<ltr?rtl|lang|xml::lang],'
