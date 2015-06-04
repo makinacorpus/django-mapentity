@@ -215,11 +215,7 @@ class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
         rooturl = self.request.build_absolute_uri('/')
 
         # Screenshot of object map is required, since present in document
-        #
-        # !!!!!!!!!!!!!!!!! A décommenter avant commit
-        #
-        # 
-        # self.get_object().prepare_map_image(rooturl)
+        self.get_object().prepare_map_image(rooturl)
 
         context = super(MapEntityDocument, self).get_context_data(**kwargs)
         context['datetime'] = datetime.now()
