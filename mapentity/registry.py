@@ -145,7 +145,7 @@ class MapEntityOptions(object):
             mapentity_models.ENTITY_FORMAT_LIST: r'^{modelname}/list/export/$',
             mapentity_models.ENTITY_DETAIL: r'^{modelname}/(?P<pk>\d+)/$',
             mapentity_models.ENTITY_MAPIMAGE: r'^image/{modelname}-(?P<pk>\d+).png$',
-            mapentity_models.ENTITY_DOCUMENT: r'^document/{modelname}-(?P<pk>\d+).odt$',
+            mapentity_models.ENTITY_DOCUMENT: r'^document/{modelname}-(?P<pk>\d+)$',
             mapentity_models.ENTITY_CREATE: r'^{modelname}/add/$',
             mapentity_models.ENTITY_UPDATE: r'^{modelname}/edit/(?P<pk>\d+)/$',
             mapentity_models.ENTITY_DELETE: r'^{modelname}/delete/(?P<pk>\d+)/$',
