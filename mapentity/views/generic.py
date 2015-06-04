@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
+from django_weasyprint import PDFTemplateResponseMixin
 
 from ..settings import app_settings
 from .. import models as mapentity_models
@@ -172,9 +173,8 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
         return response
 
 
-class MapEntityDocument(ModelViewMixin, DetailView):
-    response_class = OdtTemplateResponse
-    with_html_attributes = True
+class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
+    with_html_attributes=True
 
     @classmethod
     def get_entity_kind(cls):
@@ -188,7 +188,7 @@ class MapEntityDocument(ModelViewMixin, DetailView):
         langs.append('')   # Will also try without lang
 
         def name_for(app, modelname, lang):
-            return "%s/%s%s%s.odt" % (app, modelname, lang, self.template_name_suffix)
+            return "%s/%s%s%s_template.html" % (app, modelname, lang, self.template_name_suffix)
 
         def smart_get_template():
             for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
@@ -215,7 +215,11 @@ class MapEntityDocument(ModelViewMixin, DetailView):
         rooturl = self.request.build_absolute_uri('/')
 
         # Screenshot of object map is required, since present in document
-        self.get_object().prepare_map_image(rooturl)
+        #
+        # !!!!!!!!!!!!!!!!! A décommenter avant commit
+        #
+        # 
+        # self.get_object().prepare_map_image(rooturl)
 
         context = super(MapEntityDocument, self).get_context_data(**kwargs)
         context['datetime'] = datetime.now()
@@ -226,6 +230,7 @@ class MapEntityDocument(ModelViewMixin, DetailView):
             context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
         context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
         context['_'] = _
+        context['object_infos'] = self.get_object()
         return context
 
 
@@ -241,6 +246,8 @@ class Convert(View):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        print args
+        print kwargs
         return super(Convert, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
