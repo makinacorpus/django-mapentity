@@ -187,25 +187,40 @@ class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
         langs = ['_%s' % lang for lang, langname in app_settings['LANGUAGES']]
         langs.append('')   # Will also try without lang
 
-        def name_for(app, modelname, lang):
-            return "%s/%s%s%s_template.html" % (app, modelname, lang, self.template_name_suffix)
+        def name_for(app, modelname, lang, extension):
+            return "%s/%s%s%s_pdftemplate.%s" % (app, modelname, lang, self.template_name_suffix, extension)
 
         def smart_get_template():
             for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
                                        ("mapentity", "mapentity")]:
                 for lang in langs:
                     try:
-                        template_name = name_for(appname, modelname, lang)
+                        template_name = name_for(appname, modelname, lang, 'html')
                         get_template(template_name)  # Will raise if not exist
                         return template_name
                     except TemplateDoesNotExist:
                         pass
             return None
 
+        def smart_get_stylesheet():
+            for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
+                                       ("mapentity", "mapentity")]:
+                try:
+                    stylesheet = get_template(name_for(appname, modelname, '', 'css'))
+                    stylesheet_content = ""
+                    for node in stylesheet:
+                        stylesheet_content += str(node.s)
+                        stylesheet_content += '\n'
+                    return [stylesheet_content]
+                except TemplateDoesNotExist:
+                    pass
+            return []
+
         found = smart_get_template()
         if not found:
             raise TemplateDoesNotExist(name_for(model._meta.app_label, model._meta.object_name.lower(), ''))
         self.template_name = found
+        self.stylesheets = smart_get_stylesheet()
 
     @view_permission_required()
     def dispatch(self, *args, **kwargs):
@@ -227,6 +242,7 @@ class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
         context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
         context['_'] = _
         context['object_infos'] = self.get_object()
+        context['image_url'] = self.get_object().get_map_image_url()
         return context
 
 
