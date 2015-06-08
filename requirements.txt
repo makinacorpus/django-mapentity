@@ -18,4 +18,5 @@ django-geojson==2.6.0
 djangorestframework-gis==0.7
 django-embed-video==0.11
 WeasyPrint==0.23
-django-weasyprint==0.1
+git+https://github.com/Babawah/django-weasyprint
+
