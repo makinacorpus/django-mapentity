@@ -14,6 +14,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
+from django.template import Context
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -178,6 +179,7 @@ class MapEntityDocumentBase(ModelViewMixin, DetailView):
     def __init__(self, *args, **kwargs):
         super(MapEntityDocumentBase, self).__init__(*args, **kwargs)
         self.model = self.get_model()
+
 
     @classmethod
     def get_entity_kind(cls):
