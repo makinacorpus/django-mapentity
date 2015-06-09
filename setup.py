@@ -40,6 +40,8 @@ setup(
         'django-leaflet>=0.14',
         'django-geojson>=2',
         'paperclip',
+        'WeasyPrint',
+        'django-weasyprint',
     ] + test_requires,
     tests_requires=test_requires,
     packages=find_packages(),
