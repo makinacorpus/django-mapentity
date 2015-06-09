@@ -14,6 +14,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
+from django.template import Context
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -176,6 +177,7 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
 class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
     with_html_attributes=True
 
+
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DOCUMENT
@@ -207,11 +209,7 @@ class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
                                        ("mapentity", "mapentity")]:
                 try:
                     stylesheet = get_template(name_for(appname, modelname, '', 'css'))
-                    stylesheet_content = ""
-                    for node in stylesheet:
-                        stylesheet_content += str(node.s)
-                        stylesheet_content += '\n'
-                    return [stylesheet_content]
+                    return [stylesheet.render(Context())]
                 except TemplateDoesNotExist:
                     pass
             return []
@@ -234,14 +232,10 @@ class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
 
         context = super(MapEntityDocument, self).get_context_data(**kwargs)
         context['datetime'] = datetime.now()
-        context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
-        context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
-        context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
         if self.with_html_attributes:
             context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
         context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
         context['_'] = _
-        context['object_infos'] = self.get_object()
         context['image_url'] = self.get_object().get_map_image_url()
         return context
 
