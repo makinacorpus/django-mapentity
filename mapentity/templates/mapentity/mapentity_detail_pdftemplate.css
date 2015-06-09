@@ -1,0 +1,84 @@
+.autohide {
+	display: none;
+	visibility: hidden;
+}
+
+body {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Table CSS */
+.table-bordered {
+    border-width: 1px 1px 1px 0px;
+    border-style: solid solid solid none;
+    border-color: #DDD #DDD #DDD;
+    border-collapse: separate;
+    border-radius: 4px;
+}
+
+.table {
+    width: 100%;
+}
+
+table {
+    max-width: 100%;
+    background-color: transparent;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+
+.table-bordered thead:first-child tr:first-child > th:first-child, .table-bordered tbody:first-child tr:first-child > td:first-child, .table-bordered tbody:first-child tr:first-child > th:first-child {
+    border-top-left-radius: 4px;
+}
+
+.table-bordered caption + thead tr:first-child th, .table-bordered caption + tbody tr:first-child th, .table-bordered caption + tbody tr:first-child td, .table-bordered colgroup + thead tr:first-child th, .table-bordered colgroup + tbody tr:first-child th, .table-bordered colgroup + tbody tr:first-child td, .table-bordered thead:first-child tr:first-child th, .table-bordered tbody:first-child tr:first-child th, .table-bordered tbody:first-child tr:first-child td {
+    border-top: 0px none;
+}
+
+.table-striped tbody > tr:nth-child(2n+1) > td, .table-striped tbody > tr:nth-child(2n+1) > th {
+    background-color: #F9F9F9;
+}
+
+.table-bordered th, .table-bordered td {
+    border-left: 1px solid #DDD;
+}
+
+.table th {
+    font-weight: bold;
+}
+
+.table th, .table td {
+    text-align: left;
+    vertical-align: top;
+}
+/* End Table CSS */
+
+/* H3 CSS */
+h3 {
+    margin: 10px 0px;
+    font-family: inherit;
+    font-weight: bold;
+    color: inherit;
+    line-height: 40px;
+    font-size: 24.5px;
+}
+
+/* End H3 CSS */
+
+
+/* Link CSS */
+li {
+    line-height: 20px;
+}
+
+a {
+    color: #08C;
+    text-decoration: none;
+}
+
+.details-panel td ul li {
+    list-style: outside none none;
+}
+/* End link CSS */

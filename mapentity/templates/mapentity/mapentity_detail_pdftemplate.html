@@ -1,18 +1,20 @@
-{% load mapentity_tags staticfiles %}
+{% load i18n mapentity_tags staticfiles %}
 
-{% block style %}
-    <link rel="stylesheet" type="text/css" href="{% static "bootstrap/css/bootstrap.css" %}" />
-    <link rel="stylesheet" type="text/css" href="{% static "mapentity/dataTables/css/dataTables.bootstrap.css" %}">
-    <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
+{% block body %}
+	<body>
+	{% block style %}
 
-	<style type="text/css">
-		{% include "mapentity/mapentity_detail_pdftemplate.css" %}
-	</style>
-{% endblock style %}
+		<style type="text/css">
+			{% include "mapentity/mapentity_detail_pdftemplate.css" %}
+		</style>
+	{% endblock style %}
 
-{% block EntityDetail %}
-	{% smart_include "detail" %}
+	{% block EntityDetail %}
+		{% smart_include "detail" %}
 
-	<img src="{{ image_url }}" id="EntityScreenshot">
+		<h3>{% trans "Map" %}</h3>
+		<img src="{{ image_url }}" id="EntityScreenshot">
 
-{% endblock EntityDetail %}
+	{% endblock EntityDetail %}
+	</body>
+{% endblock body %}
