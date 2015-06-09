@@ -173,8 +173,6 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
 
 
 class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
-    with_html_attributes=True
-
 
     @classmethod
     def get_entity_kind(cls):
