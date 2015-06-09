@@ -1,4 +1,14 @@
-{% load mapentity_tags %}
+{% load mapentity_tags staticfiles %}
+
+{% block style %}
+    <link rel="stylesheet" type="text/css" href="{% static "bootstrap/css/bootstrap.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "mapentity/dataTables/css/dataTables.bootstrap.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
+
+	<style type="text/css">
+		{% include "mapentity/mapentity_detail_pdftemplate.css" %}
+	</style>
+{% endblock style %}
 
 {% block EntityDetail %}
 	{% smart_include "detail" %}
