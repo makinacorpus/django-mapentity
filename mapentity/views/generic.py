@@ -179,7 +179,6 @@ class MapEntityDocumentBase(ModelViewMixin, DetailView):
         super(MapEntityDocumentBase, self).__init__(*args, **kwargs)
         self.model = self.get_model()
 
-
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DOCUMENT
