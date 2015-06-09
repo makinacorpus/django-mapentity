@@ -14,7 +14,6 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.template.base import TemplateDoesNotExist
 from django.template.defaultfilters import slugify
-from django.template import Context
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
