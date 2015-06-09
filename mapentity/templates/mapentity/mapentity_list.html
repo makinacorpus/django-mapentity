@@ -14,7 +14,7 @@
         <!-- Modules Panel -->
         <div id="entitylist">
             <ul class="nav nav-pills nav-stacked">
-                {% for entity in registry.entities %}
+                {% for entity in allowed_entities %}
                     {% if entity.menu %}
                         <li class="centered {% if entity.modelname == modelname %}active{% endif %}">
                           <a href="{% url entity.url_list %}" title="{{ entity.label }}"><img src="{% static entity.icon %}"/></a>

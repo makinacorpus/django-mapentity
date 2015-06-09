@@ -5,6 +5,10 @@ CHANGELOG
 2.2.1.dev0
 ==================
 
+**New features**
+
+- Hide models in navbar when not allowed to read them
+
 
 2.2.0 (2015-05-22)
 ==================

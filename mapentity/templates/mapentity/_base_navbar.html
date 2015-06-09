@@ -13,7 +13,7 @@
                 <span class="caret"></span>
               </button>
               <ul class="dropdown-menu">
-                {% for entity in registry.entities %}
+                {% for entity in allowed_entities %}
                   {% if entity.menu %}
                     <li class="{% if entity.modelname == modelname %}active{% endif %}">
                       <a href="{% url entity.url_list %}">

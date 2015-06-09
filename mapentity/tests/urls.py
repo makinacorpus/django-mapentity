@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.views.generic import RedirectView
 
-from .models import DummyModel
+from .models import DummyModel, MushroomSpot
 from mapentity import registry
 
 
@@ -10,7 +10,7 @@ handler403 = 'mapentity.views.handler403'
 
 admin.autodiscover()
 
-models_urls = registry.register(DummyModel)
+models_urls = registry.register(DummyModel) + registry.register(MushroomSpot)
 
 urlpatterns = patterns(
     '',

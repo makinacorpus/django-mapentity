@@ -23,7 +23,7 @@
     {% leaflet_css plugins="ALL" %}
 
     <style>
-    {% for entity in registry.entities %}
+    {% for entity in allowed_entities %}
         .form-panel.{{ entity.modelname }}, .details-panel.{{ entity.modelname }} {
             background: url({% static entity.icon_big %}) no-repeat;
         }
