@@ -1,1 +1,8 @@
-<p>{{ object_infos }}</p>
+{% load mapentity_tags %}
+
+{% block EntityDetail %}
+	{% smart_include "detail" %}
+
+	<img src="{{ image_url }}" id="EntityScreenshot">
+
+{% endblock EntityDetail %}
