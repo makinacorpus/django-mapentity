@@ -5,15 +5,18 @@
 	{% block style %}
 
 		<style type="text/css">
-			{% include "mapentity/mapentity_detail_pdftemplate.css" %}
+			{% include template_css %}
 		</style>
 	{% endblock style %}
 
 	{% block EntityDetail %}
-		{% smart_include "detail" %}
 
-		<h3>{% trans "Map" %}</h3>
-		<img src="{{ image_url }}" id="EntityScreenshot">
+		{% include model_basicdata %}
+
+		{% block Map %}
+			<h3>{% trans "Map" %}</h3>
+			<img src="{{ image_url }}" id="EntityScreenshot">
+		{% endblock Map %}
 
 	{% endblock EntityDetail %}
 	</body>

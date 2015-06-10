@@ -38,7 +38,7 @@
             <div class="tab-content scrollable">
                 <div id="properties" class="tab-pane {% if activetab != "attachments" %}active{% endif %}">
                     {% block detailspanel %}
-                        {% smart_include "detail" %}
+                        {% include model_basicdata %}
                     {% endblock detailspanel %}
                 </div>
 
