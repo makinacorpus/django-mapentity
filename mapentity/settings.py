@@ -30,6 +30,7 @@ app_settings = dict({
     'SERVE_MEDIA_AS_ATTACHMENT': True,
     'SENDFILE_HTTP_HEADER': None,
     'DRF_API_URL_PREFIX': r'^api/',
+    'MAPENTITY_WEASYPRINT': False,
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 
