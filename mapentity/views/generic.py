@@ -18,6 +18,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from djappypod.odt import get_template
+from djappypod.response import OdtTemplateResponse
 from django_weasyprint import PDFTemplateResponseMixin
 
 from ..settings import app_settings
@@ -171,65 +172,121 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
             response[app_settings['SENDFILE_HTTP_HEADER']] = os.path.join(settings.MEDIA_URL_SECURE, path)
         return response
 
+if app_settings['MAPENTITY_WEASYPRINT']:
+    class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
 
-class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
+        @classmethod
+        def get_entity_kind(cls):
+            return mapentity_models.ENTITY_DOCUMENT
 
-    @classmethod
-    def get_entity_kind(cls):
-        return mapentity_models.ENTITY_DOCUMENT
+        def __init__(self, *args, **kwargs):
+            super(MapEntityDocument, self).__init__(*args, **kwargs)
+            # Try to load template for each lang and object detail
+            model = self.get_model()
+            langs = ['_%s' % lang for lang, langname in app_settings['LANGUAGES']]
+            langs.append('')   # Will also try without lang
 
-    def __init__(self, *args, **kwargs):
-        super(MapEntityDocument, self).__init__(*args, **kwargs)
-        # Try to load template for each lang and object detail
-        model = self.get_model()
-        langs = ['_%s' % lang for lang, langname in app_settings['LANGUAGES']]
-        langs.append('')   # Will also try without lang
+            def name_for(app, modelname, lang, template_type, extension):
+                return "%s/%s%s%s_%s.%s" % (app, modelname, lang, self.template_name_suffix, template_type, extension)
 
-        def name_for(app, modelname, lang, template_type, extension):
-            return "%s/%s%s%s_%s.%s" % (app, modelname, lang, self.template_name_suffix, template_type, extension)
+            def smart_get_template(template_type, extension):
+                for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
+                                           ("mapentity", "override"),
+                                           ("mapentity", "mapentity")]:
+                    for lang in langs:
+                        try:
+                            template_name = name_for(appname, modelname, lang, template_type, extension)
+                            get_template(template_name)  # Will raise if not exist
+                            return template_name
+                        except TemplateDoesNotExist:
+                            pass
+                return None
 
-        def smart_get_template(template_type, extension):
-            for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
-                                       ("mapentity", "override"),
-                                       ("mapentity", "mapentity")]:
-                for lang in langs:
-                    try:
-                        template_name = name_for(appname, modelname, lang, template_type, extension)
-                        get_template(template_name)  # Will raise if not exist
-                        return template_name
-                    except TemplateDoesNotExist:
-                        pass
-            return None
+            found = smart_get_template("pdftemplate", "html")
+            if not found:
+                raise TemplateDoesNotExist(name_for(model._meta.app_label, model._meta.object_name.lower(), ''))
+            self.template_name = found
+            self.model_basicdata = smart_get_template("basicdata", "html")
+            self.template_css = smart_get_template("pdftemplate", "css")
 
-        found = smart_get_template("pdftemplate", "html")
-        if not found:
-            raise TemplateDoesNotExist(name_for(model._meta.app_label, model._meta.object_name.lower(), ''))
-        self.template_name = found
-        self.model_basicdata = smart_get_template("basicdata", "html")
-        self.template_css = smart_get_template("pdftemplate", "css")
+        @view_permission_required()
+        def dispatch(self, *args, **kwargs):
+            return super(MapEntityDocument, self).dispatch(*args, **kwargs)
 
+        def get_context_data(self, **kwargs):
+            rooturl = self.request.build_absolute_uri('/')
 
-    @view_permission_required()
-    def dispatch(self, *args, **kwargs):
-        return super(MapEntityDocument, self).dispatch(*args, **kwargs)
+            # Screenshot of object map is required, since present in document
+            self.get_object().prepare_map_image(rooturl)
 
-    def get_context_data(self, **kwargs):
-        rooturl = self.request.build_absolute_uri('/')
+            context = super(MapEntityDocument, self).get_context_data(**kwargs)
+            context['image_header'] = settings.MEDIA_ROOT + "/upload/logo-header.png"
+            context['datetime'] = datetime.now()
+            context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
+            context['_'] = _
+            context['image_url'] = self.get_object().get_map_image_url()
+            context['export_pdf'] = True
+            context['model_basicdata'] = self.model_basicdata
+            context['template_css'] = self.template_css
+            context['pdf_rendering'] = True
+            return context
 
-        # Screenshot of object map is required, since present in document
-        self.get_object().prepare_map_image(rooturl)
+else:
+    class MapEntityDocument(ModelViewMixin, DetailView):
+        response_class = OdtTemplateResponse
+        with_html_attributes = True
 
-        context = super(MapEntityDocument, self).get_context_data(**kwargs)
-        context['image_header'] = settings.MEDIA_ROOT + "/upload/logo-header.png"
-        context['datetime'] = datetime.now()
-        context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
-        context['_'] = _
-        context['image_url'] = self.get_object().get_map_image_url()
-        context['export_pdf'] = True
-        context['model_basicdata'] = self.model_basicdata
-        context['template_css'] = self.template_css
-        context['pdf_rendering'] = True
-        return context
+        @classmethod
+        def get_entity_kind(cls):
+            return mapentity_models.ENTITY_DOCUMENT
+
+        def __init__(self, *args, **kwargs):
+            super(MapEntityDocument, self).__init__(*args, **kwargs)
+            # Try to load template for each lang and object detail
+            model = self.get_model()
+            langs = ['_%s' % lang for lang, langname in app_settings['LANGUAGES']]
+            langs.append('')   # Will also try without lang
+
+            def name_for(app, modelname, lang):
+                return "%s/%s%s%s.odt" % (app, modelname, lang, self.template_name_suffix)
+
+            def smart_get_template():
+                for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
+                                           ("mapentity", "mapentity")]:
+                    for lang in langs:
+                        try:
+                            template_name = name_for(appname, modelname, lang)
+                            get_template(template_name)  # Will raise if not exist
+                            return template_name
+                        except TemplateDoesNotExist:
+                            pass
+                return None
+
+            found = smart_get_template()
+            if not found:
+                raise TemplateDoesNotExist(name_for(model._meta.app_label, model._meta.object_name.lower(), ''))
+            self.template_name = found
+
+        @view_permission_required()
+        def dispatch(self, *args, **kwargs):
+            return super(MapEntityDocument, self).dispatch(*args, **kwargs)
+
+        def get_context_data(self, **kwargs):
+            rooturl = self.request.build_absolute_uri('/')
+
+            # Screenshot of object map is required, since present in document
+            self.get_object().prepare_map_image(rooturl)
+
+            context = super(MapEntityDocument, self).get_context_data(**kwargs)
+            context['datetime'] = datetime.now()
+            context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
+            context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
+            context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
+            if self.with_html_attributes:
+                context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
+            context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
+            context['_'] = _
+            return context
 
 
 class Convert(View):
