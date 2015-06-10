@@ -190,6 +190,7 @@ class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
 
         def smart_get_template(template_type, extension):
             for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
+                                       ("mapentity", "override"),
                                        ("mapentity", "mapentity")]:
                 for lang in langs:
                     try:
@@ -206,6 +207,7 @@ class MapEntityDocument(ModelViewMixin, PDFTemplateResponseMixin, DetailView):
         self.template_name = found
         self.model_basicdata = smart_get_template("basicdata", "html")
         self.template_css = smart_get_template("pdftemplate", "css")
+
 
     @view_permission_required()
     def dispatch(self, *args, **kwargs):
