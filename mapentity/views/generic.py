@@ -301,8 +301,6 @@ class Convert(View):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        print args
-        print kwargs
         return super(Convert, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -453,6 +451,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         context['can_edit'] = can_edit
         context['attachment_form_class'] = AttachmentForm
         context['model_basicdata'] = self.model_basicdata
+        context['mapentity_weasyprint'] = app_settings['MAPENTITY_WEASYPRINT']
 
         return context
 
