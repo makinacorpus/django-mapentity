@@ -254,3 +254,9 @@ msgstr "Éditer %s"
 
 msgid "Saved"
 msgstr "Sauvegardé"
+
+#~ msgid "ODT"
+#~ msgstr "ODT"
+
+#~ msgid "DOC"
+#~ msgstr "DOC"
