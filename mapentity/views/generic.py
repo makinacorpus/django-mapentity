@@ -261,8 +261,6 @@ class Convert(View):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        print args
-        print kwargs
         return super(Convert, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
