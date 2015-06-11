@@ -204,7 +204,7 @@ if app_settings['MAPENTITY_WEASYPRINT']:
 
             found = smart_get_template("pdftemplate", "html")
             if not found:
-                raise TemplateDoesNotExist(name_for(model._meta.app_label, model._meta.object_name.lower(), ''))
+                raise TemplateDoesNotExist(name_for(model._meta.app_label, model._meta.object_name.lower(), '', "pdftemplate", "html"))
             self.template_name = found
             self.model_basicdata = smart_get_template("basicdata", "html")
             self.template_css = smart_get_template("pdftemplate", "css")
