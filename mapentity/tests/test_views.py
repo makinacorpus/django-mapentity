@@ -372,10 +372,10 @@ class DocumentWeasyprintViewTest(BaseTest):
         self.assertEqual(self.documentview.template_name, "mapentity/mapentity_detail_pdftemplate.html")
 
     def test_default_model_basicdata(self):
-        self.assertEqual(self.documentview.model_basicdata, "mapentity/mapentity_basicdata.html")
+        self.assertEqual(self.documentview.model_basicdata, "mapentity/mapentity_detail_basicdata.html")
 
     def test_default_tempkate_css(self):
-        self.assertEqual(self.documentview.template_name, "mapentity/mapentity_detail_pdftemplate.css")
+        self.assertEqual(self.documentview.template_css, "mapentity/mapentity_detail_pdftemplate.css")
 
 
 class ViewPermissionsTest(BaseTest):
