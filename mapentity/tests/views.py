@@ -19,7 +19,11 @@ class DummyFormat(mapentity_views.MapEntityFormat):
     model = DummyModel
 
 
-class DummyDocument(mapentity_views.MapEntityDocument):
+class DummyDocumentOdt(mapentity_views.MapEntityDocumentOdt):
+    model = DummyModel
+
+
+class DummyDocumentWeasyprint(mapentity_views.MapEntityDocumentWeasyprint):
     model = DummyModel
 
 
