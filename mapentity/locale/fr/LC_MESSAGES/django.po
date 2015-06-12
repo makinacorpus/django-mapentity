@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-09 17:22+0200\n"
+"POT-Creation-Date: 2015-06-12 10:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,240 +17,321 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 
+#: decorators.py:33
 msgid ""
 "Access to the requested resource is restricted. You have been redirected."
 msgstr "L'accès à la ressource demandée est restreint. Vous avez été redirigé."
 
+#: forms.py:133
 msgid "Create"
 msgstr "Créer"
 
+#: forms.py:133
 msgid "Save changes"
 msgstr "Sauvegarder"
 
+#: forms.py:134 forms.py:246
 msgid "Cancel"
 msgstr "Annuler"
 
+#: forms.py:144
 msgid "Delete"
 msgstr "Supprimer"
 
+#: forms.py:241
 msgid "Submit attachment"
 msgstr ""
 
+#: forms.py:248
 msgid "Update attachment"
 msgstr ""
 
+#: models.py:78
 #, python-format
 msgid "Add a new %s"
 msgstr "Ajouter un nouveau %s"
 
+#: models.py:267
 msgid "object"
 msgstr "objet"
 
+#: models.py:275
 msgid "Added"
 msgstr "Ajouté"
 
+#: models.py:276
 msgid "Changed"
 msgstr "Modifié"
 
+#: models.py:277
 msgid "Deleted"
 msgstr "Supprimé"
 
+#: serializers/datatables.py:20 serializers/datatables.py:22
+#: templates/mapentity/_detail_valuelist_fragment.html:7
+#: templates/mapentity/_detail_valuetable_fragment.html:27
+#: templates/mapentity/mapentity_detail.html:76
 msgid "None"
 msgstr "Aucun(e)"
 
+#: serializers/gpx.py:46
 msgid "Modified"
 msgstr "Modifié"
 
+#: serializers/helpers.py:22
 msgid "no"
 msgstr "non"
 
+#: serializers/helpers.py:22
 msgid "yes"
 msgstr "oui"
 
+#: templates/admin/base_site.html:5 templates/admin/base_site.html.py:12
 msgid "administration"
 msgstr ""
 
+#: templates/admin/base_site.html:16
 msgid "Back to application"
 msgstr "Retour à l'application"
 
+#: templates/admin/base_site.html:17
 msgid "Change password"
 msgstr "Changer le mot de passe"
 
+#: templates/admin/base_site.html:18
 msgid "Log out"
 msgstr "Se déconnecter"
 
+#: templates/mapentity/403.html:5
 msgid "Permission denied"
 msgstr "Permission refusée"
 
+#: templates/mapentity/404.html:5
 msgid "Page not found"
 msgstr "Page non trouvée"
 
+#: templates/mapentity/500.html:6
 msgid "Internal error"
 msgstr "Erreur interne"
 
+#: templates/mapentity/500.html:9
 msgid "Details"
 msgstr "Détails"
 
+#: templates/mapentity/_base_navbar.html:10
 msgid "List"
 msgstr "Liste"
 
+#: templates/mapentity/_base_navbar.html:23
 msgid "Add"
 msgstr "Ajouter"
 
+#: templates/mapentity/_base_navbar.html:68
+#: templates/mapentity/_base_navbar.html:70
 msgid "Admin"
 msgstr "Admin"
 
+#: templates/mapentity/_base_navbar.html:75
+#: templates/mapentity/_base_navbar.html:77
 msgid "Logbook"
 msgstr "Journal"
 
+#: templates/mapentity/_base_navbar.html:82
 msgid "Logout"
 msgstr "Déconnexion"
 
+#: templates/mapentity/_mapentity_list_filter.html:3
+#: templates/mapentity/_mapentity_list_filter.html:20
 msgid "Filter"
 msgstr "Filtrer"
 
+#: templates/mapentity/base.html:120
 msgid "Measure distances"
 msgstr "Mesurer les distances"
 
+#: templates/mapentity/base.html:121
 msgid "Save map as image"
 msgstr "Sauvegarder l'image"
 
+#: templates/mapentity/base.html:123
 msgid "Load local file (GPX, KML, GeoJSON)"
 msgstr "Charger un fichier local (GPX, KML, GeoJSON)"
 
+#: templates/mapentity/base.html:124
 msgid "Map geometry is unsaved"
 msgstr "La géométrie n'a pas été sauvegardée"
 
+#: templates/mapentity/base.html:127
 msgid "Objects"
 msgstr "Objets"
 
+#: templates/mapentity/base.html:128
 msgid "Search"
 msgstr "Rechercher"
 
+#: templates/mapentity/base.html:129
 msgid "results"
 msgstr "résultats"
 
+#: templates/mapentity/base.html:130
 msgid "Current criteria"
 msgstr "Critères choisis"
 
+#: templates/mapentity/base.html:131
 msgid "No filter"
 msgstr "Aucun filtre"
 
+#: templates/mapentity/mapentity_confirm_delete.html:17
 #, python-format
 msgid "Do you really wish to delete <strong>%(object)s</strong> ?"
 msgstr "Voulez-vous vraiment supprimer <strong>%(object)s</strong> ?"
 
+#: templates/mapentity/mapentity_confirm_delete.html:21
 msgid "Yes, delete"
 msgstr "Oui, supprimer"
 
+#: templates/mapentity/mapentity_confirm_delete.html:22
 msgid "No, back to edit view"
 msgstr "Non, retour à la vue d'édition"
 
+#: templates/mapentity/mapentity_detail.html:13
+#: templates/mapentity/mapentity_detail.html:17
 msgid "PDF"
 msgstr "PDF"
 
+#: templates/mapentity/mapentity_detail.html:15
+msgid "ODT"
+msgstr "ODT"
+
+#: templates/mapentity/mapentity_detail.html:16
+msgid "DOC"
+msgstr "DOC"
+
+#: templates/mapentity/mapentity_detail.html:26
 msgid "Properties"
 msgstr "Propriétés"
 
+#: templates/mapentity/mapentity_detail.html:31
 msgid "Attached files"
 msgstr "Fichiers liés"
 
+#: templates/mapentity/mapentity_detail.html:35
 msgid "History"
 msgstr "Historique"
 
+#: templates/mapentity/mapentity_detail.html:39
+#: templates/mapentity/mapentity_detail.html:41
 msgid "Update"
 msgstr "Modifier"
 
+#: templates/mapentity/mapentity_detail.html:62
 msgid "Date"
 msgstr "Date"
 
+#: templates/mapentity/mapentity_detail.html:63
 msgid "User"
 msgstr "utilisateur"
 
+#: templates/mapentity/mapentity_detail.html:64
 msgid "Action"
 msgstr "Action"
 
+#: templates/mapentity/mapentity_detail.html:88
 msgid "Full history"
 msgstr "Historique complet"
 
+#: templates/mapentity/mapentity_detail_pdftemplate.html:17
 msgid "Map"
 msgstr "Carte"
 
+#: templates/mapentity/mapentity_list.html:58
 msgid "CSV"
 msgstr "CSV"
 
+#: templates/mapentity/mapentity_list.html:59
 msgid "Shapefile"
 msgstr "Shapefile"
 
+#: templates/mapentity/mapentity_list.html:60
 msgid "GPX"
 msgstr "GPX"
 
+#: templates/mapentity/trackinfo_fragment.html:9
 msgid "Last author"
 msgstr "Dernier auteur"
 
+#: templates/mapentity/trackinfo_fragment.html:12
 msgid "Creator"
 msgstr "Créateur"
 
+#: templates/mapentity/trackinfo_fragment.html:15
 msgid "Authors"
 msgstr "Auteurs"
 
+#: templatetags/mapentity_tags.py:103
 #, python-format
 msgid "%d year ago"
 msgid_plural "%d years ago"
 msgstr[0] "%d an"
 msgstr[1] "%d ans"
 
+#: templatetags/mapentity_tags.py:107
 #, python-format
 msgid "%d week ago"
 msgid_plural "%d weeks ago"
 msgstr[0] "%d semaine"
 msgstr[1] "%d semaines"
 
+#: templatetags/mapentity_tags.py:110
 #, python-format
 msgid "%d day ago"
 msgid_plural "%d days ago"
 msgstr[0] "%d jour"
 msgstr[1] "%d jours"
 
+#: templatetags/mapentity_tags.py:114
 #, python-format
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
 msgstr[0] "%d heure"
 msgstr[1] "%d heures"
 
+#: templatetags/mapentity_tags.py:118
 #, python-format
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
 msgstr[0] "%d minute"
 msgstr[1] "%d minutes"
 
+#: templatetags/mapentity_tags.py:120
 msgid "just a few seconds ago"
 msgstr "quelques secondes"
 
+#: tests/models.py:52
 msgid "Dummy Model"
 msgstr ""
 
+#: tests/test_functional.py:55
 msgid "Invalid geometry value."
 msgstr "Géométrie invalide"
 
+#: views/generic.py:360
 msgid "Created"
 msgstr "Créé"
 
+#: views/generic.py:365 views/generic.py:470
 msgid "Your form contains errors"
 msgstr "Le formulaire contient des erreurs"
 
+#: views/generic.py:423
 msgid "No map available for this object."
 msgstr "Pas de carte disponible pour cet objet."
 
+#: views/generic.py:448
 #, python-format
 msgid "Edit %s"
 msgstr "Éditer %s"
 
+#: views/generic.py:465
 msgid "Saved"
 msgstr "Sauvegardé"
-
-#~ msgid "ODT"
-#~ msgstr "ODT"
-
-#~ msgid "DOC"
-#~ msgstr "DOC"
