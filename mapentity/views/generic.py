@@ -270,6 +270,7 @@ if app_settings['MAPENTITY_WEASYPRINT']:
 else:
     MapEntityDocument = MapEntityDocumentOdt
 
+
 class Convert(View):
     """
     A proxy view to conversion server.
