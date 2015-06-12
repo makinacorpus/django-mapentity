@@ -172,6 +172,7 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
             response[app_settings['SENDFILE_HTTP_HEADER']] = os.path.join(settings.MEDIA_URL_SECURE, path)
         return response
 
+
 class MapEntityDocumentBase(ModelViewMixin, DetailView):
     # template_name_suffix = ""
 
@@ -220,7 +221,6 @@ class MapEntityDocumentBase(ModelViewMixin, DetailView):
 
 class MapEntityDocumentWeasyprint(MapEntityDocumentBase, PDFTemplateResponseMixin):
 
-
     def __init__(self, *args, **kwargs):
         super(MapEntityDocumentWeasyprint, self).__init__(*args, **kwargs)
 
@@ -265,6 +265,7 @@ if app_settings['MAPENTITY_WEASYPRINT']:
     MapEntityDocument = MapEntityDocumentWeasyprint
 else:
     MapEntityDocument = MapEntityDocumentOdt
+
 
 class Convert(View):
     """
