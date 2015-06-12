@@ -25,7 +25,6 @@ import requests
 from ..helpers import smart_urljoin
 from ..forms import MapEntityForm
 from ..factories import SuperUserFactory
-from ..settings import app_settings
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
@@ -96,15 +95,6 @@ class MapEntityTest(TestCase):
         response = self.client.get(obj.get_document_url())
         self.assertEqual(response.status_code, 200)
 
-        app_settings['MAPENTITY_WEASYPRINT'] = True
-
-        mock_requests.get.return_value.status_code = 200
-        mock_requests.get.return_value.content = '<p id="properties">Mock</p>'
-
-        self.login()
-        obj = self.modelfactory.create()
-        response = self.client.get(obj.get_document_url())
-        self.assertEqual(response.status_code, 200)
 
     def test_bbox_filter(self):
         if self.model is None:
