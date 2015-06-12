@@ -248,28 +248,6 @@ if app_settings['MAPENTITY_WEASYPRINT']:
 else:
     MapEntityDocument = MapEntityDocumentOdt
 
-    def __init__(self, *args, **kwargs):
-        super(MapEntityDocumentOdt, self).__init__(*args, **kwargs)
-
-        found = self.smart_get_template("", "odt")
-        if not found:
-            raise TemplateDoesNotExist(self.name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), '', "", "odt"))
-        self.template_name = found
-
-    def get_context_data(self, **kwargs):
-        context = super(MapEntityDocumentOdt, self).get_context_data(**kwargs)
-        context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
-        context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
-        context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
-        if self.with_html_attributes:
-            context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
-        return context
-
-if app_settings['MAPENTITY_WEASYPRINT']:
-    MapEntityDocument = MapEntityDocumentWeasyprint
-else:
-    MapEntityDocument = MapEntityDocumentOdt
-
 
 class Convert(View):
     """
