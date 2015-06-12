@@ -17,7 +17,6 @@ from django.template.defaultfilters import slugify
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
 from django_weasyprint import PDFTemplateResponseMixin
 
@@ -28,6 +27,7 @@ from ..decorators import save_history, view_permission_required
 from ..forms import AttachmentForm
 from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from .. import serializers as mapentity_serializers
+from ..helpers import suffix_for, name_for, smart_get_template
 from .base import history_delete, BaseListView
 from .mixins import (ModelViewMixin, FormViewMixin)
 
@@ -174,30 +174,10 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
 
 
 class MapEntityDocumentBase(ModelViewMixin, DetailView):
-    # template_name_suffix = ""
-
-    def name_for(self, app, modelname, lang, template_type, extension):
-        return "%s/%s%s%s%s.%s" % (app, modelname, lang, self.template_name_suffix, template_type, extension)
-
-    def smart_get_template(self, template_type, extension):
-        for appname, modelname in [(self.model._meta.app_label, self.model._meta.object_name.lower()),
-                                   ("mapentity", "override"),
-                                   ("mapentity", "mapentity")]:
-            for lang in self.langs:
-                try:
-                    template_name = self.name_for(appname, modelname, lang, template_type, extension)
-                    get_template(template_name)  # Will raise if not exist
-                    return template_name
-                except TemplateDoesNotExist:
-                    pass
-        return None
 
     def __init__(self, *args, **kwargs):
         super(MapEntityDocumentBase, self).__init__(*args, **kwargs)
-        # Try to load template for each lang and object detail
         self.model = self.get_model()
-        self.langs = ['_%s' % lang for lang, langname in app_settings['LANGUAGES']]
-        self.langs.append('')   # Will also try without lang
 
     @classmethod
     def get_entity_kind(cls):
@@ -224,12 +204,13 @@ class MapEntityDocumentWeasyprint(MapEntityDocumentBase, PDFTemplateResponseMixi
     def __init__(self, *args, **kwargs):
         super(MapEntityDocumentWeasyprint, self).__init__(*args, **kwargs)
 
-        found = self.smart_get_template("_pdftemplate", "html")
+        suffix = suffix_for(self.template_name_suffix, "_pdftemplate", "html")
+        found = smart_get_template(self.model, suffix)
         if not found:
-            raise TemplateDoesNotExist(self.name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), '', "_pdftemplate", "html"))
+            raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), '', suffix))
         self.template_name = found
-        self.model_basicdata = self.smart_get_template("_basicdata", "html")
-        self.template_css = self.smart_get_template("_pdftemplate", "css")
+        self.model_basicdata = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_basicdata", "html"))
+        self.template_css = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_pdftemplate", "css"))
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityDocumentWeasyprint, self).get_context_data(**kwargs)
@@ -247,9 +228,10 @@ class MapEntityDocumentOdt(MapEntityDocumentBase):
     def __init__(self, *args, **kwargs):
         super(MapEntityDocumentOdt, self).__init__(*args, **kwargs)
 
-        found = self.smart_get_template("", "odt")
+        suffix = suffix_for(self.template_name_suffix, "", "odt")
+        found = smart_get_template(self.model, suffix)
         if not found:
-            raise TemplateDoesNotExist(self.name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), '', "", "odt"))
+            raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), '', suffix))
         self.template_name = found
 
     def get_context_data(self, **kwargs):
@@ -376,25 +358,8 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         super(MapEntityDetail, self).__init__(*args, **kwargs)
         # Try to load template for each lang and object detail
         model = self.get_model()
-        langs = ['_%s' % lang for lang, langname in app_settings['LANGUAGES']]
-        langs.append('')   # Will also try without lang
-
-        def name_for(app, modelname, lang, template_type, extension):
-            return "%s/%s%s%s_%s.%s" % (app, modelname, lang, self.template_name_suffix, template_type, extension)
-
-        def smart_get_template(template_type, extension):
-            for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
-                                       ("mapentity", "mapentity")]:
-                for lang in langs:
-                    try:
-                        template_name = name_for(appname, modelname, lang, template_type, extension)
-                        get_template(template_name)  # Will raise if not exist
-                        return template_name
-                    except TemplateDoesNotExist:
-                        pass
-            return None
-
-        self.model_basicdata = smart_get_template("basicdata", "html")
+        suffix = suffix_for(self.template_name_suffix, "_basicdata", "html")
+        self.model_basicdata = smart_get_template(model, suffix)
 
     @classmethod
     def get_entity_kind(cls):
