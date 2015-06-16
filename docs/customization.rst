@@ -113,20 +113,63 @@ Then update ``views.py`` to use your custom form in your curstom views::
 Templates
 ---------
 
-Create a couple of templates inside  ``main/templates/main``.
+To display information accordingly to your Museum model, you can create a template in ``main/templates/main``.
 
 
-``museum_detail.html`` can contain::
+``museum_detail_basicdata.html`` can contain::
 
-    {% extends "mapentity/mapentity_detail.html" %}
+    {% extends "mapentity/mapentity_detail_basicdata.html" %}
     {% load i18n mapentity_tags %}
 
-    {% block detailspanel %}
-        {{ block.super }}
+    {% block basicdata %}
         <table class="table-striped table-bordered table">
             <tr>
                 <th>{{ object|verbose:"name" }}</th>
                 <td>{{ object.name }}</td>
             </tr>
         </table>
-    {% endblock detailspanel %}
+        {{ block.super }}
+    {% endblock basicdata %}
+
+You can override the detail view template for your Museum model by creating a ``museum_detail.html`` in the same directory as before.
+
+Exports
+---------
+
+There is another export system in MapEntity which use `Weasyprint` (http://weasyprint.org/).
+
+Instead of using ODT templates, Weasyprint use HTML/CSS and export to PDF.
+Do not use this system if you need an ODT or DOC export.
+
+Although Weasyprint export only to PDF, there are multiple advantages to it, such as :
+    - Use the power of HTML/CSS to generate your pages (far simpler than the ODT template)
+    - Use the Django template system to generate PDF content
+    - No longer need an instance of convertit to convert ODT to PDF and svg to png
+
+To use MapEntity with Weasyprint, you just need to activate it in the ``settings.py`` of MapEntity.
+
+Replace::
+
+    'MAPENTITY_WEASYPRINT': False,
+by::
+
+    'MAPENTITY_WEASYPRINT': True,
+
+You can customize the templates used to export your model in two different ways.
+
+First one is to create a template for a model only.
+
+    In your museum project, you can override the CSS used to style the export by creating a file named ``museum_detail_pdftemplate.css`` in ``main/templates/main``.
+    Refer to the CSS documentation and ``mapentity_detail_pdftemplate.css``.
+
+    Note that, in the ``mapentity_detail_pdftemplate.html``, the CSS file is included instead of linked to take advantage of the Django template generation.
+
+    Same as the CSS, you can override mapentity_detail_pdftemplate.html by creating a file named ``musuem_detail_pdftemplate.html``.
+    Again, refer to ``mapentity_detail_pdftemplate.html``.
+
+    If you create another model and need to override his template, the template should be of the form ``templates/appname/modelname_detail_pdftemplate.html`` with appname the name of your Django app and modelname the name of your model.
+
+The second way overrides these templates for all your models.
+
+    you need to create a sub-directory named ``mapentity`` in ``main/templates``.
+    Then you can create a file named ``override_detail_pdftemplate.html``(or ``.css``) and it will be used for all your models if a specific template is not provided.
