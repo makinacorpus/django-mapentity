@@ -138,6 +138,7 @@ class MapEntityOptions(object):
         return self.model.objects.all()
 
     def _url_path(self, view_kind):
+        doc_ext = 'pdf' if app_settings['MAPENTITY_WEASYPRINT'] else 'odt'
         kind_to_urlpath = {
             mapentity_models.ENTITY_LAYER: r'^api/{modelname}/{modelname}.geojson$',
             mapentity_models.ENTITY_LIST: r'^{modelname}/list/$',
@@ -145,7 +146,7 @@ class MapEntityOptions(object):
             mapentity_models.ENTITY_FORMAT_LIST: r'^{modelname}/list/export/$',
             mapentity_models.ENTITY_DETAIL: r'^{modelname}/(?P<pk>\d+)/$',
             mapentity_models.ENTITY_MAPIMAGE: r'^image/{modelname}-(?P<pk>\d+).png$',
-            mapentity_models.ENTITY_DOCUMENT: r'^document/{modelname}-(?P<pk>\d+)$',
+            mapentity_models.ENTITY_DOCUMENT: r'^document/{modelname}-(?P<pk>\d+).{ext}$'.format(ext=doc_ext),
             mapentity_models.ENTITY_CREATE: r'^{modelname}/add/$',
             mapentity_models.ENTITY_UPDATE: r'^{modelname}/edit/(?P<pk>\d+)/$',
             mapentity_models.ENTITY_DELETE: r'^{modelname}/delete/(?P<pk>\d+)/$',
