@@ -12,11 +12,11 @@
 
 		{% block EntityDetail %}
 
-			{% include model_basicdata %}
+			{% include template_attributes %}
 
 			{% block Map %}
 				<h3>{% trans "Map" %}</h3>
-				<img src="{{ image_url }}" id="EntityScreenshot">
+				<img src="{{ map_url }}" id="EntityScreenshot">
 			{% endblock Map %}
 
 		{% endblock EntityDetail %}
