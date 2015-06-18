@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, MapEntityDocumentOdt, MapEntityDocumentWeasyprint
 
 from .models import DummyModel
 from mapentity import registry
@@ -24,4 +24,6 @@ urlpatterns = patterns(
 
     url(r'^paperclip/', include('paperclip.urls')),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^document/DummyModel-(?P<pk>\d+).odt', MapEntityDocumentOdt.as_view(),),
+    url(r'^document/DummyModel-(?P<pk>\d+).pdf', MapEntityDocumentWeasyprint.as_view(),),
 )
