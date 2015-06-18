@@ -116,12 +116,12 @@ Templates
 To display information accordingly to your Museum model, you can create a template in ``main/templates/main``.
 
 
-``museum_detail_basicdata.html`` can contain::
+``museum_detail_attributes.html`` can contain::
 
-    {% extends "mapentity/mapentity_detail_basicdata.html" %}
+    {% extends "mapentity/mapentity_detail_attributes.html" %}
     {% load i18n mapentity_tags %}
 
-    {% block basicdata %}
+    {% block attributes %}
         <table class="table-striped table-bordered table">
             <tr>
                 <th>{{ object|verbose:"name" }}</th>
@@ -129,7 +129,7 @@ To display information accordingly to your Museum model, you can create a templa
             </tr>
         </table>
         {{ block.super }}
-    {% endblock basicdata %}
+    {% endblock attributes %}
 
 You can override the detail view template for your Museum model by creating a ``museum_detail.html`` in the same directory as before.
 
@@ -159,17 +159,17 @@ You can customize the templates used to export your model in two different ways.
 
 First one is to create a template for a model only.
 
-    In your museum project, you can override the CSS used to style the export by creating a file named ``museum_detail_pdftemplate.css`` in ``main/templates/main``.
-    Refer to the CSS documentation and ``mapentity_detail_pdftemplate.css``.
+    In your museum project, you can override the CSS used to style the export by creating a file named ``museum_detail_pdf.css`` in ``main/templates/main``.
+    Refer to the CSS documentation and ``mapentity_detail_pdf.css``.
 
-    Note that, in the ``mapentity_detail_pdftemplate.html``, the CSS file is included instead of linked to take advantage of the Django template generation.
+    Note that, in the ``mapentity_detail_pdf.html``, the CSS file is included instead of linked to take advantage of the Django template generation.
 
-    Same as the CSS, you can override mapentity_detail_pdftemplate.html by creating a file named ``musuem_detail_pdftemplate.html``.
-    Again, refer to ``mapentity_detail_pdftemplate.html``.
+    Same as the CSS, you can override mapentity_detail_pdf.html by creating a file named ``musuem_detail_pdf.html``.
+    Again, refer to ``mapentity_detail_pdf.html``.
 
-    If you create another model and need to override his template, the template should be of the form ``templates/appname/modelname_detail_pdftemplate.html`` with appname the name of your Django app and modelname the name of your model.
+    If you create another model and need to override his template, the template should be of the form ``templates/appname/modelname_detail_pdf.html`` with appname the name of your Django app and modelname the name of your model.
 
 The second way overrides these templates for all your models.
 
     you need to create a sub-directory named ``mapentity`` in ``main/templates``.
-    Then you can create a file named ``override_detail_pdftemplate.html``(or ``.css``) and it will be used for all your models if a specific template is not provided.
+    Then you can create a file named ``override_detail_pdf.html``(or ``.css``) and it will be used for all your models if a specific template is not provided.

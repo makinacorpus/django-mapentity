@@ -195,7 +195,6 @@ class MapEntityDocumentBase(ModelViewMixin, DetailView):
         context = super(MapEntityDocumentBase, self).get_context_data(**kwargs)
         context['datetime'] = datetime.now()
         context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
-        context['_'] = _
         return context
 
 
@@ -204,19 +203,18 @@ class MapEntityDocumentWeasyprint(MapEntityDocumentBase, PDFTemplateResponseMixi
     def __init__(self, *args, **kwargs):
         super(MapEntityDocumentWeasyprint, self).__init__(*args, **kwargs)
 
-        suffix = suffix_for(self.template_name_suffix, "_pdftemplate", "html")
+        suffix = suffix_for(self.template_name_suffix, "_pdf", "html")
         found = smart_get_template(self.model, suffix)
         if not found:
             raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), suffix))
         self.template_name = found
-        self.model_basicdata = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_basicdata", "html"))
-        self.template_css = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_pdftemplate", "css"))
+        self.template_attributes = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_attributes", "html"))
+        self.template_css = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_pdf", "css"))
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityDocumentWeasyprint, self).get_context_data(**kwargs)
-        context['image_header'] = settings.MEDIA_ROOT + "/upload/logo-header.png"
-        context['image_url'] = self.get_object().get_map_image_url()
-        context['model_basicdata'] = self.model_basicdata
+        context['map_url'] = self.get_object().get_map_image_url()
+        context['template_attributes'] = self.template_attributes
         context['template_css'] = self.template_css
         return context
 
@@ -241,6 +239,7 @@ class MapEntityDocumentOdt(MapEntityDocumentBase):
         context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
         if self.with_html_attributes:
             context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
+        context['_'] = _
         return context
 
 if app_settings['MAPENTITY_WEASYPRINT']:
@@ -358,8 +357,8 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         super(MapEntityDetail, self).__init__(*args, **kwargs)
         # Try to load template for each lang and object detail
         model = self.get_model()
-        suffix = suffix_for(self.template_name_suffix, "_basicdata", "html")
-        self.model_basicdata = smart_get_template(model, suffix)
+        suffix = suffix_for(self.template_name_suffix, "_attributes", "html")
+        self.template_attributes = smart_get_template(model, suffix)
 
     @classmethod
     def get_entity_kind(cls):
@@ -393,7 +392,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         can_edit = user_has_perm(self.request.user, perm_update)
         context['can_edit'] = can_edit
         context['attachment_form_class'] = AttachmentForm
-        context['model_basicdata'] = self.model_basicdata
+        context['template_attributes'] = self.template_attributes
         context['mapentity_weasyprint'] = app_settings['MAPENTITY_WEASYPRINT']
 
         return context
