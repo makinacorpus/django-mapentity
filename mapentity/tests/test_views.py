@@ -16,7 +16,7 @@ from mapentity import app_settings
 from mapentity.views import serve_attachment, Convert, JSSettings
 
 from .models import DummyModel
-from .views import DummyList, DummyDetail, DummyDocumentOdt, DummyDocumentWeasyprint
+from .views import DummyList, DummyDetail
 from .test_functional import MapEntityTest, MapEntityLiveTest
 
 
