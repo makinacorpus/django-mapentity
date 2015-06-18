@@ -207,7 +207,7 @@ class MapEntityDocumentWeasyprint(MapEntityDocumentBase, PDFTemplateResponseMixi
         suffix = suffix_for(self.template_name_suffix, "_pdftemplate", "html")
         found = smart_get_template(self.model, suffix)
         if not found:
-            raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), '', suffix))
+            raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), suffix))
         self.template_name = found
         self.model_basicdata = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_basicdata", "html"))
         self.template_css = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_pdftemplate", "css"))
@@ -231,7 +231,7 @@ class MapEntityDocumentOdt(MapEntityDocumentBase):
         suffix = suffix_for(self.template_name_suffix, "", "odt")
         found = smart_get_template(self.model, suffix)
         if not found:
-            raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), '', suffix))
+            raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), suffix))
         self.template_name = found
 
     def get_context_data(self, **kwargs):
