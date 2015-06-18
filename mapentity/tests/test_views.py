@@ -402,40 +402,6 @@ class DocumentWeasyprintViewTest(BaseTest):
         self.assertEqual(response.status_code, 200)
 
 
-class DocumentOdtViewTest(BaseTest):
-    def setUp(self):
-        self.login()
-        self.user.is_superuser = True
-        self.user.save()
-        self.logout()
-        self.object = DummyModelFactory.create(name='dumber')
-
-    def test_default_template_name(self):
-        documentview = DummyDocumentOdt()
-        documentview.object = self.object
-        self.assertEqual(documentview.template_name, "mapentity/mapentity_detail.odt")
-
-
-class DocumentWeasyprintViewTest(BaseTest):
-    def setUp(self):
-        self.login()
-        self.user.is_superuser = True
-        self.user.save()
-        self.logout()
-        self.object = DummyModelFactory.create(name='dumber')
-        self.documentview = DummyDocumentWeasyprint()
-        self.documentview.object = self.object
-
-    def test_default_template_name(self):
-        self.assertEqual(self.documentview.template_name, "mapentity/mapentity_detail_pdftemplate.html")
-
-    def test_default_model_basicdata(self):
-        self.assertEqual(self.documentview.model_basicdata, "mapentity/mapentity_detail_basicdata.html")
-
-    def test_default_tempkate_css(self):
-        self.assertEqual(self.documentview.template_css, "mapentity/mapentity_detail_pdftemplate.css")
-
-
 class ViewPermissionsTest(BaseTest):
     def setUp(self):
         self.login()
