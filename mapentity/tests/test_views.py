@@ -353,9 +353,9 @@ class DetailViewTest(BaseTest):
 
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>')
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>')
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>')
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>')
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
 
     def test_export_buttons_weasyprint(self):
         self.login()
@@ -367,9 +367,12 @@ class DetailViewTest(BaseTest):
 
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
-        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>')
-        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>')
+        if app_settings['MAPENTITY_WEASYPRINT']:
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.pdf"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
+        else:
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
+        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>')
+        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>')
 
 
 class DocumentOdtViewTest(BaseTest):
@@ -382,7 +385,8 @@ class DocumentOdtViewTest(BaseTest):
         self.object = DummyModelFactory.create(name='dumber')
 
     def test_status_code(self):
-        url = "/document/DummyModel-{pk}.odt".format(pk=self.object.pk)
+        self.login()
+        url = "/test/document/dummymodel-{pk}.odt".format(pk=self.object.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -397,7 +401,8 @@ class DocumentWeasyprintViewTest(BaseTest):
         self.object = DummyModelFactory.create(name='dumber')
 
     def test_status_code(self):
-        url = "/document/DummyModel-{pk}.pdf".format(pk=self.object.pk)
+        self.login()
+        url = "/test/document/dummymodel-{pk}.pdf".format(pk=self.object.pk)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
