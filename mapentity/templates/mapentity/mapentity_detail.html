@@ -9,9 +9,13 @@
         <div class="download-group">
             <div class="btn-group pull-right">
                 {% block download %}
-                <a class="btn btn-mini" target="_blank" href="{{ object.get_document_url }}"><img src="{% static "paperclip/fileicons/odt.png" %}"/> {% trans "ODT" %}</a>
-                <a class="btn btn-mini" target="_blank" href="{% url "mapentity:convert" %}?url={{ object.get_document_url|urlencode }}&to=doc"><img src="{% static "paperclip/fileicons/doc.png" %}"/> {% trans "DOC" %}</a>
-                <a class="btn btn-mini" target="_blank" href="{% url "mapentity:convert" %}?url={{ object.get_document_url|urlencode }}"><img src="{% static "paperclip/fileicons/pdf.png" %}"/> {% trans "PDF" %}</a>
+                    {% if mapentity_weasyprint %}
+                        <a class="btn btn-mini" target="_blank" href="{{ object.get_document_url }}"><img src="{% static "paperclip/fileicons/pdf.png" %}"/> {% trans "PDF" %}</a>
+                    {% else %}
+                        <a class="btn btn-mini" target="_blank" href="{{ object.get_document_url }}"><img src="{% static "paperclip/fileicons/odt.png" %}"/> {% trans "ODT" %}</a>
+                        <a class="btn btn-mini" target="_blank" href="{% url "mapentity:convert" %}?url={{ object.get_document_url|urlencode }}&to=doc"><img src="{% static "paperclip/fileicons/doc.png" %}"/> {% trans "DOC" %}</a>
+                        <a class="btn btn-mini" target="_blank" href="{% url "mapentity:convert" %}?url={{ object.get_document_url|urlencode }}"><img src="{% static "paperclip/fileicons/pdf.png" %}"/> {% trans "PDF" %}</a>
+                    {% endif %}
                 {% endblock download %}
             </div>
         </div>
@@ -20,7 +24,7 @@
             <ul class="nav nav-tabs">
                 <li id="tab-properties" class="{% if activetab != "attachments" %}active{% endif %}">
                     <a href="#properties" data-toggle="tab"><i class="icon-tasks"></i> {% trans "Properties" %}
-                    {% smart_include "propertiestab" %}
+                        {% smart_include "propertiestab" %}
                     </a>
                 </li>
                 <li id="tab-attachments" class="{% if activetab == "attachments" %}active{% endif %}">
@@ -40,7 +44,7 @@
             <div class="tab-content scrollable">
                 <div id="properties" class="tab-pane {% if activetab != "attachments" %}active{% endif %}">
                     {% block detailspanel %}
-                        {% smart_include "detail" %}
+                        {% include template_attributes %}
                     {% endblock detailspanel %}
                 </div>
 

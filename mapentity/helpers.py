@@ -13,8 +13,10 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.gis.gdal.error import OGRException
 from django.contrib.gis.geos import GEOSException, fromstr
+from django.template.base import TemplateDoesNotExist
 from django.http import HttpResponse
 from django.core.urlresolvers import resolve
+from djappypod.odt import get_template
 
 import bs4
 import requests
@@ -313,3 +315,24 @@ def alphabet_enumeration(length):
         enum += alphabet[i % 26]
         enums.append(enum)
     return enums
+
+
+def suffix_for(template_name_suffix, template_type, extension):
+    return "%s%s.%s" % (template_name_suffix, template_type, extension)
+
+
+def name_for(app, modelname, suffix):
+    return "%s/%s%s" % (app, modelname, suffix)
+
+
+def smart_get_template(model, suffix):
+    for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
+                               ("mapentity", "override"),
+                               ("mapentity", "mapentity")]:
+        try:
+            template_name = name_for(appname, modelname, suffix)
+            get_template(template_name)  # Will raise if not exist
+            return template_name
+        except TemplateDoesNotExist:
+            pass
+    return None

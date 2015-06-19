@@ -17,8 +17,8 @@ from django.template.defaultfilters import slugify
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from djappypod.odt import get_template
 from djappypod.response import OdtTemplateResponse
+from django_weasyprint import PDFTemplateResponseMixin
 
 from ..settings import app_settings
 from .. import models as mapentity_models
@@ -27,6 +27,7 @@ from ..decorators import save_history, view_permission_required
 from ..forms import AttachmentForm
 from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from .. import serializers as mapentity_serializers
+from ..helpers import suffix_for, name_for, smart_get_template
 from .base import history_delete, BaseListView
 from .mixins import (ModelViewMixin, FormViewMixin)
 
@@ -172,61 +173,77 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
         return response
 
 
-class MapEntityDocument(ModelViewMixin, DetailView):
-    response_class = OdtTemplateResponse
-    with_html_attributes = True
+class MapEntityDocumentBase(ModelViewMixin, DetailView):
+
+    def __init__(self, *args, **kwargs):
+        super(MapEntityDocumentBase, self).__init__(*args, **kwargs)
+        self.model = self.get_model()
 
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DOCUMENT
 
-    def __init__(self, *args, **kwargs):
-        super(MapEntityDocument, self).__init__(*args, **kwargs)
-        # Try to load template for each lang and object detail
-        model = self.get_model()
-        langs = ['_%s' % lang for lang, langname in app_settings['LANGUAGES']]
-        langs.append('')   # Will also try without lang
-
-        def name_for(app, modelname, lang):
-            return "%s/%s%s%s.odt" % (app, modelname, lang, self.template_name_suffix)
-
-        def smart_get_template():
-            for appname, modelname in [(model._meta.app_label, model._meta.object_name.lower()),
-                                       ("mapentity", "mapentity")]:
-                for lang in langs:
-                    try:
-                        template_name = name_for(appname, modelname, lang)
-                        get_template(template_name)  # Will raise if not exist
-                        return template_name
-                    except TemplateDoesNotExist:
-                        pass
-            return None
-
-        found = smart_get_template()
-        if not found:
-            raise TemplateDoesNotExist(name_for(model._meta.app_label, model._meta.object_name.lower(), ''))
-        self.template_name = found
-
     @view_permission_required()
     def dispatch(self, *args, **kwargs):
-        return super(MapEntityDocument, self).dispatch(*args, **kwargs)
+        return super(MapEntityDocumentBase, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         rooturl = self.request.build_absolute_uri('/')
 
         # Screenshot of object map is required, since present in document
         self.get_object().prepare_map_image(rooturl)
-
-        context = super(MapEntityDocument, self).get_context_data(**kwargs)
+        context = super(MapEntityDocumentBase, self).get_context_data(**kwargs)
         context['datetime'] = datetime.now()
+        context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
+        return context
+
+
+class MapEntityDocumentWeasyprint(MapEntityDocumentBase, PDFTemplateResponseMixin):
+
+    def __init__(self, *args, **kwargs):
+        super(MapEntityDocumentWeasyprint, self).__init__(*args, **kwargs)
+
+        suffix = suffix_for(self.template_name_suffix, "_pdf", "html")
+        self.template_name = smart_get_template(self.model, suffix)
+        if not self.template_name:
+            raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), suffix))
+        self.template_attributes = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_attributes", "html"))
+        self.template_css = smart_get_template(self.model, suffix_for(self.template_name_suffix, "_pdf", "css"))
+
+    def get_context_data(self, **kwargs):
+        context = super(MapEntityDocumentWeasyprint, self).get_context_data(**kwargs)
+        context['map_url'] = self.get_object().get_map_image_url()
+        context['template_attributes'] = self.template_attributes
+        context['template_css'] = self.template_css
+        return context
+
+
+class MapEntityDocumentOdt(MapEntityDocumentBase):
+    response_class = OdtTemplateResponse
+    with_html_attributes = True
+
+    def __init__(self, *args, **kwargs):
+        super(MapEntityDocumentOdt, self).__init__(*args, **kwargs)
+
+        suffix = suffix_for(self.template_name_suffix, "", "odt")
+        self.template_name = smart_get_template(self.model, suffix)
+        if not self.template_name:
+            raise TemplateDoesNotExist(name_for(self.model._meta.app_label, self.model._meta.object_name.lower(), suffix))
+
+    def get_context_data(self, **kwargs):
+        context = super(MapEntityDocumentOdt, self).get_context_data(**kwargs)
         context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
         context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
         context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
         if self.with_html_attributes:
             context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
-        context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
         context['_'] = _
         return context
+
+if app_settings['MAPENTITY_WEASYPRINT']:
+    MapEntityDocument = MapEntityDocumentWeasyprint
+else:
+    MapEntityDocument = MapEntityDocumentOdt
 
 
 class Convert(View):
@@ -334,6 +351,13 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
 
 class MapEntityDetail(ModelViewMixin, DetailView):
 
+    def __init__(self, *args, **kwargs):
+        super(MapEntityDetail, self).__init__(*args, **kwargs)
+        # Try to load template for each lang and object detail
+        model = self.get_model()
+        suffix = suffix_for(self.template_name_suffix, "_attributes", "html")
+        self.template_attributes = smart_get_template(model, suffix)
+
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DETAIL
@@ -366,6 +390,8 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         can_edit = user_has_perm(self.request.user, perm_update)
         context['can_edit'] = can_edit
         context['attachment_form_class'] = AttachmentForm
+        context['template_attributes'] = self.template_attributes
+        context['mapentity_weasyprint'] = app_settings['MAPENTITY_WEASYPRINT']
 
         return context
 

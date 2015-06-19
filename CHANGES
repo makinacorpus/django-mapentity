@@ -5,6 +5,9 @@ CHANGELOG
 2.3.1.dev0
 ==================
 
+**New features**
+
+- Use WeasyPrint PDF export system
 
 
 2.3.0 (2015-06-09)

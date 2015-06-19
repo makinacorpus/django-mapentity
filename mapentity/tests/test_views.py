@@ -343,6 +343,69 @@ class DetailViewTest(BaseTest):
                                 template_name='tests/dummymodel_detail.html')
         self.assertContains(response, 'dumber')
 
+    def test_export_buttons_odt(self):
+        self.login()
+
+        tmp = app_settings['MAPENTITY_WEASYPRINT']
+        app_settings['MAPENTITY_WEASYPRINT'] = False
+
+        response = self.client.get(self.object.get_detail_url())
+
+        app_settings['MAPENTITY_WEASYPRINT'] = tmp
+
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>')
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>')
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
+
+    def test_export_buttons_weasyprint(self):
+        self.login()
+
+        tmp = app_settings['MAPENTITY_WEASYPRINT']
+        app_settings['MAPENTITY_WEASYPRINT'] = True
+
+        response = self.client.get(self.object.get_detail_url())
+
+        app_settings['MAPENTITY_WEASYPRINT'] = tmp
+
+        if app_settings['MAPENTITY_WEASYPRINT']:
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.pdf"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
+        else:
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
+        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>')
+        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>')
+
+
+class DocumentOdtViewTest(BaseTest):
+    def setUp(self):
+        self.urls = 'mapentity.tests.urls'
+        self.login()
+        self.user.is_superuser = True
+        self.user.save()
+        self.logout()
+        self.object = DummyModelFactory.create(name='dumber')
+
+    def test_status_code(self):
+        self.login()
+        url = "/test/document/dummymodel-{pk}.odt".format(pk=self.object.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+
+class DocumentWeasyprintViewTest(BaseTest):
+    def setUp(self):
+        self.urls = 'mapentity.tests.urls'
+        self.login()
+        self.user.is_superuser = True
+        self.user.save()
+        self.logout()
+        self.object = DummyModelFactory.create(name='dumber')
+
+    def test_status_code(self):
+        self.login()
+        url = "/test/document/dummymodel-{pk}.pdf".format(pk=self.object.pk)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
 
 class ViewPermissionsTest(BaseTest):
     def setUp(self):
