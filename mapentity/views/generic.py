@@ -195,6 +195,9 @@ class MapEntityDocumentBase(ModelViewMixin, DetailView):
         context = super(MapEntityDocumentBase, self).get_context_data(**kwargs)
         context['datetime'] = datetime.now()
         context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
+        context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
+        context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
+        context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
         return context
 
 
@@ -232,9 +235,6 @@ class MapEntityDocumentOdt(MapEntityDocumentBase):
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityDocumentOdt, self).get_context_data(**kwargs)
-        context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
-        context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
-        context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
         if self.with_html_attributes:
             context['attributeshtml'] = self.get_object().get_attributes_html(self.request)
         context['_'] = _
