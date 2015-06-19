@@ -155,7 +155,12 @@ by::
 
     'MAPENTITY_WEASYPRINT': True,
 
-You can customize the templates used to export your model in two different ways.
+If you want to include images that are not SVG or PNG, you will need to install GDK-PixBuf
+
+    sudo apt-get install libgdk-pixbuf2.0-dev
+
+
+Now, you can customize the templates used to export your model in two different ways.
 
 First one is to create a template for a model only.
 
