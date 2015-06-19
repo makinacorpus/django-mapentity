@@ -2,6 +2,7 @@ include README.rst CHANGES LICENSE
 recursive-include mapentity/locale *.mo
 recursive-include mapentity/templates *.odt
 recursive-include mapentity/templates *.html
+recursive-include mapentity/templates *.css
 recursive-include mapentity/static *.js
 recursive-include mapentity/static *.css
 recursive-include mapentity/static *.png
