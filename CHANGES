@@ -5,6 +5,10 @@ CHANGELOG
 2.4.1.dev0
 ==================
 
+**Bug fixes**
+
+- Fix insertion of images with WeasyPrint
+
 
 2.4.0 (2015-06-19)
 ==================
