@@ -51,6 +51,14 @@ class TestActionsHistory(TestCase):
         self.assertEqual(entry.action_flag, DELETION)
         self.assertEqual(entry.user, self.user)
 
+    def test_anonymous_action(self):
+        self.client.logout()
+        self.client.post('/dummymodel/add/', data={
+            'geom': '{"type": "Point", "coordinates": [0, 0]}',
+            'model': 'dummymodel',
+        })
+        self.assertEqual(LogEntry.objects.count(), 0)
+
 
 class TestCreator(TestCase):
     def setUp(self):
