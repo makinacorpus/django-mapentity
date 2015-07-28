@@ -64,6 +64,8 @@
            </a>
            <ul class="dropdown-menu">
 
+              {% smart_include "menuentries" %}
+
               {% if request.user.is_staff %}
               <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
               {% else %}
