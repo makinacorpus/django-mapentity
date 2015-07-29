@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis.geos.collections import GeometryCollection
 from django.contrib.gis.geos import Point, LineString
 
-import gpxpy
+import gpxpy.gpx
 
 from ..templatetags.mapentity_tags import humanize_timesince
 from .. import app_settings

@@ -2,6 +2,13 @@
 CHANGELOG
 =========
 
+2.5.2 (2015-07-29)
+==================
+
+**Bug fixes**
+
+- Upgrade gpxpy (fix elevation 0 in GPX exports)
+
 2.5.1 (2015-07-29)
 ==================
 
