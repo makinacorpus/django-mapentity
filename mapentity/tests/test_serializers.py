@@ -1,6 +1,6 @@
 import os
 from StringIO import StringIO
-
+from django.utils.translation import ugettext as _
 from django.test import TestCase
 from django.conf import settings
 from django.contrib.gis.db.models import GeometryField
@@ -54,7 +54,7 @@ class ShapefileSerializer(TestCase):
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():
             self.assertEquals(layer.srs.name, 'RGF93_Lambert_93')
-            self.assertItemsEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean'])
+            self.assertItemsEqual(layer.fields, [_('id'), _('name'), _('number'), _('size'), _('boolean')])
 
     def test_geometries_come_from_records(self):
         layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
