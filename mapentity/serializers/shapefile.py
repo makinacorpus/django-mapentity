@@ -1,25 +1,32 @@
 # -*- coding: utf-8 -*-
+
+from collections import OrderedDict
 import os
-import zipfile
 import tempfile
+import unicodedata
+import zipfile
+
+from django.contrib.gis.db.models.fields import (GeometryField, GeometryCollectionField,
+                                                 PointField, LineStringField,
+                                                 MultiPointField, MultiLineStringField)
+from django.contrib.gis.gdal import check_err, OGRGeomType
+from django.contrib.gis.geos import Point, LineString, MultiPoint, MultiLineString
+from django.contrib.gis.geos.collections import GeometryCollection
+from django.core.serializers.base import Serializer
+from django.db.models.fields.related import FieldDoesNotExist
+from django.utils.encoding import smart_str
+from django.utils.translation import ugettext as _
+
+from osgeo import ogr, osr
+
+from .. import app_settings
+from .helpers import field_as_string
+
+
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO  # noqa
-from collections import OrderedDict
-
-from django.core.serializers.base import Serializer
-from django.contrib.gis.gdal import check_err, OGRGeomType
-from django.contrib.gis.geos.collections import GeometryCollection
-from django.contrib.gis.geos import Point, LineString, MultiPoint, MultiLineString
-from django.contrib.gis.db.models.fields import (GeometryField, GeometryCollectionField,
-                                                 PointField, LineStringField,
-                                                 MultiPointField, MultiLineStringField)
-
-from osgeo import ogr, osr
-
-from .helpers import field_as_string
-from .. import app_settings
 
 
 class ZipShapeSerializer(Serializer):
@@ -121,7 +128,24 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
     Write tempfile with shape layer.
     """
 
-    tmp_file, layer, ds, native_srs, output_srs = create_shape_format_layer(columns, geom_type, srid, srid_out)
+    headers = []
+    columns_headers = {}
+    for field in columns:
+        c = getattr(model, '%s_verbose_name' % field, None)
+        if c is None:
+            try:
+                c = model._meta.get_field(field).verbose_name
+            except FieldDoesNotExist:
+                c = _(field.title())
+
+        reponse = unicode(c)
+        reponse = unicodedata.normalize('NFD', reponse)
+        reponse = smart_str(reponse.encode('ascii', 'ignore')).replace(' ', '_')
+
+        headers.append(reponse)
+        columns_headers[field] = reponse
+
+    tmp_file, layer, ds, native_srs, output_srs, column_map = create_shape_format_layer(headers, geom_type, srid, srid_out)
 
     feature_def = layer.GetLayerDefn()
 
@@ -141,7 +165,7 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
         for fieldname in columns:
             # They are all String (see create_shape_format_layer)
             value = field_as_string(item, fieldname, ascii=True)
-            feat.SetField(fieldname[:10], value[:255])
+            feat.SetField(column_map.get(columns_headers.get(fieldname)), value[:254])
 
         geom = get_geom(item)
         if geom:
@@ -155,7 +179,7 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
     return tmp_file.name
 
 
-def create_shape_format_layer(fieldnames, geom_type, srid, srid_out=None):
+def create_shape_format_layer(headers, geom_type, srid, srid_out=None):
     """Creates a Shapefile layer definition, that will later be filled with data.
 
     :note:
@@ -163,6 +187,8 @@ def create_shape_format_layer(fieldnames, geom_type, srid, srid_out=None):
         All attributes fields have type `String`.
 
     """
+    column_map = {}
+
     # Create temp file
     tmp = tempfile.NamedTemporaryFile(suffix='.shp', mode='w+b', dir=app_settings['TEMP_DIR'])
     # we must close the file for GDAL to be able to open and write to it
@@ -190,13 +216,19 @@ def create_shape_format_layer(fieldnames, geom_type, srid, srid_out=None):
         raise ValueError('Could not create layer (type=%s, srs=%s)' % (geom_type, output_srs))
 
     # Create other fields
-    for fieldname in fieldnames:
-        field_defn = ogr.FieldDefn(str(fieldname[:10]), ogr.OFTString)
-        field_defn.SetWidth(255)
-        if layer.CreateField(field_defn) != 0:
-            raise Exception('Faild to create field')
+    for fieldname in headers:
+        field_defn = ogr.FieldDefn(fieldname[:10], ogr.OFTString)
+        field_defn.SetWidth(254)
 
-    return tmp, layer, ds, native_srs, output_srs
+        if layer.CreateField(field_defn) != 0:
+            raise Exception('Failed to create field')
+
+        else:
+            # get name created for each field
+            layerDefinition = layer.GetLayerDefn()
+            column_map[fieldname] = layerDefinition.GetFieldDefn(layerDefinition.GetFieldCount() - 1).GetName()
+
+    return tmp, layer, ds, native_srs, output_srs, column_map
 
 
 def geo_field_from_model(model, default_geo_field_name=None):
