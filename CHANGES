@@ -5,7 +5,9 @@ CHANGELOG
 2.5.3.dev0
 ==================
 
--
+**Breaking changes**
+
+- Use translated verbose_name fields instead of column/property names in shapefiles export
 
 2.5.2 (2015-07-29)
 ==================
