@@ -28,6 +28,8 @@ try:
 except ImportError:
     from StringIO import StringIO  # noqa
 
+os.environ["SHAPE_ENCODING"] = "UTF-8"
+
 
 class ZipShapeSerializer(Serializer):
     def __init__(self, *args, **kwargs):
@@ -140,7 +142,7 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
 
         reponse = unicode(c)
         reponse = unicodedata.normalize('NFD', reponse)
-        reponse = smart_str(reponse.encode('ascii', 'ignore')).replace(' ', '_')
+        reponse = smart_str(reponse.encode('ascii', 'ignore')).replace(' ', '_').lower()
 
         headers.append(reponse)
         columns_headers[field] = reponse
@@ -165,7 +167,9 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
         for fieldname in columns:
             # They are all String (see create_shape_format_layer)
             value = field_as_string(item, fieldname, ascii=True)
-            feat.SetField(column_map.get(columns_headers.get(fieldname)), value[:254])
+
+            feat.SetField(column_map.get(columns_headers.get(fieldname)),
+                          value[:254])
 
         geom = get_geom(item)
         if geom:
