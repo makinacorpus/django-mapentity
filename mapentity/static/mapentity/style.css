@@ -12,9 +12,9 @@ body {
 
 /***** SPAN 6 *****/
 .row-fluid > .span6 > .pull-right {
-	margin-top: 5px;
-	/*margin-right: 5px;*/
-	padding-right: 12px;
+    margin-top: 5px;
+    /*margin-right: 5px;*/
+    padding-right: 12px;
 
 }
 
@@ -95,7 +95,7 @@ select[multiple] {
 /***** Reusables ******/
 
 .centered {
-	text-align: center;
+    text-align: center;
 }
 
 .autohide {
@@ -111,12 +111,12 @@ select[multiple] {
 /***** Alerts ******/
 
 #alert-box {
-	position: absolute;
-	top: 3px;
-	left: 50%;
-	width: 50%;
-	margin: 0 0 0 -25%;
-	z-index: 1000;
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    width: 50%;
+    margin: 0 0 0 -25%;
+    z-index: 1000;
 }
 
 #alert-box li.alert {
@@ -304,8 +304,8 @@ body.screamshot .enumeration-value {
 /**** Widgets ****/
 
 .axislabel {
-	color: blue;
-	font-size: 10px;
+    color: blue;
+    font-size: 10px;
 }
 
 tr.selected-row td {
@@ -413,13 +413,13 @@ tr.selected-row td {
 }
 
 #entitylist .nav-pills > li > a {
-	border-radius: 0px;
-	-moz-border-radius: 0px;
-	border-bottom: 1px solid #DDDDDD;
-	border-right: 1px solid #DDDDDD;
-	margin-bottom: 0px;
-	margin-top: 0px;
-	background-color: #F3F3F3;
+    border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-bottom: 1px solid #DDDDDD;
+    border-right: 1px solid #DDDDDD;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    background-color: #F3F3F3;
 }
 
 #entitylist .nav-pills > .active > a,
@@ -473,6 +473,19 @@ div.dataTables_paginate {
 @media (max-width: 1280px) {
     #objects-list_filter {
         left: 130px;
+    }
+
+    #list-download-toolbar{
+        padding-top: 50px;
+    }
+
+    #list-download-toolbar,
+    #objects-list_filter,
+    #objects-list_filter label,
+    div.dataTables_paginate {
+        position: inherit;
+        float: none;
+        text-align: center;
     }
 }
 
@@ -570,11 +583,11 @@ span.filter-info {
 }
 
 .details-panel h3 {
-	border-bottom: 1px solid #333333;
+    border-bottom: 1px solid #333333;
 }
 
 .details-panel td {
-	color: #636363;
+    color: #636363;
 }
 
 .details-panel th, .details-panel td {
@@ -587,7 +600,7 @@ span.filter-info {
 }
 
 .details-panel span.none {
-	opacity: 0.4;
+    opacity: 0.4;
 }
 
 .details-panel td .autohide {
@@ -595,7 +608,7 @@ span.filter-info {
 }
 
 .details-panel td ul {
-	margin: 0px;
+    margin: 0px;
 }
 
 .details-panel td p {  /* Autohide add buttons within <p> */
