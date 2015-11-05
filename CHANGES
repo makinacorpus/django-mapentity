@@ -2,10 +2,10 @@
 CHANGELOG
 =========
 
-2.6.1.dev0
+2.6.1 (2015-11-05)
 ==================
 
--
+- Rework CSS to prevent overlaping controls in list view
 
 2.6.0 (2015-10-28)
 ==================
