@@ -234,7 +234,7 @@ def capture_image(url, stream, **kwargs):
     download_to_stream(url, stream)
 
 
-def capture_map_image(url, destination, size=None, aspect=1.0):
+def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet-tile-loaded'):
     """Prepare aspect of the detail page
 
     It relies on JS code in MapEntity.Context
@@ -255,7 +255,7 @@ def capture_map_image(url, destination, size=None, aspect=1.0):
     with open(destination, 'wb') as fd:
         capture_image(url, fd,
                       selector='.map-panel',
-                      waitfor='.leaflet-tile-loaded')
+                      waitfor=waitfor)
 
 
 def extract_attributes_html(url, request):

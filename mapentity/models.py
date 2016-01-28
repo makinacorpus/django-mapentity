@@ -68,6 +68,7 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
 class MapEntityMixin(object):
 
     _entity = None
+    capture_map_image_waitfor = '.leaflet-tile-loaded'
 
     @classmethod
     def get_create_label(cls):
@@ -220,7 +221,7 @@ class MapEntityMixin(object):
         if is_file_newer(path, self.get_date_update()):
             return False
         url = smart_urljoin(rooturl, self.get_detail_url())
-        capture_map_image(url, path, aspect=self.get_geom_aspect_ratio())
+        capture_map_image(url, path, aspect=self.get_geom_aspect_ratio(), waitfor=self.capture_map_image_waitfor)
         return True
 
     def get_map_image_path(self):
