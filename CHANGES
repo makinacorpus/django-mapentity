@@ -2,6 +2,13 @@
 CHANGELOG
 =========
 
+2.7.1 (2016-01-28)
+==================
+
+**Bug fixes**
+
+- Set language to capture map images
+
 2.7.0 (2016-01-28)
 ==================
 

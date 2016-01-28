@@ -10,6 +10,7 @@ import json
 import string
 
 from django.utils import timezone
+from django.utils.translation import get_language
 from django.conf import settings
 from django.contrib.gis.gdal.error import OGRException
 from django.contrib.gis.geos import GEOSException, fromstr
@@ -250,7 +251,7 @@ def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet
     printcontext['print'] = True
     serialized = json.dumps(printcontext)
     # Run head-less capture (takes time)
-    url += '?context=' + urllib2.quote(serialized)
+    url += '?lang={}&context={}'.format(get_language(), urllib2.quote(serialized))
 
     with open(destination, 'wb') as fd:
         capture_image(url, fd,
