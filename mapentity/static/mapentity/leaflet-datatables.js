@@ -173,6 +173,7 @@ L.MapListSync = L.Class.extend({
         $form.find('input:text, input:password, input:file, select, textarea').val('').trigger('change');
         $form.find('input:radio, input:checkbox, select option')
              .removeAttr('checked').removeAttr('selected');
+        $form.find('select').val('').trigger("chosen:updated");
     },
 
     __initSelectorOnce: function () {
