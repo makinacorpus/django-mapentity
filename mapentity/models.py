@@ -1,4 +1,5 @@
 import os
+import math
 
 from django.db import models
 from django.db.utils import OperationalError
@@ -16,7 +17,7 @@ from paperclip.models import Attachment
 from rest_framework import permissions as rest_permissions
 
 from mapentity.templatetags.mapentity_tags import humanize_timesince
-from . import app_settings
+from .settings import app_settings, API_SRID
 from .helpers import smart_urljoin, is_file_newer, capture_map_image, extract_attributes_html
 
 
@@ -196,22 +197,11 @@ class MapEntityMixin(object):
     def attachments(self):
         return Attachment.objects.attachments_for_object(self)
 
-    def get_geom_aspect_ratio(self, maximum=None):
-        """ Returns a ratio with/height, bounded to a maximum aspect.
-        """
-        geom = self.get_geom()
-        if geom:
-            xmin, ymin, xmax, ymax = geom.extent
-            try:
-                aspect = (xmax - xmin) / (ymax - ymin)
-                if maximum is None:
-                    maximum = app_settings['MAP_CAPTURE_MAX_RATIO']
-                if maximum > 0:
-                    aspect = max(min(maximum, aspect), 1.0 / maximum)
-                return aspect
-            except ZeroDivisionError:
-                pass
-        return 1.0
+    def get_map_image_extent(self, srid=API_SRID):
+        fieldname = app_settings['GEOM_FIELD_NAME']
+        obj = getattr(self, fieldname)
+        obj.transform(srid)
+        return obj.extent
 
     def prepare_map_image(self, rooturl):
         if self.get_geom() is None:
@@ -221,7 +211,16 @@ class MapEntityMixin(object):
         if is_file_newer(path, self.get_date_update()):
             return False
         url = smart_urljoin(rooturl, self.get_detail_url())
-        capture_map_image(url, path, aspect=self.get_geom_aspect_ratio(), waitfor=self.capture_map_image_waitfor)
+        extent = self.get_map_image_extent(3857)
+        length = max(extent[2] - extent[0], extent[3] - extent[1])
+        hint_size = app_settings['MAP_CAPTURE_SIZE']
+        length_per_tile = 256 * length / hint_size
+        RADIUS = 6378137
+        CIRCUM = 2 * math.pi * RADIUS
+        zoom = round(math.log(CIRCUM / length_per_tile, 2))
+        size = math.ceil(length * 1.1 * 256 * 2 ** zoom / CIRCUM)
+        print length, hint_size, length_per_tile, zoom, size
+        capture_map_image(url, path, size=size, waitfor=self.capture_map_image_waitfor)
         return True
 
     def get_map_image_path(self):
