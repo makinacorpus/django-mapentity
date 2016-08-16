@@ -13,7 +13,7 @@ django-filter==0.7
 easy-thumbnails==1.4
 django-tinymce==1.5.1
 django-appypod>=0.0.2
-django-leaflet>=0.14
+django-leaflet==0.18.2
 django-geojson==2.6.0
 djangorestframework-gis==0.7
 django-embed-video==0.11

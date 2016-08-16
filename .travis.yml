@@ -1,46 +1,37 @@
+sudo: required
+dist: trusty
 language: python
 
 python:
   - 2.7
 
-before_install:
- - sudo apt-get update -qq
+env:
+  global:
+    - CPLUS_INCLUDE_PATH=/usr/include/gdal
+    - C_INCLUDE_PATH=/usr/include/gdal
 
 install:
- - sudo apt-get install -y python-software-properties
- - sudo apt-add-repository -y ppa:git-core/ppa
- - sudo apt-add-repository -y ppa:ubuntugis/ppa
- - sudo apt-get update -qq
-
- # GDAL-fix -- packaging is miserable, no way to obtain libgdal-dev for libgdal1 when libgdal1h available
- - sudo apt-get download -y libgdal-dev
- - sudo dpkg-deb -x libgdal-dev*.deb /
- - sudo ln -sf /usr/lib/libgdal.so.1 /usr/lib/libgdal.so
- - sudo ldconfig
- # GDAL for python... not better
- - pip install --no-install GDAL==1.9.1
- - pushd /home/travis/virtualenv/python2.7/build/GDAL
- - python setup.py build_ext --include-dirs=/usr/include/gdal
- - pip install --no-download GDAL
- - popd
-
-   # Spatialiate
- - sudo apt-get install -y libproj-dev libgeos-dev libspatialite-dev
+ - sudo apt-get update
+ - sudo apt-get install -y libgdal1-dev libproj-dev libgeos-dev libspatialite-dev
+ - pip install -U setuptools
  - pip install git+git://github.com/tinio/pysqlite.git@extension-enabled#egg=pysqlite
 
    # This is a dependency of our Django quicktest script
- - pip install argparse --use-mirrors
+ - pip install argparse
 
+ - pip install gdal==1.9.1
+ - pip install html5lib==0.999
  - pip install -r requirements.txt
 
  - pip install coverage
 
- - pip install flake8 --use-mirrors
+ - pip install flake8
 
  - python setup.py develop
 
 before_script:
  - flake8 --ignore=E501 mapentity
+ - pip freeze
 
 script:
  - python quicktest.py mapentity
