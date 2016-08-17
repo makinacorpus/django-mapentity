@@ -5,7 +5,9 @@ CHANGELOG
 2.8.3.dev0
 ==================
 
--
+**Bug fixes**
+
+- Fix latlngbounds template tag for GEOSGemetries objects
 
 2.8.2 (2016-08-17)
 ==================

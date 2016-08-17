@@ -3,6 +3,7 @@ import datetime
 
 from django import template
 from django.conf import settings
+from django.contrib.gis.geos import GEOSGeometry
 from django.template.base import TemplateDoesNotExist
 from django.db.models.fields.related import FieldDoesNotExist
 from django.utils.timezone import utc
@@ -54,7 +55,10 @@ def do_smart_include(parser, token):
 def latlngbounds(obj):
     if obj is None or isinstance(obj, basestring):
         return 'null'
-    extent = obj.get_map_image_extent()
+    if isinstance(obj, GEOSGeometry):
+        extent = obj.extent
+    else:
+        extent = obj.get_map_image_extent()
     return [[extent[1], extent[0]], [extent[3], extent[2]]]
 
 
