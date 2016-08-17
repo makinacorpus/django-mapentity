@@ -2,12 +2,16 @@
 CHANGELOG
 =========
 
-2.7.2.dev0
+2.8.0 (2016-08-17)
 ==================
 
 **New features**
 
 - Adjust size of map captures to entirely fill it with the geometry
+
+**Bug fixes**
+
+- Hide None in template if creator is not known
 
 2.7.1 (2016-01-28)
 ==================
