@@ -2,10 +2,12 @@
 CHANGELOG
 =========
 
-2.8.1.dev0 (unreleased)
+2.8.1 (2016-08-17)
 ==================
 
--
+**Bug fixes**
+
+- Forgot to package leaflet plugins
 
 2.8.0 (2016-08-17)
 ==================
