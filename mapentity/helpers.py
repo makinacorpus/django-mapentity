@@ -134,7 +134,7 @@ def is_file_newer(path, date_update, delete_empty=True):
             os.remove(path)
         return False
 
-    modified = datetime.fromtimestamp(os.path.getmtime(path))
+    modified = datetime.utcfromtimestamp(os.path.getmtime(path))
     modified = modified.replace(tzinfo=timezone.utc)
     return modified > date_update
 
