@@ -213,13 +213,15 @@ class MapEntityMixin(object):
         url = smart_urljoin(rooturl, self.get_detail_url())
         extent = self.get_map_image_extent(3857)
         length = max(extent[2] - extent[0], extent[3] - extent[1])
-        hint_size = app_settings['MAP_CAPTURE_SIZE']
-        length_per_tile = 256 * length / hint_size
-        RADIUS = 6378137
-        CIRCUM = 2 * math.pi * RADIUS
-        zoom = round(math.log(CIRCUM / length_per_tile, 2))
-        size = math.ceil(length * 1.1 * 256 * 2 ** zoom / CIRCUM)
-        print length, hint_size, length_per_tile, zoom, size
+        if length:
+            hint_size = app_settings['MAP_CAPTURE_SIZE']
+            length_per_tile = 256 * length / hint_size
+            RADIUS = 6378137
+            CIRCUM = 2 * math.pi * RADIUS
+            zoom = round(math.log(CIRCUM / length_per_tile, 2))
+            size = math.ceil(length * 1.1 * 256 * 2 ** zoom / CIRCUM)
+        else:
+            size = app_settings['MAP_CAPTURE_SIZE']
         capture_map_image(url, path, size=size, waitfor=self.capture_map_image_waitfor)
         return True
 
