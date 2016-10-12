@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 from datetime import datetime
 
@@ -394,6 +395,11 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         context['attachment_form_class'] = AttachmentForm
         context['template_attributes'] = self.template_attributes
         context['mapentity_weasyprint'] = app_settings['MAPENTITY_WEASYPRINT']
+        if 'context' in self.request.GET:
+            mapcontext = json.loads(self.request.GET['context'])
+            if 'mapsize' in mapcontext:
+                context['mapwidth'] = int(mapcontext['mapsize']['width'])
+                context['mapheight'] = int(mapcontext['mapsize']['height'])
 
         return context
 

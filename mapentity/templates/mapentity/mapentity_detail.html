@@ -92,7 +92,7 @@
         </div>
     </div><!-- span7 -->
 
-    <div class="map-panel detail span5">
+    <div class="map-panel detail span5" {% if mapwidth and mapheight %}style="width: {{ mapwidth }}px; height: {{ mapheight }}px;"{% endif %}>
         {% block mappanel %}
         {% if object.get_geom %}
             {% include "mapentity/mapgeometry_fragment.html" with mapname="detailmap" %}
