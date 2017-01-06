@@ -243,6 +243,7 @@ class MapEntityDocumentOdt(MapEntityDocumentBase):
         context['_'] = _
         return context
 
+
 if app_settings['MAPENTITY_WEASYPRINT']:
     MapEntityDocument = MapEntityDocumentWeasyprint
 else:

@@ -49,6 +49,7 @@ def create_user_with_password(cls, **kwargs):
     user.save()
     return user
 
+
 UserFactory.set_creation_function(create_user_with_password)
 
 

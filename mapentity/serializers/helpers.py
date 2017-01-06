@@ -61,6 +61,7 @@ class DjangoJSONEncoder(DateTimeAwareJSONEncoder):
             return json.loads(serialize('json', obj))
         return super(DjangoJSONEncoder, self).default(obj)
 
+
 # partial function, we can now use dumps(my_dict) instead
 # of dumps(my_dict, cls=DjangoJSONEncoder)
 json_django_dumps = curry(json.dumps, cls=DjangoJSONEncoder)

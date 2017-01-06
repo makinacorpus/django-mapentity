@@ -51,4 +51,5 @@ class DummyModel(MapEntityMixin, models.Model):
     class Meta:
         verbose_name = _(u"Dummy Model")
 
+
 loading.cache.loaded = False
