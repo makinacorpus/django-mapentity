@@ -1,6 +1,7 @@
 *.pyc
 *.egg*/
 *.sw?
+.idea/
 build/
 dist/
 docs/_build/
