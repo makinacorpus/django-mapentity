@@ -8,6 +8,7 @@ CHANGELOG
 **Bug fixes**
 
 - Fix install
+- Add initial migration
 
 2.8.4 (2016-10-12)
 ==================
