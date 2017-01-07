@@ -129,14 +129,14 @@ class MapEntityFormat(BaseListView, ListView):
 
     def csv_view(self, request, context, **kwargs):
         serializer = mapentity_serializers.CSVSerializer()
-        response = HttpResponse(mimetype='text/csv')
+        response = HttpResponse(content_type='text/csv')
         serializer.serialize(queryset=self.get_queryset(), stream=response,
                              model=self.get_model(), fields=self.columns, ensure_ascii=True)
         return response
 
     def shape_view(self, request, context, **kwargs):
         serializer = mapentity_serializers.ZipShapeSerializer()
-        response = HttpResponse(mimetype='application/zip')
+        response = HttpResponse(content_type='application/zip')
         serializer.serialize(queryset=self.get_queryset(), model=self.get_model(),
                              stream=response, fields=self.columns)
         response['Content-length'] = str(len(response.content))
@@ -144,7 +144,7 @@ class MapEntityFormat(BaseListView, ListView):
 
     def gpx_view(self, request, context, **kwargs):
         serializer = mapentity_serializers.GPXSerializer()
-        response = HttpResponse(mimetype='application/gpx+xml')
+        response = HttpResponse(content_type='application/gpx+xml')
         serializer.serialize(self.get_queryset(), model=self.get_model(), stream=response,
                              geom_field=app_settings['GEOM_FIELD_NAME'])
         return response
@@ -171,7 +171,7 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
         if settings.DEBUG or not app_settings['SENDFILE_HTTP_HEADER']:
             response = static.serve(self.request, path, settings.MEDIA_ROOT)
         else:
-            response = HttpResponse(mimetype='image/png')
+            response = HttpResponse(content_type='image/png')
             response[app_settings['SENDFILE_HTTP_HEADER']] = os.path.join(settings.MEDIA_URL_SECURE, path)
         return response
 
