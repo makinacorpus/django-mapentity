@@ -6,7 +6,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 test_requires = [
     'mock',
-    'factory_boy == 1.1.5',
+    'factory_boy == 2.8.1',
 ]
 
 setup(

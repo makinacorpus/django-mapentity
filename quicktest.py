@@ -1,7 +1,9 @@
 import os
 import sys
 import argparse
+import django
 from django.conf import settings
+from django.test.runner import DiscoverRunner
 
 
 class QuickDjangoTest(object):
@@ -95,8 +97,8 @@ class QuickDjangoTest(object):
             COMPRESS_ENABLED=False,
             TEST=True
         )
-        from django.test.simple import DjangoTestSuiteRunner
-        runner = DjangoTestSuiteRunner()
+        django.setup()
+        runner = DiscoverRunner()
         failures = runner.run_tests(self.apps, verbosity=1)
         if failures:  # pragma: no cover
             sys.exit(failures)

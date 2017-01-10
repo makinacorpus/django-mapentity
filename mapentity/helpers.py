@@ -17,7 +17,7 @@ from django.contrib.gis.geos import GEOSException, fromstr
 from django.template.base import TemplateDoesNotExist
 from django.http import HttpResponse
 from django.core.urlresolvers import resolve
-from djappypod.odt import get_template
+from django.template.loader import get_template
 
 import bs4
 import requests

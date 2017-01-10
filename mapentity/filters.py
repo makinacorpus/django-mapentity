@@ -1,5 +1,5 @@
 from django import forms as django_forms
-from django.db.models.related import RelatedObject
+from django.db.models.fields.related import ManyToOneRel
 from django.conf import settings
 
 from django_filters import FilterSet, Filter
@@ -17,7 +17,7 @@ class PolygonFilter(Filter):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('name', app_settings['GEOM_FIELD_NAME'])
         kwargs.setdefault('widget', HiddenGeometryWidget)
-        kwargs.setdefault('lookup_type', 'intersects')
+        kwargs.setdefault('lookup_expr', 'intersects')
         super(PolygonFilter, self).__init__(*args, **kwargs)
 
 
@@ -33,7 +33,7 @@ class PythonPolygonFilter(PolygonFilter):
         for o in qs.all():
             geom = getattr(o, self.name)
             if geom and geom.valid and not geom.empty:
-                if getattr(geom, self.lookup_type)(value):
+                if getattr(geom, self.lookup_expr)(value):
                     filtered.append(o.pk)
             else:
                 filtered.append(o.pk)
@@ -77,7 +77,7 @@ class BaseMapEntityFilterSet(FilterSet):
     def add_filter(cls, name, filter_=None):
         field = get_model_field(cls._meta.model, name)
         if filter_ is None:
-            if isinstance(field, RelatedObject):
+            if isinstance(field, ManyToOneRel):
                 filter_ = cls.filter_for_reverse_field(field, name)
             else:
                 filter_ = cls.filter_for_field(field, name)

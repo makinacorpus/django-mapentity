@@ -76,6 +76,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
         renderer, media_type = self.perform_content_negotiation(self.request)
         if getattr(renderer, 'format') == 'geojson':
             class Serializer(serializer, GeoFeatureModelSerializer):
-                pass
+                class Meta(serializer.Meta):
+                    pass
             return Serializer
         return serializer

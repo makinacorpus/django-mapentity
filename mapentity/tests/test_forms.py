@@ -7,6 +7,7 @@ from .models import DummyModel
 class DummyForm(MapEntityForm):
     class Meta:
         model = DummyModel
+        fields = '__all__'
 
 
 class MapEntityFormTest(TestCase):

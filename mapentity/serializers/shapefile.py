@@ -136,7 +136,11 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
         c = getattr(model, '%s_verbose_name' % field, None)
         if c is None:
             try:
-                c = model._meta.get_field(field).verbose_name
+                f = model._meta.get_field(field)
+                if f.one_to_many:
+                    c = f.field.model._meta.verbose_name_plural
+                else:
+                    c = f.verbose_name
             except FieldDoesNotExist:
                 c = _(field.title())
 

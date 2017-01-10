@@ -2,12 +2,12 @@
 CHANGELOG
 =========
 
-2.8.8.dev0
+3.0.0.dev0
 ==================
 
-**Bug fixes**
+**Breaking change**
 
--
+- Require Django 1.8
 
 2.8.7 (2017-02-06)
 ==================

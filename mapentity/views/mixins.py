@@ -104,6 +104,7 @@ class FormViewMixin(object):
             class MapEntityAutoForm(MapEntityForm):
                 class Meta:
                     model = _model
+                    fields = '__all__'
             self.form_class = MapEntityAutoForm
         return self.form_class
 
@@ -122,6 +123,7 @@ class FilterListMixin(object):
             class filterklass(MapEntityFilterSet):
                 class Meta:
                     model = _model
+                    fields = ("id", )
             self.filterform = filterklass
         self._filterform = self.filterform(None, self.queryset)
 

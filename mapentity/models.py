@@ -229,7 +229,7 @@ class MapEntityMixin(object):
         basefolder = os.path.join(settings.MEDIA_ROOT, 'maps')
         if not os.path.exists(basefolder):
             os.makedirs(basefolder)
-        return os.path.join(basefolder, '%s-%s.png' % (self._meta.module_name, self.pk))
+        return os.path.join(basefolder, '%s-%s.png' % (self._meta.model_name, self.pk))
 
     def get_attributes_html(self, request):
         return extract_attributes_html(self.get_detail_url(), request)

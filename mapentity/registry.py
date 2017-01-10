@@ -40,17 +40,16 @@ class MapEntityOptions(object):
         self.model = model
         self.label = model._meta.verbose_name_plural
         self.app_label = model._meta.app_label
-        self.module_name = model._meta.module_name
-        self.modelname = self.module_name
-        self.icon = 'images/%s.png' % self.module_name
-        self.icon_small = 'images/%s-16.png' % self.module_name
-        self.icon_big = 'images/%s-96.png' % self.module_name
+        self.modelname = model._meta.model_name
+        self.icon = 'images/%s.png' % self.modelname
+        self.icon_small = 'images/%s-16.png' % self.modelname
+        self.icon_big = 'images/%s-96.png' % self.modelname
 
         self.rest_router = rest_routers.DefaultRouter(trailing_slash=False)
 
         # Can't do reverse right now, URL not setup yet
-        self.url_list = '%s:%s_%s' % (self.app_label, self.module_name, 'list')
-        self.url_add = '%s:%s_%s' % (self.app_label, self.module_name, 'add')
+        self.url_list = '%s:%s_%s' % (self.app_label, self.modelname, 'list')
+        self.url_add = '%s:%s_%s' % (self.app_label, self.modelname, 'add')
 
     def scan_views(self):
         """
@@ -118,7 +117,7 @@ class MapEntityOptions(object):
                 serializer_class = _serializer
             rest_viewset = dynamic_viewset
 
-        self.rest_router.register(self.modelname + 's', rest_viewset)
+        self.rest_router.register(self.modelname + 's', rest_viewset, base_name=self.modelname)
 
         # Returns Django URL patterns
         return patterns('', *self.__view_classes_to_url(*picked))
@@ -131,6 +130,7 @@ class MapEntityOptions(object):
                 model = _model
                 geo_field = app_settings['GEOM_FIELD_NAME']
                 id_field = 'id'
+                exclude = []
 
         return Serializer
 
@@ -169,7 +169,7 @@ class MapEntityOptions(object):
 
     def url_shortname(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS
-        return '%s_%s' % (self.module_name, kind)
+        return '%s_%s' % (self.modelname, kind)
 
     def url_name(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS
@@ -189,10 +189,10 @@ class Registry(object):
 
         # Ignore models from not installed apps
         if not model._meta.installed:
-            return ()
+            return []
         # Register once only
         if model in self.registry:
-            return ()
+            return []
 
         if options is None:
             options = MapEntityOptions(model)

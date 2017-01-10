@@ -4,7 +4,8 @@ from django.contrib.auth import get_user_model
 
 
 class UserFactory(factory.Factory):
-    FACTORY_FOR = get_user_model()
+    class Meta:
+        model = get_user_model()
 
     username = factory.Sequence('mary_poppins{0}'.format)
     first_name = factory.Sequence('Mary {0}'.format)
@@ -41,16 +42,13 @@ class UserFactory(factory.Factory):
 
         return user
 
-
-def create_user_with_password(cls, **kwargs):
-    pwd = kwargs.pop('password', None)
-    user = cls(**kwargs)
-    user.set_password(pwd)
-    user.save()
-    return user
-
-
-UserFactory.set_creation_function(create_user_with_password)
+    @classmethod
+    def _create(cls, model_class, **kwargs):
+        pwd = kwargs.pop('password', None)
+        user = model_class(**kwargs)
+        user.set_password(pwd)
+        user.save()
+        return user
 
 
 class SuperUserFactory(UserFactory):

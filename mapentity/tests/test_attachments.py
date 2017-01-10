@@ -18,7 +18,7 @@ User = get_user_model()
 def add_url_for_obj(obj):
     return reverse('add_attachment', kwargs={
         'app_label': obj._meta.app_label,
-        'module_name': obj._meta.module_name,
+        'modelname': obj._meta.model_name,
         'pk': obj.pk
     })
 

@@ -106,7 +106,7 @@ def view_cache_response_content():
                 if latest_saved:
                     geojson_lookup = '%s_%s_%s_json_layer' % (
                         language,
-                        view_model._meta.module_name,
+                        view_model._meta.model_name,
                         latest_saved.strftime('%y%m%d%H%M%S%f')
                     )
                 else:
