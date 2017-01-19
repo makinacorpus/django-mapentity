@@ -37,6 +37,16 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'paperclip',
+    'leaflet',
+    'djgeojson',
+    'compressor',
+    'easy_thumbnails',
+    'crispy_forms',
+    'floppyforms',
+    'rest_framework',
+    'embed_video',
+    'mapentity',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -48,6 +58,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'mapentity.middleware.AutoLoginMiddleware',
 )
 
 ROOT_URLCONF = 'test_project.urls'
@@ -59,10 +71,15 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
+                'django.core.context_processors.debug',
+                'django.core.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.core.context_processors.i18n',
+                'django.core.context_processors.media',
+                'django.core.context_processors.static',
+                'django.core.context_processors.tz',
+                'mapentity.context_processors.settings',
             ],
         },
     },
@@ -76,11 +93,14 @@ WSGI_APPLICATION = 'test_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+        'NAME': os.path.join(BASE_DIR, 'database.db'),
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -100,3 +120,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',
+    }
+}
+
+MEDIA_URL = '/media/'
+MEDIA_URL_SECURE = '/media_secure/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+SRID = 3857
+COMPRESS_ENABLED = False
+TEST = True
+
+SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
