@@ -178,7 +178,7 @@ def map_screenshot(request):
     """
     try:
         printcontext = request.POST['printcontext']
-        assert len(printcontext) < 512, "Print context is way too big."
+        assert len(printcontext) < 2048, "Print context is way too big."
 
         # Prepare context, extract and add infos
         context = json.loads(printcontext)
@@ -200,9 +200,9 @@ def map_screenshot(request):
         response['Content-Disposition'] = 'attachment; filename=%s.png' % datetime.now().strftime('%Y%m%d-%H%M%S')
         return response
 
-    except Exception, e:
-        logger.exception(e)
-        return HttpResponseBadRequest(e)
+    except Exception as exc:
+        logger.exception(exc)
+        return HttpResponseBadRequest(exc)
 
 
 @require_http_methods(["POST"])
