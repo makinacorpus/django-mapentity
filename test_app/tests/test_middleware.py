@@ -6,10 +6,10 @@ from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 
-from .. import middleware
+from mapentity import middleware
+from mapentity.middleware import AutoLoginMiddleware, get_internal_user
 import mock
 
-from ..middleware import AutoLoginMiddleware, get_internal_user
 from .test_views import DummyModelFactory
 
 
@@ -34,10 +34,10 @@ class AutoLoginTest(TestCase):
     def test_auto_login_happens_by_remote_addr(self):
         DummyModelFactory.create()
         middleware.CONVERSION_SERVER_HOST = '1.2.3.4'
-        response = self.client.get('/media/paperclip/tests_dummymodel/1/file.pdf', REMOTE_ADDR='1.2.3.5')
+        response = self.client.get('/media/paperclip/test_app_dummymodel/1/file.pdf', REMOTE_ADDR='1.2.3.5')
         self.assertEqual(response.status_code, 403)
         with mock.patch('django.contrib.auth.models._user_has_perm', return_value=True):
-            response = self.client.get('/media/paperclip/tests_dummymodel/1/file.pdf', REMOTE_ADDR='1.2.3.4')
+            response = self.client.get('/media/paperclip/test_app_dummymodel/1/file.pdf', REMOTE_ADDR='1.2.3.4')
         self.assertEqual(response.status_code, 200)
 
     def test_auto_login_do_not_change_current_user(self):

@@ -11,7 +11,7 @@ from django.utils import translation
 from mapentity.serializers import ZipShapeSerializer, CSVSerializer
 from mapentity.serializers.shapefile import shapefile_files
 
-from .models import MushroomSpot
+from ..models import MushroomSpot
 
 
 class ShapefileSerializer(TestCase):

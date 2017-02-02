@@ -25,7 +25,7 @@ SECRET_KEY = '37r=l^!c^1-7o8z2luc%a1x&)jt^9v+ockis0ql7k_y*lm555('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -38,7 +38,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'paperclip',
-    'leaflet',
     'djgeojson',
     'compressor',
     'easy_thumbnails',
@@ -47,6 +46,8 @@ INSTALLED_APPS = (
     'rest_framework',
     'embed_video',
     'mapentity',
+    'leaflet',
+    'test_app',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -65,6 +66,9 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'test_project.urls'
 
 TEMPLATES = [
+    {
+        'BACKEND': 'djappypod.backend.OdtTemplates',
+    },
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
@@ -136,5 +140,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SRID = 3857
 COMPRESS_ENABLED = False
 TEST = True
+
+MAPENTITY_CONFIG = {
+    'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
+}
 
 SPATIALITE_LIBRARY_PATH = 'mod_spatialite'

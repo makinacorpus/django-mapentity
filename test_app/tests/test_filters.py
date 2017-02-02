@@ -5,8 +5,8 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.conf import settings
 
 from mapentity.settings import API_SRID
-from .models import MushroomSpot, WeatherStation
-from ..filters import PythonPolygonFilter, PolygonFilter, MapEntityFilterSet
+from mapentity.filters import PythonPolygonFilter, PolygonFilter, MapEntityFilterSet
+from ..models import MushroomSpot, WeatherStation
 
 
 class PolygonTest(object):
@@ -70,24 +70,24 @@ class PluggableFilterSetTest(TestCase):
 
     def test_empty_filter(self):
         filterset = self.filterset_class({'name': 'Foo'})
-        self.assertEqual(filterset.count(), 1)
+        self.assertEqual(filterset.qs.count(), 1)
 
     def test_add_filter_found(self):
         self.filterset_class.add_filter('name')
         filterset = self.filterset_class({'name': 'Empty'})
-        self.assertEqual(filterset.count(), 1)
+        self.assertEqual(filterset.qs.count(), 1)
 
     def test_add_filter_not_found(self):
         self.filterset_class.add_filter('name')
         filterset = self.filterset_class({'name': 'Foo'})
-        self.assertEqual(filterset.count(), 0)
+        self.assertEqual(filterset.qs.count(), 0)
 
     def test_add_filters_found(self):
         self.filterset_class.add_filters({'name': CharFilter()})
         filterset = self.filterset_class({'name': 'Empty'})
-        self.assertEqual(filterset.count(), 1)
+        self.assertEqual(filterset.qs.count(), 1)
 
     def test_add_filters_not_found(self):
         self.filterset_class.add_filters({'name': CharFilter()})
         filterset = self.filterset_class({'name': 'Foo'})
-        self.assertEqual(filterset.count(), 0)
+        self.assertEqual(filterset.qs.count(), 0)

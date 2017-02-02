@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.gis.db.models import GeometryField
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
 from ..forms import MapEntityForm
@@ -123,7 +124,7 @@ class FilterListMixin(object):
             class filterklass(MapEntityFilterSet):
                 class Meta:
                     model = _model
-                    fields = ("id", )
+                    fields = [field.name for field in _model._meta.get_fields() if not isinstance(field, GeometryField)]
             self.filterform = filterklass
         self._filterform = self.filterform(None, self.queryset)
 

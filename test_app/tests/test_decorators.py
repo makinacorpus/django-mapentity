@@ -1,4 +1,5 @@
 import mock
+from django.http import HttpRequest
 from django.test import TestCase
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -11,7 +12,9 @@ from mapentity.decorators import view_permission_required
 class ViewPermissionRequiredTestCase(TestCase):
     def setUp(self):
         # Fake request and its positional and keywords arguments.
-        self.request = mock.MagicMock()
+        self.request = mock.MagicMock(spec=HttpRequest())
+        self.request._messages = mock.MagicMock()
+        self.request.user = mock.MagicMock()
         self.request.user.is_anonymous = mock.MagicMock(return_value=False)
         self.request_args = ['fake_arg']
         self.request_kwargs = {'fake': 'kwarg'}
@@ -69,7 +72,7 @@ class ViewPermissionRequiredTestCase(TestCase):
     def test_it_redirects_to_the_specified_view(self):
         self.request.user.has_perm.return_value = False
         response = self.run_decorated_view(raise_exception=False,
-                                           login_url='tests:dummymodel_list')
+                                           login_url='test_app:dummymodel_list')
         self.assertEqual(response.status_code, 302)
-        dummylist_url = reverse('tests:dummymodel_list')
+        dummylist_url = reverse('test_app:dummymodel_list')
         self.assertTrue(dummylist_url in response['Location'])

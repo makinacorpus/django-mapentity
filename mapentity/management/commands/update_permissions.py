@@ -1,7 +1,7 @@
+from importlib import import_module
 import logging
 
 from django.conf import settings
-from django.utils.importlib import import_module
 from django.core.management.base import BaseCommand
 
 from mapentity import registry

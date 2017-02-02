@@ -1,2 +1,4 @@
 sphinx
 zest.releaser
+mock
+factory_boy

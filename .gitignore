@@ -2,6 +2,7 @@
 *.egg*/
 *.sw?
 .idea/
+env/
 build/
 dist/
 docs/_build/

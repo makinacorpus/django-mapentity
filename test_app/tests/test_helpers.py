@@ -3,8 +3,8 @@ import os
 import mock
 from django.test import TestCase
 
-from .. import app_settings
-from ..helpers import (
+from mapentity import app_settings
+from mapentity.helpers import (
     capture_url,
     convertit_url,
     user_has_perm,
@@ -15,9 +15,11 @@ from ..helpers import (
 class MapEntityCaptureHelpersTest(TestCase):
 
     def test_capture_url_uses_setting(self):
+        orig = app_settings['CAPTURE_SERVER']
         app_settings['CAPTURE_SERVER'] = 'https://vlan'
         url = capture_url('')
         self.assertTrue(url.startswith('https://vlan'))
+        app_settings['CAPTURE_SERVER'] = orig
 
     def test_capture_url_is_escaped(self):
         url = capture_url('http://geotrek.fr')
@@ -41,9 +43,11 @@ class MapEntityCaptureHelpersTest(TestCase):
 class MapEntityConvertHelpersTest(TestCase):
 
     def test_convert_url_uses_setting(self):
+        orig = app_settings['CONVERSION_SERVER']
         app_settings['CONVERSION_SERVER'] = 'https://vlan'
         url = convertit_url('')
         self.assertTrue(url.startswith('https://vlan'))
+        app_settings['CONVERSION_SERVER'] = orig
 
     def test_convert_url_is_escaped(self):
         url = convertit_url('http://geotrek.fr')
@@ -73,8 +77,10 @@ class UserHasPermTest(TestCase):
         self.user = mock.MagicMock()
 
     def test_return_true_if_anonymous_has_perm(self):
+        orig = app_settings['ANONYMOUS_VIEWS_PERMS']
         app_settings['ANONYMOUS_VIEWS_PERMS'] = ('view-perm',)
         self.assertTrue(user_has_perm(self.user, 'view-perm'))
+        app_settings['ANONYMOUS_VIEWS_PERMS'] = orig
 
 
 class DownloadStreamTest(TestCase):

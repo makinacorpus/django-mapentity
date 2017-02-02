@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.template import Template, Context
 
-from .models import DummyModel
+from ..models import DummyModel
 
 
 class ValueListTest(TestCase):

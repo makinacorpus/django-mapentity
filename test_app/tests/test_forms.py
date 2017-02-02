@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from mapentity.forms import MapEntityForm
-from .models import DummyModel
+from ..models import DummyModel
 
 
 class DummyForm(MapEntityForm):
@@ -13,6 +13,7 @@ class DummyForm(MapEntityForm):
 class MapEntityFormTest(TestCase):
 
     def test_can_delete_actions(self):
+        import test_project.urls
         sample_object = DummyModel.objects.create()
         delete_url = sample_object.get_delete_url()
         form = DummyForm(instance=sample_object)

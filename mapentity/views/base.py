@@ -22,7 +22,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.template import RequestContext, Context, loader
 from django.shortcuts import get_object_or_404
-from django.db.models.loading import get_model
+from django.apps import apps
 
 from ..decorators import view_permission_required
 from ..settings import app_settings, _MAP_STYLES
@@ -71,8 +71,9 @@ def serve_attachment(request, path, app_label, model_name, pk):
     Serve media/ for authorized users only, since it can contain sensitive
     information (uploaded documents)
     """
-    model = get_model(app_label, model_name)
-    if not model:
+    try:
+        model = apps.get_model(app_label, model_name)
+    except LookupError:
         raise Http404
     if not issubclass(model, mapentity_models.MapEntityMixin):
         raise Http404

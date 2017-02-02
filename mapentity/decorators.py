@@ -5,7 +5,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import last_modified as cache_last_modified
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
-from django.core.cache import get_cache
+from django.core.cache import caches
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.views.generic.edit import BaseUpdateView
@@ -112,7 +112,7 @@ def view_cache_response_content():
                 else:
                     geojson_lookup = None
 
-            geojson_cache = get_cache(app_settings['GEOJSON_LAYERS_CACHE_BACKEND'])
+            geojson_cache = caches[app_settings['GEOJSON_LAYERS_CACHE_BACKEND']]
 
             if geojson_lookup:
                 content = geojson_cache.get(geojson_lookup)

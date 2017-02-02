@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 
 from . import app_settings
 from . import registry
@@ -16,8 +16,7 @@ if _MEDIA_URL.endswith('/'):
     _MEDIA_URL = _MEDIA_URL[:-1]
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^map_screenshot/$', map_screenshot, name='map_screenshot'),
     url(r'^convert/$', Convert.as_view(), name='convert'),
     url(r'^history/delete/$', history_delete, name='history_delete'),
@@ -25,14 +24,13 @@ urlpatterns = patterns(
     # See default value in app_settings.JS_SETTINGS.
     # Will be overriden, most probably.
     url(r'^api/settings.json$', JSSettings.as_view(), name='js_settings'),
-)
+]
 
 
 if settings.DEBUG or app_settings['SENDFILE_HTTP_HEADER']:
-    urlpatterns += patterns(
-        '',
+    urlpatterns += [
         url(r'^%s/(?P<path>paperclip/(?P<app_label>.+)_(?P<model_name>.+)/(?P<pk>\d+)/.+)$' % _MEDIA_URL, serve_attachment),
-    )
+    ]
 
 
 if app_settings['ACTION_HISTORY_ENABLED']:

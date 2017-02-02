@@ -2,6 +2,7 @@ import mock
 
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
@@ -9,8 +10,7 @@ from django.core.urlresolvers import reverse
 from paperclip.models import Attachment, FileType
 from mapentity.views.generic import MapEntityDetail
 
-from .models import DummyModel
-
+from ..models import DummyModel
 
 User = get_user_model()
 
@@ -18,13 +18,14 @@ User = get_user_model()
 def add_url_for_obj(obj):
     return reverse('add_attachment', kwargs={
         'app_label': obj._meta.app_label,
-        'modelname': obj._meta.model_name,
+        'model_name': obj._meta.model_name,
         'pk': obj.pk
     })
 
 
 class EntityAttachmentTestCase(TestCase):
     def setUp(self):
+        import test_project.urls
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
 
         def user_perms(p):
@@ -57,11 +58,12 @@ class EntityAttachmentTestCase(TestCase):
 
     def test_list_attachments_in_details(self):
         self.createAttachment(self.object)
-        request = self.createRequest()
-        view = MapEntityDetail.as_view(model=DummyModel,
-                                       template_name="mapentity/mapentity_detail.html")
-        response = view(request, pk=self.object.pk)
-        html = unicode(response.render())
+        self.user.user_permissions.add(Permission.objects.get(codename='read_dummymodel'))
+        self.user.user_permissions.add(Permission.objects.get(codename='read_attachment'))
+        self.client.login(username='howard', password='booh')
+        response = self.client.get('/dummymodel/{pk}/'.format(pk=self.object.pk))
+
+        html = response.content
         self.assertTemplateUsed(response, template_name='paperclip/attachment_list.html')
 
         self.assertEqual(1, len(Attachment.objects.attachments_for_object(self.object)))
@@ -81,13 +83,16 @@ class EntityAttachmentTestCase(TestCase):
         request = self.createRequest()
         response = view(request, pk=self.object.pk)
         html = unicode(response.render())
+        with open('/home/gutard/tmp/toto.html', 'w') as f:
+            f.write(html)
         self.assertIn("Submit attachment", html)
-        self.assertIn("""<form action="/paperclip/add-for/tests/dummymodel/1/""", html)
+        self.assertIn("""<form action="/paperclip/add-for/test_app/dummymodel/1/""", html)
 
 
 class UploadAttachmentTestCase(TestCase):
 
     def setUp(self):
+        import test_project.urls
         self.object = DummyModel.objects.create()
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')
         user.is_superuser = True
@@ -105,6 +110,7 @@ class UploadAttachmentTestCase(TestCase):
             'title': 'A title',
             'legend': 'A legend',
             'attachment_file': uploaded,
+            'attachment_video': '',
             'next': self.object.get_detail_url()
         }
         return data

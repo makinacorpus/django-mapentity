@@ -6,7 +6,7 @@ from mapentity.middleware import get_internal_user
 from mapentity.helpers import user_has_perm
 from mapentity.factories import UserFactory
 
-from .models import DummyModel
+from ..models import DummyModel
 
 
 class ModelPermissionsTest(TestCase):
@@ -32,7 +32,7 @@ class ModelPermissionsTest(TestCase):
 
     def test_internal_user_permissions_work_as_others(self):
         internal_user = get_internal_user()
-        self.assertTrue(user_has_perm(internal_user, 'tests.read_dummymodel'))
+        self.assertTrue(user_has_perm(internal_user, 'test_app.read_dummymodel'))
 
 
 class NavBarPermissionsTest(TestCase):

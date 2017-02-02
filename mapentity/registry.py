@@ -1,11 +1,11 @@
 import re
+from importlib import import_module
 import inspect
 import logging
 from collections import OrderedDict
 
 from django.db.utils import ProgrammingError
 from django.db import DEFAULT_DB_ALIAS
-from django.utils.importlib import import_module
 from django.utils.translation import ugettext as _
 from django.views.generic.base import View
 from django.conf.urls import patterns, url, include

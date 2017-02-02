@@ -13,19 +13,21 @@ from django.contrib.auth.models import Permission
 from mapentity.factories import SuperUserFactory
 
 from mapentity import app_settings
+from mapentity.tests import MapEntityTest, MapEntityLiveTest
 from mapentity.views import serve_attachment, Convert, JSSettings
 
-from .models import DummyModel
-from .views import DummyList, DummyDetail
-from .test_functional import MapEntityTest, MapEntityLiveTest
+from ..models import DummyModel
+from ..views import DummyList, DummyDetail
 
 
 User = get_user_model()
 
 
-class DummyModelFactory(factory.Factory):
-    FACTORY_FOR = DummyModel
+class DummyModelFactory(factory.DjangoModelFactory):
     name = ''
+
+    class Meta:
+        model = DummyModel
 
 
 class DummyModelFunctionalTest(MapEntityTest):
@@ -120,9 +122,9 @@ class AttachmentTest(BaseTest):
         self.obj = DummyModelFactory.create()
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
-        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/tests_dummymodel/1'))
-        self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/tests_dummymodel/1/file.pdf')
-        self.url = '/media/paperclip/tests_dummymodel/1/file.pdf'
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/1'))
+        self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/1/file.pdf')
+        self.url = '/media/paperclip/test_app_dummymodel/1/file.pdf'
         open(self.file, 'wb').write('*' * 300)
 
     def tearDown(self):
@@ -172,11 +174,11 @@ class AttachmentTest(BaseTest):
         self.assertEqual(response.status_code, 404)
 
     def test_access_to_not_existing_model(self):
-        response = self.client.get('/media/paperclip/tests_yyy/1/file.pdf')
+        response = self.client.get('/media/paperclip/test_app_yyy/1/file.pdf')
         self.assertEqual(response.status_code, 404)
 
     def test_access_to_not_existing_object(self):
-        response = self.client.get('/media/paperclip/tests_dummymodel/2/file.pdf')
+        response = self.client.get('/media/paperclip/test_app_dummymodel/2/file.pdf')
         self.assertEqual(response.status_code, 404)
 
     @override_settings(DEBUG=True)
@@ -197,7 +199,7 @@ class AttachmentTest(BaseTest):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_attachment(request, 'file.pdf', 'tests', 'dummymodel', '1')
+        response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', '1')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
         self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
@@ -209,7 +211,7 @@ class AttachmentTest(BaseTest):
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = False
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_attachment(request, 'file.pdf', 'tests', 'dummymodel', '1')
+        response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', '1')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
         self.assertEqual(response['Content-Type'], 'application/pdf')
@@ -239,7 +241,7 @@ class ListViewTest(BaseTest):
         self.user = User.objects.create_user('aah', 'email@corp.com', 'booh')
 
         def user_perms(p):
-            return {'tests.export_dummymodel': False}.get(p, True)
+            return {'test_app.export_dummymodel': False}.get(p, True)
 
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
 
@@ -333,14 +335,14 @@ class DetailViewTest(BaseTest):
         detailview = DummyDetail()
         detailview.object = self.object
         self.assertEqual(detailview.get_template_names(),
-                         ['tests/dummymodel_detail.html',
+                         ['test_app/dummymodel_detail.html',
                           'mapentity/mapentity_detail.html'])
 
     def test_properties_shown_in_extended_template(self):
         self.login()
         response = self.client.get(self.object.get_detail_url())
         self.assertTemplateUsed(response,
-                                template_name='tests/dummymodel_detail.html')
+                                template_name='test_app/dummymodel_detail.html')
         self.assertContains(response, 'dumber')
 
     def test_export_buttons_odt(self):
@@ -377,7 +379,6 @@ class DetailViewTest(BaseTest):
 
 class DocumentOdtViewTest(BaseTest):
     def setUp(self):
-        self.urls = 'mapentity.tests.urls'
         self.login()
         self.user.is_superuser = True
         self.user.save()
@@ -393,7 +394,6 @@ class DocumentOdtViewTest(BaseTest):
 
 class DocumentWeasyprintViewTest(BaseTest):
     def setUp(self):
-        self.urls = 'mapentity.tests.urls'
         self.login()
         self.user.is_superuser = True
         self.user.save()
@@ -418,7 +418,7 @@ class ViewPermissionsTest(BaseTest):
 
     def test_views_name_depend_on_model(self):
         view = DummyList()
-        self.assertEqual(view.get_view_perm(), 'tests.read_dummymodel')
+        self.assertEqual(view.get_view_perm(), 'test_app.read_dummymodel')
 
     def test_unauthorized_list_view_redirects_to_login(self):
         response = self.client.get('/dummymodel/list/')
