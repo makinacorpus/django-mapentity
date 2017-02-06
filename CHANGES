@@ -5,7 +5,9 @@ CHANGELOG
 2.8.7.dev0
 ==========
 
--
+**Bug fixes**
+
+- Remove initial migration
  
 2.8.6 (2017-02-02)
 ==================
