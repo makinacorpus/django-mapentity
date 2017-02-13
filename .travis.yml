@@ -38,8 +38,8 @@ before_script:
  - pip freeze
 
 script:
- - python quicktest.py mapentity
- - coverage run --include="mapentity/*" quicktest.py mapentity
+ - ./manage.py test
+ - coverage run --include="mapentity/*" ./manage.py test
 
 after_success:
  - pip install coveralls
