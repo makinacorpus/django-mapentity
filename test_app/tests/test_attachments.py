@@ -83,8 +83,6 @@ class EntityAttachmentTestCase(TestCase):
         request = self.createRequest()
         response = view(request, pk=self.object.pk)
         html = unicode(response.render())
-        with open('/home/gutard/tmp/toto.html', 'w') as f:
-            f.write(html)
         self.assertIn("Submit attachment", html)
         self.assertIn("""<form action="/paperclip/add-for/test_app/dummymodel/1/""", html)
 
