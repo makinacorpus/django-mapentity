@@ -145,4 +145,5 @@ MAPENTITY_CONFIG = {
     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 }
 
-SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+# For spatialite >= 4.2
+#SPATIALITE_LIBRARY_PATH = 'mod_spatialite'

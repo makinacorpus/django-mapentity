@@ -23,7 +23,7 @@ install:
    # This is a dependency of our Django quicktest script
  - pip install argparse
 
- - pip install gdal==1.9.1
+ - pip install gdal==1.10.0
  - pip install html5lib==0.999
  - pip install -r requirements.txt
 
