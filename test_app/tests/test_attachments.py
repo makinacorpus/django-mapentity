@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
-from paperclip.models import Attachment, FileType
+from paperclip.settings import get_attachment_model, get_filetype_model
 from mapentity.views.generic import MapEntityDetail
 
 from ..models import DummyModel
@@ -48,13 +48,13 @@ class EntityAttachmentTestCase(TestCase):
         kwargs = {
             'content_type': ContentType.objects.get_for_model(obj),
             'object_id': obj.pk,
-            'filetype': FileType.objects.create(),
+            'filetype': get_filetype_model().objects.create(),
             'creator': self.user,
             'title': "Attachment title",
             'legend': "Attachment legend",
             'attachment_file': uploaded
         }
-        return Attachment.objects.create(**kwargs)
+        return get_attachment_model().objects.create(**kwargs)
 
     def test_list_attachments_in_details(self):
         self.createAttachment(self.object)
@@ -66,11 +66,11 @@ class EntityAttachmentTestCase(TestCase):
         html = response.content
         self.assertTemplateUsed(response, template_name='paperclip/attachment_list.html')
 
-        self.assertEqual(1, len(Attachment.objects.attachments_for_object(self.object)))
+        self.assertEqual(1, len(get_attachment_model().objects.attachments_for_object(self.object)))
 
         self.assertNotIn("Submit attachment", html)
 
-        for attachment in Attachment.objects.attachments_for_object(self.object):
+        for attachment in get_attachment_model().objects.attachments_for_object(self.object):
             self.assertIn(attachment.legend, html)
             self.assertIn(attachment.title, html)
             self.assertIn(attachment.attachment_file.url, html)
@@ -99,7 +99,7 @@ class UploadAttachmentTestCase(TestCase):
         self.assertTrue(success)
 
     def attachmentPostData(self):
-        filetype = FileType.objects.create()
+        filetype = get_filetype_model().objects.create()
         uploaded = SimpleUploadedFile('face.jpg',
                                       '*' * 128,
                                       content_type='image/jpeg')
@@ -123,7 +123,7 @@ class UploadAttachmentTestCase(TestCase):
     def test_upload_creates_attachment(self):
         data = self.attachmentPostData()
         self.client.post(add_url_for_obj(self.object), data=data)
-        att = Attachment.objects.attachments_for_object(self.object).get()
+        att = get_attachment_model().objects.attachments_for_object(self.object).get()
         self.assertEqual(att.title, data['title'])
         self.assertEqual(att.legend, data['legend'])
         self.assertEqual(att.filetype.pk, data['filetype'])
@@ -131,12 +131,12 @@ class UploadAttachmentTestCase(TestCase):
     def test_title_gives_name_to_file(self):
         data = self.attachmentPostData()
         self.client.post(add_url_for_obj(self.object), data=data)
-        att = Attachment.objects.attachments_for_object(self.object).get()
+        att = get_attachment_model().objects.attachments_for_object(self.object).get()
         self.assertTrue('a-title' in att.attachment_file.name)
 
     def test_filename_is_used_if_no_title(self):
         data = self.attachmentPostData()
         data['title'] = ''
         self.client.post(add_url_for_obj(self.object), data=data)
-        att = Attachment.objects.attachments_for_object(self.object).get()
+        att = get_attachment_model().objects.attachments_for_object(self.object).get()
         self.assertTrue('face' in att.attachment_file.name)

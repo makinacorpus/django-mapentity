@@ -13,7 +13,7 @@ from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.utils.formats import localize
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
-from paperclip.models import Attachment
+from paperclip.settings import get_attachment_model
 from rest_framework import permissions as rest_permissions
 
 from mapentity.templatetags.mapentity_tags import humanize_timesince
@@ -195,7 +195,7 @@ class MapEntityMixin(object):
 
     @property
     def attachments(self):
-        return Attachment.objects.attachments_for_object(self)
+        return get_attachment_model().objects.attachments_for_object(self)
 
     def get_map_image_extent(self, srid=API_SRID):
         fieldname = app_settings['GEOM_FIELD_NAME']

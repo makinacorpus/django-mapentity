@@ -19,7 +19,7 @@ from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
 from mapentity import app_settings
 
-from paperclip import models as paperclip_models
+from paperclip.settings import get_attachment_model
 
 
 logger = logging.getLogger(__name__)
@@ -276,7 +276,7 @@ def create_mapentity_model_permissions(model):
             logger.info("Added permission %s to internal user %s" % (codename,
                                                                      internal_user))
 
-    attachmenttype = ContentType.objects.db_manager(db).get_for_model(paperclip_models.Attachment)
+    attachmenttype = ContentType.objects.db_manager(db).get_for_model(get_attachment_model())
     read_perm = dict(codename='read_attachment', content_type=attachmenttype)
     if not internal_user.user_permissions.filter(**read_perm).exists():
         permission = perms_manager.get(**read_perm)
