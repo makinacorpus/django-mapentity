@@ -3,6 +3,15 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import ugettext_lazy as _
 
 from mapentity.models import MapEntityMixin
+from paperclip.models import FileType as BaseFileType, Attachment as BaseAttachment
+
+
+class FileType(BaseFileType):
+    pass
+
+
+class Attachment(BaseAttachment):
+    pass
 
 
 class MushroomSpot(MapEntityMixin, models.Model):

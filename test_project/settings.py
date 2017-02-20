@@ -145,5 +145,8 @@ MAPENTITY_CONFIG = {
     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 }
 
-# For spatialite >= 4.2
-#SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+PAPERCLIP_FILETYPE_MODEL = 'test_app.FileType'
+PAPERCLIP_ATTACHMENT_MODEL = 'test_app.Attachment'
+
+# Uncomment for spatialite >= 4.2
+SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
