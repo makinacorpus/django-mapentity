@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from mapentity.forms import MapEntityForm
 from ..models import DummyModel
@@ -10,7 +10,7 @@ class DummyForm(MapEntityForm):
         fields = '__all__'
 
 
-class MapEntityFormTest(TestCase):
+class MapEntityFormTest(TransactionTestCase):
 
     def test_can_delete_actions(self):
         import test_project.urls

@@ -1,10 +1,10 @@
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.template import Template, Context
 
 from ..models import DummyModel
 
 
-class ValueListTest(TestCase):
+class ValueListTest(TransactionTestCase):
     def test_empty_list_should_show_none(self):
         out = Template(
             '{% load mapentity_tags %}'

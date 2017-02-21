@@ -30,6 +30,7 @@ from ..helpers import capture_image
 from .mixins import JSONResponseMixin, FilterListMixin, ModelViewMixin
 
 from mapentity import models as mapentity_models
+from paperclip.settings import get_attachment_permission
 
 
 logger = logging.getLogger(__name__)
@@ -81,7 +82,7 @@ def serve_attachment(request, path, app_label, model_name, pk):
     if not obj.is_public():
         if not request.user.is_authenticated():
             raise PermissionDenied
-        if not request.user.has_perm('paperclip.read_attachment'):
+        if not request.user.has_perm(get_attachment_permission('read')):
             raise PermissionDenied
         if not request.user.has_perm('%s.read_%s' % (app_label, model_name)):
             raise PermissionDenied

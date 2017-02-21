@@ -2,7 +2,7 @@ from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
 from django.test.client import Client
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from mapentity.models import LogEntry
 from mapentity.views.generic import log_action
@@ -12,7 +12,7 @@ from ..models import DummyModel
 User = get_user_model()
 
 
-class TestActionsHistory(TestCase):
+class TestActionsHistory(TransactionTestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
@@ -60,7 +60,7 @@ class TestActionsHistory(TestCase):
         self.assertEqual(LogEntry.objects.count(), 0)
 
 
-class TestCreator(TestCase):
+class TestCreator(TransactionTestCase):
     def setUp(self):
         self.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
         self.request = HttpRequest()

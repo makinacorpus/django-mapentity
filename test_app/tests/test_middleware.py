@@ -1,5 +1,6 @@
 from django.conf import settings
-from django.test import TestCase
+from django.core.management import call_command
+from django.test import TransactionTestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
 
@@ -17,13 +18,14 @@ User = get_user_model()
 
 
 @override_settings(TEST=False)
-class AutoLoginTest(TestCase):
+class AutoLoginTest(TransactionTestCase):
     def setUp(self):
         self.middleware = AutoLoginMiddleware()
         self.request = RequestFactory()
         self.request.user = AnonymousUser()  # usually set by other middleware
         self.request.META = {'REMOTE_ADDR': '6.6.6.6'}
         self.internal_user = get_internal_user()
+        call_command('update_permissions')
 
     def test_internal_user_cannot_login(self):
         success = self.client.login(
@@ -32,12 +34,12 @@ class AutoLoginTest(TestCase):
         self.assertFalse(success)
 
     def test_auto_login_happens_by_remote_addr(self):
-        DummyModelFactory.create()
+        obj = DummyModelFactory.create()
         middleware.CONVERSION_SERVER_HOST = '1.2.3.4'
-        response = self.client.get('/media/paperclip/test_app_dummymodel/1/file.pdf', REMOTE_ADDR='1.2.3.5')
+        response = self.client.get('/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(obj.pk), REMOTE_ADDR='1.2.3.5')
         self.assertEqual(response.status_code, 403)
         with mock.patch('django.contrib.auth.models._user_has_perm', return_value=True):
-            response = self.client.get('/media/paperclip/test_app_dummymodel/1/file.pdf', REMOTE_ADDR='1.2.3.4')
+            response = self.client.get('/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(obj.pk), REMOTE_ADDR='1.2.3.4')
         self.assertEqual(response.status_code, 200)
 
     def test_auto_login_do_not_change_current_user(self):

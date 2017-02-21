@@ -1,6 +1,7 @@
 import mock
+from django.core.management import call_command
 
-from django.test import TestCase, RequestFactory
+from django.test import TransactionTestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -23,7 +24,7 @@ def add_url_for_obj(obj):
     })
 
 
-class EntityAttachmentTestCase(TestCase):
+class EntityAttachmentTestCase(TransactionTestCase):
     def setUp(self):
         import test_project.urls
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
@@ -34,6 +35,7 @@ class EntityAttachmentTestCase(TestCase):
         self.user.is_anonymous = mock.MagicMock(return_value=False)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
         self.object = DummyModel.objects.create()
+        call_command('update_permissions')
 
     def createRequest(self):
         request = RequestFactory().get('/dummy')
@@ -84,10 +86,10 @@ class EntityAttachmentTestCase(TestCase):
         response = view(request, pk=self.object.pk)
         html = unicode(response.render())
         self.assertIn("Submit attachment", html)
-        self.assertIn("""<form action="/paperclip/add-for/test_app/dummymodel/1/""", html)
+        self.assertIn('<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk), html)
 
 
-class UploadAttachmentTestCase(TestCase):
+class UploadAttachmentTestCase(TransactionTestCase):
 
     def setUp(self):
         import test_project.urls

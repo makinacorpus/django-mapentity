@@ -270,6 +270,7 @@ class LogEntry(MapEntityMixin, BaseLogEntry):
 
     class Meta:
         proxy = True
+        app_label = 'mapentity'
 
     @property
     def action_flag_display(self):

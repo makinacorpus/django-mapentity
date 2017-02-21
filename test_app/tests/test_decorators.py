@@ -1,6 +1,6 @@
 import mock
 from django.http import HttpRequest
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -9,7 +9,7 @@ from mapentity import app_settings
 from mapentity.decorators import view_permission_required
 
 
-class ViewPermissionRequiredTestCase(TestCase):
+class ViewPermissionRequiredTestCase(TransactionTestCase):
     def setUp(self):
         # Fake request and its positional and keywords arguments.
         self.request = mock.MagicMock(spec=HttpRequest())

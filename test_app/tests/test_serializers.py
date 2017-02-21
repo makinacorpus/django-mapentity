@@ -1,7 +1,7 @@
 import os
 from StringIO import StringIO
 
-from django.test import TestCase
+from django.test import TransactionTestCase
 from django.conf import settings
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis import gdal
@@ -14,7 +14,7 @@ from mapentity.serializers.shapefile import shapefile_files
 from ..models import MushroomSpot
 
 
-class ShapefileSerializer(TestCase):
+class ShapefileSerializer(TransactionTestCase):
     def setUp(self):
         self.point1 = MushroomSpot.objects.create(serialized='SRID=%s;POINT(0 0)' % settings.SRID)
         self.line1 = MushroomSpot.objects.create(serialized='SRID=%s;LINESTRING(0 0, 10 0)' % settings.SRID)
@@ -71,7 +71,7 @@ class ShapefileSerializer(TestCase):
         self.assertTrue(feature.geom.geos.equals(self.point1.geom))
 
 
-class CSVSerializerTests(TestCase):
+class CSVSerializerTests(TransactionTestCase):
     def setUp(self):
         self.point = MushroomSpot.objects.create()
         self.serializer = CSVSerializer()
@@ -90,5 +90,5 @@ class CSVSerializerTests(TestCase):
         translation.activate('fr-fr')
         self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
                                   fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
-        self.assertEquals(self.stream.getvalue(), 'ID,name,number,size,boolean\r\n1,Empty,42,"3,14159",oui\r\n')
+        self.assertEquals(self.stream.getvalue(), 'ID,name,number,size,boolean\r\n{},Empty,42,"3,14159",oui\r\n'.format(self.point.pk))
         translation.deactivate()

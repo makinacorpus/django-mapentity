@@ -1,4 +1,5 @@
-from django.test import TestCase
+from django.core.management import call_command
+from django.test import TransactionTestCase
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
@@ -9,10 +10,12 @@ from mapentity.factories import UserFactory
 from ..models import DummyModel
 
 
-class ModelPermissionsTest(TestCase):
+class ModelPermissionsTest(TransactionTestCase):
 
     def setUp(self):
         self.ctype = ContentType.objects.get_for_model(DummyModel)
+
+        call_command('update_permissions')
 
     def test_model_permissions_were_created(self):
         permissions = Permission.objects.filter(content_type=self.ctype)
@@ -35,7 +38,9 @@ class ModelPermissionsTest(TestCase):
         self.assertTrue(user_has_perm(internal_user, 'test_app.read_dummymodel'))
 
 
-class NavBarPermissionsTest(TestCase):
+class NavBarPermissionsTest(TransactionTestCase):
+    def setUp(self):
+        call_command('update_permissions')
 
     def test_navbar_permissions(self):
         user = UserFactory.create(password='booh')

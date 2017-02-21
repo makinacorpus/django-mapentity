@@ -5,7 +5,8 @@ import json
 import mock
 import factory
 from django.conf import settings
-from django.test import TestCase, RequestFactory
+from django.core.management import call_command
+from django.test import TransactionTestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
@@ -45,7 +46,7 @@ class DummyModelLiveTest(MapEntityLiveTest):
     modelfactory = DummyModelFactory
 
 
-class BaseTest(TestCase):
+class BaseTest(TransactionTestCase):
     def login(self):
         if getattr(self, 'user', None) is None:
             user = User.objects.create_user(self.__class__.__name__ + 'User',
@@ -116,16 +117,16 @@ class ConvertTest(BaseTest):
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class AttachmentTest(BaseTest):
-
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         self.obj = DummyModelFactory.create()
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
-        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/1'))
-        self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/1/file.pdf')
-        self.url = '/media/paperclip/test_app_dummymodel/1/file.pdf'
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}'.format(self.obj.pk)))
+        self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk))
+        self.url = '/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk)
         open(self.file, 'wb').write('*' * 300)
+        call_command('update_permissions')
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
@@ -170,15 +171,15 @@ class AttachmentTest(BaseTest):
         self.assertEqual(response.status_code, 404)
 
     def test_access_to_not_existing_app(self):
-        response = self.client.get('/media/paperclip/xxx_dummymodel/1/file.pdf')
+        response = self.client.get('/media/paperclip/xxx_dummymodel/{}/file.pdf'.format(self.obj.pk))
         self.assertEqual(response.status_code, 404)
 
     def test_access_to_not_existing_model(self):
-        response = self.client.get('/media/paperclip/test_app_yyy/1/file.pdf')
+        response = self.client.get('/media/paperclip/test_app_yyy/{}/file.pdf'.format(self.obj.pk))
         self.assertEqual(response.status_code, 404)
 
     def test_access_to_not_existing_object(self):
-        response = self.client.get('/media/paperclip/test_app_dummymodel/2/file.pdf')
+        response = self.client.get('/media/paperclip/test_app_dummymodel/99999999/file.pdf')
         self.assertEqual(response.status_code, 404)
 
     @override_settings(DEBUG=True)
@@ -199,7 +200,7 @@ class AttachmentTest(BaseTest):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', '1')
+        response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', str(self.obj.pk))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
         self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
@@ -211,7 +212,7 @@ class AttachmentTest(BaseTest):
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = False
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', '1')
+        response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', str(self.obj.pk))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '')
         self.assertEqual(response['Content-Type'], 'application/pdf')
@@ -355,9 +356,9 @@ class DetailViewTest(BaseTest):
 
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>')
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>')
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-{}.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
 
     def test_export_buttons_weasyprint(self):
         self.login()
@@ -370,11 +371,11 @@ class DetailViewTest(BaseTest):
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
         if app_settings['MAPENTITY_WEASYPRINT']:
-            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.pdf"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.pdf"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
         else:
-            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>')
-        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-1.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>')
-        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-1.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>')
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
+        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-{}.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
+        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
 
 
 class DocumentOdtViewTest(BaseTest):
