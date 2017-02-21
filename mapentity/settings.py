@@ -36,7 +36,8 @@ app_settings = dict({
 
 TINYMCE_DEFAULT_CONFIG = {
     'theme': 'advanced',
-    'theme_advanced_buttons1': 'bold,italic,forecolor,separator,bullist,numlist,link,media,separator,undo,redo,separator,cleanup,code',
+    'theme_advanced_buttons1': 'bold,italic,forecolor,separator,bullist,numlist,link,media,separator,undo,redo,\
+separator,cleanup,code',
     'theme_advanced_buttons2': '',
     'theme_advanced_buttons3': '',
     'theme_advanced_statusbar_location': 'bottom',

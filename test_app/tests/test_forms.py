@@ -13,7 +13,6 @@ class DummyForm(MapEntityForm):
 class MapEntityFormTest(TransactionTestCase):
 
     def test_can_delete_actions(self):
-        import test_project.urls
         sample_object = DummyModel.objects.create()
         delete_url = sample_object.get_delete_url()
         form = DummyForm(instance=sample_object)

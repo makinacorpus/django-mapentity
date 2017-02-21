@@ -34,7 +34,7 @@ install:
  - python setup.py develop
 
 before_script:
- - flake8 --ignore=E501 mapentity
+ - flake8
  - pip freeze
 
 script:

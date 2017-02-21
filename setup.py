@@ -17,8 +17,8 @@ setup(
     url='https://github.com/makinacorpus/django-mapentity',
     download_url="http://pypi.python.org/pypi/mapentity/",
     description="Generic CRUD with maps",
-    long_description=open(os.path.join(here, 'README.rst')).read() + '\n\n' +
-                     open(os.path.join(here, 'CHANGES')).read(),
+    long_description=(open(os.path.join(here, 'README.rst')).read() + '\n\n' +
+                      open(os.path.join(here, 'CHANGES')).read()),
     license='BSD, see LICENSE file.',
     install_requires=[
         'Django >= 1.4',

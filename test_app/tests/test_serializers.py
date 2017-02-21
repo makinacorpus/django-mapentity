@@ -90,5 +90,6 @@ class CSVSerializerTests(TransactionTestCase):
         translation.activate('fr-fr')
         self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
                                   fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
-        self.assertEquals(self.stream.getvalue(), 'ID,name,number,size,boolean\r\n{},Empty,42,"3,14159",oui\r\n'.format(self.point.pk))
+        self.assertEquals(self.stream.getvalue(),
+                          'ID,name,number,size,boolean\r\n{},Empty,42,"3,14159",oui\r\n'.format(self.point.pk))
         translation.deactivate()

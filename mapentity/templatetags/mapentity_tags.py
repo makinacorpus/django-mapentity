@@ -32,7 +32,8 @@ class SmartIncludeNode(template.Node):
         result = ""
         for module in apps:
             try:
-                template_name = "%(module)s/%(module)s_%(viewname)s_fragment.html" % {'viewname': viewname, 'module': module}
+                template_name = "%(module)s/%(module)s_%(viewname)s_fragment.html" % {'viewname': viewname,
+                                                                                      'module': module}
                 t = template.loader.get_template(template_name)
                 result += t.render(context)
             except TemplateDoesNotExist:

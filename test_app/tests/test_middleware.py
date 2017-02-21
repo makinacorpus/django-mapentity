@@ -36,10 +36,12 @@ class AutoLoginTest(TransactionTestCase):
     def test_auto_login_happens_by_remote_addr(self):
         obj = DummyModelFactory.create()
         middleware.CONVERSION_SERVER_HOST = '1.2.3.4'
-        response = self.client.get('/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(obj.pk), REMOTE_ADDR='1.2.3.5')
+        response = self.client.get('/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(obj.pk),
+                                   REMOTE_ADDR='1.2.3.5')
         self.assertEqual(response.status_code, 403)
         with mock.patch('django.contrib.auth.models._user_has_perm', return_value=True):
-            response = self.client.get('/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(obj.pk), REMOTE_ADDR='1.2.3.4')
+            response = self.client.get('/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(obj.pk),
+                                       REMOTE_ADDR='1.2.3.4')
         self.assertEqual(response.status_code, 200)
 
     def test_auto_login_do_not_change_current_user(self):

@@ -356,9 +356,14 @@ class DetailViewTest(BaseTest):
 
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-{}.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt">\
+<img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" \
+href="/convert/?url=/document/dummymodel-{}.odt&to=doc">\
+<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" \
+href="/convert/?url=/document/dummymodel-{}.odt">\
+<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
 
     def test_export_buttons_weasyprint(self):
         self.login()
@@ -371,11 +376,16 @@ class DetailViewTest(BaseTest):
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
         if app_settings['MAPENTITY_WEASYPRINT']:
-            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.pdf"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.pdf">\
+<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
         else:
-            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
-        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/convert/?url=/document/dummymodel-{}.odt&to=doc"><img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
-        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt">\
+<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
+        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" \
+href="/convert/?url=/document/dummymodel-{}.odt&to=doc">\
+<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
+        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" \
+href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
 
 
 class DocumentOdtViewTest(BaseTest):

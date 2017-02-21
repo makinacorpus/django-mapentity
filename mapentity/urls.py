@@ -29,7 +29,8 @@ urlpatterns = [
 
 if settings.DEBUG or app_settings['SENDFILE_HTTP_HEADER']:
     urlpatterns += [
-        url(r'^%s/(?P<path>paperclip/(?P<app_label>.+)_(?P<model_name>.+)/(?P<pk>\d+)/.+)$' % _MEDIA_URL, serve_attachment),
+        url(r'^%s/(?P<path>paperclip/(?P<app_label>.+)_(?P<model_name>.+)/(?P<pk>\d+)/.+)$' % _MEDIA_URL,
+            serve_attachment),
     ]
 
 

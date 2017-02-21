@@ -81,7 +81,8 @@ class SubmitButton(HTML):
 
     def __init__(self, divid, label):
         content = ("""
-            <a id="%s" class="btn btn-success pull-right offset1" onclick="javascript:$(this).parents('form').submit();">
+            <a id="%s" class="btn btn-success pull-right offset1"
+               onclick="javascript:$(this).parents('form').submit();">
                 <i class="icon-white icon-ok-sign"></i> %s
             </a>""" % (divid, unicode(label)))
         super(SubmitButton, self).__init__(content)
@@ -213,7 +214,8 @@ class MapEntityForm(TranslatedModelForm):
             HTML("""
             <ul class="nav nav-pills">
             {% for lang in TRANSLATED_LANGUAGES %}
-                <li {% if lang.0 == LANGUAGE_CODE %}class="active"{% endif %}><a href="#%s_{{ lang.0 }}" data-toggle="tab">{{ lang.0 }}</a></li>
+                <li {% if lang.0 == LANGUAGE_CODE %}class="active"{% endif %}><a href="#%s_{{ lang.0 }}"
+                    data-toggle="tab">{{ lang.0 }}</a></li>
             {% endfor %}
             </ul>
             """.replace("%s", field)),

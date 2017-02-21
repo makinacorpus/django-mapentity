@@ -138,7 +138,8 @@ class JSSettings(JSONResponseMixin, TemplateView):
         dictsettings['urls']['screenshot'] = reverse("mapentity:map_screenshot")
 
         # Useful for JS calendars
-        dictsettings['date_format'] = settings.DATE_INPUT_FORMATS[0].replace('%Y', 'yyyy').replace('%m', 'mm').replace('%d', 'dd')
+        date_format = settings.DATE_INPUT_FORMATS[0].replace('%Y', 'yyyy').replace('%m', 'mm').replace('%d', 'dd')
+        dictsettings['date_format'] = date_format
         # Languages
         dictsettings['languages'] = dict(available=dict(app_settings['TRANSLATED_LANGUAGES']),
                                          default=app_settings['LANGUAGE_CODE'])

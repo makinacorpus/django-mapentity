@@ -34,22 +34,23 @@ class CSVSerializer(Serializer):
                     c = _(field.title())
             headers.append(smart_str(unicode(c)))
 
-        attr_getters = {}
+        getters = {}
         for field in columns:
             try:
                 modelfield = model._meta.get_field(field)
             except FieldDoesNotExist:
                 modelfield = None
             if isinstance(modelfield, ForeignKey):
-                attr_getters[field] = lambda obj, field: smart_plain_text(getattr(obj, field), ascii)
+                getters[field] = lambda obj, field: smart_plain_text(getattr(obj, field), ascii)
             elif isinstance(modelfield, ManyToManyField):
-                attr_getters[field] = lambda obj, field: ','.join([smart_plain_text(o, ascii) for o in getattr(obj, field).all()] or '')
+                getters[field] = lambda obj, field: ','.join([smart_plain_text(o, ascii)
+                                                              for o in getattr(obj, field).all()] or '')
             else:
-                attr_getters[field] = partial(field_as_string, ascii=ascii)
+                getters[field] = partial(field_as_string, ascii=ascii)
 
         def get_lines():
             yield headers
             for obj in queryset:
-                yield [attr_getters[field](obj, field) for field in columns]
+                yield [getters[field](obj, field) for field in columns]
         writer = csv.writer(stream)
         writer.writerows(get_lines())

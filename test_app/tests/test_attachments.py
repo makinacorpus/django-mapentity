@@ -26,7 +26,6 @@ def add_url_for_obj(obj):
 
 class EntityAttachmentTestCase(TransactionTestCase):
     def setUp(self):
-        import test_project.urls
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
 
         def user_perms(p):
@@ -92,7 +91,6 @@ class EntityAttachmentTestCase(TransactionTestCase):
 class UploadAttachmentTestCase(TransactionTestCase):
 
     def setUp(self):
-        import test_project.urls
         self.object = DummyModel.objects.create()
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')
         user.is_superuser = True

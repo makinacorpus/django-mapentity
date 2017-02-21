@@ -66,8 +66,8 @@ class ViewPermissionRequiredTestCase(TransactionTestCase):
         self.request.user.has_perm.return_value = False
         with mock.patch('django.contrib.messages.warning') as patched:
             self.run_decorated_view(raise_exception=False)
-            patched.assert_called_once_with(self.request,
-                                            u'Access to the requested resource is restricted. You have been redirected.')
+            patched.assert_called_once_with(
+                self.request, u'Access to the requested resource is restricted. You have been redirected.')
 
     def test_it_redirects_to_the_specified_view(self):
         self.request.user.has_perm.return_value = False
