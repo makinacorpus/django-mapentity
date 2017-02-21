@@ -1,5 +1,5 @@
 Django==1.8.17
--e git+https://github.com/makinacorpus/django-paperclip@abstract_model#egg=paperclip
+paperclip==2.0.0
 djangorestframework==3.5.3
 gpxpy==0.9.8
 BeautifulSoup4==4.5.3
