@@ -75,8 +75,10 @@ class GPXSerializer(Serializer):
             wp.description = description
             self.gpx.waypoints.append(wp)
         elif isinstance(geom, LineString):
-            gpx_route = gpxpy.gpx.GPXRoute(name=name, description=description)
-            gpx_route.points = [self._point_to_GPX(point, klass=gpxpy.gpx.GPXRoutePoint) for point in geom]
-            self.gpx.routes.append(gpx_route)
+            gpx_track = gpxpy.gpx.GPXTrack(name=name, description=description)
+            gpx_segment = gpxpy.gpx.GPXTrackSegment()
+            gpx_segment.points = [self._point_to_GPX(point, klass=gpxpy.gpx.GPXTrackPoint) for point in geom]
+            gpx_track.segments.append(gpx_segment)
+            self.gpx.tracks.append(gpx_track)
         else:
             raise ValueError("Unsupported geometry %s" % geom)
