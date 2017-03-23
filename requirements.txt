@@ -1,5 +1,5 @@
 Django==1.8.17
-paperclip==2.1.0
+paperclip==2.1.1
 djangorestframework==3.5.3
 gpxpy==0.9.8
 BeautifulSoup4==4.5.3
