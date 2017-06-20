@@ -137,7 +137,7 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.get('Content-Type'), 'text/csv')
 
         # Read the csv
-        lines = list(csv.reader(StringIO(response.content), delimiter=','))
+        lines = list(csv.reader(u"{}".format(StringIO(response.content)), delimiter=','))
 
         # There should be one more line in the csv than in the items: this is the header line
         self.assertEqual(len(lines), self.model.objects.all().count() + 1)
