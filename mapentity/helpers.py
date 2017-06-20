@@ -3,7 +3,6 @@ import json
 import logging
 import os
 import string
-import urllib
 from datetime import datetime
 from mimetypes import types_map
 
