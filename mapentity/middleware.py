@@ -22,10 +22,12 @@ def get_internal_user():
         username = app_settings['INTERNAL_USER']
         User = get_user_model()
 
-        internal_user = User.objects.get_or_create(username=username,
-                                                   defaults={'password': settings.SECRET_KEY,
-                                                             'is_active': True,
-                                                             'is_staff': False})
+        internal_user, created = User.objects.get_or_create(
+            username=username,
+            defaults={'password': settings.SECRET_KEY,
+                      'is_active': True,
+                      'is_staff': False}
+        )
 
         get_internal_user.instance = internal_user
     return get_internal_user.instance
