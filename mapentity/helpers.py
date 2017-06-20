@@ -17,7 +17,7 @@ from django.template.base import TemplateDoesNotExist
 from django.template.loader import get_template
 from django.utils import six
 from django.utils import timezone
-from django.utils.six.moves.urllib.parse import urljoin, urlparse, quote
+from django.utils.six.moves.urllib.parse import urljoin, quote
 from django.utils.translation import get_language
 
 from .settings import app_settings, API_SRID
