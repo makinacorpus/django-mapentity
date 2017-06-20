@@ -137,7 +137,7 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.get('Content-Type'), 'text/csv')
 
         # Read the csv
-        lines = list(csv.reader(u"{}".format(StringIO(response.content)), delimiter=','))
+        lines = list(csv.reader(StringIO(response.content.decode('utf-8')), delimiter=','))
 
         # There should be one more line in the csv than in the items: this is the header line
         self.assertEqual(len(lines), self.model.objects.all().count() + 1)
@@ -340,7 +340,9 @@ class MapEntityLiveTest(LiveServerTestCase):
         # Without headers to cache
         lastmodified = response.headers.get('Last-Modified')
         expires = response.headers.get('Expires')
-        md5sum = hashlib.md5().update(response.content).digest()
+        hasher = hashlib.md5()
+        hasher.update(response.content)
+        md5sum = hasher.digest()
         self.assertNotEqual(lastmodified, None)
         self.assertNotEqual(expires, None)
 
@@ -349,7 +351,9 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertEqual(latest, self.model.latest_updated())
         response = self.session.get(geojson_layer_url)
         self.assertEqual(lastmodified, response.headers.get('Last-Modified'))
-        self.assertEqual(md5sum, hashlib.md5().update(response.content).digest())
+        new_hasher = hashlib.md5()
+        new_hasher.update(response.content)
+        self.assertEqual(md5sum, new_hasher.digest())
 
         # Create a new object
         time.sleep(1.1)  # wait some time, last-modified has precision in seconds
@@ -360,7 +364,9 @@ class MapEntityLiveTest(LiveServerTestCase):
         response = self.session.get(geojson_layer_url)
         # Check that last modified and content changed
         self.assertNotEqual(lastmodified, response.headers.get('Last-Modified'))
-        self.assertNotEqual(md5sum, hashlib.md5().update(response.content).digest())
+        new_hasher = hashlib.md5()
+        new_hasher.update(response.content)
+        self.assertNotEqual(md5sum,new_hasher.digest())
 
         # Ask again with headers, and expect a 304 status (not changed)
         lastmodified = response.headers.get('Last-Modified')
@@ -372,7 +378,9 @@ class MapEntityLiveTest(LiveServerTestCase):
         response = self.session.get(geojson_layer_url,
                                     headers={'if-modified-since': http_date(1000)})
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(md5sum, hashlib.md5().update(response.content).digest())
+        new_hasher = hashlib.md5()
+        new_hasher.update(response.content)
+        self.assertNotEqual(md5sum, new_hasher.digest())
 
     @patch('mapentity.helpers.requests')
     def test_map_image(self, mock_requests):
