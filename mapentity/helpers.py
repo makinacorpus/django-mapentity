@@ -17,7 +17,7 @@ from django.template.base import TemplateDoesNotExist
 from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.six.moves import urllib
-from django.utils.six.moves.urllib.parse.urlparse import urljoin
+from django.utils.six.moves.urllib.parse import urlparse
 from django.utils.translation import get_language
 
 from .settings import app_settings, API_SRID
@@ -117,7 +117,7 @@ def smart_urljoin(base, path):
         base += '/'
     if path[0] == '/':
         path = path[1:]
-    return urljoin(base, path)
+    return urlparse.urljoin(base, path)
 
 
 def is_file_newer(path, date_update, delete_empty=True):
