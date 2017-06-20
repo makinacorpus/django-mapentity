@@ -108,7 +108,7 @@ def transform_wkt(wkt, srid_from=None, srid_to=None, dim=3):
         wkt3d = geom.wkt.replace(',', extracoords + ',')
         wkt3d = wkt3d.replace(')', extracoords + ')')
         return 'SRID=%s;%s' % (srid_to, wkt3d)
-    except (OGRException, GEOSException, TypeError, ValueError), e:
+    except (OGRException, GEOSException, TypeError, ValueError) as e:
         if settings.DEBUG or not getattr(settings, 'TEST', False):
             logger.error("wkt_to_geom('%s', %s, %s) : %s" % (wkt, srid_from, srid_to, e))
         return None
