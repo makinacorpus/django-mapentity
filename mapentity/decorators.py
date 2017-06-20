@@ -31,7 +31,7 @@ def view_permission_required(login_url=None, raise_exception=None):
 
         # As the last resort, redirects
         msg = _(u'Access to the requested resource is restricted. You have been redirected.')
-        messages.warning(request, unicode(msg))
+        messages.warning(request, msg)
         return False
 
     def decorator(view_func):
@@ -144,9 +144,9 @@ def save_history():
             history = [h for h in history if h['path'] != request.path]
             # Add this one and remove extras
             model = self.model or self.queryset.model
-            history.insert(0, dict(title=unicode(self.get_title()),
+            history.insert(0, dict(title=self.get_title(),
                                    path=request.path,
-                                   modelname=unicode(model._meta.object_name.lower())))
+                                   modelname=model._meta.object_name.lower()))
             if len(history) > app_settings['HISTORY_ITEMS_MAX']:
                 history.pop()
             request.session['history'] = history

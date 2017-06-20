@@ -287,7 +287,7 @@ class LogEntry(MapEntityMixin, BaseLogEntry):
 
     @property
     def object_display(self):
-        model_str = unicode(self.content_type)
+        model_str = u"{}".format(self.content_type)
         try:
             obj = self.get_edited_object()
             assert obj._entity, 'Unregistered model %s' % model_str

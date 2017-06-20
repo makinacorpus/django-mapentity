@@ -15,9 +15,9 @@ from django.core.urlresolvers import resolve
 from django.http import HttpResponse
 from django.template.base import TemplateDoesNotExist
 from django.template.loader import get_template
+from django.utils import six
 from django.utils import timezone
-from django.utils.six.moves import urllib
-from django.utils.six.moves.urllib.parse import urlparse
+from django.utils.six.moves.urllib.parse import urlparse, quote
 from django.utils.translation import get_language
 
 from .settings import app_settings, API_SRID
@@ -140,8 +140,10 @@ def is_file_newer(path, date_update, delete_empty=True):
 def download_to_stream(url, stream, silent=False, headers=None):
     """ Download url and writes response to stream.
     """
+    source = None
+
     try:
-        source = None
+
         logger.info("Request to: %s" % url)
         source = requests.get(url, headers=headers)
 
@@ -188,10 +190,10 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False):
         extension = '.' + mimetype if not mimetype.startswith('.') else mimetype
         mimetype = types_map[extension]
 
-    fromparam = ("&from=%s" % urllib.quote(from_type)) if from_type is not None else ''
-    params = 'url={url}{fromparam}&to={to}'.format(url=urllib.quote(url),
+    fromparam = ("&from=%s" % quote(from_type)) if from_type is not None else ''
+    params = 'url={url}{fromparam}&to={to}'.format(url=quote(url),
                                                    fromparam=fromparam,
-                                                   to=urllib.quote(mimetype))
+                                                   to=quote(mimetype))
     url = '{server}/?{params}'.format(server=app_settings['CONVERSION_SERVER'],
                                       params=params)
     return url
@@ -204,7 +206,7 @@ def convertit_download(url, destination, from_type=None, to_type='application/pd
         return
 
     url = convertit_url(url, from_type, to_type)
-    fd = open(destination, 'wb') if isinstance(destination, basestring) else destination
+    fd = open(destination, 'wb') if isinstance(destination, six.string_types) else destination
     download_to_stream(url, fd, headers=headers)
 
 
@@ -214,14 +216,14 @@ def capture_url(url, width=None, height=None, selector=None, waitfor=None):
     server = app_settings['CAPTURE_SERVER']
     width = ('&width=%s' % width) if width else ''
     height = ('&height=%s' % height) if height else ''
-    selector = ('&selector=%s' % urllib.quote(selector)) if selector else ''
-    waitfor = ('&waitfor=%s' % urllib.quote(waitfor)) if waitfor else ''
+    selector = ('&selector=%s' % quote(selector)) if selector else ''
+    waitfor = ('&waitfor=%s' % quote(waitfor)) if waitfor else ''
     params = '{width}{height}{selector}{waitfor}'.format(width=width,
                                                          height=height,
                                                          selector=selector,
                                                          waitfor=waitfor)
     capture_url = '{server}/?url={url}{params}'.format(server=server,
-                                                       url=urllib.quote(url),
+                                                       url=quote(url),
                                                        params=params)
     return capture_url
 
@@ -249,7 +251,7 @@ def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet
     printcontext['print'] = True
     serialized = json.dumps(printcontext)
     # Run head-less capture (takes time)
-    url += '?lang={}&context={}'.format(get_language(), urllib.quote(serialized))
+    url += '?lang={}&context={}'.format(get_language(), quote(serialized))
 
     with open(destination, 'wb') as fd:
         capture_image(url, fd,

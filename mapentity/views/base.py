@@ -18,7 +18,7 @@ from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseServerError, Http404)
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext, Context, loader
-from django.utils.six.moves import urllib
+from django.utils.six.moves.urllib.parse import quote
 from django.views import static
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -191,7 +191,7 @@ def map_screenshot(request):
         map_url = request.build_absolute_uri(map_url)
         context['print'] = True
         printcontext = json.dumps(context)
-        contextencoded = urllib.quote(printcontext)
+        contextencoded = quote(printcontext)
         map_url += '?context=%s' % contextencoded
         logger.debug("Capture %s" % map_url)
 
