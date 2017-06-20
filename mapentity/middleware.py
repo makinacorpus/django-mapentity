@@ -1,5 +1,4 @@
 import logging
-
 from subprocess import check_output
 
 from django.conf import settings
@@ -7,8 +6,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.db import DatabaseError
 from django.utils.six.moves.urllib.parse import urlparse
-from . import app_settings
 
+from . import app_settings
 
 logger = logging.getLogger(__name__)
 

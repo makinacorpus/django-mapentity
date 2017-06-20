@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import json
 import logging
 import mimetypes
@@ -82,7 +83,7 @@ def serve_attachment(request, path, app_label, model_name, pk):
             raise PermissionDenied
         if not request.user.has_perm(get_attachment_permission('read')):
             raise PermissionDenied
-        if not request.user.has_perm('%s.read_%s' % (app_label, model_name)):
+        if not request.user.has_perm('{}.read_{}'.format(app_label, model_name)):
             raise PermissionDenied
 
     content_type, encoding = mimetypes.guess_type(path)
@@ -107,6 +108,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
     Likely to be overriden. Contains only necessary stuff
     for mapentity.
     """
+
     def get_context_data(self):
         dictsettings = {}
         dictsettings['debug'] = settings.DEBUG
@@ -117,7 +119,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
 
         # URLs
         root_url = app_settings['ROOT_URL']
-        root_url = root_url if root_url.endswith('/') else root_url + '/'
+        root_url = root_url if root_url.endswith('/') else '{}/'.format(root_url)
         dictsettings['urls'] = {}
         dictsettings['urls']['root'] = root_url
 
@@ -130,9 +132,9 @@ class JSSettings(JSONResponseMixin, TemplateView):
         options = MapEntityOptions(ModelName)
 
         dictsettings['urls']['static'] = settings.STATIC_URL
-        dictsettings['urls']['layer'] = root_url + options._url_path(mapentity_models.ENTITY_LAYER)[1:-1]
-        dictsettings['urls']['detail'] = root_url + 'modelname/0/'
-        dictsettings['urls']['format_list'] = root_url + options._url_path(mapentity_models.ENTITY_FORMAT_LIST)[1:-1]
+        dictsettings['urls']['layer'] = '{}{}'.format(root_url, options._url_path(mapentity_models.ENTITY_LAYER)[1:-1])
+        dictsettings['urls']['detail'] = '{}modelname/0/'.format(root_url)
+        dictsettings['urls']['format_list'] = '{}{}'.format(root_url, options._url_path(mapentity_models.ENTITY_FORMAT_LIST)[1:-1])
         dictsettings['urls']['screenshot'] = reverse("mapentity:map_screenshot")
 
         # Useful for JS calendars
@@ -145,7 +147,6 @@ class JSSettings(JSONResponseMixin, TemplateView):
 
 
 class BaseListView(FilterListMixin, ModelViewMixin):
-
     columns = None
 
     def __init__(self, *args, **kwargs):
@@ -213,7 +214,7 @@ def history_delete(request, path=None):
     path = request.POST.get('path', path)
     if path:
         history = request.session.get('history')
-    if history:
-        history = [h for h in history if h['path'] != path]
-        request.session['history'] = history
+        if history:
+            history = [h for h in history if h['path'] != path]
+            request.session['history'] = history
     return HttpResponse()
