@@ -366,7 +366,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertNotEqual(lastmodified, response.headers.get('Last-Modified'))
         new_hasher = hashlib.md5()
         new_hasher.update(response.content)
-        self.assertNotEqual(md5sum,new_hasher.digest())
+        self.assertNotEqual(md5sum, new_hasher.digest())
 
         # Ask again with headers, and expect a 304 status (not changed)
         lastmodified = response.headers.get('Last-Modified')
