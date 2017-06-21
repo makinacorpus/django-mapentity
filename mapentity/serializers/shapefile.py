@@ -26,7 +26,7 @@ from .helpers import field_as_string
 try:
     from cStringIO import StringIO
 except ImportError:
-    from StringIO import StringIO  # noqa
+    from io import StringIO  # noqa
 
 os.environ["SHAPE_ENCODING"] = "UTF-8"
 
@@ -144,7 +144,7 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
             except FieldDoesNotExist:
                 c = _(field.title())
 
-        reponse = unicode(c)
+        reponse = u"{}".format(c)
         reponse = unicodedata.normalize('NFD', reponse)
         reponse = smart_str(reponse.encode('ascii', 'ignore')).replace(' ', '_').lower()
 
