@@ -66,11 +66,14 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
     }
 
 
-class MapEntityMixin(object):
+class MapEntityMixin(models.Model):
     attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
 
     _entity = None
     capture_map_image_waitfor = '.leaflet-tile-loaded'
+
+    class Meta:
+        abstract = True
 
     @classmethod
     def get_create_label(cls):
