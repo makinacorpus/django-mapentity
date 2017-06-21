@@ -11,7 +11,7 @@ test_requires = [
 
 setup(
     name='mapentity',
-    version='3.1.1.dev0',
+    version='3.1.2',
     author='Makina Corpus',
     author_email='geobi@makina-corpus.com',
     url='https://github.com/makinacorpus/django-mapentity',
@@ -21,7 +21,7 @@ setup(
                       open(os.path.join(here, 'CHANGES')).read()),
     license='BSD, see LICENSE file.',
     install_requires=[
-        'Django >= 1.4',
+        'Django >= 1.8',
         'GDAL >= 1.9',
         'gpxpy',
         'BeautifulSoup4',
