@@ -1,13 +1,14 @@
 import logging
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.gis.db.models import GeometryField
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
-from ..forms import MapEntityForm
-from ..filters import MapEntityFilterSet
-from ..serializers import json_django_dumps
-from .. import registry
 
+from .. import registry
+from ..filters import MapEntityFilterSet
+from ..forms import MapEntityForm
+from ..serializers import json_django_dumps
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +125,8 @@ class FilterListMixin(object):
             class filterklass(MapEntityFilterSet):
                 class Meta:
                     model = _model
-                    fields = [field.name for field in _model._meta.get_fields() if not isinstance(field, GeometryField)]
+                    fields = [field.name for field in _model._meta.get_fields() if
+                              not isinstance(field, GeometryField) and not isinstance(field, GenericRelation)]
             self.filterform = filterklass
         self._filterform = self.filterform(None, self.queryset)
 
