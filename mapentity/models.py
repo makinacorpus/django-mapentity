@@ -67,7 +67,7 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
 
 
 class MapEntityMixin(object):
-    attachment_files = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
+    attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
 
     _entity = None
     capture_map_image_waitfor = '.leaflet-tile-loaded'
@@ -193,10 +193,6 @@ class MapEntityMixin(object):
     @models.permalink
     def get_delete_url(self):
         return (self._entity.url_name(ENTITY_DELETE), [str(self.pk)])
-
-    @property
-    def attachments(self):
-        return self.attachment_files.all()
 
     def get_map_image_extent(self, srid=API_SRID):
         fieldname = app_settings['GEOM_FIELD_NAME']
