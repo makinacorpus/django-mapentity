@@ -1,16 +1,16 @@
-import os
 import datetime
+import os
 
 from django import template
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
-from django.template.base import TemplateDoesNotExist
 from django.db.models.fields.related import FieldDoesNotExist
+from django.template.base import TemplateDoesNotExist
+from django.utils import six
 from django.utils.timezone import utc
 from django.utils.translation import ugettext, ungettext
 
 from ..helpers import alphabet_enumeration
-
 
 register = template.Library()
 
@@ -54,7 +54,7 @@ def do_smart_include(parser, token):
 
 @register.filter
 def latlngbounds(obj):
-    if obj is None or isinstance(obj, basestring):
+    if obj is None or isinstance(obj, six.string_types):
         return 'null'
     if isinstance(obj, GEOSGeometry):
         extent = obj.extent
@@ -72,7 +72,7 @@ def field_verbose_name(obj, field):
         a = getattr(obj, '%s_verbose_name' % field)
         if a is None:
             raise
-        return unicode(a)
+        return u"{}".format(a)
 
 
 @register.simple_tag()

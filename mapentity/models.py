@@ -1,6 +1,7 @@
 import os
 import math
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.utils import OperationalError
 from django.conf import settings
@@ -13,7 +14,6 @@ from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.utils.formats import localize
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
-from paperclip.settings import get_attachment_model
 from rest_framework import permissions as rest_permissions
 
 from mapentity.templatetags.mapentity_tags import humanize_timesince
@@ -67,6 +67,7 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
 
 
 class MapEntityMixin(object):
+    attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
 
     _entity = None
     capture_map_image_waitfor = '.leaflet-tile-loaded'
@@ -193,10 +194,6 @@ class MapEntityMixin(object):
     def get_delete_url(self):
         return (self._entity.url_name(ENTITY_DELETE), [str(self.pk)])
 
-    @property
-    def attachments(self):
-        return get_attachment_model().objects.attachments_for_object(self)
-
     def get_map_image_extent(self, srid=API_SRID):
         fieldname = app_settings['GEOM_FIELD_NAME']
         obj = getattr(self, fieldname)
@@ -287,7 +284,7 @@ class LogEntry(MapEntityMixin, BaseLogEntry):
 
     @property
     def object_display(self):
-        model_str = unicode(self.content_type)
+        model_str = u"{}".format(self.content_type)
         try:
             obj = self.get_edited_object()
             assert obj._entity, 'Unregistered model %s' % model_str

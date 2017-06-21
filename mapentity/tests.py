@@ -1,30 +1,30 @@
 # -*- coding: utf-8 -*-
-import os
-import md5
-import time
-import shutil
-import StringIO
 import csv
-import urllib2
 import json
+import hashlib
+import os
+import shutil
+import time
 from datetime import datetime
+from io import StringIO
 
+import requests
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.utils.timezone import utc
-from django.utils.http import http_date
-from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import force_unicode
 from django.test import TestCase, LiveServerTestCase
-from django.test.utils import override_settings
 from django.test.testcases import to_list
+from django.test.utils import override_settings
 from django.utils import html
+from django.utils.encoding import force_unicode
+from django.utils.http import http_date
+from django.utils.six.moves.urllib.parse import quote
+from django.utils.timezone import utc
+from django.utils.translation import ugettext_lazy as _
 from mock import patch
-import requests
 
-from .helpers import smart_urljoin
-from .forms import MapEntityForm
 from .factories import SuperUserFactory
+from .forms import MapEntityForm
+from .helpers import smart_urljoin
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
@@ -137,7 +137,7 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.get('Content-Type'), 'text/csv')
 
         # Read the csv
-        lines = list(csv.reader(StringIO.StringIO(response.content), delimiter=','))
+        lines = list(csv.reader(StringIO(response.content.decode('utf-8')), delimiter=','))
 
         # There should be one more line in the csv than in the items: this is the header line
         self.assertEqual(len(lines), self.model.objects.all().count() + 1)
@@ -161,8 +161,8 @@ class MapEntityTest(TestCase):
         fields_errors = form.errors[bad_data.keys()[0]]
         form_errors = to_list(form_error)
         for err in form_errors:
-            self.assertTrue(unicode(err) in fields_errors,
-                            "'%s' not in %s" % (unicode(err), fields_errors))
+            self.assertTrue(u"{}".format(err) in fields_errors,
+                            u"'%s' not in %s" % (err, fields_errors))
 
         response = self.client.post(url, self.get_good_data())
         if response.status_code != 302:
@@ -340,7 +340,9 @@ class MapEntityLiveTest(LiveServerTestCase):
         # Without headers to cache
         lastmodified = response.headers.get('Last-Modified')
         expires = response.headers.get('Expires')
-        md5sum = md5.new(response.content).digest()
+        hasher = hashlib.md5()
+        hasher.update(response.content)
+        md5sum = hasher.digest()
         self.assertNotEqual(lastmodified, None)
         self.assertNotEqual(expires, None)
 
@@ -349,7 +351,9 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertEqual(latest, self.model.latest_updated())
         response = self.session.get(geojson_layer_url)
         self.assertEqual(lastmodified, response.headers.get('Last-Modified'))
-        self.assertEqual(md5sum, md5.new(response.content).digest())
+        new_hasher = hashlib.md5()
+        new_hasher.update(response.content)
+        self.assertEqual(md5sum, new_hasher.digest())
 
         # Create a new object
         time.sleep(1.1)  # wait some time, last-modified has precision in seconds
@@ -360,7 +364,9 @@ class MapEntityLiveTest(LiveServerTestCase):
         response = self.session.get(geojson_layer_url)
         # Check that last modified and content changed
         self.assertNotEqual(lastmodified, response.headers.get('Last-Modified'))
-        self.assertNotEqual(md5sum, md5.new(response.content).digest())
+        new_hasher = hashlib.md5()
+        new_hasher.update(response.content)
+        self.assertNotEqual(md5sum, new_hasher.digest())
 
         # Ask again with headers, and expect a 304 status (not changed)
         lastmodified = response.headers.get('Last-Modified')
@@ -372,7 +378,9 @@ class MapEntityLiveTest(LiveServerTestCase):
         response = self.session.get(geojson_layer_url,
                                     headers={'if-modified-since': http_date(1000)})
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(md5sum, md5.new(response.content).digest())
+        new_hasher = hashlib.md5()
+        new_hasher.update(response.content)
+        self.assertNotEqual(md5sum, new_hasher.digest())
 
     @patch('mapentity.helpers.requests')
     def test_map_image(self, mock_requests):
@@ -399,7 +407,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertTrue(os.path.exists(image_path))
 
         mapimage_url = '%s%s?context' % (self.live_server_url, obj.get_detail_url())
-        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % urllib2.quote(mapimage_url)
+        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % quote(mapimage_url)
         url_called = mock_requests.get.call_args_list[0]
         self.assertTrue(url_called.startswith(screenshot_url))
 

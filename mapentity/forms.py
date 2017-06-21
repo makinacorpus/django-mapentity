@@ -53,7 +53,7 @@ class TranslatedModelForm(forms.ModelForm):
                 # Add to form.fields{}
                 translated = copy.deepcopy(native)
                 translated.required = native.required and (lang == app_settings['LANGUAGE_CODE'])
-                translated.label = u"%s [%s]" % (unicode(translated.label), lang)
+                translated.label = u"%s [%s]" % (translated.label, lang)
                 self.fields[name] = translated
                 # Keep track of replacements
                 self._translated.setdefault(modelfield, []).append(name)
@@ -84,7 +84,7 @@ class SubmitButton(HTML):
             <a id="%s" class="btn btn-success pull-right offset1"
                onclick="javascript:$(this).parents('form').submit();">
                 <i class="icon-white icon-ok-sign"></i> %s
-            </a>""" % (divid, unicode(label)))
+            </a>""" % (divid, label))
         super(SubmitButton, self).__init__(content)
 
 
@@ -142,7 +142,7 @@ class MapEntityForm(TranslatedModelForm):
             actions.insert(0, HTML('<a class="btn %s delete" href="%s"><i class="icon-white icon-trash"></i> %s</a>' % (
                 'btn-danger' if self.can_delete else 'disabled',
                 self.instance.get_delete_url() if self.can_delete else '#',
-                unicode(_("Delete")))))
+                _(u"Delete"))))
         else:
             self.helper.form_action = self.instance.get_add_url()
 

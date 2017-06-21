@@ -121,7 +121,7 @@ class MapEntityFormat(BaseListView, ListView):
             return HttpResponseBadRequest()
 
         filename = '%s-%s-list' % (datetime.now().strftime('%Y%m%d-%H%M'),
-                                   str(slugify(unicode(self.get_model()._meta.verbose_name))))
+                                   str(slugify(u"{}".format(self.get_model()._meta.verbose_name))))
         filename += '.%s' % extensions.get(fmt_str, fmt_str)
         response = formatter(request=self.request, context=context, **response_kwargs)
         response['Content-Disposition'] = 'attachment; filename=%s' % filename
@@ -374,7 +374,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         return default + ['mapentity/mapentity_detail.html']
 
     def get_title(self):
-        return unicode(self.get_object())
+        return u"{}".format(self.get_object())
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
     @save_history()

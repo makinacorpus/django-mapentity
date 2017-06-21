@@ -8,7 +8,13 @@ CHANGELOG
 
 **Bug fixes**
 
--
+- Fix AutoLogin middleware with django 1.8
+
+**Internal changes**
+
+- Prepare code to compatibility python2 / python3
+- Use GenericRelation for Paperclip, to permit prefetch_related on them
+- Upgrade requirements
 
 3.1.0 (2017-03-23)
 ==================
