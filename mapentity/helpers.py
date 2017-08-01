@@ -312,8 +312,10 @@ def alphabet_enumeration(length):
     enums = []
     alphabet = string.lowercase.upper()
     for i in range(length):
-        enum = '' if i < 26 else alphabet[(i // 26) - 1]
-        enum += alphabet[i % 26]
+        enum = alphabet[i % 26]
+        while i >= 26:
+            i = i // 26
+            enum = alphabet[i % 26] + enum
         enums.append(enum)
     return enums
 
