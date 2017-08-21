@@ -1,6 +1,7 @@
 import itertools
 import json
 import logging
+import math
 import os
 import string
 from datetime import datetime
@@ -309,13 +310,18 @@ def alphabet_enumeration(length):
     Return list of letters : A, B, ... Z, AA, AB, ...
     See mapentity/leaflet.enumeration.js
     """
+    if length == 0:
+        return []
+    if length == 1:
+        return ["A"]
+    width = int(math.ceil(math.log(length, 26)))
     enums = []
     alphabet = string.lowercase.upper()
     for i in range(length):
-        enum = alphabet[i % 26]
-        while i >= 26:
-            i = i // 26
+        enum = ""
+        for j in range(width):
             enum = alphabet[i % 26] + enum
+            i = i // 26
         enums.append(enum)
     return enums
 
