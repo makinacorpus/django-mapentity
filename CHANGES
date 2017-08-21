@@ -5,6 +5,10 @@ CHANGELOG
 3.1.5.dev0
 ==================
 
+**New features**
+
+- Serialize polygons to GPX
+
 **Bug fixes**
 
 - Fix POI enumeration if > 26 * 26

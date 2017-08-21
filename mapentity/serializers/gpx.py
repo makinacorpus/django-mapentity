@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.serializers.base import Serializer
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis.geos.collections import GeometryCollection
-from django.contrib.gis.geos import Point, LineString
+from django.contrib.gis.geos import Point, LineString, Polygon
 
 import gpxpy.gpx
 
@@ -64,6 +64,7 @@ class GPXSerializer(Serializer):
 
         Point -> add as a Way Point
         LineString -> add all Points in a Route
+        Polygon -> add all Points of the external linering in a Route
         Collection (of LineString or Point) -> add as a route, concatening all points
         """
         if isinstance(geom, GeometryCollection):
@@ -80,5 +81,7 @@ class GPXSerializer(Serializer):
             gpx_segment.points = [self._point_to_GPX(point, klass=gpxpy.gpx.GPXTrackPoint) for point in geom]
             gpx_track.segments.append(gpx_segment)
             self.gpx.tracks.append(gpx_track)
+        elif isinstance(geom, Polygon):
+            self.geomToGPX(geom[0], name, description)
         else:
             raise ValueError("Unsupported geometry %s" % geom)
