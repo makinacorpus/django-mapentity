@@ -83,7 +83,8 @@ class CSVSerializerTests(TransactionTestCase):
     def test_content(self):
         self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
                                   fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
-        self.assertEquals(self.stream.getvalue(), 'ID,name,number,size,boolean\r\n1,Empty,42,3.14159,yes\r\n')
+        self.assertEquals(self.stream.getvalue(),
+                          'ID,name,number,size,boolean\r\n{},Empty,42,3.14159,yes\r\n'.format(self.point.pk))
 
     @override_settings(USE_L10N=True)
     def test_content_fr(self):
