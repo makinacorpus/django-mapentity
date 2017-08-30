@@ -347,7 +347,7 @@ tr.selected-row td {
     height: 95%;
 }
 
-@media (max-width: 1280px) {
+@media (max-height: 960px) {
     #list-panel {
         margin-left: 34px;
     }
@@ -386,7 +386,7 @@ tr.selected-row td {
     width: 60px;
 }
 
-@media (max-width: 1280px) {
+@media (max-height: 960px) {
     #entitylist {
         width: 32px;
     }
@@ -433,7 +433,7 @@ tr.selected-row td {
     padding-bottom: 4px;
 }
 
-@media (max-width: 1280px) {
+@media (max-height: 960px) {
     #entitylist .nav-pills > li > a > img  {
         width: 30px;
     }

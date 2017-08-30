@@ -8,6 +8,7 @@ CHANGELOG
 **Bug fixes**
 
 - constant size numbers for POI enumeration
+- change nav icons size depending on page height instead of width
 
 3.2.0 (2017-08-21)
 ==================
