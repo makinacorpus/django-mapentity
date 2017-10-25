@@ -55,7 +55,7 @@ def handler500(request, template_name='mapentity/500.html'):
     # Try returning using a RequestContext
     try:
         context = RequestContext(request)
-    except:
+    except:  # noqa
         logger.warn('Error getting RequestContext for ServerError page.')
         context = Context({'request': request})
     e, name, tb = sys.exc_info()
