@@ -2,7 +2,7 @@
 CHANGELOG
 =========
 
-3.2.1.dev0
+3.2.1 (2017-11-07)
 ==================
 
 **Bug fixes**
@@ -10,6 +10,7 @@ CHANGELOG
 - constant size numbers for POI enumeration
 - change nav icons size depending on page height instead of width
 - draw circle geometries if radius property exists
+
 
 
 3.2.0 (2017-08-21)
