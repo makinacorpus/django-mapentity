@@ -7,7 +7,7 @@ CHANGELOG
 
 **Bug fixes**
 
--
+- add missing support for polygon in shapefile exports
 
 
 3.2.1 (2017-11-07)

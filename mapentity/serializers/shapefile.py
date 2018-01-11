@@ -7,10 +7,10 @@ import unicodedata
 import zipfile
 
 from django.contrib.gis.db.models.fields import (GeometryField, GeometryCollectionField,
-                                                 PointField, LineStringField,
-                                                 MultiPointField, MultiLineStringField)
+                                                 PointField, LineStringField, PolygonField,
+                                                 MultiPointField, MultiLineStringField, MultiPolygonField)
 from django.contrib.gis.gdal import check_err, OGRGeomType
-from django.contrib.gis.geos import Point, LineString, MultiPoint, MultiLineString
+from django.contrib.gis.geos import Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon
 from django.contrib.gis.geos.collections import GeometryCollection
 from django.core.serializers.base import Serializer
 from django.db.models.fields.related import FieldDoesNotExist
@@ -75,18 +75,21 @@ class ZipShapeSerializer(Serializer):
 
         if geom_type.upper() in (GeometryField.geom_type, GeometryCollectionField.geom_type):
 
-            by_points, by_linestrings, multipoints, multilinestrings = self.split_bygeom(queryset, geom_getter=get_geom)
+            by_points, by_linestrings, by_polygons, multipoints, multilinestrings, multipolygons = \
+                self.split_bygeom(queryset, geom_getter=get_geom)
 
             for split_qs, split_geom_field in ((by_points, PointField),
                                                (by_linestrings, LineStringField),
+                                               (by_polygons, PolygonField),
                                                (multipoints, MultiPointField),
-                                               (multilinestrings, MultiLineStringField)):
+                                               (multilinestrings, MultiLineStringField),
+                                               (multipolygons, MultiPolygonField)):
                 if len(split_qs) == 0:
                     continue
                 split_geom_type = split_geom_field.geom_type
                 shp_filepath = shape_write(split_qs, model, columns, get_geom, split_geom_type, srid)
-                filename = '%s_%s' % (filename, split_geom_type.lower())
-                self.layers[filename] = shp_filepath
+                subfilename = '%s_%s' % (filename, split_geom_type.lower())
+                self.layers[subfilename] = shp_filepath
 
         else:
             shp_filepath = shape_write(queryset, model, columns, get_geom, geom_type, srid)
@@ -94,7 +97,7 @@ class ZipShapeSerializer(Serializer):
 
     def split_bygeom(self, iterable, geom_getter=lambda x: x.geom):
         """Split an iterable in two list (points, linestring)"""
-        points, linestrings, multipoints, multilinestrings = [], [], [], []
+        points, linestrings, polygons, multipoints, multilinestrings, multipolygons = [], [], [], [], [], []
 
         for x in iterable:
             geom = geom_getter(x)
@@ -102,7 +105,7 @@ class ZipShapeSerializer(Serializer):
                 pass
             elif isinstance(geom, GeometryCollection):
                 # Duplicate object, shapefile do not support geometry collections !
-                subpoints, sublines, pp, ll = self.split_bygeom(geom, geom_getter=lambda geom: geom)
+                subpoints, sublines, subpolygons, pp, ll, yy = self.split_bygeom(geom, geom_getter=lambda geom: geom)
                 if subpoints:
                     clone = x.__class__.objects.get(pk=x.pk)
                     clone.geom = MultiPoint(subpoints, srid=geom.srid)
@@ -111,13 +114,19 @@ class ZipShapeSerializer(Serializer):
                     clone = x.__class__.objects.get(pk=x.pk)
                     clone.geom = MultiLineString(sublines, srid=geom.srid)
                     multilinestrings.append(clone)
+                if subpolygons:
+                    clone = x.__class__.objects.get(pk=x.pk)
+                    clone.geom = MultiPolygon(subpolygons, srid=geom.srid)
+                    multipolygons.append(clone)
             elif isinstance(geom, Point):
                 points.append(x)
             elif isinstance(geom, LineString):
                 linestrings.append(x)
+            elif isinstance(geom, Polygon):
+                polygons.append(x)
             else:
-                raise ValueError("Only LineString and Point geom should be here. Got %s for pk %d" % (geom, x.pk))
-        return points, linestrings, multipoints, multilinestrings
+                raise ValueError("Only LineString, Point and Polygon should be here. Got %s for pk %d" % (geom, x.pk))
+        return points, linestrings, polygons, multipoints, multilinestrings, multipolygons
 
 
 def shapefile_files(shapefile_path):
