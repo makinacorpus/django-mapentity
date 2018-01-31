@@ -222,7 +222,8 @@ class MapEntityMixin(models.Model):
             size = math.ceil(length * 1.1 * 256 * 2 ** zoom / CIRCUM)
         else:
             size = app_settings['MAP_CAPTURE_SIZE']
-        capture_map_image(url, path, size=size, waitfor=self.capture_map_image_waitfor)
+        printcontext = self.get_printcontext() if hasattr(self, 'get_printcontext') else None
+        capture_map_image(url, path, size=size, waitfor=self.capture_map_image_waitfor, printcontext=printcontext)
         return True
 
     def get_map_image_path(self):

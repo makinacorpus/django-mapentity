@@ -236,7 +236,7 @@ def capture_image(url, stream, **kwargs):
     download_to_stream(url, stream)
 
 
-def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet-tile-loaded'):
+def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet-tile-loaded', printcontext=None):
     """Prepare aspect of the detail page
 
     It relies on JS code in MapEntity.Context
@@ -248,9 +248,11 @@ def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet
         mapsize = dict(width=size * aspect, height=size)
     else:
         mapsize = dict(width=size, height=size / aspect)
-    printcontext = dict(mapsize=mapsize)
-    printcontext['print'] = True
-    serialized = json.dumps(printcontext)
+    _printcontext = dict(mapsize=mapsize)
+    _printcontext['print'] = True
+    if printcontext:
+        _printcontext.update(printcontext)
+    serialized = json.dumps(_printcontext)
     # Run head-less capture (takes time)
     url += '?lang={}&context={}'.format(get_language(), quote(serialized))
 

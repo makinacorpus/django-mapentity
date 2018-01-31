@@ -5,9 +5,9 @@ CHANGELOG
 3.2.3.dev0
 ==================
 
-**Bug fixes**
+**New features**
 
--
+- allow to specify print context on models for map captures
 
 
 3.2.2 (2018-01-11)
