@@ -13,7 +13,7 @@ from django.contrib.gis.gdal import check_err, OGRGeomType
 from django.contrib.gis.geos import Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon
 from django.contrib.gis.geos.collections import GeometryCollection
 from django.core.serializers.base import Serializer
-from django.db.models.fields.related import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 from django.utils.encoding import smart_str
 from django.utils.translation import ugettext as _
 

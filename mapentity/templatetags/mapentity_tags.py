@@ -4,8 +4,8 @@ import os
 from django import template
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
-from django.db.models.fields.related import FieldDoesNotExist
-from django.template.base import TemplateDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
+from django.template.exceptions import TemplateDoesNotExist
 from django.utils import six
 from django.utils.timezone import utc
 from django.utils.translation import ugettext, ungettext

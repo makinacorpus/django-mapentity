@@ -1,7 +1,7 @@
 import copy
 
 from django import forms
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis.db.models.fields import GeometryField
 

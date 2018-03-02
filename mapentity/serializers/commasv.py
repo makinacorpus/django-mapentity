@@ -4,7 +4,8 @@ from functools import partial
 from django.core.serializers.base import Serializer
 from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
-from django.db.models.fields.related import ForeignKey, ManyToManyField, FieldDoesNotExist
+from django.db.models.fields.related import ForeignKey, ManyToManyField
+from django.core.exceptions import FieldDoesNotExist
 
 from .helpers import smart_plain_text, field_as_string
 
