@@ -7,7 +7,7 @@ from django.contrib.auth.signals import user_logged_in
 from django.db import DatabaseError
 from django.utils.six.moves.urllib.parse import urlparse
 
-from . import app_settings
+from .settings import app_settings
 
 logger = logging.getLogger(__name__)
 

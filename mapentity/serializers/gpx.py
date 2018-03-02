@@ -8,7 +8,7 @@ from django.contrib.gis.geos import Point, LineString, Polygon
 import gpxpy.gpx
 
 from ..templatetags.mapentity_tags import humanize_timesince
-from .. import app_settings
+from ..settings import app_settings
 
 
 class GPXSerializer(Serializer):

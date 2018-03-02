@@ -17,7 +17,7 @@ from rest_framework import routers as rest_routers
 from rest_framework import serializers as rest_serializers
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
-from mapentity import app_settings
+from mapentity.settings import app_settings
 
 from paperclip.settings import get_attachment_model
 
@@ -220,6 +220,8 @@ class Registry(object):
     def entities(self):
         return self.registry.values()
 
+
+registry = Registry()
 
 def create_mapentity_model_permissions(model):
     """
