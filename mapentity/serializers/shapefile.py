@@ -19,7 +19,7 @@ from django.utils.translation import ugettext as _
 
 from osgeo import ogr, osr
 
-from .. import app_settings
+from ..settings import app_settings
 from .helpers import field_as_string
 
 

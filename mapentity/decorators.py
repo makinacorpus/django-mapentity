@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.views.generic.edit import BaseUpdateView
 from django.views.generic.detail import BaseDetailView
 
-from . import app_settings
+from .settings import app_settings
 from .helpers import user_has_perm
 from . import models as mapentity_models
 

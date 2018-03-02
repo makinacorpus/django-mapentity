@@ -14,7 +14,7 @@ from modeltranslation.translator import translator, NotRegistered
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 
 
-from . import app_settings
+from .settings import app_settings
 from .widgets import MapWidget
 
 
