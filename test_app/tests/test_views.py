@@ -13,7 +13,7 @@ from django.contrib.auth.models import Permission
 
 from mapentity.factories import SuperUserFactory
 
-from mapentity import app_settings
+from mapentity.registry import app_settings
 from mapentity.tests import MapEntityTest, MapEntityLiveTest
 from mapentity.views import serve_attachment, Convert, JSSettings
 

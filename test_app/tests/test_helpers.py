@@ -3,7 +3,7 @@ import os
 import mock
 from django.test import TransactionTestCase
 
-from mapentity import app_settings
+from mapentity.registry import app_settings
 from mapentity.helpers import (
     capture_url,
     convertit_url,
