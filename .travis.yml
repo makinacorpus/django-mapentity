@@ -10,6 +10,7 @@ env:
    - CPLUS_INCLUDE_PATH=/usr/include/gdal
    - C_INCLUDE_PATH=/usr/include/gdal
   matrix:
+
    - DJANGO_VERSION=1.10.7
 
 install:
