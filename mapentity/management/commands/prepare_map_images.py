@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
-from mapentity import registry
+from mapentity.registry import registry
 
 from optparse import make_option
 

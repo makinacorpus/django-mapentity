@@ -4,7 +4,7 @@ from django.views.generic import RedirectView
 
 from test_app.models import DummyModel, MushroomSpot
 from test_app.views import DummyDocumentOdt, DummyDocumentWeasyprint
-from mapentity import registry
+from mapentity.registry import registry
 
 
 handler403 = 'mapentity.views.handler403'
