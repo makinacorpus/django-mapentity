@@ -4,7 +4,6 @@ import inspect
 import logging
 from collections import OrderedDict
 
-from django.db.utils import ProgrammingError
 from django.db import DEFAULT_DB_ALIAS
 from django.utils.translation import ugettext as _
 from django.views.generic.base import View
@@ -17,7 +16,7 @@ from rest_framework import routers as rest_routers
 from rest_framework import serializers as rest_serializers
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
-from mapentity import app_settings
+from mapentity.settings import app_settings
 
 from paperclip.settings import get_attachment_model
 
@@ -211,7 +210,7 @@ class Registry(object):
 
         try:
             self.content_type_ids.append(model.get_content_type_id())
-        except ProgrammingError:
+        except RuntimeError:
             pass  # Content types table is not yet synced
 
         return options.scan_views()
@@ -219,6 +218,9 @@ class Registry(object):
     @property
     def entities(self):
         return self.registry.values()
+
+
+registry = Registry()
 
 
 def create_mapentity_model_permissions(model):

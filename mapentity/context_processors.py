@@ -1,6 +1,7 @@
 from django.conf import settings as settings_  # import the settings file
 
-from . import app_settings, registry
+from .registry import registry
+from .settings import app_settings
 
 
 def settings(request):
