@@ -211,7 +211,7 @@ class Registry(object):
 
         try:
             self.content_type_ids.append(model.get_content_type_id())
-        except ProgrammingError:
+        except RuntimeError:
             pass  # Content types table is not yet synced
 
         return options.scan_views()
