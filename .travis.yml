@@ -11,8 +11,8 @@ env:
    - C_INCLUDE_PATH=/usr/include/gdal
   matrix:
    - DJANGO_VERSION=1.9.13
-   - DJANGO_VERSION=1.10.7
-   - DJANGO_VERSION=1.11.2
+#   - DJANGO_VERSION=1.10.7
+#   - DJANGO_VERSION=1.11.2
 
 install:
  - sudo apt-get update
