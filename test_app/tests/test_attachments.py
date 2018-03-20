@@ -118,7 +118,7 @@ class UploadAttachmentTestCase(TransactionTestCase):
                                     data=self.attachmentPostData())
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'],
-                         'http://testserver/dummymodel/%s/' % self.object.pk)
+                         '/dummymodel/%s/' % self.object.pk)
 
     def test_upload_creates_attachment(self):
         data = self.attachmentPostData()

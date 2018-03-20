@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 
-from mapentity import app_settings
+from mapentity.registry import app_settings
 from mapentity.decorators import view_permission_required
 
 

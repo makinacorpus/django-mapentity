@@ -1,7 +1,7 @@
 import copy
 
 from django import forms
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis.db.models.fields import GeometryField
 
@@ -14,7 +14,7 @@ from modeltranslation.translator import translator, NotRegistered
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 
 
-from . import app_settings
+from .settings import app_settings
 from .widgets import MapWidget
 
 

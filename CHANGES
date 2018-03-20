@@ -2,6 +2,26 @@
 CHANGELOG
 =========
 
+4.0.1
+=====
+
+**Bug fixes**
+
+- 
+
+
+4.0.0 (2018-03-06)
+==================
+
+**New features**
+
+- upgrade to django 1.9
+
+**Breaking changes**
+
+- replace `from mapentity import registry` by `from mapentity.registry import registry`
+
+
 3.3.0 (2018-02-02)
 ==================
 
