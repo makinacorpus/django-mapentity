@@ -14,6 +14,12 @@ class PolygonFilter(Filter):
 
     field_class = forms.gis.PolygonField
 
+    def filter(self, qs, value):
+        print(value, qs.count(), "django_filter")
+        qs = super(PolygonFilter, self).filter(qs, value)
+        print(value, qs.query, "after_django_filter")
+        return qs
+
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('name', app_settings['GEOM_FIELD_NAME'])
         kwargs.setdefault('widget', HiddenGeometryWidget)
@@ -24,6 +30,7 @@ class PolygonFilter(Filter):
 class PythonPolygonFilter(PolygonFilter):
 
     def filter(self, qs, value):
+        print(value, qs.count(), "PythonPolygonFilter")
         if not value:
             return qs
         if not value.srid:

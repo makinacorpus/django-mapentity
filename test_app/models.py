@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import ugettext_lazy as _
@@ -40,7 +41,7 @@ class MushroomSpot(MapEntityMixin, models.Model):
 
 
 class WeatherStation(models.Model):
-    geom = models.PointField(null=True, default=None, srid=2154)
+    geom = models.PointField(null=True, default=None, srid=settings.SRID)
 
     objects = models.GeoManager()
 
