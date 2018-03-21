@@ -29,8 +29,6 @@ class EntityAttachmentTestCase(TransactionTestCase):
 
         def user_perms(p):
             return {'paperclip.add_attachment': False}.get(p, True)
-
-        self.user.is_anonymous = mock.MagicMock(return_value=False)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
         self.object = DummyModel.objects.create()
         call_command('update_permissions')
