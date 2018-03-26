@@ -7,7 +7,11 @@ CHANGELOG
 
 **Bug fixes**
 
-- 
+- Fix select multiple reset
+
+**New features**
+
+- add an install.sh script
 
 
 4.0.0 (2018-03-06)
