@@ -137,7 +137,7 @@ MEDIA_URL = '/media/'
 MEDIA_URL_SECURE = '/media_secure/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SRID = 3857
+SRID = 2154
 COMPRESS_ENABLED = False
 TEST = True
 

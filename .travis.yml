@@ -16,7 +16,6 @@ install:
  - ./install.sh
  - ./env/bin/pip install -U django==$DJANGO_VERSION
  - ./env/bin/pip install coverage
- 
  - pip install flake8==3.5.0
 
 before_script:
