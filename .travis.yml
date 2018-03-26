@@ -6,9 +6,6 @@ python:
  - 2.7
 
 env:
-  global:
-   - CPLUS_INCLUDE_PATH=/usr/include/gdal
-   - C_INCLUDE_PATH=/usr/include/gdal
   matrix:
    - DJANGO_VERSION=1.9.13
 #   - DJANGO_VERSION=1.10.7
@@ -22,8 +19,6 @@ install:
  - ./env/bin/pip install -e git://github.com/LePetitTim/django-paperclip.git@Django_110#egg=django-paperclip
  
  - pip install flake8==3.5.0
-
- - python setup.py develop
 
 before_script:
  - flake8
