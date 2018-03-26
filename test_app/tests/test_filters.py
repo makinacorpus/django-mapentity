@@ -29,9 +29,7 @@ class PolygonTest(object):
         shape = GEOSGeometry('POLYGON((0 -1, 4 -1, 4 1, 0 1, 0 -1))', srid=settings.SRID)
         shape.transform(API_SRID)
         result = self.filter.filter(self.model.objects.all(), shape)
-        self.assertEqual(2, len(result), '{} : {} filter {}'.format(self.model,
-                                                                    self.model.objects.all().count(),
-                                                                    len(result)))
+        self.assertEqual(2, len(result))
 
 
 class PolygonFilterTest(PolygonTest, TransactionTestCase):
