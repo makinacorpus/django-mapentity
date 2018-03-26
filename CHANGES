@@ -2,8 +2,8 @@
 CHANGELOG
 =========
 
-4.0.1
-=====
+4.1.0 (2018-03-26)
+==================
 
 **Bug fixes**
 
@@ -11,6 +11,7 @@ CHANGELOG
 
 **New features**
 
+- add support of Django 1.10
 - add an install.sh script
 
 
