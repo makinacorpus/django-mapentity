@@ -20,7 +20,7 @@ class ShapefileSerializer(TransactionTestCase):
         self.line1 = MushroomSpot.objects.create(serialized='SRID=%s;LINESTRING(0 0, 10 0)' % settings.SRID)
         self.multipoint = MushroomSpot.objects.create(serialized='SRID=%s;MULTIPOINT((1 1), (2 2))' % settings.SRID)
 
-        MushroomSpot.geomfield = GeometryField(name='geom', srid=2154)
+        MushroomSpot.geomfield = GeometryField(name='geom', srid=settings.SRID)
 
         self.serializer = ZipShapeSerializer()
         devnull = open(os.devnull, "wb")

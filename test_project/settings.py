@@ -75,14 +75,14 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.core.context_processors.debug',
-                'django.core.context_processors.request',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.i18n',
-                'django.core.context_processors.media',
-                'django.core.context_processors.static',
-                'django.core.context_processors.tz',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
                 'mapentity.context_processors.settings',
             ],
         },
@@ -137,7 +137,7 @@ MEDIA_URL = '/media/'
 MEDIA_URL_SECURE = '/media_secure/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SRID = 3857
+SRID = 2154
 COMPRESS_ENABLED = False
 TEST = True
 

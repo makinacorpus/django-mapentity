@@ -7,7 +7,7 @@ from collections import OrderedDict
 from django.db import DEFAULT_DB_ALIAS
 from django.utils.translation import ugettext as _
 from django.views.generic.base import View
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import auth
 from django.contrib.auth.models import Permission
@@ -119,7 +119,7 @@ class MapEntityOptions(object):
         self.rest_router.register(self.modelname + 's', rest_viewset, base_name=self.modelname)
 
         # Returns Django URL patterns
-        return patterns('', *self.__view_classes_to_url(*picked))
+        return self.__view_classes_to_url(*picked)
 
     def get_serializer(self):
         _model = self.model

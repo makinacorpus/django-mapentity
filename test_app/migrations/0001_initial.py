@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
             name='WeatherStation',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('geom', django.contrib.gis.db.models.fields.PointField(default=None, srid=2154, null=True)),
+                ('geom', django.contrib.gis.db.models.fields.PointField(default=None, srid=settings.SRID, null=True)),
             ],
         ),
         migrations.AddField(

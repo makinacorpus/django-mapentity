@@ -18,6 +18,8 @@ export C_INCLUDE_PATH=/usr/include/gdal
 ./env/bin/pip install -U setuptools pip wheel
 if [ "`lsb_release -rs`" = "14.04" ]; then
     ./env/bin/pip install gdal==1.10.0
+elif [ "`lsb_release -rs`" = "16.04" ]; then
+    ./env/bin/pip install gdal==1.11.2
 else
     ./env/bin/pip install gdal==2.2.4
 fi
