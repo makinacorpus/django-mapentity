@@ -30,7 +30,6 @@ class PolygonFilter(Filter):
 class PythonPolygonFilter(PolygonFilter):
 
     def filter(self, qs, value):
-        print(value, qs.count(), "PythonPolygonFilter")
         if not value:
             return qs
         if not value.srid:

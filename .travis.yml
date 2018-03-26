@@ -16,7 +16,6 @@ install:
  - ./install.sh
  - ./env/bin/pip install -U django==$DJANGO_VERSION
  - ./env/bin/pip install coverage
- - ./env/bin/pip install -e git://github.com/LePetitTim/django-paperclip.git@Django_110#egg=django-paperclip
  
  - pip install flake8==3.5.0
 

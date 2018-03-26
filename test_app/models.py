@@ -41,7 +41,7 @@ class MushroomSpot(MapEntityMixin, models.Model):
 
 
 class WeatherStation(models.Model):
-    geom = models.PointField(null=True, default=None, srid=settings.SRID)
+    geom = models.PointField(null=True, default=None, srid=2154)
 
     objects = models.GeoManager()
 
