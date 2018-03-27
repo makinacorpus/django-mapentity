@@ -149,4 +149,4 @@ PAPERCLIP_FILETYPE_MODEL = 'test_app.FileType'
 PAPERCLIP_ATTACHMENT_MODEL = 'test_app.Attachment'
 
 # Uncomment for spatialite >= 4.2
-# SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
