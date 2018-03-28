@@ -5,6 +5,7 @@ import logging
 from collections import OrderedDict
 
 from django.db import DEFAULT_DB_ALIAS
+from django.db.utils import ProgrammingError
 from django.utils.translation import ugettext as _
 from django.views.generic.base import View
 from django.conf.urls import url, include
@@ -210,7 +211,7 @@ class Registry(object):
 
         try:
             self.content_type_ids.append(model.get_content_type_id())
-        except RuntimeError:
+        except (RuntimeError, ProgrammingError):
             pass  # Content types table is not yet synced
 
         return options.scan_views()
