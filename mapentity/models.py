@@ -14,6 +14,7 @@ from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.utils.formats import localize
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
+from django.urls import reverse
 from rest_framework import permissions as rest_permissions
 
 from mapentity.templatetags.mapentity_tags import humanize_timesince
@@ -141,61 +142,50 @@ class MapEntityMixin(models.Model):
         super(MapEntityMixin, self).delete(*args, **kwargs)
 
     @classmethod
-    @models.permalink
     def get_layer_url(cls):
-        return (cls._entity.url_name(ENTITY_LAYER), )
+        return reverse(cls._entity.url_name(ENTITY_LAYER))
 
     @classmethod
-    @models.permalink
     def get_list_url(cls):
-        return (cls._entity.url_name(ENTITY_LIST), )
+        return reverse(cls._entity.url_name(ENTITY_LIST))
 
     @classmethod
-    @models.permalink
     def get_jsonlist_url(cls):
-        return (cls._entity.url_name(ENTITY_JSON_LIST), )
+        return reverse(cls._entity.url_name(ENTITY_JSON_LIST))
 
     @classmethod
-    @models.permalink
     def get_format_list_url(cls):
-        return (cls._entity.url_name(ENTITY_FORMAT_LIST), )
+        return reverse(cls._entity.url_name(ENTITY_FORMAT_LIST))
 
     @classmethod
-    @models.permalink
     def get_add_url(cls):
-        return (cls._entity.url_name(ENTITY_CREATE), )
+        return reverse(cls._entity.url_name(ENTITY_CREATE))
 
     def get_absolute_url(self):
         return self.get_detail_url()
 
     @classmethod
-    @models.permalink
     def get_generic_detail_url(cls):
-        return (cls._entity.url_name(ENTITY_DETAIL), [str(0)])
+        return reverse(cls._entity.url_name(ENTITY_DETAIL), args=[str(0)])
 
-    @models.permalink
     def get_detail_url(self):
-        return (self._entity.url_name(ENTITY_DETAIL), [str(self.pk)])
+        return reverse(self._entity.url_name(ENTITY_DETAIL), args=[str(self.pk)])
 
     @property
     def map_image_url(self):
         return self.get_map_image_url()
 
-    @models.permalink
     def get_map_image_url(self):
-        return (self._entity.url_name(ENTITY_MAPIMAGE), [str(self.pk)])
+        return reverse(self._entity.url_name(ENTITY_MAPIMAGE), args=[str(self.pk)])
 
-    @models.permalink
     def get_document_url(self):
-        return (self._entity.url_name(ENTITY_DOCUMENT), [str(self.pk)])
+        return reverse(self._entity.url_name(ENTITY_DOCUMENT), args=[str(self.pk)])
 
-    @models.permalink
     def get_update_url(self):
-        return (self._entity.url_name(ENTITY_UPDATE), [str(self.pk)])
+        return reverse(self._entity.url_name(ENTITY_UPDATE), args=[str(self.pk)])
 
-    @models.permalink
     def get_delete_url(self):
-        return (self._entity.url_name(ENTITY_DELETE), [str(self.pk)])
+        return reverse(self._entity.url_name(ENTITY_DELETE), args=[str(self.pk)])
 
     def get_map_image_extent(self, srid=API_SRID):
         fieldname = app_settings['GEOM_FIELD_NAME']
