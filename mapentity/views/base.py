@@ -43,29 +43,6 @@ def handler404(request, template_name='mapentity/404.html'):
     return page_not_found(request, template_name)
 
 
-def handler500(request, template_name='mapentity/500.html'):
-    """
-    500 error handler which tries to use a RequestContext - unless an error
-    is raised, in which a normal Context is used with just the request
-    available.
-
-    Templates: `500.html`
-    Context: None
-    """
-    # Try returning using a RequestContext
-    try:
-        context = RequestContext(request)
-    except Exception:
-        logger.warn('Error getting RequestContext for ServerError page.')
-        context = Context({'request': request})
-    e, name, tb = sys.exc_info()
-    context['exception'] = repr(name)
-    context['stack'] = "\n".join(traceback.format_tb(tb))
-    t = loader.get_template(template_name)
-    response = t.render(context)
-    return HttpResponseServerError(response)
-
-
 def serve_attachment(request, path, app_label, model_name, pk):
     """
     Serve media/ for authorized users only, since it can contain sensitive
