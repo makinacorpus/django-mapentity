@@ -1,4 +1,3 @@
-from django import forms
 from django.db.models.fields.related import ManyToOneRel
 from django.conf import settings
 

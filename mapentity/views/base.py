@@ -4,8 +4,6 @@ import json
 import logging
 import mimetypes
 import os
-import sys
-import traceback
 from datetime import datetime
 
 from django.apps import apps
@@ -14,10 +12,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.gis.db.models import GeometryField
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import (HttpResponse, HttpResponseBadRequest,
-                         HttpResponseServerError, Http404)
+from django.http import (HttpResponse, HttpResponseBadRequest, Http404)
 from django.shortcuts import get_object_or_404
-from django.template import RequestContext, Context, loader
 from django.utils.six.moves.urllib.parse import quote
 from django.views import static
 from django.views.decorators.csrf import csrf_exempt
