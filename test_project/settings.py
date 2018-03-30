@@ -42,7 +42,6 @@ INSTALLED_APPS = (
     'compressor',
     'easy_thumbnails',
     'crispy_forms',
-    'floppyforms',
     'rest_framework',
     'embed_video',
     'mapentity',

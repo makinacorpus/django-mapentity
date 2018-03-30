@@ -1,10 +1,10 @@
-from django import forms as django_forms
+from django import forms
 from django.db.models.fields.related import ManyToOneRel
 from django.conf import settings
 
 from django_filters import FilterSet, Filter
 from django_filters.filterset import get_model_field
-import floppyforms as forms
+from django.contrib.gis import forms
 
 from .settings import app_settings, API_SRID
 from .widgets import HiddenGeometryWidget
@@ -12,7 +12,7 @@ from .widgets import HiddenGeometryWidget
 
 class PolygonFilter(Filter):
 
-    field_class = forms.gis.PolygonField
+    field_class = forms.PolygonField
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('name', app_settings['GEOM_FIELD_NAME'])
@@ -53,13 +53,13 @@ class BaseMapEntityFilterSet(FilterSet):
         """
         for fieldname in self.base_filters.keys():
             field = self.form.fields[fieldname]
-            if isinstance(field, django_forms.MultiValueField):
+            if isinstance(field, forms.MultiValueField):
                 for i, widget in enumerate(field.widget.widgets):
                     self.__set_placeholder(field.fields[i], widget)
-            elif isinstance(field, django_forms.ChoiceField):
+            elif isinstance(field, forms.ChoiceField):
                 field.empty_label = field.label
                 self.__set_placeholder(field, field.widget)
-            elif isinstance(field, django_forms.NullBooleanField):
+            elif isinstance(field, forms.NullBooleanField):
                 choices = [(u'1', field.label)] + field.widget.choices[1:]
                 field.widget.choices = choices
                 self.__set_placeholder(field, field.widget)
