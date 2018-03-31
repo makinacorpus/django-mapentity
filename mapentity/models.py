@@ -1,5 +1,6 @@
 import os
 import math
+from PIL import Image, ImageDraw, ImageFont
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
@@ -194,12 +195,18 @@ class MapEntityMixin(models.Model):
         return obj.extent
 
     def prepare_map_image(self, rooturl):
-        if self.get_geom() is None:
-            return True
         path = self.get_map_image_path()
         # Do nothing if image is up-to-date
         if is_file_newer(path, self.get_date_update()):
             return False
+        if self.get_geom() is None:
+            size = app_settings['MAP_CAPTURE_SIZE']
+            image = Image.new('RGB', (size, size), color=(192, 192, 192))
+            font = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 24)
+            draw = ImageDraw.Draw(image)
+            draw.text((10, 10), "This object has no geometry", font=font, fill=(0, 0, 0))
+            image.save(path)
+            return True
         url = smart_urljoin(rooturl, self.get_detail_url())
         extent = self.get_map_image_extent(3857)
         length = max(extent[2] - extent[0], extent[3] - extent[1])
