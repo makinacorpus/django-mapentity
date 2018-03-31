@@ -5,6 +5,7 @@
 /env/
 /build/
 /dist/
+/static/
 /media/
 /docs/_build/
 /README.html

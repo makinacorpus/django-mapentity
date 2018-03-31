@@ -17,6 +17,7 @@ install:
  - ./env/bin/pip install -U django==$DJANGO_VERSION
  - ./env/bin/pip install coverage
  - pip install flake8==3.5.0
+ - ./env/bin/python ./manage.py collectstatic --noinput
 
 before_script:
  - flake8
