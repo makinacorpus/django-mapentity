@@ -1,8 +1,14 @@
 Installation
 ============
 
-A PostGIS database
-------------------
+Quickstart
+----------
+
+Run `./install.sh` on Ubuntu 14.04 Trusty LTS, 16.04 Xenial LTS or 17.10 Artful.
+
+
+Manual installation With a PostGIS database
+-------------------------------------------
 
 In order to use MapEntity you'll need to create a geospatial database. Feel
 free to skip this section if you already know how to do this. Here is how you
@@ -20,17 +26,10 @@ Now enable PostGIS extension for your new database::
     $ psql -q spatialdb
     spatialdb=# CREATE EXTENSION postgis;
 
-Python environment
-------------------
-
 Create a *virtualenv*, and activate it::
 
     virtualenv env/
     source env/bin/activate
-
-
-Dependencies
-------------
 
 Install GDAL with its development files. For example, on Ubuntu/Debian::
 
@@ -52,7 +51,6 @@ git submodules::
 
     $ git submodule init
     $ git submodule update
-
 
 Since you will PostgreSQL, also install its python library::
 
