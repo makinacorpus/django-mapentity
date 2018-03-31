@@ -5,9 +5,16 @@ CHANGELOG
 4.1.2.dev0
 ==========
 
-**Bug fixes**
+**New features**
 
--
+- add support of Django 1.11 (Django 1.9 and 1.10 are still supported)
+
+**Minor changes**
+
+- fix errors logged during tests
+- create a map image (with an error message) when geom is null
+- add a default logo-header.png
+- use file transport instead of http one in weasyprint template
 
 
 4.1.1 (2018-03-28)
