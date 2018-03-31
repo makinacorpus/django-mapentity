@@ -2,8 +2,10 @@
 *.egg*/
 *.sw?
 .idea/
+.vscode/
 env/
 build/
 dist/
+media/
 docs/_build/
 README.html
