@@ -220,7 +220,7 @@ class MapEntityDocumentWeasyprint(MapEntityDocumentBase, PDFTemplateResponseMixi
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityDocumentWeasyprint, self).get_context_data(**kwargs)
-        context['map_url'] = self.get_object().get_map_image_url()
+        context['map_url'] = "file:{}".format(self.get_object().get_map_image_path())
         context['template_attributes'] = self.template_attributes
         context['template_css'] = self.template_css
         return context
