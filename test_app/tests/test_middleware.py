@@ -20,6 +20,7 @@ User = get_user_model()
 @override_settings(TEST=False)
 class AutoLoginTest(TransactionTestCase):
     def setUp(self):
+        middleware.clear_internal_user_cache()
         self.middleware = AutoLoginMiddleware()
         self.request = RequestFactory()
         self.request.user = AnonymousUser()  # usually set by other middleware

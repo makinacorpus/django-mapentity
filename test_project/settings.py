@@ -149,3 +149,24 @@ PAPERCLIP_ATTACHMENT_MODEL = 'test_app.Attachment'
 
 if os.path.exists('/usr/lib/x86_64-linux-gnu/mod_spatialite.so'):
     SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(name)s %(pathname)s:%(lineno)d %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+        },
+    },
+}
