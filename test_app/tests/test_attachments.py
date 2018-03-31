@@ -13,8 +13,6 @@ from mapentity.views.generic import MapEntityDetail
 
 from ..models import DummyModel
 
-User = get_user_model()
-
 
 def add_url_for_obj(obj):
     return reverse('add_attachment', kwargs={
@@ -26,12 +24,11 @@ def add_url_for_obj(obj):
 
 class EntityAttachmentTestCase(TransactionTestCase):
     def setUp(self):
+        User = get_user_model()
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
 
         def user_perms(p):
             return {'paperclip.add_attachment': False}.get(p, True)
-
-        self.user.is_anonymous = mock.MagicMock(return_value=False)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
         self.object = DummyModel.objects.create()
         call_command('update_permissions')
@@ -91,6 +88,7 @@ class EntityAttachmentTestCase(TransactionTestCase):
 class UploadAttachmentTestCase(TransactionTestCase):
 
     def setUp(self):
+        User = get_user_model()
         self.object = DummyModel.objects.create()
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')
         user.is_superuser = True
@@ -118,7 +116,7 @@ class UploadAttachmentTestCase(TransactionTestCase):
                                     data=self.attachmentPostData())
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'],
-                         'http://testserver/dummymodel/%s/' % self.object.pk)
+                         '/dummymodel/%s/' % self.object.pk)
 
     def test_upload_creates_attachment(self):
         data = self.attachmentPostData()

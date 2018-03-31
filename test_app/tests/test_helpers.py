@@ -3,7 +3,7 @@ import os
 import mock
 from django.test import TransactionTestCase
 
-from mapentity import app_settings
+from mapentity.registry import app_settings
 from mapentity.helpers import (
     capture_url,
     convertit_url,
@@ -88,5 +88,7 @@ class DownloadStreamTest(TransactionTestCase):
     @mock.patch('mapentity.helpers.requests.get')
     def test_headers_can_be_specified_for_download(self, get_mocked):
         # Required to specified language for example
-        download_to_stream('http://google.com', open(os.devnull), silent=True, headers={'Accept-language': 'fr'})
+        get_mocked.return_value.status_code = 200
+        get_mocked.return_value.content = "x"
+        download_to_stream('http://google.com', open(os.devnull, 'w'), silent=True, headers={'Accept-language': 'fr'})
         get_mocked.assert_called_with('http://google.com', headers={'Accept-language': 'fr'})

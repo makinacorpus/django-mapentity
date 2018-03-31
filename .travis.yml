@@ -6,41 +6,26 @@ python:
  - 2.7
 
 env:
-  global:
-   - CPLUS_INCLUDE_PATH=/usr/include/gdal
-   - C_INCLUDE_PATH=/usr/include/gdal
   matrix:
-   - DJANGO_VERSION=1.8.18
    - DJANGO_VERSION=1.9.13
    - DJANGO_VERSION=1.10.7
    - DJANGO_VERSION=1.11.2
 
 install:
  - sudo apt-get update
- - sudo apt-get install -y libgdal1-dev libproj-dev libgeos-dev libspatialite-dev
- - pip install -U setuptools
- - pip install git+git://github.com/tinio/pysqlite.git@extension-enabled#egg=pysqlite
-
-   # This is a dependency of our Django quicktest script
- - pip install argparse
-
- - pip install gdal==1.10.0
- - pip install html5lib==0.999
- - pip install -r requirements.txt
-
- - pip install coverage
-
+ - ./install.sh
+ - ./env/bin/pip install -U django==$DJANGO_VERSION
+ - ./env/bin/pip install coverage
  - pip install flake8==3.5.0
-
- - python setup.py develop
+ - ./env/bin/python ./manage.py collectstatic --noinput
 
 before_script:
  - flake8
- - pip freeze
+ - ./env/bin/pip freeze
 
 script:
- - ./manage.py test
- - coverage run --include="mapentity/*" ./manage.py test
+ - ./env/bin/python ./manage.py test
+ - ./env/bin/coverage run --include="mapentity/*" manage.py test
 
 after_success:
  - pip install coveralls

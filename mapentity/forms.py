@@ -1,11 +1,10 @@
 import copy
 
 from django import forms
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis.db.models.fields import GeometryField
 
-import floppyforms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Button, HTML, Submit
 from crispy_forms.bootstrap import FormActions
@@ -14,7 +13,7 @@ from modeltranslation.translator import translator, NotRegistered
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 
 
-from . import app_settings
+from .settings import app_settings
 from .widgets import MapWidget
 
 
@@ -119,8 +118,7 @@ class MapEntityForm(TranslatedModelForm):
                     pass
 
                 # Bypass widgets that inherit textareas, such as geometry fields
-                if formfield.widget.__class__ in (forms.widgets.Textarea,
-                                                  floppyforms.widgets.Textarea):
+                if formfield.widget.__class__ == forms.widgets.Textarea:
                     formfield.widget = TinyMCE()
 
         self._init_layout()

@@ -4,8 +4,9 @@ import os
 from django import template
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
-from django.db.models.fields.related import FieldDoesNotExist
-from django.template.base import TemplateDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
+from django.template import Context
+from django.template.exceptions import TemplateDoesNotExist
 from django.utils import six
 from django.utils.timezone import utc
 from django.utils.translation import ugettext, ungettext
@@ -35,7 +36,7 @@ class SmartIncludeNode(template.Node):
                 template_name = "%(module)s/%(module)s_%(viewname)s_fragment.html" % {'viewname': viewname,
                                                                                       'module': module}
                 t = template.loader.get_template(template_name)
-                result += t.render(context)
+                result += t.render(Context.flatten(context))
             except TemplateDoesNotExist:
                 pass
         return result

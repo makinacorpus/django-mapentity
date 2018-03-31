@@ -4,8 +4,6 @@ import json
 import logging
 import mimetypes
 import os
-import sys
-import traceback
 from datetime import datetime
 
 from django.apps import apps
@@ -14,10 +12,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.gis.db.models import GeometryField
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import (HttpResponse, HttpResponseBadRequest,
-                         HttpResponseServerError, Http404)
+from django.http import (HttpResponse, HttpResponseBadRequest, Http404)
 from django.shortcuts import get_object_or_404
-from django.template import RequestContext, Context, loader
 from django.utils.six.moves.urllib.parse import quote
 from django.views import static
 from django.views.decorators.csrf import csrf_exempt
@@ -41,29 +37,6 @@ def handler403(request, template_name='mapentity/403.html'):
 
 def handler404(request, template_name='mapentity/404.html'):
     return page_not_found(request, template_name)
-
-
-def handler500(request, template_name='mapentity/500.html'):
-    """
-    500 error handler which tries to use a RequestContext - unless an error
-    is raised, in which a normal Context is used with just the request
-    available.
-
-    Templates: `500.html`
-    Context: None
-    """
-    # Try returning using a RequestContext
-    try:
-        context = RequestContext(request)
-    except Exception:
-        logger.warn('Error getting RequestContext for ServerError page.')
-        context = Context({'request': request})
-    e, name, tb = sys.exc_info()
-    context['exception'] = repr(name)
-    context['stack'] = "\n".join(traceback.format_tb(tb))
-    t = loader.get_template(template_name)
-    response = t.render(context)
-    return HttpResponseServerError(response)
 
 
 def serve_attachment(request, path, app_label, model_name, pk):

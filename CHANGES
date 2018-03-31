@@ -2,6 +2,62 @@
 CHANGELOG
 =========
 
+4.2.1.dev0
+==================
+
+**Bug fixes**
+
+-
+
+
+4.2.0 (2018-03-31)
+==================
+
+**New features**
+
+- add support of Django 1.11 (Django 1.9 and 1.10 are still supported)
+
+**Minor changes**
+
+- fix errors logged during tests
+- create a map image (with an error message) when geom is null
+- add a default logo-header.png
+- use file transport instead of http one in weasyprint template
+
+
+4.1.1 (2018-03-28)
+==================
+
+**Bug fixes**
+
+- Fix registering of Mapentity based models when migrations are not done
+
+
+4.1.0 (2018-03-26)
+==================
+
+**Bug fixes**
+
+- Fix select multiple reset
+
+**New features**
+
+- add support of Django 1.10
+- add an install.sh script
+
+
+4.0.0 (2018-03-06)
+==================
+
+**New features**
+
+- upgrade to django 1.9
+
+**Breaking changes**
+
+- replace `from mapentity import registry` by `from mapentity.registry import registry`
+
+
 3.3.0 (2018-02-02)
 ==================
 

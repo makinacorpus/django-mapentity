@@ -42,7 +42,6 @@ INSTALLED_APPS = (
     'compressor',
     'easy_thumbnails',
     'crispy_forms',
-    'floppyforms',
     'rest_framework',
     'embed_video',
     'mapentity',
@@ -75,14 +74,14 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.core.context_processors.debug',
-                'django.core.context_processors.request',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.i18n',
-                'django.core.context_processors.media',
-                'django.core.context_processors.static',
-                'django.core.context_processors.tz',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
                 'mapentity.context_processors.settings',
             ],
         },
@@ -137,7 +136,7 @@ MEDIA_URL = '/media/'
 MEDIA_URL_SECURE = '/media_secure/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SRID = 3857
+SRID = 2154
 COMPRESS_ENABLED = False
 TEST = True
 
@@ -148,5 +147,26 @@ MAPENTITY_CONFIG = {
 PAPERCLIP_FILETYPE_MODEL = 'test_app.FileType'
 PAPERCLIP_ATTACHMENT_MODEL = 'test_app.Attachment'
 
-# Uncomment for spatialite >= 4.2
-# SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+if os.path.exists('/usr/lib/x86_64-linux-gnu/mod_spatialite.so'):
+    SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(name)s %(pathname)s:%(lineno)d %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+        },
+    },
+}

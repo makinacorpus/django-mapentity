@@ -2,6 +2,7 @@
 import csv
 import json
 import hashlib
+import logging
 import os
 import shutil
 import time
@@ -25,6 +26,19 @@ from mock import patch
 from .factories import SuperUserFactory
 from .forms import MapEntityForm
 from .helpers import smart_urljoin
+
+
+class AdjustDebugLevel():
+    def __init__(self, name, level):
+        self.logger = logging.getLogger(name)
+        self.old_level = self.logger.level
+        self.new_level = level
+
+    def __enter__(self):
+        self.logger.setLevel(self.new_level)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.logger.setLevel(self.old_level)
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
@@ -110,7 +124,8 @@ class MapEntityTest(TestCase):
         # If bbox is invalid, it should return all
         allresponse = self.client.get(self.model.get_jsonlist_url())
         params = '?bbox=POLYGON(prout)'
-        response = self.client.get(self.model.get_jsonlist_url() + params)
+        with AdjustDebugLevel('django.contrib.gis', logging.CRITICAL):
+            response = self.client.get(self.model.get_jsonlist_url() + params)
         self.assertEqual(response.status_code, 200)
         response.content = allresponse.content
 
@@ -153,7 +168,8 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         bad_data, form_error = self.get_bad_data()
-        response = self.client.post(url, bad_data)
+        with AdjustDebugLevel('django.contrib.gis', logging.CRITICAL):
+            response = self.client.post(url, bad_data)
         self.assertEqual(response.status_code, 200)
 
         form = self.get_form(response)

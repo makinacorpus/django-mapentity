@@ -27,7 +27,6 @@ from .mixins import (
 from .base import (
     handler403,
     handler404,
-    handler500,
     serve_attachment,
     JSSettings,
     map_screenshot,

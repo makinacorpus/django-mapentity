@@ -2,7 +2,7 @@ from django.template.loader import render_to_string
 from django.forms import widgets as django_widgets
 from django.utils import six
 from leaflet.forms.widgets import LeafletWidget
-import floppyforms as forms
+from django import forms
 
 from .settings import API_SRID
 from .helpers import wkt_to_geom

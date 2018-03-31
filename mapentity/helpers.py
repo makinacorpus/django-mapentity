@@ -14,7 +14,7 @@ from django.contrib.gis.gdal.error import OGRException
 from django.contrib.gis.geos import GEOSException, fromstr
 from django.core.urlresolvers import resolve
 from django.http import HttpResponse
-from django.template.base import TemplateDoesNotExist
+from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import get_template
 from django.utils import six
 from django.utils import timezone

@@ -1,7 +1,7 @@
 import json
 
 from django.core.serializers import serialize
-from django.core.serializers.json import DateTimeAwareJSONEncoder
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query import QuerySet
 from django.utils.encoding import force_unicode
 from django.utils.encoding import smart_str
@@ -45,7 +45,7 @@ def smart_plain_text(s, ascii=False):
         return smart_str(s)
 
 
-class DjangoJSONEncoder(DateTimeAwareJSONEncoder):
+class DjangoJSONEncoder(DjangoJSONEncoder):
     """
     Taken (slightly modified) from:
     http://stackoverflow.com/questions/2249792/json-serializing-django-models-with-simplejson
