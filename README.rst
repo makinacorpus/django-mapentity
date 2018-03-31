@@ -9,10 +9,10 @@ Works with Django 1.9 to 1.11.
 .. image:: https://img.shields.io/pypi/v/mapentity.svg
         :target: https://pypi.python.org/pypi/mapentity
 
-.. image:: https://travis-ci.org/makinacorpus/django-mapentity.png?branch=develop
-    :target: https://travis-ci.org/makinacorpus/django-mapentity?branch=develop
+.. image:: https://img.shields.io/travis/makinacorpus/django-mapentity.svg
+    :target: https://travis-ci.org/makinacorpus/django-mapentity
 
-.. image:: https://coveralls.io/repos/makinacorpus/django-mapentity/badge.png
+.. image:: 	https://img.shields.io/coveralls/github/makinacorpus/django-mapentity.svg
     :target: https://coveralls.io/r/makinacorpus/django-mapentity
 
 
