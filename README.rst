@@ -6,7 +6,7 @@ that powers `Geotrek <http://geotrek.fr>`_.
 
 Works with Django 1.9 to 1.11.
 
-.. image:: https://pypip.in/v/mapentity/badge.png
+.. image:: https://img.shields.io/pypi/v/mapentity.svg
         :target: https://pypi.python.org/pypi/mapentity
 
 .. image:: https://travis-ci.org/makinacorpus/django-mapentity.png?branch=develop
