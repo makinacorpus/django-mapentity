@@ -198,9 +198,13 @@ class MapEntityDocumentBase(ModelViewMixin, DetailView):
         context = super(MapEntityDocumentBase, self).get_context_data(**kwargs)
         context['datetime'] = datetime.now()
         context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
-        context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)[:-1]
-        context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)[:-1]
-        context['MEDIA_ROOT'] = settings.MEDIA_ROOT + '/'
+        context['logo_path'] = os.path.join(settings.MEDIA_ROOT, 'upload/logo-header.png')
+        if not os.path.exists(context['logo_path']):
+            context['logo_path'] = os.path.join(settings.STATIC_ROOT, 'images/logo-header.png')
+        context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)
+        context['STATIC_ROOT'] = settings.STATIC_ROOT
+        context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)
+        context['MEDIA_ROOT'] = settings.MEDIA_ROOT
         return context
 
 
@@ -220,7 +224,7 @@ class MapEntityDocumentWeasyprint(MapEntityDocumentBase, PDFTemplateResponseMixi
 
     def get_context_data(self, **kwargs):
         context = super(MapEntityDocumentWeasyprint, self).get_context_data(**kwargs)
-        context['map_url'] = "file:{}".format(self.get_object().get_map_image_path())
+        context['map_path'] = self.get_object().get_map_image_path()
         context['template_attributes'] = self.template_attributes
         context['template_css'] = self.template_css
         return context
