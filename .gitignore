@@ -1,4 +1,5 @@
 *.pyc
+/database.db
 /mapentity.egg-info/
 /.idea/
 /.vscode/
