@@ -180,4 +180,5 @@ LEAFLET_CONFIG = {
         ('OSM', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
         ('OSM N&B', 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
     ],
+    'SPATIAL_EXTENT': (1.3, 43.7, 1.5, 43.5),
 }
