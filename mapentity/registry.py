@@ -148,6 +148,7 @@ class MapEntityOptions(object):
             mapentity_models.ENTITY_CREATE: r'^{modelname}/add/$',
             mapentity_models.ENTITY_UPDATE: r'^{modelname}/edit/(?P<pk>\d+)/$',
             mapentity_models.ENTITY_DELETE: r'^{modelname}/delete/(?P<pk>\d+)/$',
+            mapentity_models.ENTITY_MARKUP: r'^{modelname}/markup/(?P<pk>\d+)/$',
         }
         if app_settings['MAPENTITY_WEASYPRINT']:
             kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = r'^document/{modelname}-(?P<pk>\d+).pdf$'
