@@ -8,6 +8,12 @@ CHANGELOG
 **Bug fixes**
 
 - Fix logo path/url
+- Fix test_project settings
+- Make sure mapentity settings are loaded before leaflet ones
+
+**New features**
+
+- Add weasyprint HTML markup view
 
 
 4.2.0 (2018-03-31)
