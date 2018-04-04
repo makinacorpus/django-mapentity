@@ -83,6 +83,13 @@ def media_static_fallback(media_file, static_file, *args, **kwarg):
     return os.path.join(settings.STATIC_URL, static_file)
 
 
+@register.simple_tag()
+def media_static_fallback_path(media_file, static_file, *args, **kwarg):
+    if os.path.exists(os.path.join(settings.MEDIA_ROOT, media_file)):
+        return os.path.join(settings.MEDIA_ROOT, media_file)
+    return os.path.join(settings.STATIC_ROOT, static_file)
+
+
 @register.filter(name='timesince')
 def humanize_timesince(date):
     """

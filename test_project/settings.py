@@ -44,7 +44,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'rest_framework',
     'embed_video',
-    'mapentity',
+    'mapentity',  # Make sure mapentity settings are loaded before leaflet ones
     'leaflet',
     'test_app',
 )
@@ -108,6 +108,10 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
+LANGUAGES = (
+    ('en', u"English"),
+    ('fr', u"French"),
+)
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -127,8 +131,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'my_cache_table',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
 
@@ -169,4 +172,13 @@ LOGGING = {
             'level': 'WARNING',
         },
     },
+}
+
+LEAFLET_CONFIG = {
+    'SRID': 3857,
+    'TILES': [
+        ('OSM', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
+        ('OSM N&B', 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
+    ],
+    'SPATIAL_EXTENT': (1.3, 43.7, 1.5, 43.5),
 }
