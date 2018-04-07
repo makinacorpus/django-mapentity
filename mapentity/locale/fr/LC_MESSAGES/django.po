@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-18 14:57+0200\n"
+"POT-Creation-Date: 2018-04-07 16:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,10 +34,10 @@ msgid "Delete"
 msgstr "Supprimer"
 
 msgid "Submit attachment"
-msgstr ""
+msgstr "Soumettre le fichier"
 
 msgid "Update attachment"
-msgstr ""
+msgstr "Modifier le fichier"
 
 #, python-format
 msgid "Add a new %s"
@@ -68,7 +68,7 @@ msgid "yes"
 msgstr "oui"
 
 msgid "administration"
-msgstr ""
+msgstr "administration"
 
 msgid "Back to application"
 msgstr "Retour à l'application"
@@ -232,9 +232,6 @@ msgstr[1] "%d minutes"
 
 msgid "just a few seconds ago"
 msgstr "quelques secondes"
-
-msgid "Dummy Model"
-msgstr ""
 
 msgid "Invalid geometry value."
 msgstr "Géométrie invalide"
