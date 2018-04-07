@@ -57,8 +57,8 @@ class MapEntityTest(TestCase):
         shutil.rmtree(settings.MEDIA_ROOT)
 
     def login(self):
-        user = self.userfactory(password='booh')
-        success = self.client.login(username=user.username, password='booh')
+        self.user = self.userfactory(password='booh')
+        success = self.client.login(username=self.user.username, password='booh')
         self.assertTrue(success)
 
     def logout(self):
@@ -187,8 +187,11 @@ class MapEntityTest(TestCase):
 
         self.assertEqual(response.status_code, 302)  # success, redirects to detail view
 
+    def _get_add_url(self):
+        return self.model.get_add_url()
+
     def _post_add_form(self):
-        self._post_form(self.model.get_add_url())
+        self._post_form(self._get_add_url())
 
     def _post_update_form(self, obj):
         self._post_form(obj.get_update_url())

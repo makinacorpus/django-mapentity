@@ -5,17 +5,9 @@ CHANGELOG
 4.3.1.dev0
 ==================
 
-**Bug fixes**
-
--
-
-**New features**
-
--
-
 **Minor changes**
 
--
+- Make MapEntityTest more extensible
 
 
 4.3.0 (2018-04-02)
