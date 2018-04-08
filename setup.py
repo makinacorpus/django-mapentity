@@ -11,7 +11,7 @@ test_requires = [
 
 setup(
     name='mapentity',
-    version='4.3.2',
+    version='4.3.3',
     author='Makina Corpus',
     author_email='geobi@makina-corpus.com',
     url='https://github.com/makinacorpus/django-mapentity',
@@ -21,8 +21,8 @@ setup(
                       open(os.path.join(here, 'CHANGES')).read()),
     license='BSD, see LICENSE file.',
     install_requires=[
-        'Django >= 1.9',
-        'GDAL >= 1.9',
+        'Django>=1.9,<2',
+        'GDAL>=1.9',
         'gpxpy',
         'BeautifulSoup4',
         'requests',
@@ -40,8 +40,8 @@ setup(
         'django-leaflet>=0.14',
         'django-geojson>=2',
         'paperclip',
-        'WeasyPrint < 0.42',  # 0.42 drops support of python 2.7,
-        'django-weasyprint == 0.1',  # 0.5.x API changed
+        'WeasyPrint<0.42',  # 0.42 drops support of python 2.7,
+        'django-weasyprint==0.1',  # 0.5.x API changed
     ] + test_requires,
     tests_requires=test_requires,
     packages=find_packages(),
