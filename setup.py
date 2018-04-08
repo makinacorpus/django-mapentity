@@ -40,8 +40,8 @@ setup(
         'django-leaflet>=0.14',
         'django-geojson>=2',
         'paperclip',
-        'WeasyPrint',
-        'django-weasyprint',
+        'WeasyPrint < 0.42',  # 0.42 drops support of python 2.7,
+        'django-weasyprint == 0.1',  # 0.5.x API changed
     ] + test_requires,
     tests_requires=test_requires,
     packages=find_packages(),
