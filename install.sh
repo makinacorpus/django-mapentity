@@ -23,10 +23,10 @@ elif [ "`lsb_release -rs`" = "16.04" ]; then
 else
     ./env/bin/pip install gdal==2.2.4
 fi
-./env/bin/pip install -r requirements.txt
-./env/bin/pip install -r dev-requirements.txt
+#./env/bin/pip install -r requirements.txt
+#./env/bin/pip install -r dev-requirements.txt
 
 echo "--- Setup:"
-./env/bin/python setup.py develop
+./env/bin/pip install -e .
 
 echo "--- Done"
