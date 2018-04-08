@@ -1,4 +1,3 @@
 sphinx
-zest.releaser
 mock
-factory_boy
+factory_boy==2.8.1
