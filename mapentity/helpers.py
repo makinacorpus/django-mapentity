@@ -318,7 +318,7 @@ def alphabet_enumeration(length):
         return ["A"]
     width = int(math.ceil(math.log(length, 26)))
     enums = []
-    alphabet = string.lowercase.upper()
+    alphabet = string.ascii_uppercase
     for i in range(length):
         enum = ""
         for j in range(width):
