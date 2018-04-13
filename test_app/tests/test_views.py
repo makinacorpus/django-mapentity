@@ -271,7 +271,7 @@ class ListViewTest(BaseTest):
         request.session = {}
         view = DummyList.as_view()
         response = view(request)
-        html = unicode(response.render())
+        html = (response.render())
 
         self.assertTrue('btn-group disabled' in html)
         self.assertTrue('Add a new dummy model</a>' in html)

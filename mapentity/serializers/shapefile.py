@@ -24,9 +24,9 @@ from .helpers import field_as_string
 
 
 try:
-    from cStringIO import StringIO
+    from cStringIO import BytesIO
 except ImportError:
-    from io import StringIO  # noqa
+    from io import BytesIO  # noqa
 
 os.environ["SHAPE_ENCODING"] = "UTF-8"
 
@@ -51,7 +51,7 @@ class ZipShapeSerializer(Serializer):
 
     def zip_shapefiles(self, stream, delete=True):
         # Can't use stream, because HttpResponse is not seekable
-        buffr = StringIO()
+        buffr = BytesIO()
         zipf = zipfile.ZipFile(buffr, 'w', zipfile.ZIP_DEFLATED)
 
         for filename, shp_filepath in self.layers.items():
@@ -208,13 +208,13 @@ def create_shape_format_layer(headers, geom_type, srid, srid_out=None):
     column_map = {}
 
     # Create temp file
-    tmp = tempfile.NamedTemporaryFile(suffix='.shp', mode='w+b', dir=app_settings['TEMP_DIR'])
+    tmp = tempfile.NamedTemporaryFile(suffix='.shp', mode='w+b')
     # we must close the file for GDAL to be able to open and write to it
     tmp.close()
     # create shape format
 
     dr = ogr.GetDriverByName('ESRI Shapefile')
-    ds = dr.CreateDataSource(tmp.name)
+    ds = dr.CreateDataSource(str(tmp.name))
     if ds is None:
         raise Exception('Could not create file!')
 

@@ -65,7 +65,7 @@ class MapEntityTest(TestCase):
         self.client.logout()
 
     def get_bad_data(self):
-        return {'geom': 'doh!'}, _(u'Invalid geometry value.')
+        return {'geom': 'doh!'}, _('Invalid geometry value.')
 
     def get_good_data(self):
         raise NotImplementedError()

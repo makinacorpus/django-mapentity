@@ -80,7 +80,7 @@ class EntityAttachmentTestCase(TransactionTestCase):
                                        template_name="mapentity/mapentity_detail.html")
         request = self.createRequest()
         response = view(request, pk=self.object.pk)
-        html = unicode(response.render())
+        html = (response.render())
         self.assertIn("Submit attachment", html)
         self.assertIn('<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk), html)
 

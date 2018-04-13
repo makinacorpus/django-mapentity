@@ -167,7 +167,7 @@ def download_to_stream(url, stream, silent=False, headers=None):
         return source
 
     try:
-        stream.write(source.content)
+        stream.write(bytes(source.content, 'utf-8'))
         stream.flush()
     except IOError as e:
         logger.exception(e)
@@ -203,7 +203,7 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False):
 def convertit_download(url, destination, from_type=None, to_type='application/pdf', headers=None):
     # Mock for tests
     if getattr(settings, 'TEST', False):
-        open(destination, 'wb').write("Mock\n")
+        open(destination, 'wb').write(b"Mock\n")
         return
 
     url = convertit_url(url, from_type, to_type)

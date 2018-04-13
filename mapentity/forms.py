@@ -83,7 +83,7 @@ class SubmitButton(HTML):
             <a id="%s" class="btn btn-success pull-right offset1"
                onclick="javascript:$(this).parents('form').submit();">
                 <i class="icon-white icon-ok-sign"></i> %s
-            </a>""" % (divid, unicode(label)))
+            </a>""" % (divid, label))
         super(SubmitButton, self).__init__(content)
 
 
