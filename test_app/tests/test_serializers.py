@@ -49,12 +49,12 @@ class ShapefileSerializer(TransactionTestCase):
 
     def test_each_layer_has_a_different_geometry_type(self):
         layer_types = [l.geom_type.name for l in self.getShapefileLayers()]
-        self.assertItemsEqual(layer_types, ['MultiPoint', 'Point', 'LineString'])
+        self.assertCountEqual(layer_types, ['MultiPoint', 'Point', 'LineString'])
 
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():
             self.assertEquals(layer.srs.name, 'RGF93_Lambert_93')
-            self.assertItemsEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean'])
+            self.assertCountEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean'])
 
     def test_geometries_come_from_records(self):
         layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()

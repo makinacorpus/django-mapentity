@@ -20,7 +20,7 @@ class ModelPermissionsTest(TransactionTestCase):
     def test_model_permissions_were_created(self):
         permissions = Permission.objects.filter(content_type=self.ctype)
         all_codenames = permissions.values_list('codename', flat=True)
-        self.assertItemsEqual(all_codenames, [u'add_dummymodel',
+        self.assertCountEqual(all_codenames, [u'add_dummymodel',
                                               u'change_dummymodel',
                                               u'delete_dummymodel',
                                               u'export_dummymodel',
