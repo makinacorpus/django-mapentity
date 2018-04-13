@@ -129,7 +129,7 @@ class AttachmentTest(BaseTest):
         os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}'.format(self.obj.pk)))
         self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk))
         self.url = '/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk)
-        open(self.file, 'wb').write('*' * 300)
+        open(self.file, 'wb').write(b'*' * 300)
         call_command('update_permissions')
 
     def tearDown(self):
