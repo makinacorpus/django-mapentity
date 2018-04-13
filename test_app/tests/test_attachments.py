@@ -41,7 +41,7 @@ class EntityAttachmentTestCase(TransactionTestCase):
 
     def createAttachment(self, obj):
         uploaded = SimpleUploadedFile('file.odt',
-                                      '*' * 128,
+                                      b'*' * 128,
                                       content_type='application/vnd.oasis.opendocument.text')
         kwargs = {
             'content_type': ContentType.objects.get_for_model(obj),
@@ -99,7 +99,7 @@ class UploadAttachmentTestCase(TransactionTestCase):
     def attachmentPostData(self):
         filetype = get_filetype_model().objects.create()
         uploaded = SimpleUploadedFile('face.jpg',
-                                      '*' * 128,
+                                      b'*' * 128,
                                       content_type='image/jpeg')
         data = {
             'filetype': filetype.pk,
