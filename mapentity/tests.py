@@ -174,7 +174,7 @@ class MapEntityTest(TestCase):
 
         form = self.get_form(response)
 
-        fields_errors = form.errors[bad_data.keys()[0]]
+        fields_errors = form.errors[list(bad_data.keys())[0]]
         form_errors = to_list(form_error)
         for err in form_errors:
             self.assertTrue(u"{}".format(err) in fields_errors,

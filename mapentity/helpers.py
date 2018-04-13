@@ -57,7 +57,7 @@ def bbox_split(bbox, by_x=2, by_y=2, cycle=False):
 def bbox_split_srid_2154(*args, **kwargs):
     """Just round"""
     gen = bbox_split(*args, **kwargs)
-    return iter(lambda: map(round, gen.next()), None)
+    return iter(lambda: map(round, next(gen)), None)
 
 
 def api_bbox(bbox, srid=None, buffer=0.0):
