@@ -1,5 +1,5 @@
 import os
-from StringIO import StringIO
+from io import StringIO
 
 from django.test import TransactionTestCase
 from django.conf import settings
