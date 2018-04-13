@@ -8,7 +8,6 @@ chardet==3.0.4
 cssselect2==0.2.1
 Django==1.11.12
 django-appconf==1.0.2
-django-appypod==1.0.0
 django-compressor==2.2
 django-crispy-forms==1.7.2
 django-embed-video==1.1.2
@@ -48,3 +47,4 @@ tinycss2==0.6.1
 urllib3==1.22
 WeasyPrint==0.41
 webencodings==0.5.1
+git+git://github.com/LePetitTim/django-appypod.git@python_3
