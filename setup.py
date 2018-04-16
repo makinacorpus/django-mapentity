@@ -21,7 +21,6 @@ setup(
                       open(os.path.join(here, 'CHANGES')).read()),
     license='BSD, see LICENSE file.',
     install_requires=[
-        'appy',
         'BeautifulSoup4>=4.6.0',
         'Django>=1.9,<2',
         'GDAL>=1.10',
@@ -46,7 +45,6 @@ setup(
         'WeasyPrint<0.42',  # 0.42 drops support of python 2.7,
     ] + test_requires,
     dependency_links=[
-        "git+ssh://github.com/stefanklug/appypod.git@master#appy",
         "git+ssh://github.com/LePetitTim/django-appypod.git@python_3#django-appypod"
     ],
     tests_requires=test_requires,
