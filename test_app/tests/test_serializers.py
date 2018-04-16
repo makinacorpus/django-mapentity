@@ -1,5 +1,5 @@
 import os
-from io import StringIO
+from io import BytesIO
 
 from django.test import TransactionTestCase
 from django.conf import settings
@@ -75,7 +75,7 @@ class CSVSerializerTests(TransactionTestCase):
     def setUp(self):
         self.point = MushroomSpot.objects.create()
         self.serializer = CSVSerializer()
-        self.stream = StringIO()
+        self.stream = BytesIO()
 
     def tearDown(self):
         self.stream.close()
