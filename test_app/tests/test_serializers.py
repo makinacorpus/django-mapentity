@@ -1,5 +1,5 @@
 import os
-from io import BytesIO
+from io import StringIO
 
 from django.test import TransactionTestCase
 from django.conf import settings
@@ -23,7 +23,7 @@ class ShapefileSerializer(TransactionTestCase):
         MushroomSpot.geomfield = GeometryField(name='geom', srid=settings.SRID)
 
         self.serializer = ZipShapeSerializer()
-        devnull = open(os.devnull, "wb")
+        devnull = open(os.devnull, "w")
         self.serializer.serialize(MushroomSpot.objects.all(), stream=devnull,
                                   fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
 
@@ -76,7 +76,7 @@ class CSVSerializerTests(TransactionTestCase):
     def setUp(self):
         self.point = MushroomSpot.objects.create()
         self.serializer = CSVSerializer()
-        self.stream = BytesIO()
+        self.stream = StringIO()
 
     def tearDown(self):
         self.stream.close()

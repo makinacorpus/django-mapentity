@@ -167,7 +167,7 @@ def download_to_stream(url, stream, silent=False, headers=None):
         return source
 
     try:
-        stream.write(source.content.encode())
+        stream.write(source.content)
         stream.flush()
     except IOError as e:
         logger.exception(e)
@@ -203,11 +203,11 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False):
 def convertit_download(url, destination, from_type=None, to_type='application/pdf', headers=None):
     # Mock for tests
     if getattr(settings, 'TEST', False):
-        open(destination, 'wb').write(b"Mock\n")
+        open(destination, 'w').write("Mock\n")
         return
 
     url = convertit_url(url, from_type, to_type)
-    fd = open(destination, 'wb') if isinstance(destination, six.string_types) else destination
+    fd = open(destination, 'w') if isinstance(destination, six.string_types) else destination
     download_to_stream(url, fd, headers=headers)
 
 
@@ -256,7 +256,7 @@ def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet
     # Run head-less capture (takes time)
     url += '?lang={}&context={}'.format(get_language(), quote(serialized))
 
-    with open(destination, 'wb') as fd:
+    with open(destination, 'w') as fd:
         capture_image(url, fd,
                       selector='.map-panel',
                       waitfor=waitfor)

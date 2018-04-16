@@ -2,7 +2,7 @@ import csv
 from functools import partial
 
 from django.core.serializers.base import Serializer
-from django.utils.encoding import smart_bytes
+from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.core.exceptions import FieldDoesNotExist
@@ -33,7 +33,7 @@ class CSVSerializer(Serializer):
                         c = f.verbose_name
                 except FieldDoesNotExist:
                     c = _(field.title())
-            headers.append(smart_bytes(c))
+            headers.append(smart_str(c))
 
         getters = {}
         for field in columns:

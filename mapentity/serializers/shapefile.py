@@ -24,9 +24,9 @@ from .helpers import field_as_string
 
 
 try:
-    from cStringIO import BytesIO
+    from cStringIO import StringIO
 except ImportError:
-    from io import BytesIO  # noqa
+    from io import StringIO  # noqa
 
 os.environ["SHAPE_ENCODING"] = "UTF-8"
 
@@ -51,7 +51,7 @@ class ZipShapeSerializer(Serializer):
 
     def zip_shapefiles(self, stream, delete=True):
         # Can't use stream, because HttpResponse is not seekable
-        buffr = BytesIO()
+        buffr = StringIO()
         zipf = zipfile.ZipFile(buffr, 'w', zipfile.ZIP_DEFLATED)
 
         for filename, shp_filepath in self.layers.items():
@@ -153,7 +153,7 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
             except FieldDoesNotExist:
                 c = _(field.title())
 
-        reponse = u"{}".format(c)
+        reponse = "{}".format(c)
         reponse = unicodedata.normalize('NFD', reponse)
         reponse = smart_str(reponse.encode('ascii', 'ignore')).replace(' ', '_').lower()
 
