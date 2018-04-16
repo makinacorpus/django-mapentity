@@ -46,5 +46,5 @@ tinycss2==0.6.1
 urllib3==1.22
 WeasyPrint==0.41
 webencodings==0.5.1
-git+git://github.com/lino-framework/appypod.git@master#egg=appy
+git+git://github.com/LePetitTim/appypod-1.git@python_3#egg=appy
 git+git://github.com/LePetitTim/django-appypod.git@python_3
