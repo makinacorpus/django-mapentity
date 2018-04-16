@@ -69,10 +69,10 @@ class EntityAttachmentTestCase(TransactionTestCase):
         self.assertNotIn(b"Submit attachment", html)
 
         for attachment in get_attachment_model().objects.attachments_for_object(self.object):
-            self.assertIn(attachment.legend, html)
-            self.assertIn(attachment.title, html)
-            self.assertIn(attachment.attachment_file.url, html)
-            self.assertIn('paperclip/fileicons/odt.png', html)
+            self.assertIn(attachment.legend.encode(), html)
+            self.assertIn(attachment.title.encode(), html)
+            self.assertIn(attachment.attachment_file.url.encode(), html)
+            self.assertIn(b'paperclip/fileicons/odt.png', html)
 
     def test_upload_form_in_details_if_perms(self):
         self.user.has_perm = mock.MagicMock(return_value=True)

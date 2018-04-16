@@ -90,5 +90,5 @@ class DownloadStreamTest(TransactionTestCase):
         # Required to specified language for example
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = "x"
-        download_to_stream('http://google.com', open(os.devnull, 'w'), silent=True, headers={'Accept-language': 'fr'})
+        download_to_stream('http://google.com', open(os.devnull, 'wb'), silent=True, headers={'Accept-language': 'fr'})
         get_mocked.assert_called_with('http://google.com', headers={'Accept-language': 'fr'})

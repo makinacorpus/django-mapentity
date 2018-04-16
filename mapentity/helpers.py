@@ -167,7 +167,7 @@ def download_to_stream(url, stream, silent=False, headers=None):
         return source
 
     try:
-        stream.write(bytes(source.content, 'utf-8'))
+        stream.write(source.content.encode())
         stream.flush()
     except IOError as e:
         logger.exception(e)

@@ -207,9 +207,9 @@ class AttachmentTest(BaseTest):
         response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', str(self.obj.pk))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'')
-        self.assertEqual(response[b'X-Accel-Redirect'], b'/media_secure/file.pdf')
-        self.assertEqual(response[b'Content-Type'], b'application/pdf')
-        self.assertEqual(response[b'Content-Disposition'], b'attachment; filename=file.pdf')
+        self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertEqual(response['Content-Disposition'], 'attachment; filename=file.pdf')
         app_settings['SENDFILE_HTTP_HEADER'] = None
 
     def test_http_headers_inline(self):
@@ -219,7 +219,7 @@ class AttachmentTest(BaseTest):
         response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', str(self.obj.pk))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'')
-        self.assertEqual(response['Content-Type'], b'application/pdf')
+        self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertFalse('Content-Disposition' in response)
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = True
 
@@ -272,9 +272,9 @@ class ListViewTest(BaseTest):
         view = DummyList.as_view()
         response = view(request)
         html = (response.render())
-
-        self.assertTrue(b'btn-group disabled' in html)
-        self.assertTrue(b'Add a new dummy model</a>' in html)
+        print(html)
+        self.assertTrue('btn-group disabled' in html)
+        self.assertTrue('Add a new dummy model</a>' in html)
 
 
 class MapEntityLayerViewTest(BaseTest):
