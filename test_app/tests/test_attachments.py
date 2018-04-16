@@ -66,7 +66,7 @@ class EntityAttachmentTestCase(TransactionTestCase):
 
         self.assertEqual(1, len(get_attachment_model().objects.attachments_for_object(self.object)))
 
-        self.assertNotIn("Submit attachment", html)
+        self.assertNotIn(b"Submit attachment", html)
 
         for attachment in get_attachment_model().objects.attachments_for_object(self.object):
             self.assertIn(attachment.legend, html)
@@ -81,8 +81,8 @@ class EntityAttachmentTestCase(TransactionTestCase):
         request = self.createRequest()
         response = view(request, pk=self.object.pk)
         html = (response.render())
-        self.assertIn("Submit attachment", html)
-        self.assertIn('<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk), html)
+        self.assertIn(b"Submit attachment", html)
+        self.assertIn(b'<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk), html)
 
 
 class UploadAttachmentTestCase(TransactionTestCase):
