@@ -272,9 +272,8 @@ class ListViewTest(BaseTest):
         view = DummyList.as_view()
         response = view(request)
         html = (response.render())
-        print(html)
-        self.assertTrue('btn-group disabled' in html)
-        self.assertTrue('Add a new dummy model</a>' in html)
+        self.assertTrue(b'btn-group disabled' in html.content)
+        self.assertTrue(b'Add a new dummy model</a>' in html.content)
 
 
 class MapEntityLayerViewTest(BaseTest):

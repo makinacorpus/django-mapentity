@@ -58,7 +58,6 @@ class ShapefileSerializer(TransactionTestCase):
 
     def test_geometries_come_from_records(self):
         layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
-        print(layer_point[0])
         feature = layer_point[0]
         self.assertEquals(str(feature['id']), str(self.point1.pk))
         self.assertTrue(feature.geom.geos.equals(self.point1.geom))
