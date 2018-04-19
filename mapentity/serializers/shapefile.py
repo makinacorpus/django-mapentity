@@ -21,12 +21,8 @@ from osgeo import ogr, osr
 
 from ..settings import app_settings
 from .helpers import field_as_string
-
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO  # noqa
+from io import BytesIO  # noqa
+from io import TextIOWrapper
 
 os.environ["SHAPE_ENCODING"] = "UTF-8"
 
@@ -51,7 +47,7 @@ class ZipShapeSerializer(Serializer):
 
     def zip_shapefiles(self, stream, delete=True):
         # Can't use stream, because HttpResponse is not seekable
-        buffr = StringIO()
+        buffr = BytesIO()
         zipf = zipfile.ZipFile(buffr, 'w', zipfile.ZIP_DEFLATED)
 
         for filename, shp_filepath in self.layers.items():
@@ -64,7 +60,10 @@ class ZipShapeSerializer(Serializer):
 
         zipf.close()
         buffr.flush()  # zip.close() writes stuff.
-        stream.write(buffr.getvalue())
+        if isinstance(stream, TextIOWrapper):
+            stream.write(buffr.read().decode('utf-16'))
+        else:
+            stream.write(buffr.getvalue())
         buffr.close()
 
     def _create_shape(self, queryset, model, columns, filename):
