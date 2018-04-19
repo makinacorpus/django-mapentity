@@ -60,8 +60,9 @@ class DjangoJSONEncoder(DjangoJSONEncoder):
             # `default` must return a python serializable
             # structure, the easiest way is to load the JSON
             # string produced by `serialize` and return it
+
             return json.loads(serialize('json', obj))
-        return super(DjangoJSONEncoder, self).default(obj)
+        return force_text(obj)
 
 
 # partial function, we can now use dumps(my_dict) instead
