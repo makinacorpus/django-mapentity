@@ -82,7 +82,8 @@ class EntityAttachmentTestCase(TransactionTestCase):
         response = view(request, pk=self.object.pk)
         html = response.render()
         self.assertIn(b"Submit attachment", html.content)
-        self.assertIn('<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk).encode(), html.content)
+        self.assertIn(
+            '<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk).encode(), html.content)
 
 
 class UploadAttachmentTestCase(TransactionTestCase):
