@@ -1,6 +1,5 @@
 import mock
-from django.http import HttpRequest
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, RequestFactory
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -12,7 +11,7 @@ from mapentity.decorators import view_permission_required
 class ViewPermissionRequiredTestCase(TransactionTestCase):
     def setUp(self):
         # Fake request and its positional and keywords arguments.
-        self.request = mock.MagicMock(spec=HttpRequest())
+        self.request = RequestFactory().get('/toto/')
         self.request._messages = mock.MagicMock()
         self.request.user = mock.MagicMock()
         self.request.user.is_anonymous = mock.MagicMock(return_value=False)

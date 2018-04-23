@@ -103,6 +103,7 @@ class ConvertTest(BaseTest):
     def test_convert_view_uses_original_request_headers(self, get_mocked):
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
+        get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=http://geotrek.fr',
                         HTTP_ACCEPT_LANGUAGE='it')
@@ -113,6 +114,7 @@ class ConvertTest(BaseTest):
     def test_convert_view_builds_absolute_url_from_relative(self, get_mocked):
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
+        get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=/path/1/')
         get_mocked.assert_called_with('http://convertit//?url=http%3A//testserver/path/1/&to=application/pdf',
