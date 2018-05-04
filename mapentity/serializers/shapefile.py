@@ -184,12 +184,12 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
             except FieldDoesNotExist:
                 modelfield = None
             if isinstance(modelfield, ForeignKey):
-                value = smart_plain_text(getattr(item, fieldname), ascii)
+                value = smart_plain_text(getattr(item, fieldname))
             elif isinstance(modelfield, ManyToManyField):
-                value = ','.join([smart_plain_text(o, ascii)
+                value = ','.join([smart_plain_text(o)
                                   for o in getattr(item, fieldname).all()] or '')
             else:
-                value = field_as_string(item, fieldname, ascii=ascii)
+                value = field_as_string(item, fieldname)
 
             feat.SetField(column_map.get(columns_headers.get(fieldname)),
                           value[:254])
