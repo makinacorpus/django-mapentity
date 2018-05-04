@@ -5,6 +5,7 @@ from django.test import TransactionTestCase
 from django.conf import settings
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis import gdal
+from django.http import HttpResponse
 from django.test.utils import override_settings
 from django.utils import translation
 
@@ -25,8 +26,8 @@ class ShapefileSerializer(TransactionTestCase):
         MushroomSpot.geomfield = GeometryField(name='geom', srid=settings.SRID)
 
         self.serializer = ZipShapeSerializer()
-        devnull = open(os.devnull, "w")
-        self.serializer.serialize(MushroomSpot.objects.all(), stream=devnull,
+        response = HttpResponse()
+        self.serializer.serialize(MushroomSpot.objects.all(), stream=response,
                                   fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
 
     def tearDown(self):

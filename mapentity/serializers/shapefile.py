@@ -22,8 +22,7 @@ from osgeo import ogr, osr
 
 from ..settings import app_settings
 from .helpers import smart_plain_text, field_as_string
-from io import BytesIO  # noqa
-from io import TextIOWrapper
+from io import BytesIO
 
 os.environ["SHAPE_ENCODING"] = "UTF-8"
 
@@ -61,10 +60,7 @@ class ZipShapeSerializer(Serializer):
 
         zipf.close()
         buffr.flush()  # zip.close() writes stuff.
-        if isinstance(stream, TextIOWrapper):
-            stream.write(buffr.read().decode('utf-16'))
-        else:
-            stream.write(buffr.getvalue())
+        stream.write(buffr.getvalue())
         buffr.close()
 
     def _create_shape(self, queryset, model, columns, filename):
