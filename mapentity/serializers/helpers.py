@@ -22,10 +22,6 @@ def field_as_string(obj, field, ascii=False):
             value = (_('no'), _('yes'))[value]
         if isinstance(value, float) or isinstance(value, int):
             value = number_format(value)
-    # FixMe : The , is the thing which break the tests ','
-    # if hasattr(value, '__iter__'):
-    #    print(smart_plain_text(value[0], ascii))
-    #    return ''.join([smart_plain_text(item, ascii) for item in value])
     return smart_plain_text(value, ascii)
 
 

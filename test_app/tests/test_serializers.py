@@ -11,12 +11,14 @@ from django.utils import translation
 from mapentity.serializers import ZipShapeSerializer, CSVSerializer
 from mapentity.serializers.shapefile import shapefile_files
 
-from ..models import MushroomSpot
+from ..models import MushroomSpot, Tag
 
 
 class ShapefileSerializer(TransactionTestCase):
     def setUp(self):
         self.point1 = MushroomSpot.objects.create(serialized='SRID=%s;POINT(0 0)' % settings.SRID)
+        self.point1.tags.add(Tag.objects.create(label="Tag1"))
+        self.point1.tags.add(Tag.objects.create(label="Tag2"))
         self.line1 = MushroomSpot.objects.create(serialized='SRID=%s;LINESTRING(0 0, 10 0)' % settings.SRID)
         self.multipoint = MushroomSpot.objects.create(serialized='SRID=%s;MULTIPOINT((1 1), (2 2))' % settings.SRID)
 
@@ -25,7 +27,7 @@ class ShapefileSerializer(TransactionTestCase):
         self.serializer = ZipShapeSerializer()
         devnull = open(os.devnull, "w")
         self.serializer.serialize(MushroomSpot.objects.all(), stream=devnull,
-                                  fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
+                                  fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
 
     def tearDown(self):
         for layer_file in self.serializer.layers.values():
@@ -54,7 +56,7 @@ class ShapefileSerializer(TransactionTestCase):
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():
             self.assertEquals(layer.srs.name, 'RGF93_Lambert_93')
-            self.assertCountEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean'])
+            self.assertCountEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean', 'tags'])
 
     def test_geometries_come_from_records(self):
         layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
@@ -70,10 +72,18 @@ class ShapefileSerializer(TransactionTestCase):
         self.assertEquals(str(feature['id']), str(self.point1.pk))
         self.assertTrue(feature.geom.geos.equals(self.point1.geom))
 
+    def test_attributes(self):
+        layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
+        feature = layer_point[0]
+        self.assertEquals(feature['name'].value, "Empty")
+        self.assertEquals(feature['tags'].value, "Tag1,Tag2")
+
 
 class CSVSerializerTests(TransactionTestCase):
     def setUp(self):
         self.point = MushroomSpot.objects.create()
+        self.point.tags.add(Tag.objects.create(label="Tag1"))
+        self.point.tags.add(Tag.objects.create(label="Tag2"))
         self.serializer = CSVSerializer()
         self.stream = StringIO()
 
@@ -82,15 +92,15 @@ class CSVSerializerTests(TransactionTestCase):
 
     def test_content(self):
         self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
-                                  fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
+                                  fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
         self.assertEquals(self.stream.getvalue(),
-                          'ID,name,number,size,boolean\r\n{},Empty,42,3.14159,yes\r\n'.format(self.point.pk))
+                          'ID,name,number,size,boolean,tags\r\n{},Empty,42,3.14159,yes,"Tag1,Tag2"\r\n'.format(self.point.pk))
 
     @override_settings(USE_L10N=True)
     def test_content_fr(self):
         translation.activate('fr-fr')
         self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
-                                  fields=['id', 'name', 'number', 'size', 'boolean'], delete=False)
+                                  fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
         self.assertEquals(self.stream.getvalue(),
-                          'ID,name,number,size,boolean\r\n{},Empty,42,"3,14159",oui\r\n'.format(self.point.pk))
+                          'ID,name,number,size,boolean,tags\r\n{},Empty,42,"3,14159",oui,"Tag1,Tag2"\r\n'.format(self.point.pk))
         translation.deactivate()

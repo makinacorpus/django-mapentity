@@ -6,6 +6,7 @@ import tempfile
 import unicodedata
 import zipfile
 
+from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.contrib.gis.db.models.fields import (GeometryField, GeometryCollectionField,
                                                  PointField, LineStringField, PolygonField,
                                                  MultiPointField, MultiLineStringField, MultiPolygonField)
@@ -20,7 +21,7 @@ from django.utils.translation import ugettext as _
 from osgeo import ogr, osr
 
 from ..settings import app_settings
-from .helpers import field_as_string
+from .helpers import smart_plain_text, field_as_string
 from io import BytesIO  # noqa
 from io import TextIOWrapper
 
@@ -178,8 +179,17 @@ def shape_write(iterable, model, columns, get_geom, geom_type, srid, srid_out=No
         feat = ogr.Feature(feature_def)
 
         for fieldname in columns:
-            # They are all String (see create_shape_format_layer)
-            value = field_as_string(item, fieldname, ascii=True)
+            try:
+                modelfield = model._meta.get_field(fieldname)
+            except FieldDoesNotExist:
+                modelfield = None
+            if isinstance(modelfield, ForeignKey):
+                value = smart_plain_text(getattr(item, fieldname), ascii)
+            elif isinstance(modelfield, ManyToManyField):
+                value = ','.join([smart_plain_text(o, ascii)
+                                  for o in getattr(item, fieldname).all()] or '')
+            else:
+                value = field_as_string(item, fieldname, ascii=ascii)
 
             feat.SetField(column_map.get(columns_headers.get(fieldname)),
                           value[:254])
