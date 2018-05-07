@@ -29,7 +29,4 @@ fi
 ./env/bin/pip install -r requirements.txt
 ./env/bin/pip install -r dev-requirements.txt
 
-echo "--- Setup:"
-./env/bin/python3 setup.py develop
-
 echo "--- Done"
