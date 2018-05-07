@@ -25,7 +25,7 @@ setup(
         'Django>=1.9,<2',
         'GDAL>=1.10',
         'gpxpy>=1.1.2',
-        'django-appypod',
+        'django-appypod>=2.0.0',
         'django-compressor>=2.2',
         'django-crispy-forms>=1.6.1',
         'django-embed-video>=1.1.2',
@@ -44,9 +44,6 @@ setup(
         'requests>=2.18.4',
         'WeasyPrint<0.42',  # 0.42 drops support of python 2.7,
     ] + test_requires,
-    dependency_links=[
-        "git+ssh://github.com/LePetitTim/django-appypod.git@python_3#django-appypod"
-    ],
     tests_requires=test_requires,
     packages=find_packages(),
     include_package_data=True,
