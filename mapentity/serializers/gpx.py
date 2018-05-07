@@ -38,7 +38,7 @@ class GPXSerializer(Serializer):
     def end_object(self, obj):
         """ Single object serialization.
         """
-        objtype = (obj.__class__._meta.verbose_name)
+        objtype = obj.__class__._meta.verbose_name
         name = '[%s] %s' % (objtype, (obj))
         description = getattr(obj, 'description', '')
         objupdate = obj.get_date_update()
