@@ -1,9 +1,8 @@
 import os
 import shutil
-import json
-
 import mock
 import factory
+
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TransactionTestCase, RequestFactory
