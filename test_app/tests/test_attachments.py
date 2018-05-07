@@ -41,7 +41,7 @@ class EntityAttachmentTestCase(TransactionTestCase):
 
     def createAttachment(self, obj):
         uploaded = SimpleUploadedFile('file.odt',
-                                      '*' * 128,
+                                      b'*' * 128,
                                       content_type='application/vnd.oasis.opendocument.text')
         kwargs = {
             'content_type': ContentType.objects.get_for_model(obj),
@@ -66,13 +66,13 @@ class EntityAttachmentTestCase(TransactionTestCase):
 
         self.assertEqual(1, len(get_attachment_model().objects.attachments_for_object(self.object)))
 
-        self.assertNotIn("Submit attachment", html)
+        self.assertNotIn(b"Submit attachment", html)
 
         for attachment in get_attachment_model().objects.attachments_for_object(self.object):
-            self.assertIn(attachment.legend, html)
-            self.assertIn(attachment.title, html)
-            self.assertIn(attachment.attachment_file.url, html)
-            self.assertIn('paperclip/fileicons/odt.png', html)
+            self.assertIn(attachment.legend.encode(), html)
+            self.assertIn(attachment.title.encode(), html)
+            self.assertIn(attachment.attachment_file.url.encode(), html)
+            self.assertIn(b'paperclip/fileicons/odt.png', html)
 
     def test_upload_form_in_details_if_perms(self):
         self.user.has_perm = mock.MagicMock(return_value=True)
@@ -80,9 +80,10 @@ class EntityAttachmentTestCase(TransactionTestCase):
                                        template_name="mapentity/mapentity_detail.html")
         request = self.createRequest()
         response = view(request, pk=self.object.pk)
-        html = unicode(response.render())
-        self.assertIn("Submit attachment", html)
-        self.assertIn('<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk), html)
+        html = response.render()
+        self.assertIn(b"Submit attachment", html.content)
+        self.assertIn(
+            '<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk).encode(), html.content)
 
 
 class UploadAttachmentTestCase(TransactionTestCase):
@@ -99,7 +100,7 @@ class UploadAttachmentTestCase(TransactionTestCase):
     def attachmentPostData(self):
         filetype = get_filetype_model().objects.create()
         uploaded = SimpleUploadedFile('face.jpg',
-                                      '*' * 128,
+                                      b'*' * 128,
                                       content_type='image/jpeg')
         data = {
             'filetype': filetype.pk,

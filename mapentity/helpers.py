@@ -57,7 +57,7 @@ def bbox_split(bbox, by_x=2, by_y=2, cycle=False):
 def bbox_split_srid_2154(*args, **kwargs):
     """Just round"""
     gen = bbox_split(*args, **kwargs)
-    return iter(lambda: map(round, gen.next()), None)
+    return iter(lambda: map(round, next(gen)), None)
 
 
 def api_bbox(bbox, srid=None, buffer=0.0):
@@ -157,8 +157,8 @@ def download_to_stream(url, stream, silent=False, headers=None):
     except (AssertionError, requests.exceptions.RequestException) as e:
         logger.exception(e)
         logger.info('Headers sent: %s' % headers)
-        if hasattr(source, 'content'):
-            logger.info('Response: %s' % source.content[:150])
+        if hasattr(source, 'text'):
+            logger.info('Response: %s' % source.text[:150])
 
         if not silent:
             raise
@@ -203,7 +203,7 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False):
 def convertit_download(url, destination, from_type=None, to_type='application/pdf', headers=None):
     # Mock for tests
     if getattr(settings, 'TEST', False):
-        open(destination, 'wb').write("Mock\n")
+        open(destination, 'w').write("Mock\n")
         return
 
     url = convertit_url(url, from_type, to_type)
@@ -318,7 +318,7 @@ def alphabet_enumeration(length):
         return ["A"]
     width = int(math.ceil(math.log(length, 26)))
     enums = []
-    alphabet = string.lowercase.upper()
+    alphabet = string.ascii_uppercase
     for i in range(length):
         enum = ""
         for j in range(width):

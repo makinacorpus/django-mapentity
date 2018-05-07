@@ -1,9 +1,8 @@
 import os
 import shutil
-import json
-
 import mock
 import factory
+
 from django.conf import settings
 from django.core.management import call_command
 from django.test import TransactionTestCase, RequestFactory
@@ -103,6 +102,7 @@ class ConvertTest(BaseTest):
     def test_convert_view_uses_original_request_headers(self, get_mocked):
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
+        get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=http://geotrek.fr',
                         HTTP_ACCEPT_LANGUAGE='it')
@@ -113,6 +113,7 @@ class ConvertTest(BaseTest):
     def test_convert_view_builds_absolute_url_from_relative(self, get_mocked):
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
+        get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=/path/1/')
         get_mocked.assert_called_with('http://convertit//?url=http%3A//testserver/path/1/&to=application/pdf',
@@ -129,7 +130,7 @@ class AttachmentTest(BaseTest):
         os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}'.format(self.obj.pk)))
         self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk))
         self.url = '/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk)
-        open(self.file, 'wb').write('*' * 300)
+        open(self.file, 'wb').write(b'*' * 300)
         call_command('update_permissions')
 
     def tearDown(self):
@@ -206,7 +207,7 @@ class AttachmentTest(BaseTest):
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
         response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', str(self.obj.pk))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, '')
+        self.assertEqual(response.content, b'')
         self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertEqual(response['Content-Disposition'], 'attachment; filename=file.pdf')
@@ -218,7 +219,7 @@ class AttachmentTest(BaseTest):
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
         response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', str(self.obj.pk))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, '')
+        self.assertEqual(response.content, b'')
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertFalse('Content-Disposition' in response)
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = True
@@ -271,10 +272,9 @@ class ListViewTest(BaseTest):
         request.session = {}
         view = DummyList.as_view()
         response = view(request)
-        html = unicode(response.render())
-
-        self.assertTrue('btn-group disabled' in html)
-        self.assertTrue('Add a new dummy model</a>' in html)
+        html = response.render()
+        self.assertTrue(b'btn-group disabled' in html.content)
+        self.assertTrue(b'Add a new dummy model</a>' in html.content)
 
 
 class MapEntityLayerViewTest(BaseTest):
@@ -290,42 +290,34 @@ class MapEntityLayerViewTest(BaseTest):
     def test_geojson_layer_returns_all_by_default(self):
         self.login()
         response = self.client.get(DummyModel.get_layer_url())
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 31)
+        self.assertEqual(len(response.json()['features']), 31)
 
     def test_geojson_layer_can_be_filtered(self):
         self.login()
         response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 1)
+        self.assertEqual(len(response.json()['features']), 1)
 
     def test_geojson_layer_with_parameters_is_not_cached(self):
         self.login()
         response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 1)
+        self.assertEqual(len(response.json()['features']), 1)
         response = self.client.get(DummyModel.get_layer_url())
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 31)
+        self.assertEqual(len(response.json()['features']), 31)
 
     def test_geojson_layer_with_parameters_does_not_use_cache(self):
         self.login()
         response = self.client.get(DummyModel.get_layer_url())
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 31)
+        self.assertEqual(len(response.json()['features']), 31)
         response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 1)
+        self.assertEqual(len(response.json()['features']), 1)
 
     def test_geojson_layer_with_dummy_parameter_still_uses_cache(self):
         self.login()
         response = self.client.get(DummyModel.get_layer_url())
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 31)
+        self.assertEqual(len(response.json()['features']), 31)
         # See Leaflet-ObjectsLayer.js load() function
         response = self.client.get(DummyModel.get_layer_url() + '?_u=1234&name=toto')
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 31)
+        self.assertEqual(len(response.json()['features']), 31)
 
 
 class DetailViewTest(BaseTest):

@@ -33,7 +33,7 @@ class CSVSerializer(Serializer):
                         c = f.verbose_name
                 except FieldDoesNotExist:
                     c = _(field.title())
-            headers.append(smart_str(unicode(c)))
+            headers.append(smart_str(c))
 
         getters = {}
         for field in columns:

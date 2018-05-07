@@ -1,11 +1,13 @@
 from django.test import TransactionTestCase
 from django.template import Template, Context
+from django.utils import translation
 
 from ..models import DummyModel
 
 
 class ValueListTest(TransactionTestCase):
     def test_empty_list_should_show_none(self):
+        translation.deactivate()
         out = Template(
             '{% load mapentity_tags %}'
             '{% valuelist items %}'

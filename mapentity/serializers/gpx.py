@@ -38,8 +38,8 @@ class GPXSerializer(Serializer):
     def end_object(self, obj):
         """ Single object serialization.
         """
-        objtype = unicode(obj.__class__._meta.verbose_name)
-        name = u'[%s] %s' % (objtype, unicode(obj))
+        objtype = obj.__class__._meta.verbose_name
+        name = '[%s] %s' % (objtype, (obj))
         description = getattr(obj, 'description', '')
         objupdate = obj.get_date_update()
         if objupdate:
@@ -69,7 +69,7 @@ class GPXSerializer(Serializer):
         """
         if isinstance(geom, GeometryCollection):
             for i, g in enumerate(geom):
-                self.geomToGPX(g, u"%s (%s)" % (name, i), description)
+                self.geomToGPX(g, "%s (%s)" % (name, i), description)
         elif isinstance(geom, Point):
             wp = self._point_to_GPX(geom)
             wp.name = name

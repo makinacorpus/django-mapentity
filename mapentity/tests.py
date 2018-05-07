@@ -16,7 +16,7 @@ from django.test import TestCase, LiveServerTestCase
 from django.test.testcases import to_list
 from django.test.utils import override_settings
 from django.utils import html
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.utils.http import http_date
 from django.utils.six.moves.urllib.parse import quote
 from django.utils.timezone import utc
@@ -65,7 +65,7 @@ class MapEntityTest(TestCase):
         self.client.logout()
 
     def get_bad_data(self):
-        return {'geom': 'doh!'}, _(u'Invalid geometry value.')
+        return {'geom': 'doh!'}, _('Invalid geometry value.')
 
     def get_good_data(self):
         raise NotImplementedError()
@@ -160,7 +160,7 @@ class MapEntityTest(TestCase):
         for line in lines:
             for col in line:
                 # the col should not contains any html tags
-                self.assertEquals(force_unicode(col), html.strip_tags(force_unicode(col)))
+                self.assertEquals(force_text(col), html.strip_tags(force_text(col)))
 
     def _post_form(self, url):
         # no data
@@ -174,7 +174,7 @@ class MapEntityTest(TestCase):
 
         form = self.get_form(response)
 
-        fields_errors = form.errors[bad_data.keys()[0]]
+        fields_errors = form.errors[list(bad_data.keys())[0]]
         form_errors = to_list(form_error)
         for err in form_errors:
             self.assertTrue(u"{}".format(err) in fields_errors,
@@ -262,7 +262,7 @@ class MapEntityTest(TestCase):
                                                           modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = json.loads(response.content.decode())
         self.assertEqual(len(result), 1)
         first_result = result[0]
         self.assertEqual(first_result['id'], obj.pk)
@@ -277,7 +277,7 @@ class MapEntityTest(TestCase):
                                                              modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = json.loads(response.content.decode())
         self.assertEqual(result['type'], 'FeatureCollection')
         self.assertEqual(len(result['features']), 1)
         first_result = result['features'][0]
@@ -295,7 +295,7 @@ class MapEntityTest(TestCase):
                                                             id=obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = json.loads(response.content.decode())
         self.assertEqual(result['id'], obj.pk)
 
     def test_api_geojson_detail_for_model(self):
@@ -309,7 +309,7 @@ class MapEntityTest(TestCase):
                                                                     id=obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = json.loads(response.content.decode())
         self.assertEqual(result['id'], obj.pk)
 
 
@@ -419,7 +419,7 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         # Mock Screenshot response
         mock_requests.get.return_value.status_code = 200
-        mock_requests.get.return_value.content = '*' * 100
+        mock_requests.get.return_value.content = b'*' * 100
 
         response = self.client.get(obj.map_image_url)
         self.assertEqual(response.status_code, 200)
@@ -439,7 +439,7 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         # Mock Screenshot response
         mock_requests.get.return_value.status_code = 200
-        mock_requests.get.return_value.content = '*' * 100
+        mock_requests.get.return_value.content = b'*' * 100
 
         response = self.client.get(obj.map_image_url)
         self.assertEqual(response.status_code, 200 if obj.is_public() else 403)

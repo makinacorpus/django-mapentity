@@ -17,9 +17,9 @@ class DatatablesSerializer(Serializer):
             else:
                 modelfield = model._meta.get_field(field)
                 if isinstance(modelfield, ForeignKey):
-                    getters[field] = lambda obj, field: unicode(getattr(obj, field) or _("None"))
+                    getters[field] = lambda obj, field: (getattr(obj, field) or _("None"))
                 elif isinstance(modelfield, ManyToManyField):
-                    getters[field] = lambda obj, field: [unicode(o) for o in getattr(obj, field).all()] or _("None")
+                    getters[field] = lambda obj, field: (getattr(obj, field).all() or _("None"))
                 else:
                     def fixfloat(obj, field):
                         value = getattr(obj, field)

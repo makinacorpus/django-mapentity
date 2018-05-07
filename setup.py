@@ -21,12 +21,11 @@ setup(
                       open(os.path.join(here, 'CHANGES')).read()),
     license='BSD, see LICENSE file.',
     install_requires=[
-        'appy>=0.9.10',
         'BeautifulSoup4>=4.6.0',
         'Django>=1.9,<2',
         'GDAL>=1.10',
         'gpxpy>=1.1.2',
-        'django-appypod>=1.0.0',
+        'django-appypod>=2.0.0',
         'django-compressor>=2.2',
         'django-crispy-forms>=1.6.1',
         'django-embed-video>=1.1.2',
@@ -56,5 +55,5 @@ setup(
                  'Environment :: Web Environment',
                  'Framework :: Django',
                  'Development Status :: 5 - Production/Stable',
-                 'Programming Language :: Python :: 2.7'],
+                 'Programming Language :: Python :: 3.5'],
 )

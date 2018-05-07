@@ -14,12 +14,20 @@ class Attachment(BaseAttachment):
     pass
 
 
+class Tag(models.Model):
+    label = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.label
+
+
 class MushroomSpot(MapEntityMixin, models.Model):
     name = models.CharField(max_length=100, default='Empty')
     serialized = models.CharField(max_length=200, null=True, default=None)
     number = models.IntegerField(null=True, default=42)
     size = models.FloatField(null=True, default=3.14159)
     boolean = models.BooleanField(default=True)
+    tags = models.ManyToManyField(Tag)
 
     def __init__(self, *args, **kwargs):
         super(MushroomSpot, self).__init__(*args, **kwargs)
