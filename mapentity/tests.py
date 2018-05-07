@@ -419,7 +419,7 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         # Mock Screenshot response
         mock_requests.get.return_value.status_code = 200
-        mock_requests.get.return_value.content = '*' * 100
+        mock_requests.get.return_value.content = b'*' * 100
 
         response = self.client.get(obj.map_image_url)
         self.assertEqual(response.status_code, 200)
@@ -439,7 +439,7 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         # Mock Screenshot response
         mock_requests.get.return_value.status_code = 200
-        mock_requests.get.return_value.content = '*' * 100
+        mock_requests.get.return_value.content = b'*' * 100
 
         response = self.client.get(obj.map_image_url)
         self.assertEqual(response.status_code, 200 if obj.is_public() else 403)

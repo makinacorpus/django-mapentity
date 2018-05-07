@@ -157,8 +157,8 @@ def download_to_stream(url, stream, silent=False, headers=None):
     except (AssertionError, requests.exceptions.RequestException) as e:
         logger.exception(e)
         logger.info('Headers sent: %s' % headers)
-        if hasattr(source, 'content'):
-            logger.info('Response: %s' % source.content[:150])
+        if hasattr(source, 'text'):
+            logger.info('Response: %s' % source.text[:150])
 
         if not silent:
             raise
@@ -207,7 +207,7 @@ def convertit_download(url, destination, from_type=None, to_type='application/pd
         return
 
     url = convertit_url(url, from_type, to_type)
-    fd = open(destination, 'w') if isinstance(destination, six.string_types) else destination
+    fd = open(destination, 'wb') if isinstance(destination, six.string_types) else destination
     download_to_stream(url, fd, headers=headers)
 
 
@@ -256,7 +256,7 @@ def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet
     # Run head-less capture (takes time)
     url += '?lang={}&context={}'.format(get_language(), quote(serialized))
 
-    with open(destination, 'w') as fd:
+    with open(destination, 'wb') as fd:
         capture_image(url, fd,
                       selector='.map-panel',
                       waitfor=waitfor)
