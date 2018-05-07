@@ -213,13 +213,13 @@ def create_shape_format_layer(headers, geom_type, srid, srid_out=None):
     column_map = {}
 
     # Create temp file
-    tmp = tempfile.NamedTemporaryFile(suffix='.shp', mode='w+b')
+    tmp = tempfile.NamedTemporaryFile(suffix='.shp', mode='w+b', dir=app_settings['TEMP_DIR'])
     # we must close the file for GDAL to be able to open and write to it
     tmp.close()
     # create shape format
 
     dr = ogr.GetDriverByName('ESRI Shapefile')
-    ds = dr.CreateDataSource(str(tmp.name))
+    ds = dr.CreateDataSource(tmp.name)
     if ds is None:
         raise Exception('Could not create file!')
 
