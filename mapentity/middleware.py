@@ -1,4 +1,5 @@
 import logging
+import socket
 from subprocess import check_output
 
 from django.conf import settings
@@ -13,7 +14,12 @@ logger = logging.getLogger(__name__)
 
 CONVERSION_SERVER_HOST = urlparse(app_settings['CONVERSION_SERVER']).hostname
 CAPTURE_SERVER_HOST = urlparse(app_settings['CAPTURE_SERVER']).hostname
-LOCALHOST = check_output(['hostname', '-I']).split() + ['127.0.0.1']
+LOCALHOST = [
+    '127.0.0.1',
+    socket.gethostname(),
+    socket.gethostbyname(CAPTURE_SERVER_HOST),
+    socket.gethostbyname(CONVERSION_SERVER_HOST),
+]
 
 
 def get_internal_user():
