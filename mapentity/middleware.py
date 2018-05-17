@@ -16,9 +16,27 @@ CAPTURE_SERVER_HOST = urlparse(app_settings['CAPTURE_SERVER']).hostname
 LOCALHOST = [
     '127.0.0.1',
     socket.gethostname(),
-    socket.gethostbyname(CAPTURE_SERVER_HOST),
-    socket.gethostbyname(CONVERSION_SERVER_HOST),
 ]
+
+try:
+    socket.inet_aton(CONVERSION_SERVER_HOST)
+    LOCALHOST.append(CONVERSION_SERVER_HOST)
+
+except socket.error:
+    try:
+        LOCALHOST.append(socket.gethostbyname(CONVERSION_SERVER_HOST))
+    except socket.gaierror:
+        logger.warning("host {} can't be resolved".format(CONVERSION_SERVER_HOST))
+
+try:
+    socket.inet_aton(CAPTURE_SERVER_HOST)
+    LOCALHOST.append(CAPTURE_SERVER_HOST)
+
+except socket.error:
+    try:
+        LOCALHOST.append(socket.gethostbyname(CAPTURE_SERVER_HOST))
+    except socket.gaierror:
+        logger.warning("host {} can't be resolved".format(CAPTURE_SERVER_HOST))
 
 
 def get_internal_user():
