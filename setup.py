@@ -22,7 +22,7 @@ setup(
     license='BSD, see LICENSE file.',
     install_requires=[
         'BeautifulSoup4>=4.6.0',
-        'Django>=1.9,<2',
+        'Django>=1.10,<2',
         'GDAL>=1.10',
         'gpxpy>=1.1.2',
         'django-appypod>=2.0.0',
@@ -36,7 +36,7 @@ setup(
         'django-shapes>=0.2.0',
         'django-tinymce>=2.6.0',
         'django-weasyprint==0.1',  # 0.5.x API changed
-        'djangorestframework>=3.6.4,<3.7',  # 3.7 is not compatible with django 1.9
+        'djangorestframework>=3.8,<3.9',  # 3.7 is not compatible with django 1.9
         'djangorestframework-gis>=0.11.2',
         'easy-thumbnails>=2.5.0',
         'lxml>=4.2.1',
