@@ -1,6 +1,7 @@
 import copy
 
 from django import forms
+from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis.db.models.fields import GeometryField
@@ -9,7 +10,9 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Button, HTML, Submit
 from crispy_forms.bootstrap import FormActions
 from tinymce.widgets import TinyMCE
-from modeltranslation.translator import translator, NotRegistered
+if 'modeltranslation' in settings.INSTALLED_APPS:
+    from modeltranslation.translator import translator, NotRegistered
+
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 
 
