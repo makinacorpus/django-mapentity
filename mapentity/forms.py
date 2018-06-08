@@ -10,14 +10,14 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Button, HTML, Submit
 from crispy_forms.bootstrap import FormActions
 from tinymce.widgets import TinyMCE
-if 'modeltranslation' in settings.INSTALLED_APPS:
-    from modeltranslation.translator import translator, NotRegistered
-
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 
 
 from .settings import app_settings
 from .widgets import MapWidget
+
+if 'modeltranslation' in settings.INSTALLED_APPS:
+    from modeltranslation.translator import translator, NotRegistered
 
 
 class TranslatedModelForm(forms.ModelForm):
