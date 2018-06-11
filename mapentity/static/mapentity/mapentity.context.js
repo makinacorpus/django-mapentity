@@ -1,6 +1,6 @@
 MapEntity.Context = new function() {
     var self = this;
-
+    var last_sort = {};
     self.getFullContext = function(map, kwargs) {
         var context = {},
             filter = kwargs && kwargs.filter,
@@ -25,7 +25,8 @@ MapEntity.Context = new function() {
 
         // Sort columns
         if (datatable) {
-            context['sortcolumns'] = datatable.fnSettings().aaSorting;
+            context['sortcolumns'] = last_sort;
+            context['sortcolumns'][$('body').attr('data-modelname')] = datatable.fnSettings().aaSorting;
         }
 
         // Extra-info, not restored so far but can be useful for screenshoting
@@ -117,7 +118,10 @@ MapEntity.Context = new function() {
         }
 
         if (datatable && context.sortcolumns) {
-            datatable.fnSort(context.sortcolumns);
+            if ($('body').attr('data-modelname') in context.sortcolumns) {
+                datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
+            }
+            last_sort = context['sortcolumns'];
         }
 
         // This map view change will refresh the list

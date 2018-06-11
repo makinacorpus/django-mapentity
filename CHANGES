@@ -8,6 +8,7 @@ CHANGELOG
 **Bug fixes**
 
 - Fix /logentry/list/ crash
+- Fix sort list
 
 
 5.0.0 (2018-05-07)
