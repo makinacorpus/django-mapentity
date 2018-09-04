@@ -4,7 +4,7 @@ from django import forms
 from .generic import MapEntityList
 from ..filters import BaseMapEntityFilterSet
 from ..models import LogEntry
-from .. import registry
+from ..registry import registry
 
 
 class LogEntryFilter(BaseMapEntityFilterSet):

@@ -7,7 +7,7 @@ CHANGELOG
 
 **Bug fixes**
 
-- 
+- Fix crash in log entries view
 
 
 4.3.5 (2018-06-08)
