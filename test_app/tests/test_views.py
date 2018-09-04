@@ -462,3 +462,19 @@ class ViewPermissionsTest(BaseTest):
         response = self.client.get(delete_url)
         self.assertRedirects(response, 'http://testserver/dummymodel/%s/' % (self.object.pk),
                              target_status_code=302)  # --> login
+
+
+class LogViewTest(BaseTest):
+    def test_logentry_view(self):
+        user = self.login_as_superuser()
+        response = self.client.get('/logentry/list/')
+        self.assertContains(response, "<th>action flag</th>")
+
+    def test_logentry_view_not_logged(self):
+        response = self.client.get('/logentry/list/')
+        self.assertRedirects(response, "/login/")
+
+    def test_logentry_view_not_superuser(self):
+        user = self.login()
+        response = self.client.get('/logentry/list/')
+        self.assertRedirects(response, "/login/")
