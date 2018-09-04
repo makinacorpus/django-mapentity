@@ -2,12 +2,16 @@
 CHANGELOG
 =========
 
-4.3.6.dev0
+4.3.6 (2018-09-04)
 ==================
 
 **Bug fixes**
 
 - Fix crash in log entries view
+
+**Minor changes**
+
+- Save column sort by module
 
 
 4.3.5 (2018-06-08)
