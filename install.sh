@@ -21,7 +21,7 @@ if [ "`lsb_release -rs`" = "14.04" ]; then
 elif [ "`lsb_release -rs`" = "16.04" ]; then
     ./env/bin/pip install gdal==1.11.2
 else
-    ./env/bin/pip install gdal==2.2.4
+    ./env/bin/pip install gdal==2.2.3
 fi
 ./env/bin/pip install -r requirements.txt
 ./env/bin/pip install -r dev-requirements.txt
