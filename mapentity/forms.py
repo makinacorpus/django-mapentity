@@ -15,6 +15,7 @@ from paperclip.forms import AttachmentForm as BaseAttachmentForm
 
 from .settings import app_settings
 from .widgets import MapWidget
+from .models import ENTITY_PERMISSION_UPDATE_GEOM
 
 if 'modeltranslation' in settings.INSTALLED_APPS:
     from modeltranslation.translator import translator, NotRegistered
@@ -99,10 +100,14 @@ class MapEntityForm(TranslatedModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.can_delete = kwargs.pop('can_delete', True)
-        super(MapEntityForm, self).__init__(*args, **kwargs)
 
+        super(MapEntityForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = True
+        if hasattr(self.instance, 'get_permission_codename'):
+            if not self.user.has_perm(self.instance.get_permission_codename(
+                    ENTITY_PERMISSION_UPDATE_GEOM)):
+                self.fields['geom'].widget.modifiable = False
 
         # Default widgets
         for fieldname, formfield in self.fields.items():
