@@ -104,10 +104,6 @@ class MapEntityForm(TranslatedModelForm):
         super(MapEntityForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = True
-        if hasattr(self.instance, 'get_permission_codename'):
-            if not self.user.has_perm(self.instance.get_permission_codename(
-                    ENTITY_PERMISSION_UPDATE_GEOM)):
-                self.fields['geom'].widget.modifiable = False
 
         # Default widgets
         for fieldname, formfield in self.fields.items():
@@ -121,6 +117,10 @@ class MapEntityForm(TranslatedModelForm):
                                             not isinstance(formfield.widget, MapWidget))
                     if needs_replace_widget:
                         formfield.widget = MapWidget()
+                        if self.instance.pk and hasattr(self.instance, 'get_permission_codename'):
+                            if not self.user.has_perm(self.instance.get_permission_codename(
+                                    ENTITY_PERMISSION_UPDATE_GEOM)):
+                                formfield.widget.modifiable = False
                         formfield.widget.attrs['geom_type'] = formfield.geom_type
                 except FieldDoesNotExist:
                     pass
@@ -129,6 +129,11 @@ class MapEntityForm(TranslatedModelForm):
                 if formfield.widget.__class__ == forms.widgets.Textarea:
                     formfield.widget = TinyMCE()
 
+        if self.instance.pk and hasattr(self.instance, 'get_permission_codename'):
+            if not self.user.has_perm(self.instance.get_permission_codename(
+                    ENTITY_PERMISSION_UPDATE_GEOM)):
+                for field in self.geomfields:
+                    self.fields.get(field).widget.modifiable = False
         self._init_layout()
 
     def _init_layout(self):
