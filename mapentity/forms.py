@@ -117,7 +117,8 @@ class MapEntityForm(TranslatedModelForm):
                                             not isinstance(formfield.widget, MapWidget))
                     if needs_replace_widget:
                         formfield.widget = MapWidget()
-                        if self.instance.pk and hasattr(self.instance, 'get_permission_codename'):
+                        if self.instance.pk and hasattr(self.instance, 'get_permission_codename')\
+                                and self.user:
                             if not self.user.has_perm(self.instance.get_permission_codename(
                                     ENTITY_PERMISSION_UPDATE_GEOM)):
                                 formfield.widget.modifiable = False
@@ -129,7 +130,8 @@ class MapEntityForm(TranslatedModelForm):
                 if formfield.widget.__class__ == forms.widgets.Textarea:
                     formfield.widget = TinyMCE()
 
-        if self.instance.pk and hasattr(self.instance, 'get_permission_codename'):
+        if self.instance.pk and hasattr(self.instance, 'get_permission_codename')\
+                and self.user:
             if not self.user.has_perm(self.instance.get_permission_codename(
                     ENTITY_PERMISSION_UPDATE_GEOM)):
                 for field in self.geomfields:
