@@ -24,7 +24,8 @@ class ModelPermissionsTest(TransactionTestCase):
                                               u'change_dummymodel',
                                               u'delete_dummymodel',
                                               u'export_dummymodel',
-                                              u'read_dummymodel'])
+                                              u'read_dummymodel',
+                                              u'change_geom_dummymodel'])
 
     def test_internal_user_has_necessary_permissions(self):
         internal_user = get_internal_user()
