@@ -6,7 +6,7 @@ certifi==2018.1.18
 cffi==1.11.5
 chardet==3.0.4
 cssselect2==0.2.1
-Django==1.11.12
+Django==1.11.*
 django-appconf==1.0.2
 django-appypod==1.0.0
 django-compressor==2.2
@@ -31,7 +31,7 @@ idna==2.6
 ipaddress==1.0.19
 lxml==4.2.1
 mock==2.0.0
-paperclip==2.1.2
+paperclip==2.2.0
 pbr==4.0.1
 pdfrw==0.4
 Pillow==5.1.0
@@ -40,7 +40,7 @@ Pyphen==0.9.4
 python-dateutil==2.7.2
 pytz==2018.3
 rcssmin==1.0.6
-requests==2.18.4
+requests==2.20.*
 rjsmin==1.0.12
 six==1.11.0
 text-unidecode==1.2
