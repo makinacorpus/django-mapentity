@@ -31,7 +31,7 @@ class EntityAttachmentTestCase(TransactionTestCase):
             return {'paperclip.add_attachment': False}.get(p, True)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
         self.object = DummyModel.objects.create()
-        call_command('update_permissions')
+        call_command('update_permissions_mapentity')
 
     def createRequest(self):
         request = RequestFactory().get('/dummy')

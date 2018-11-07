@@ -130,7 +130,7 @@ class AttachmentTest(BaseTest):
         self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk))
         self.url = '/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk)
         open(self.file, 'wb').write('*' * 300)
-        call_command('update_permissions')
+        call_command('update_permissions_mapentity')
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
