@@ -2,15 +2,12 @@
 CHANGELOG
 =========
 
-4.3.7.dev0
+4.4.0 (2018-11-08)
 ==================
 
 **New features**
 
 - Create new permission Update geom
-
-**Minor changes**
-
 - Drop support to Django 1.9 and 1.10 versions
 - upgrade libraries
 
