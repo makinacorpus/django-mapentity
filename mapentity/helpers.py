@@ -12,7 +12,7 @@ import requests
 from django.conf import settings
 from django.contrib.gis.gdal.error import OGRException
 from django.contrib.gis.geos import GEOSException, fromstr
-from django.core.urlresolvers import resolve
+from django.urls import resolve
 from django.http import HttpResponse
 from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import get_template

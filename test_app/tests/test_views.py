@@ -466,7 +466,7 @@ class ViewPermissionsTest(BaseTest):
 
 class LogViewTest(BaseTest):
     def test_logentry_view(self):
-        user = self.login_as_superuser()
+        self.login_as_superuser()
         response = self.client.get('/logentry/list/')
         self.assertContains(response, "<th>action flag</th>")
 
@@ -475,6 +475,6 @@ class LogViewTest(BaseTest):
         self.assertRedirects(response, "/login/")
 
     def test_logentry_view_not_superuser(self):
-        user = self.login()
+        self.login()
         response = self.client.get('/logentry/list/')
         self.assertRedirects(response, "/login/")

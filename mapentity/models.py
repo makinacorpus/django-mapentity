@@ -8,14 +8,13 @@ from django.db.utils import OperationalError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.core.urlresolvers import NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 from django.contrib import auth
 from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.utils.formats import localize
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
 from rest_framework import permissions as rest_permissions
 
 from mapentity.templatetags.mapentity_tags import humanize_timesince
