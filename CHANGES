@@ -2,10 +2,12 @@
 CHANGELOG
 =========
 
-4.4.1.dev0
+4.4.1 (2018-11-08)
 ==================
 
-**New features**
+**Bug fix**
+
+- Fix test permission geom
 
 
 4.4.0 (2018-11-08)
