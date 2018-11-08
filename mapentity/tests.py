@@ -197,7 +197,8 @@ class MapEntityTest(TestCase):
         self._post_form(obj.get_update_url())
 
     def _check_update_geom_permission(self, response):
-        if self.user.has_perm('change_geom_{model}'.format(model=self.model)):
+        if self.user.has_perm('{app}.change_geom_{model}'.format(app=self.model._meta.app_label,
+                                                                 model=self.model._meta.model_name)):
             self.assertIn('.modifiable = true;', response.content)
         else:
             self.assertIn('.modifiable = false;', response.content)
