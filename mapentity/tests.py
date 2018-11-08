@@ -196,6 +196,12 @@ class MapEntityTest(TestCase):
     def _post_update_form(self, obj):
         self._post_form(obj.get_update_url())
 
+    def _check_update_geom_permission(self, response):
+        if self.user.has_perm('change_geom_{model}'.format(model=self.model)):
+            self.assertIn('.modifiable = true;', response.content)
+        else:
+            self.assertIn('.modifiable = false;', response.content)
+
     def test_crud_status(self):
         if self.model is None:
             return  # Abstract test should not run
@@ -215,8 +221,8 @@ class MapEntityTest(TestCase):
 
         response = self.client.get(obj.get_update_url())
         self.assertEqual(response.status_code, 200)
-
         self._post_update_form(obj)
+        self._check_update_geom_permission(response)
 
         response = self.client.get(obj.get_delete_url())
         self.assertEqual(response.status_code, 200)

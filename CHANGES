@@ -7,6 +7,10 @@ CHANGELOG
 
 **New features**
 
+- Create new permission Update geom
+
+**Minor changes**
+
 - Drop support to Django 1.9 and 1.10 versions
 - upgrade libraries
 

@@ -15,7 +15,7 @@ class ModelPermissionsTest(TransactionTestCase):
     def setUp(self):
         self.ctype = ContentType.objects.get_for_model(DummyModel)
 
-        call_command('update_permissions')
+        call_command('update_permissions_mapentity')
 
     def test_model_permissions_were_created(self):
         permissions = Permission.objects.filter(content_type=self.ctype)
@@ -24,7 +24,8 @@ class ModelPermissionsTest(TransactionTestCase):
                                               u'change_dummymodel',
                                               u'delete_dummymodel',
                                               u'export_dummymodel',
-                                              u'read_dummymodel'])
+                                              u'read_dummymodel',
+                                              u'change_geom_dummymodel'])
 
     def test_internal_user_has_necessary_permissions(self):
         internal_user = get_internal_user()
@@ -40,7 +41,7 @@ class ModelPermissionsTest(TransactionTestCase):
 
 class NavBarPermissionsTest(TransactionTestCase):
     def setUp(self):
-        call_command('update_permissions')
+        call_command('update_permissions_mapentity')
 
     def test_navbar_permissions(self):
         user = UserFactory.create(password='booh')
