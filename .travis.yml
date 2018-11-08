@@ -7,16 +7,14 @@ python:
 
 env:
   matrix:
-   - DJANGO_VERSION=1.9.13
-   - DJANGO_VERSION=1.10.7
-   - DJANGO_VERSION=1.11.2
+   - DJANGO_VERSION=1.11.*
 
 install:
  - sudo apt-get update
  - ./install.sh
  - ./env/bin/pip install -U django==$DJANGO_VERSION
  - ./env/bin/pip install coverage
- - pip install flake8==3.5.0
+ - pip install flake8
  - ./env/bin/python ./manage.py collectstatic --noinput
 
 before_script:
