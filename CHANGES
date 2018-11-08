@@ -5,9 +5,10 @@ CHANGELOG
 4.3.7.dev0
 ==================
 
-**Bug fixes**
+**New features**
 
--
+- Drop support to Django 1.9 and 1.10 versions
+- upgrade libraries
 
 
 4.3.6 (2018-09-04)

@@ -6,7 +6,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 test_requires = [
     'mock',
-    'factory_boy==2.8.1',
+    'factory_boy',
 ]
 
 setup(
@@ -23,7 +23,7 @@ setup(
     install_requires=[
         'appy>=0.9.10',
         'BeautifulSoup4>=4.6.0',
-        'Django>=1.9,<2',
+        'Django>=1.11,<2',
         'GDAL>=1.10',
         'gpxpy>=1.1.2',
         'django-appypod>=1.0.0',
@@ -37,12 +37,12 @@ setup(
         'django-shapes>=0.2.0',
         'django-tinymce>=2.6.0',
         'django-weasyprint==0.1',  # 0.5.x API changed
-        'djangorestframework>=3.6.4,<3.7',  # 3.7 is not compatible with django 1.9
-        'djangorestframework-gis>=0.11.2',
+        'djangorestframework>=3.6.4,<3.9',  # 3.9 is not compatible with drf gis 0.13
+        'djangorestframework-gis>=0.13',
         'easy-thumbnails>=2.5.0',
         'lxml>=4.2.1',
-        'paperclip>=2.1.2',
-        'requests>=2.18.4',
+        'paperclip>=2.2.0',
+        'requests>=2.20.0',
         'WeasyPrint<0.42',  # 0.42 drops support of python 2.7,
     ] + test_requires,
     tests_requires=test_requires,
