@@ -159,7 +159,7 @@ Create a database schema based on your models::
 
 Create all permission objects with this command::
 
-    $ python manage.py update_permissions
+    $ python manage.py update_permissions_mapentity
 
 
 Start the app
