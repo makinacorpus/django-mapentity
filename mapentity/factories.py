@@ -19,30 +19,6 @@ class UserFactory(factory.DjangoModelFactory):
     # last_login/date_joined
 
     @classmethod
-    def _prepare(cls, create, **kwargs):
-        """
-        A topology mixin should be linked to at least one Path (through
-        PathAggregation).
-        """
-        # groups/user_permissions
-        groups = kwargs.pop('groups', [])
-        permissions = kwargs.pop('permissions', [])
-
-        user = super(UserFactory, cls)._prepare(create, **kwargs)
-
-        for group in groups:
-            user.groups.add(group)
-
-        for perm in permissions:
-            user.user_permissions.add(perm)
-
-        if create:
-            # Save ManyToMany group and perm relations
-            user.save()
-
-        return user
-
-    @classmethod
     def _create(cls, model_class, **kwargs):
         pwd = kwargs.pop('password', None)
         user = model_class(**kwargs)
