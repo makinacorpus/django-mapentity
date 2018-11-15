@@ -60,11 +60,17 @@ class AutoLoginMiddleware(object):
         if user and user.is_anonymous() and not is_running_tests:
             remoteip = request.META.get('REMOTE_ADDR')
             remotehost = request.META.get('REMOTE_HOST')
+            token = request.GET.get('token')
+            token_ok = False
+
+            if token and token == app_settings['CONVERSION_AUTOLOGIN_TOKEN']:
+                token_ok = True
 
             is_auto_allowed = (
-                (remoteip in LOCALHOST or remotehost == 'localhost') or
-                (remoteip and remoteip in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST)) or
-                (remotehost and remotehost in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST))
+                token_ok
+                or (remoteip in LOCALHOST or remotehost == 'localhost')
+                or (remoteip and remoteip in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST))
+                or (remotehost and remotehost in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST))
             )
 
             if is_auto_allowed:

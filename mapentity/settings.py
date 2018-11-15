@@ -10,6 +10,7 @@ app_settings = dict({
     'HISTORY_ITEMS_MAX': 5,
     'CONVERSION_SERVER': 'http://convertit/',
     'CAPTURE_SERVER': 'http://screamshotter/',
+    'CONVERSION_AUTOLOGIN_TOKEN': None,
     'INTERNAL_USER': '__internal__',
     'JS_SETTINGS_VIEW': 'mapentity:js_settings',
     'ROOT_URL': '',
