@@ -232,8 +232,12 @@ $(window).on('entity:map:list', function (e, data) {
         return window.SETTINGS.urls.detail.replace(new RegExp('modelname', 'g'), data.modelname)
                                           .replace('0', properties.pk);
     }
-
-    var style = L.Util.extend({}, window.SETTINGS.map.styles.others);
+    if (typeof window.SETTINGS.map.styles.others === "function"){
+        var style = window.SETTINGS.map.styles.others;
+    }
+    else{
+        var style = L.Util.extend({}, window.SETTINGS.map.styles.others);
+    }
     var objectsLayer = new L.ObjectsLayer(null, {
         objectUrl: getUrl,
         style: style,
