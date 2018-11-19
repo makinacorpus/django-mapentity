@@ -2,12 +2,12 @@
 CHANGELOG
 =========
 
-4.4.2.dev0
+4.4.2 (2018-11-19)
 ==================
 
-**Bug fix**
+**Minor changes**
 
-- Fix test permission geom
+- Can use function style in leaflet
 
 
 4.4.1 (2018-11-08)
