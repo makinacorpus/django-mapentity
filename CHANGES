@@ -5,7 +5,9 @@ CHANGELOG
 4.4.3.dev0
 ==================
 
-**Minor changes**
+**Bug fix**
+
+- Fix HTTP headers forwarded to convertit
 
 
 4.4.2 (2018-11-19)
