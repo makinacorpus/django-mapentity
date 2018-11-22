@@ -102,7 +102,7 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         mock_requests.get.return_value.status_code = 200
-        mock_requests.get.return_value.content = '<p id="properties">Mock</p>'
+        mock_requests.get.return_value.content = b'<p id="properties">Mock</p>'
 
         self.login()
         obj = self.modelfactory.create()
@@ -196,6 +196,13 @@ class MapEntityTest(TestCase):
     def _post_update_form(self, obj):
         self._post_form(obj.get_update_url())
 
+    def _check_update_geom_permission(self, response):
+        if self.user.has_perm('{app}.change_geom_{model}'.format(app=self.model._meta.app_label,
+                                                                 model=self.model._meta.model_name)):
+            self.assertIn(b'.modifiable = true;', response.content)
+        else:
+            self.assertIn(b'.modifiable = false;', response.content)
+
     def test_crud_status(self):
         if self.model is None:
             return  # Abstract test should not run
@@ -215,8 +222,8 @@ class MapEntityTest(TestCase):
 
         response = self.client.get(obj.get_update_url())
         self.assertEqual(response.status_code, 200)
-
         self._post_update_form(obj)
+        self._check_update_geom_permission(response)
 
         response = self.client.get(obj.get_delete_url())
         self.assertEqual(response.status_code, 200)

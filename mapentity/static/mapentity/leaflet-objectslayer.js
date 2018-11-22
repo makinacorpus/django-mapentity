@@ -200,12 +200,11 @@ L.ObjectsLayer = L.GeoJSON.extend({
         if (!layer) return;
 
         if (on) {
-            layer._defaultStyle = layer._defaultStyle || this.options.styles['default'];
             layer.setStyle(this.options.styles.highlight);
             this.fire('highlight', {layer: layer});
         }
         else {
-            layer.setStyle(layer._defaultStyle);
+            this.resetStyle(layer);
         }
     },
 

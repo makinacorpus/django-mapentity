@@ -90,7 +90,7 @@
 
     {# Global Javascript settings #}
     <script src="{% url JS_SETTINGS_VIEW %}?callback=window.SETTINGS%3D"></script>
-
+    {% block change_style %}{% endblock change_style %}
     {% compress js %}
 
         {% if DEBUG %}

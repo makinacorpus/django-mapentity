@@ -8,14 +8,13 @@ from django.db.utils import OperationalError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.core.urlresolvers import NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 from django.contrib import auth
 from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.utils.formats import localize
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
 from rest_framework import permissions as rest_permissions
 
 from mapentity.templatetags.mapentity_tags import humanize_timesince
@@ -35,11 +34,12 @@ ENTITY_MARKUP = "markup"
 ENTITY_CREATE = "add"
 ENTITY_UPDATE = "update"
 ENTITY_DELETE = "delete"
+ENTITY_UPDATE_GEOM = "update_geom"
 
 ENTITY_KINDS = (
     ENTITY_LAYER, ENTITY_LIST, ENTITY_JSON_LIST,
     ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE, ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE,
-    ENTITY_UPDATE, ENTITY_DELETE
+    ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
 )
 
 ENTITY_PERMISSION_CREATE = 'add'
@@ -47,11 +47,13 @@ ENTITY_PERMISSION_READ = 'read'
 ENTITY_PERMISSION_UPDATE = 'change'
 ENTITY_PERMISSION_DELETE = 'delete'
 ENTITY_PERMISSION_EXPORT = 'export'
+ENTITY_PERMISSION_UPDATE_GEOM = 'change_geom'
 
 ENTITY_PERMISSIONS = (
     ENTITY_PERMISSION_CREATE,
     ENTITY_PERMISSION_READ,
     ENTITY_PERMISSION_UPDATE,
+    ENTITY_PERMISSION_UPDATE_GEOM,
     ENTITY_PERMISSION_DELETE,
     ENTITY_PERMISSION_EXPORT
 )
@@ -91,8 +93,8 @@ class MapEntityMixin(models.Model):
         operations = {
             ENTITY_CREATE: ENTITY_PERMISSION_CREATE,
             ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
+            ENTITY_UPDATE_GEOM: ENTITY_PERMISSION_UPDATE_GEOM,
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
-
             ENTITY_DETAIL: ENTITY_PERMISSION_READ,
             ENTITY_LAYER: ENTITY_PERMISSION_READ,
             ENTITY_LIST: ENTITY_PERMISSION_READ,

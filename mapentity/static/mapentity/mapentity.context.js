@@ -26,7 +26,7 @@ MapEntity.Context = new function() {
         // Sort columns
         if (datatable) {
             context['sortcolumns'] = last_sort;
-            context['sortcolumns'][$('body').attr('data-modelname')] = datatable.fnSettings().aaSorting;
+            context['sortcolumns'][$('body').attr('data-appname')] = datatable.fnSettings().aaSorting;
         }
 
         // Extra-info, not restored so far but can be useful for screenshoting
@@ -118,9 +118,9 @@ MapEntity.Context = new function() {
         }
 
         if (datatable && context.sortcolumns) {
-            if ($('body').attr('data-modelname') in context.sortcolumns) {
-                datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
-            }
+            if ($('body').attr('data-appname') in context.sortcolumns) {
+                datatable.fnSort(context.sortcolumns[$('body').attr('data-appname')]);
+                }
             last_sort = context['sortcolumns'];
         }
 

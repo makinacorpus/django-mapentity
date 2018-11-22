@@ -304,18 +304,14 @@ class Convert(View):
         return response
 
     def request_headers(self):
-        """Retrieves the original HTTP headers of this view request.
+        """Retrieves the original Accept-Language header of this view request.
         Django converts header names to upper-case with underscores.
 
         See http://stackoverflow.com/questions/3889769/get-all-request-headers-in-django
         """
-        excluded = ['HTTP_COOKIE', 'HTTP_HOST']
-        headers = []
-        for name, value in self.request.META.items():
-            if name.startswith('HTTP_') and name not in excluded:
-                realname = name.replace('HTTP_', '').replace('_', '-').title()
-                headers.append((realname, value))
-        return dict(headers)
+        if 'HTTP_ACCEPT_LANGUAGE' not in self.request.META:
+            return {}
+        return {'Accept-Language': self.request.META['HTTP_ACCEPT_LANGUAGE']}
 
 
 class DocumentConvert(Convert, DetailView):

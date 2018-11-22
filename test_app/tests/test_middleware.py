@@ -26,7 +26,7 @@ class AutoLoginTest(TransactionTestCase):
         self.request.user = AnonymousUser()  # usually set by other middleware
         self.request.META = {'REMOTE_ADDR': '6.6.6.6'}
         self.internal_user = get_internal_user()
-        call_command('update_permissions')
+        call_command('update_permissions_mapentity')
 
     def test_internal_user_cannot_login(self):
         success = self.client.login(

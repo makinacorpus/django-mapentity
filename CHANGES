@@ -10,13 +10,72 @@ CHANGELOG
 - Fix /logentry/list/ crash
 - Fix sort list
 
-
 5.0.0 (2018-05-07)
 ==================
 
 **Breaking changes**
 
 - Move to python 3
+
+
+4.4.4.dev0
+==================
+
+**Bug fix**
+
+
+4.4.3 (2018-11-21)
+==================
+
+**Bug fix**
+
+- Fix HTTP headers forwarded to convertit
+
+
+4.4.2 (2018-11-19)
+==================
+
+**Minor changes**
+
+- Can use function style in leaflet
+
+
+4.4.1 (2018-11-08)
+==================
+
+**Bug fix**
+
+- Fix test permission geom
+
+
+4.4.0 (2018-11-08)
+==================
+
+**New features**
+
+- Create new permission Update geom
+- Drop support to Django 1.9 and 1.10 versions
+- upgrade libraries
+
+
+4.3.6 (2018-09-04)
+==================
+
+**Bug fixes**
+
+- Fix crash in log entries view
+
+**Minor changes**
+
+- Save column sort by module
+
+
+4.3.5 (2018-06-08)
+==================
+
+**Bug fixes**
+
+- Fix makemigrations (disabling of modeltranslation)
 
 
 4.3.4 (2018-04-08)
