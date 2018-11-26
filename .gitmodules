@@ -6,7 +6,7 @@
 	url = https://github.com/makinacorpus/Leaflet.Spin.git
 [submodule "mapentity/static/mapentity/Leaflet.Snap"]
 	path = mapentity/static/mapentity/Leaflet.Snap
-	url = https://github.com/makinacorpus/Leaflet.Snap.git
+	url = https://github.com/GeotrekCE/Leaflet.Snap.git
 [submodule "mapentity/static/mapentity/Leaflet.GeometryUtil"]
 	path = mapentity/static/mapentity/Leaflet.GeometryUtil
 	url = https://github.com/makinacorpus/Leaflet.GeometryUtil.git
