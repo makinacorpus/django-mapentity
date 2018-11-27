@@ -2,10 +2,12 @@
 CHANGELOG
 =========
 
-4.4.4.dev0
+4.4.4 (2018-11-27)
 ==================
 
 **Bug fix**
+
+- Snap better on lines splitted.
 
 
 4.4.3 (2018-11-21)
