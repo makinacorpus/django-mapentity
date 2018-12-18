@@ -7,7 +7,7 @@ from rest_framework import viewsets
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mapentity import models as mapentity_models
-from ..settings import API_SRID
+from ..settings import API_SRID, app_settings
 from ..decorators import (view_cache_response_content, view_cache_latest,
                           view_permission_required)
 from .. import serializers as mapentity_serializers
@@ -28,6 +28,9 @@ class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
     srid = API_SRID
 
     def __init__(self, *args, **kwargs):
+        if app_settings.get('GEOJSON_PRECISION'):
+            self.precision = app_settings['GEOJSON_PRECISION']
+
         super(MapEntityLayer, self).__init__(*args, **kwargs)
         # Backward compatibility with django-geojson 1.X
         # for JS ObjectsLayer and rando-trekking application
@@ -36,6 +39,7 @@ class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
         if 'id' not in self.properties:
             properties['id'] = 'pk'
         self.properties = properties
+
 
     @classmethod
     def get_entity_kind(cls):
