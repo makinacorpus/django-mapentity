@@ -26,11 +26,9 @@ class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
 
     force2d = True
     srid = API_SRID
+    precision = app_settings.get('GEOJSON_PRECISION')
 
     def __init__(self, *args, **kwargs):
-        if app_settings.get('GEOJSON_PRECISION'):
-            self.precision = app_settings['GEOJSON_PRECISION']
-
         super(MapEntityLayer, self).__init__(*args, **kwargs)
         # Backward compatibility with django-geojson 1.X
         # for JS ObjectsLayer and rando-trekking application
