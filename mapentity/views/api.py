@@ -40,7 +40,6 @@ class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
             properties['id'] = 'pk'
         self.properties = properties
 
-
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_LAYER
