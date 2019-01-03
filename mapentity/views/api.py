@@ -7,7 +7,7 @@ from rest_framework import viewsets
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mapentity import models as mapentity_models
-from ..settings import API_SRID
+from ..settings import API_SRID, app_settings
 from ..decorators import (view_cache_response_content, view_cache_latest,
                           view_permission_required)
 from .. import serializers as mapentity_serializers
@@ -26,6 +26,7 @@ class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
 
     force2d = True
     srid = API_SRID
+    precision = app_settings.get('GEOJSON_PRECISION')
 
     def __init__(self, *args, **kwargs):
         super(MapEntityLayer, self).__init__(*args, **kwargs)

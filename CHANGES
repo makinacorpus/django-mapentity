@@ -5,7 +5,9 @@ CHANGELOG
 4.4.5.dev0
 ==================
 
-**Bug fix**
+**New features**
+
+- Geojson float precision settings.
 
 
 4.4.4 (2018-11-27)

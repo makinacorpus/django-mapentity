@@ -27,6 +27,7 @@ app_settings = dict({
     'ACTION_HISTORY_LENGTH': 20,
     'ANONYMOUS_VIEWS_PERMS': tuple(),
     'GEOJSON_LAYERS_CACHE_BACKEND': 'default',
+    'GEOJSON_PRECISION': None,
     'SERVE_MEDIA_AS_ATTACHMENT': True,
     'SENDFILE_HTTP_HEADER': None,
     'DRF_API_URL_PREFIX': r'^api/',
