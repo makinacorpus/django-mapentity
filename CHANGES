@@ -2,12 +2,16 @@
 CHANGELOG
 =========
 
-4.4.5.dev0
+4.4.5 (2019-01-08)
 ==================
 
-**New features**
+**Minor changes**
 
 - Geojson float precision settings.
+
+**Bug fix**
+
+- Fix permission paperclip (version 2.2.1)
 
 
 4.4.4 (2018-11-27)
