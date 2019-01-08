@@ -41,7 +41,7 @@ setup(
         'djangorestframework-gis>=0.13',
         'easy-thumbnails>=2.5.0',
         'lxml>=4.2.1',
-        'paperclip>=2.2.0',
+        'paperclip>=2.2.1',
         'requests>=2.20.0',
         'WeasyPrint<0.42',  # 0.42 drops support of python 2.7,
     ] + test_requires,
