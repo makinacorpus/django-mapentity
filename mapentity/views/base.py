@@ -54,7 +54,7 @@ def serve_attachment(request, path, app_label, model_name, pk):
     if not obj.is_public():
         if not request.user.is_authenticated():
             raise PermissionDenied
-        if not request.user.has_perm(get_attachment_permission('read')):
+        if not request.user.has_perm(get_attachment_permission('read_attachment')):
             raise PermissionDenied
         if not request.user.has_perm('{}.read_{}'.format(app_label, model_name)):
             raise PermissionDenied
