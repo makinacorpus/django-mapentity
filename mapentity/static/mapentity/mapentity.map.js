@@ -296,6 +296,27 @@ $(window).on('entity:map:list', function (e, data) {
     });
     map.addControl(screenshot);
 
+    /*
+     * Allow to load files locally.
+     */
+    var pointToLayer = function (feature, latlng) {
+            return L.circleMarker(latlng, {style: window.SETTINGS.map.styles.filelayer})
+                    .setRadius(window.SETTINGS.map.styles.filelayer.radius);
+        },
+        onEachFeature = function (feature, layer) {
+            if (feature.properties.name) {
+                layer.bindLabel(feature.properties.name);
+            }
+        },
+        filecontrol = L.Control.fileLayerLoad({
+            fitBounds: true,
+            layerOptions: {style: window.SETTINGS.map.styles.filelayer,
+                           pointToLayer: pointToLayer,
+                           onEachFeature: onEachFeature}
+        });
+    map.filecontrol = filecontrol;
+    map.addControl(filecontrol);
+
     // Restore map view, layers and filter from any available context
     // Get context from URL parameter, if any
     var mapViewContext = getURLParameter('context'),
