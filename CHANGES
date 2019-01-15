@@ -5,9 +5,9 @@ CHANGELOG
 4.4.6.dev0
 ==================
 
-**Bug fix**
+**Minor changes**
 
--
+- Load local file in list views
 
 
 4.4.5 (2019-01-08)
