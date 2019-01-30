@@ -365,12 +365,12 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         # Without headers to cache
         lastmodified = response.headers.get('Last-Modified')
-        expires = response.headers.get('Expires')
+        cachecontrol = response.headers.get('Cache-control')
         hasher = hashlib.md5()
         hasher.update(response.content)
         md5sum = hasher.digest()
         self.assertNotEqual(lastmodified, None)
-        self.assertNotEqual(expires, None)
+        self.assertEqual(cachecontrol, 'must-revalidate')
 
         # Try again, check that nothing changed
         time.sleep(1.1)
