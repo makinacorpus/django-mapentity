@@ -70,6 +70,11 @@ class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
                                     fields=self.columns,
                                     model=self.get_model())
 
+    @view_permission_required()
+    @view_cache_latest()
+    def dispatch(self, *args, **kwargs):
+        return super(BaseListView, self).dispatch(*args, **kwargs)
+
 
 class MapEntityViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
