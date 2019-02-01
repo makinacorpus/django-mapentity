@@ -58,7 +58,7 @@ MapEntity.History = L.Class.extend({
                 $(this).find('.close').addClass('hidden');
             }
         );
-
+/*
         window.setTimeout(function () {
             // Remove all entries returning 404 :) Useful to remove deleted entries
             $('#historylist li.history > a').each(function () {
@@ -74,6 +74,7 @@ MapEntity.History = L.Class.extend({
                 });
             });
         }, 10000);  // Don't stress loading.
+*/
     },
 });
 
