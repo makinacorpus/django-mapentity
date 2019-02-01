@@ -107,7 +107,7 @@ _LEAFLET_PLUGINS = OrderedDict([
                'mapentity/Leaflet.FileLayer/leaflet.filelayer.js']
     }),
     ('leaflet.geometryutil', {
-        'js': 'mapentity/Leaflet.GeometryUtil/src/leaflet.geometryutil.js'
+        'js': 'mapentity/Leaflet.GeometryUtil/dist/leaflet.geometryutil.js'
     }),
     ('forms', {}),
     ('leaflet.snap', {
