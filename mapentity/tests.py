@@ -370,7 +370,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         hasher.update(response.content)
         md5sum = hasher.digest()
         self.assertNotEqual(lastmodified, None)
-        self.assertEqual(cachecontrol, 'must-revalidate')
+        self.assertEqual(cachecontrol, 'must-revalidate, max-age=0')
 
         # Try again, check that nothing changed
         time.sleep(1.1)
