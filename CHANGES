@@ -2,12 +2,12 @@
 CHANGELOG
 =========
 
-4.4.8.dev0
+4.4.8 (2019-02-01)
 ==================
 
 **Bug fix**
 
--
+- Fix points on narrow angles sublines (Leaflet.GeometryUtil)
 
 
 4.4.7 (2019-01-23)
