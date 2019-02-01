@@ -194,7 +194,9 @@ $(window).on('entity:map:detail', function (e, data) {
         });
         map.addLayer(objectLayer);
         map.on('layeradd', function (e) {
-            if (objectLayer._map) objectLayer.bringToFront();
+            if (!e.layer.properties && objectLayer._map) {
+                objectLayer.bringToFront();
+            }
         });
 
         // Show objects enumeration
