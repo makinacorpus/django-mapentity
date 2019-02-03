@@ -5,9 +5,11 @@ CHANGELOG
 4.4.8.dev0
 ==================
 
-**Bug fix**
+**Performances**
 
--
+- Allow client side caching with systematic revalidation for Layer and JsonList views
+- Remove validation of history bar
+- Don't bringToFront() every single feature on map
 
 
 4.4.7 (2019-01-23)
