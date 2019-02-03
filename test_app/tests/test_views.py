@@ -317,16 +317,6 @@ class MapEntityLayerViewTest(BaseTest):
         collection = json.loads(response.content)
         self.assertEqual(len(collection['features']), 1)
 
-    def test_geojson_layer_with_dummy_parameter_still_uses_cache(self):
-        self.login()
-        response = self.client.get(DummyModel.get_layer_url())
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 31)
-        # See Leaflet-ObjectsLayer.js load() function
-        response = self.client.get(DummyModel.get_layer_url() + '?_u=1234&name=toto')
-        collection = json.loads(response.content)
-        self.assertEqual(len(collection['features']), 31)
-
 
 class DetailViewTest(BaseTest):
     def setUp(self):

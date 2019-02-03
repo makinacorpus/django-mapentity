@@ -194,7 +194,9 @@ $(window).on('entity:map:detail', function (e, data) {
         });
         map.addLayer(objectLayer);
         map.on('layeradd', function (e) {
-            if (objectLayer._map) objectLayer.bringToFront();
+            if (!e.layer.properties && objectLayer._map) {
+                objectLayer.bringToFront();
+            }
         });
 
         // Show objects enumeration
@@ -250,7 +252,7 @@ $(window).on('entity:map:list', function (e, data) {
         if (e.layer._map !== null) e.layer.bringToFront();
     });
     map.addLayer(objectsLayer);
-    objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname), true);
+    objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname));
 
     var nameHTML = '<span style="color: '+ style['color'] + ';">&#x25A3;</span>&nbsp;' + data.objectsname;
     map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"));
