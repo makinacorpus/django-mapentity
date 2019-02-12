@@ -2,12 +2,12 @@
 CHANGELOG
 =========
 
-4.4.10.dev0
-==================
+4.4.10 (12/02/2019)
+===================
 
 **Bug fix**
 
--
+- Make sure that locateOnLine() tolerance is sufficient to pass Geotrek tests
 
 
 4.4.9 (03/02/2019)
