@@ -9,7 +9,6 @@ import re
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db.models import GeometryField
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
@@ -46,9 +45,8 @@ def serve_attachment(request, path):
     information (uploaded documents)
     """
     original_path = re.sub(r'\.\d+x\d+_q\d+\.(jpg|png|jpeg)$', '', path, count=1, flags=re.IGNORECASE)
-    attachment = get_attachment_model().objects.get(attachment_file=original_path)
-    model = ContentType.objects.get(id=attachment.content_type_id).model_class()
-    obj = get_object_or_404(model, pk=attachment.object_id)
+    attachment = get_object_or_404(get_attachment_model(), attachment_file=original_path)
+    obj = attachment.content_object
     if not issubclass(obj._meta.model, mapentity_models.MapEntityMixin):
         raise Http404
     if not obj.is_public():
@@ -56,7 +54,7 @@ def serve_attachment(request, path):
             raise PermissionDenied
         if not request.user.has_perm(get_attachment_permission('read_attachment')):
             raise PermissionDenied
-        if not request.user.has_perm('{}.read_{}'.format(obj._meta.app_label, obj._meta.model)):
+        if not request.user.has_perm('{}.read_{}'.format(obj._meta.app_label, obj._meta.model_name)):
             raise PermissionDenied
 
     content_type, encoding = mimetypes.guess_type(path)
