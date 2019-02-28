@@ -2,12 +2,12 @@
 CHANGELOG
 =========
 
-4.4.11.dev0
+4.4.11 (28/02/2019)
 ==================
 
-**Bug fix**
+**Minor changes**
 
--
+- Change serve_attachments get all attachments using generic foreign key
 
 
 4.4.10 (12/02/2019)
