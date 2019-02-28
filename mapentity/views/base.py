@@ -5,8 +5,8 @@ import logging
 import mimetypes
 import os
 from datetime import datetime
+import re
 
-from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.db.models import GeometryField
@@ -20,7 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.views.defaults import page_not_found, permission_denied
 from django.views.generic.base import TemplateView
-from paperclip.settings import get_attachment_permission
+from paperclip.settings import get_attachment_permission, get_attachment_model
 
 from mapentity import models as mapentity_models
 from .mixins import JSONResponseMixin, FilterListMixin, ModelViewMixin
@@ -39,24 +39,22 @@ def handler404(request, template_name='mapentity/404.html'):
     return page_not_found(request, template_name)
 
 
-def serve_attachment(request, path, app_label, model_name, pk):
+def serve_attachment(request, path):
     """
     Serve media/ for authorized users only, since it can contain sensitive
     information (uploaded documents)
     """
-    try:
-        model = apps.get_model(app_label, model_name)
-    except LookupError:
+    original_path = re.sub(r'\.\d+x\d+_q\d+\.(jpg|png|jpeg)$', '', path, count=1, flags=re.IGNORECASE)
+    attachment = get_object_or_404(get_attachment_model(), attachment_file=original_path)
+    obj = attachment.content_object
+    if not issubclass(obj._meta.model, mapentity_models.MapEntityMixin):
         raise Http404
-    if not issubclass(model, mapentity_models.MapEntityMixin):
-        raise Http404
-    obj = get_object_or_404(model, pk=pk)
     if not obj.is_public():
         if not request.user.is_authenticated():
             raise PermissionDenied
         if not request.user.has_perm(get_attachment_permission('read_attachment')):
             raise PermissionDenied
-        if not request.user.has_perm('{}.read_{}'.format(app_label, model_name)):
+        if not request.user.has_perm('{}.read_{}'.format(obj._meta.app_label, obj._meta.model_name)):
             raise PermissionDenied
 
     content_type, encoding = mimetypes.guess_type(path)

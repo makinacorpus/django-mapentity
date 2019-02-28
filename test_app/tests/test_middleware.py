@@ -11,7 +11,7 @@ from mapentity import middleware
 from mapentity.middleware import AutoLoginMiddleware, get_internal_user
 import mock
 
-from .test_views import DummyModelFactory
+from .test_views import DummyModelFactory, AttachmentFactory
 
 
 User = get_user_model()
@@ -37,11 +37,12 @@ class AutoLoginTest(TransactionTestCase):
     def test_auto_login_happens_by_remote_addr(self):
         obj = DummyModelFactory.create()
         middleware.CONVERSION_SERVER_HOST = '1.2.3.4'
-        response = self.client.get('/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(obj.pk),
+        attachment = AttachmentFactory.create(content_object=obj)
+        response = self.client.get("/media/%s" % attachment.attachment_file,
                                    REMOTE_ADDR='1.2.3.5')
         self.assertEqual(response.status_code, 403)
         with mock.patch('django.contrib.auth.models._user_has_perm', return_value=True):
-            response = self.client.get('/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(obj.pk),
+            response = self.client.get("/media/%s" % attachment.attachment_file,
                                        REMOTE_ADDR='1.2.3.4')
         self.assertEqual(response.status_code, 200)
 
