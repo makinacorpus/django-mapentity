@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import string
+import time
 from datetime import datetime
 from mimetypes import types_map
 
@@ -153,7 +154,15 @@ def download_to_stream(url, stream, silent=False, headers=None):
 
         content_error = 'Request on %s returned empty content' % url
         assert len(source.content) > 0, content_error
-
+    except requests.exceptions.ConnectionError:
+        time.sleep(1)
+        headers['User-Agent'] = 'Mozilla/5.0 ' \
+                                '(Macintosh; Intel Mac OS X 10_9_3) ' \
+                                'AppleWebKit/537.36 (KHTML, like Gecko) ' \
+                                'Chrome/35.0.1916.47 Safari/537.36'
+        source = requests.get(url, headers=headers)
+        status_error = 'Request on %s failed (status=%s)' % (url, source.status_code)
+        assert source.status_code == 200, status_error
     except (AssertionError, requests.exceptions.RequestException) as e:
         logger.exception(e)
         logger.info('Headers sent: %s' % headers)
