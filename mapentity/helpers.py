@@ -139,35 +139,50 @@ def is_file_newer(path, date_update, delete_empty=True):
     return modified > date_update
 
 
+def get_source(url, headers=None):
+    error = None
+    logger.info("Request to: %s" % url)
+    try:
+        source = requests.get(url, headers=headers)
+    except requests.exceptions.RequestException as e:
+        logger.exception(e)
+        logger.info('Headers sent: %s' % headers)
+        return
+    if source.status_code != 200:
+        error = 'Request on %s failed (status=%s)' % (url, source.status_code)
+    if len(source.content) <= 0:
+        error = 'Request on %s returned empty content' % source.content[:150]
+
+    return error, source
+
+
+def log_error(error, source=None, headers=None):
+    logger.exception(error)
+    logger.info('Headers sent: %s' % headers)
+    if hasattr(source, 'content'):
+        logger.info('Response: %s' % source.content[:150])
+
+
 def download_to_stream(url, stream, silent=False, headers=None):
     """ Download url and writes response to stream.
     """
     source = None
 
     try:
+        error, source = get_source(url, headers)
+        if error:
+            log_error(error, source, headers)
 
-        logger.info("Request to: %s" % url)
-        source = requests.get(url, headers=headers)
-
-        status_error = 'Request on %s failed (status=%s)' % (url, source.status_code)
-        assert source.status_code == 200, status_error
-
-        content_error = 'Request on %s returned empty content' % url
-        assert len(source.content) > 0, content_error
     except requests.exceptions.ConnectionError:
         time.sleep(1)
+        # https://stackoverflow.com/questions/33174804/python-requests-getting-connection-aborted-badstatusline-error
         headers['User-Agent'] = 'Mozilla/5.0 ' \
                                 '(Macintosh; Intel Mac OS X 10_9_3) ' \
                                 'AppleWebKit/537.36 (KHTML, like Gecko) ' \
                                 'Chrome/35.0.1916.47 Safari/537.36'
-        source = requests.get(url, headers=headers)
-        status_error = 'Request on %s failed (status=%s)' % (url, source.status_code)
-        assert source.status_code == 200, status_error
+        error, source = get_source(url, headers)
     except (AssertionError, requests.exceptions.RequestException) as e:
-        logger.exception(e)
-        logger.info('Headers sent: %s' % headers)
-        if hasattr(source, 'content'):
-            logger.info('Response: %s' % source.content[:150])
+        log_error(e, source, headers)
 
         if not silent:
             raise
