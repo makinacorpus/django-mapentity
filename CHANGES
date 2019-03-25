@@ -7,7 +7,7 @@ CHANGELOG
 
 **Bug fix**
 
--
+- Fix BadStatusLine exception
 
 
 4.4.13 (01/03/2019)
