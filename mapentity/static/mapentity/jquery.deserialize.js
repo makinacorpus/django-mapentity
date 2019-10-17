@@ -47,6 +47,8 @@
           changeChecked($input, true);
         } else if (type == 'checkbox') { 
           // see below
+        } else if ($input.prop("tagName") == 'SELECT') {
+          $input.children("option[value=" + pair[1] + "]").prop("selected", true);
         } else {
           var oldVal = $input.val();
           var newVal = pair[1];
