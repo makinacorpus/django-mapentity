@@ -36,7 +36,7 @@ MapEntity.TogglableFilter = L.Class.extend({
         $('#mainfilter select[multiple] option:first-child').remove();
         $("form#mainfilter").bind("reset", function() {
             setTimeout(function() {
-                $('form#mainfilter select[multiple]').trigger('liszt:updated');
+                $('form#mainfilter select[multiple]').trigger('chosen:updated');
             }, 1);
         });
         // Make sure filter-set class is added if a choice is selected.
@@ -178,7 +178,7 @@ MapEntity.TogglableFilter = L.Class.extend({
         // Displayed value
         var value = val;
         if (field.tagName == 'SELECT') {
-            value = $(field).find("option:selected").text();
+            value = Array.from($(field).find("option:selected")).map(item => item.textContent).filter(Boolean).join(', ');
         }
 
         if (set) {

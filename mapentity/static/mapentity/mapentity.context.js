@@ -114,7 +114,7 @@ MapEntity.Context = new function() {
 
         if (filter && context.filter) {
             $(filter).deserialize(context.filter);
-            $(filter).find('select').trigger("liszt:updated");
+            $(filter).find('select').trigger("chosen:updated");
         }
 
         if (datatable && context.sortcolumns) {
