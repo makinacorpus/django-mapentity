@@ -178,7 +178,9 @@ MapEntity.TogglableFilter = L.Class.extend({
         // Displayed value
         var value = val;
         if (field.tagName == 'SELECT') {
-            value = Array.from($(field).find("option:selected")).map(item => item.textContent).filter(Boolean).join(', ');
+            value = $(field).find("option:selected").toArray().map(function (node) {
+                return $(node).text()
+            }).join(', ')
         }
 
         if (set) {

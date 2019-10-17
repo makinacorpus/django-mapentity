@@ -153,5 +153,6 @@ MapEntity.Context = new function() {
             // Disable tiles animations when screenshoting
             $(map._container).removeClass('leaflet-fade-anim');
         }
+        $(filter).find('select').trigger("change");
     };
 };
