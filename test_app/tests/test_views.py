@@ -25,7 +25,7 @@ User = get_user_model()
 
 
 def get_dummy_uploaded_file(name='file.pdf'):
-    return SimpleUploadedFile(name, '*' * 300, content_type='application/pdf')
+    return SimpleUploadedFile(name, b'*' * 300, content_type='application/pdf')
 
 
 class FileTypeFactory(factory.DjangoModelFactory):

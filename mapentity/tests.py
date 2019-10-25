@@ -7,7 +7,7 @@ import os
 import shutil
 import time
 from datetime import datetime
-from StringIO import StringIO
+from io import StringIO
 
 import requests
 from django.conf import settings
@@ -152,7 +152,7 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.get('Content-Type'), 'text/csv')
 
         # Read the csv
-        lines = list(csv.reader(StringIO(response.content), delimiter=','))
+        lines = list(csv.reader(StringIO(response.content.decode("utf-8")), delimiter=','))
 
         # There should be one more line in the csv than in the items: this is the header line
         self.assertEqual(len(lines), self.model.objects.all().count() + 1)
@@ -370,7 +370,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         hasher.update(response.content)
         md5sum = hasher.digest()
         self.assertNotEqual(lastmodified, None)
-        self.assertEqual(cachecontrol, 'must-revalidate, max-age=0')
+        self.assertItemsEqual(cachecontrol.split(', '), ('must-revalidate', 'max-age=0'))
 
         # Try again, check that nothing changed
         time.sleep(1.1)
