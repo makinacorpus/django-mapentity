@@ -31,7 +31,7 @@ idna==2.6
 ipaddress==1.0.19
 lxml==4.2.1
 mock==2.0.0
-paperclip==2.2.0
+paperclip==2.2.1
 pbr==4.0.1
 pdfrw==0.4
 Pillow==5.3.*

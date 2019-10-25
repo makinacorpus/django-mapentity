@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import string
+import time
 from datetime import datetime
 from mimetypes import types_map
 
@@ -138,22 +139,30 @@ def is_file_newer(path, date_update, delete_empty=True):
     return modified > date_update
 
 
+def get_source(url, headers):
+    logger.info("Request to: %s" % url)
+    source = requests.get(url, headers=headers)
+
+    status_error = 'Request on %s failed (status=%s)' % (url, source.status_code)
+    assert source.status_code == 200, status_error
+
+    content_error = 'Request on %s returned empty content' % url
+    assert len(source.content) > 0, content_error
+
+    return source
+
+
 def download_to_stream(url, stream, silent=False, headers=None):
     """ Download url and writes response to stream.
     """
     source = None
 
     try:
-
-        logger.info("Request to: %s" % url)
-        source = requests.get(url, headers=headers)
-
-        status_error = 'Request on %s failed (status=%s)' % (url, source.status_code)
-        assert source.status_code == 200, status_error
-
-        content_error = 'Request on %s returned empty content' % url
-        assert len(source.content) > 0, content_error
-
+        try:
+            source = get_source(url, headers)
+        except requests.exceptions.ConnectionError:
+            time.sleep(1)
+            source = get_source(url, headers)
     except (AssertionError, requests.exceptions.RequestException) as e:
         logger.exception(e)
         logger.info('Headers sent: %s' % headers)

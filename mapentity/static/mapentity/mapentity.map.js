@@ -194,7 +194,9 @@ $(window).on('entity:map:detail', function (e, data) {
         });
         map.addLayer(objectLayer);
         map.on('layeradd', function (e) {
-            if (objectLayer._map) objectLayer.bringToFront();
+            if (!e.layer.properties && objectLayer._map) {
+                objectLayer.bringToFront();
+            }
         });
 
         // Show objects enumeration
@@ -250,7 +252,7 @@ $(window).on('entity:map:list', function (e, data) {
         if (e.layer._map !== null) e.layer.bringToFront();
     });
     map.addLayer(objectsLayer);
-    objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname), true);
+    objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname));
 
     var nameHTML = '<span style="color: '+ style['color'] + ';">&#x25A3;</span>&nbsp;' + data.objectsname;
     map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"));
@@ -295,6 +297,27 @@ $(window).on('entity:map:list', function (e, data) {
         return JSON.stringify(context);
     });
     map.addControl(screenshot);
+
+    /*
+     * Allow to load files locally.
+     */
+    var pointToLayer = function (feature, latlng) {
+            return L.circleMarker(latlng, {style: window.SETTINGS.map.styles.filelayer})
+                    .setRadius(window.SETTINGS.map.styles.filelayer.radius);
+        },
+        onEachFeature = function (feature, layer) {
+            if (feature.properties.name) {
+                layer.bindLabel(feature.properties.name);
+            }
+        },
+        filecontrol = L.Control.fileLayerLoad({
+            fitBounds: true,
+            layerOptions: {style: window.SETTINGS.map.styles.filelayer,
+                           pointToLayer: pointToLayer,
+                           onEachFeature: onEachFeature}
+        });
+    map.filecontrol = filecontrol;
+    map.addControl(filecontrol);
 
     // Restore map view, layers and filter from any available context
     // Get context from URL parameter, if any

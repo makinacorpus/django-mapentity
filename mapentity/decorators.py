@@ -1,7 +1,7 @@
 from functools import wraps
 
 from django.utils.decorators import available_attrs, method_decorator
-from django.views.decorators.cache import never_cache
+from django.views.decorators.cache import cache_control
 from django.views.decorators.http import last_modified as cache_last_modified
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
@@ -71,9 +71,7 @@ def view_cache_latest():
             cache_latest = cache_last_modified(lambda x: view_model.latest_updated())
             cbv_cache_latest = method_decorator(cache_latest)
 
-            # The first decorator forces browser's cache revalidation.
-            # The second one allows browser's cache revalidation.
-            @method_decorator(never_cache)
+            @method_decorator(cache_control(max_age=0, must_revalidate=True))
             @cbv_cache_latest
             def decorated(self, request, *args, **kwargs):
                 return view_func(self, request, *args, **kwargs)
@@ -90,16 +88,17 @@ def view_cache_response_content():
             response_class = self.response_class
             response_kwargs = dict()
 
-            # Do not (re)store cache if filters presents
+            # Do not cache if filters presents
             params = self.request.GET.keys()
             with_filters = all([not p.startswith('_') for p in params])
             if len(params) > 0 and with_filters:
                 return view_func(self, *args, **kwargs)
 
-            # Otherwise, restore from cache or store view result
+            # Restore from cache or store view result
+            geojson_lookup = None
             if hasattr(self, 'view_cache_key'):
                 geojson_lookup = self.view_cache_key()
-            else:
+            elif not self.request.GET:  # Do not cache filtered responses
                 view_model = self.get_model()
                 language = self.request.LANGUAGE_CODE
                 latest_saved = view_model.latest_updated()
@@ -109,8 +108,6 @@ def view_cache_response_content():
                         view_model._meta.model_name,
                         latest_saved.strftime('%y%m%d%H%M%S%f')
                     )
-                else:
-                    geojson_lookup = None
 
             geojson_cache = caches[app_settings['GEOJSON_LAYERS_CACHE_BACKEND']]
 
