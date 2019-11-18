@@ -2,158 +2,7 @@
 CHANGELOG
 =========
 
-5.0.1.dev0
-==================
-
-**Bug fixes**
-
-- Fix /logentry/list/ crash
-- Fix sort list
-
-
-5.0.0 (2018-05-07)
-==================
-
-**Breaking changes**
-
-- Move to python 3
-
-
-4.4.16 (17/10/2019)
-===================
-
-**Bug fix**
-
-- Fix filters after get context
-
-
-4.4.15 (17/10/2019)
-===================
-
-**Bug fix**
-
-- Fix multi select filters
-
-
-4.4.14 (01/04/2019)
-===================
-
-**Bug fix**
-
-- Fix BadStatusLine exception
-
-
-4.4.13 (01/03/2019)
-===================
-
-**Bug fix**
-
-- Fix croped attachments
-
-
-4.4.12 (28/02/2019)
-===================
-
-**Bug fix**
-
-- Fix missing ressources files in pypi release
-
-
-4.4.11 (28/02/2019)
-===================
-
-**Minor changes**
-
-- Change serve_attachments get all attachments using generic foreign key
-
-
-4.4.10 (12/02/2019)
-===================
-
-**Bug fix**
-
-- Make sure that locateOnLine() tolerance is sufficient to pass Geotrek tests
-
-
-4.4.9 (03/02/2019)
-==================
-
-**Performances**
-
-- Allow client side caching with systematic revalidation for Layer and JsonList views
-- Remove validation of history bar
-- Don't bringToFront() every single feature on map
-
-
-4.4.8 (2019-02-01)
-==================
-
-**Bug fix**
-
-- Fix points on narrow angles sublines (Leaflet.GeometryUtil)
-
-
-4.4.7 (2019-01-23)
-==================
-
-**Bug fix**
-
-- Fix tests csv : stringio and encode
-
-
-4.4.6 (2019-01-15)
-==================
-
-**Minor changes**
-
-- Load local file in list views
-
-
-4.4.5 (2019-01-08)
-==================
-
-**Minor changes**
-
-- Geojson float precision settings.
-
-**Bug fix**
-
-- Fix permission paperclip (version 2.2.1)
-
-
-4.4.4 (2018-11-27)
-==================
-
-**Bug fix**
-
-- Snap better on lines splitted.
-
-
-4.4.3 (2018-11-21)
-==================
-
-**Bug fix**
-
-- Fix HTTP headers forwarded to convertit
-
-
-4.4.2 (2018-11-19)
-==================
-
-**Minor changes**
-
-- Can use function style in leaflet
-
-
-4.4.1 (2018-11-08)
-==================
-
-**Bug fix**
-
-- Fix test permission geom
-
-
-4.4.0 (2018-11-08)
+5.1.0 (2019-11-18)
 ==================
 
 **New features**
@@ -162,25 +11,44 @@ CHANGELOG
 - Drop support to Django 1.9 and 1.10 versions
 - upgrade libraries
 
+**Performances**
 
-4.3.6 (2018-09-04)
-==================
-
-**Bug fixes**
-
-- Fix crash in log entries view
+- Allow client side caching with systematic revalidation for Layer and JsonList views
+- Remove validation of history bar
+- Don't bringToFront() every single feature on map
 
 **Minor changes**
 
+- Change serve_attachments get all attachments using generic foreign key
+- Load local file in list views
+- Geojson float precision settings.
+- Can use function style in leaflet
 - Save column sort by module
-
-
-4.3.5 (2018-06-08)
-==================
 
 **Bug fixes**
 
+- Fix sort list
+- Fix filters after get context
+- Fix multi select filters
+- Fix BadStatusLine exception
+- Fix croped attachments
+- Make sure that locateOnLine() tolerance is sufficient to pass Geotrek tests
+- Fix points on narrow angles sublines (Leaflet.GeometryUtil)
+- Fix tests csv : stringio and encode
+- Fix permission paperclip (version 2.2.1)
+- Snap better on lines splitted.
+- Fix HTTP headers forwarded to convertit
+- Fix test permission geom
+- Fix crash in log entries view
 - Fix makemigrations (disabling of modeltranslation)
+
+
+5.0.0 (2018-05-07)
+==================
+
+**Breaking changes**
+
+- Move to python 3
 
 
 4.3.4 (2018-04-08)
