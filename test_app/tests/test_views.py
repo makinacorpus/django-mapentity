@@ -9,18 +9,46 @@ from django.test import TransactionTestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.core.files.uploadedfile import SimpleUploadedFile
 
-from mapentity.factories import SuperUserFactory
+from mapentity.factories import SuperUserFactory, UserFactory
 
 from mapentity.registry import app_settings
 from mapentity.tests import MapEntityTest, MapEntityLiveTest
 from mapentity.views import serve_attachment, Convert, JSSettings
 
-from ..models import DummyModel
+from ..models import DummyModel, Attachment, FileType
 from ..views import DummyList, DummyDetail
 
 
 User = get_user_model()
+
+
+def get_dummy_uploaded_file(name='file.pdf'):
+    return SimpleUploadedFile(name, b'*' * 300, content_type='application/pdf')
+
+
+class FileTypeFactory(factory.DjangoModelFactory):
+
+    class Meta:
+        model = FileType
+
+
+class AttachmentFactory(factory.DjangoModelFactory):
+    """
+    Create an attachment. You must provide an 'obj' keywords,
+    the object (saved in db) to which the attachment will be bound.
+    """
+
+    class Meta:
+        model = Attachment
+
+    attachment_file = get_dummy_uploaded_file()
+    filetype = factory.SubFactory(FileTypeFactory)
+
+    creator = factory.SubFactory(UserFactory)
+    title = factory.Sequence(u"Title {0}".format)
+    legend = factory.Sequence(u"Legend {0}".format)
 
 
 class DummyModelFactory(factory.DjangoModelFactory):
@@ -125,13 +153,17 @@ class AttachmentTest(BaseTest):
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         self.obj = DummyModelFactory.create()
+        """
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
         os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}'.format(self.obj.pk)))
         self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk))
         self.url = '/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk)
         open(self.file, 'wb').write(b'*' * 300)
-        call_command('update_permissions')
+        """
+        self.attachment = AttachmentFactory.create(content_object=self.obj)
+        self.url = "/media/%s" % self.attachment.attachment_file
+        call_command('update_permissions_mapentity')
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
@@ -189,7 +221,7 @@ class AttachmentTest(BaseTest):
 
     @override_settings(DEBUG=True)
     def test_access_to_not_existing_file(self):
-        os.remove(self.file)
+        os.remove(self.attachment.attachment_file.path)
         self.login_as_superuser()
         response = self.download(self.url)
         self.assertEqual(response.status_code, 404)
@@ -205,19 +237,20 @@ class AttachmentTest(BaseTest):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', str(self.obj.pk))
+        response = serve_attachment(request, str(self.attachment.attachment_file))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'')
-        self.assertEqual(response['X-Accel-Redirect'], '/media_secure/file.pdf')
+        self.assertEqual(response['X-Accel-Redirect'], '/media_secure/%s' % self.attachment.attachment_file)
         self.assertEqual(response['Content-Type'], 'application/pdf')
-        self.assertEqual(response['Content-Disposition'], 'attachment; filename=file.pdf')
+        self.assertEqual(response['Content-Disposition'],
+                         'attachment; filename=%s' % str(self.attachment.attachment_file.name).split('/')[-1])
         app_settings['SENDFILE_HTTP_HEADER'] = None
 
     def test_http_headers_inline(self):
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = False
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_attachment(request, 'file.pdf', 'test_app', 'dummymodel', str(self.obj.pk))
+        response = serve_attachment(request, str(self.attachment.attachment_file))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'')
         self.assertEqual(response['Content-Type'], 'application/pdf')
@@ -310,14 +343,6 @@ class MapEntityLayerViewTest(BaseTest):
         self.assertEqual(len(response.json()['features']), 31)
         response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
         self.assertEqual(len(response.json()['features']), 1)
-
-    def test_geojson_layer_with_dummy_parameter_still_uses_cache(self):
-        self.login()
-        response = self.client.get(DummyModel.get_layer_url())
-        self.assertEqual(len(response.json()['features']), 31)
-        # See Leaflet-ObjectsLayer.js load() function
-        response = self.client.get(DummyModel.get_layer_url() + '?_u=1234&name=toto')
-        self.assertEqual(len(response.json()['features']), 31)
 
 
 class DetailViewTest(BaseTest):
@@ -454,3 +479,19 @@ class ViewPermissionsTest(BaseTest):
         response = self.client.get(delete_url)
         self.assertRedirects(response, 'http://testserver/dummymodel/%s/' % (self.object.pk),
                              target_status_code=302)  # --> login
+
+
+class LogViewTest(BaseTest):
+    def test_logentry_view(self):
+        self.login_as_superuser()
+        response = self.client.get('/logentry/list/')
+        self.assertContains(response, "<th>action flag</th>")
+
+    def test_logentry_view_not_logged(self):
+        response = self.client.get('/logentry/list/')
+        self.assertRedirects(response, "/login/")
+
+    def test_logentry_view_not_superuser(self):
+        self.login()
+        response = self.client.get('/logentry/list/')
+        self.assertRedirects(response, "/login/")

@@ -1,6 +1,7 @@
 import copy
 
 from django import forms
+from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis.db.models.fields import GeometryField
@@ -9,12 +10,15 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Button, HTML, Submit
 from crispy_forms.bootstrap import FormActions
 from tinymce.widgets import TinyMCE
-from modeltranslation.translator import translator, NotRegistered
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 
 
 from .settings import app_settings
 from .widgets import MapWidget
+from .models import ENTITY_PERMISSION_UPDATE_GEOM
+
+if 'modeltranslation' in settings.INSTALLED_APPS:
+    from modeltranslation.translator import translator, NotRegistered
 
 
 class TranslatedModelForm(forms.ModelForm):
@@ -96,8 +100,8 @@ class MapEntityForm(TranslatedModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.can_delete = kwargs.pop('can_delete', True)
-        super(MapEntityForm, self).__init__(*args, **kwargs)
 
+        super(MapEntityForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = True
 
@@ -113,6 +117,10 @@ class MapEntityForm(TranslatedModelForm):
                                             not isinstance(formfield.widget, MapWidget))
                     if needs_replace_widget:
                         formfield.widget = MapWidget()
+                        if self.instance.pk and self.user:
+                            if not self.user.has_perm(self.instance.get_permission_codename(
+                                    ENTITY_PERMISSION_UPDATE_GEOM)):
+                                formfield.widget.modifiable = False
                         formfield.widget.attrs['geom_type'] = formfield.geom_type
                 except FieldDoesNotExist:
                     pass
@@ -121,6 +129,11 @@ class MapEntityForm(TranslatedModelForm):
                 if formfield.widget.__class__ == forms.widgets.Textarea:
                     formfield.widget = TinyMCE()
 
+        if self.instance.pk and self.user:
+            if not self.user.has_perm(self.instance.get_permission_codename(
+                    ENTITY_PERMISSION_UPDATE_GEOM)):
+                for field in self.geomfields:
+                    self.fields.get(field).widget.modifiable = False
         self._init_layout()
 
     def _init_layout(self):

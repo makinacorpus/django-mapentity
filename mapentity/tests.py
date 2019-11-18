@@ -102,7 +102,7 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         mock_requests.get.return_value.status_code = 200
-        mock_requests.get.return_value.content = '<p id="properties">Mock</p>'
+        mock_requests.get.return_value.content = b'<p id="properties">Mock</p>'
 
         self.login()
         obj = self.modelfactory.create()
@@ -152,7 +152,7 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.get('Content-Type'), 'text/csv')
 
         # Read the csv
-        lines = list(csv.reader(StringIO(response.content.decode('utf-8')), delimiter=','))
+        lines = list(csv.reader(StringIO(response.content.decode("utf-8")), delimiter=','))
 
         # There should be one more line in the csv than in the items: this is the header line
         self.assertEqual(len(lines), self.model.objects.all().count() + 1)
@@ -196,6 +196,13 @@ class MapEntityTest(TestCase):
     def _post_update_form(self, obj):
         self._post_form(obj.get_update_url())
 
+    def _check_update_geom_permission(self, response):
+        if self.user.has_perm('{app}.change_geom_{model}'.format(app=self.model._meta.app_label,
+                                                                 model=self.model._meta.model_name)):
+            self.assertIn(b'.modifiable = true;', response.content)
+        else:
+            self.assertIn(b'.modifiable = false;', response.content)
+
     def test_crud_status(self):
         if self.model is None:
             return  # Abstract test should not run
@@ -215,8 +222,8 @@ class MapEntityTest(TestCase):
 
         response = self.client.get(obj.get_update_url())
         self.assertEqual(response.status_code, 200)
-
         self._post_update_form(obj)
+        self._check_update_geom_permission(response)
 
         response = self.client.get(obj.get_delete_url())
         self.assertEqual(response.status_code, 200)
@@ -358,12 +365,12 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         # Without headers to cache
         lastmodified = response.headers.get('Last-Modified')
-        expires = response.headers.get('Expires')
+        cachecontrol = response.headers.get('Cache-control')
         hasher = hashlib.md5()
         hasher.update(response.content)
         md5sum = hasher.digest()
         self.assertNotEqual(lastmodified, None)
-        self.assertNotEqual(expires, None)
+        self.assertCountEqual(cachecontrol.split(', '), ('must-revalidate', 'max-age=0'))
 
         # Try again, check that nothing changed
         time.sleep(1.1)

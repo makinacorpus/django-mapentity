@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'mapentity',  # Make sure mapentity settings are loaded before leaflet ones
     'leaflet',
     'test_app',
+    'modeltranslation'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -151,7 +152,7 @@ PAPERCLIP_FILETYPE_MODEL = 'test_app.FileType'
 PAPERCLIP_ATTACHMENT_MODEL = 'test_app.Attachment'
 
 if os.path.exists('/usr/lib/x86_64-linux-gnu/mod_spatialite.so'):
-    SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+    SPATIALITE_LIBRARY_PATH = '/usr/lib/x86_64-linux-gnu/mod_spatialite'
 
 LOGGING = {
     'version': 1,

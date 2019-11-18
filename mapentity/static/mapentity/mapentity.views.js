@@ -10,6 +10,26 @@ $(window).on('entity:view:list', function (e, data) {
         aaData: [],
         iDeferLoading: 0,
         iDisplayLength: 15,  // TODO: this is VERY ANNOYING ! I want to fill height !
+        // Enable cache
+        fnServerData: function ( sUrl, aoData, fnCallback, oSettings ) {
+			oSettings.jqXHR = $.ajax( {
+				"url":  sUrl,
+				"data": aoData,
+				"success": function (json) {
+					$(oSettings.oInstance).trigger('xhr', oSettings);
+					fnCallback( json );
+				},
+				"dataType": "json",
+				"cache": true,
+				"type": oSettings.sServerMethod,
+				"error": function (xhr, error, thrown) {
+					if ( error == "parsererror" ) {
+						oSettings.oApi._fnLog( oSettings, 0, "DataTables warning: JSON data from "+
+							"server could not be parsed. This is caused by a JSON formatting error." );
+					}
+				}
+			} );
+		}
     });
 
     // Adjust vertically

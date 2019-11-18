@@ -109,10 +109,7 @@ L.ObjectsLayer = L.GeoJSON.extend({
         }
     },
 
-    load: function (url, force) {
-        if (!!force && url.indexOf("?") != -1) {
-            url += '?_u=' + (new Date().getTime());
-        }
+    load: function (url) {
         var jsonLoad = function (data) {
             var features = jQuery.grep(data.features, function(obj, i) {
                 return obj.geometry !== null;
@@ -200,12 +197,11 @@ L.ObjectsLayer = L.GeoJSON.extend({
         if (!layer) return;
 
         if (on) {
-            layer._defaultStyle = layer._defaultStyle || this.options.styles['default'];
             layer.setStyle(this.options.styles.highlight);
             this.fire('highlight', {layer: layer});
         }
         else {
-            layer.setStyle(layer._defaultStyle);
+            this.resetStyle(layer);
         }
     },
 
