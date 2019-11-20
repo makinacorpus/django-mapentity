@@ -14,7 +14,7 @@ class PolygonFilter(Filter):
     field_class = forms.PolygonField
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('name', app_settings['GEOM_FIELD_NAME'])
+        kwargs.setdefault('field_name', app_settings['GEOM_FIELD_NAME'])
         kwargs.setdefault('widget', HiddenGeometryWidget)
         kwargs.setdefault('lookup_expr', 'intersects')
         super(PolygonFilter, self).__init__(*args, **kwargs)
@@ -30,7 +30,7 @@ class PythonPolygonFilter(PolygonFilter):
         value.transform(settings.SRID)
         filtered = []
         for o in qs.all():
-            geom = getattr(o, self.name)
+            geom = getattr(o, self.field_name)
             if geom and geom.valid and not geom.empty:
                 if getattr(geom, self.lookup_expr)(value):
                     filtered.append(o.pk)
@@ -85,7 +85,7 @@ class BaseMapEntityFilterSet(FilterSet):
     @classmethod
     def add_filters(cls, filters):
         for name, filter_ in filters.items():
-            filter_.name = name
+            filter_.field_name = name
             cls.add_filter(name, filter_)
 
 

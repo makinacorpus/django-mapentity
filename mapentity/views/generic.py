@@ -19,7 +19,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from djappypod.response import OdtTemplateResponse
-from django_weasyprint import PDFTemplateResponseMixin
+from django_weasyprint import WeasyTemplateResponseMixin
 
 from ..settings import app_settings
 from .. import models as mapentity_models
@@ -230,7 +230,7 @@ class MapEntityWeasyprint(MapEntityDocumentBase):
         return context
 
 
-class MapEntityDocumentWeasyprint(MapEntityWeasyprint, PDFTemplateResponseMixin):
+class MapEntityDocumentWeasyprint(MapEntityWeasyprint, WeasyTemplateResponseMixin):
     pass
 
 
