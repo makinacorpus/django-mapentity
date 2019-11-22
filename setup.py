@@ -21,7 +21,7 @@ setup(
         # 'GDAL',  # Depends on installed libgdal version
         'gpxpy',
         'django-appypod',
-        'appy@https://github.com/GeotrekCE/appy/archive/1.0.0.mc1.tar.gz',
+        'appy-python-3',
         'django-compressor',
         'django-crispy-forms',
         'django-embed-video',
