@@ -4,11 +4,6 @@ from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-test_requires = [
-    'mock',
-    'factory_boy',
-]
-
 setup(
     name='mapentity',
     version='5.1.0',
@@ -21,30 +16,35 @@ setup(
                       open(os.path.join(here, 'CHANGES')).read()),
     license='BSD, see LICENSE file.',
     install_requires=[
-        'BeautifulSoup4>=4.6.0',
-        'Django>=1.11,<2',
-        'GDAL>=1.10',
-        'gpxpy>=1.1.2',
-        'django-appypod>=2.0.0',
-        'django-compressor>=2.2',
-        'django-crispy-forms>=1.6.1',
-        'django-embed-video>=1.1.2',
-        'django-filter>=1.1.0',
-        'django-geojson>=2.11.0',
-        'django-leaflet>=0.19.0',
-        'django-modeltranslation>=0.12.2',
-        'django-shapes>=0.2.0',
-        'django-tinymce>=2.6.0',
-        'django-weasyprint==0.1',  # 0.5.x API changed
-        'djangorestframework>=3.6.4,<3.9',  # 3.9 is not compatible with drf gis 0.13
-        'djangorestframework-gis>=0.13',
-        'easy-thumbnails>=2.5.0',
-        'lxml>=4.2.1',
-        'paperclip>=2.2.1',
-        'requests>=2.20.0',
-        'WeasyPrint<0.42',  # 0.42 drops support of python 2.7,
-    ] + test_requires,
-    tests_requires=test_requires,
+        'BeautifulSoup4',
+        'Django<2',
+        # 'GDAL',  # Depends on installed libgdal version
+        'gpxpy',
+        'django-appypod',
+        'appy@https://github.com/GeotrekCE/appy/archive/1.0.0.mc1.tar.gz',
+        'django-compressor',
+        'django-crispy-forms',
+        'django-embed-video',
+        'django-filter',
+        'django-geojson',
+        'django-leaflet',
+        'django-modeltranslation',
+        'django-shapes',
+        'django-tinymce',
+        'django-weasyprint',
+        'djangorestframework',
+        'djangorestframework-gis',
+        'easy-thumbnails',
+        'lxml',
+        'paperclip',
+        'requests',
+        'WeasyPrint',
+    ],
+    tests_require=[
+        'mock',
+        'factory_boy',
+        'sphinx',
+    ],
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
