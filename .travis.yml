@@ -11,7 +11,7 @@ env:
 install:
  - sudo apt-get update
  - ./install.sh
- - ./env/bin/pip install -U django==$DJANGO_VERSION
+ - ./env/bin/pip install --force-reinstall django==$DJANGO_VERSION
  - ./env/bin/pip install coverage
  - pip install flake8
  - ./env/bin/python ./manage.py collectstatic --noinput
