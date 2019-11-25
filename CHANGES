@@ -7,7 +7,7 @@ CHANGELOG
 
 **Bug fixes**
 
--
+- Remove useless dependency django-shapes
 
 
 6.0.1 (2019-11-25)
