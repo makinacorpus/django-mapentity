@@ -303,7 +303,7 @@ def extract_attributes_html(url, request):
     for a in details('a'):
         a.replaceWith(a.text)
     # Prettify (ODT compat.) and convert unicode to XML entities
-    cooked = details.prettify('ascii', formatter='html')
+    cooked = details.prettify('ascii', formatter='html').decode()
     return cooked
 
 

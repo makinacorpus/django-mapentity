@@ -9,6 +9,7 @@ CHANGELOG
 
 - Remove useless dependency django-shapes
 - Fix autologin
+- Fix XML attributes in ODT templates
 
 
 6.0.1 (2019-11-25)
