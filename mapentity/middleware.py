@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 CONVERSION_SERVER_HOST = urlparse(app_settings['CONVERSION_SERVER']).hostname
 CAPTURE_SERVER_HOST = urlparse(app_settings['CAPTURE_SERVER']).hostname
-LOCALHOST = check_output(['hostname', '-I']).split() + ['127.0.0.1']
+LOCALHOST = check_output(['hostname', '-I']).decode().split() + ['127.0.0.1']
 
 
 def get_internal_user():
