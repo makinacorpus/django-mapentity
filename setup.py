@@ -29,7 +29,6 @@ setup(
         'django-geojson',
         'django-leaflet',
         'django-modeltranslation',
-        'django-shapes',
         'django-tinymce',
         'django-weasyprint',
         'djangorestframework',
