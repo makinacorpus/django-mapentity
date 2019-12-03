@@ -40,7 +40,6 @@ setup(
         'WeasyPrint',
     ],
     tests_require=[
-        'mock',
         'factory_boy',
         'sphinx',
     ],
