@@ -1,3 +1,2 @@
 sphinx
-mock
 factory_boy==2.8.1

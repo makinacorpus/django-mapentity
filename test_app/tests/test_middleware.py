@@ -9,7 +9,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from mapentity import middleware
 from mapentity.middleware import AutoLoginMiddleware, get_internal_user
-import mock
+from unittest import mock
 
 from .test_views import DummyModelFactory, AttachmentFactory
 

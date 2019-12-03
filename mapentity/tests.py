@@ -8,6 +8,7 @@ import shutil
 import time
 from datetime import datetime
 from io import StringIO
+from unittest.mock import patch
 
 import requests
 from django.conf import settings
@@ -21,7 +22,6 @@ from django.utils.http import http_date
 from django.utils.six.moves.urllib.parse import quote
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
-from mock import patch
 
 from .factories import SuperUserFactory
 from .forms import MapEntityForm

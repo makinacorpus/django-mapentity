@@ -1,6 +1,6 @@
 import os
+from unittest import mock
 
-import mock
 from django.test import TransactionTestCase
 
 from mapentity.registry import app_settings

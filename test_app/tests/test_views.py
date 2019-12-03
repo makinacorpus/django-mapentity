@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-import mock
+from unittest import mock
 import factory
 
 from django.conf import settings
