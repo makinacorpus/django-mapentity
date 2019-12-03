@@ -24,7 +24,7 @@ django-leaflet==0.25.0
 django-modeltranslation==0.14
 django-tinymce==2.8.0
 django-weasyprint==0.5.4
-django==1.11.26
+django==3.0
 djangorestframework-gis==0.14
 djangorestframework==3.10.3
 easy-thumbnails==2.6
