@@ -311,7 +311,7 @@ def user_has_perm(user, perm):
     # First check if the user has the permission (even anon user)
     if user.has_perm(perm):
         return True
-    if user.is_anonymous():
+    if user.is_anonymous:
         return perm in app_settings['ANONYMOUS_VIEWS_PERMS']
     return False
 

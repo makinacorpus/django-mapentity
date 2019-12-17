@@ -16,6 +16,7 @@ if _MEDIA_URL.endswith('/'):
     _MEDIA_URL = _MEDIA_URL[:-1]
 
 
+app_name = 'mapentity'
 urlpatterns = [
     url(r'^map_screenshot/$', map_screenshot, name='map_screenshot'),
     url(r'^convert/$', Convert.as_view(), name='convert'),

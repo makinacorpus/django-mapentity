@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 def log_action(request, object, action_flag):
     if not app_settings['ACTION_HISTORY_ENABLED']:
         return
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return
     LogEntry.objects.log_action(
         user_id=request.user.pk,
@@ -162,7 +162,7 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
     def render_to_response(self, context, **response_kwargs):
         obj = self.get_object()
         if not obj.is_public():
-            if not self.request.user.is_authenticated():
+            if not self.request.user.is_authenticated:
                 raise PermissionDenied
             if not self.request.user.has_perm('%s.read_%s' % (obj._meta.app_label, obj._meta.model_name)):
                 raise PermissionDenied
