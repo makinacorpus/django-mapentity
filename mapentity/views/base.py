@@ -31,14 +31,6 @@ from ..settings import app_settings, _MAP_STYLES
 logger = logging.getLogger(__name__)
 
 
-def handler403(request, template_name='mapentity/403.html'):
-    return permission_denied(request, template_name)
-
-
-def handler404(request, template_name='mapentity/404.html'):
-    return page_not_found(request, template_name)
-
-
 def serve_attachment(request, path):
     """
     Serve media/ for authorized users only, since it can contain sensitive
