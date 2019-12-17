@@ -26,8 +26,6 @@ from .mixins import (
     ModelViewMixin,
 )
 from .base import (
-    handler403,
-    handler404,
     serve_attachment,
     JSSettings,
     map_screenshot,
