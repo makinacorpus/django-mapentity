@@ -26,7 +26,7 @@ def view_permission_required(login_url=None, raise_exception=None):
         if user_has_perm(user, perm):
             return True
 
-        if not user.is_anonymous() and raise_exception:
+        if not user.is_anonymous and raise_exception:
             raise PermissionDenied
 
         # As the last resort, redirects

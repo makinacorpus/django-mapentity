@@ -54,40 +54,40 @@ class AutoLoginTest(TransactionTestCase):
 
     def test_auto_login_do_not_log_whoever(self):
         self.middleware.process_request(self.request)
-        self.assertTrue(self.request.user.is_anonymous())
+        self.assertTrue(self.request.user.is_anonymous)
 
     def test_auto_login_for_conversion(self):
         middleware.CONVERSION_SERVER_HOST = '1.2.3.4'
         self.request.META['REMOTE_ADDR'] = '1.2.3.4'
 
-        self.assertTrue(self.request.user.is_anonymous())
+        self.assertTrue(self.request.user.is_anonymous)
         self.middleware.process_request(self.request)
-        self.assertFalse(self.request.user.is_anonymous())
+        self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(self.request.user, self.internal_user)
 
     def test_auto_login_for_capture(self):
         middleware.CAPTURE_SERVER_HOST = '4.5.6.7'
         self.request.META['REMOTE_ADDR'] = '4.5.6.7'
 
-        self.assertTrue(self.request.user.is_anonymous())
+        self.assertTrue(self.request.user.is_anonymous)
         self.middleware.process_request(self.request)
-        self.assertFalse(self.request.user.is_anonymous())
+        self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(self.request.user, self.internal_user)
 
     def test_auto_login_for_conversion_host(self):
         middleware.CONVERSION_SERVER_HOST = 'convertit.makina.com'
         self.request.META['REMOTE_HOST'] = 'convertit.makina.com'
 
-        self.assertTrue(self.request.user.is_anonymous())
+        self.assertTrue(self.request.user.is_anonymous)
         self.middleware.process_request(self.request)
-        self.assertFalse(self.request.user.is_anonymous())
+        self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(self.request.user, self.internal_user)
 
     def test_auto_login_for_capture_host(self):
         middleware.CAPTURE_SERVER_HOST = 'capture.makina.com'
         self.request.META['REMOTE_HOST'] = 'capture.makina.com'
 
-        self.assertTrue(self.request.user.is_anonymous())
+        self.assertTrue(self.request.user.is_anonymous)
         self.middleware.process_request(self.request)
-        self.assertFalse(self.request.user.is_anonymous())
+        self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(self.request.user, self.internal_user)
