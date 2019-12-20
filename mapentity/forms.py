@@ -35,7 +35,7 @@ class TranslatedModelForm(forms.ModelForm):
         self.populate_fields()
 
     def replace_orig_fields(self):
-        self.orig_fields = self.fields.keys()
+        self.orig_fields = list(self.fields.keys())
         # Expand i18n fields
         try:
             # Obtain model translation options
