@@ -89,6 +89,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='attachment',
             name='filetype',
-            field=models.ForeignKey(verbose_name='File type', to='test_app.FileType'),
+            field=models.ForeignKey(verbose_name='File type', on_delete=django.db.models.deletion.CASCADE, to='test_app.FileType'),
         ),
     ]

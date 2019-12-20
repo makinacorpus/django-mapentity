@@ -57,7 +57,7 @@ class AutoLoginMiddleware(object):
                             getattr(settings, 'TEST', False))
 
         user = getattr(request, 'user', None)
-        if user and user.is_anonymous() and not is_running_tests:
+        if user and user.is_anonymous and not is_running_tests:
             remoteip = request.META.get('REMOTE_ADDR')
             remotehost = request.META.get('REMOTE_HOST')
 
