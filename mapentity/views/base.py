@@ -18,7 +18,6 @@ from django.utils.six.moves.urllib.parse import quote
 from django.views import static
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django.views.defaults import page_not_found, permission_denied
 from django.views.generic.base import TemplateView
 from paperclip.settings import get_attachment_permission, get_attachment_model
 
