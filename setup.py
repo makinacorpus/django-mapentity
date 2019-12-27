@@ -17,7 +17,7 @@ setup(
     license='BSD, see LICENSE file.',
     install_requires=[
         'BeautifulSoup4',
-        'Django<3',
+        'Django',
         # 'GDAL',  # Depends on installed libgdal version
         'gpxpy',
         'django-appypod',
