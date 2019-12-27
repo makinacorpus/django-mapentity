@@ -7,7 +7,7 @@ python:
 
 env:
   matrix:
-   - DJANGO_VERSION=1.11.*
+   - DJANGO_VERSION=2.0.*
 install:
  - sudo apt-get update
  - ./install.sh
