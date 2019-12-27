@@ -7,23 +7,19 @@ from test_app.views import DummyDocumentOdt, DummyDocumentWeasyprint
 from mapentity.registry import registry
 from django.contrib.auth import views as auth_views
 
-
-handler403 = 'mapentity.views.handler403'
-
 admin.autodiscover()
 
-models_urls = registry.register(DummyModel) + registry.register(MushroomSpot)
+models_urls = (registry.register(DummyModel) + registry.register(MushroomSpot), 'test_app')
 
 urlpatterns = [
     url(r'', include(models_urls, namespace='test_app')),
-    url(r'', include('mapentity.urls', namespace='mapentity',
-                     app_name='mapentity')),
+    url(r'', include('mapentity.urls', namespace='mapentity')),
     url(r'^home/$', RedirectView.as_view(url='/', permanent=True), name='home'),
     url(r'^login/$', auth_views.login, name='login'),
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name='logout',),
 
     url(r'^paperclip/', include('paperclip.urls')),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls[:2])),
     url(r'^test/document/dummymodel-(?P<pk>\d+).odt', DummyDocumentOdt.as_view(), name="dummymodel_odt"),
     url(r'^test/document/dummymodel-(?P<pk>\d+).pdf', DummyDocumentWeasyprint.as_view(), name="dummymodel_pdf"),
 ]

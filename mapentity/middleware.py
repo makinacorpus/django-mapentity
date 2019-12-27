@@ -44,7 +44,10 @@ class AutoLoginMiddleware(object):
     We could have deployed implemented authentication in ConvertIt and
     django-screamshot, or deployed OpenId, or whatever. But this was a lot easier.
     """
-    def process_request(self, request):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
         if "HTTP_X_FORWARDED_FOR" in request.META:
             request.META["HTTP_X_PROXY_REMOTE_ADDR"] = request.META["REMOTE_ADDR"]
             parts = request.META["HTTP_X_FORWARDED_FOR"].split(",", 1)
@@ -75,4 +78,4 @@ class AutoLoginMiddleware(object):
                 except DatabaseError:
                     logger.error("Could not update last-login field of internal user")
                 request.user = user
-        return None
+        return self.get_response(request)

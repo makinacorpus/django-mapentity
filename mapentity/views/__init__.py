@@ -74,9 +74,6 @@ __all__ = [
     'ModelViewMixin',
     'MAPENTITY_GENERIC_VIEWS',
 
-    'handler403',
-    'handler404',
-    'handler500',
     'serve_attachment',
     'JSSettings',
     'map_screenshot',
