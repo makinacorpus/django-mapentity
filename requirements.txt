@@ -14,7 +14,8 @@ chardet==3.0.4            # via requests
 cssselect2==0.2.2         # via cairosvg, weasyprint
 defusedxml==0.6.0         # via cairosvg
 django-appconf==1.0.3     # via django-compressor
-django-appypod==2.0.2
+# django-appypod==2.0.2
+-e git+https://github.com/makinacorpus/django-appypod@migration-django2#egg=django-appypod
 django-compressor==2.3
 django-crispy-forms==1.8.0
 django-embed-video==1.3
