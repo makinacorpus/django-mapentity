@@ -1,6 +1,7 @@
 import logging
 from subprocess import check_output
 
+from django.utils.deprecation import MiddlewareMixin
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
@@ -37,7 +38,7 @@ def clear_internal_user_cache():
         del get_internal_user.instance
 
 
-class AutoLoginMiddleware(object):
+class AutoLoginMiddleware(MiddlewareMixin):
     """
     This middleware enables auto-login for Conversion and Capture servers.
 
