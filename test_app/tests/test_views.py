@@ -6,7 +6,7 @@ import factory
 
 from django.conf import settings
 from django.core.management import call_command
-from django.test import TransactionTestCase, RequestFactory
+from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
@@ -74,7 +74,7 @@ class DummyModelLiveTest(MapEntityLiveTest):
     modelfactory = DummyModelFactory
 
 
-class BaseTest(TransactionTestCase):
+class BaseTest(TestCase):
     def login(self):
         if getattr(self, 'user', None) is None:
             user = User.objects.create_user(self.__class__.__name__ + 'User',

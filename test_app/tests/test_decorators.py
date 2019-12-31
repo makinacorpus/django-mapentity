@@ -1,5 +1,5 @@
 from unittest import mock
-from django.test import TransactionTestCase, RequestFactory
+from django.test import TestCase, RequestFactory
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
@@ -8,7 +8,7 @@ from mapentity.registry import app_settings
 from mapentity.decorators import view_permission_required
 
 
-class ViewPermissionRequiredTestCase(TransactionTestCase):
+class ViewPermissionRequiredTestCase(TestCase):
     def setUp(self):
         # Fake request and its positional and keywords arguments.
         self.request = RequestFactory().get('/toto/')

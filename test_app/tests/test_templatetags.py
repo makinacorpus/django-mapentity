@@ -1,11 +1,11 @@
-from django.test import TransactionTestCase
+from django.test import TestCase
 from django.template import Template, Context
 from django.utils import translation
 
 from ..models import DummyModel
 
 
-class ValueListTest(TransactionTestCase):
+class ValueListTest(TestCase):
     def test_empty_list_should_show_none(self):
         translation.deactivate()
         out = Template(

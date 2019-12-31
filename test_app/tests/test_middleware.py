@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.management import call_command
-from django.test import TransactionTestCase
+from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
 
@@ -18,7 +18,7 @@ User = get_user_model()
 
 
 @override_settings(TEST=False)
-class AutoLoginTest(TransactionTestCase):
+class AutoLoginTest(TestCase):
     def setUp(self):
         middleware.clear_internal_user_cache()
         self.middleware = AutoLoginMiddleware()
