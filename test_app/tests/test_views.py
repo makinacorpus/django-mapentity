@@ -455,30 +455,30 @@ class ViewPermissionsTest(BaseTest):
 
     def test_unauthorized_list_view_redirects_to_login(self):
         response = self.client.get('/dummymodel/list/')
-        self.assertRedirects(response, 'http://testserver/login/')
+        self.assertRedirects(response, '/login/')
 
     def test_unauthorized_detail_view_redirects_to_list(self):
         detail_url = '/dummymodel/%s/' % self.object.pk
         response = self.client.get(detail_url)
-        self.assertRedirects(response, 'http://testserver/dummymodel/list/',
+        self.assertRedirects(response, '/dummymodel/list/',
                              target_status_code=302)  # --> login
 
     def test_unauthorized_add_view_redirects_to_list(self):
         add_url = '/dummymodel/add/'
         response = self.client.get(add_url)
-        self.assertRedirects(response, 'http://testserver/dummymodel/list/',
+        self.assertRedirects(response, '/dummymodel/list/',
                              target_status_code=302)  # --> login
 
     def test_unauthorized_update_view_redirects_to_detail(self):
         edit_url = '/dummymodel/edit/%s/' % self.object.pk
         response = self.client.get(edit_url)
-        self.assertRedirects(response, 'http://testserver/dummymodel/%s/' % (self.object.pk),
+        self.assertRedirects(response, '/dummymodel/%s/' % (self.object.pk),
                              target_status_code=302)  # --> login
 
     def test_unauthorized_delete_view_redirects_to_detail(self):
         delete_url = '/dummymodel/delete/%s/' % self.object.pk
         response = self.client.get(delete_url)
-        self.assertRedirects(response, 'http://testserver/dummymodel/%s/' % (self.object.pk),
+        self.assertRedirects(response, '/dummymodel/%s/' % (self.object.pk),
                              target_status_code=302)  # --> login
 
 
