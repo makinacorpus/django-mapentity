@@ -10,7 +10,6 @@ from datetime import datetime
 from io import StringIO
 from unittest.mock import patch
 
-import requests
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, LiveServerTestCase
@@ -324,7 +323,6 @@ class MapEntityLiveTest(LiveServerTestCase):
     model = None
     userfactory = None
     modelfactory = None
-    session = None
 
     def _pre_setup(self):
         # Workaround https://code.djangoproject.com/ticket/10827
@@ -336,16 +334,15 @@ class MapEntityLiveTest(LiveServerTestCase):
 
     def login(self):
         user = self.userfactory(password='booh')
-        self.session = requests.Session()
         login_url = self.url_for('/login/')
-        response = self.session.get(login_url,
-                                    allow_redirects=False)
+        response = self.client.get(login_url,
+                                   allow_redirects=False)
         csrftoken = response.cookies['csrftoken']
-        response = self.session.post(login_url,
-                                     {'username': user.username,
-                                      'password': 'booh',
-                                      'csrfmiddlewaretoken': csrftoken},
-                                     allow_redirects=False)
+        response = self.client.post(login_url,
+                                    {'username': user.username,
+                                     'password': 'booh',
+                                     'csrfmiddlewaretoken': csrftoken},
+                                    allow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
     @patch('mapentity.models.MapEntityMixin.latest_updated')
@@ -360,12 +357,12 @@ class MapEntityLiveTest(LiveServerTestCase):
         latest = self.model.latest_updated()
         geojson_layer_url = self.url_for(self.model.get_layer_url())
 
-        response = self.session.get(geojson_layer_url, allow_redirects=False)
+        response = self.client.get(geojson_layer_url, allow_redirects=False)
         self.assertEqual(response.status_code, 200)
 
         # Without headers to cache
-        lastmodified = response.headers.get('Last-Modified')
-        cachecontrol = response.headers.get('Cache-control')
+        lastmodified = response.get('Last-Modified')
+        cachecontrol = response.get('Cache-control')
         hasher = hashlib.md5()
         hasher.update(response.content)
         md5sum = hasher.digest()
@@ -375,8 +372,8 @@ class MapEntityLiveTest(LiveServerTestCase):
         # Try again, check that nothing changed
         time.sleep(1.1)
         self.assertEqual(latest, self.model.latest_updated())
-        response = self.session.get(geojson_layer_url)
-        self.assertEqual(lastmodified, response.headers.get('Last-Modified'))
+        response = self.client.get(geojson_layer_url)
+        self.assertEqual(lastmodified, response.get('Last-Modified'))
         new_hasher = hashlib.md5()
         new_hasher.update(response.content)
         self.assertEqual(md5sum, new_hasher.digest())
@@ -387,22 +384,20 @@ class MapEntityLiveTest(LiveServerTestCase):
         latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
 
         self.assertNotEqual(latest, self.model.latest_updated())
-        response = self.session.get(geojson_layer_url)
+        response = self.client.get(geojson_layer_url)
         # Check that last modified and content changed
-        self.assertNotEqual(lastmodified, response.headers.get('Last-Modified'))
+        self.assertNotEqual(lastmodified, response.get('Last-Modified'))
         new_hasher = hashlib.md5()
         new_hasher.update(response.content)
         self.assertNotEqual(md5sum, new_hasher.digest())
 
         # Ask again with headers, and expect a 304 status (not changed)
-        lastmodified = response.headers.get('Last-Modified')
-        response = self.session.get(geojson_layer_url,
-                                    headers={'if-modified-since': lastmodified})
+        lastmodified = response.get('Last-Modified')
+        response = self.client.get(geojson_layer_url, HTTP_IF_MODIFIED_SINCE=lastmodified)
         self.assertEqual(response.status_code, 304)
 
         # Ask again with headers in the past, and expect a 200
-        response = self.session.get(geojson_layer_url,
-                                    headers={'if-modified-since': http_date(1000)})
+        response = self.client.get(geojson_layer_url, HTTP_IF_MODIFIED_SINCE=http_date(1000))
         self.assertEqual(response.status_code, 200)
         new_hasher = hashlib.md5()
         new_hasher.update(response.content)
