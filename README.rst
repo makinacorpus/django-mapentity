@@ -4,7 +4,7 @@ MapEntity
 MapEntity is a CRUD interface for geospatial entities built with Django,
 that powers `Geotrek <http://geotrek.fr>`_.
 
-Works with Django 1.9 to 1.11.
+Works with Python 3.5/3.6 and Django 2.0.
 
 .. image:: https://img.shields.io/pypi/v/mapentity.svg
         :target: https://pypi.python.org/pypi/mapentity

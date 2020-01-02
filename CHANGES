@@ -5,9 +5,9 @@ CHANGELOG
 6.0.6.dev0
 ==================
 
-**Bug fixes**
+**Breaking changes**
 
--
+- Upgrade to Django 2.0
 
 
 6.0.5 (2019-12-20)
