@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.management import call_command
+from django.http import HttpResponse
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
@@ -17,11 +18,15 @@ from .test_views import DummyModelFactory, AttachmentFactory
 User = get_user_model()
 
 
+def fake_view(request):
+    return HttpResponse()
+
+
 @override_settings(TEST=False)
 class AutoLoginTest(TestCase):
     def setUp(self):
         middleware.clear_internal_user_cache()
-        self.middleware = AutoLoginMiddleware()
+        self.middleware = AutoLoginMiddleware(fake_view)
         self.request = RequestFactory()
         self.request.user = AnonymousUser()  # usually set by other middleware
         self.request.META = {'REMOTE_ADDR': '6.6.6.6'}
@@ -49,11 +54,11 @@ class AutoLoginTest(TestCase):
     def test_auto_login_do_not_change_current_user(self):
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')
         self.request.user = user
-        self.middleware.process_request(self.request)
+        self.middleware(self.request)
         self.assertEqual(self.request.user, user)
 
     def test_auto_login_do_not_log_whoever(self):
-        self.middleware.process_request(self.request)
+        self.middleware(self.request)
         self.assertTrue(self.request.user.is_anonymous)
 
     def test_auto_login_for_conversion(self):
@@ -61,7 +66,7 @@ class AutoLoginTest(TestCase):
         self.request.META['REMOTE_ADDR'] = '1.2.3.4'
 
         self.assertTrue(self.request.user.is_anonymous)
-        self.middleware.process_request(self.request)
+        self.middleware(self.request)
         self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(self.request.user, self.internal_user)
 
@@ -70,7 +75,7 @@ class AutoLoginTest(TestCase):
         self.request.META['REMOTE_ADDR'] = '4.5.6.7'
 
         self.assertTrue(self.request.user.is_anonymous)
-        self.middleware.process_request(self.request)
+        self.middleware(self.request)
         self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(self.request.user, self.internal_user)
 
@@ -79,7 +84,7 @@ class AutoLoginTest(TestCase):
         self.request.META['REMOTE_HOST'] = 'convertit.makina.com'
 
         self.assertTrue(self.request.user.is_anonymous)
-        self.middleware.process_request(self.request)
+        self.middleware(self.request)
         self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(self.request.user, self.internal_user)
 
@@ -88,6 +93,6 @@ class AutoLoginTest(TestCase):
         self.request.META['REMOTE_HOST'] = 'capture.makina.com'
 
         self.assertTrue(self.request.user.is_anonymous)
-        self.middleware.process_request(self.request)
+        self.middleware(self.request)
         self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(self.request.user, self.internal_user)
