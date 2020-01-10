@@ -2,12 +2,12 @@
 CHANGELOG
 =========
 
-6.0.6.dev0
+6.1.0 (2020-01-10)
 ==================
 
-**Breaking changes**
+**New features**
 
-- Upgrade to Django 2.0
+- Add support of Django 2.0
 
 
 6.0.5 (2019-12-20)
