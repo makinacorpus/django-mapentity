@@ -50,16 +50,12 @@ class MushroomSpot(MapEntityMixin, models.Model):
 class WeatherStation(models.Model):
     geom = models.PointField(null=True, default=None, srid=2154)
 
-    objects = models.GeoManager()
-
 
 class DummyModel(MapEntityMixin, models.Model):
     name = models.CharField(blank=True, default='', max_length=128)
     geom = models.PointField(null=True, default=None)
     date_update = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=False)
-
-    objects = models.GeoManager()
 
     def __str__(self):
         return "{} ({})".format(self.name, self.pk)

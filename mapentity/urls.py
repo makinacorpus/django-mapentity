@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import url, include
+from django.urls import path, re_path, include
 
 from .settings import app_settings
 from .registry import registry
@@ -16,21 +16,21 @@ if _MEDIA_URL.endswith('/'):
     _MEDIA_URL = _MEDIA_URL[:-1]
 
 
+app_name = 'mapentity'
 urlpatterns = [
-    url(r'^map_screenshot/$', map_screenshot, name='map_screenshot'),
-    url(r'^convert/$', Convert.as_view(), name='convert'),
-    url(r'^history/delete/$', history_delete, name='history_delete'),
-    url(r'^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('map_screenshot/', map_screenshot, name='map_screenshot'),
+    path('convert/', Convert.as_view(), name='convert'),
+    path('history/delete/', history_delete, name='history_delete'),
+    path('api/auth/', include('rest_framework.urls')),
     # See default value in app_settings.JS_SETTINGS.
     # Will be overriden, most probably.
-    url(r'^api/settings.json$', JSSettings.as_view(), name='js_settings'),
+    path('api/settings.json', JSSettings.as_view(), name='js_settings'),
 ]
 
 
 if settings.DEBUG or app_settings['SENDFILE_HTTP_HEADER']:
     urlpatterns += [
-        url(r'^%s/(?P<path>paperclip/.*)$' % _MEDIA_URL,
-            serve_attachment),
+        re_path(r'^%s/(?P<path>paperclip/.*)$' % _MEDIA_URL, serve_attachment),
     ]
 
 

@@ -1,7 +1,7 @@
 import os
 from unittest import mock
 
-from django.test import TransactionTestCase
+from django.test import TestCase
 
 from mapentity.registry import app_settings
 from mapentity.helpers import (
@@ -12,7 +12,7 @@ from mapentity.helpers import (
 )
 
 
-class MapEntityCaptureHelpersTest(TransactionTestCase):
+class MapEntityCaptureHelpersTest(TestCase):
 
     def test_capture_url_uses_setting(self):
         orig = app_settings['CAPTURE_SERVER']
@@ -40,7 +40,7 @@ class MapEntityCaptureHelpersTest(TransactionTestCase):
         self.assertIn('%23bazinga', url)
 
 
-class MapEntityConvertHelpersTest(TransactionTestCase):
+class MapEntityConvertHelpersTest(TestCase):
 
     def test_convert_url_uses_setting(self):
         orig = app_settings['CONVERSION_SERVER']
@@ -72,7 +72,7 @@ class MapEntityConvertHelpersTest(TransactionTestCase):
         self.assertIn('from=application/%23bb', url)
 
 
-class UserHasPermTest(TransactionTestCase):
+class UserHasPermTest(TestCase):
     def setUp(self):
         self.user = mock.MagicMock()
 
@@ -83,7 +83,7 @@ class UserHasPermTest(TransactionTestCase):
         app_settings['ANONYMOUS_VIEWS_PERMS'] = orig
 
 
-class DownloadStreamTest(TransactionTestCase):
+class DownloadStreamTest(TestCase):
 
     @mock.patch('mapentity.helpers.requests.get')
     def test_headers_can_be_specified_for_download(self, get_mocked):

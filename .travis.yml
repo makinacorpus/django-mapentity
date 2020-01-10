@@ -4,14 +4,16 @@ language: python
 
 python:
  - 3.5
+ - 3.6
 
 env:
   matrix:
    - DJANGO_VERSION=1.11.*
+   - DJANGO_VERSION=2.0.*
+
 install:
  - sudo apt-get update
  - ./install.sh
- - ./env/bin/pip install --force-reinstall django==$DJANGO_VERSION
  - ./env/bin/pip install coverage
  - pip install flake8
  - ./env/bin/python ./manage.py collectstatic --noinput

@@ -18,7 +18,6 @@ from django.utils.six.moves.urllib.parse import quote
 from django.views import static
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django.views.defaults import page_not_found, permission_denied
 from django.views.generic.base import TemplateView
 from paperclip.settings import get_attachment_permission, get_attachment_model
 
@@ -29,14 +28,6 @@ from ..helpers import capture_image
 from ..settings import app_settings, _MAP_STYLES
 
 logger = logging.getLogger(__name__)
-
-
-def handler403(request, template_name='mapentity/403.html'):
-    return permission_denied(request, template_name)
-
-
-def handler404(request, template_name='mapentity/404.html'):
-    return page_not_found(request, template_name)
 
 
 def serve_attachment(request, path):
@@ -50,7 +41,7 @@ def serve_attachment(request, path):
     if not issubclass(obj._meta.model, mapentity_models.MapEntityMixin):
         raise Http404
     if not obj.is_public():
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             raise PermissionDenied
         if not request.user.has_perm(get_attachment_permission('read_attachment')):
             raise PermissionDenied

@@ -1,7 +1,7 @@
 from unittest import mock
 from django.core.management import call_command
 
-from django.test import TransactionTestCase, RequestFactory
+from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -22,7 +22,7 @@ def add_url_for_obj(obj):
     })
 
 
-class EntityAttachmentTestCase(TransactionTestCase):
+class EntityAttachmentTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
@@ -86,7 +86,7 @@ class EntityAttachmentTestCase(TransactionTestCase):
             '<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk).encode(), html.content)
 
 
-class UploadAttachmentTestCase(TransactionTestCase):
+class UploadAttachmentTestCase(TestCase):
 
     def setUp(self):
         User = get_user_model()

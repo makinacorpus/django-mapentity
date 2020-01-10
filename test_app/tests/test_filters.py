@@ -1,6 +1,6 @@
 from django_filters import CharFilter
 
-from django.test import TransactionTestCase
+from django.test import TestCase
 from django.contrib.gis.geos import GEOSGeometry
 from django.conf import settings
 
@@ -32,7 +32,7 @@ class PolygonTest(object):
         self.assertEqual(2, len(result))
 
 
-class PolygonFilterTest(PolygonTest, TransactionTestCase):
+class PolygonFilterTest(PolygonTest, TestCase):
 
     def setUp(self):
         self.model = WeatherStation
@@ -44,7 +44,7 @@ class PolygonFilterTest(PolygonTest, TransactionTestCase):
         self.filter = PolygonFilter()
 
 
-class PythonPolygonFilterTest(PolygonTest, TransactionTestCase):
+class PythonPolygonFilterTest(PolygonTest, TestCase):
 
     def setUp(self):
         self.model = MushroomSpot
@@ -56,7 +56,7 @@ class PythonPolygonFilterTest(PolygonTest, TransactionTestCase):
         self.filter = PythonPolygonFilter()
 
 
-class PluggableFilterSetTest(TransactionTestCase):
+class PluggableFilterSetTest(TestCase):
 
     def setUp(self):
         self.spot = MushroomSpot.objects.create()

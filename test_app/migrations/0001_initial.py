@@ -28,8 +28,8 @@ class Migration(migrations.Migration):
                 ('starred', models.BooleanField(default=False, help_text='Mark as starred', verbose_name='Starred', db_column='marque')),
                 ('date_insert', models.DateTimeField(auto_now_add=True, verbose_name='Insertion date')),
                 ('date_update', models.DateTimeField(auto_now=True, verbose_name='Update date')),
-                ('content_type', models.ForeignKey(to='contenttypes.ContentType')),
-                ('creator', models.ForeignKey(related_name='created_attachments', verbose_name='Creator', to=settings.AUTH_USER_MODEL, help_text='User that uploaded')),
+                ('content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=django.db.models.deletion.CASCADE)),
+                ('creator', models.ForeignKey(related_name='created_attachments', verbose_name='Creator', to=settings.AUTH_USER_MODEL, help_text='User that uploaded', on_delete=django.db.models.deletion.CASCADE)),
             ],
             options={
                 'ordering': ['-date_insert'],
@@ -89,6 +89,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='attachment',
             name='filetype',
-            field=models.ForeignKey(verbose_name='File type', to='test_app.FileType'),
+            field=models.ForeignKey(verbose_name='File type', on_delete=django.db.models.deletion.CASCADE, to='test_app.FileType'),
         ),
     ]

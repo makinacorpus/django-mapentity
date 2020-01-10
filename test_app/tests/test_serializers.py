@@ -1,7 +1,7 @@
 import os
 from io import StringIO
 
-from django.test import TransactionTestCase
+from django.test import TestCase
 from django.conf import settings
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis import gdal
@@ -15,7 +15,7 @@ from mapentity.serializers.shapefile import shapefile_files
 from ..models import MushroomSpot, Tag
 
 
-class ShapefileSerializer(TransactionTestCase):
+class ShapefileSerializer(TestCase):
     def setUp(self):
         self.point1 = MushroomSpot.objects.create(serialized='SRID=%s;POINT(0 0)' % settings.SRID)
         self.point1.tags.add(Tag.objects.create(label="Tag1"))
@@ -80,7 +80,7 @@ class ShapefileSerializer(TransactionTestCase):
         self.assertEquals(feature['tags'].value, "Tag1,Tag2")
 
 
-class CSVSerializerTests(TransactionTestCase):
+class CSVSerializerTests(TestCase):
     def setUp(self):
         self.point = MushroomSpot.objects.create()
         self.point.tags.add(Tag.objects.create(label="Tag1"))

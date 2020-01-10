@@ -11,7 +11,7 @@ Create your django Project and your main app::
 
    $ django-admin.py startproject museum
    $ cd museum/
-   $ python manage.py startapp main
+   $ python3 manage.py startapp main
 
 
 Edit your Django settings to point to your PostGIS database::
@@ -43,7 +43,7 @@ Add these entries to your ``INSTALLED_APPS``::
     'rest_framework',
     'main',  # the app you just created
 
-Add ``django.middleware.locale.LocaleMiddleware`` to your ``MIDDLEWARE_CLASSES``.
+Add ``django.middleware.locale.LocaleMiddleware`` to your ``MIDDLEWARE`` classes.
 
 Setup your list of supported languages::
 
@@ -65,17 +65,19 @@ Specify a static root::
 Add MapEntity and request context processors to the list of default context
 processors::
 
-    TEMPLATE_CONTEXT_PROCESSORS = (
-        "django.contrib.auth.context_processors.auth",
-        "django.core.context_processors.debug",
-        "django.core.context_processors.i18n",
-        "django.core.context_processors.media",
-        "django.core.context_processors.static",
-        "django.core.context_processors.tz",
-        "django.contrib.messages.context_processors.messages",
-        "django.core.context_processors.request",
-        "mapentity.context_processors.settings",
-    )
+    TEMPLATES = [
+        {
+            …
+            'OPTIONS': {
+                …
+                'context_processors': [
+                    …
+                    "django.core.context_processors.request",
+                    "mapentity.context_processors.settings",
+                ]
+            }
+        }
+    ]
 
 
 Model
@@ -140,13 +142,12 @@ Then glue everything together in your project's ``urls.py``:
 
     urlpatterns = patterns(
         | '',
-        | url(r'^$', 'main.views.home', name='home'),
-        | url(r'^login/$',  'django.contrib.auth.views.login', name='login'),
-        | url(r'^logout/$', 'django.contrib.auth.views.logout', name='logout',),
-        | url(r'', include('mapentity.urls', namespace='mapentity', app_name='mapentity')),
-        | url(r'^paperclip/', include('paperclip.urls')),
-        | url(r'', include('main.urls', namespace='main', app_name='main')),
-        | url(r'^admin/', include(admin.site.urls)),
+        | path('', 'main.views.home', name='home'),
+        | path('login/',  'django.contrib.auth.views.login', name='login'),
+        | path('logout/', 'django.contrib.auth.views.logout', name='logout',),
+        | path('', include('mapentity.urls')),
+        | path('paperclip/', include('paperclip.urls')),
+        | path('admin', admin.site.urls),
     )
 
 

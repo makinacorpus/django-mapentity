@@ -1,16 +1,16 @@
 from django.core.management import call_command
-from django.test import TransactionTestCase
+from django.test import TestCase
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
-from mapentity.middleware import get_internal_user
+from mapentity.middleware import get_internal_user, clear_internal_user_cache
 from mapentity.helpers import user_has_perm
 from mapentity.factories import UserFactory
 
 from ..models import DummyModel
 
 
-class ModelPermissionsTest(TransactionTestCase):
+class ModelPermissionsTest(TestCase):
 
     def setUp(self):
         self.ctype = ContentType.objects.get_for_model(DummyModel)
@@ -39,8 +39,9 @@ class ModelPermissionsTest(TransactionTestCase):
         self.assertTrue(user_has_perm(internal_user, 'test_app.read_dummymodel'))
 
 
-class NavBarPermissionsTest(TransactionTestCase):
+class NavBarPermissionsTest(TestCase):
     def setUp(self):
+        clear_internal_user_cache()
         call_command('update_permissions_mapentity')
 
     def test_navbar_permissions(self):
