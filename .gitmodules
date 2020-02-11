@@ -1,6 +1,3 @@
-[submodule "mapentity/static/mapentity/Leaflet.label"]
-	path = mapentity/static/mapentity/Leaflet.label
-	url = https://github.com/Leaflet/Leaflet.label.git
 [submodule "mapentity/static/mapentity/Leaflet.Spin"]
 	path = mapentity/static/mapentity/Leaflet.Spin
 	url = https://github.com/makinacorpus/Leaflet.Spin.git
