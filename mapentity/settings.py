@@ -100,7 +100,7 @@ _LEAFLET_PLUGINS = OrderedDict([
     }),
     ('leaflet.filelayer', {
         'js': ['mapentity/togeojson/togeojson.js',
-               'mapentity/Leaflet.FileLayer/leaflet.filelayer.js']
+               'mapentity/Leaflet.FileLayer/src/leaflet.filelayer.js']
     }),
     ('leaflet.geometryutil', {
         'js': 'mapentity/Leaflet.GeometryUtil/dist/leaflet.geometryutil.js'
