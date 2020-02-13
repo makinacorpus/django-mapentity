@@ -28,3 +28,6 @@
 [submodule "mapentity/static/mapentity/Leaflet.groupedlayercontrol"]
 	path = mapentity/static/mapentity/Leaflet.groupedlayercontrol
 	url = https://github.com/makinacorpus/Leaflet.groupedlayercontrol.git
+[submodule "mapentity/static/mapentity/Leaflet.GeometryUtil"]
+	path = mapentity/static/mapentity/Leaflet.GeometryUtil
+	url = https://github.com/makinacorpus/Leaflet.GeometryUtil.git
