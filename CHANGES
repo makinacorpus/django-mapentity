@@ -2,12 +2,12 @@
 CHANGELOG
 =========
 
-6.1.1.dev0
+6.1.1 (2020-03-30)
 ==================
 
 **Bug fixes**
 
--
+- Save sorted column by model rather than Django app
 
 
 6.1.0 (2020-01-10)
