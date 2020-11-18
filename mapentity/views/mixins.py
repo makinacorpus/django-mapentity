@@ -1,6 +1,6 @@
 import logging
 
-from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.gis.db.models import GeometryField
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
@@ -61,11 +61,6 @@ class ModelViewMixin(object):
     """
     Add model meta information in context data
     """
-
-    @classmethod
-    def get_entity_kind(self):
-        return None
-
     def get_title(self):
         return None
 
