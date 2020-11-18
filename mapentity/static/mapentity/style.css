@@ -203,10 +203,6 @@ select[multiple] {
 
 /**** Maps ****/
 
-.leaflet-container {
-    min-height: 600px;
-}
-
 .map-fogged .leaflet-container {
      background-color: #000;
 }
@@ -578,8 +574,16 @@ span.filter-info {
     margin-right: 10px;
 }
 
+.details-panel table.blades {
+    table-layout: auto;
+}
+
 .details-panel .table th {
     width: 40%;
+}
+
+.details-panel table.blades th {
+    width: auto;
 }
 
 .details-panel h3 {
@@ -593,6 +597,10 @@ span.filter-info {
 .details-panel th, .details-panel td {
     border-top: 0px;
     border-bottom: 1px solid #DDDDDD;
+}
+
+.details-panel tr.dashed-line td {
+    border-bottom: 1px dashed #DDDDDD;
 }
 
 .details-panel td ul li {
