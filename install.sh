@@ -23,6 +23,8 @@ elif [ "`lsb_release -rs`" = "18.04" ]; then
     ./env/bin/pip install gdal==2.2.4
 elif [ "`lsb_release -rs`" = "19.10" ]; then
     ./env/bin/pip install gdal==2.4.3
+elif [ "`lsb_release -rs`" = "20.04" ]; then
+    ./env/bin/pip install gdal==3.0.4
 else
     echo "WARNING! Failed to compute GDAL version."
 fi

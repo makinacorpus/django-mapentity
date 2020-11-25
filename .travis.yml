@@ -5,10 +5,13 @@ language: python
 python:
  - 3.5
  - 3.6
+ - 3.7
+ - 3.8
 
 env:
   matrix:
    - DJANGO_VERSION=2.2.*
+   - DJANGO_VERSION=3.1.*
 
 install:
  - sudo apt-get update
