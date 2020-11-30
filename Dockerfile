@@ -6,7 +6,7 @@ ENV SERVER_NAME="localhost"
 # If POSTGRES_HOST is empty, entrypoint will set it to the IP of the docker host in the container
 ENV POSTGRES_HOST=""
 ENV POSTGRES_PORT="5432"
-ENV POSTGRES_USER="dbuser"
+ENV POSTGRES_USER="mapentity"
 ENV POSTGRES_PASSWORD="mapentity"
 ENV POSTGRES_DB="mapentitydb"
 ENV REDIS_HOST="redis"
@@ -29,20 +29,21 @@ RUN apt-get update && apt-get install -y \
     python3.8 python3.8-dev gettext \
     # geodjango
     gdal-bin binutils libproj-dev libgdal-dev \
-    # postgresql
-    libpq-dev postgresql-client \
+    # spatialite
+    libsqlite3-mod-spatialite \
     iproute2 \
-    software-properties-common \
-    shared-mime-info \
     fonts-liberation \
-    libssl-dev \
-    libfreetype6-dev \
-    libxml2-dev \
-    libxslt-dev \
     libcairo2 \
+    libffi-dev  \
+    libfreetype6-dev \
+    libgdk-pixbuf2.0-dev \
     libpango1.0-0 \
     libpangocairo-1.0-0 \
-    libgdk-pixbuf2.0-dev \
+    libssl-dev \
+    libxml2-dev \
+    libxslt-dev \
+    shared-mime-info \
+    software-properties-common \
     libffi-dev && \
     apt-get install -y --no-install-recommends postgis && \
     apt-get clean all && rm -rf /var/lib/apt/lists/* && rm -rf /var/cache/apt/*
