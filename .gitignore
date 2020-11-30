@@ -10,3 +10,5 @@
 /media/
 /docs/_build/
 /README.html
+docker-compose.yml
+.env
