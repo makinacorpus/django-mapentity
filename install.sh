@@ -10,7 +10,7 @@ echo "--- Create virtualenv:"
 
 echo "--- Install python requirements:"
 ./env/bin/pip install -U setuptools pip wheel
-./env/bin/pip install Django==${DJANGO_VERSION:-2.2.*}
+./env/bin/pip install Django==${DJANGO_VERSION:-3.1.*}
 ./env/bin/pip install -r requirements.txt
 ./env/bin/pip install -r dev-requirements.txt
 
@@ -21,8 +21,6 @@ if [ "`lsb_release -rs`" = "16.04" ]; then
     ./env/bin/pip install gdal==1.11.2
 elif [ "`lsb_release -rs`" = "18.04" ]; then
     ./env/bin/pip install gdal==2.2.4
-elif [ "`lsb_release -rs`" = "19.10" ]; then
-    ./env/bin/pip install gdal==2.4.3
 elif [ "`lsb_release -rs`" = "20.04" ]; then
     ./env/bin/pip install gdal==3.0.4
 else
