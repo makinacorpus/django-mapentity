@@ -12,7 +12,7 @@ if [ "$ENV" = "dev" ]; then
         export ARG CPLUS_INCLUDE_PATH=/usr/include/gdal
         export ARG C_INCLUDE_PATH=/usr/include/gdal
         python3 -m venv env
-        env/bin/pip install -U setuptools==45.2.0
+        env/bin/pip install -U setuptools==50.3.2
         env/bin/pip install --no-cache-dir -r requirements.txt
     fi
 fi

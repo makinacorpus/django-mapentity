@@ -20,12 +20,17 @@ WORKDIR /app/src
 
 # Install postgis because raster2pgsl is required by manage.py loaddem
 RUN apt-get update && apt-get install -y \
-    unzip \
-    sudo \
-    less \
-    nano \
-    curl \
-    git \
+    # std libs
+    git less nano curl \
+    ca-certificates \
+    wget build-essential\
+    unzip sudo \
+    # python basic libs
+    python3.8 python3.8-dev gettext \
+    # geodjango
+    gdal-bin binutils libproj-dev libgdal-dev \
+    # postgresql
+    libpq-dev postgresql-client \
     iproute2 \
     software-properties-common \
     shared-mime-info \
@@ -45,7 +50,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt requirements.txt
 COPY dev-requirements.txt dev-requirements.txt
 RUN python3 -m venv env
-RUN env/bin/pip install -U setuptools==45.2.0
+RUN env/bin/pip install -U setuptools==50.3.2
 RUN env/bin/pip install --no-cache-dir -r requirements.txt
 RUN env/bin/pip install --no-cache-dir -r dev-requirements.txt
 
