@@ -11,3 +11,4 @@
 /docs/_build/
 /README.html
 .env
+secret_key
