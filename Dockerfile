@@ -29,6 +29,6 @@ COPY . /app/src
 WORKDIR /app/src
 
 # Install dev requirements
-RUN /app/env/bin/pip3 install --no-cache-dir -e . -U
+RUN /app/env/bin/pip3 install --no-cache-dir -e .[dev] -U
 
 ENTRYPOINT ["/bin/sh", "-e", "/app/src/docker/entrypoint.sh"]

@@ -13,8 +13,14 @@ env:
    - DJANGO_VERSION=3.1.*
 
 install:
-- sudo apt-get -y install libproj-dev binutils gdal-bin libgdal-dev
-- pip install -e .[dev]
+- >
+  sudo apt-get -y install libproj-dev binutils gdal-bin libgdal-dev 
+  libsqlite3-mod-spatialite
+  iproute2 fonts-liberation
+  libcairo2 libffi-dev libfreetype6-dev libgdk-pixbuf2.0-dev
+  libpango1.0-0 libpangocairo-1.0-0 libssl-dev libxml2-dev libxslt-dev
+  software-properties-common libffi-dev
+- pip install .[dev]
 - pip install codecov
 - pip install flake8
 - ./env/bin/python ./manage.py collectstatic --noinput

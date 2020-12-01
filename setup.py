@@ -1,8 +1,17 @@
 import os
 from setuptools import setup, find_packages
 
+HERE = os.path.abspath(os.path.dirname(__file__))
 
-here = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(HERE, 'README.rst')).read()
+CHANGES = open(os.path.join(HERE, 'CHANGES')).read()
+
+test_require=[
+    'factory-boy',
+    'freezegun',
+    'sphinx',
+    'flake8',
+]
 
 setup(
     name='mapentity',
@@ -12,10 +21,7 @@ setup(
     url='https://github.com/makinacorpus/django-mapentity',
     download_url="http://pypi.python.org/pypi/mapentity/",
     description="Generic CRUD with maps",
-    long_description=(
-        open(os.path.join(here, 'README.rst')).read() + '\n\n' +
-        open(os.path.join(here, 'CHANGES')).read()
-    ),
+    long_description=README + '\n\n' + CHANGES,
     license='BSD, see LICENSE file.',
     classifiers=[
         'Topic :: Utilities',
@@ -55,10 +61,13 @@ setup(
         'requests[security]',
         'WeasyPrint',
     ],
-    tests_require=[
-        'factory_boy',
-        'sphinx',
-    ],
+    tests_require=test_require,
+    extras_require={
+        'dev': test_require + [
+            'django-debug-toolbar',
+            'ipython',
+        ]
+    },
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
