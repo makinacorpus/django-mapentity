@@ -1,4 +1,4 @@
-ARG BASE_IMAGE_TAG=focal-3.8
+ARG BASE_IMAGE_TAG=bionic-3.6
 FROM makinacorpus/geodjango:${BASE_IMAGE_TAG}
 
 ENV ENV=prod
