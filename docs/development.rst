@@ -3,7 +3,8 @@ Development
 
 Follow installation procedure, and then install development packages::
 
-    $ pip install -r dev-requirements.txt
+    $ python3 -m venv env && source ./env/bin/activate
+    $ pip install -e .[dev] -U
 
 
 Release
