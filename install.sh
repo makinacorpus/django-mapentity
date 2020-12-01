@@ -1,12 +1,12 @@
 #!/bin/bash
 
 echo "--- Install Ubuntu packages:"
-sudo apt -y install python-virtualenv build-essential python3-dev libgdal-dev
+sudo apt -y install build-essential python3-dev libgdal-dev
 sudo apt -y install libsqlite3-mod-spatialite
 sudo apt -y install libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
 
 echo "--- Create virtualenv:"
-[ -f env/bin/python3 ] || virtualenv -p python3 env
+[ -f env/bin/python3 ] || venv -p python3 env
 
 echo "--- Install python requirements:"
 ./env/bin/pip install -U setuptools pip wheel
