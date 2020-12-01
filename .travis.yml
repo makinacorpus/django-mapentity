@@ -1,12 +1,11 @@
 sudo: required
-dist: focal
+dist: bionic
 language: python
 
 python:
- - 3.5
- - 3.6
- - 3.7
- - 3.8
+- 3.6
+- 3.7
+- 3.8
 
 env:
   matrix:
@@ -14,20 +13,21 @@ env:
    - DJANGO_VERSION=3.1.*
 
 install:
- - sudo apt-get update
- - ./install.sh
- - ./env/bin/pip install coverage
- - pip install flake8
- - ./env/bin/python ./manage.py collectstatic --noinput
+- sudo apt-get -y install libproj-dev binutils gdal-bin libgdal-dev
+- pip install -e .[dev]
+- pip install codecov
+- pip install flake8
+- ./env/bin/python ./manage.py collectstatic --noinput
 
 before_script:
- - flake8
- - ./env/bin/pip freeze
+- flake8
+
+after_failure:
+- pip freeze
 
 script:
- - ./env/bin/python ./manage.py test
- - ./env/bin/coverage run --include="mapentity/*" manage.py test
+- coverage run ./manage.py test
+- coverage run --include="mapentity/*" manage.py test
 
 after_success:
- - pip install coveralls
- - coveralls
+  - codecov

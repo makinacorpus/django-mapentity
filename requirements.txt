@@ -5,9 +5,11 @@
 #    pip-compile
 #
 appy-python-3==2020.11.24
+asgiref==3.3.1
+attrs==20.3.0
 beautifulsoup4==4.9.0
 cairocffi==1.1.0          # via cairosvg, weasyprint
-cairosvg==2.4.2           # via weasyprint
+CairoSVG==2.4.2           # via weasyprint
 certifi==2019.11.28        # via requests
 cffi==1.14.3              # via cairocffi, weasyprint
 chardet==3.0.4            # via requests
@@ -28,10 +30,13 @@ django-weasyprint==0.5.5
 djangorestframework==3.12.2
 djangorestframework-gis==0.16
 easy-thumbnails==2.7
+Fiona==1.8.18
 gpxpy==1.4.0
 html5lib==1.0.1           # via weasyprint
 idna==2.8                 # via requests
 lxml==4.2.1
+munch==2.5.0
+netifaces==0.10.9
 paperclip==2.2.6
 Pillow==7.1.2  --no-binary Pillow             # via cairosvg, easy-thumbnails
 pycparser==2.19           # via cffi
@@ -46,3 +51,4 @@ tinycss2==1.0.2           # via cairosvg, cssselect2, weasyprint
 urllib3==1.25.8           # via requests
 WeasyPrint==52.1
 webencodings==0.5.1       # via html5lib, tinycss2
+wheel

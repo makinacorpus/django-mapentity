@@ -6,19 +6,35 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='mapentity',
-    version='6.1.1.dev0',
+    version='7.0.0.dev0',
     author='Makina Corpus',
     author_email='geobi@makina-corpus.com',
     url='https://github.com/makinacorpus/django-mapentity',
     download_url="http://pypi.python.org/pypi/mapentity/",
     description="Generic CRUD with maps",
-    long_description=(open(os.path.join(here, 'README.rst')).read() + '\n\n' +
-                      open(os.path.join(here, 'CHANGES')).read()),
+    long_description=(
+        open(os.path.join(here, 'README.rst')).read() + '\n\n' +
+        open(os.path.join(here, 'CHANGES')).read()
+    ),
     license='BSD, see LICENSE file.',
+    classifiers=[
+        'Topic :: Utilities',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Intended Audience :: Developers',
+        'Environment :: Web Environment',
+        'Framework :: Django',
+        'Development Status :: 5 - Production/Stable',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+    ],
     install_requires=[
+        'Django>=2.2',
+        'djangorestframework',
+        'djangorestframework-gis',
         'BeautifulSoup4',
-        'Django',
-        # 'GDAL',  # Depends on installed libgdal version
         'gpxpy',
         'django-appypod',
         'appy-python-3',
@@ -31,12 +47,12 @@ setup(
         'django-modeltranslation',
         'django-tinymce',
         'django-weasyprint',
-        'djangorestframework',
-        'djangorestframework-gis',
         'easy-thumbnails',
+        'Fiona',
         'lxml',
+        'netifaces',
         'paperclip',
-        'requests',
+        'requests[security]',
         'WeasyPrint',
     ],
     tests_require=[
@@ -46,12 +62,4 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    classifiers=['Topic :: Utilities',
-                 'Natural Language :: English',
-                 'Operating System :: OS Independent',
-                 'Intended Audience :: Developers',
-                 'Environment :: Web Environment',
-                 'Framework :: Django',
-                 'Development Status :: 5 - Production/Stable',
-                 'Programming Language :: Python :: 3.5'],
 )

@@ -10,3 +10,4 @@
 /media/
 /docs/_build/
 /README.html
+.env

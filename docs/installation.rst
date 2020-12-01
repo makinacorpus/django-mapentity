@@ -4,7 +4,7 @@ Installation
 Quickstart
 ----------
 
-Run `./install.sh` on Ubuntu 14.04 Trusty LTS, 16.04 Xenial LTS or 17.10 Artful.
+Run `./install.sh` on Ubuntu 16.04 Xenial LTS or 17.10 Artful.
 
 
 Manual installation With a PostGIS database
