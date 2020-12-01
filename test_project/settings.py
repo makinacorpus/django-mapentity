@@ -62,7 +62,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'test_project.urls'
-ROOT_URL = ""
 
 TEMPLATES = [
     {
@@ -166,8 +165,6 @@ TEST = True
 TITLE = "Test project"
 
 MAPENTITY_CONFIG = {
-    'TITLE': TITLE,
-    'TEMP_DIR': '/tmp',
     'CONVERSION_SERVER': 'http://{}:{}'.format(os.getenv('CONVERSION_HOST', 'convertit'),
                                                os.getenv('CONVERSION_PORT', '6543')),
     'CAPTURE_SERVER': 'http://{}:{}'.format(os.getenv('CAPTURE_HOST', 'screamshotter'),
