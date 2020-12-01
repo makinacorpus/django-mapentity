@@ -1,13 +1,8 @@
-ARG BASE_IMAGE_TAG=bionic-3.6
-FROM makinacorpus/geodjango:${BASE_IMAGE_TAG}
+FROM makinacorpus/geodjango:bionic-3.6
 
-ENV ENV=prod
 ENV SERVER_NAME="localhost"
 ENV CONVERSION_HOST="convertit"
 ENV CAPTURE_HOST="screamshotter"
-
-ARG CPLUS_INCLUDE_PATH=/usr/include/gdal
-ARG C_INCLUDE_PATH=/usr/include/gdal
 
 RUN apt-get update && apt-get install -y \
     # spatialite
@@ -29,13 +24,11 @@ RUN apt-get update && apt-get install -y \
 
 RUN python3 -m venv /app/env
 RUN /app/env/bin/pip install --no-cache-dir pip setuptools wheel -U
-RUN . /app/env/bin/activate
 
 COPY . /app/src
 WORKDIR /app/src
 
 # Install dev requirements
 RUN /app/env/bin/pip3 install --no-cache-dir -e . -U
-RUN . /app/env/bin/activate
 
 ENTRYPOINT ["/bin/sh", "-e", "/app/src/docker/entrypoint.sh"]
