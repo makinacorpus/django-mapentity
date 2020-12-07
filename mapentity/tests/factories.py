@@ -1,7 +1,35 @@
-from factory import post_generation
+import factory
 from factory.django import DjangoModelFactory
-
+from django.core.files.uploadedfile import SimpleUploadedFile
 from test_app import models as test_models
+from mapentity.factories import UserFactory
+
+
+def get_dummy_uploaded_file(name='file.pdf'):
+    return SimpleUploadedFile(name, b'*' * 300, content_type='application/pdf')
+
+
+class FileTypeFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = test_models.FileType
+
+
+class AttachmentFactory(DjangoModelFactory):
+    """
+    Create an attachment. You must provide an 'obj' keywords,
+    the object (saved in db) to which the attachment will be bound.
+    """
+
+    class Meta:
+        model = test_models.Attachment
+
+    attachment_file = get_dummy_uploaded_file()
+    filetype = factory.SubFactory(FileTypeFactory)
+
+    creator = factory.SubFactory(UserFactory)
+    title = factory.Sequence(u"Title {0}".format)
+    legend = factory.Sequence(u"Legend {0}".format)
 
 
 class DummyModelFactory(DjangoModelFactory):
@@ -27,7 +55,7 @@ class MushroomSpotFactory(DjangoModelFactory):
     name = "Mushroom spot"
     geom = 'POINT(0 0)'
 
-    @post_generation
+    @factory.post_generation
     def tags(obj, create, extracted=None, **kwargs):
         if create:
             obj.tags.add(TagFactory.create().pk)
