@@ -49,7 +49,7 @@ setup(
         'django-embed-video',
         'django-filter',
         'django-geojson',
-        'django-leaflet',
+        'django-leaflet@https://github.com/GeotrekCE/django-leaflet/archive/0.19.0+geotrek5.tar.gz',
         'django-modeltranslation',
         'django-tinymce',
         'django-weasyprint',
