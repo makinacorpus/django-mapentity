@@ -11,8 +11,8 @@ from django.urls import reverse
 from paperclip.settings import get_attachment_model, get_filetype_model
 from mapentity.views.generic import MapEntityDetail
 
+from mapentity.tests.factories import DummyModelFactory
 from test_app.models import DummyModel
-from .factories import DummyModelFactory
 
 
 def add_url_for_obj(obj):

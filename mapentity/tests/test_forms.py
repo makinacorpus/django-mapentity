@@ -1,20 +1,20 @@
 from django.test import TestCase
 
 from mapentity.forms import MapEntityForm
-from geotrek.tourism.models import TouristicEvent
-from geotrek.tourism.factories import TouristicEventFactory
+from mapentity.tests.factories import DummyModelFactory
+from test_app.models import DummyModel
 
 
 class DummyForm(MapEntityForm):
     class Meta:
-        model = TouristicEvent
+        model = DummyModel
         fields = '__all__'
 
 
 class MapEntityFormTest(TestCase):
 
     def test_can_delete_actions(self):
-        sample_object = TouristicEventFactory.create()
+        sample_object = DummyModelFactory.create()
         delete_url = sample_object.get_delete_url()
         form = DummyForm(instance=sample_object)
         self.assertTrue(form.can_delete)
