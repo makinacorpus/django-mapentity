@@ -9,9 +9,8 @@ from mapentity.models import LogEntry
 from mapentity.registry import app_settings
 from mapentity.views.generic import log_action
 
-from geotrek.authent.factories import StructureFactory
-from geotrek.tourism.factories import TouristicEventFactory
-from geotrek.tourism.models import TouristicEvent
+from mapentity.tests.factories import DummyModelFactory
+from test_app.models import DummyModel
 
 
 User = get_user_model()
@@ -20,31 +19,28 @@ User = get_user_model()
 class TestActionsHistory(TestCase):
     def setUp(self):
         self.client = Client()
-        self.structure = StructureFactory.create()
         self.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
         self.client.login(username='test', password='booh')
 
     def test_create_view_logs_addition(self):
-        self.client.post('/touristicevent/add/', data={
-            'structure': self.structure.pk,
-            'name_en': 'test',
+        self.client.post('/dummymodel/add/', data={
+            'name': 'test',
             'geom': '{"type": "Point", "coordinates": [0, 0]}',
-            'model': 'touristicevent',
+            'model': 'dummymodel',
         })
         self.assertEqual(LogEntry.objects.count(), 1)
         entry = LogEntry.objects.get()
-        obj = TouristicEvent.objects.get()
+        obj = DummyModel.objects.get()
         self.assertEqual(entry.get_edited_object(), obj)
         self.assertEqual(entry.action_flag, ADDITION)
         self.assertEqual(entry.user, self.user)
 
     def test_update_view_logs_change(self):
-        obj = TouristicEventFactory.create()
-        self.client.post('/touristicevent/edit/{0}/'.format(obj.pk), data={
-            'structure': StructureFactory.create().pk,
-            'name_en': 'test',
+        obj = DummyModelFactory.create()
+        self.client.post('/dummymodel/edit/{0}/'.format(obj.pk), data={
+            'name': 'test',
             'geom': '{"type": "Point", "coordinates": [0, 0]}',
-            'model': 'touristicevent',
+            'model': 'dummymodel',
         })
         self.assertEqual(LogEntry.objects.count(), 1)
         entry = LogEntry.objects.get()
@@ -53,8 +49,8 @@ class TestActionsHistory(TestCase):
         self.assertEqual(entry.user, self.user)
 
     def test_delete_view_logs_deletion(self):
-        obj = TouristicEventFactory.create()
-        self.client.post('/touristicevent/delete/{0}/'.format(obj.pk))
+        obj = DummyModelFactory.create()
+        self.client.post('/dummymodel/delete/{0}/'.format(obj.pk))
         self.assertEqual(LogEntry.objects.count(), 1)
         entry = LogEntry.objects.get()
         self.assertEqual(entry.object_id, str(obj.pk))
@@ -63,11 +59,10 @@ class TestActionsHistory(TestCase):
 
     def test_anonymous_action(self):
         self.client.logout()
-        self.client.post('/touristicevent/add/', data={
-            'structure': StructureFactory.create().pk,
-            'name_en': 'test',
+        self.client.post('/dummymodel/add/', data={
+            'name': 'test',
             'geom': '{"type": "Point", "coordinates": [0, 0]}',
-            'model': 'touristicevent',
+            'model': 'dummymodel',
         })
         self.assertEqual(LogEntry.objects.count(), 0)
 
@@ -77,7 +72,7 @@ class TestCreator(TestCase):
         self.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
         self.request = HttpRequest()
         self.request.user = self.user
-        self.obj = TouristicEventFactory.create()
+        self.obj = DummyModelFactory.create()
 
     def test_no_creator(self):
         """No crash if no creator in history table"""
