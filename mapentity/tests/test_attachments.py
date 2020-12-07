@@ -11,8 +11,8 @@ from django.urls import reverse
 from paperclip.settings import get_attachment_model, get_filetype_model
 from mapentity.views.generic import MapEntityDetail
 
-from geotrek.tourism.models import TouristicEvent
-from geotrek.tourism.factories import TouristicEventFactory
+from test_app.models import DummyModel
+from .factories import DummyModelFactory
 
 
 def add_url_for_obj(obj):
@@ -31,8 +31,8 @@ class EntityAttachmentTestCase(TestCase):
         def user_perms(p):
             return {'paperclip.add_attachment': False}.get(p, True)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
-        self.object = TouristicEventFactory.create()
-        call_command('update_geotrek_permissions', verbosity=0)
+        self.object = DummyModelFactory.create()
+        #call_command('update_geotrek_permissions', verbosity=0)
 
     def createRequest(self):
         request = RequestFactory().get('/dummy')
@@ -57,10 +57,10 @@ class EntityAttachmentTestCase(TestCase):
 
     def test_list_attachments_in_details(self):
         self.createAttachment(self.object)
-        self.user.user_permissions.add(Permission.objects.get(codename='read_touristicevent'))
+        self.user.user_permissions.add(Permission.objects.get(codename='read_dummymodel'))
         self.user.user_permissions.add(Permission.objects.get(codename='read_attachment'))
         self.client.login(username='howard', password='booh')
-        response = self.client.get('/touristicevent/{pk}/'.format(pk=self.object.pk))
+        response = self.client.get('/dummymodel/{pk}/'.format(pk=self.object.pk))
 
         html = response.content
         self.assertTemplateUsed(response, template_name='paperclip/attachment_list.html')
@@ -77,21 +77,21 @@ class EntityAttachmentTestCase(TestCase):
 
     def test_upload_form_in_details_if_perms(self):
         self.user.has_perm = mock.MagicMock(return_value=True)
-        view = MapEntityDetail.as_view(model=TouristicEvent,
+        view = MapEntityDetail.as_view(model=DummyModel,
                                        template_name="mapentity/mapentity_detail.html")
         request = self.createRequest()
         response = view(request, pk=self.object.pk)
         html = response.render()
         self.assertIn(b"Submit attachment", html.content)
         self.assertIn(
-            '<form  action="/paperclip/add-for/tourism/touristicevent/{}/'.format(self.object.pk).encode(), html.content)
+            '<form  action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk).encode(), html.content)
 
 
 class UploadAttachmentTestCase(TestCase):
 
     def setUp(self):
         User = get_user_model()
-        self.object = TouristicEventFactory.create()
+        self.object = DummyModelFactory.create()
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')
         user.is_superuser = True
         user.save()
@@ -119,7 +119,7 @@ class UploadAttachmentTestCase(TestCase):
                                     data=self.attachmentPostData())
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'],
-                         '/touristicevent/%s/' % self.object.pk)
+                         '/dummymodel/%s/' % self.object.pk)
 
     def test_upload_creates_attachment(self):
         data = self.attachmentPostData()
