@@ -22,11 +22,10 @@ install:
   software-properties-common libffi-dev
 - pip install .[dev]
 - pip install codecov
-- pip install flake8
-- ./env/bin/python ./manage.py collectstatic --noinput
-
-before_script:
-- flake8
+- if [[ $DJANGO_VERSION == dev ]]; then
+  pip install -e git+https://github.com/django/django@master#egg=django;
+  else
+  pip install Django==$DJANGO_VERSION -U; fi
 
 after_failure:
 - pip freeze
@@ -37,3 +36,16 @@ script:
 
 after_success:
   - codecov
+
+jobs:
+  allow_failures:
+    - env: DJANGO_VERSION=dev
+
+  include:
+  - stage: lint
+    install:
+    - pip install flake8
+    before_script: skip
+    script:
+    - flake8 geostore test_geostore
+    after_success: skip
