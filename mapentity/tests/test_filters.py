@@ -6,8 +6,8 @@ from django.conf import settings
 
 from mapentity.settings import API_SRID
 from mapentity.filters import PythonPolygonFilter, MapEntityFilterSet
-from geotrek.diving.factories import DiveFactory
-from geotrek.diving.models import Dive
+from mapentity.tests.factories import MushroomSpotFactory
+from test_app.models import MushroomSpot
 
 
 class PolygonTest(object):
@@ -51,11 +51,11 @@ class PolygonFilterTest(PolygonTest, TestCase):
 class PythonPolygonFilterTest(PolygonTest, TestCase):
 
     def setUp(self):
-        self.model = Dive
-        self.none = DiveFactory.create(geom="POINT EMPTY")
+        self.model = MushroomSpot
+        self.none = MushroomSpotFactory.create(geom="POINT EMPTY")
 
-        self.basic = DiveFactory.create(geom='SRID=%s;LINESTRING(0 0, 10 0)' % settings.SRID)
-        self.outside = DiveFactory.create(geom='SRID=%s;LINESTRING(0 10, 10 10)' % settings.SRID)
+        self.basic = MushroomSpotFactory.create(geom='SRID=%s;LINESTRING(0 0, 10 0)' % settings.SRID)
+        self.outside = MushroomSpotFactory.create(geom='SRID=%s;LINESTRING(0 10, 10 10)' % settings.SRID)
 
         self.filter = PythonPolygonFilter()
 
@@ -63,14 +63,14 @@ class PythonPolygonFilterTest(PolygonTest, TestCase):
 class PluggableFilterSetTest(TestCase):
 
     def setUp(self):
-        self.spot = DiveFactory.create(name="Empty")
+        self.spot = MushroomSpotFactory.create(name="Empty")
 
-        class DiveFilterSet(MapEntityFilterSet):
+        class MushroomSpotFilterSet(MapEntityFilterSet):
             class Meta:
-                model = Dive
+                model = MushroomSpot
                 fields = ()
 
-        self.filterset_class = DiveFilterSet
+        self.filterset_class = MushroomSpotFilterSet
 
     def test_empty_filter(self):
         filterset = self.filterset_class({'name': 'Foo'})
