@@ -20,4 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('test/document/dummymodel-<int:pk>.odt', DummyDocumentOdt.as_view(), name="dummymodel_odt"),
     path('test/document/dummymodel-<int:pk>.pdf', DummyDocumentWeasyprint.as_view(), name="dummymodel_pdf"),
+    path('i18n/', include('django.conf.urls.i18n')),
 ]
