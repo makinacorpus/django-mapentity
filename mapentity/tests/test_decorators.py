@@ -9,7 +9,7 @@ from mapentity.factories import SuperUserFactory
 from mapentity.registry import app_settings
 from mapentity.decorators import view_permission_required
 
-from geotrek.tourism.factories import TouristicEventFactory
+from mapentity.tests.factories import DummyModelFactory
 
 
 class ViewPermissionRequiredTestCase(TestCase):
@@ -76,10 +76,10 @@ class ViewPermissionRequiredTestCase(TestCase):
     def test_it_redirects_to_the_specified_view(self):
         self.request.user.has_perm.return_value = False
         response = self.run_decorated_view(raise_exception=False,
-                                           login_url='tourism:touristicevent_list')
+                                           login_url='test_app:dummymodel_list')
         self.assertEqual(response.status_code, 302)
-        touristiceventlist_url = reverse('tourism:touristicevent_list')
-        self.assertTrue(touristiceventlist_url in response['Location'])
+        dummymodellist_url = reverse('test_app:dummymodel_list')
+        self.assertTrue(dummymodellist_url in response['Location'])
 
 
 class HistoryTest(TestCase):
@@ -87,8 +87,8 @@ class HistoryTest(TestCase):
         app_settings['HISTORY_ITEMS_MAX'] = 0
         SuperUserFactory.create(username='Superuser', password='booh')
         self.client.login(username='Superuser', password='booh')
-        self.object = TouristicEventFactory.create()
-        self.client.get('/touristicevent/{pk}/'.format(pk=self.object.pk))
+        self.object = DummyModelFactory.create()
+        self.client.get('/dummymodel/{pk}/'.format(pk=self.object.pk))
         session = self.client.session
         self.assertEqual(session['history'], [])
         app_settings['HISTORY_ITEMS_MAX'] = 7
@@ -96,7 +96,7 @@ class HistoryTest(TestCase):
     def test_history_items(self):
         SuperUserFactory.create(username='Superuser', password='booh')
         self.client.login(username='Superuser', password='booh')
-        self.object = TouristicEventFactory.create()
-        self.client.get('/touristicevent/{pk}/'.format(pk=self.object.pk))
+        self.object = DummyModelFactory.create()
+        self.client.get('/dummymodel/{pk}/'.format(pk=self.object.pk))
         session = self.client.session
         self.assertNotEqual(session['history'], [])
