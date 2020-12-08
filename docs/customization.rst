@@ -133,6 +133,22 @@ To display information accordingly to your Museum model, you can create a templa
 
 You can override the detail view template for your Museum model by creating a ``museum_detail.html`` in the same directory as before.
 
+Pictures
+--------
+
+Create 3 pictures for each models :
+
+museum.png (48x48 px)
+museum-16.png (16x16 px)
+museum-96.png (96x96 px)
+
+Add them in a static sub-directory
+
+Add a logo for the login page :
+
+logo-login.png
+
+
 Exports
 ---------
 

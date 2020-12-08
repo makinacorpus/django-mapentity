@@ -148,7 +148,10 @@ Then glue everything together in your project's ``urls.py``:
         | path('', include('mapentity.urls')),
         | path('paperclip/', include('paperclip.urls')),
         | path('admin', admin.site.urls),
+        | path('i18n/', include('django.conf.urls.i18n')),
     )
+
+Do not forget to add rediection to login page with views and/or settings.
 
 
 Initialize the database
