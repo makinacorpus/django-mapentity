@@ -102,12 +102,14 @@ $(window).on('entity:map', function (e, data) {
     }
     var baseLayers = {};
     var overlaysLayers = {};
-    for (var l in map.layerscontrol._layers) {
-        var layer = map.layerscontrol._layers[l];
-        if (layer.overlay)
-            overlaysLayers[layer.name] = layer.layer;
-        else
-            baseLayers[layer.name] = layer.layer;
+    if (map.layerscontrol) {
+        for (var l in map.layerscontrol._layers) {
+            var layer = map.layerscontrol._layers[l];
+            if (layer.overlay)
+                overlaysLayers[layer.name] = layer.layer;
+            else
+                baseLayers[layer.name] = layer.layer;
+        }
     }
     var layerscontrol = L.control.groupedLayers(baseLayers, {'': overlaysLayers});
     map.layerscontrol = layerscontrol.addTo(map);
