@@ -30,7 +30,7 @@ class ZipShapeSerializer(Serializer):
     def __init__(self, *args, **kwargs):
         super(ZipShapeSerializer, self).__init__(*args, **kwargs)
         self.path_directory = os.path.join(app_settings['TEMP_DIR'], str(uuid.uuid4()))
-        os.mkdir(self.path_directory)
+        os.makedirs(self.path_directory)
 
     def serialize(self, queryset, **options):
         columns = options.pop('fields')
