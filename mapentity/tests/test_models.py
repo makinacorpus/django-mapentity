@@ -5,14 +5,14 @@ from django.utils.formats import localize
 
 from mapentity.models import LogEntry, ADDITION, DELETION
 from mapentity.factories import UserFactory
-from geotrek.core.factories import PathFactory
+from mapentity.tests.factories import DummyModelFactory
 
 import os
 
 
 class ModelsTest(TestCase):
     def test_delete_with_attachment(self):
-        path = PathFactory.create()
+        path = DummyModelFactory.create()
         with open(os.path.join(settings.MEDIA_ROOT, 'maps', 'path-%s.png' % path.pk), mode='w'):
             path.delete()
         self.assertFalse(os.path.exists(os.path.join(settings.MEDIA_ROOT, 'maps', 'path-%s.png' % path.pk)))
@@ -21,7 +21,7 @@ class ModelsTest(TestCase):
 class LogEntryTest(TestCase):
     def test_logentry(self):
         user = UserFactory.create()
-        object = PathFactory.create()
+        object = DummyModelFactory.create()
         logentry = LogEntry.objects.log_action(
             user_id=user.pk,
             content_type_id=object.get_content_type_id(),
@@ -35,7 +35,7 @@ class LogEntryTest(TestCase):
 
     def test_logentry_deleted(self):
         user = UserFactory.create()
-        object = PathFactory.create()
+        object = DummyModelFactory.create()
         logentry = LogEntry.objects.log_action(
             user_id=user.pk,
             content_type_id=object.get_content_type_id(),

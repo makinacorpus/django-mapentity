@@ -6,7 +6,7 @@ from django.template.exceptions import TemplateSyntaxError
 from django.utils import translation
 from django.utils.timezone import make_aware, utc
 
-from geotrek.tourism.factories import TouristicEventFactory
+from mapentity.tests.factories import DummyModelFactory
 
 from datetime import datetime, timedelta
 import json
@@ -35,7 +35,7 @@ class ValueListTest(TestCase):
         self.assertEqual(out.strip(), """<ul>\n    <li>blah</li>\n    </ul>""")
 
     def test_can_specify_field_to_be_used(self):
-        obj = TouristicEventFactory.create(name='blah')
+        obj = DummyModelFactory.create(name='blah')
         out = Template(
             '{% load mapentity_tags %}'
             '{% valuelist items field="name" %}'
@@ -107,7 +107,7 @@ class LatLngBoundsTest(TestCase):
         self.assertEqual('null', out)
 
     def test_latlngbound_object(self):
-        object_event = TouristicEventFactory.create()
+        object_event = DummyModelFactory.create()
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object|latlngbounds }}'
@@ -121,7 +121,7 @@ class LatLngBoundsTest(TestCase):
 
 class FieldVerboseNameTest(TestCase):
     def test_field_no_field_but_verbose_name_field(self):
-        object_event = TouristicEventFactory.create()
+        object_event = DummyModelFactory.create()
         setattr(object_event, 'do_not_exist_verbose_name', "test")
         template = Template(
             '{% load mapentity_tags %}'
@@ -130,7 +130,7 @@ class FieldVerboseNameTest(TestCase):
         self.assertEqual(template, "test")
 
     def test_field_verbose_name_field_does_not_exist(self):
-        object_event = TouristicEventFactory.create()
+        object_event = DummyModelFactory.create()
         with self.assertRaisesRegex(FieldDoesNotExist, "TouristicEvent has no field named 'do_not_exist'"):
             Template(
                 '{% load mapentity_tags %}'
@@ -168,7 +168,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_years(self):
         date = make_aware(datetime.now() - timedelta(days=800), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -177,7 +177,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_year(self):
         date = make_aware(datetime.now() - timedelta(days=366), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -186,7 +186,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_weeks(self):
         date = make_aware(datetime.now() - timedelta(days=15), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -195,7 +195,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_week(self):
         date = make_aware(datetime.now() - timedelta(days=13), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -204,7 +204,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_days(self):
         date = make_aware(datetime.now() - timedelta(days=3), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -213,7 +213,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_day(self):
         date = make_aware(datetime.now() - timedelta(days=1), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -222,7 +222,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_hours(self):
         date = make_aware(datetime.now() - timedelta(hours=4), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -231,7 +231,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_hour(self):
         date = make_aware(datetime.now() - timedelta(hours=1), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -240,7 +240,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_minutes(self):
         date = make_aware(datetime.now() - timedelta(minutes=3), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -249,7 +249,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_minute(self):
         date = make_aware(datetime.now() - timedelta(minutes=1), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -258,7 +258,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_seconds(self):
         date = make_aware(datetime.now() - timedelta(seconds=15), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
@@ -267,7 +267,7 @@ class TimeSinceTest(TestCase):
 
     def test_time_since_now(self):
         date = make_aware(datetime.now(), utc)
-        object_event = TouristicEventFactory.create(begin_date=date)
+        object_event = DummyModelFactory.create(begin_date=date)
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object.begin_date|timesince }}'
