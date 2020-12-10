@@ -9,7 +9,7 @@ from mapentity.models import LogEntry
 from mapentity.registry import app_settings
 from mapentity.views.generic import log_action
 
-from mapentity.tests.factories import DummyModelFactory
+from test_app.factories import DummyModelFactory
 from test_app.models import DummyModel
 
 

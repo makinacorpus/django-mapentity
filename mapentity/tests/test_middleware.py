@@ -12,8 +12,8 @@ from mapentity import middleware
 from mapentity.middleware import AutoLoginMiddleware, get_internal_user
 from unittest import mock
 
-from mapentity.tests.factories import AttachmentFactory
-from mapentity.tests.factories import DummyModelFactory
+from test_app.factories import AttachmentFactory
+from test_app.factories import DummyModelFactory
 
 User = get_user_model()
 

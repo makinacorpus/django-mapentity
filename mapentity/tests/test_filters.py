@@ -6,7 +6,7 @@ from django.conf import settings
 
 from mapentity.settings import API_SRID
 from mapentity.filters import PythonPolygonFilter, MapEntityFilterSet
-from mapentity.tests.factories import MushroomSpotFactory
+from test_app.factories import MushroomSpotFactory
 from test_app.models import MushroomSpot
 
 

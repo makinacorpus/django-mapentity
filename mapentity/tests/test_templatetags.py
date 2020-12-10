@@ -6,7 +6,7 @@ from django.template.exceptions import TemplateSyntaxError
 from django.utils import translation
 from django.utils.timezone import make_aware, utc
 
-from mapentity.tests.factories import DummyModelFactory
+from test_app.factories import DummyModelFactory
 
 from datetime import datetime, timedelta
 import json

@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from mapentity.forms import MapEntityForm
-from mapentity.tests.factories import DummyModelFactory
+from test_app.factories import DummyModelFactory
 from test_app.models import DummyModel
 
 

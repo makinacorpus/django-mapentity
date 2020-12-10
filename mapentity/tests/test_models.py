@@ -5,7 +5,7 @@ from django.utils.formats import localize
 
 from mapentity.models import LogEntry, ADDITION, DELETION
 from mapentity.factories import UserFactory
-from mapentity.tests.factories import DummyModelFactory
+from test_app.factories import DummyModelFactory
 
 import os
 

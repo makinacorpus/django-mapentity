@@ -9,7 +9,7 @@ from mapentity.factories import SuperUserFactory
 from mapentity.registry import app_settings
 from mapentity.decorators import view_permission_required
 
-from mapentity.tests.factories import DummyModelFactory
+from test_app.factories import DummyModelFactory
 
 
 class ViewPermissionRequiredTestCase(TestCase):
