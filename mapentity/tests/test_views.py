@@ -21,15 +21,15 @@ from mapentity.registry import app_settings
 from mapentity.views import serve_attachment, Convert, JSSettings, MapEntityList, map_screenshot
 
 
-from geotrek.common.models import Attachment
-from geotrek.common.models import FileType
-from geotrek.trekking.factories import TrekFactory
-from geotrek.trekking.views import TrekDocumentPublic, TrekDocument
-from geotrek.tourism.filters import TouristicEventFilterSet
-from geotrek.tourism.factories import TouristicEventFactory
-from geotrek.tourism.models import TouristicEvent
-from geotrek.tourism.views import TouristicEventList, TouristicEventDetail
-from geotrek.zoning.factories import CityFactory
+from test_app.models import Attachment, FileType, Event
+from test_app.factories import DummyModelFactory, CityFactory, EventFactory
+from test_app.views import (
+    DummyDocumentWeasyprint,
+    DummyDocumentPublicWeasyprint,
+    EventList,
+    EventDetail,
+)
+from test_app.filters import EventFilterSet
 
 
 User = get_user_model()
@@ -147,7 +147,7 @@ class ConvertTest(BaseTest):
 class AttachmentTest(BaseTest):
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
-        self.obj = TouristicEventFactory.create(published=False)
+        self.obj = EventFactory.create(public=False)
         """
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
@@ -158,7 +158,6 @@ class AttachmentTest(BaseTest):
         """
         self.attachment = AttachmentFactory.create(content_object=self.obj)
         self.url = "/media/%s" % self.attachment.attachment_file
-        call_command('update_geotrek_permissions', verbosity=0)
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
@@ -294,15 +293,15 @@ class AttachmentTest(BaseTest):
 
 
 class TestList(MapEntityList):
-    queryset = TouristicEvent.objects.existing()
-    filterform = TouristicEventFilterSet
+    queryset = Event.objects.exists()
+    filterform = EventFilterSet
     columns = None
 
 
 class ViewTestList(BaseTest):
     def test_every_field_column_none(self):
         self.login_as_superuser()
-        TouristicEventFactory.create()
+        EventFactory.create()
         request = RequestFactory().get('/fake-path')
         request.user = self.superuser
         request.session = {}
@@ -340,13 +339,13 @@ class ListViewTest(BaseTest):
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
 
     def test_mapentity_template_is_last_candidate(self):
-        listview = TouristicEventList()
-        listview.object_list = TouristicEvent.objects.none()
+        listview = EventList()
+        listview.object_list = Event.objects.none()
         self.assertEqual(listview.get_template_names()[-1],
                          'mapentity/mapentity_list.html')
 
     def test_list_should_have_some_perms_in_context(self):
-        view = TouristicEventList()
+        view = EventList()
         view.object_list = []
         view.request = RequestFactory().get('/fake-path')
         view.request.user = self.user
@@ -358,7 +357,7 @@ class ListViewTest(BaseTest):
         request = RequestFactory().get('/fake-path')
         request.user = self.user
         request.session = {}
-        view = TouristicEventList.as_view()
+        view = EventList.as_view()
         response = view(request)
         html = response.render()
         self.assertTrue(b'btn-group disabled' in html.content)
@@ -367,8 +366,8 @@ class ListViewTest(BaseTest):
 
 class MapEntityLayerViewTest(BaseTest):
     def setUp(self):
-        TouristicEventFactory.create_batch(30)
-        TouristicEventFactory.create(name='toto')
+        EventFactory.create_batch(30)
+        EventFactory.create(name='toto')
 
         self.login()
         self.user.is_superuser = True
@@ -377,26 +376,26 @@ class MapEntityLayerViewTest(BaseTest):
 
     def test_geojson_layer_returns_all_by_default(self):
         self.login()
-        response = self.client.get(TouristicEvent.get_layer_url())
+        response = self.client.get(Event.get_layer_url())
         self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
 
     def test_geojson_layer_can_be_filtered(self):
         self.login()
-        response = self.client.get(TouristicEvent.get_layer_url() + '?name=toto')
+        response = self.client.get(Event.get_layer_url() + '?name=toto')
         self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
 
     def test_geojson_layer_with_parameters_is_not_cached(self):
         self.login()
-        response = self.client.get(TouristicEvent.get_layer_url() + '?name=toto')
+        response = self.client.get(Event.get_layer_url() + '?name=toto')
         self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
-        response = self.client.get(TouristicEvent.get_layer_url())
+        response = self.client.get(Event.get_layer_url())
         self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
 
     def test_geojson_layer_with_parameters_does_not_use_cache(self):
         self.login()
-        response = self.client.get(TouristicEvent.get_layer_url())
+        response = self.client.get(Event.get_layer_url())
         self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
-        response = self.client.get(TouristicEvent.get_layer_url() + '?name=toto')
+        response = self.client.get(Event.get_layer_url() + '?name=toto')
         self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
 
 
@@ -406,10 +405,10 @@ class DetailViewTest(BaseTest):
         self.user.is_superuser = True
         self.user.save()
         self.logout()
-        self.object = TouristicEventFactory.create(name='dumber')
+        self.object = EventFactory.create(name='dumber')
 
     def test_mapentity_template_is_last_candidate(self):
-        detailview = TouristicEventDetail()
+        detailview = EventDetail()
         detailview.object = self.object
         self.assertEqual(detailview.get_template_names(),
                          ['tourism/touristicevent_detail.html',
@@ -471,13 +470,13 @@ class ViewPermissionsTest(BaseTest):
     def setUp(self):
         self.login()
         self.user.user_permissions.all().delete()  # WTF ?
-        self.object = TouristicEventFactory.create()
+        self.object = EventFactory.create()
 
     def tearDown(self):
         self.logout()
 
     def test_views_name_depend_on_model(self):
-        view = TouristicEventList()
+        view = EventList()
         self.assertEqual(view.get_view_perm(), 'tourism.read_touristicevent')
 
     def test_unauthorized_list_view_redirects_to_login(self):
@@ -532,8 +531,8 @@ class TemplateTest(BaseTest):
         request = RequestFactory().get('/fake-path')
         request.user = self.superuser
         request.session = {}
-        trek = TrekFactory.create()
-        view = TrekDocumentPublic.as_view()
+        trek = DummyModelFactory.create()
+        view = DummyDocumentWeasyprint.as_view()
         with self.assertRaises(TemplateDoesNotExist):
             view(request, pk=trek.pk, slug=trek.slug)
 
@@ -543,7 +542,7 @@ class TemplateTest(BaseTest):
         request = RequestFactory().get('/fake-path')
         request.user = self.superuser
         request.session = {}
-        trek = TrekFactory.create()
-        view = TrekDocument.as_view()
+        trek = DummyModelFactory.create()
+        view = DummyDocumentPublicWeasyprint.as_view()
         with self.assertRaises(TemplateDoesNotExist):
             view(request, pk=trek.pk, slug=trek.slug)
