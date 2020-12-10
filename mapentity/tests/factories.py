@@ -1,6 +1,7 @@
 import factory
 from factory.django import DjangoModelFactory
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.gis.geos import Point, LineString, Polygon
 from test_app import models as test_models
 from mapentity.factories import UserFactory
 
@@ -39,6 +40,13 @@ class DummyModelFactory(DjangoModelFactory):
     name = "Dummy object"
     geom = 'POINT(0 0)'
     public = True
+
+
+class PathFactory(DjangoModelFactory):
+    class Meta:
+        model = test_models.Path
+
+    geom = LineString(Point(700000, 6600000), Point(700100, 6600100))
 
 
 class TagFactory(DjangoModelFactory):

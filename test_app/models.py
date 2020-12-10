@@ -21,6 +21,7 @@ class Tag(models.Model):
         return self.label
 
 
+
 class MushroomSpot(MapEntityMixin, models.Model):
     name = models.CharField(max_length=100, default='Empty')
     serialized = models.CharField(max_length=200, null=True, default=None)
@@ -49,6 +50,10 @@ class MushroomSpot(MapEntityMixin, models.Model):
 
 class WeatherStation(models.Model):
     geom = models.PointField(null=True, default=None, srid=2154)
+
+
+class Path(MapEntityMixin, models.Model):
+    geom = models.LineStringField(srid=2154, spatial_index=False)
 
 
 class DummyModel(MapEntityMixin, models.Model):
