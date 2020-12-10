@@ -165,6 +165,7 @@ TEST = True
 TITLE = "Test project"
 
 MAPENTITY_CONFIG = {
+    'TEMP_DIR': '/tmp',
     'CONVERSION_SERVER': 'http://{}:{}'.format(os.getenv('CONVERSION_HOST', 'convertit'),
                                                os.getenv('CONVERSION_PORT', '6543')),
     'CAPTURE_SERVER': 'http://{}:{}'.format(os.getenv('CAPTURE_HOST', 'screamshotter'),
