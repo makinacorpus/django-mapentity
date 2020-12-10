@@ -21,6 +21,12 @@ class Tag(models.Model):
         return self.label
 
 
+class Theme(models.Model):
+    name = models.CharField(max_length=128)
+
+    def __str__(self):
+        return self.name
+
 
 class MushroomSpot(MapEntityMixin, models.Model):
     name = models.CharField(max_length=100, default='Empty')
@@ -54,6 +60,12 @@ class WeatherStation(models.Model):
 
 class Path(MapEntityMixin, models.Model):
     geom = models.LineStringField(srid=2154, spatial_index=False)
+
+
+class AnyGeomModel(MapEntityMixin, models.Model):
+    name = models.CharField(blank=True, default='', max_length=128)
+    geom = models.GeometryField(srid=2154)
+    tags = models.ManyToManyField(Tag, related_name="whatevergeoms", blank=True,)
 
 
 class DummyModel(MapEntityMixin, models.Model):

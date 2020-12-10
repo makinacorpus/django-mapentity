@@ -49,11 +49,26 @@ class PathFactory(DjangoModelFactory):
     geom = LineString(Point(700000, 6600000), Point(700100, 6600100))
 
 
+class AnyGeomModelFactory(DjangoModelFactory):
+    class Meta:
+        model = test_models.AnyGeomModel
+
+    name = "Mushroom spot"
+    geom = 'POINT(0 0)'
+
+
 class TagFactory(DjangoModelFactory):
     class Meta:
         model = test_models.Tag
 
     label = "Easy"
+
+
+class ThemeFactory(DjangoModelFactory):
+    class Meta:
+        model = test_models.Theme
+
+    label = "Forest"
 
 
 class MushroomSpotFactory(DjangoModelFactory):
