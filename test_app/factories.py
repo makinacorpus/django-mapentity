@@ -82,3 +82,23 @@ class MushroomSpotFactory(DjangoModelFactory):
     def tags(obj, create, extracted=None, **kwargs):
         if create:
             obj.tags.add(TagFactory.create().pk)
+
+
+class EventFactory(DjangoModelFactory):
+    class Meta:
+        model = test_models.Event
+
+    name = "Touristic event"
+    geom = 'POINT(0 0)'
+    public = True
+    begin_date = '2002-02-20'
+    end_date = '2202-02-22'
+
+
+class CityFactory(DjangoModelFactory):
+    class Meta:
+        model = test_models.City
+
+    code = factory.Sequence(lambda n: "#%s" % n)  # id (!) with max_length=6
+    name = factory.Sequence(lambda n: "City name %s" % n)
+    geom = factory.Sequence(lambda _: MultiPolygon(Polygon.from_bbox(next(geom_city_iter)), srid=settings.SRID))
