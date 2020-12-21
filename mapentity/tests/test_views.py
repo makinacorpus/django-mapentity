@@ -21,15 +21,15 @@ from mapentity.registry import app_settings
 from mapentity.views import serve_attachment, Convert, JSSettings, MapEntityList, map_screenshot
 
 
-from geotrek.common.models import Attachment
-from geotrek.common.models import FileType
-from geotrek.trekking.factories import TrekFactory
-from geotrek.trekking.views import TrekDocumentPublic, TrekDocument
-from geotrek.tourism.filters import TouristicEventFilterSet
-from geotrek.tourism.factories import TouristicEventFactory
-from geotrek.tourism.models import TouristicEvent
-from geotrek.tourism.views import TouristicEventList, TouristicEventDetail
-from geotrek.zoning.factories import CityFactory
+from test_app.models import Attachment, FileType, Event, DummyModel
+from test_app.factories import DummyModelFactory, CityFactory, EventFactory
+from test_app.views import (
+    DummyDocumentWeasyprint,
+    DummyDocumentPublicWeasyprint,
+    EventList,
+    EventDetail,
+)
+from test_app.filters import EventFilterSet
 
 
 User = get_user_model()
@@ -147,7 +147,7 @@ class ConvertTest(BaseTest):
 class AttachmentTest(BaseTest):
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
-        self.obj = TouristicEventFactory.create(published=False)
+        self.obj = EventFactory.create(public=False)
         """
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
@@ -158,7 +158,7 @@ class AttachmentTest(BaseTest):
         """
         self.attachment = AttachmentFactory.create(content_object=self.obj)
         self.url = "/media/%s" % self.attachment.attachment_file
-        call_command('update_geotrek_permissions', verbosity=0)
+        call_command('update_permissions_mapentity', verbosity=0)
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
@@ -169,7 +169,7 @@ class AttachmentTest(BaseTest):
 
     def test_access_to_public_attachment(self):
         self.login()
-        self.obj.published = True
+        self.obj.public = True
         self.obj.save()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -188,19 +188,19 @@ class AttachmentTest(BaseTest):
         self.login()
         perm1 = Permission.objects.get(codename='read_attachment')
         self.user.user_permissions.add(perm1)
-        perm2 = Permission.objects.get(codename='read_touristicevent')
+        perm2 = Permission.objects.get(codename='read_event')
         self.user.user_permissions.add(perm2)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
     def test_anonymous_access_to_deleted_object(self):
-        self.obj.delete(force=True)
+        self.obj.delete()
         self.login()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 404)
 
     def test_authorized_access_to_deleted_object(self):
-        self.obj.delete(force=True)
+        self.obj.delete()
         self.login_as_superuser()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 404)
@@ -293,24 +293,24 @@ class AttachmentTest(BaseTest):
         self.assertEqual(200, response.status_code)
 
 
-class TestList(MapEntityList):
-    queryset = TouristicEvent.objects.existing()
-    filterform = TouristicEventFilterSet
+class DummyList(MapEntityList):
+    queryset = DummyModel.objects.all()
+    filterform = EventFilterSet
     columns = None
 
 
 class ViewTestList(BaseTest):
     def test_every_field_column_none(self):
         self.login_as_superuser()
-        TouristicEventFactory.create()
+        DummyModelFactory.create()
         request = RequestFactory().get('/fake-path')
         request.user = self.superuser
         request.session = {}
-        view = TestList.as_view()
+        view = DummyList.as_view()
         response = view(request)
         html = response.render()
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(b'Description' in html.content)
+        self.assertTrue(b'name' in html.content)
 
 
 class SettingsViewTest(BaseTest):
@@ -335,18 +335,18 @@ class ListViewTest(BaseTest):
         self.user = User.objects.create_user('aah', 'email@corp.com', 'booh')
 
         def user_perms(p):
-            return {'tourism.export_touristicevent': False}.get(p, True)
+            return {'tourism.export_event': False}.get(p, True)
 
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
 
     def test_mapentity_template_is_last_candidate(self):
-        listview = TouristicEventList()
-        listview.object_list = TouristicEvent.objects.none()
+        listview = EventList()
+        listview.object_list = Event.objects.none()
         self.assertEqual(listview.get_template_names()[-1],
                          'mapentity/mapentity_list.html')
 
     def test_list_should_have_some_perms_in_context(self):
-        view = TouristicEventList()
+        view = EventList()
         view.object_list = []
         view.request = RequestFactory().get('/fake-path')
         view.request.user = self.user
@@ -358,7 +358,7 @@ class ListViewTest(BaseTest):
         request = RequestFactory().get('/fake-path')
         request.user = self.user
         request.session = {}
-        view = TouristicEventList.as_view()
+        view = EventList.as_view()
         response = view(request)
         html = response.render()
         self.assertTrue(b'btn-group disabled' in html.content)
@@ -367,8 +367,8 @@ class ListViewTest(BaseTest):
 
 class MapEntityLayerViewTest(BaseTest):
     def setUp(self):
-        TouristicEventFactory.create_batch(30)
-        TouristicEventFactory.create(name='toto')
+        EventFactory.create_batch(30)
+        EventFactory.create(name='toto')
 
         self.login()
         self.user.is_superuser = True
@@ -377,26 +377,26 @@ class MapEntityLayerViewTest(BaseTest):
 
     def test_geojson_layer_returns_all_by_default(self):
         self.login()
-        response = self.client.get(TouristicEvent.get_layer_url())
+        response = self.client.get(Event.get_layer_url())
         self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
 
     def test_geojson_layer_can_be_filtered(self):
         self.login()
-        response = self.client.get(TouristicEvent.get_layer_url() + '?name=toto')
+        response = self.client.get(Event.get_layer_url() + '?name=toto')
         self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
 
     def test_geojson_layer_with_parameters_is_not_cached(self):
         self.login()
-        response = self.client.get(TouristicEvent.get_layer_url() + '?name=toto')
+        response = self.client.get(Event.get_layer_url() + '?name=toto')
         self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
-        response = self.client.get(TouristicEvent.get_layer_url())
+        response = self.client.get(Event.get_layer_url())
         self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
 
     def test_geojson_layer_with_parameters_does_not_use_cache(self):
         self.login()
-        response = self.client.get(TouristicEvent.get_layer_url())
+        response = self.client.get(Event.get_layer_url())
         self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
-        response = self.client.get(TouristicEvent.get_layer_url() + '?name=toto')
+        response = self.client.get(Event.get_layer_url() + '?name=toto')
         self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
 
 
@@ -406,20 +406,20 @@ class DetailViewTest(BaseTest):
         self.user.is_superuser = True
         self.user.save()
         self.logout()
-        self.object = TouristicEventFactory.create(name='dumber')
+        self.object = EventFactory.create(name='dumber')
 
     def test_mapentity_template_is_last_candidate(self):
-        detailview = TouristicEventDetail()
+        detailview = EventDetail()
         detailview.object = self.object
         self.assertEqual(detailview.get_template_names(),
-                         ['tourism/touristicevent_detail.html',
+                         ['test_app/event_detail.html',
                           'mapentity/mapentity_detail.html'])
 
     def test_properties_shown_in_extended_template(self):
         self.login()
         response = self.client.get(self.object.get_detail_url())
         self.assertTemplateUsed(response,
-                                template_name='tourism/touristicevent_detail.html')
+                                template_name='test_app/event_detail.html')
         self.assertContains(response, 'dumber')
 
     def test_export_buttons_odt(self):
@@ -435,13 +435,13 @@ class DetailViewTest(BaseTest):
 
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/touristicevent-{}.odt">\
+        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/event-{}.odt">\
 <img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
         self.assertContains(response, '<a class="btn btn-mini" target="_blank" \
-href="/convert/?url=/document/touristicevent-{}.odt&to=doc">\
+href="/convert/?url=/document/event-{}.odt&to=doc">\
 <img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
         self.assertContains(response, '<a class="btn btn-mini" target="_blank" \
-href="/convert/?url=/document/touristicevent-{}.odt">\
+href="/convert/?url=/document/event-{}.odt">\
 <img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
 
     def test_export_buttons_weasyprint(self):
@@ -455,57 +455,57 @@ href="/convert/?url=/document/touristicevent-{}.odt">\
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
         if app_settings['MAPENTITY_WEASYPRINT']:
-            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/touristicevent-{}.pdf">\
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/event-{}.pdf">\
 <img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
         else:
-            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/touristicevent-{}.odt">\
+            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/event-{}.odt">\
 <img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
         self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" \
-href="/convert/?url=/document/touristicevent-{}.odt&to=doc">\
+href="/convert/?url=/document/event-{}.odt&to=doc">\
 <img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
         self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" \
-href="/document/touristicevent-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
+href="/document/event-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
 
 
 class ViewPermissionsTest(BaseTest):
     def setUp(self):
         self.login()
         self.user.user_permissions.all().delete()  # WTF ?
-        self.object = TouristicEventFactory.create()
+        self.object = EventFactory.create()
 
     def tearDown(self):
         self.logout()
 
     def test_views_name_depend_on_model(self):
-        view = TouristicEventList()
-        self.assertEqual(view.get_view_perm(), 'tourism.read_touristicevent')
+        view = EventList()
+        self.assertEqual(view.get_view_perm(), 'test_app.read_event')
 
     def test_unauthorized_list_view_redirects_to_login(self):
-        response = self.client.get('/touristicevent/list/')
+        response = self.client.get('/event/list/')
         self.assertRedirects(response, '/login/')
 
     def test_unauthorized_detail_view_redirects_to_list(self):
-        detail_url = '/touristicevent/%s/' % self.object.pk
+        detail_url = '/event/%s/' % self.object.pk
         response = self.client.get(detail_url)
-        self.assertRedirects(response, '/touristicevent/list/',
+        self.assertRedirects(response, '/event/list/',
                              target_status_code=302)  # --> login
 
     def test_unauthorized_add_view_redirects_to_list(self):
-        add_url = '/touristicevent/add/'
+        add_url = '/event/add/'
         response = self.client.get(add_url)
-        self.assertRedirects(response, '/touristicevent/list/',
+        self.assertRedirects(response, '/event/list/',
                              target_status_code=302)  # --> login
 
     def test_unauthorized_update_view_redirects_to_detail(self):
-        edit_url = '/touristicevent/edit/%s/' % self.object.pk
+        edit_url = '/event/edit/%s/' % self.object.pk
         response = self.client.get(edit_url)
-        self.assertRedirects(response, '/touristicevent/%s/' % (self.object.pk),
+        self.assertRedirects(response, '/event/%s/' % (self.object.pk),
                              target_status_code=302)  # --> login
 
     def test_unauthorized_delete_view_redirects_to_detail(self):
-        delete_url = '/touristicevent/delete/%s/' % self.object.pk
+        delete_url = '/event/delete/%s/' % self.object.pk
         response = self.client.get(delete_url)
-        self.assertRedirects(response, '/touristicevent/%s/' % (self.object.pk),
+        self.assertRedirects(response, '/event/%s/' % (self.object.pk),
                              target_status_code=302)  # --> login
 
 
@@ -532,10 +532,10 @@ class TemplateTest(BaseTest):
         request = RequestFactory().get('/fake-path')
         request.user = self.superuser
         request.session = {}
-        trek = TrekFactory.create()
-        view = TrekDocumentPublic.as_view()
+        trek = DummyModelFactory.create()
+        view = DummyDocumentWeasyprint.as_view()
         with self.assertRaises(TemplateDoesNotExist):
-            view(request, pk=trek.pk, slug=trek.slug)
+            view(request, pk=trek.pk)
 
     @mock.patch('mapentity.views.generic.smart_get_template', return_value=None)
     def test_no_template_odt(self, mock_get_template):
@@ -543,7 +543,7 @@ class TemplateTest(BaseTest):
         request = RequestFactory().get('/fake-path')
         request.user = self.superuser
         request.session = {}
-        trek = TrekFactory.create()
-        view = TrekDocument.as_view()
+        obj = DummyModelFactory.create()
+        view = DummyDocumentPublicWeasyprint.as_view()
         with self.assertRaises(TemplateDoesNotExist):
-            view(request, pk=trek.pk, slug=trek.slug)
+            view(request, pk=obj.pk)

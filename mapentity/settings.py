@@ -35,7 +35,6 @@ app_settings = dict({
     'MAPENTITY_WEASYPRINT': False,
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
-
 TINYMCE_DEFAULT_CONFIG = {
     'theme': 'advanced',
     'theme_advanced_buttons1': 'bold,italic,forecolor,separator,bullist,numlist,link,media,separator,undo,redo,\

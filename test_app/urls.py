@@ -1,5 +1,8 @@
-from test_app.models import DummyModel, MushroomSpot
+from test_app.models import DummyModel, ComplexModel, MushroomSpot, Event
 from mapentity.registry import registry
 
 app_name = 'test_app'
-urlpatterns = registry.register(DummyModel) + registry.register(MushroomSpot)
+urlpatterns = registry.register(DummyModel) \
+    + registry.register(ComplexModel) \
+    + registry.register(MushroomSpot) \
+    + registry.register(Event)

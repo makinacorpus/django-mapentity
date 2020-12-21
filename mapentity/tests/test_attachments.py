@@ -1,7 +1,7 @@
 from unittest import mock
-from django.core.management import call_command
 
 from django.test import TestCase, RequestFactory
+from django.core.management import call_command
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -11,8 +11,8 @@ from django.urls import reverse
 from paperclip.settings import get_attachment_model, get_filetype_model
 from mapentity.views.generic import MapEntityDetail
 
-from geotrek.tourism.models import TouristicEvent
-from geotrek.tourism.factories import TouristicEventFactory
+from test_app.factories import DummyModelFactory
+from test_app.models import DummyModel
 
 
 def add_url_for_obj(obj):
@@ -27,12 +27,11 @@ class EntityAttachmentTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
-
         def user_perms(p):
             return {'paperclip.add_attachment': False}.get(p, True)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
-        self.object = TouristicEventFactory.create()
-        call_command('update_geotrek_permissions', verbosity=0)
+        self.obj = DummyModelFactory.create()
+        call_command('update_permissions_mapentity', verbosity=0)
 
     def createRequest(self):
         request = RequestFactory().get('/dummy')
@@ -56,20 +55,20 @@ class EntityAttachmentTestCase(TestCase):
         return get_attachment_model().objects.create(**kwargs)
 
     def test_list_attachments_in_details(self):
-        self.createAttachment(self.object)
-        self.user.user_permissions.add(Permission.objects.get(codename='read_touristicevent'))
+        self.createAttachment(self.obj)
+        self.user.user_permissions.add(Permission.objects.get(codename='read_dummymodel'))
         self.user.user_permissions.add(Permission.objects.get(codename='read_attachment'))
         self.client.login(username='howard', password='booh')
-        response = self.client.get('/touristicevent/{pk}/'.format(pk=self.object.pk))
+        response = self.client.get('/dummymodel/{pk}/'.format(pk=self.obj.pk))
 
         html = response.content
         self.assertTemplateUsed(response, template_name='paperclip/attachment_list.html')
 
-        self.assertEqual(1, len(get_attachment_model().objects.attachments_for_object(self.object)))
+        self.assertEqual(1, len(get_attachment_model().objects.attachments_for_object(self.obj)))
 
         self.assertNotIn(b"Submit attachment", html)
 
-        for attachment in get_attachment_model().objects.attachments_for_object(self.object):
+        for attachment in get_attachment_model().objects.attachments_for_object(self.obj):
             self.assertIn(attachment.legend.encode(), html)
             self.assertIn(attachment.title.encode(), html)
             self.assertIn(attachment.attachment_file.url.encode(), html)
@@ -77,21 +76,20 @@ class EntityAttachmentTestCase(TestCase):
 
     def test_upload_form_in_details_if_perms(self):
         self.user.has_perm = mock.MagicMock(return_value=True)
-        view = MapEntityDetail.as_view(model=TouristicEvent,
+        view = MapEntityDetail.as_view(model=DummyModel,
                                        template_name="mapentity/mapentity_detail.html")
         request = self.createRequest()
-        response = view(request, pk=self.object.pk)
+        response = view(request, pk=self.obj.pk)
         html = response.render()
         self.assertIn(b"Submit attachment", html.content)
-        self.assertIn(
-            '<form  action="/paperclip/add-for/tourism/touristicevent/{}/'.format(self.object.pk).encode(), html.content)
+        self.assertContains(html, '<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.obj.pk))
 
 
 class UploadAttachmentTestCase(TestCase):
 
     def setUp(self):
         User = get_user_model()
-        self.object = TouristicEventFactory.create()
+        self.obj = DummyModelFactory.create()
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')
         user.is_superuser = True
         user.save()
@@ -110,34 +108,34 @@ class UploadAttachmentTestCase(TestCase):
             'attachment_file': uploaded,
             'attachment_video': '',
             'embed': 'False',
-            'next': self.object.get_detail_url()
+            'next': self.obj.get_detail_url()
         }
         return data
 
     def test_upload_redirects_to_dummy_detail_url(self):
-        response = self.client.post(add_url_for_obj(self.object),
+        response = self.client.post(add_url_for_obj(self.obj),
                                     data=self.attachmentPostData())
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'],
-                         '/touristicevent/%s/' % self.object.pk)
+                         '/dummymodel/%s/' % self.obj.pk)
 
     def test_upload_creates_attachment(self):
         data = self.attachmentPostData()
-        self.client.post(add_url_for_obj(self.object), data=data)
-        att = get_attachment_model().objects.attachments_for_object(self.object).get()
+        self.client.post(add_url_for_obj(self.obj), data=data)
+        att = get_attachment_model().objects.attachments_for_object(self.obj).get()
         self.assertEqual(att.title, data['title'])
         self.assertEqual(att.legend, data['legend'])
         self.assertEqual(att.filetype.pk, data['filetype'])
 
     def test_title_gives_name_to_file(self):
         data = self.attachmentPostData()
-        self.client.post(add_url_for_obj(self.object), data=data)
-        att = get_attachment_model().objects.attachments_for_object(self.object).get()
+        self.client.post(add_url_for_obj(self.obj), data=data)
+        att = get_attachment_model().objects.attachments_for_object(self.obj).get()
         self.assertTrue('a-title' in att.attachment_file.name)
 
     def test_filename_is_used_if_no_title(self):
         data = self.attachmentPostData()
         data['title'] = ''
-        self.client.post(add_url_for_obj(self.object), data=data)
-        att = get_attachment_model().objects.attachments_for_object(self.object).get()
+        self.client.post(add_url_for_obj(self.obj), data=data)
+        att = get_attachment_model().objects.attachments_for_object(self.obj).get()
         self.assertTrue('face' in att.attachment_file.name)

@@ -4,15 +4,17 @@ from django.test import TestCase
 from mapentity.registry import registry
 from mapentity.models import MapEntityMixin
 
-
-from geotrek.diving.models import Dive
+from test_app.models import DummyModel
 
 
 class ModelDoNotExist(MapEntityMixin, models.Model):
     pass
 
+    class Meta:
+        abstract = True
+
 
 class RegistryTest(TestCase):
     def test_already_register(self):
-        paterns = registry.register(model=Dive, menu=False)
-        self.assertEqual(paterns, [])
+        patterns = registry.register(model=DummyModel, menu=False)
+        self.assertEqual(patterns, [])

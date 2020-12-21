@@ -12,8 +12,8 @@ from mapentity import middleware
 from mapentity.middleware import AutoLoginMiddleware, get_internal_user
 from unittest import mock
 
-from .test_views import AttachmentFactory
-from geotrek.tourism.factories import TouristicEventFactory
+from test_app.factories import AttachmentFactory
+from test_app.factories import DummyModelFactory
 
 User = get_user_model()
 
@@ -33,7 +33,7 @@ class AutoLoginTest(TestCase):
         self.request.session = {}
         self.request.META = {'REMOTE_ADDR': '6.6.6.6'}
         self.internal_user = get_internal_user()
-        call_command('update_geotrek_permissions')
+        call_command('update_permissions_mapentity')
 
     def test_internal_user_cannot_login(self):
         success = self.client.login(
@@ -42,7 +42,7 @@ class AutoLoginTest(TestCase):
         self.assertFalse(success)
 
     def test_auto_login_happens_by_remote_addr(self):
-        obj = TouristicEventFactory.create(published=False)
+        obj = DummyModelFactory.create(public=False)
         middleware.AUTOLOGIN_IPS = ['1.2.3.4']
         attachment = AttachmentFactory.create(content_object=obj)
         response = self.client.get("/media/%s" % attachment.attachment_file,

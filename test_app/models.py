@@ -51,6 +51,10 @@ class WeatherStation(models.Model):
     geom = models.PointField(null=True, default=None, srid=2154)
 
 
+class Path(MapEntityMixin, models.Model):
+    geom = models.LineStringField(srid=2154, spatial_index=False)
+
+
 class DummyModel(MapEntityMixin, models.Model):
     name = models.CharField(blank=True, default='', max_length=128)
     geom = models.PointField(null=True, default=None)
@@ -65,3 +69,43 @@ class DummyModel(MapEntityMixin, models.Model):
 
     class Meta:
         verbose_name = _(u"Dummy Model")
+
+
+class ComplexModel(MapEntityMixin, models.Model):
+    name = models.CharField(blank=True, default='', max_length=128, verbose_name=_("Name"))
+    geom = models.GeometryField(srid=2154)
+    date_update = models.DateTimeField(auto_now=True)
+    public = models.BooleanField(default=False)
+    tags = models.ManyToManyField(Tag, related_name="complexmodels", blank=True,)
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.pk)
+
+    def is_public(self):
+        return self.public
+
+    class Meta:
+        verbose_name = _(u"Complex Model")
+
+
+class Event(MapEntityMixin, models.Model):
+    name = models.CharField(blank=True, default='', max_length=128)
+    geom = models.PointField(null=True, default=None)
+    public = models.BooleanField(default=False)
+    begin_date = models.DateField(blank=True, null=True, verbose_name=_("Begin date"))
+    end_date = models.DateField(blank=True, null=True, verbose_name=_("End date"))
+    tags = models.ManyToManyField(Tag, related_name="events",
+                                    blank=True, verbose_name=_("Tags"),
+                                    help_text=_("Main tag(s)"))
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.pk)
+
+    class Meta:
+        verbose_name = _(u"Event")
+
+
+class City(models.Model):
+    code = models.CharField(primary_key=True, max_length=6)
+    name = models.CharField(max_length=128, verbose_name=_("Name"))
+    geom = models.MultiPolygonField(srid=2154, spatial_index=False)
