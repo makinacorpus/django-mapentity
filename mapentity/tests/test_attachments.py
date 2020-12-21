@@ -27,11 +27,10 @@ class EntityAttachmentTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
         self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
-
         def user_perms(p):
             return {'paperclip.add_attachment': False}.get(p, True)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
-        self.object = DummyModelFactory.create()
+        self.obj = DummyModelFactory.create()
         call_command('update_permissions_mapentity', verbosity=0)
 
     def createRequest(self):
@@ -56,20 +55,20 @@ class EntityAttachmentTestCase(TestCase):
         return get_attachment_model().objects.create(**kwargs)
 
     def test_list_attachments_in_details(self):
-        self.createAttachment(self.object)
+        self.createAttachment(self.obj)
         self.user.user_permissions.add(Permission.objects.get(codename='read_dummymodel'))
         self.user.user_permissions.add(Permission.objects.get(codename='read_attachment'))
         self.client.login(username='howard', password='booh')
-        response = self.client.get('/dummymodel/{pk}/'.format(pk=self.object.pk))
+        response = self.client.get('/dummymodel/{pk}/'.format(pk=self.obj.pk))
 
         html = response.content
         self.assertTemplateUsed(response, template_name='paperclip/attachment_list.html')
 
-        self.assertEqual(1, len(get_attachment_model().objects.attachments_for_object(self.object)))
+        self.assertEqual(1, len(get_attachment_model().objects.attachments_for_object(self.obj)))
 
         self.assertNotIn(b"Submit attachment", html)
 
-        for attachment in get_attachment_model().objects.attachments_for_object(self.object):
+        for attachment in get_attachment_model().objects.attachments_for_object(self.obj):
             self.assertIn(attachment.legend.encode(), html)
             self.assertIn(attachment.title.encode(), html)
             self.assertIn(attachment.attachment_file.url.encode(), html)
@@ -80,17 +79,17 @@ class EntityAttachmentTestCase(TestCase):
         view = MapEntityDetail.as_view(model=DummyModel,
                                        template_name="mapentity/mapentity_detail.html")
         request = self.createRequest()
-        response = view(request, pk=self.object.pk)
+        response = view(request, pk=self.obj.pk)
         html = response.render()
         self.assertIn(b"Submit attachment", html.content)
-        self.assertContains(html, '<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.object.pk))
+        self.assertContains(html, '<form action="/paperclip/add-for/test_app/dummymodel/{}/'.format(self.obj.pk))
 
 
 class UploadAttachmentTestCase(TestCase):
 
     def setUp(self):
         User = get_user_model()
-        self.object = DummyModelFactory.create()
+        self.obj = DummyModelFactory.create()
         user = User.objects.create_user('aah', 'email@corp.com', 'booh')
         user.is_superuser = True
         user.save()
@@ -109,34 +108,34 @@ class UploadAttachmentTestCase(TestCase):
             'attachment_file': uploaded,
             'attachment_video': '',
             'embed': 'False',
-            'next': self.object.get_detail_url()
+            'next': self.obj.get_detail_url()
         }
         return data
 
     def test_upload_redirects_to_dummy_detail_url(self):
-        response = self.client.post(add_url_for_obj(self.object),
+        response = self.client.post(add_url_for_obj(self.obj),
                                     data=self.attachmentPostData())
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'],
-                         '/dummymodel/%s/' % self.object.pk)
+                         '/dummymodel/%s/' % self.obj.pk)
 
     def test_upload_creates_attachment(self):
         data = self.attachmentPostData()
-        self.client.post(add_url_for_obj(self.object), data=data)
-        att = get_attachment_model().objects.attachments_for_object(self.object).get()
+        self.client.post(add_url_for_obj(self.obj), data=data)
+        att = get_attachment_model().objects.attachments_for_object(self.obj).get()
         self.assertEqual(att.title, data['title'])
         self.assertEqual(att.legend, data['legend'])
         self.assertEqual(att.filetype.pk, data['filetype'])
 
     def test_title_gives_name_to_file(self):
         data = self.attachmentPostData()
-        self.client.post(add_url_for_obj(self.object), data=data)
-        att = get_attachment_model().objects.attachments_for_object(self.object).get()
+        self.client.post(add_url_for_obj(self.obj), data=data)
+        att = get_attachment_model().objects.attachments_for_object(self.obj).get()
         self.assertTrue('a-title' in att.attachment_file.name)
 
     def test_filename_is_used_if_no_title(self):
         data = self.attachmentPostData()
         data['title'] = ''
-        self.client.post(add_url_for_obj(self.object), data=data)
-        att = get_attachment_model().objects.attachments_for_object(self.object).get()
+        self.client.post(add_url_for_obj(self.obj), data=data)
+        att = get_attachment_model().objects.attachments_for_object(self.obj).get()
         self.assertTrue('face' in att.attachment_file.name)

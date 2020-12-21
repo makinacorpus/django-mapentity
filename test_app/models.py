@@ -72,7 +72,7 @@ class DummyModel(MapEntityMixin, models.Model):
 
 
 class ComplexModel(MapEntityMixin, models.Model):
-    name = models.CharField(blank=True, default='', max_length=128)
+    name = models.CharField(blank=True, default='', max_length=128, verbose_name=_("Name"))
     geom = models.GeometryField(srid=2154)
     date_update = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=False)
