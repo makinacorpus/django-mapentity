@@ -1,6 +1,6 @@
 from mapentity import views as mapentity_views
 
-from .models import DummyModel, Event
+from .models import DummyModel, ComplexModel, Event
 
 
 class DummyList(mapentity_views.MapEntityList):
@@ -45,6 +45,50 @@ class DummyUpdate(mapentity_views.MapEntityUpdate):
 
 class DummyDelete(mapentity_views.MapEntityDelete):
     model = DummyModel
+
+
+class ComplexList(mapentity_views.MapEntityList):
+    model = ComplexModel
+
+
+class ComplexLayer(mapentity_views.MapEntityLayer):
+    model = ComplexModel
+
+
+class ComplexJsonList(mapentity_views.MapEntityJsonList, ComplexList):
+    pass
+
+
+class ComplexFormat(mapentity_views.MapEntityFormat):
+    model = ComplexModel
+
+
+class ComplexDocumentOdt(mapentity_views.MapEntityDocumentOdt):
+    model = ComplexModel
+
+
+class ComplexDocumentWeasyprint(mapentity_views.MapEntityDocumentWeasyprint):
+    model = ComplexModel
+
+
+class ComplexDocumentPublicWeasyprint(mapentity_views.MapEntityDocumentWeasyprint):
+    model = ComplexModel
+
+
+class ComplexDetail(mapentity_views.MapEntityDetail):
+    model = ComplexModel
+
+
+class ComplexCreate(mapentity_views.MapEntityCreate):
+    model = ComplexModel
+
+
+class ComplexUpdate(mapentity_views.MapEntityUpdate):
+    model = ComplexModel
+
+
+class ComplexDelete(mapentity_views.MapEntityDelete):
+    model = ComplexModel
 
 
 class EventList(mapentity_views.MapEntityList):

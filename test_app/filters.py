@@ -26,5 +26,5 @@ class EventFilterSet(MapEntityFilterSet):
     class Meta(MapEntityFilterSet.Meta):
         model = Event
         fields = MapEntityFilterSet.Meta.fields + [
-            'themes', 'before', 'after',
+            'tags', 'before', 'after',
         ]

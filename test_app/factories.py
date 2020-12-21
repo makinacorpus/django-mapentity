@@ -42,6 +42,29 @@ class DummyModelFactory(DjangoModelFactory):
     public = True
 
 
+class ComplexModelFactory(DjangoModelFactory):
+    class Meta:
+        model = test_models.ComplexModel
+
+    name = "Complex object"
+    geom = 'POINT(0 0)'
+    public = True
+
+
+class ComplexModelWithThemesFactory(DjangoModelFactory):
+    class Meta:
+        model = test_models.ComplexModel
+
+    name = "Complex object with themes"
+    geom = 'POINT(0 0)'
+    published = True
+
+    @factory.post_generation
+    def tags(obj, create, extracted=None, **kwargs):
+        if create:
+            obj.tags.add(TagFactory.create().pk)
+
+
 class PathFactory(DjangoModelFactory):
     class Meta:
         model = test_models.Path
@@ -49,26 +72,11 @@ class PathFactory(DjangoModelFactory):
     geom = LineString(Point(700000, 6600000), Point(700100, 6600100))
 
 
-class AnyGeomModelFactory(DjangoModelFactory):
-    class Meta:
-        model = test_models.AnyGeomModel
-
-    name = "Mushroom spot"
-    geom = 'POINT(0 0)'
-
-
 class TagFactory(DjangoModelFactory):
     class Meta:
         model = test_models.Tag
 
     label = "Easy"
-
-
-class ThemeFactory(DjangoModelFactory):
-    class Meta:
-        model = test_models.Theme
-
-    label = "Forest"
 
 
 class MushroomSpotFactory(DjangoModelFactory):
