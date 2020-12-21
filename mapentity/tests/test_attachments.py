@@ -1,6 +1,7 @@
 from unittest import mock
 
 from django.test import TestCase, RequestFactory
+from django.core.management import call_command
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -31,7 +32,7 @@ class EntityAttachmentTestCase(TestCase):
             return {'paperclip.add_attachment': False}.get(p, True)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
         self.object = DummyModelFactory.create()
-        #call_command('update_geotrek_permissions', verbosity=0)
+        call_command('update_permissions_mapentity', verbosity=0)
 
     def createRequest(self):
         request = RequestFactory().get('/dummy')

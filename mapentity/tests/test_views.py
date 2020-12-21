@@ -158,6 +158,7 @@ class AttachmentTest(BaseTest):
         """
         self.attachment = AttachmentFactory.create(content_object=self.obj)
         self.url = "/media/%s" % self.attachment.attachment_file
+        call_command('update_permissions_mapentity', verbosity=0)
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
