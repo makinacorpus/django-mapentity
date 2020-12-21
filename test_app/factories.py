@@ -1,9 +1,19 @@
 import factory
+
+from django.conf import settings
 from factory.django import DjangoModelFactory
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.contrib.gis.geos import Point, LineString, Polygon
-from test_app import models as test_models
+from django.contrib.gis.geos import Point, LineString, Polygon, MultiPolygon
+
+from mapentity.helpers import bbox_split_srid_2154
 from mapentity.factories import UserFactory
+
+from test_app import models as test_models
+
+SPATIAL_EXTENT = (200000, 300000, 1100000, 1200000)
+
+# Create 16 cities covering the spatial_extent and cycle on it
+geom_city_iter = bbox_split_srid_2154(SPATIAL_EXTENT, by_x=4, by_y=4, cycle=True)
 
 
 def get_dummy_uploaded_file(name='file.pdf'):
