@@ -104,8 +104,8 @@ class ShapefileSerializer(TestCase):
             self.serializer.serialize(Tag.objects.all(), stream=response,
                                       fields=['id', 'name'], delete=False)
 
+    @override_settings(GEOM_FIELD_NAME=None)
     def test_serializer_model_geofield_multiple(self):
-        app_settings['GEOM_FIELD_NAME'] = None
         self.serializer = ZipShapeSerializer()
         DummyModelFactory.create()
         response = HttpResponse()
@@ -114,10 +114,9 @@ class ShapefileSerializer(TestCase):
                                                 "Available fields are: 'geom_3d, geom, geom_cadastre'"):
             self.serializer.serialize(DummyModel.objects.all(), stream=response,
                                       fields=['id', 'name'], delete=False)
-        app_settings['GEOM_FIELD_NAME'] = 'geom'
 
+    @override_settings(GEOM_FIELD_NAME='do_not_exist')
     def test_serializer_model_geofield_do_not_exist(self):
-        app_settings['GEOM_FIELD_NAME'] = 'do_not_exist'
         self.serializer = ZipShapeSerializer()
         DummyModelFactory.create()
         response = HttpResponse()
@@ -125,7 +124,6 @@ class ShapefileSerializer(TestCase):
                                                 "fields available are: 'geom_3d, geom, geom_cadastre'"):
             self.serializer.serialize(DummyModel.objects.all(), stream=response,
                                       fields=['id', 'name'], delete=False)
-        app_settings['GEOM_FIELD_NAME'] = 'geom'
 
     def test_serializer_shape_write_special_srid(self):
         geo_field = geo_field_from_model(ComplexModel, 'geom')

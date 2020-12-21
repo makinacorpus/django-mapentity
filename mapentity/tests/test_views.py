@@ -21,7 +21,7 @@ from mapentity.registry import app_settings
 from mapentity.views import serve_attachment, Convert, JSSettings, MapEntityList, map_screenshot
 
 
-from test_app.models import Attachment, FileType, Event
+from test_app.models import Attachment, FileType, Event, DummyModel
 from test_app.factories import DummyModelFactory, CityFactory, EventFactory
 from test_app.views import (
     DummyDocumentWeasyprint,
@@ -293,8 +293,8 @@ class AttachmentTest(BaseTest):
         self.assertEqual(200, response.status_code)
 
 
-class TestList(MapEntityList):
-    queryset = Event.objects.exists()
+class DummyList(MapEntityList):
+    queryset = DummyModel.objects.all()
     filterform = EventFilterSet
     columns = None
 
@@ -302,15 +302,15 @@ class TestList(MapEntityList):
 class ViewTestList(BaseTest):
     def test_every_field_column_none(self):
         self.login_as_superuser()
-        EventFactory.create()
+        DummyModelFactory.create()
         request = RequestFactory().get('/fake-path')
         request.user = self.superuser
         request.session = {}
-        view = TestList.as_view()
+        view = DummyList.as_view()
         response = view(request)
         html = response.render()
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(b'Description' in html.content)
+        self.assertTrue(b'name' in html.content)
 
 
 class SettingsViewTest(BaseTest):
