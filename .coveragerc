@@ -1,0 +1,16 @@
+[run]
+source = mapentity
+omit =
+    */migrations/*
+    */tests/*
+    */wsgi.py
+    venv/*
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    pragma: no cover # Have to re-enable the standard pragma
+    if __name__ == .__main__. # Don't complain if non-runnable code isn't run
+
+# Display missing lines in report
+show_missing = True

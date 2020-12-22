@@ -11,6 +11,7 @@ test_require=[
     'freezegun',
     'sphinx',
     'flake8',
+    'coverage',
 ]
 
 setup(
