@@ -3,9 +3,29 @@ Development
 
 Follow installation procedure, and then install development packages::
 
-    $ python3 -m venv env && source ./env/bin/activate
-    $ pip install -e .[dev] -U
+    python3 -m venv env && source ./env/bin/activate
+    pip install -e .[dev] -U
 
+Or use docker
+
+::
+
+    cp .env-dev.dist .env
+    docker-compose build
+    docker-compose up
+
+Run tests
+---------
+
+::
+
+    ./manage.py test
+
+Or with docker
+
+::
+
+    docker-compose run --rm web ./manage.py test
 
 Release
 -------

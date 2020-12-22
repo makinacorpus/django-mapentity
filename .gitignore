@@ -4,6 +4,7 @@
 /.idea/
 /.vscode/
 /env/
+/venv/
 /build/
 /dist/
 /static/
