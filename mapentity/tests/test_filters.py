@@ -6,8 +6,8 @@ from django.conf import settings
 
 from mapentity.settings import API_SRID
 from mapentity.filters import PythonPolygonFilter, MapEntityFilterSet
-from test_app.factories import MushroomSpotFactory
-from test_app.models import MushroomSpot
+from test_app.factories import EventFactory
+from test_app.models import Event
 
 
 class PolygonTest(object):
@@ -51,26 +51,25 @@ class PolygonFilterTest(PolygonTest, TestCase):
 class PythonPolygonFilterTest(PolygonTest, TestCase):
 
     def setUp(self):
-        self.model = MushroomSpot
-        self.none = MushroomSpotFactory.create(geom="POINT EMPTY")
+        self.model = Event
+        self.none = EventFactory.create(geom="POINT EMPTY")
 
-        self.basic = MushroomSpotFactory.create(geom='SRID=%s;LINESTRING(0 0, 10 0)' % settings.SRID)
-        self.outside = MushroomSpotFactory.create(geom='SRID=%s;LINESTRING(0 10, 10 10)' % settings.SRID)
-
+        self.basic = EventFactory.create(geom='SRID=%s;LINESTRING(0 0, 10 0)' % settings.SRID)
+        self.outside = EventFactory.create(geom='SRID=%s;LINESTRING(0 10, 10 10)' % settings.SRID)
         self.filter = PythonPolygonFilter()
 
 
 class PluggableFilterSetTest(TestCase):
 
     def setUp(self):
-        self.spot = MushroomSpotFactory.create(name="Empty")
+        self.spot = EventFactory.create(name="Empty")
 
-        class MushroomSpotFilterSet(MapEntityFilterSet):
+        class EventFilterSet(MapEntityFilterSet):
             class Meta:
-                model = MushroomSpot
+                model = Event
                 fields = ()
 
-        self.filterset_class = MushroomSpotFilterSet
+        self.filterset_class = EventFilterSet
 
     def test_empty_filter(self):
         filterset = self.filterset_class({'name': 'Foo'})

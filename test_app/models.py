@@ -90,7 +90,7 @@ class ComplexModel(MapEntityMixin, models.Model):
 
 class Event(MapEntityMixin, models.Model):
     name = models.CharField(blank=True, default='', max_length=128)
-    geom = models.PointField(null=True, default=None)
+    geom = models.GeometryField(srid=2154, null=True, default=None)
     public = models.BooleanField(default=False)
     begin_date = models.DateField(blank=True, null=True, verbose_name=_("Begin date"))
     end_date = models.DateField(blank=True, null=True, verbose_name=_("End date"))
