@@ -7,7 +7,7 @@
 appy-python-3==2019.11.19
 beautifulsoup4==4.8.1
 cairocffi==1.1.0          # via cairosvg, weasyprint
-cairosvg==2.4.2           # via weasyprint
+cairosvg==2.5.1           # via weasyprint
 certifi==2019.9.11        # via requests
 cffi==1.13.2              # via cairocffi, weasyprint
 chardet==3.0.4            # via requests
