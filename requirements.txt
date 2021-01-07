@@ -31,7 +31,7 @@ easy-thumbnails==2.6
 gpxpy==1.3.5
 html5lib==1.0.1           # via weasyprint
 idna==2.8                 # via requests
-lxml==4.4.1
+lxml==4.6.2
 paperclip==2.2.3
 pillow==6.2.1             # via cairosvg, easy-thumbnails
 pycparser==2.19           # via cffi
