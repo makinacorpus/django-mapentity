@@ -33,7 +33,7 @@ html5lib==1.0.1           # via weasyprint
 idna==2.8                 # via requests
 lxml==4.4.1
 paperclip==2.2.3
-pillow==6.2.1             # via cairosvg, easy-thumbnails
+pillow==8.1.1             # via cairosvg, easy-thumbnails
 pycparser==2.19           # via cffi
 pyphen==0.9.5             # via weasyprint
 pytz==2019.3              # via django
