@@ -43,7 +43,7 @@ rjsmin==1.1.0             # via django-compressor
 six==1.13.0               # via django-appconf, django-geojson, html5lib
 soupsieve==1.9.5          # via beautifulsoup4
 tinycss2==1.0.2           # via cairosvg, cssselect2, weasyprint
-urllib3==1.25.7           # via requests
+urllib3==1.26.5           # via requests
 weasyprint==50
 webencodings==0.5.1       # via html5lib, tinycss2
 
