@@ -37,42 +37,47 @@ class ShapefileSerializer(TestCase):
         return layers
 
     def test_serializer_creates_one_layer_per_type(self):
-        self.assertEquals(len(self.serializer.layers), 3)
+        self.assertEqual(len(self.getShapefileLayers()), 6)
 
     def test_each_layer_has_records_by_type(self):
-        layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
-        self.assertEquals(len(layer_point), 1)
-        self.assertEquals(len(layer_linestring), 1)
-        self.assertEquals(len(layer_multipoint), 1)
+        layer_multipolygon, layer_linestring, layer_multilinestring, layer_point, \
+        layer_multipoint, layer_polygon = self.getShapefileLayers()
+        self.assertEqual(len(layer_point), 1)
+        self.assertEqual(len(layer_linestring), 1)
+        self.assertEqual(len(layer_multipoint), 1)
+        self.assertEqual(len(layer_polygon), 1)
+        self.assertEqual(len(layer_multilinestring), 1)
+        self.assertEqual(len(layer_multipolygon), 1)
 
     def test_each_layer_has_a_different_geometry_type(self):
         layer_types = [layer.geom_type.name for layer in self.getShapefileLayers()]
-        self.assertCountEqual(layer_types, ['MultiPoint', 'Point', 'LineString'])
+        self.assertCountEqual(layer_types, ['LineString', 'Polygon', 'MultiPoint', 'Point', 'LineString', 'Polygon'])
 
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():
             self.assertIn(layer.srs.name, ('RGF93_Lambert_93', 'RGF93 / Lambert-93'))
-            self.assertCountEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean', 'tags'])
+            self.assertCountEqual(layer.fields, ['id', 'name'])
 
     def test_geometries_come_from_records(self):
-        layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
-        feature = layer_point[0]
-        self.assertEquals(str(feature['id']), str(self.point1.pk))
+        layers = self.getShapefileLayers()
+        geom_type_layer = {layer.name: layer for layer in layers}
+        feature = geom_type_layer['Point'][0]
+        self.assertEqual(str(feature['id']), str(self.point1.pk))
         self.assertTrue(feature.geom.geos.equals(self.point1.geom))
 
-        feature = layer_point[0]
-        self.assertEquals(str(feature['id']), str(self.point1.pk))
-        self.assertTrue(feature.geom.geos.equals(self.point1.geom))
+        feature = geom_type_layer['MultiPoint'][0]
+        self.assertEqual(str(feature['id']), str(self.multipoint.pk))
+        self.assertTrue(feature.geom.geos.equals(self.multipoint.geom))
 
-        feature = layer_point[0]
-        self.assertEquals(str(feature['id']), str(self.point1.pk))
-        self.assertTrue(feature.geom.geos.equals(self.point1.geom))
+        feature = geom_type_layer['LineString'][0]
+        self.assertEqual(str(feature['id']), str(self.line1.pk))
+        self.assertTrue(feature.geom.geos.equals(self.line1.geom))
 
     def test_attributes(self):
-        layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
+        layer_point, layer_linestring, layer_polygon, layer_multipoint, \
+        layer_multilinestring, layer_multipolygon = self.getShapefileLayers()
         feature = layer_point[0]
-        self.assertEquals(feature['name'].value, "Empty")
-        self.assertEquals(feature['tags'].value, "Tag1,Tag2")
+        self.assertEqual(feature['name'].value, self.point1.name)
 
 
 class CSVSerializerTests(TestCase):
