@@ -37,7 +37,7 @@ class ShapefileSerializer(TestCase):
         return layers
 
     def test_serializer_creates_one_layer_per_type(self):
-        self.assertEqual(len(self.getShapefileLayers()), 6)
+        self.assertEqual(len(self.getShapefileLayers()), 3)
 
     def test_each_layer_has_records_by_type(self):
         layer_point, layer_linestring, layer_multipoint = self.getShapefileLayers()
@@ -47,11 +47,11 @@ class ShapefileSerializer(TestCase):
 
     def test_each_layer_has_a_different_geometry_type(self):
         layer_types = [layer.geom_type.name for layer in self.getShapefileLayers()]
-        self.assertCountEqual(layer_types, ['LineString', 'Polygon', 'MultiPoint', 'Point', 'LineString', 'Polygon'])
+        self.assertCountEqual(layer_types, ['LineString', 'Polygon'])
 
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():
-            self.assertIn(layer.srs.name, ('RGF93_Lambert_93', 'RGF93 / Lambert-93'))
+            self.assertIn(layer.srs.name, ('RGF_1993_Lambert_93', 'RGF93_Lambert_93', 'RGF93 / Lambert-93'))
             self.assertCountEqual(layer.fields, ['id', 'name'])
 
     def test_geometries_come_from_records(self):
