@@ -321,7 +321,7 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
         self.login()
 
-        self.modelfactory.create()
+        self.obj = self.modelfactory.create()
         list_url = '{api_prefix}{modelname}s.geojson'.format(api_prefix=self.api_prefix,
                                                              modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
@@ -369,7 +369,7 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
         self.login()
 
-        obj = self.modelfactory.create()
+        self.obj = self.modelfactory.create()
         detail_url = '{api_prefix}{modelname}s/{id}.geojson'.format(api_prefix=self.api_prefix,
                                                                     modelname=self.model._meta.model_name,
                                                                     id=obj.pk)
