@@ -52,7 +52,7 @@ class ShapefileSerializer(TestCase):
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():
             self.assertIn(layer.srs.name, ('RGF_1993_Lambert_93', 'RGF93_Lambert_93', 'RGF93 / Lambert-93'))
-            self.assertCountEqual(layer.fields, ['id', 'name'])
+            self.assertCountEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean', 'tags'])
 
     def test_geometries_come_from_records(self):
         layers = self.getShapefileLayers()
