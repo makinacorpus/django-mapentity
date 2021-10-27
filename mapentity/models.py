@@ -14,12 +14,12 @@ from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.utils.formats import localize
 from django.utils.timezone import utc
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from rest_framework import permissions as rest_permissions
 
 from mapentity.templatetags.mapentity_tags import humanize_timesince
 from .settings import app_settings, API_SRID
-from .helpers import smart_urljoin, is_file_newer, capture_map_image, extract_attributes_html
+from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract_attributes_html
 
 
 # Used to create the matching url name
@@ -71,9 +71,7 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
     }
 
 
-class MapEntityMixin(models.Model):
-    attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
-
+class BaseMapEntityMixin(models.Model):
     _entity = None
     capture_map_image_waitfor = '.leaflet-tile-loaded'
 
@@ -86,7 +84,7 @@ class MapEntityMixin(models.Model):
         if hasattr(name, '_proxy____args'):
             name = name._proxy____args[0]  # untranslated
         # Whole "add" phrase translatable, but not catched  by makemessages
-        return _(u"Add a new %s" % name.lower())
+        return _("Add a new %s" % name.lower())
 
     @classmethod
     def get_entity_kind_permission(cls, entity_kind):
@@ -144,7 +142,7 @@ class MapEntityMixin(models.Model):
         image_path = self.get_map_image_path()
         if os.path.exists(image_path):
             os.unlink(image_path)
-        super(MapEntityMixin, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
     @classmethod
     def get_layer_url(cls):
@@ -201,7 +199,7 @@ class MapEntityMixin(models.Model):
     def prepare_map_image(self, rooturl):
         path = self.get_map_image_path()
         # Do nothing if image is up-to-date
-        if is_file_newer(path, self.get_date_update()):
+        if is_file_uptodate(path, self.get_date_update()):
             return False
         if self.get_geom() is None:
             size = app_settings['MAP_CAPTURE_SIZE']
@@ -266,7 +264,14 @@ class MapEntityMixin(models.Model):
         return False
 
 
-class LogEntry(MapEntityMixin, BaseLogEntry):
+class MapEntityMixin(BaseMapEntityMixin):
+    attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
+
+    class Meta:
+        abstract = True
+
+
+class LogEntry(BaseMapEntityMixin, BaseLogEntry):
     geom = None
     object_verbose_name = _("object")
 
@@ -289,7 +294,7 @@ class LogEntry(MapEntityMixin, BaseLogEntry):
 
     @property
     def object_display(self):
-        model_str = u"{}".format(self.content_type)
+        model_str = str(self.content_type)
         try:
             obj = self.get_edited_object()
             assert obj._entity, 'Unregistered model %s' % model_str

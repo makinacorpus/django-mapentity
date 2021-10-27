@@ -6,15 +6,17 @@ from collections import OrderedDict
 
 from django.db import DEFAULT_DB_ALIAS
 from django.db.utils import ProgrammingError
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views.generic.base import View
-from django.conf.urls import url, include
+from django.conf.urls import include, re_path
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import auth
 from django.contrib.auth.models import Permission
 
 from rest_framework import routers as rest_routers
 from rest_framework import serializers as rest_serializers
+from rest_framework_gis.fields import GeometryField
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
 from mapentity.settings import app_settings
@@ -25,7 +27,7 @@ from paperclip.settings import get_attachment_model
 logger = logging.getLogger(__name__)
 
 
-class MapEntityOptions(object):
+class MapEntityOptions:
     menu = True
     label = ''
     modelname = ''
@@ -111,13 +113,15 @@ class MapEntityOptions(object):
         if rest_viewset is None:
             _queryset = self.get_queryset()
             _serializer = self.get_serializer()
+            _geojson_serializer = self.get_geojson_serializer()
 
             class dynamic_viewset(mapentity_views.MapEntityViewSet):
                 queryset = _queryset
                 serializer_class = _serializer
+                geojson_serializer_class = _geojson_serializer
             rest_viewset = dynamic_viewset
 
-        self.rest_router.register(self.modelname + 's', rest_viewset, base_name=self.modelname)
+        self.rest_router.register(self.modelname + 's', rest_viewset, basename=self.modelname)
 
         # Returns Django URL patterns
         return self.__view_classes_to_url(*picked)
@@ -128,7 +132,20 @@ class MapEntityOptions(object):
         class Serializer(rest_serializers.ModelSerializer):
             class Meta:
                 model = _model
-                geo_field = app_settings['GEOM_FIELD_NAME']
+                id_field = 'id'
+                exclude = []
+
+        return Serializer
+
+    def get_geojson_serializer(self):
+        _model = self.model
+
+        class Serializer(GeoFeatureModelSerializer):
+            api_geom = GeometryField(read_only=True, precision=7)
+
+            class Meta:
+                model = _model
+                geo_field = 'api_geom'
                 id_field = 'id'
                 exclude = []
 
@@ -162,11 +179,11 @@ class MapEntityOptions(object):
         view_kind = view_class.get_entity_kind()
         url_path = self._url_path(view_kind)
         url_name = self.url_shortname(view_kind)
-        return url(url_path, view_class.as_view(), name=url_name)
+        return re_path(url_path, view_class.as_view(), name=url_name)
 
     def __view_classes_to_url(self, *view_classes):
         return [self.url_for(view_class) for view_class in view_classes] + \
-               [url(app_settings['DRF_API_URL_PREFIX'], include(self.rest_router.urls))]
+               [re_path(app_settings['DRF_API_URL_PREFIX'], include(self.rest_router.urls))]
 
     def url_shortname(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS
@@ -177,7 +194,7 @@ class MapEntityOptions(object):
         return '%s:%s' % (self.app_label, self.url_shortname(kind))
 
 
-class Registry(object):
+class Registry:
     def __init__(self):
         self.registry = OrderedDict()
         self.apps = {}
@@ -186,8 +203,6 @@ class Registry(object):
     def register(self, model, options=None, menu=None):
         """ Register model and returns URL patterns
         """
-        from .signals import post_register
-
         # Ignore models from not installed apps
         if not model._meta.installed:
             return []
@@ -208,7 +223,6 @@ class Registry(object):
             options.menu = menu
 
         self.registry[model] = options
-        post_register.send(sender=self, app_label=options.app_label, model=model)
 
         try:
             self.content_type_ids.append(model.get_content_type_id())

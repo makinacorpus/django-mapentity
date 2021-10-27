@@ -20,12 +20,14 @@ class ModelPermissionsTest(TestCase):
     def test_model_permissions_were_created(self):
         permissions = Permission.objects.filter(content_type=self.ctype)
         all_codenames = permissions.values_list('codename', flat=True)
-        self.assertCountEqual(all_codenames, [u'add_dummymodel',
-                                              u'change_dummymodel',
-                                              u'delete_dummymodel',
-                                              u'export_dummymodel',
-                                              u'read_dummymodel',
-                                              u'change_geom_dummymodel'])
+        self.assertListEqual(sorted(list(all_codenames)), ['add_dummymodel',
+                                              'change_dummymodel',
+                                              'change_geom_dummymodel',
+                                              'delete_dummymodel',
+                                              'export_dummymodel',
+                                              'publish_dummymodel',
+                                              'read_dummymodel',
+                                              'view_dummymodel'], all_codenames)
 
     def test_internal_user_has_necessary_permissions(self):
         internal_user = get_internal_user()
@@ -50,6 +52,6 @@ class NavBarPermissionsTest(TestCase):
         self.client.login(username=user.username, password='booh')
         response = self.client.get('/dummymodel/list/')
         self.assertContains(response, 'href="/dummymodel/add/">+</a>')
-        self.assertContains(response, '<a href="/dummymodel/list/" title="')
+        self.assertContains(response, '<a href="/dummymodel/list/"')
         self.assertNotContains(response, 'href="/mushroomspot/add/">+</a>')
-        self.assertNotContains(response, '<a href="/mushroomspot/list/" title="')
+        self.assertNotContains(response, '<a href="/mushroomspot/list/"')

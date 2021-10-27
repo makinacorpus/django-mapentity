@@ -182,3 +182,10 @@ LEAFLET_CONFIG = {
     ],
     'SPATIAL_EXTENT': (1.3, 43.7, 1.5, 43.5),
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MAPENTITY_CONFIG = {
+    'CONVERSION_SERVER': 'http://localhost/',
+    'CAPTURE_SERVER': 'http://localhost/',
+}

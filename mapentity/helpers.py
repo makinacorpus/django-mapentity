@@ -7,6 +7,7 @@ import string
 import time
 from datetime import datetime
 from mimetypes import types_map
+from urllib.parse import urljoin, quote
 
 import bs4
 import requests
@@ -17,9 +18,7 @@ from django.urls import resolve
 from django.http import HttpResponse
 from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import get_template
-from django.utils import six
 from django.utils import timezone
-from django.utils.six.moves.urllib.parse import urljoin, quote
 from django.utils.translation import get_language
 
 from .settings import app_settings, API_SRID
@@ -92,28 +91,6 @@ def wkt_to_geom(wkt, srid_from=None, silent=False):
         return None
 
 
-def transform_wkt(wkt, srid_from=None, srid_to=None, dim=3):
-    """
-    Changes SRID, and returns 3D wkt
-    """
-    if srid_from is None:
-        srid_from = API_SRID
-    if srid_to is None:
-        srid_to = settings.SRID
-    try:
-        geom = fromstr(wkt, srid=srid_from)
-        if srid_from != srid_to:
-            geom.transform(srid_to)
-        extracoords = ' 0.0' * (dim - 2)  # add missing dimensions
-        wkt3d = geom.wkt.replace(',', extracoords + ',')
-        wkt3d = wkt3d.replace(')', extracoords + ')')
-        return 'SRID=%s;%s' % (srid_to, wkt3d)
-    except (GDALException, GEOSException, TypeError, ValueError) as e:
-        if settings.DEBUG or not getattr(settings, 'TEST', False):
-            logger.error("wkt_to_geom('%s', %s, %s) : %s" % (wkt, srid_from, srid_to, e))
-        return None
-
-
 def smart_urljoin(base, path):
     if base[-1] != '/':
         base += '/'
@@ -122,7 +99,7 @@ def smart_urljoin(base, path):
     return urljoin(base, path)
 
 
-def is_file_newer(path, date_update, delete_empty=True):
+def is_file_uptodate(path, date_update, delete_empty=True):
     if not os.path.exists(path):
         return False
 
@@ -212,11 +189,12 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False):
 def convertit_download(url, destination, from_type=None, to_type='application/pdf', headers=None):
     # Mock for tests
     if getattr(settings, 'TEST', False):
-        open(destination, 'w').write("Mock\n")
-        return
+        with open(destination, 'w') as out_file:
+            out_file.write("Mock\n")
+            return
 
     url = convertit_url(url, from_type, to_type)
-    fd = open(destination, 'wb') if isinstance(destination, six.string_types) else destination
+    fd = open(destination, 'wb') if isinstance(destination, str) else destination
     download_to_stream(url, fd, headers=headers)
 
 

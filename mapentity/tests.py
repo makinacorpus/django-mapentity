@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import csv
-import json
 import hashlib
+import json
 import logging
 import os
 import shutil
@@ -10,6 +9,7 @@ from datetime import datetime
 from io import StringIO
 from unittest.mock import patch
 
+from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, LiveServerTestCase
@@ -17,14 +17,15 @@ from django.test.testcases import to_list
 from django.test.utils import override_settings
 from django.utils import html
 from django.utils.encoding import force_text
-from django.utils.http import http_date
-from django.utils.six.moves.urllib.parse import quote
+from django.utils.http import http_date, urlquote
 from django.utils.timezone import utc
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
+from freezegun import freeze_time
 
 from .factories import SuperUserFactory
 from .forms import MapEntityForm
 from .helpers import smart_urljoin
+from .settings import app_settings
 
 
 class AdjustDebugLevel():
@@ -46,6 +47,11 @@ class MapEntityTest(TestCase):
     modelfactory = None
     userfactory = None
     api_prefix = '/api/'
+    expected_json_geom = {}
+    maxDiff = None
+
+    def get_expected_json_attrs(self):
+        return {}
 
     def setUp(self):
         if os.path.exists(settings.MEDIA_ROOT):
@@ -78,7 +84,7 @@ class MapEntityTest(TestCase):
                 break
 
         if not form:
-            self.fail(u'Could not find form')
+            self.fail('Could not find form')
         return form
 
     def test_status(self):
@@ -128,6 +134,16 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.status_code, 200)
         response.content = allresponse.content
 
+    def test_callback_jsonlist(self):
+        if self.model is None:
+            return  # Abstract test should not run
+        self.login()
+        params = '?callback=json_decode'
+        # If no objects exist, should not fail.
+        response = self.client.get(self.model.get_jsonlist_url() + params)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'json_decode(', response.content)
+
     def test_basic_format(self):
         if self.model is None:
             return  # Abstract test should not run
@@ -136,6 +152,27 @@ class MapEntityTest(TestCase):
         for fmt in ('csv', 'shp', 'gpx'):
             response = self.client.get(self.model.get_format_list_url() + '?format=' + fmt)
             self.assertEqual(response.status_code, 200, u"")
+
+    def test_gpx_elevation(self):
+        if self.model is None:
+            return  # Abstract test should not run
+        self.login()
+        obj = self.modelfactory.create()
+        response = self.client.get(self.model.get_format_list_url() + '?format=gpx')
+        parsed = BeautifulSoup(response.content, 'lxml')
+        if hasattr(obj, 'geom_3d'):
+            self.assertGreater(len(parsed.findAll('ele')), 0)
+        else:
+            self.assertEqual(len(parsed.findAll('ele')), 0)
+
+    def test_no_basic_format_fail(self):
+        if self.model is None:
+            return  # Abstract test should not run
+        self.login()
+        self.modelfactory.create()
+
+        response = self.client.get(self.model.get_format_list_url() + '?format=')
+        self.assertEqual(response.status_code, 400)
 
     def test_no_html_in_csv(self):
         if self.model is None:
@@ -258,7 +295,10 @@ class MapEntityTest(TestCase):
 
     """
 
+    @freeze_time("2020-03-17")
     def test_api_list_for_model(self):
+        if self.get_expected_json_attrs is None:
+            return
         if self.model is None:
             return  # Abstract test should not run
         self.login()
@@ -268,12 +308,16 @@ class MapEntityTest(TestCase):
                                                           modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content.decode())
-        self.assertEqual(len(result), 1)
-        first_result = result[0]
-        self.assertEqual(first_result['id'], obj.pk)
+        content_json = response.json()
+        if hasattr(self, 'length'):
+            length = content_json[0].pop('length')
+            self.assertAlmostEqual(length, self.length)
+        self.assertEqual(content_json, [{'id': self.obj.pk, **self.get_expected_json_attrs()}])
 
+    @freeze_time("2020-03-17")
     def test_api_geojson_list_for_model(self):
+        if self.get_expected_json_attrs is None:
+            return
         if self.model is None:
             return  # Abstract test should not run
         self.login()
@@ -283,14 +327,24 @@ class MapEntityTest(TestCase):
                                                              modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content.decode())
-        self.assertEqual(result['type'], 'FeatureCollection')
-        self.assertEqual(len(result['features']), 1)
-        first_result = result['features'][0]
-        self.assertEqual(first_result['id'], obj.pk)
-        self.assertEqual(first_result['type'], 'Feature')
+        content_json = response.json()
+        if hasattr(self, 'length'):
+            length = content_json['features'][0]['properties'].pop('length')
+            self.assertAlmostEqual(length, self.length)
+        self.assertEqual(content_json, {
+            'type': 'FeatureCollection',
+            'features': [{
+                'id': self.obj.pk,
+                'type': 'Feature',
+                'geometry': self.expected_json_geom,
+                'properties': self.get_expected_json_attrs(),
+            }],
+        })
 
+    @freeze_time("2020-03-17")
     def test_api_detail_for_model(self):
+        if self.get_expected_json_attrs is None:
+            return
         if self.model is None:
             return  # Abstract test should not run
         self.login()
@@ -301,10 +355,17 @@ class MapEntityTest(TestCase):
                                                             id=obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content.decode())
-        self.assertEqual(result['id'], obj.pk)
 
+        content_json = response.json()
+        if hasattr(self, 'length'):
+            length = content_json.pop('length')
+            self.assertAlmostEqual(length, self.length)
+        self.assertEqual(content_json, {'id': self.obj.pk, **self.get_expected_json_attrs()})
+
+    @freeze_time("2020-03-17")
     def test_api_geojson_detail_for_model(self):
+        if self.get_expected_json_attrs is None:
+            return
         if self.model is None:
             return  # Abstract test should not run
         self.login()
@@ -315,8 +376,16 @@ class MapEntityTest(TestCase):
                                                                     id=obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content.decode())
-        self.assertEqual(result['id'], obj.pk)
+        content_json = response.json()
+        if hasattr(self, 'length'):
+            length = content_json['properties'].pop('length')
+            self.assertAlmostEqual(length, self.length)
+        self.assertEqual(content_json, {
+            'id': self.obj.pk,
+            'type': 'Feature',
+            'geometry': self.expected_json_geom,
+            'properties': self.get_expected_json_attrs(),
+        })
 
 
 class MapEntityLiveTest(LiveServerTestCase):
@@ -324,10 +393,13 @@ class MapEntityLiveTest(LiveServerTestCase):
     userfactory = None
     modelfactory = None
 
+    def setUp(self):
+        app_settings['SENDFILE_HTTP_HEADER'] = None
+
     def _pre_setup(self):
         # Workaround https://code.djangoproject.com/ticket/10827
         ContentType.objects.clear_cache()
-        return super(MapEntityLiveTest, self)._pre_setup()
+        return super()._pre_setup()
 
     def url_for(self, path):
         return smart_urljoin(self.live_server_url, path)
@@ -428,7 +500,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertTrue(os.path.exists(image_path))
 
         mapimage_url = '%s%s?context' % (self.live_server_url, obj.get_detail_url())
-        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % quote(mapimage_url)
+        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % urlquote(mapimage_url)
         url_called = mock_requests.get.call_args_list[0]
         self.assertTrue(url_called.startswith(screenshot_url))
 
@@ -445,3 +517,6 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         response = self.client.get(obj.map_image_url)
         self.assertEqual(response.status_code, 200 if obj.is_public() else 403)
+
+    def tearDown(self):
+        app_settings['SENDFILE_HTTP_HEADER'] = None

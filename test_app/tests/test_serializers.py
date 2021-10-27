@@ -10,7 +10,6 @@ from django.test.utils import override_settings
 from django.utils import translation
 
 from mapentity.serializers import ZipShapeSerializer, CSVSerializer
-from mapentity.serializers.shapefile import shapefile_files
 
 from ..models import MushroomSpot, Tag
 
@@ -30,14 +29,10 @@ class ShapefileSerializer(TestCase):
         self.serializer.serialize(MushroomSpot.objects.all(), stream=response,
                                   fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
 
-    def tearDown(self):
-        for layer_file in self.serializer.layers.values():
-            for subfile in shapefile_files(layer_file):
-                os.remove(subfile)
-
     def getShapefileLayers(self):
-        shapefiles = self.serializer.layers.values()
-        datasources = [gdal.DataSource(s) for s in shapefiles]
+        shapefiles = self.serializer.path_directory
+        shapefiles = [shapefile for shapefile in os.listdir(shapefiles) if shapefile[-3:] == "shp"]
+        datasources = [gdal.DataSource(os.path.join(self.serializer.path_directory, s)) for s in shapefiles]
         layers = [ds[0] for ds in datasources]
         return layers
 
