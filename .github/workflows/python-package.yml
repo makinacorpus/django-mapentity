@@ -30,7 +30,8 @@ jobs:
         sudo apt-get update
         sudo apt-get -y install libproj-dev binutils gdal-bin libgdal-dev libsqlite3-mod-spatialite libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
         python -m pip install --upgrade pip setuptools wheel
-        pip install Django==${{ matrix.django-version }} -U;
+        pip install .[dev]
+        pip install Django==${{ matrix.django-version }} -U
 
     - name: Check pending migrations
       run: |
