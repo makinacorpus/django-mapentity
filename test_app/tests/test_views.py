@@ -67,6 +67,13 @@ class DummyModelFunctionalTest(MapEntityTest):
     def get_good_data(self):
         return {'geom': '{"type": "Point", "coordinates":[0, 0]}'}
 
+    def get_expected_json_attrs(self):
+        return {'date_update': '2020-03-17T00:00:00Z',
+                'geom': None,
+                'id': 1,
+                'name': '',
+                'public': False}
+
 
 class DummyModelLiveTest(MapEntityLiveTest):
     userfactory = SuperUserFactory
