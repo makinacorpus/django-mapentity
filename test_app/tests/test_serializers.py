@@ -40,14 +40,10 @@ class ShapefileSerializer(TestCase):
         self.assertEqual(len(self.getShapefileLayers()), 6)
 
     def test_each_layer_has_records_by_type(self):
-        layer_multipolygon, layer_linestring, layer_multilinestring, layer_point, \
-        layer_multipoint, layer_polygon = self.getShapefileLayers()
+        layer_point, layer_linestring, layer_multipoint = self.getShapefileLayers()
         self.assertEqual(len(layer_point), 1)
         self.assertEqual(len(layer_linestring), 1)
         self.assertEqual(len(layer_multipoint), 1)
-        self.assertEqual(len(layer_polygon), 1)
-        self.assertEqual(len(layer_multilinestring), 1)
-        self.assertEqual(len(layer_multipolygon), 1)
 
     def test_each_layer_has_a_different_geometry_type(self):
         layer_types = [layer.geom_type.name for layer in self.getShapefileLayers()]
@@ -74,8 +70,7 @@ class ShapefileSerializer(TestCase):
         self.assertTrue(feature.geom.geos.equals(self.line1.geom))
 
     def test_attributes(self):
-        layer_point, layer_linestring, layer_polygon, layer_multipoint, \
-        layer_multilinestring, layer_multipolygon = self.getShapefileLayers()
+        layer_point, layer_linestring, layer_multipoint = self.getShapefileLayers()
         feature = layer_point[0]
         self.assertEqual(feature['name'].value, self.point1.name)
 
