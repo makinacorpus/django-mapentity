@@ -36,7 +36,7 @@ setup(
         'django-tinymce',
         'django-weasyprint',
         'djangorestframework',
-        'djangorestframework-gis<=0.16',
+        'djangorestframework-gis',
         'django-modelcluster',
         'easy-thumbnails',
         'fiona',
@@ -45,7 +45,7 @@ setup(
         'lxml',
         'paperclip',
         'requests',
-        'WeasyPrint',
+        'WeasyPrint<53',  # 53 required pango 1.44+ not available on old ubuntu
     ],
     tests_require=tests_require,
     extras_require={
