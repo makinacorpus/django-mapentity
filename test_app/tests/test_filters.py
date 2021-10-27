@@ -6,7 +6,7 @@ from django.conf import settings
 
 from mapentity.settings import API_SRID
 from mapentity.filters import PythonPolygonFilter, MapEntityFilterSet
-from ..models import MushroomSpot, WeatherStation
+from ..models import MushroomSpot
 
 
 class PolygonTest(object):

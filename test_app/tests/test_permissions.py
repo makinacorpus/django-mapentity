@@ -20,14 +20,15 @@ class ModelPermissionsTest(TestCase):
     def test_model_permissions_were_created(self):
         permissions = Permission.objects.filter(content_type=self.ctype)
         all_codenames = permissions.values_list('codename', flat=True)
-        self.assertListEqual(sorted(list(all_codenames)), ['add_dummymodel',
-                                              'change_dummymodel',
-                                              'change_geom_dummymodel',
-                                              'delete_dummymodel',
-                                              'export_dummymodel',
-                                              'publish_dummymodel',
-                                              'read_dummymodel',
-                                              'view_dummymodel'], all_codenames)
+        self.assertListEqual(sorted(list(all_codenames)),
+                             ['add_dummymodel',
+                              'change_dummymodel',
+                              'change_geom_dummymodel',
+                              'delete_dummymodel',
+                              'export_dummymodel',
+                              'publish_dummymodel',
+                              'read_dummymodel',
+                              'view_dummymodel'], all_codenames)
 
     def test_internal_user_has_necessary_permissions(self):
         internal_user = get_internal_user()
