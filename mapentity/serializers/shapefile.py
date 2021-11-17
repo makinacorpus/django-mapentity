@@ -161,8 +161,8 @@ def shape_write(shape_directory, iterable, model, columns, get_geom, geom_type, 
         geom = get_geom(item)
         if geom:
             geom = transform(geom)
-        shape.write({'geometry': json.loads(geom.json),
-                     'properties': get_serialized_properties(model, item, columns, columns_headers)})
+            shape.write({'geometry': json.loads(geom.json),
+                         'properties': get_serialized_properties(model, item, columns, columns_headers)})
     shape.close()
 
 

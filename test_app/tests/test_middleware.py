@@ -44,11 +44,11 @@ class AutoLoginTest(TestCase):
         obj = DummyModelFactory.create()
         middleware.AUTOLOGIN_IPS = ['1.2.3.4']
         attachment = AttachmentFactory.create(content_object=obj)
-        response = self.client.get(attachment.attachment_file.url,
+        response = self.client.get("/media/%s" % attachment.attachment_file,
                                    REMOTE_ADDR='1.2.3.5')
         self.assertEqual(response.status_code, 403)
         with mock.patch('django.contrib.auth.models._user_has_perm', return_value=True):
-            response = self.client.get(attachment.attachment_file.url,
+            response = self.client.get("/media/%s" % attachment.attachment_file,
                                        REMOTE_ADDR='1.2.3.4')
         self.assertEqual(response.status_code, 200)
 

@@ -150,7 +150,7 @@ class MapEntityTest(TestCase):
         self.modelfactory.create()
         for fmt in ('csv', 'shp', 'gpx'):
             response = self.client.get(self.model.get_format_list_url() + '?format=' + fmt)
-            self.assertEqual(response.status_code, 200, u"")
+            self.assertEqual(response.status_code, 200)
 
     def test_gpx_elevation(self):
         if self.model is None:

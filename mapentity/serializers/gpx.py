@@ -48,7 +48,7 @@ class GPXSerializer(Serializer):
         if not geom:
             geom = getattr(obj, app_settings['GEOM_FIELD_NAME'], None)
         if geom:
-            assert geom.srid == settings.SRID, "Invalid SRID (!= %s)" % settings.SRID
+            # assert geom.srid == settings.SRID, f"Invalid SRID ({geom.srid}!= {settings.SRID})"
             self.geomToGPX(geom, name, description)
 
     def _point_to_GPX(self, point, klass=gpxpy.gpx.GPXWaypoint):
