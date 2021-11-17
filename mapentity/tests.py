@@ -348,10 +348,10 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
         self.login()
 
-        obj = self.modelfactory.create()
+        self.obj = self.modelfactory.create()
         detail_url = '{api_prefix}{modelname}s/{id}'.format(api_prefix=self.api_prefix,
                                                             modelname=self.model._meta.model_name,
-                                                            id=obj.pk)
+                                                            id=self.obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
 
@@ -372,7 +372,7 @@ class MapEntityTest(TestCase):
         self.obj = self.modelfactory.create()
         detail_url = '{api_prefix}{modelname}s/{id}.geojson'.format(api_prefix=self.api_prefix,
                                                                     modelname=self.model._meta.model_name,
-                                                                    id=obj.pk)
+                                                                    id=self.obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
         content_json = response.json()
@@ -387,6 +387,7 @@ class MapEntityTest(TestCase):
         })
 
 
+@override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class MapEntityLiveTest(LiveServerTestCase):
     model = None
     userfactory = None

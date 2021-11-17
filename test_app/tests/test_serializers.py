@@ -47,7 +47,7 @@ class ShapefileSerializer(TestCase):
 
     def test_each_layer_has_a_different_geometry_type(self):
         layer_types = [layer.geom_type.name for layer in self.getShapefileLayers()]
-        self.assertCountEqual(layer_types, ['LineString', 'Polygon', 'Point'])
+        self.assertCountEqual(layer_types, ['MultiPoint', 'Point', 'LineString'])
 
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():

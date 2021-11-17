@@ -1,6 +1,7 @@
 from django.conf import settings
-from django.conf.urls import url
-from django.urls import path, include
+from django.conf.urls import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.urls import path, include, re_path
 from django.contrib import admin
 from django.views.generic import RedirectView
 from django.views.static import serve
@@ -22,7 +23,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('test/document/dummymodel-<int:pk>.odt', DummyDocumentOdt.as_view(), name="dummymodel_odt"),
     path('test/document/dummymodel-<int:pk>.pdf', DummyDocumentWeasyprint.as_view(), name="dummymodel_pdf"),
-    url(r'^media/(?P<path>.*)$', serve, {
+    re_path(r'^media/(?P<path>.*)$', serve, {
         'document_root': settings.MEDIA_ROOT,
-    })
+    }),
 ]
+
+urlpatterns += staticfiles_urlpatterns()
+urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
