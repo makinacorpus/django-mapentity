@@ -1,6 +1,11 @@
 import factory
 
 from django.contrib.auth import get_user_model
+from faker import Faker
+from faker.providers import geo
+
+fake = Faker('fr_FR')
+fake.add_provider(geo)
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -48,3 +53,12 @@ class UserFactory(factory.django.DjangoModelFactory):
 class SuperUserFactory(UserFactory):
     is_superuser = True
     is_staff = True
+
+
+class PointFactory(factory.django.DjangoModelFactory):
+    @factory.lazy_attribute
+    def geom(self):
+        lat, lon, *other = fake.local_latlng(country_code='FR')
+        point = Point(float(lon), float(lat), srid=4326)
+        point.transform(2154)
+        return point

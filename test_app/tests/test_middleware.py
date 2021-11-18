@@ -13,8 +13,8 @@ from mapentity.factories import UserFactory
 from mapentity.middleware import AutoLoginMiddleware, get_internal_user
 from unittest import mock
 
-from .test_views import DummyModelFactory, AttachmentFactory
-
+from .test_views import AttachmentFactory
+from .factories import DummyModelFactory
 
 User = get_user_model()
 

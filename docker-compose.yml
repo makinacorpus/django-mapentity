@@ -1,0 +1,29 @@
+version: "3"
+services:
+  convertit:
+    image: makinacorpus/convertit:latest
+
+  screamshotter:
+    image: makinacorpus/screamshotter:v2
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      - ./:/code/src
+    depends_on:
+      - screamshotter
+      - convertit
+    user: ${UID:-1000}:${GID:-1000}
+    command: /code/venv/bin/python ./manage.py runserver 0.0.0.0:8000
+    networks:
+      default:
+        aliases:
+          - ${SERVER_NAME}
+
+volumes:
+  postgres:
+  redis:
