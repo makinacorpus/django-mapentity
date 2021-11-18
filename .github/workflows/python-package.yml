@@ -39,7 +39,8 @@ jobs:
 
     - name: Test with coverage
       run: |
-        coverage run ./manage.py test
+        coverage run ./manage.py test -v3
+        coverage report -m
 
     - name: Coverage upload
       run: |
