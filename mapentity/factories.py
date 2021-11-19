@@ -1,6 +1,7 @@
 import factory
 
 from django.contrib.auth import get_user_model
+from django.contrib.gis.geos import Point
 from faker import Faker
 from faker.providers import geo
 
