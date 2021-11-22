@@ -1,4 +1,6 @@
 import os
+from distutils.command.build import build
+
 from setuptools import setup, find_packages
 
 
@@ -9,6 +11,21 @@ tests_require = [
     'factory_boy',
     'coverage',
 ]
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+
+class BuildCommand(build):
+    def run(self):
+        """ Compile translation when install or build project. gettext should be installed """
+        super().run()
+        from django.core.management import call_command
+        call_command('compilemessages')
+
+
+with open(os.path.join(here, 'mapentity', 'VERSION')) as version_file:
+    VERSION = version_file.read().strip()
+
 
 setup(
     name='mapentity',
@@ -21,6 +38,8 @@ setup(
     long_description=(open(os.path.join(here, 'README.rst')).read() + '\n\n' +
                       open(os.path.join(here, 'CHANGES')).read()),
     license='BSD, see LICENSE file.',
+    setup_requires=['django'],  # allow compilemessage to work in setup.py
+    cmdclass={"build": BuildCommand},
     install_requires=[
         'BeautifulSoup4',
         'cairocffi',
@@ -57,6 +76,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
+    python_requires='>=3.6',
     classifiers=['Topic :: Utilities',
                  'Natural Language :: English',
                  'Operating System :: OS Independent',
@@ -64,5 +84,5 @@ setup(
                  'Environment :: Web Environment',
                  'Framework :: Django',
                  'Development Status :: 5 - Production/Stable',
-                 'Programming Language :: Python :: 3.5'],
+                 'Programming Language :: Python :: 3'],
 )
