@@ -419,7 +419,6 @@ href="/convert/?url=/document/dummymodel-{}.odt&to=doc">\
 href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
 
 
-
 class ViewPermissionsTest(BaseTest):
     def setUp(self):
         self.login()
