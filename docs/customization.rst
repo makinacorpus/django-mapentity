@@ -151,9 +151,11 @@ To use MapEntity with Weasyprint, you just need to activate it in the ``settings
 Replace::
 
     'MAPENTITY_WEASYPRINT': False,
+
 by::
 
     'MAPENTITY_WEASYPRINT': True,
+
 
 If you want to include images that are not SVG or PNG, you will need to install GDK-PixBuf
 

@@ -29,7 +29,7 @@ with open(os.path.join(here, 'mapentity', 'VERSION')) as version_file:
 
 setup(
     name='mapentity',
-    version='6.1.1.dev0',
+    version=VERSION,
     author='Makina Corpus',
     author_email='geobi@makina-corpus.com',
     url='https://github.com/makinacorpus/django-mapentity',
