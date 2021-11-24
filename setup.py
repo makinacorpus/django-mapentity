@@ -38,7 +38,7 @@ setup(
     long_description=(open(os.path.join(here, 'README.rst')).read() + '\n\n' +
                       open(os.path.join(here, 'CHANGES')).read()),
     license='BSD, see LICENSE file.',
-    setup_requires=['django'],  # allow compilemessage to work in setup.py
+    setup_requires=['django'],  # allow compilemessages to work in setup.py
     cmdclass={"build": BuildCommand},
     install_requires=[
         'BeautifulSoup4',
