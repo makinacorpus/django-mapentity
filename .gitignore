@@ -12,3 +12,4 @@ __pycache__
 /media/
 /docs/_build/
 /README.html
+/.coverage
