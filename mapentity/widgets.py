@@ -1,10 +1,10 @@
-from django.template.loader import render_to_string
-from django.forms import widgets as django_widgets
-from leaflet.forms.widgets import LeafletWidget
 from django import forms
+from django.forms import widgets as django_widgets
+from django.template.loader import render_to_string
+from leaflet.forms.widgets import LeafletWidget
 
-from .settings import API_SRID
 from .helpers import wkt_to_geom
+from .settings import API_SRID
 
 
 class MapWidget(LeafletWidget):

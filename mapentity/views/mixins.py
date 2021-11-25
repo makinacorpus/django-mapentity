@@ -5,9 +5,9 @@ from django.contrib.gis.db.models import GeometryField
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
 
-from ..registry import registry
 from ..filters import MapEntityFilterSet
 from ..forms import MapEntityForm
+from ..registry import registry
 from ..serializers import json_django_dumps
 
 logger = logging.getLogger(__name__)

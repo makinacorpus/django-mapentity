@@ -1,5 +1,6 @@
 import django_filters
 from django import forms
+
 from .generic import MapEntityList
 from ..filters import BaseMapEntityFilterSet
 from ..models import LogEntry

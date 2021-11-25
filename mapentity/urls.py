@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.urls import path, re_path, include
 
-from .settings import app_settings
 from .registry import registry
+from .settings import app_settings
 from .views import (map_screenshot, history_delete,
                     serve_attachment, JSSettings, Convert)
+
 if app_settings['ACTION_HISTORY_ENABLED']:
     from .models import LogEntry
 

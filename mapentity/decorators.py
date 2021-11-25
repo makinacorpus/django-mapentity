@@ -1,19 +1,19 @@
 from functools import wraps
 
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
+from django.core.cache import caches
+from django.core.exceptions import PermissionDenied
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import last_modified as cache_last_modified
-from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import PermissionDenied
-from django.core.cache import caches
-from django.contrib.auth.decorators import user_passes_test
-from django.contrib import messages
-from django.views.generic.edit import BaseUpdateView
 from django.views.generic.detail import BaseDetailView
+from django.views.generic.edit import BaseUpdateView
 
-from .settings import app_settings
-from .helpers import user_has_perm
 from . import models as mapentity_models
+from .helpers import user_has_perm
+from .settings import app_settings
 
 
 def view_permission_required(login_url=None, raise_exception=None):

@@ -1,37 +1,36 @@
-import os
 import json
 import logging
+import os
 from datetime import datetime
 
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest
-from django.utils.translation import gettext_lazy as _
-from django.utils.decorators import method_decorator
-from django.utils.encoding import force_str
-from django.views import static
-from django.views.generic.detail import DetailView
-from django.views.generic import View
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic.list import ListView
-from django.template.exceptions import TemplateDoesNotExist
-from django.template.defaultfilters import slugify
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from djappypod.response import OdtTemplateResponse
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.template.defaultfilters import slugify
+from django.template.exceptions import TemplateDoesNotExist
+from django.utils.decorators import method_decorator
+from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
+from django.views import static
+from django.views.generic import View
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.list import ListView
 from django_weasyprint import WeasyTemplateResponseMixin
+from djappypod.response import OdtTemplateResponse
 
-from ..settings import app_settings
-from .. import models as mapentity_models
-from ..helpers import convertit_url, download_to_stream, user_has_perm
-from ..decorators import save_history, view_permission_required
-from ..forms import AttachmentForm
-from ..models import LogEntry, ADDITION, CHANGE, DELETION
-from .. import serializers as mapentity_serializers
-from ..helpers import suffix_for, name_for, smart_get_template
 from .base import history_delete, BaseListView
 from .mixins import (ModelViewMixin, FormViewMixin)
-
+from .. import models as mapentity_models
+from .. import serializers as mapentity_serializers
+from ..decorators import save_history, view_permission_required
+from ..forms import AttachmentForm
+from ..helpers import convertit_url, download_to_stream, user_has_perm
+from ..helpers import suffix_for, name_for, smart_get_template
+from ..models import LogEntry, ADDITION, CHANGE, DELETION
+from ..settings import app_settings
 
 logger = logging.getLogger(__name__)
 

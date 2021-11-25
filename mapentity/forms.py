@@ -1,21 +1,19 @@
 import copy
 
-from django import forms
-from django.conf import settings
-from django.core.exceptions import FieldDoesNotExist
-from django.utils.translation import gettext_lazy as _
-from django.contrib.gis.db.models.fields import GeometryField
-
+from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Button, HTML, Submit
-from crispy_forms.bootstrap import FormActions
-from tinymce.widgets import TinyMCE
+from django import forms
+from django.conf import settings
+from django.contrib.gis.db.models.fields import GeometryField
+from django.core.exceptions import FieldDoesNotExist
+from django.utils.translation import gettext_lazy as _
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
+from tinymce.widgets import TinyMCE
 
-
+from .models import ENTITY_PERMISSION_UPDATE_GEOM
 from .settings import app_settings
 from .widgets import MapWidget
-from .models import ENTITY_PERMISSION_UPDATE_GEOM
 
 if 'modeltranslation' in settings.INSTALLED_APPS:
     from modeltranslation.translator import translator, NotRegistered
