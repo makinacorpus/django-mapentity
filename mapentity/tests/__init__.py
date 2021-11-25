@@ -6,6 +6,7 @@ import shutil
 import time
 from datetime import datetime
 from io import StringIO
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from bs4 import BeautifulSoup
@@ -22,12 +23,12 @@ from django.utils.translation import gettext_lazy as _
 from freezegun import freeze_time
 
 from .factories import SuperUserFactory
-from .forms import MapEntityForm
-from .helpers import smart_urljoin
-from .settings import app_settings
+from ..forms import MapEntityForm
+from ..helpers import smart_urljoin
+from ..settings import app_settings
 
 
-class AdjustDebugLevel():
+class AdjustDebugLevel:
     def __init__(self, name, level):
         self.logger = logging.getLogger(name)
         self.old_level = self.logger.level
@@ -40,7 +41,7 @@ class AdjustDebugLevel():
         self.logger.setLevel(self.old_level)
 
 
-@override_settings(MEDIA_ROOT='/tmp/mapentity-media')
+@override_settings(MEDIA_ROOT=TemporaryDirectory().name)
 class MapEntityTest(TestCase):
     model = None
     modelfactory = None
