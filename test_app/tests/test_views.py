@@ -58,13 +58,13 @@ class DummyModelFunctionalTest(MapEntityTest):
     userfactory = SuperUserFactory
     model = DummyModel
     modelfactory = DummyModelFactory
-
-    # TODO: find a way to fix these tests
-    def test_api_geojson_list_for_model(self):
-        pass
-
-    def test_api_geojson_detail_for_model(self):
-        pass
+    expected_json_geom = {
+        "type": "Point",
+        "coordinates": [
+            0.0,
+            0.0
+        ]
+    }
 
     def get_good_data(self):
         return {'geom': '{"type": "Point", "coordinates":[0, 0]}'}
@@ -72,7 +72,6 @@ class DummyModelFunctionalTest(MapEntityTest):
     def get_expected_json_attrs(self):
         return {'date_update': '2020-03-17T00:00:00Z',
                 'geom': self.obj.geom.ewkt,
-                'id': self.obj.pk,
                 'name': self.obj.name,
                 'public': False}
 

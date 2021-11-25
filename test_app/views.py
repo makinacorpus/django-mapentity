@@ -1,6 +1,11 @@
+from django.contrib.gis.db.models.functions import Transform
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
+
 from mapentity import views as mapentity_views
+from mapentity.views import MapEntityViewSet
 
 from .models import DummyModel
+from .serializers import DummySerializer, DummyGeojsonSerializer
 
 
 class DummyList(mapentity_views.MapEntityList):
@@ -41,3 +46,13 @@ class DummyUpdate(mapentity_views.MapEntityUpdate):
 
 class DummyDelete(mapentity_views.MapEntityDelete):
     model = DummyModel
+
+
+class DummyViewSet(MapEntityViewSet):
+    model = DummyModel
+    serializer_class = DummySerializer
+    geojson_serializer_class = DummyGeojsonSerializer
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
+    def get_queryset(self):
+        return self.model.objects.all().annotate(api_geom=Transform('geom', 4326))
