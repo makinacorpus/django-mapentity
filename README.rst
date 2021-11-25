@@ -12,11 +12,10 @@ Works with Python 3.6+ and Django 2.2+
 .. image:: https://img.shields.io/pypi/v/mapentity.svg
     :target: https://pypi.python.org/pypi/mapentity
 
-.. image:: https://img.shields.io/travis/makinacorpus/django-mapentity.svg
-    :target: https://travis-ci.org/makinacorpus/django-mapentity
+.. image:: https://github.com/makinacorpus/django-mapentity/actions/workflows/python-ci.yml/badge.svg
 
-.. image:: https://codecov.io/gh/Georiviere/Georiviere-admin/branch/master/graph/badge.svg?token=UE1LM2RJIO
-    :target: https://codecov.io/gh/Georiviere/Georiviere-admin
+.. image:: https://codecov.io/gh/makinacorpus/django-mapentity/branch/master/graph/badge.svg?token=lFNYhcVjuz
+    :target: https://codecov.io/gh/makinacorpus/django-mapentity
 
 
 `See the full documentation <http://django-mapentity.readthedocs.org/>`_.
