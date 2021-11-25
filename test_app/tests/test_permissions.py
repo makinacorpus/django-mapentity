@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from mapentity.middleware import get_internal_user, clear_internal_user_cache
 from mapentity.helpers import user_has_perm
-from mapentity.factories import UserFactory
+from mapentity.tests.factories import UserFactory
 
 from ..models import DummyModel
 

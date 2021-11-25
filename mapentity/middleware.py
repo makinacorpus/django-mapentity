@@ -1,13 +1,12 @@
-from urllib.parse import urlparse
-
-from netifaces import interfaces, ifaddresses, AF_INET
 import logging
 import socket
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.db import DatabaseError
+from netifaces import interfaces, ifaddresses, AF_INET
 
 from .settings import app_settings
 

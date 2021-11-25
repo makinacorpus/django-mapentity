@@ -3,7 +3,6 @@ from copy import deepcopy
 
 from django.conf import settings
 
-
 API_SRID = 4326
 
 _DEFAULT_MAP_STYLES = {

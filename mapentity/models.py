@@ -1,26 +1,25 @@
-import os
 import math
-from PIL import Image, ImageDraw, ImageFont
+import os
 
-from django.contrib.contenttypes.fields import GenericRelation
-from django.db import models
-from django.db.utils import OperationalError
+from PIL import Image, ImageDraw, ImageFont
 from django.conf import settings
+from django.contrib import auth
+from django.contrib.admin.models import ADDITION, CHANGE, DELETION
+from django.contrib.admin.models import LogEntry as BaseLogEntry
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist
+from django.db import models
+from django.db.utils import OperationalError
 from django.urls import reverse, NoReverseMatch
-from django.contrib import auth
-from django.contrib.admin.models import LogEntry as BaseLogEntry
-from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.utils.formats import localize
 from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from rest_framework import permissions as rest_permissions
 
 from mapentity.templatetags.mapentity_tags import humanize_timesince
-from .settings import app_settings, API_SRID
 from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract_attributes_html
-
+from .settings import app_settings, API_SRID
 
 # Used to create the matching url name
 ENTITY_LAYER = "layer"

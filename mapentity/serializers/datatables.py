@@ -1,8 +1,8 @@
 import math
 
 from django.core.serializers.base import Serializer
-from django.utils.translation import gettext_lazy as _
 from django.db.models.fields.related import ForeignKey, ManyToManyField
+from django.utils.translation import gettext_lazy as _
 
 
 class DatatablesSerializer(Serializer):

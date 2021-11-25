@@ -14,10 +14,10 @@ import requests
 from django.conf import settings
 from django.contrib.gis.gdal.error import GDALException
 from django.contrib.gis.geos import GEOSException, fromstr
-from django.urls import resolve
 from django.http import HttpResponse
 from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import get_template
+from django.urls import resolve
 from django.utils import timezone
 from django.utils.translation import get_language
 

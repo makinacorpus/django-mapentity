@@ -1,26 +1,26 @@
-import fiona
-from fiona.crs import from_epsg
-from io import BytesIO
 import json
 import os
 import shutil
-import uuid
 import unicodedata
+import uuid
 import zipfile
+from io import BytesIO
 
-from django.db.models.fields.related import ForeignKey, ManyToManyField
+import fiona
 from django.contrib.gis.db.models.fields import (GeometryField, GeometryCollectionField,
                                                  PointField, LineStringField, PolygonField,
                                                  MultiPointField, MultiLineStringField, MultiPolygonField)
 from django.contrib.gis.geos import Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon
 from django.contrib.gis.geos.collections import GeometryCollection
-from django.core.serializers.base import Serializer
 from django.core.exceptions import FieldDoesNotExist
+from django.core.serializers.base import Serializer
+from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext as _
+from fiona.crs import from_epsg
 
-from ..settings import app_settings
 from .helpers import smart_plain_text, field_as_string
+from ..settings import app_settings
 
 os.environ["SHAPE_ENCODING"] = "UTF-8"
 

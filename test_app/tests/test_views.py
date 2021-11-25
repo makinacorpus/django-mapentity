@@ -1,7 +1,9 @@
-import factory
 import json
 import os
 import shutil
+from unittest import mock
+
+import factory
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
@@ -11,11 +13,10 @@ from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 from faker import Faker
 from faker.providers import geo
-from unittest import mock
 
-from mapentity.factories import SuperUserFactory, UserFactory
 from mapentity.registry import app_settings
 from mapentity.tests import MapEntityTest, MapEntityLiveTest
+from mapentity.tests.factories import SuperUserFactory, UserFactory
 from mapentity.views import serve_attachment, Convert, JSSettings
 from .factories import DummyModelFactory
 from ..models import DummyModel, Attachment, FileType

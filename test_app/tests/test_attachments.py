@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from paperclip.settings import get_attachment_model, get_filetype_model
 
-from mapentity.factories import UserFactory
+from mapentity.tests.factories import UserFactory
 from mapentity.views.generic import MapEntityDetail
 
 from ..models import DummyModel

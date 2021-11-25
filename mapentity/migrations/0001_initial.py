@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations
 import django.contrib.admin.models
+from django.db import migrations
+
 import mapentity.models
 
 

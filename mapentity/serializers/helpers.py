@@ -1,7 +1,7 @@
-from decimal import Decimal
-from functools import partial
 import html
 import json
+from decimal import Decimal
+from functools import partial
 
 from django.core.serializers import serialize
 from django.core.serializers.json import DjangoJSONEncoder

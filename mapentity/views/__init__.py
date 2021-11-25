@@ -1,3 +1,14 @@
+from .api import (
+    MapEntityLayer,
+    MapEntityJsonList,
+    MapEntityViewSet
+)
+from .base import (
+    serve_attachment,
+    JSSettings,
+    map_screenshot,
+    history_delete,
+)
 from .generic import (
     Convert,
     MapEntityList,
@@ -14,25 +25,13 @@ from .generic import (
     MapEntityUpdate,
     MapEntityDelete,
 )
-from .api import (
-    MapEntityLayer,
-    MapEntityJsonList,
-    MapEntityViewSet
-)
+from .logentry import LogEntryList
 from .mixins import (
     HttpJSONResponse,
     JSONResponseMixin,
     LastModifiedMixin,
     ModelViewMixin,
 )
-from .base import (
-    serve_attachment,
-    JSSettings,
-    map_screenshot,
-    history_delete,
-)
-from .logentry import LogEntryList
-
 
 MAPENTITY_GENERIC_VIEWS = [
     MapEntityLayer,

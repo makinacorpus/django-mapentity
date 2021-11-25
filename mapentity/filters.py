@@ -1,9 +1,8 @@
-from django.db.models.fields.related import ManyToOneRel, ForeignKey
 from django.conf import settings
-
+from django.contrib.gis import forms
+from django.db.models.fields.related import ManyToOneRel, ForeignKey
 from django_filters import FilterSet, Filter, ModelMultipleChoiceFilter
 from django_filters.filterset import get_model_field, remote_queryset
-from django.contrib.gis import forms
 
 from .settings import app_settings, API_SRID
 from .widgets import HiddenGeometryWidget
