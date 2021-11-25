@@ -8,6 +8,8 @@ on:
   release:
     types:
       - created
+  schedule:
+    - cron: '0 2 * * *'
 
 jobs:
   lint:
