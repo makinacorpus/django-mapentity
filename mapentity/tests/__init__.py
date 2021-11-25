@@ -16,7 +16,7 @@ from django.test import TestCase, LiveServerTestCase
 from django.test.testcases import to_list
 from django.test.utils import override_settings
 from django.utils import html
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.http import http_date, urlquote
 from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
@@ -196,7 +196,7 @@ class MapEntityTest(TestCase):
         for line in lines:
             for col in line:
                 # the col should not contains any html tags
-                self.assertEquals(force_text(col), html.strip_tags(force_text(col)))
+                self.assertEquals(force_str(col), html.strip_tags(force_str(col)))
 
     def _post_form(self, url):
         # no data
@@ -213,8 +213,8 @@ class MapEntityTest(TestCase):
         fields_errors = form.errors[list(bad_data.keys())[0]]
         form_errors = to_list(form_error)
         for err in form_errors:
-            self.assertTrue(u"{}".format(err) in fields_errors,
-                            u"'%s' not in %s" % (err, fields_errors))
+            self.assertTrue("{}".format(err) in fields_errors,
+                            "'%s' not in %s" % (err, fields_errors))
 
         response = self.client.post(url, self.get_good_data())
         if response.status_code != 302:
