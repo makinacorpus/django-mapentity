@@ -56,7 +56,7 @@ class TranslatedModelForm(forms.ModelForm):
                 # Add to form.fields{}
                 translated = copy.deepcopy(native)
                 translated.required = native.required and (lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
-                translated.label = u"{0} [{1}]".format(translated.label, lang)
+                translated.label = "{0} [{1}]".format(translated.label, lang)
                 self.fields[name] = translated
                 # Keep track of replacements
                 self._translated.setdefault(modelfield, []).append(name)

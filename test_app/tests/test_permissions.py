@@ -33,9 +33,9 @@ class ModelPermissionsTest(TestCase):
     def test_internal_user_has_necessary_permissions(self):
         internal_user = get_internal_user()
         all_codenames = internal_user.user_permissions.all().values_list('codename', flat=True)
-        self.assertTrue(u'read_dummymodel' in all_codenames)
-        self.assertTrue(u'export_dummymodel' in all_codenames)
-        self.assertTrue(u'read_attachment' in all_codenames)
+        self.assertTrue('read_dummymodel' in all_codenames)
+        self.assertTrue('export_dummymodel' in all_codenames)
+        self.assertTrue('read_attachment' in all_codenames)
 
     def test_internal_user_permissions_work_as_others(self):
         internal_user = get_internal_user()

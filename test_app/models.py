@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from mapentity.models import MapEntityMixin
 from paperclip.models import FileType as BaseFileType, Attachment as BaseAttachment
@@ -64,4 +64,4 @@ class DummyModel(MapEntityMixin, models.Model):
         return self.public
 
     class Meta:
-        verbose_name = _(u"Dummy Model")
+        verbose_name = _("Dummy Model")

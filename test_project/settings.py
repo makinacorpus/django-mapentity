@@ -109,8 +109,8 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGES = (
-    ('en', u"English"),
-    ('fr', u"French"),
+    ('en', "English"),
+    ('fr', "French"),
 )
 LANGUAGE_CODE = 'en-us'
 

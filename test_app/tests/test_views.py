@@ -51,8 +51,8 @@ class AttachmentFactory(factory.django.DjangoModelFactory):
     filetype = factory.SubFactory(FileTypeFactory)
 
     creator = factory.SubFactory(UserFactory)
-    title = factory.Sequence(u"Title {0}".format)
-    legend = factory.Sequence(u"Legend {0}".format)
+    title = factory.Sequence("Title {0}".format)
+    legend = factory.Sequence("Legend {0}".format)
 
 
 class DummyModelFunctionalTest(MapEntityTest):

@@ -288,8 +288,8 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
 
     @property
     def action_time_display(self):
-        return u'{0} ({1})'.format(localize(self.action_time),
-                                   humanize_timesince(self.action_time))
+        return '{0} ({1})'.format(localize(self.action_time),
+                                  humanize_timesince(self.action_time))
 
     @property
     def object_display(self):
@@ -299,7 +299,7 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
             assert obj._entity, 'Unregistered model %s' % model_str
             obj_url = obj.get_detail_url()
         except (ObjectDoesNotExist, NoReverseMatch, AssertionError):
-            return u'%s %s' % (model_str, self.object_repr)
+            return '%s %s' % (model_str, self.object_repr)
         else:
-            return u'<a data-pk="%s" href="%s" >%s %s</a>' % (
+            return '<a data-pk="%s" href="%s" >%s %s</a>' % (
                 obj.pk, obj_url, model_str, self.object_repr)
