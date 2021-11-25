@@ -1,19 +1,28 @@
+from urllib.parse import urlparse
+
+from netifaces import interfaces, ifaddresses, AF_INET
 import logging
-from subprocess import check_output
+import socket
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.db import DatabaseError
-from django.utils.six.moves.urllib.parse import urlparse
 
 from .settings import app_settings
 
 logger = logging.getLogger(__name__)
 
+
 CONVERSION_SERVER_HOST = urlparse(app_settings['CONVERSION_SERVER']).hostname
 CAPTURE_SERVER_HOST = urlparse(app_settings['CAPTURE_SERVER']).hostname
-LOCALHOST = check_output(['hostname', '-I']).decode().split() + ['127.0.0.1']
+AUTOLOGIN_IPS = [
+    socket.gethostbyname(CONVERSION_SERVER_HOST),
+    socket.gethostbyname(CAPTURE_SERVER_HOST),
+]
+for interface in interfaces():
+    for link in ifaddresses(interface).get(AF_INET, []):
+        AUTOLOGIN_IPS.append(link['addr'])
 
 
 def get_internal_user():
@@ -38,12 +47,6 @@ def clear_internal_user_cache():
 
 
 class AutoLoginMiddleware:
-    """
-    This middleware enables auto-login for Conversion and Capture servers.
-
-    We could have deployed implemented authentication in ConvertIt and
-    django-screamshot, or deployed OpenId, or whatever. But this was a lot easier.
-    """
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -56,27 +59,18 @@ class AutoLoginMiddleware:
         useragent = request.META.get('HTTP_USER_AGENT', '')
         if useragent:
             request.META['HTTP_USER_AGENT'] = useragent.replace('FrontendTest', '')
-        is_running_tests = ('FrontendTest' in useragent or
-                            getattr(settings, 'TEST', False))
+        is_running_tests = ('FrontendTest' in useragent or getattr(settings, 'TEST', False))
 
         user = getattr(request, 'user', None)
+
         if user and user.is_anonymous and not is_running_tests:
             remoteip = request.META.get('REMOTE_ADDR')
-            remotehost = request.META.get('REMOTE_HOST')
-
-            is_auto_allowed = (
-                (remoteip in LOCALHOST or remotehost == 'localhost') or
-                (remoteip and remoteip in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST)) or
-                (remotehost and remotehost in (CONVERSION_SERVER_HOST, CAPTURE_SERVER_HOST))
-            )
-
-            if is_auto_allowed:
-                logger.info("Auto-login for %s/%s" % (remoteip, remotehost))
+            if remoteip in AUTOLOGIN_IPS:
                 user = get_internal_user()
                 try:
                     user_logged_in.send(self, user=user, request=request)
-                except DatabaseError:
-                    logger.error("Could not update last-login field of internal user")
+                except DatabaseError as exc:
+                    print(exc)
                 request.user = user
 
         return self.get_response(request)

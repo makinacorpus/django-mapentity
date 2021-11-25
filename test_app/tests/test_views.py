@@ -1,26 +1,28 @@
+import factory
 import json
 import os
 import shutil
-from unittest import mock
-import factory
-
 from django.conf import settings
-from django.core.management import call_command
-from django.test import TestCase, RequestFactory
-from django.test.utils import override_settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
+from django.test import TestCase, RequestFactory
+from django.test.utils import override_settings
+from faker import Faker
+from faker.providers import geo
+from unittest import mock
 
 from mapentity.factories import SuperUserFactory, UserFactory
-
 from mapentity.registry import app_settings
 from mapentity.tests import MapEntityTest, MapEntityLiveTest
 from mapentity.views import serve_attachment, Convert, JSSettings
-
+from .factories import DummyModelFactory
 from ..models import DummyModel, Attachment, FileType
 from ..views import DummyList, DummyDetail
 
+fake = Faker('fr_FR')
+fake.add_provider(geo)
 
 User = get_user_model()
 
@@ -29,13 +31,13 @@ def get_dummy_uploaded_file(name='file.pdf'):
     return SimpleUploadedFile(name, b'*' * 300, content_type='application/pdf')
 
 
-class FileTypeFactory(factory.DjangoModelFactory):
+class FileTypeFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = FileType
 
 
-class AttachmentFactory(factory.DjangoModelFactory):
+class AttachmentFactory(factory.django.DjangoModelFactory):
     """
     Create an attachment. You must provide an 'obj' keywords,
     the object (saved in db) to which the attachment will be bound.
@@ -52,20 +54,26 @@ class AttachmentFactory(factory.DjangoModelFactory):
     legend = factory.Sequence(u"Legend {0}".format)
 
 
-class DummyModelFactory(factory.DjangoModelFactory):
-    name = ''
-
-    class Meta:
-        model = DummyModel
-
-
 class DummyModelFunctionalTest(MapEntityTest):
     userfactory = SuperUserFactory
     model = DummyModel
     modelfactory = DummyModelFactory
+    expected_json_geom = {
+        "type": "Point",
+        "coordinates": [
+            0.0,
+            0.0
+        ]
+    }
 
     def get_good_data(self):
         return {'geom': '{"type": "Point", "coordinates":[0, 0]}'}
+
+    def get_expected_json_attrs(self):
+        return {'date_update': '2020-03-17T00:00:00Z',
+                'geom': self.obj.geom.ewkt,
+                'name': self.obj.name,
+                'public': False}
 
 
 class DummyModelLiveTest(MapEntityLiveTest):
@@ -135,7 +143,7 @@ class ConvertTest(BaseTest):
         self.login()
         self.client.get('/convert/?url=http://geotrek.fr',
                         HTTP_ACCEPT_LANGUAGE='it')
-        get_mocked.assert_called_with('http://convertit//?url=http%3A//geotrek.fr&to=application/pdf',
+        get_mocked.assert_called_with('http://localhost//?url=http%3A//geotrek.fr&to=application/pdf',
                                       headers={'Accept-Language': 'it'})
 
     @mock.patch('mapentity.helpers.requests.get')
@@ -145,7 +153,7 @@ class ConvertTest(BaseTest):
         get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=/path/1/')
-        get_mocked.assert_called_with('http://convertit//?url=http%3A//testserver/path/1/&to=application/pdf',
+        get_mocked.assert_called_with('http://localhost//?url=http%3A//testserver/path/1/&to=application/pdf',
                                       headers={})
 
 
@@ -287,9 +295,9 @@ class ListViewTest(BaseTest):
 
     def test_mapentity_template_is_last_candidate(self):
         listview = DummyList()
-        listview.object_list = []
-        self.assertEqual(listview.get_template_names(),
-                         ['mapentity/mapentity_list.html'])
+        listview.object_list = DummyModel.objects.none()
+        self.assertEqual(listview.get_template_names()[-1],
+                         'mapentity/mapentity_list.html')
 
     def test_list_should_have_some_perms_in_context(self):
         view = DummyList()
@@ -308,7 +316,7 @@ class ListViewTest(BaseTest):
         response = view(request)
         html = response.render()
         self.assertTrue(b'btn-group disabled' in html.content)
-        self.assertTrue(b'Add a new dummy model</a>' in html.content)
+        self.assertTrue(b'Add a new dummy model' in html.content)
 
 
 class MapEntityLayerViewTest(BaseTest):
@@ -378,12 +386,12 @@ class DetailViewTest(BaseTest):
 
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt">\
+        self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" href="/document/dummymodel-{}.odt">\
 <img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" \
+        self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" \
 href="/convert/?url=/document/dummymodel-{}.odt&to=doc">\
 <img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
-        self.assertContains(response, '<a class="btn btn-mini" target="_blank" \
+        self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" \
 href="/convert/?url=/document/dummymodel-{}.odt">\
 <img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
 
@@ -398,46 +406,16 @@ href="/convert/?url=/document/dummymodel-{}.odt">\
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
         if app_settings['MAPENTITY_WEASYPRINT']:
-            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.pdf">\
+            self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" href="/document/dummymodel-{}.pdf">\
 <img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
         else:
-            self.assertContains(response, '<a class="btn btn-mini" target="_blank" href="/document/dummymodel-{}.odt">\
+            self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" href="/document/dummymodel-{}.odt">\
 <img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
-        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" \
+        self.assertNotContains(response, '<a class="btn btn-light btn-sm" target="_blank" \
 href="/convert/?url=/document/dummymodel-{}.odt&to=doc">\
 <img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
-        self.assertNotContains(response, '<a class="btn btn-mini" target="_blank" \
+        self.assertNotContains(response, '<a class="btn btn-light btn-sm" target="_blank" \
 href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
-
-
-class DocumentOdtViewTest(BaseTest):
-    def setUp(self):
-        self.login()
-        self.user.is_superuser = True
-        self.user.save()
-        self.logout()
-        self.object = DummyModelFactory.create(name='dumber')
-
-    def test_status_code(self):
-        self.login()
-        url = "/test/document/dummymodel-{pk}.odt".format(pk=self.object.pk)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-
-class DocumentWeasyprintViewTest(BaseTest):
-    def setUp(self):
-        self.login()
-        self.user.is_superuser = True
-        self.user.save()
-        self.logout()
-        self.object = DummyModelFactory.create(name='dumber')
-
-    def test_status_code(self):
-        self.login()
-        url = "/test/document/dummymodel-{pk}.pdf".format(pk=self.object.pk)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
 
 
 class ViewPermissionsTest(BaseTest):

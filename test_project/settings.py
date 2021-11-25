@@ -25,7 +25,7 @@ SECRET_KEY = '37r=l^!c^1-7o8z2luc%a1x&)jt^9v+ockis0ql7k_y*lm555('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -181,4 +181,12 @@ LEAFLET_CONFIG = {
         ('OSM N&B', 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
     ],
     'SPATIAL_EXTENT': (1.3, 43.7, 1.5, 43.5),
+}
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+MAPENTITY_CONFIG = {
+    'CONVERSION_SERVER': 'http://localhost/',
+    'CAPTURE_SERVER': 'http://localhost/',
+    'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 }

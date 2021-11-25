@@ -1,10 +1,10 @@
 import logging
 
+from django.contrib.gis.db.models.functions import Transform
 from django.views.generic.list import ListView
 
 from djgeojson.views import GeoJSONLayerView
 from rest_framework import viewsets
-from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mapentity import models as mapentity_models
 from ..settings import API_SRID, app_settings
@@ -29,7 +29,7 @@ class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
     precision = app_settings.get('GEOJSON_PRECISION')
 
     def __init__(self, *args, **kwargs):
-        super(MapEntityLayer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Backward compatibility with django-geojson 1.X
         # for JS ObjectsLayer and rando-trekking application
         # TODO: remove when migrated
@@ -45,11 +45,11 @@ class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
     @view_permission_required()
     @view_cache_latest()
     def dispatch(self, *args, **kwargs):
-        return super(MapEntityLayer, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
     @view_cache_response_content()
     def render_to_response(self, context, **response_kwargs):
-        return super(MapEntityLayer, self).render_to_response(context, **response_kwargs)
+        return super().render_to_response(context, **response_kwargs)
 
 
 class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
@@ -73,16 +73,16 @@ class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
     @view_permission_required()
     @view_cache_latest()
     def dispatch(self, *args, **kwargs):
-        return super(BaseListView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
 
 class MapEntityViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
-        serializer = super(MapEntityViewSet, self).get_serializer_class()
         renderer, media_type = self.perform_content_negotiation(self.request)
         if getattr(renderer, 'format') == 'geojson':
-            class Serializer(serializer, GeoFeatureModelSerializer):
-                class Meta(serializer.Meta):
-                    pass
-            return Serializer
-        return serializer
+            return self.geojson_serializer_class
+        else:
+            return self.serializer_class
+
+    def get_queryset(self):
+        return super().get_queryset().annotate(api_geom=Transform("geom", API_SRID))

@@ -9,11 +9,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 
 from mapentity import middleware
+from mapentity.factories import UserFactory
 from mapentity.middleware import AutoLoginMiddleware, get_internal_user
 from unittest import mock
 
-from .test_views import DummyModelFactory, AttachmentFactory
-
+from .test_views import AttachmentFactory
+from .factories import DummyModelFactory
 
 User = get_user_model()
 
@@ -41,7 +42,7 @@ class AutoLoginTest(TestCase):
 
     def test_auto_login_happens_by_remote_addr(self):
         obj = DummyModelFactory.create()
-        middleware.CONVERSION_SERVER_HOST = '1.2.3.4'
+        middleware.AUTOLOGIN_IPS = ['1.2.3.4']
         attachment = AttachmentFactory.create(content_object=obj)
         response = self.client.get("/media/%s" % attachment.attachment_file,
                                    REMOTE_ADDR='1.2.3.5')
@@ -52,7 +53,7 @@ class AutoLoginTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_auto_login_do_not_change_current_user(self):
-        user = User.objects.create_user('aah', 'email@corp.com', 'booh')
+        user = UserFactory()
         self.request.user = user
         self.middleware(self.request)
         self.assertEqual(self.request.user, user)
@@ -61,8 +62,8 @@ class AutoLoginTest(TestCase):
         self.middleware(self.request)
         self.assertTrue(self.request.user.is_anonymous)
 
-    def test_auto_login_for_conversion(self):
-        middleware.CONVERSION_SERVER_HOST = '1.2.3.4'
+    def test_auto_login(self):
+        middleware.AUTOLOGIN_IPS = ['1.2.3.4']
         self.request.META['REMOTE_ADDR'] = '1.2.3.4'
 
         self.assertTrue(self.request.user.is_anonymous)
@@ -70,27 +71,9 @@ class AutoLoginTest(TestCase):
         self.assertFalse(self.request.user.is_anonymous)
         self.assertEqual(self.request.user, self.internal_user)
 
-    def test_auto_login_for_capture(self):
-        middleware.CAPTURE_SERVER_HOST = '4.5.6.7'
-        self.request.META['REMOTE_ADDR'] = '4.5.6.7'
-
-        self.assertTrue(self.request.user.is_anonymous)
-        self.middleware(self.request)
-        self.assertFalse(self.request.user.is_anonymous)
-        self.assertEqual(self.request.user, self.internal_user)
-
-    def test_auto_login_for_conversion_host(self):
-        middleware.CONVERSION_SERVER_HOST = 'convertit.makina.com'
-        self.request.META['REMOTE_HOST'] = 'convertit.makina.com'
-
-        self.assertTrue(self.request.user.is_anonymous)
-        self.middleware(self.request)
-        self.assertFalse(self.request.user.is_anonymous)
-        self.assertEqual(self.request.user, self.internal_user)
-
-    def test_auto_login_for_capture_host(self):
-        middleware.CAPTURE_SERVER_HOST = 'capture.makina.com'
-        self.request.META['REMOTE_HOST'] = 'capture.makina.com'
+    def test_auto_login_proxy(self):
+        middleware.AUTOLOGIN_IPS = ['1.2.3.4']
+        self.request.META['HTTP_X_FORWARDED_FOR'] = '1.2.3.4,2.2.2.2'
 
         self.assertTrue(self.request.user.is_anonymous)
         self.middleware(self.request)

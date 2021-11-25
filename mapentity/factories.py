@@ -1,9 +1,15 @@
 import factory
 
 from django.contrib.auth import get_user_model
+from django.contrib.gis.geos import Point
+from faker import Faker
+from faker.providers import geo
+
+fake = Faker('fr_FR')
+fake.add_provider(geo)
 
 
-class UserFactory(factory.DjangoModelFactory):
+class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = get_user_model()
 
@@ -18,29 +24,23 @@ class UserFactory(factory.DjangoModelFactory):
 
     # last_login/date_joined
 
-    @classmethod
-    def _prepare(cls, create, **kwargs):
-        """
-        A topology mixin should be linked to at least one Path (through
-        PathAggregation).
-        """
+    @factory.post_generation
+    def add_other(obj, create, extracted=False, **kwargs):
         # groups/user_permissions
         groups = kwargs.pop('groups', [])
         permissions = kwargs.pop('permissions', [])
 
-        user = super(UserFactory, cls)._prepare(create, **kwargs)
-
         for group in groups:
-            user.groups.add(group)
+            obj.groups.add(group)
 
         for perm in permissions:
-            user.user_permissions.add(perm)
+            obj.user_permissions.add(perm)
 
         if create:
             # Save ManyToMany group and perm relations
-            user.save()
+            obj.save()
 
-        return user
+        return obj
 
     @classmethod
     def _create(cls, model_class, **kwargs):
@@ -54,3 +54,12 @@ class UserFactory(factory.DjangoModelFactory):
 class SuperUserFactory(UserFactory):
     is_superuser = True
     is_staff = True
+
+
+class PointFactory(factory.django.DjangoModelFactory):
+    @factory.lazy_attribute
+    def geom(self):
+        lat, lon, *other = fake.local_latlng(country_code='FR')
+        point = Point(float(lon), float(lat), srid=4326)
+        point.transform(2154)
+        return point

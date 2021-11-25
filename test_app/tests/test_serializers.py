@@ -10,7 +10,6 @@ from django.test.utils import override_settings
 from django.utils import translation
 
 from mapentity.serializers import ZipShapeSerializer, CSVSerializer
-from mapentity.serializers.shapefile import shapefile_files
 
 from ..models import MushroomSpot, Tag
 
@@ -30,54 +29,50 @@ class ShapefileSerializer(TestCase):
         self.serializer.serialize(MushroomSpot.objects.all(), stream=response,
                                   fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
 
-    def tearDown(self):
-        for layer_file in self.serializer.layers.values():
-            for subfile in shapefile_files(layer_file):
-                os.remove(subfile)
-
     def getShapefileLayers(self):
-        shapefiles = self.serializer.layers.values()
-        datasources = [gdal.DataSource(s) for s in shapefiles]
+        shapefiles = self.serializer.path_directory
+        shapefiles = [shapefile for shapefile in os.listdir(shapefiles) if shapefile[-3:] == "shp"]
+        datasources = [gdal.DataSource(os.path.join(self.serializer.path_directory, s)) for s in shapefiles]
         layers = [ds[0] for ds in datasources]
         return layers
 
     def test_serializer_creates_one_layer_per_type(self):
-        self.assertEquals(len(self.serializer.layers), 3)
+        self.assertEqual(len(self.getShapefileLayers()), 3)
 
     def test_each_layer_has_records_by_type(self):
-        layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
-        self.assertEquals(len(layer_point), 1)
-        self.assertEquals(len(layer_linestring), 1)
-        self.assertEquals(len(layer_multipoint), 1)
+        layer_point, layer_linestring, layer_multipoint = self.getShapefileLayers()
+        self.assertEqual(len(layer_point), 1)
+        self.assertEqual(len(layer_linestring), 1)
+        self.assertEqual(len(layer_multipoint), 1)
 
     def test_each_layer_has_a_different_geometry_type(self):
-        layer_types = [l.geom_type.name for l in self.getShapefileLayers()]
+        layer_types = [layer.geom_type.name for layer in self.getShapefileLayers()]
         self.assertCountEqual(layer_types, ['MultiPoint', 'Point', 'LineString'])
 
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():
-            self.assertIn(layer.srs.name, ('RGF93_Lambert_93', 'RGF93 / Lambert-93'))
+            self.assertIn(layer.srs.name, ('RGF_1993_Lambert_93', 'RGF93_Lambert_93', 'RGF93 / Lambert-93'))
             self.assertCountEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean', 'tags'])
 
     def test_geometries_come_from_records(self):
-        layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
-        feature = layer_point[0]
-        self.assertEquals(str(feature['id']), str(self.point1.pk))
+        layers = self.getShapefileLayers()
+        geom_type_layer = {layer.name: layer for layer in layers}
+        feature = geom_type_layer['Point'][0]
+        self.assertEqual(str(feature['id']), str(self.point1.pk))
         self.assertTrue(feature.geom.geos.equals(self.point1.geom))
 
-        feature = layer_point[0]
-        self.assertEquals(str(feature['id']), str(self.point1.pk))
-        self.assertTrue(feature.geom.geos.equals(self.point1.geom))
+        feature = geom_type_layer['MultiPoint'][0]
+        self.assertEqual(str(feature['id']), str(self.multipoint.pk))
+        self.assertTrue(feature.geom.geos.equals(self.multipoint.geom))
 
-        feature = layer_point[0]
-        self.assertEquals(str(feature['id']), str(self.point1.pk))
-        self.assertTrue(feature.geom.geos.equals(self.point1.geom))
+        feature = geom_type_layer['LineString'][0]
+        self.assertEqual(str(feature['id']), str(self.line1.pk))
+        self.assertTrue(feature.geom.geos.equals(self.line1.geom))
 
     def test_attributes(self):
-        layer_point, layer_multipoint, layer_linestring = self.getShapefileLayers()
+        layer_point, layer_linestring, layer_multipoint = self.getShapefileLayers()
         feature = layer_point[0]
-        self.assertEquals(feature['name'].value, "Empty")
-        self.assertEquals(feature['tags'].value, "Tag1,Tag2")
+        self.assertEqual(feature['name'].value, self.point1.name)
 
 
 class CSVSerializerTests(TestCase):

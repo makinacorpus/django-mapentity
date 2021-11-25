@@ -9,6 +9,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from paperclip.settings import get_attachment_model, get_filetype_model
+
+from mapentity.factories import UserFactory
 from mapentity.views.generic import MapEntityDetail
 
 from ..models import DummyModel
@@ -23,15 +25,16 @@ def add_url_for_obj(obj):
 
 
 class EntityAttachmentTestCase(TestCase):
-    def setUp(self):
-        User = get_user_model()
-        self.user = User.objects.create_user('howard', 'h@w.com', 'booh')
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory()
 
+    def setUp(self):
         def user_perms(p):
             return {'paperclip.add_attachment': False}.get(p, True)
         self.user.has_perm = mock.MagicMock(side_effect=user_perms)
         self.object = DummyModel.objects.create()
-        call_command('update_permissions_mapentity')
+        call_command('update_permissions_mapentity', verbosity=0)
 
     def createRequest(self):
         request = RequestFactory().get('/dummy')
@@ -58,7 +61,7 @@ class EntityAttachmentTestCase(TestCase):
         self.createAttachment(self.object)
         self.user.user_permissions.add(Permission.objects.get(codename='read_dummymodel'))
         self.user.user_permissions.add(Permission.objects.get(codename='read_attachment'))
-        self.client.login(username='howard', password='booh')
+        self.client.force_login(self.user)
         response = self.client.get('/dummymodel/{pk}/'.format(pk=self.object.pk))
 
         html = response.content

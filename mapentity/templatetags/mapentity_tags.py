@@ -1,4 +1,3 @@
-import datetime
 import os
 
 from django import template
@@ -7,9 +6,8 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.core.exceptions import FieldDoesNotExist
 from django.template import Context
 from django.template.exceptions import TemplateDoesNotExist
-from django.utils import six
-from django.utils.timezone import utc
-from django.utils.translation import ugettext, ungettext
+from django.utils.timezone import now
+from django.utils.translation import gettext, ngettext
 
 from ..helpers import alphabet_enumeration
 
@@ -18,7 +16,7 @@ register = template.Library()
 
 class SmartIncludeNode(template.Node):
     def __init__(self, viewname):
-        super(SmartIncludeNode, self).__init__()
+        super().__init__()
         self.viewname = viewname
 
     def render(self, context):
@@ -55,7 +53,7 @@ def do_smart_include(parser, token):
 
 @register.filter
 def latlngbounds(obj):
-    if obj is None or isinstance(obj, six.string_types):
+    if obj is None or isinstance(obj, str):
         return 'null'
     if isinstance(obj, GEOSGeometry):
         extent = obj.extent
@@ -67,13 +65,12 @@ def latlngbounds(obj):
 @register.filter(name='verbose')
 def field_verbose_name(obj, field):
     """Usage: {{ object|get_object_field }}"""
+    if hasattr(obj, '%s_verbose_name' % field):
+        return str(getattr(obj, '%s_verbose_name' % field))
     try:
         return obj._meta.get_field(field).verbose_name
     except FieldDoesNotExist:
-        a = getattr(obj, '%s_verbose_name' % field)
-        if a is None:
-            raise
-        return u"{}".format(a)
+        raise
 
 
 @register.simple_tag()
@@ -97,28 +94,31 @@ def humanize_timesince(date):
     Humanized and localized version of built-in timesince template filter.
     Based on Joey Bratton's idea.
     """
-    delta = datetime.datetime.utcnow().replace(tzinfo=utc) - date
+    if not date:
+        return ""
 
-    num_years = delta.days / 365
+    delta = now() - date
+
+    num_years = delta.days // 365
     if (num_years > 0):
-        return ungettext(u"%d year ago", u"%d years ago", num_years) % num_years
+        return ngettext("%d year ago", "%d years ago", num_years) % num_years
 
-    num_weeks = delta.days / 7
+    num_weeks = delta.days // 7
     if (num_weeks > 0):
-        return ungettext(u"%d week ago", u"%d weeks ago", num_weeks) % num_weeks
+        return ngettext("%d week ago", "%d weeks ago", num_weeks) % num_weeks
 
     if (delta.days > 0):
-        return ungettext(u"%d day ago", u"%d days ago", delta.days) % delta.days
+        return ngettext("%d day ago", "%d days ago", delta.days) % delta.days
 
-    num_hours = delta.seconds / 3600
+    num_hours = delta.seconds // 3600
     if (num_hours > 0):
-        return ungettext(u"%d hour ago", u"%d hours ago", num_hours) % num_hours
+        return ngettext("%d hour ago", "%d hours ago", num_hours) % num_hours
 
-    num_minutes = delta.seconds / 60
+    num_minutes = delta.seconds // 60
     if (num_minutes > 0):
-        return ungettext(u"%d minute ago", u"%d minutes ago", num_minutes) % num_minutes
+        return ngettext("%d minute ago", "%d minutes ago", num_minutes) % num_minutes
 
-    return ugettext(u"just a few seconds ago")
+    return gettext("just a few seconds ago")
 
 
 @register.inclusion_tag('mapentity/_detail_valuelist_fragment.html')

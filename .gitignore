@@ -1,4 +1,6 @@
 *.pyc
+*.mo
+__pycache__
 /database.db
 /mapentity.egg-info/
 /.idea/
@@ -10,3 +12,4 @@
 /media/
 /docs/_build/
 /README.html
+/.coverage

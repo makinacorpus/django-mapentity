@@ -1,9 +1,6 @@
-include README.rst CHANGES LICENSE
-recursive-include mapentity/locale *.mo
-recursive-include mapentity/templates *.odt
-recursive-include mapentity/templates *.html
-recursive-include mapentity/templates *.css
-recursive-include mapentity/static *.js
-recursive-include mapentity/static *.css
-recursive-include mapentity/static *.png
-recursive-include mapentity/static *.svg
+include README.rst CHANGES LICENSE mapentity/VERSION
+recursive-exclude test_app *
+recursive-exclude test_project *
+recursive-include mapentity/locale *
+recursive-include mapentity/templates *
+recursive-include mapentity/static *
