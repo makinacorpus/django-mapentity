@@ -57,7 +57,7 @@ class BaseMapEntityFilterSet(FilterSet):
             elif isinstance(field, forms.ChoiceField):
                 self.__set_placeholder(field, field.widget)
             elif isinstance(field, forms.NullBooleanField):
-                choices = [(u'1', field.label)] + field.widget.choices[1:]
+                choices = [('1', field.label)] + field.widget.choices[1:]
                 field.widget.choices = choices
                 self.__set_placeholder(field, field.widget)
             else:

@@ -30,7 +30,7 @@ def view_permission_required(login_url=None, raise_exception=None):
             raise PermissionDenied
 
         # As the last resort, redirects
-        msg = _(u'Access to the requested resource is restricted. You have been redirected.')
+        msg = _('Access to the requested resource is restricted. You have been redirected.')
         messages.warning(request, msg)
         return False
 

@@ -64,4 +64,4 @@ class DummyModel(MapEntityMixin, models.Model):
         return self.public
 
     class Meta:
-        verbose_name = _(u"Dummy Model")
+        verbose_name = _("Dummy Model")
