@@ -9,21 +9,8 @@ Follow installation procedure, and then install development packages::
 Release
 -------
 
-We use *zest.releaser*, but since we have git submodules, we can't use the ``fullrelease``
-command. Follow those step to release:
+Set mapentity/VERSION
 
-Update version and changelog release date:
+Set Changelog
 
-::
-
-    prerelease
-
-::
-
-    git tag -a X.Y.Z
-
-    python setup.py sdist register upload
-
-::
-
-    postrelease
+Draft a new release on github
