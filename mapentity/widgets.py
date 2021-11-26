@@ -1,4 +1,3 @@
-from django import forms
 from django.forms import widgets as django_widgets
 from django.template.loader import render_to_string
 from leaflet.forms.widgets import LeafletWidget
@@ -25,7 +24,7 @@ class HiddenGeometryWidget(django_widgets.HiddenInput):
         wkt = super().value_from_datadict(data, files, name)
         return None if not wkt else wkt_to_geom(wkt, silent=True)
 
-    def _format_value(self, value):
+    def format_value(self, value):
         """
         Before serialization, reprojects to API_SRID
         """
@@ -34,7 +33,7 @@ class HiddenGeometryWidget(django_widgets.HiddenInput):
         return value
 
 
-class SelectMultipleWithPop(forms.SelectMultiple):
+class SelectMultipleWithPop(django_widgets.SelectMultiple):
     def __init__(self, *args, **kwargs):
         self.add_url = kwargs.pop('add_url')
         super().__init__(*args, **kwargs)
