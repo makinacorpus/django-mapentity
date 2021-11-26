@@ -1,11 +1,24 @@
 Installation
 ============
 
-Quickstart
-----------
+System prerequisites
+--------------------
 
-Run `./install.sh` on Ubuntu 14.04 Trusty LTS, 16.04 Xenial LTS or 17.10 Artful.
+For GeoDjango to work, your system must meet the following requirements::
 
+    $ sudo apt install binutils libproj-dev gdal-bin
+
+For weasyprint and PDF generation, you need::
+
+    $ sudo apt install libjpeg62 libjpeg62-dev zlib1g-dev libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+
+If you use spatialite, you will need::
+
+    $ sudo apt install libsqlite3-mod-spatialite
+
+Else, if you use PostGIS, you will need::
+
+    $ sudo apt install libpq-dev
 
 Manual installation With a PostGIS database
 -------------------------------------------
@@ -31,27 +44,11 @@ Create a *virtualenv*, and activate it::
     virtualenv env/
     source env/bin/activate
 
-Install GDAL with its development files. For example, on Ubuntu/Debian::
-
-    $ sudo apt-get install libgdal-dev
-
-You might need to set a couple of environement variables to make sure the
-install process can find GDAL headers::
-
-    $ export CPLUS_INCLUDE_PATH=/usr/include/gdal
-    $ export C_INCLUDE_PATH=/usr/include/gdal
-
 Then install the Python packages::
 
-    $ pip install -r requirements.txt
-    $ python setup.py install
-
-Download static assets (JavaScript libraries etc.), currently managed as
-git submodules::
-
-    $ git submodule init
-    $ git submodule update
+    $ pip install django-mapentity
 
 Since you will PostgreSQL, also install its python library::
 
    $ pip install psycopg2
+

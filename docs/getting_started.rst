@@ -31,16 +31,16 @@ Edit your Django settings to point to your PostGIS database::
 
 Add these entries to your ``INSTALLED_APPS``::
 
-    'easy_thumbnails',
+    'paperclip',
     'djgeojson',
-    'leaflet',
-    'paperclip',
-    'mapentity',
-    'paperclip',
     'compressor',
-    'floppyforms',
+    'easy_thumbnails',
     'crispy_forms',
     'rest_framework',
+    'embed_video',
+    'modeltranslation'
+    'mapentity',  # Make sure mapentity settings are loaded before leaflet ones
+    'leaflet',
     'main',  # the app you just created
 
 Add ``django.middleware.locale.LocaleMiddleware`` to your ``MIDDLEWARE`` classes.
@@ -54,7 +54,7 @@ Setup your list of supported languages::
 
 Specify a media URL::
 
-    MEDIA_URL = 'media/'
+    MEDIA_URL = '/media/'
 
 Specify a static root::
 
@@ -86,18 +86,16 @@ Model
 Create a GeoDjango model which also inherits from ``MapEntityMixin``. Note that
 you'll need to specify the *GeoDjango* manager, as below:
 
-..code-block :: python
+
+.. code-block:: python
 
     from django.contrib.gis.db import models
-
     from mapentity.models import MapEntityMixin
 
 
     class Museum(MapEntityMixin, models.Model):
-
-        | geom = models.PointField()
-        | name = models.CharField(max_length=80)
-        | objects = models.GeoManager()
+        geom = models.PointField()
+        name = models.CharField(max_length=80)
 
 
 Admin
@@ -106,11 +104,10 @@ Admin
 Create a file ``admin.py`` in the ``main`` directory and register your model
 against the admin registry:
 
-..code-block :: python
+.. code-block:: python
 
-
-    | from django.contrib import admin
-    | from leaflet.admin import LeafletGeoAdmin
+    from django.contrib import admin
+    from leaflet.admin import LeafletGeoAdmin
 
     from .models import Museum
 
@@ -122,33 +119,32 @@ URLs
 
 Register your MapEntity views in ``main/urls.py``:
 
-..code-block :: python
+.. code-block:: python
 
-    | from main.models import Museum
-    | from mapentity import registry
-
+    from main.models import Museum
+    from mapentity import registry
 
     urlpatterns = registry.register(Museum)
 
 
 Then glue everything together in your project's ``urls.py``:
 
-..code-block :: python
+.. code-block:: python
 
-    | from django.conf.urls import patterns, include, url
-    | from django.contrib import admin
+    from django.conf.urls import patterns, include, url
+    from django.contrib import admin
 
     admin.autodiscover()
 
-    urlpatterns = patterns(
-        | '',
-        | path('', 'main.views.home', name='home'),
-        | path('login/',  'django.contrib.auth.views.login', name='login'),
-        | path('logout/', 'django.contrib.auth.views.logout', name='logout',),
-        | path('', include('mapentity.urls')),
-        | path('paperclip/', include('paperclip.urls')),
-        | path('admin', admin.site.urls),
-    )
+    urlpatterns = [
+        '',
+        path('', 'main.views.home', name='home'),
+        path('login/',  'django.contrib.auth.views.login', name='login'),
+        path('logout/', 'django.contrib.auth.views.logout', name='logout',),
+        path('', include('mapentity.urls')),
+        path('paperclip/', include('paperclip.urls')),
+        path('admin', admin.site.urls),
+    ]
 
 
 Initialize the database
@@ -156,7 +152,7 @@ Initialize the database
 
 Create a database schema based on your models::
 
-    $ python manage.py syncdb
+    $ python manage.py migrate
 
 Create all permission objects with this command::
 
