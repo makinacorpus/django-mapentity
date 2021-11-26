@@ -1,8 +1,7 @@
-from django.contrib.gis.db.models.functions import Transform
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
-from mapentity.views import MapEntityViewSet
+from mapentity.views import MapEntityViewSet, LastModifiedMixin
 
 from .models import DummyModel
 from .serializers import DummySerializer, DummyGeojsonSerializer
@@ -32,7 +31,7 @@ class DummyDocumentWeasyprint(mapentity_views.MapEntityDocumentWeasyprint):
     model = DummyModel
 
 
-class DummyDetail(mapentity_views.MapEntityDetail):
+class DummyDetail(LastModifiedMixin, mapentity_views.MapEntityDetail):
     model = DummyModel
 
 
@@ -49,10 +48,7 @@ class DummyDelete(mapentity_views.MapEntityDelete):
 
 
 class DummyViewSet(MapEntityViewSet):
-    model = DummyModel
+    queryset = DummyModel.objects.all()
     serializer_class = DummySerializer
     geojson_serializer_class = DummyGeojsonSerializer
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-
-    def get_queryset(self):
-        return self.model.objects.all().annotate(api_geom=Transform('geom', 4326))
