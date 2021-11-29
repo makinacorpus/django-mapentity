@@ -48,6 +48,7 @@ class DummyDelete(mapentity_views.MapEntityDelete):
 
 
 class DummyViewSet(MapEntityViewSet):
+    model = DummyModel
     queryset = DummyModel.objects.all()
     serializer_class = DummySerializer
     geojson_serializer_class = DummyGeojsonSerializer
