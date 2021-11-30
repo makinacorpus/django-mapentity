@@ -2,12 +2,16 @@
 CHANGELOG
 =========
 
-6.1.2.dev0
+7.0.0 (2021-11-30)
 ==================
 
-**Bug fixes**
+**New features**
 
--
+- Support django 2.2 to 3.2
+- Support python 3.6 to 3.9
+- Bootstrap 4
+- Disable form field with settings
+- Choose export columns from settings
 
 
 6.1.1 (2020-03-30)
@@ -323,7 +327,7 @@ CHANGELOG
 **Bug fixes**
 
 - Remove initial migration
- 
+
 2.8.6 (2017-02-02)
 ==================
 
