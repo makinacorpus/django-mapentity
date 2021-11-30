@@ -94,7 +94,7 @@ jobs:
 
   publish:
     needs: [lint, doc_build, test]
-    runs-on: ubuntu-18-04
+    runs-on: ubuntu-18.04
     if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
 
     steps:
