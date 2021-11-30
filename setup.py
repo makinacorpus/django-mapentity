@@ -50,7 +50,7 @@ setup(
         'django-embed-video',
         'django-filter',
         'django-geojson',
-        'django-leaflet@git+https://github.com/GeotrekCE/django-leaflet.git@0.19+geotrek8#egg=django-leaflet',  # fix while leaflet 1.x is not supported
+        'django-leaflet==0.19.post9',
         'django-modeltranslation',
         'django-tinymce<3.0',
         'django-weasyprint',
