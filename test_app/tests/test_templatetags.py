@@ -1,5 +1,5 @@
-from django.test import TestCase
 from django.template import Template, Context
+from django.test import TestCase
 from django.utils import translation
 
 from ..models import DummyModel

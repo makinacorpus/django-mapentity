@@ -1,11 +1,12 @@
 from unittest import mock
-from django.test import TestCase, RequestFactory
+
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.test import TestCase, RequestFactory
 from django.urls import reverse
 
-from mapentity.registry import app_settings
 from mapentity.decorators import view_permission_required
+from mapentity.registry import app_settings
 
 
 class ViewPermissionRequiredTestCase(TestCase):
