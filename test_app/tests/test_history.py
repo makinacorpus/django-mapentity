@@ -1,13 +1,12 @@
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.contrib.auth import get_user_model
 from django.http import HttpRequest
-from django.test.client import Client
 from django.test import TestCase
+from django.test.client import Client
 
 from mapentity.models import LogEntry
 from mapentity.views.generic import log_action
 from ..models import DummyModel
-
 
 User = get_user_model()
 

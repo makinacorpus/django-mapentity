@@ -3,13 +3,13 @@ from unittest import mock
 
 from django.test import TestCase
 
-from mapentity.registry import app_settings
 from mapentity.helpers import (
     capture_url,
     convertit_url,
     user_has_perm,
     download_to_stream
 )
+from mapentity.registry import app_settings
 
 
 class MapEntityCaptureHelpersTest(TestCase):

@@ -1,9 +1,9 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import gettext_lazy as _
+from paperclip.models import FileType as BaseFileType, Attachment as BaseAttachment
 
 from mapentity.models import MapEntityMixin
-from paperclip.models import FileType as BaseFileType, Attachment as BaseAttachment
 
 
 class FileType(BaseFileType):
@@ -22,6 +22,7 @@ class Tag(models.Model):
 
 
 class MushroomSpot(MapEntityMixin, models.Model):
+    """ Linestring Mapentity model """
     name = models.CharField(max_length=100, default='Empty')
     serialized = models.CharField(max_length=200, null=True, default=None)
     number = models.IntegerField(null=True, default=42)
@@ -48,7 +49,13 @@ class MushroomSpot(MapEntityMixin, models.Model):
 
 
 class WeatherStation(models.Model):
+    """ Not a Mapentity model. should be displayed in menu entries """
     geom = models.PointField(null=True, default=None, srid=2154)
+
+
+class Road(MapEntityMixin, models.Model):
+    """ Linestring Mapentity model """
+    geom = models.LineStringField(null=True, default=None, srid=2154)
 
 
 class DummyModel(MapEntityMixin, models.Model):
@@ -65,3 +72,11 @@ class DummyModel(MapEntityMixin, models.Model):
 
     class Meta:
         verbose_name = _("Dummy Model")
+
+
+class City(MapEntityMixin, models.Model):
+    geom = models.PolygonField(null=True, default=None, srid=2154)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name

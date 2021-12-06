@@ -1,18 +1,16 @@
 from unittest import mock
-from django.core.management import call_command
 
-from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
+from django.test import TestCase, RequestFactory
 from django.urls import reverse
-
 from paperclip.settings import get_attachment_model, get_filetype_model
 
 from mapentity.tests.factories import UserFactory
 from mapentity.views.generic import MapEntityDetail
-
 from ..models import DummyModel
 
 
