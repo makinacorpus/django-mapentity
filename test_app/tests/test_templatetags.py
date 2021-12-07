@@ -4,14 +4,19 @@ from django.utils import translation
 from django.utils.timezone import make_aware
 
 from ..models import DummyModel
+from .factories import DummyModelFactory
 
 from datetime import datetime
 from freezegun import freeze_time
 
 
 class ValueListTest(TestCase):
-    def test_empty_list_should_show_none(self):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
         translation.deactivate()
+
+    def test_empty_list_should_show_none(self):
         out = Template(
             '{% load mapentity_tags %}'
             '{% valuelist items %}'
@@ -74,6 +79,36 @@ class ValueListTest(TestCase):
         self.assertIn('<li><span class="enumeration-value">ABA.&nbsp;</span>27</li>', out)
         self.assertIn('<li><span class="enumeration-value">ABB.&nbsp;</span>28</li>', out)
         self.assertIn('<li><span class="enumeration-value">BAA.&nbsp;</span>677</li>', out)
+
+
+class ValueTableTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        translation.deactivate()
+
+    def test_empty_objects_should_show_none(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{% valuetable dummys %}'
+        ).render(Context({
+            'dummys': DummyModel.objects.all()
+        }))
+        self.assertHTMLEqual(out, '<span class="none">None</span>')
+
+    def test_simple_usage_outputs_list_of_items(self):
+        dummy = DummyModelFactory.create(name="foo")
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{% valuetable dummys "name" %}'
+        ).render(Context({
+            'dummys': DummyModel.objects.all()
+        }))
+        self.assertHTMLEqual(out,
+                             f"""
+                             <table class="table"><thead><tr><th class="name">name</th></tr>
+                             </thead><tbody><tr class="hoverable" data-modelname="dummymodel" data-pk="{dummy.pk}"><td>
+                             foo</td></tr></tbody></table>""")
 
 
 @freeze_time("2021-12-12")
