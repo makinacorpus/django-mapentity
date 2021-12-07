@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.template import Template, Context
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils import translation
 from django.utils.timezone import make_aware
 
@@ -8,6 +10,8 @@ from .factories import DummyModelFactory
 
 from datetime import datetime
 from freezegun import freeze_time
+import os
+from tempfile import TemporaryDirectory
 
 
 class ValueListTest(TestCase):
@@ -220,3 +224,24 @@ class HumanizeTimesinceTest(TestCase):
             'date': make_aware(datetime(2021, 12, 12, 23, 59, 59))
         }))
         self.assertEqual(out, "just a few seconds ago")
+
+
+class MediaStaticFallbackPathTest(TestCase):
+    def test_media_static_fallback(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{% media_static_fallback_path "doesnotexist.png" "foo.png" %}'
+        ).render(Context({}))
+        self.assertEqual(out, "/code/src/static/foo.png")
+
+    @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
+    def test_media_static_find(self):
+        d = TemporaryDirectory()
+        with override_settings(MEDIA_ROOT=d.name):
+            with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
+                f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
+            out = Template(
+                '{% load mapentity_tags %}'
+                '{% media_static_fallback_path "exist.png" "foo.png" %}'
+            ).render(Context({}))
+            self.assertEqual(out, f.name)
