@@ -227,15 +227,17 @@ class HumanizeTimesinceTest(TestCase):
 
 
 class MediaStaticFallbackPathTest(TestCase):
-    def test_media_static_fallback(self):
-        out = Template(
-            '{% load mapentity_tags %}'
-            '{% media_static_fallback_path "doesnotexist.png" "foo.png" %}'
-        ).render(Context({}))
-        self.assertEqual(out, "/code/src/static/foo.png")
+    def test_media_static_fallback_path(self):
+        d = TemporaryDirectory()
+        with override_settings(STATIC_ROOT=d.name):
+            out = Template(
+                '{% load mapentity_tags %}'
+                '{% media_static_fallback_path "doesnotexist.png" "foo.png" %}'
+            ).render(Context({}))
 
-    @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
-    def test_media_static_find(self):
+        self.assertEqual(os.path.join(d.name, 'foo.png'), out)
+
+    def test_media_static_find_path(self):
         d = TemporaryDirectory()
         with override_settings(MEDIA_ROOT=d.name):
             with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
@@ -245,3 +247,23 @@ class MediaStaticFallbackPathTest(TestCase):
                 '{% media_static_fallback_path "exist.png" "foo.png" %}'
             ).render(Context({}))
             self.assertEqual(out, f.name)
+
+
+class MediaStaticFallbackTest(TestCase):
+    def test_media_static_fallback(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{% media_static_fallback "doesnotexist.png" "foo.png" %}'
+        ).render(Context({}))
+
+        self.assertEqual(out, "/static/foo.png")
+
+    def test_media_static_find(self):
+        d = TemporaryDirectory()
+        with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
+            f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{% media_static_fallback "exist.png" "foo.png" %}'
+        ).render(Context({}))
+        self.assertEqual(out, '/media/exist.png')
