@@ -20,7 +20,12 @@ class ShapefileSerializer(TestCase):
         self.point1.tags.add(Tag.objects.create(label="Tag2"))
         self.line1 = MushroomSpot.objects.create(serialized='SRID=%s;LINESTRING(0 0, 10 0)' % settings.SRID)
         self.multipoint = MushroomSpot.objects.create(serialized='SRID=%s;MULTIPOINT((1 1), (2 2))' % settings.SRID)
-
+        self.multiline = MushroomSpot.objects.create(serialized='SRID=%s;MULTILINESTRING((1 1, 2 2), '
+                                                                '(3 3, 4 4))' % settings.SRID)
+        self.polygon = MushroomSpot.objects.create(serialized='SRID=%s;POLYGON((1 1, 2 2, '
+                                                              '1 2, 1 1))' % settings.SRID)
+        self.multipolygon = MushroomSpot.objects.create(serialized='SRID=%s;MULTIPOLYGON(((1 1, 2 2, '
+                                                                   '1 2, 1 1)))' % settings.SRID)
         MushroomSpot.geomfield = GeometryField(name='geom', srid=settings.SRID)
 
         self.serializer = ZipShapeSerializer()
@@ -35,18 +40,35 @@ class ShapefileSerializer(TestCase):
         layers = [ds[0] for ds in datasources]
         return layers
 
+    def test_serializer_no_geom(self):
+        response = HttpResponse()
+        MushroomSpot.objects.create()
+        self.serializer.serialize(MushroomSpot.objects.all(), stream=response,
+                                  fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
+        l_point, l_linestring, l_m_point, l_m_linestring, l_polygon, l_m_polygon = self.getShapefileLayers()
+        self.assertEqual(len(l_point), 1)
+        self.assertEqual(len(l_linestring), 1)
+        self.assertEqual(len(l_m_point), 1)
+        self.assertEqual(len(l_m_linestring), 1)
+        self.assertEqual(len(l_polygon), 1)
+        self.assertEqual(len(l_m_polygon), 1)
+
     def test_serializer_creates_one_layer_per_type(self):
-        self.assertEqual(len(self.getShapefileLayers()), 3)
+        self.assertEqual(len(self.getShapefileLayers()), 6)
 
     def test_each_layer_has_records_by_type(self):
-        layer_point, layer_linestring, layer_multipoint = self.getShapefileLayers()
-        self.assertEqual(len(layer_point), 1)
-        self.assertEqual(len(layer_linestring), 1)
-        self.assertEqual(len(layer_multipoint), 1)
+        l_point, l_linestring, l_m_point, l_m_linestring, l_polygon, l_m_polygon = self.getShapefileLayers()
+        self.assertEqual(len(l_point), 1)
+        self.assertEqual(len(l_linestring), 1)
+        self.assertEqual(len(l_m_point), 1)
+        self.assertEqual(len(l_m_linestring), 1)
+        self.assertEqual(len(l_polygon), 1)
+        self.assertEqual(len(l_m_polygon), 1)
 
     def test_each_layer_has_a_different_geometry_type(self):
         layer_types = [layer.geom_type.name for layer in self.getShapefileLayers()]
-        self.assertCountEqual(layer_types, ['MultiPoint', 'Point', 'LineString'])
+
+        self.assertCountEqual(layer_types, ['Polygon', 'LineString', 'LineString', 'Point', 'MultiPoint', 'Polygon'])
 
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers():
@@ -68,9 +90,21 @@ class ShapefileSerializer(TestCase):
         self.assertEqual(str(feature['id']), str(self.line1.pk))
         self.assertTrue(feature.geom.geos.equals(self.line1.geom))
 
+        feature = geom_type_layer['MultiLineString'][0]
+        self.assertEqual(str(feature['id']), str(self.multiline.pk))
+        self.assertTrue(feature.geom.geos.equals(self.multiline.geom))
+
+        feature = geom_type_layer['Polygon'][0]
+        self.assertEqual(str(feature['id']), str(self.polygon.pk))
+        self.assertTrue(feature.geom.geos.equals(self.polygon.geom))
+
+        feature = geom_type_layer['MultiPolygon'][0]
+        self.assertEqual(str(feature['id']), str(self.multipolygon.pk))
+        self.assertTrue(feature.geom.geos.equals(self.multipolygon.geom))
+
     def test_attributes(self):
-        layer_point, layer_linestring, layer_multipoint = self.getShapefileLayers()
-        feature = layer_point[0]
+        l_point, l_linestring, l_m_point, l_m_linestring, l_polygon, l_m_polygon = self.getShapefileLayers()
+        feature = l_point[0]
         self.assertEqual(feature['name'].value, self.point1.name)
 
 
