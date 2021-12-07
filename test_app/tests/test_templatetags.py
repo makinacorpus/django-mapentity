@@ -111,8 +111,8 @@ class ValueTableTest(TestCase):
         self.assertHTMLEqual(out,
                              f"""
                              <table class="table"><thead><tr><th class="name">name</th></tr>
-                             </thead><tbody><tr class="hoverable" data-modelname="dummymodel" data-pk="{dummy.pk}"><td>
-                             foo</td></tr></tbody></table>""")
+                             </thead><tbody><tr class="hoverable" data-modelname="dummymodel"
+                              data-pk="{dummy.pk}"><td>foo</td></tr></tbody></table>""")
 
 
 @freeze_time("2021-12-12")
@@ -241,7 +241,8 @@ class MediaStaticFallbackPathTest(TestCase):
         d = TemporaryDirectory()
         with override_settings(MEDIA_ROOT=d.name):
             with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
-                f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
+                f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
+                        b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
             out = Template(
                 '{% load mapentity_tags %}'
                 '{% media_static_fallback_path "exist.png" "foo.png" %}'
@@ -260,8 +261,10 @@ class MediaStaticFallbackTest(TestCase):
 
     def test_media_static_find(self):
         d = TemporaryDirectory()
-        with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
-            f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
+        with override_settings(MEDIA_ROOT=d.name):
+            with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
+                f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
+                        b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
         out = Template(
             '{% load mapentity_tags %}'
             '{% media_static_fallback "exist.png" "foo.png" %}'
