@@ -268,11 +268,11 @@ class MediaStaticFallbackTest(TestCase):
             with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
                 f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
                         b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
-        out = Template(
-            '{% load mapentity_tags %}'
-            '{% media_static_fallback "exist.png" "foo.png" %}'
-        ).render(Context({}))
-        self.assertEqual(out, '/media/exist.png')
+                out = Template(
+                    '{% load mapentity_tags %}'
+                    '{% media_static_fallback "exist.png" "foo.png" %}'
+                ).render(Context({}))
+                self.assertEqual(out, '/media/exist.png')
 
 
 class SmartIncludeTest(TestCase):
