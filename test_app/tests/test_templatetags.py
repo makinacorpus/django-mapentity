@@ -301,16 +301,30 @@ class LatLngBoundsTest(TestCase):
         self.assertEqual('null', out)
 
     def test_latlngbound_object(self):
-        object_event = DummyModelFactory.create(geom='SRID=2154;POINT(0 0)')
+        object_dummy = DummyModelFactory.create(geom='SRID=2154;POINT(0 0)')
         out = Template(
             '{% load mapentity_tags %}'
             '{{ object|latlngbounds }}'
-        ).render(Context({'object': object_event}))
+        ).render(Context({'object': object_dummy}))
         json_out = json.loads(out)
         self.assertAlmostEqual(json_out[0][0], -5.9838563092087576)
         self.assertAlmostEqual(json_out[0][1], -1.363081210117898)
         self.assertAlmostEqual(json_out[1][0], -5.9838563092087576)
         self.assertAlmostEqual(json_out[1][1], -1.363081210117898)
+
+    def test_latlngbound_geosgeometry(self):
+        object_dummy = DummyModelFactory.create(geom='SRID=2154;POINT(0 0)')
+        geom = object_dummy.geom
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ geom|latlngbounds }}'
+        ).render(Context({'geom': geom}))
+        json_out = json.loads(out)
+        # This time there is no transformation
+        self.assertAlmostEqual(json_out[0][0], 0)
+        self.assertAlmostEqual(json_out[0][1], 0)
+        self.assertAlmostEqual(json_out[1][0], 0)
+        self.assertAlmostEqual(json_out[1][1], 0)
 
 
 class FieldVerboseNameTest(TestCase):
