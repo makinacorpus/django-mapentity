@@ -1,5 +1,7 @@
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from django.template import Template, Context
+from django.template.exceptions import TemplateSyntaxError
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import translation
@@ -10,6 +12,7 @@ from .factories import DummyModelFactory
 
 from datetime import datetime
 from freezegun import freeze_time
+import json
 import os
 from tempfile import TemporaryDirectory
 
@@ -270,3 +273,60 @@ class MediaStaticFallbackTest(TestCase):
             '{% media_static_fallback "exist.png" "foo.png" %}'
         ).render(Context({}))
         self.assertEqual(out, '/media/exist.png')
+
+
+class SmartIncludeTest(TestCase):
+    def test_smart_include_no_argument(self):
+        with self.assertRaisesRegex(TemplateSyntaxError, "'smart_include' tag requires one argument"):
+            Template(
+                '{% load mapentity_tags %}'
+                '{% smart_include %}'
+            ).render(Context())
+
+    def test_smart_include_no_quotes(self):
+        with self.assertRaisesRegex(TemplateSyntaxError,
+                                    "'smart_include' tag's viewname argument should be in quotes"):
+            Template(
+                '{% load mapentity_tags %}'
+                '{% smart_include test %}'
+            ).render(Context())
+
+
+class LatLngBoundsTest(TestCase):
+    def test_latlngbound_null(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ object|latlngbounds }}'
+        ).render(Context({'object': None}))
+        self.assertEqual('null', out)
+
+    def test_latlngbound_object(self):
+        object_event = DummyModelFactory.create(geom='SRID=2154;POINT(0 0)')
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ object|latlngbounds }}'
+        ).render(Context({'object': object_event}))
+        json_out = json.loads(out)
+        self.assertAlmostEqual(json_out[0][0], -5.9838563092087576)
+        self.assertAlmostEqual(json_out[0][1], -1.363081210117898)
+        self.assertAlmostEqual(json_out[1][0], -5.9838563092087576)
+        self.assertAlmostEqual(json_out[1][1], -1.363081210117898)
+
+
+class FieldVerboseNameTest(TestCase):
+    def test_field_no_field_but_verbose_name_field(self):
+        object_dummy = DummyModelFactory.create()
+        setattr(object_dummy, 'do_not_exist_verbose_name', "test")
+        template = Template(
+            '{% load mapentity_tags %}'
+            '{{ object|verbose:"do_not_exist" }}'
+        ).render(Context({'object': object_dummy}))
+        self.assertEqual(template, "test")
+
+    def test_field_verbose_name_field_does_not_exist(self):
+        object_dummy = DummyModelFactory.create()
+        with self.assertRaisesRegex(FieldDoesNotExist, "DummyModel has no field named 'do_not_exist'"):
+            Template(
+                '{% load mapentity_tags %}'
+                '{{ object|verbose:"do_not_exist" }}'
+            ).render(Context({'object': object_dummy}))
