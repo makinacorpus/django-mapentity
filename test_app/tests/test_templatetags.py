@@ -1,8 +1,12 @@
 from django.template import Template, Context
 from django.test import TestCase
 from django.utils import translation
+from django.utils.timezone import make_aware
 
 from ..models import DummyModel
+
+from datetime import datetime
+from freezegun import freeze_time
 
 
 class ValueListTest(TestCase):
@@ -70,3 +74,114 @@ class ValueListTest(TestCase):
         self.assertIn('<li><span class="enumeration-value">ABA.&nbsp;</span>27</li>', out)
         self.assertIn('<li><span class="enumeration-value">ABB.&nbsp;</span>28</li>', out)
         self.assertIn('<li><span class="enumeration-value">BAA.&nbsp;</span>677</li>', out)
+
+
+@freeze_time("2021-12-12")
+class HumanizeTimesinceTest(TestCase):
+    def test_no_date(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': ""
+        }))
+        self.assertEqual(out, "")
+
+    def test_years_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2012, 6, 1))  # Initial import of Geotrek-admin on github
+        }))
+        self.assertEqual(out, "9 years ago")
+
+    def test_year_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2020, 11, 12))
+        }))
+        self.assertEqual(out, "1 year ago")
+
+    def test_weeks_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2021, 6, 12))
+        }))
+        self.assertEqual(out, "26 weeks ago")
+
+    def test_week_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2021, 12, 5))
+        }))
+        self.assertEqual(out, "1 week ago")
+
+    def test_days_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2021, 12, 10))
+        }))
+        self.assertEqual(out, "2 days ago")
+
+    def test_day_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2021, 12, 11))
+        }))
+        self.assertEqual(out, "1 day ago")
+
+    def test_hours_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2021, 12, 12, 9))
+        }))
+        self.assertEqual(out, "15 hours ago")
+
+    def test_hour_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2021, 12, 12, 23))
+        }))
+        self.assertEqual(out, "1 hour ago")
+
+    def test_minutes_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2021, 12, 12, 23, 55))
+        }))
+        self.assertEqual(out, "5 minutes ago")
+
+    def test_minute_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2021, 12, 12, 23, 59))
+        }))
+        self.assertEqual(out, "1 minute ago")
+
+    def test_few_seconds_ago(self):
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{{ date|timesince }}'
+        ).render(Context({
+            'date': make_aware(datetime(2021, 12, 12, 23, 59, 59))
+        }))
+        self.assertEqual(out, "just a few seconds ago")
