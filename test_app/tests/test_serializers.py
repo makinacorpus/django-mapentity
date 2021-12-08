@@ -158,13 +158,14 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         layer = layers[0]
         self.assertEqual(layer.name, 'Polygon')
 
+        self.serializer = ZipShapeSerializer()
         Supermarket.geomfield = GeometryField(name='parking', srid=settings.SRID)
         self.serializer.serialize(Supermarket.objects.all(), stream=response,
                                   fields=['id'], delete=False)
         layers = self.getShapefileLayers()
+        delattr(Supermarket, 'geomfield')
         layer = layers[0]
         self.assertEqual(layer.name, 'Point')
-        delattr(Supermarket, 'geomfield')
 
     def tearDown(self):
         super().tearDown()
