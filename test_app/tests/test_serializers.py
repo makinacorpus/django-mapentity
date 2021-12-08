@@ -115,9 +115,9 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
     def setUp(self):
         self.market = Supermarket.objects.create(geom='SRID=%s;POLYGON((1 1, 2 2, 1 2, 1 1))' % settings.SRID,
                                                  parking='SRID=%s;POINT(0 0)' % settings.SRID)
+        self.geom_field = app_settings['GEOM_FIELD_NAME']
 
     def test_multiple_geoms_wrong_geom_field(self):
-        tmp = app_settings['GEOM_FIELD_NAME']
         app_settings['GEOM_FIELD_NAME'] = 'other_geom'
         self.serializer = ZipShapeSerializer()
         response = HttpResponse()
@@ -125,10 +125,8 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
                                                 "fields available are: 'geom, parking'"):
             self.serializer.serialize(Supermarket.objects.all(), stream=response,
                                       fields=['id'], delete=False)
-        app_settings['GEOM_FIELD_NAME'] = tmp
 
     def test_multiple_geoms_no_geom_field(self):
-        tmp = app_settings['GEOM_FIELD_NAME']
         app_settings['GEOM_FIELD_NAME'] = None
         self.serializer = ZipShapeSerializer()
         response = HttpResponse()
@@ -137,7 +135,6 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
                                                 "Available fields are: 'geom, parking'"):
             self.serializer.serialize(Supermarket.objects.all(), stream=response,
                                       fields=['id'], delete=False)
-        app_settings['GEOM_FIELD_NAME'] = tmp
 
     def test_multiple_geoms(self):
         self.serializer = ZipShapeSerializer()
@@ -155,6 +152,10 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         layer = layers[0]
         self.assertEqual(layer.name, 'Point')
         delattr(Supermarket, 'geomfield')
+
+    def tearDown(self):
+        super().tearDown()
+        app_settings['GEOM_FIELD_NAME'] = self.geom_field
 
 
 class CSVSerializerTests(TestCase):
