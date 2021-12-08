@@ -2,6 +2,7 @@ import os
 from io import StringIO
 from unittest.mock import patch
 
+from django import VERSION
 from django.conf import settings
 from django.contrib.gis import gdal
 from django.contrib.gis.db.models import GeometryField
@@ -186,7 +187,10 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         layers = self.getShapefileLayers()
         layer = layers[0]
         feature = layer[0]
-        self.assertEqual(feature['tag'].value, "")
+        if VERSION[0] >= 3:
+            self.assertEqual(feature['tag'].value, None)
+        else:
+            self.assertEqual(feature['tag'].value, "")
 
         self.serializer = ZipShapeSerializer()
         tag = Tag.objects.create(label="Tag")
