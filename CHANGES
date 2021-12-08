@@ -5,6 +5,9 @@ CHANGELOG
 7.0.1+dev (XXXX-XX-XX)
 ======================
 
+**New feature**
+
+- Use map styles to configure colors in lists and detail views 
 
 7.0.1 (2021-11-30)
 ==================
