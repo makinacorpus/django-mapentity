@@ -1,16 +1,15 @@
 import os
 from io import StringIO
 
-from django.test import TestCase
 from django.conf import settings
-from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis import gdal
+from django.contrib.gis.db.models import GeometryField
 from django.http import HttpResponse
+from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import translation
 
 from mapentity.serializers import ZipShapeSerializer, CSVSerializer
-
 from ..models import MushroomSpot, Tag
 
 

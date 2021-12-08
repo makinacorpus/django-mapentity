@@ -2,7 +2,6 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
 from mapentity.views import MapEntityViewSet, LastModifiedMixin
-
 from .models import DummyModel
 from .serializers import DummySerializer, DummyGeojsonSerializer
 
