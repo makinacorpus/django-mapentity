@@ -1,5 +1,6 @@
 import os
 from io import StringIO
+from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.gis import gdal
@@ -118,23 +119,35 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         self.geom_field = app_settings['GEOM_FIELD_NAME']
 
     def test_multiple_geoms_wrong_geom_field(self):
-        app_settings['GEOM_FIELD_NAME'] = 'other_geom'
+        class MockedDict(dict):
+            def __getitem__(self, key):
+                if key == "GEOM_FIELD_NAME":
+                    return "other_geom"
+                return app_settings[key]
         self.serializer = ZipShapeSerializer()
         response = HttpResponse()
         with self.assertRaisesRegex(ValueError, "Geodjango geometry field not found with the name 'other_geom', "
                                                 "fields available are: 'geom, parking'"):
-            self.serializer.serialize(Supermarket.objects.all(), stream=response,
-                                      fields=['id'], delete=False)
+            with patch('mapentity.serializers.shapefile.app_settings') as mock:
+                mock.__getitem__.side_effect = MockedDict().__getitem__
+                self.serializer.serialize(Supermarket.objects.all(), stream=response,
+                                          fields=['id'], delete=False)
 
     def test_multiple_geoms_no_geom_field(self):
-        app_settings['GEOM_FIELD_NAME'] = None
+        class MockedDict(dict):
+            def __getitem__(self, key):
+                if key == "GEOM_FIELD_NAME":
+                    return
+                return app_settings[key]
         self.serializer = ZipShapeSerializer()
         response = HttpResponse()
         with self.assertRaisesRegex(ValueError, "More than one geodjango geometry field found, please specify "
                                                 "which to use by name using the 'geo_field' keyword. "
                                                 "Available fields are: 'geom, parking'"):
-            self.serializer.serialize(Supermarket.objects.all(), stream=response,
-                                      fields=['id'], delete=False)
+            with patch('mapentity.serializers.shapefile.app_settings') as mock:
+                mock.__getitem__.side_effect = MockedDict().__getitem__
+                self.serializer.serialize(Supermarket.objects.all(), stream=response,
+                                          fields=['id'], delete=False)
 
     def test_multiple_geoms(self):
         self.serializer = ZipShapeSerializer()
