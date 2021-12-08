@@ -5,6 +5,9 @@ CHANGELOG
 7.0.1+dev (XXXX-XX-XX)
 ======================
 
+**Bug fixes**
+
+- Update JQuery formsets to fix item deletion
 
 7.0.1 (2021-11-30)
 ==================
