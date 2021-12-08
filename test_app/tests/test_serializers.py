@@ -112,11 +112,22 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
         self.assertEqual(feature['name'].value, self.point1.name)
 
 
+class NoGeomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
+    def setUp(self):
+        self.market = Tag.objects.create(label="Label")
+
+    def test_multiple_geoms(self):
+        self.serializer = ZipShapeSerializer()
+        response = HttpResponse()
+        with self.assertRaisesRegex(ValueError, 'No geodjango geometry fields found in this model'):
+            self.serializer.serialize(Tag.objects.all(), stream=response,
+                                      fields=['id', 'label'], delete=False)
+
+
 class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
     def setUp(self):
         self.market = Supermarket.objects.create(geom='SRID=%s;POLYGON((1 1, 2 2, 1 2, 1 1))' % settings.SRID,
                                                  parking='SRID=%s;POINT(0 0)' % settings.SRID)
-        self.geom_field = app_settings['GEOM_FIELD_NAME']
 
     def test_multiple_geoms_wrong_geom_field(self):
         class MockedDict(dict):
@@ -167,9 +178,25 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         layer = layers[0]
         self.assertEqual(layer.name, 'Point')
 
-    def tearDown(self):
-        super().tearDown()
-        app_settings['GEOM_FIELD_NAME'] = self.geom_field
+    def test_serializer_foreign_key(self):
+        self.serializer = ZipShapeSerializer()
+        response = HttpResponse()
+        self.serializer.serialize(Supermarket.objects.all(), stream=response,
+                                  fields=['id', 'tag'], delete=False)
+        layers = self.getShapefileLayers()
+        layer = layers[0]
+        feature = layer[0]
+        self.assertEqual(feature['tag'].value, "")
+
+        self.serializer = ZipShapeSerializer()
+        tag = Tag.objects.create(label="Tag")
+        Supermarket.objects.update(tag=tag)
+        self.serializer.serialize(Supermarket.objects.all(), stream=response,
+                                  fields=['id', 'tag'], delete=False)
+        layers = self.getShapefileLayers()
+        layer = layers[0]
+        feature = layer[0]
+        self.assertEqual(feature['tag'].value, "Tag")
 
 
 class CSVSerializerTests(TestCase):
