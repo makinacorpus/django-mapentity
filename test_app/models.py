@@ -80,3 +80,9 @@ class City(MapEntityMixin, models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Supermarket(MapEntityMixin, models.Model):
+    """ Linestring Mapentity model """
+    geom = models.PolygonField(null=True, default=None, srid=2154)
+    parking = models.PointField(null=True, default=None, srid=2154)

@@ -9,11 +9,21 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import translation
 
+from mapentity.registry import app_settings
 from mapentity.serializers import ZipShapeSerializer, CSVSerializer
-from ..models import MushroomSpot, Tag
+from ..models import MushroomSpot, Tag, Supermarket
 
 
-class ShapefileSerializer(TestCase):
+class CommonShapefileSerializerMixin(object):
+    def getShapefileLayers(self):
+        shapefiles = self.serializer.path_directory
+        shapefiles = [shapefile for shapefile in os.listdir(shapefiles) if shapefile[-3:] == "shp"]
+        datasources = [gdal.DataSource(os.path.join(self.serializer.path_directory, s)) for s in shapefiles]
+        layers = [ds[0] for ds in datasources]
+        return layers
+
+
+class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
     def setUp(self):
         self.point1 = MushroomSpot.objects.create(serialized='SRID=%s;POINT(0 0)' % settings.SRID)
         self.point1.tags.add(Tag.objects.create(label="Tag1"))
@@ -32,13 +42,6 @@ class ShapefileSerializer(TestCase):
         response = HttpResponse()
         self.serializer.serialize(MushroomSpot.objects.all(), stream=response,
                                   fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
-
-    def getShapefileLayers(self):
-        shapefiles = self.serializer.path_directory
-        shapefiles = [shapefile for shapefile in os.listdir(shapefiles) if shapefile[-3:] == "shp"]
-        datasources = [gdal.DataSource(os.path.join(self.serializer.path_directory, s)) for s in shapefiles]
-        layers = [ds[0] for ds in datasources]
-        return layers
 
     def test_serializer_no_geom(self):
         response = HttpResponse()
@@ -106,6 +109,52 @@ class ShapefileSerializer(TestCase):
         l_point, l_linestring, l_m_point, l_m_linestring, l_polygon, l_m_polygon = self.getShapefileLayers()
         feature = l_point[0]
         self.assertEqual(feature['name'].value, self.point1.name)
+
+
+class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
+    def setUp(self):
+        self.market = Supermarket.objects.create(geom='SRID=%s;POLYGON((1 1, 2 2, 1 2, 1 1))' % settings.SRID,
+                                                 parking='SRID=%s;POINT(0 0)' % settings.SRID)
+
+    def test_multiple_geoms_wrong_geom_field(self):
+        tmp = app_settings['GEOM_FIELD_NAME']
+        app_settings['GEOM_FIELD_NAME'] = 'other_geom'
+        self.serializer = ZipShapeSerializer()
+        response = HttpResponse()
+        with self.assertRaisesRegex(ValueError, "Geodjango geometry field not found with the name 'other_geom', "
+                                                "fields available are: 'geom, parking'"):
+            self.serializer.serialize(Supermarket.objects.all(), stream=response,
+                                      fields=['id'], delete=False)
+        app_settings['GEOM_FIELD_NAME'] = tmp
+
+    def test_multiple_geoms_no_geom_field(self):
+        tmp = app_settings['GEOM_FIELD_NAME']
+        app_settings['GEOM_FIELD_NAME'] = None
+        self.serializer = ZipShapeSerializer()
+        response = HttpResponse()
+        with self.assertRaisesRegex(ValueError, "More than one geodjango geometry field found, please specify "
+                                                "which to use by name using the 'geo_field' keyword. "
+                                                "Available fields are: 'geom, parking'"):
+            self.serializer.serialize(Supermarket.objects.all(), stream=response,
+                                      fields=['id'], delete=False)
+        app_settings['GEOM_FIELD_NAME'] = tmp
+
+    def test_multiple_geoms(self):
+        self.serializer = ZipShapeSerializer()
+        response = HttpResponse()
+        self.serializer.serialize(Supermarket.objects.all(), stream=response,
+                                  fields=['id'], delete=False)
+        layers = self.getShapefileLayers()
+        layer = layers[0]
+        self.assertEqual(layer.name, 'Polygon')
+
+        Supermarket.geomfield = GeometryField(name='parking', srid=settings.SRID)
+        self.serializer.serialize(Supermarket.objects.all(), stream=response,
+                                  fields=['id'], delete=False)
+        layers = self.getShapefileLayers()
+        layer = layers[0]
+        self.assertEqual(layer.name, 'Point')
+        delattr(Supermarket, 'geomfield')
 
 
 class CSVSerializerTests(TestCase):
