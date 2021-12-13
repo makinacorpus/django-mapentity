@@ -14,7 +14,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import (HttpResponse, HttpResponseBadRequest, Http404)
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.views import static
+from django.views import static, View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.views.generic.base import TemplateView
@@ -29,38 +29,41 @@ from ..settings import app_settings
 logger = logging.getLogger(__name__)
 
 
-def serve_attachment(request, path):
-    """
-    Serve media/ for authorized users only, since it can contain sensitive
-    information (uploaded documents)
-    """
-    original_path = re.sub(r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$', '', path, count=1, flags=re.IGNORECASE)
-    attachment = get_object_or_404(get_attachment_model(), attachment_file=original_path)
-    obj = attachment.content_object
-    if not hasattr(obj._meta.model, 'attachments'):
-        raise Http404
-    if not obj.is_public():
-        if not request.user.is_authenticated:
-            raise PermissionDenied
-        if not request.user.has_perm(get_attachment_permission('read_attachment')):
-            raise PermissionDenied
-        if not request.user.has_perm('{}.read_{}'.format(obj._meta.app_label, obj._meta.model_name)):
-            raise PermissionDenied
+class ServeAttachment(View):
 
-    content_type, encoding = mimetypes.guess_type(path)
+    def get(self, request, *args, **kwargs):
+        """
+            Serve media/ for authorized users only, since it can contain sensitive
+            information (uploaded documents)
+        """
+        path = kwargs['path']
+        original_path = re.sub(app_settings['REGEX_PATH_ATTACHMENTS'], '', path, count=1, flags=re.IGNORECASE)
+        attachment = get_object_or_404(get_attachment_model(), attachment_file=original_path)
+        obj = attachment.content_object
+        if not hasattr(obj._meta.model, 'attachments'):
+            raise Http404
+        if not obj.is_public():
+            if not request.user.is_authenticated:
+                raise PermissionDenied
+            if not request.user.has_perm(get_attachment_permission('read_attachment')):
+                raise PermissionDenied
+            if not request.user.has_perm('{}.read_{}'.format(obj._meta.app_label, obj._meta.model_name)):
+                raise PermissionDenied
 
-    if settings.DEBUG:
-        response = static.serve(request, path, settings.MEDIA_ROOT)
-    else:
-        response = HttpResponse()
-        response[app_settings['SENDFILE_HTTP_HEADER']] = os.path.join(settings.MEDIA_URL_SECURE, path)
-    response["Content-Type"] = content_type or 'application/octet-stream'
-    if encoding:
-        response["Content-Encoding"] = encoding
-    if app_settings['SERVE_MEDIA_AS_ATTACHMENT']:
-        response['Content-Disposition'] = "attachment; filename={0}".format(
-            os.path.basename(path))
-    return response
+        content_type, encoding = mimetypes.guess_type(path)
+
+        if settings.DEBUG:
+            response = static.serve(request, path, settings.MEDIA_ROOT)
+        else:
+            response = HttpResponse()
+            response[app_settings['SENDFILE_HTTP_HEADER']] = os.path.join(settings.MEDIA_URL_SECURE, path)
+        response["Content-Type"] = content_type or 'application/octet-stream'
+        if encoding:
+            response["Content-Encoding"] = encoding
+        if app_settings['SERVE_MEDIA_AS_ATTACHMENT']:
+            response['Content-Disposition'] = "attachment; filename={0}".format(
+                os.path.basename(path))
+        return response
 
 
 class JSSettings(JSONResponseMixin, TemplateView):

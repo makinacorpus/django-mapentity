@@ -17,7 +17,7 @@ from faker.providers import geo
 from mapentity.registry import app_settings
 from mapentity.tests import MapEntityTest, MapEntityLiveTest
 from mapentity.tests.factories import SuperUserFactory, UserFactory
-from mapentity.views import serve_attachment, Convert, JSSettings
+from mapentity.views import ServeAttachment, Convert, JSSettings
 from .factories import DummyModelFactory
 from ..models import DummyModel, Attachment, FileType
 from ..views import DummyList, DummyDetail
@@ -247,7 +247,7 @@ class AttachmentTest(BaseTest):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_attachment(request, str(self.attachment.attachment_file))
+        response = ServeAttachment.as_view()(request, path=str(self.attachment.attachment_file))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'')
         self.assertEqual(response['X-Accel-Redirect'], '/media_secure/%s' % self.attachment.attachment_file)
@@ -260,7 +260,7 @@ class AttachmentTest(BaseTest):
         app_settings['SERVE_MEDIA_AS_ATTACHMENT'] = False
         request = RequestFactory().get('/fake-path')
         request.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        response = serve_attachment(request, str(self.attachment.attachment_file))
+        response = ServeAttachment.as_view()(request, path=str(self.attachment.attachment_file))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'')
         self.assertEqual(response['Content-Type'], 'application/pdf')

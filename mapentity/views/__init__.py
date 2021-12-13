@@ -4,7 +4,7 @@ from .api import (
     MapEntityViewSet
 )
 from .base import (
-    serve_attachment,
+    ServeAttachment,
     JSSettings,
     map_screenshot,
     history_delete,
@@ -73,7 +73,7 @@ __all__ = [
     'ModelViewMixin',
     'MAPENTITY_GENERIC_VIEWS',
 
-    'serve_attachment',
+    'ServeAttachment',
     'JSSettings',
     'map_screenshot',
     'convert',
