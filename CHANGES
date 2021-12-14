@@ -5,6 +5,10 @@ CHANGELOG
 7.0.3+dev (XXXX-XX-XX)
 ======================
 
+**New feature**
+
+- Allow to choose regex which find attachments
+
 
 7.0.2     (2021-12-08)
 ======================
