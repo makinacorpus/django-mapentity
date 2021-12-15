@@ -180,3 +180,43 @@ The second way overrides these templates for all your models.
 
     you need to create a sub-directory named ``mapentity`` in ``main/templates``.
     Then you can create a file named ``override_detail_pdf.html``(or ``.css``) and it will be used for all your models if a specific template is not provided.
+
+
+Settings
+-----------
+
+Attached files are downloaded by default by browser, with the following line,
+files will be opened in the browser :
+
+.. code-block :: python
+
+    MAPENTITY_CONFIG['SERVE_MEDIA_AS_ATTACHMENT'] = False
+
+
+All layers colors can be customized from the settings.
+See `Leaflet reference <http://leafletjs.com/reference.html#path>`_ for vectorial
+layer style.
+
+The styles are loaded in leaflet map in js and can be use with window.SETTINGS.map.styles
+
+
+.. code-block :: python
+
+    MAPENTITY_CONFIG['MAP_STYLES'][key] = {'color': 'red', 'weight': 5}
+
+Or change just one parameter (the opacity for example) :
+
+.. code-block :: python
+
+    MAPENTITY_CONFIG['MAP_STYLES'][key]['opacity'] = 0.8
+
+Paperclip medias (under /paperclip/<app>_<model>/<pk>/<name>.**) are protected by mapentity.
+We use easy_thumbnail to generate thumbnails of pictures.
+These files are generated with a new name with all the characteristics of the thumbnail generated (crop or not, width, height, etc...).
+These files need to be protected as the parent picture. We use a regex to find the parent's picture and all the permissions on this picture.
+
+You can change the regex, for example if you need to add other behaviour with easy_thumbnail :
+
+.. code-block :: python
+
+    MAPENTITY_CONFIG['REGEX_PATH_ATTACHMENTS'] = r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$'
