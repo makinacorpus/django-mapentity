@@ -418,6 +418,11 @@ href="/convert/?url=/document/dummymodel-{}.odt&to=doc">\
         self.assertNotContains(response, '<a class="btn btn-light btn-sm" target="_blank" \
 href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
 
+    def test_detail_fragment(self):
+        self.login()
+        response = self.client.get(self.object.get_detail_url())
+        self.assertContains(response, '<h3>Fragment dummymodel</h3>')
+
 
 class ViewPermissionsTest(BaseTest):
     def setUp(self):
