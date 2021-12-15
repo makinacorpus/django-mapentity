@@ -4,7 +4,7 @@ from django.urls import path, re_path, include
 from .registry import registry
 from .settings import app_settings
 from .views import (map_screenshot, history_delete,
-                    serve_attachment, JSSettings, Convert)
+                    ServeAttachment, JSSettings, Convert)
 
 if app_settings['ACTION_HISTORY_ENABLED']:
     from .models import LogEntry
@@ -31,7 +31,7 @@ urlpatterns = [
 
 if settings.DEBUG or app_settings['SENDFILE_HTTP_HEADER']:
     urlpatterns += [
-        re_path(r'^%s/(?P<path>paperclip/.*)$' % _MEDIA_URL, serve_attachment),
+        re_path(r'^%s/(?P<path>paperclip/.*)$' % _MEDIA_URL, ServeAttachment.as_view()),
     ]
 
 
