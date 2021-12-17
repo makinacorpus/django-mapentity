@@ -91,7 +91,7 @@
                         del.val('on');
                         row.hide();
                         forms = $('.' + options.formCssClass).not(':hidden');
-                        totalForms.val(forms.length);
+                        // totalForms.val(forms.length); => https://github.com/elo80ka/django-dynamic-formset/issues/180#issuecomment-705011515
                     } else {
                         row.remove();
                         // Update the TOTAL_FORMS count:

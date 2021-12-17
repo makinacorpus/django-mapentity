@@ -5,6 +5,10 @@ CHANGELOG
 7.0.4+dev (XXXX-XX-XX)
 ======================
 
+**Bug fixes**
+
+- Fix django dynamic formset multiple deletion https://github.com/elo80ka/django-dynamic-formset/issues/180#issuecomment-705011515
+
 
 7.0.3     (2021-12-15)
 ======================
