@@ -5,6 +5,10 @@ CHANGELOG
 7.0.5+dev (XXXX-XX-XX)
 ======================
 
+**Bug fixes**
+
+- Fix a template break in DEBUG False mode
+
 
 7.0.4     (2021-12-17)
 ======================
