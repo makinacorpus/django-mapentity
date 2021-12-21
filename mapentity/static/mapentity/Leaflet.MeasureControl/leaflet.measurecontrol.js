@@ -28,7 +28,7 @@
                 this._map.addLayer(this._markerGroup);
 
                 this._markers = [];
-                this._map.on('click', this._onClick, this);
+                this._map.on('touch', this._onTouch, this);
                 this._startShape();
             }
         },
@@ -42,7 +42,7 @@
             this._map
                 .off('pointermove', this._onMouseMove, this)
                 .off('mousemove', this._onMouseMove, this)
-                .off('click', this._onClick, this);
+                .off('touch', this._onTouch, this);
 
             this._clearGuides();
             this._container.style.cursor = '';
@@ -54,8 +54,8 @@
             this._drawing = true;
             this._poly = new L.Polyline([], this.options.shapeOptions);
             // this is added as a placeholder, if leaflet doesn't recieve
-            // this when the tool is turned off all onclick events are removed
-            this._poly._onClick = function () {};
+            // this when the tool is turned off all onTouch events are removed
+            this._poly._onTouch = function () {};
 
             this._container.style.cursor = 'crosshair';
 
@@ -88,7 +88,7 @@
             this._markerGroup.clearLayers();
         },
 
-        _onClick: function () {
+        _onTouch: function () {
             if (!this._drawing) {
                 this._removeShape();
                 this._startShape();
