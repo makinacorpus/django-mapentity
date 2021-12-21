@@ -314,10 +314,14 @@ $(window).on('entity:map:list', function (e, data) {
             }
         },
         filecontrol = L.Control.fileLayerLoad({
+            addToMap: true,
+            layer: L.geoJSON().addTo(map),
             fitBounds: true,
-            layerOptions: {style: window.SETTINGS.map.styles.filelayer,
-                           pointToLayer: pointToLayer,
-                           onEachFeature: onEachFeature}
+            layerOptions: {
+                style: window.SETTINGS.map.styles.filelayer,
+                pointToLayer: pointToLayer,
+                onEachFeature: onEachFeature
+            }
         });
     map.filecontrol = filecontrol;
     map.addControl(filecontrol);
