@@ -135,7 +135,17 @@ $(window).on('entity:map', function (e, data) {
     }
 
     map.addControl(new L.Control.FullScreen());
-    map.addControl(new L.Control.MeasureControl());
+    map.addControl(new L.Control.MeasureControl({
+        position: 'topleft',
+        handler: {
+            shapeOptions: {
+                color: '#f06eaa'
+            },
+            icon: new L.DivIcon({
+                iconSize: new L.Point(8, 8),
+            }),
+        }
+    }));
 });
 
 
