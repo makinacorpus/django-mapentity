@@ -5,6 +5,10 @@ CHANGELOG
 7.0.5+dev  (XXXX-XX-XX)
 ======================
 
+**Bug fixes**
+
+- Set default config for crispy form and messages tags to match with included bootstrap4
+
 
 7.0.5     (2021-12-21)
 ======================
