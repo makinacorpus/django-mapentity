@@ -3,6 +3,16 @@
 
 {% block content %}
 <div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
     <div class="row justify-content-center">
         <div class="col-12 col-sm-8 col-md-6 col-lg-4">
             <img src="{% media_static_fallback 'upload/logo-login.png' 'images/logo-login.png' %}" />

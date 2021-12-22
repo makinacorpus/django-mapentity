@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from copy import deepcopy
+from django.contrib.messages import constants as messages
 
 from django.conf import settings
 
@@ -154,3 +155,21 @@ _MODELTRANSLATION_DEFAULT_LANGUAGE = getattr(settings, 'MODELTRANSLATION_DEFAULT
                                              _MODELTRANSLATION_LANGUAGES[0])
 setattr(settings, 'MODELTRANSLATION_LANGUAGES', _MODELTRANSLATION_LANGUAGES)
 setattr(settings, 'MODELTRANSLATION_DEFAULT_LANGUAGE', _MODELTRANSLATION_DEFAULT_LANGUAGE)
+
+# default django message tags matching bootstrap4
+_MESSAGE_TAGS = getattr(settings, 'MESSAGE_TAGS', {
+    messages.SUCCESS: 'alert-success',
+    messages.INFO: 'alert-info',
+    messages.DEBUG: 'alert-info',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+})
+
+setattr(settings, 'MESSAGE_TAGS', _MESSAGE_TAGS)
+
+# crispy form default config with bootstrap4
+_CRISPY_ALLOWED_TEMPLATE_PACKS = getattr(settings, 'CRISPY_ALLOWED_TEMPLATE_PACKS', ('bootstrap4', ))
+setattr(settings, 'CRISPY_ALLOWED_TEMPLATE_PACKS', _CRISPY_ALLOWED_TEMPLATE_PACKS)
+
+_CRISPY_TEMPLATE_PACK = getattr(settings, 'CRISPY_TEMPLATE_PACK', 'bootstrap4')
+setattr(settings, 'CRISPY_TEMPLATE_PACK', _CRISPY_TEMPLATE_PACK)
