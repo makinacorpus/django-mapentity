@@ -190,3 +190,6 @@ MAPENTITY_CONFIG = {
     'CAPTURE_SERVER': 'http://localhost/',
     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 }
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'

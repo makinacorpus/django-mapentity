@@ -22,7 +22,6 @@ class Tag(models.Model):
 
 
 class MushroomSpot(MapEntityMixin, models.Model):
-    """ Linestring Mapentity model """
     name = models.CharField(max_length=100, default='Empty')
     serialized = models.CharField(max_length=200, null=True, default=None)
     number = models.IntegerField(null=True, default=42)
