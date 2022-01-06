@@ -38,6 +38,8 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
                                                               '1 2, 1 1))' % settings.SRID)
         self.multipolygon = MushroomSpot.objects.create(serialized='SRID=%s;MULTIPOLYGON(((1 1, 2 2, '
                                                                    '1 2, 1 1)))' % settings.SRID)
+        self.geometrycollection = MushroomSpot.objects.create(
+            serialized='SRID=%s;GEOMETRYCOLLECTION(POINT(0 0), POLYGON((1 1, 2 2, 1 2, 1 1))))' % settings.SRID)
         MushroomSpot.geomfield = GeometryField(name='geom', srid=settings.SRID)
 
         self.serializer = ZipShapeSerializer()
@@ -63,11 +65,11 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
 
     def test_each_layer_has_records_by_type(self):
         l_point, l_linestring, l_m_point, l_m_linestring, l_polygon, l_m_polygon = self.getShapefileLayers()
-        self.assertEqual(len(l_point), 1)
+        self.assertEqual(len(l_point), 2)
         self.assertEqual(len(l_linestring), 1)
         self.assertEqual(len(l_m_point), 1)
         self.assertEqual(len(l_m_linestring), 1)
-        self.assertEqual(len(l_polygon), 1)
+        self.assertEqual(len(l_polygon), 2)
         self.assertEqual(len(l_m_polygon), 1)
 
     def test_each_layer_has_a_different_geometry_type(self):
