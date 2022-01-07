@@ -2,13 +2,14 @@
 CHANGELOG
 =========
 
-7.0.5+dev  (XXXX-XX-XX)
+7.0.6     (2022-01-07)
 ======================
 
 **Bug fixes**
 
 - Set default config for crispy form and messages tags to match with included bootstrap4
 - Fix shapefile generation for GeometryCollection layers
+
 
 7.0.5     (2021-12-21)
 ======================
