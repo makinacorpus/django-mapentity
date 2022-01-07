@@ -170,8 +170,7 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         self.serializer.serialize(Supermarket.objects.all(), stream=response,
                                   fields=['id'], delete=False)
         layers = self.getShapefileLayers()
-        layer = layers[0]
-        self.assertEqual(layer.name, 'Polygon')
+        self.assertIn('Polygon.shp', layers)
 
         self.serializer = ZipShapeSerializer()
         Supermarket.geomfield = GeometryField(name='parking', srid=settings.SRID)
@@ -179,8 +178,7 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
                                   fields=['id'], delete=False)
         layers = self.getShapefileLayers()
         delattr(Supermarket, 'geomfield')
-        layer = layers[0]
-        self.assertEqual(layer.name, 'Point')
+        self.assertIn('Point.shp', layers)
 
     def test_serializer_foreign_key(self):
         self.serializer = ZipShapeSerializer()
@@ -188,7 +186,7 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         self.serializer.serialize(Supermarket.objects.all(), stream=response,
                                   fields=['id', 'tag'], delete=False)
         layers = self.getShapefileLayers()
-        layer = layers[0]
+        layer = layers['Polygon.shp']
         feature = layer[0]
         if VERSION[0] >= 3:
             self.assertEqual(feature['tag'].value, None)
@@ -201,7 +199,7 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         self.serializer.serialize(Supermarket.objects.all(), stream=response,
                                   fields=['id', 'tag'], delete=False)
         layers = self.getShapefileLayers()
-        layer = layers[0]
+        layer = layers['Polygon.shp']
         feature = layer[0]
         self.assertEqual(feature['tag'].value, "Tag")
 
