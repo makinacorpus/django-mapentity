@@ -50,7 +50,7 @@ setup(
         'django-embed-video',
         'django-filter',
         'django-geojson',
-        'django-leaflet==0.19.post9',
+        'django-leaflet',
         'django-modeltranslation',
         'django-tinymce<3.0',
         'django-weasyprint',
