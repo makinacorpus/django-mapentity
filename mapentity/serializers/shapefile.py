@@ -100,15 +100,15 @@ class ZipShapeSerializer(Serializer):
                 # Duplicate object, shapefile do not support geometry collections !
                 subpoints, sublines, subpolygons, pp, ll, yy = self.split_bygeom(geom, geom_getter=lambda geom: geom)
                 if subpoints:
-                    clone = x.__class__.objects.get(pk=x.pk)
+                    clone = iterable.get(id=x.pk)
                     clone.geom = MultiPoint(subpoints, srid=geom.srid)
                     multipoints.append(clone)
                 if sublines:
-                    clone = x.__class__.objects.get(pk=x.pk)
+                    clone = iterable.get(id=x.pk)
                     clone.geom = MultiLineString(sublines, srid=geom.srid)
                     multilinestrings.append(clone)
                 if subpolygons:
-                    clone = x.__class__.objects.get(pk=x.pk)
+                    clone = iterable.get(id=x.pk)
                     clone.geom = MultiPolygon(subpolygons, srid=geom.srid)
                     multipolygons.append(clone)
             elif isinstance(geom, Point):
