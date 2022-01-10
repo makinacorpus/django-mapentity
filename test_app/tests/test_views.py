@@ -72,6 +72,7 @@ class DummyModelFunctionalTest(MapEntityTest):
 
     def get_expected_json_attrs(self):
         return {'date_update': '2020-03-17T00:00:00Z',
+                'description': '',
                 'geom': self.obj.geom.ewkt,
                 'name': self.obj.name,
                 'public': False}

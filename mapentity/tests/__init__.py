@@ -8,6 +8,7 @@ from datetime import datetime
 from io import StringIO
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
+from urllib.parse import quote
 
 from bs4 import BeautifulSoup
 from django.conf import settings
@@ -17,7 +18,7 @@ from django.test.testcases import to_list
 from django.test.utils import override_settings
 from django.utils import html
 from django.utils.encoding import force_str
-from django.utils.http import http_date, urlquote
+from django.utils.http import http_date
 from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from freezegun import freeze_time
@@ -501,7 +502,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertTrue(os.path.exists(image_path))
 
         mapimage_url = '%s%s?context' % (self.live_server_url, obj.get_detail_url())
-        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % urlquote(mapimage_url)
+        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % quote(mapimage_url)
         url_called = mock_requests.get.call_args_list[0]
         self.assertTrue(url_called.startswith(screenshot_url))
 

@@ -53,11 +53,10 @@ jobs:
 
   test:
     runs-on: ubuntu-18.04
-    continue-on-error: true
     strategy:
       matrix:
-        python-version: [ 3.6, 3.9 ]
-        django-version: [ 2.2.*, 3.2.* ]
+        python-version: [ '3.6', '3.7', '3.8', '3.9', ]
+        django-version: [ 2.2.*, 3.2.*]
 
     steps:
     - uses: actions/checkout@v2
