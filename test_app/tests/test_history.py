@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.test.client import Client
 
 from mapentity.models import LogEntry
+from mapentity.tests import SuperUserFactory
 from mapentity.views.generic import log_action
 from ..models import DummyModel
 
@@ -12,10 +13,12 @@ User = get_user_model()
 
 
 class TestActionsHistory(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = SuperUserFactory()
+
     def setUp(self):
-        self.client = Client()
-        self.user = User.objects.create_superuser('test', 'email@corp.com', 'booh')
-        self.client.login(username='test', password='booh')
+        self.client.force_login(self.user)
 
     def test_create_view_logs_addition(self):
         self.client.post('/dummymodel/add/', data={
