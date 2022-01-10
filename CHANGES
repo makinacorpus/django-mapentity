@@ -7,7 +7,7 @@ CHANGELOG
 
 **New**
 
-- Support python 3.10 and django 4.0
+- Support python 3.10
 
 **Breaking changes**
 
