@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'rest_framework',
     'embed_video',
+    'tinymce',
     'mapentity',  # Make sure mapentity settings are loaded before leaflet ones
     'leaflet',
     'test_app',

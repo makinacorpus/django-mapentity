@@ -16,6 +16,7 @@ urlpatterns = [
     path('', RedirectView.as_view(url=reverse_lazy('test_app:dummymodel_list'), permanent=True), name='home'),
     path('', include('test_app.urls')),
     path('', include('mapentity.urls')),
+    path('tinymce/', include('tinymce.urls')),
     path('i18n/', include('django.conf.urls.i18n')),
 
     path('login/', auth_views.LoginView.as_view(), name='login'),

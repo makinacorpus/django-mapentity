@@ -54,19 +54,18 @@ app_settings['MAP_STYLES'] = _MAP_STYLES
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 TINYMCE_DEFAULT_CONFIG = {
-    'theme': 'advanced',
-    'theme_advanced_buttons1': 'bold,italic,forecolor,separator,bullist,numlist,link,media,separator,undo,redo,\
-separator,cleanup,code',
-    'theme_advanced_buttons2': '',
-    'theme_advanced_buttons3': '',
-    'theme_advanced_statusbar_location': 'bottom',
-    'theme_advanced_toolbar_location': 'top',
-    'theme_advanced_toolbar_align': 'center',
-    'theme_advanced_resizing': True,
-    'theme_advanced_resize_horizontal': False,
-    'forced_root_block': False,
-    'plugins': 'media,paste',
+    "theme": "silver",
+    "height": 500,
+    "menubar": False,
+    "plugins": "advlist,autolink,lists,link,image,charmap,print,preview,anchor,"
+               "searchreplace,visualblocks,code,fullscreen,insertdatetime,media,table,paste,"
+               "code,help,wordcount,textcolor",
+    "toolbar": "undo redo | formatselect | "
+               "bold italic forecolor backcolor | link image media | alignleft aligncenter "
+               "alignright alignjustify | bullist numlist outdent indent | "
+               "removeformat | code | help",
     'paste_auto_cleanup_on_paste': True,
+    'forced_root_block': False,
     'width': '95%',
     'resize': "both",
     'valid_elements': ('@[id|class|style|title|dir<ltr?rtl|lang|xml::lang],'

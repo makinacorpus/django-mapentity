@@ -50,9 +50,9 @@ setup(
         'django-embed-video',
         'django-filter',
         'django-geojson',
-        'django-leaflet==0.19.post9',
+        'django-leaflet>=0.19,<0.20',  # leaflet 0.7.x
         'django-modeltranslation',
-        'django-tinymce<3.0',
+        'django-tinymce',
         'django-weasyprint',
         'djangorestframework',
         'djangorestframework-gis',
@@ -64,7 +64,7 @@ setup(
         'lxml',
         'paperclip',
         'requests',
-        'WeasyPrint<53',  # 53 required pango 1.44+ not available on old ubuntu
+        'WeasyPrint',
     ],
     tests_require=tests_require,
     extras_require={
