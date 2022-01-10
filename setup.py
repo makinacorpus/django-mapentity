@@ -52,7 +52,7 @@ setup(
         'django-geojson',
         'django-leaflet>=0.19,<0.20',  # leaflet 0.7.x
         'django-modeltranslation',
-        'django-tinymce',
+        'django-tinymce>=3',
         'django-weasyprint',
         'djangorestframework',
         'djangorestframework-gis',
