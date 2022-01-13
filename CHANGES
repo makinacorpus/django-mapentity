@@ -2,12 +2,12 @@
 CHANGELOG
 =========
 
-7.0.6+dev  (XXXX-XX-XX)
+7.1.0      (2022-01-13)
 =======================
 
 **Breaking changes**
 
-- New django-tinymce 3+. You should update your project settings if you customize this. https://django-tinymce.readthedocs.io/en/latest/installation.html#configuration
+- New django-tinymce 3+. You should update your project settings if you customize this (and dependencies). https://django-tinymce.readthedocs.io/en/latest/installation.html#configuration
 
 
 7.0.6     (2022-01-07)
