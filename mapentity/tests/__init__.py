@@ -51,10 +51,6 @@ class MapEntityTest(TestCase):
     expected_json_geom = {}
     maxDiff = None
 
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = cls.userfactory()
-
     def get_expected_json_attrs(self):
         return {}
 
@@ -67,7 +63,9 @@ class MapEntityTest(TestCase):
         shutil.rmtree(settings.MEDIA_ROOT)
 
     def login(self):
-        self.client.force_login(self.user)
+        self.user = self.userfactory(password='booh')
+        success = self.client.login(username=self.user.username, password='booh')
+        self.assertTrue(success)
 
     def logout(self):
         self.client.logout()
@@ -95,16 +93,13 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         # Make sure database is not empty for this model
-        self.modelfactory.batch_create(30)
+        for i in range(30):
+            self.modelfactory.create()
 
         self.login()
         response = self.client.get(self.model.get_layer_url())
         self.assertEqual(response.status_code, 200)
         response = self.client.get(self.model.get_jsonlist_url())
-        self.assertEqual(response.status_code, 200)
-
-    def test_list_view(self):
-        response = self.client.get(self.model.get_list_url())
         self.assertEqual(response.status_code, 200)
 
     @patch('mapentity.helpers.requests')
