@@ -5,7 +5,10 @@ CHANGELOG
 7.1.0+dev  (XXXX-XX-XX)
 =======================
 
-*
+**New feature**
+
+- Use js for url with tab parameters
+- Add blocks detail views (attachments and properties)
 
 
 7.1.0      (2022-01-13)
