@@ -3,6 +3,6 @@ $(document).ready(function () {
     var url = new URL(url_string);
     var tab = url.searchParams.get("tab");
     if (tab !== null) {
-        $('#tab-' + tab).find('a').click();
+        $('#tab-' + tab).click();
     }
 });
