@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "debug_toolbar",
     'paperclip',
     'djgeojson',
     'compressor',
@@ -52,6 +53,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = (
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -90,7 +92,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'test_project.wsgi.application'
-
+INTERNAL_IPS = type(str('c'), (), {'__contains__': lambda *a: True})()
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
