@@ -95,8 +95,7 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         # Make sure database is not empty for this model
-        for i in range(30):
-            self.modelfactory.create()
+        self.modelfactory.create_batch(30)
 
         response = self.client.get(self.model.get_layer_url())
         self.assertEqual(response.status_code, 200)
