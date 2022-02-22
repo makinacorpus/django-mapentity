@@ -9,7 +9,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS
 from django.db.utils import ProgrammingError
-from django.urls import re_path, include
+from django.urls import re_path, include, path
 from django.utils.translation import gettext as _
 from django.views.generic.base import View
 from paperclip.settings import get_attachment_model
@@ -119,7 +119,8 @@ class MapEntityOptions:
                 geojson_serializer_class = _geojson_serializer
             rest_viewset = dynamic_viewset
 
-        self.rest_router.register(self.modelname + 's', rest_viewset, basename=self.modelname)
+        self.rest_router.register(app_settings['DRF_API_URL_PREFIX'] + self.modelname + '/drf/' + self.modelname + 's',
+                                  rest_viewset, basename=f"{self.modelname}-drf")
 
         # Returns Django URL patterns
         return self.__view_classes_to_url(*picked)
@@ -181,7 +182,7 @@ class MapEntityOptions:
 
     def __view_classes_to_url(self, *view_classes):
         return [self.url_for(view_class) for view_class in view_classes] + \
-               [re_path(app_settings['DRF_API_URL_PREFIX'], include(self.rest_router.urls))]
+               [path('', include(self.rest_router.urls))]
 
     def url_shortname(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS
