@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 
 class ServeAttachment(View):
-
     def get(self, request, *args, **kwargs):
         """
             Serve media/ for authorized users only, since it can contain sensitive
