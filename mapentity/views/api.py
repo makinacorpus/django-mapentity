@@ -2,8 +2,14 @@ import logging
 
 from django.contrib.gis.db.models.functions import Transform
 from django.views.generic.list import ListView
+from django_filters.rest_framework import DjangoFilterBackend
 from djgeojson.views import GeoJSONLayerView
-from rest_framework import viewsets
+from rest_framework import viewsets, renderers
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework_datatables.filters import DatatablesFilterBackend
+from rest_framework_datatables.renderers import DatatablesRenderer
+from rest_framework_gis.filters import InBBoxFilter
 
 from mapentity import models as mapentity_models
 from .base import BaseListView
@@ -11,6 +17,9 @@ from .mixins import FilterListMixin, ModelViewMixin, JSONResponseMixin
 from .. import serializers as mapentity_serializers
 from ..decorators import (view_cache_response_content, view_cache_latest,
                           view_permission_required)
+from ..filters import MapEntityFilterSet
+from ..pagination import MapentityDatatablePagination
+from ..renderers import GeoJSONRenderer
 from ..settings import API_SRID, app_settings
 
 logger = logging.getLogger(__name__)
@@ -74,7 +83,18 @@ class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
 
 
 class MapEntityViewSet(viewsets.ModelViewSet):
+    renderer_classes = [renderers.BrowsableAPIRenderer,
+                        renderers.JSONRenderer,
+                        GeoJSONRenderer,
+                        DatatablesRenderer, ]
+    pagination_class = MapentityDatatablePagination
+    filter_backends = [InBBoxFilter, DatatablesFilterBackend, DjangoFilterBackend]
+    filterset_class = MapEntityFilterSet
+    bbox_filter_field = 'geom'
+    bbox_filter_include_overlapping = True
+
     def get_serializer_class(self):
+        """ Use specific Serializer for GeoJSON """
         renderer, media_type = self.perform_content_negotiation(self.request)
         if getattr(renderer, 'format') == 'geojson':
             return self.geojson_serializer_class
@@ -82,4 +102,17 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             return self.serializer_class
 
     def get_queryset(self):
-        return super().get_queryset().annotate(api_geom=Transform("geom", API_SRID))
+        """ Transform projection for geojson """
+        renderer, media_type = self.perform_content_negotiation(self.request)
+        qs = super().get_queryset()
+        if getattr(renderer, 'format') == 'geojson':
+            return qs.annotate(api_geom=Transform("geom", API_SRID)).defer("geom")
+        return qs
+
+    @action(detail=False)
+    def list_id(self, request, *args, **kwargs):
+        """ List of all object primary keys according filters """
+        qs = self.get_queryset()
+        qs = self.filter_queryset(qs)
+        qs = qs.only('pk')
+        return Response({'pk_list': qs.values_list('pk', flat=True)})
