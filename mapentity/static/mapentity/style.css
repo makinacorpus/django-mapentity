@@ -339,9 +339,6 @@ tr.selected-row td {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-#list-panel .pagination a, .pagination span {
-    line-height: 30px;
-}
 
 #list-panel .table tbody tr.success > td {
     background-color: #75E376;
@@ -773,7 +770,7 @@ label.requiredField .asteriskField {
 
 .translatable .nav-pills {
     padding-left: 15px;
-} 
+}
 
 .translatable .nav-link {
     padding: 0.15rem .5rem;
