@@ -17,12 +17,12 @@ L.MapListSync = L.Class.extend({
         L.Util.setOptions(this, options);
 
         this.selectorOnce = this.__initSelectorOnce(); // TODO: rename this and refactor
-        this._dtcontainer = this.dt.fnSettings().nTableWrapper;
+        //this._dtcontainer = this.dt.fnSettings().nTableWrapper;
 
-        this.dt.fnSettings()['aoRowCreatedCallback'].push({
-            fn: this._onRowCreated.bind(this),
-            sName: 'user',
-        });
+        // this.dt.fnSettings()['aoRowCreatedCallback'].push({
+        //     fn: this._onRowCreated.bind(this),
+        //     sName: 'user',
+        // });
 
         this.layer.on('mouseintent', this._onObjectOver.bind(this));
 
@@ -34,7 +34,7 @@ L.MapListSync = L.Class.extend({
             this.options.filter.resetbutton.click(this._onFormReset.bind(this));
         }
 
-        $(this.dt.fnSettings().oInstance).on('filter', this._onListFilter.bind(this));
+        //$(this.dt.fnSettings().oInstance).on('filter', this._onListFilter.bind(this));
     },
 
     _onListFilter: function () {
@@ -103,20 +103,24 @@ L.MapListSync = L.Class.extend({
     },
 
     _reloadList: function (refreshLayer) {
+        this.dt.ajax.url($('#mainfilter').attr('action') + '?' + $('#mainfilter').serialize()).load();
+
+
         if (this._loading)
             return;
         this._loading = true;
+
         var spinner = new Spinner().spin(this._dtcontainer);
 
         // on JSON load, return the json used by dataTable
         // Update also the map given the layer's pk
         var self = this;
         var extract_data_and_pks = function(data, type, callback_args) {
+
             callback_args.map_obj_pk = data.map_obj_pk;
             return data.aaData;
         };
         var on_data_loaded = function (oSettings, callback_args) {
-
             var nbrecords = self.dt.fnSettings().fnRecordsTotal();
             var nbonmap = Object.keys(self.layer.getCurrentLayers()).length;
 
@@ -148,11 +152,20 @@ L.MapListSync = L.Class.extend({
             self._loading = false;  // loading done.
         };
 
+        // get filtered pks
+        $.get($('#mainfilter').attr('action').replace('.datatables', '/list_id.json'),
+            $('#mainfilter').serialize(),
+            function(data) {
+                this.layer.updateFromPks(data.pk_list);
+                spinner.stop();
+                self._loading = false;  // loading done.
+            }.bind(this));
+
         var url = this.options.url;
         if (this.options.filter) {
             url = this.options.filter.form.attr("action") + '?' + this.options.filter.form.serialize();
         }
-        this.dt.fnReloadAjax(url, extract_data_and_pks, on_data_loaded);
+        //this.dt.fnReloadAjax(url, extract_data_and_pks, on_data_loaded);
         return false;
     },
 
@@ -164,9 +177,13 @@ L.MapListSync = L.Class.extend({
             console.warn("Map view not set, cannot get bounds.");
             return;
         }
-        var bounds = this.map.getBounds(),
-            rect = new L.Rectangle([bounds._northEast, bounds._southWest]);
-        this.options.filter.bboxfield.val(L.Util.getWKT(rect));
+        var bounds = this.map.getBounds();
+        // get map bound coordinates, keep them in max real values
+        var min_lat = Math.max(bounds._southWest.lat, -90);
+        var max_lat = Math.min(bounds._northEast.lat, 90);
+        var min_lon = Math.max(bounds._southWest.lng, -180);
+        var max_lon = Math.min(bounds._northEast.lng, 180);
+        this.options.filter.bboxfield.val(`${min_lon},${min_lat},${max_lon},${max_lat}`);
     },
 
     _formClear: function ($form) {
