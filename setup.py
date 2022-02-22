@@ -56,6 +56,7 @@ setup(
         'django-weasyprint',
         'djangorestframework',
         'djangorestframework-gis',
+        'djangorestframework-datatables',
         'django-modelcluster',
         'easy-thumbnails',
         'fiona',
