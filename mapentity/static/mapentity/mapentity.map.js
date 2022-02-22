@@ -136,6 +136,11 @@ $(window).on('entity:map', function (e, data) {
 
     map.addControl(new L.Control.FullScreen());
     map.addControl(new L.Control.MeasureControl());
+
+    map.on("moveend", function () {
+        var bounds = map.getBounds();
+        $('#id_in_bbox').val(`${bounds.getSouthWest().lng},${bounds.getSouthWest().lat},${bounds.getNorthEast().lng},${bounds.getNorthEast().lat}`);
+    });
 });
 
 
