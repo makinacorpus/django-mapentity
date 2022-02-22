@@ -42,14 +42,16 @@ INSTALLED_APPS = (
     'djgeojson',
     'compressor',
     'easy_thumbnails',
+    'django_filters',
     'crispy_forms',
     'rest_framework',
+    'rest_framework_gis',
     'embed_video',
     'tinymce',
     'mapentity',  # Make sure mapentity settings are loaded before leaflet ones
     'leaflet',
     'test_app',
-    'modeltranslation'
+    'modeltranslation',
 )
 
 MIDDLEWARE = (
