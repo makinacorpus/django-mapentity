@@ -1,9 +1,42 @@
-from django import forms
+from django.conf import settings
+from django.contrib.gis import forms
 from django.db.models.fields.related import ManyToOneRel, ForeignKey
 from django.forms import HiddenInput
-from django_filters import ModelMultipleChoiceFilter, CharFilter
+from django_filters import ModelMultipleChoiceFilter, CharFilter, Filter
 from django_filters.filterset import get_model_field, remote_queryset
 from django_filters.rest_framework import FilterSet
+
+from mapentity.settings import app_settings, API_SRID
+from mapentity.widgets import HiddenGeometryWidget
+
+
+class PolygonFilter(Filter):
+    field_class = forms.PolygonField
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('field_name', app_settings['GEOM_FIELD_NAME'])
+        kwargs.setdefault('widget', HiddenGeometryWidget)
+        kwargs.setdefault('lookup_expr', 'intersects')
+        super().__init__(*args, **kwargs)
+
+
+class PythonPolygonFilter(PolygonFilter):
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+        if not value.srid:
+            value.srid = API_SRID
+        value.transform(settings.SRID)
+        filtered = []
+        for o in qs.all():
+            geom = getattr(o, self.field_name)
+            if geom and geom.valid and not geom.empty:
+                if getattr(geom, self.lookup_expr)(value):
+                    filtered.append(o.pk)
+            else:
+                filtered.append(o.pk)
+        return qs.filter(pk__in=filtered)
 
 
 class BaseMapEntityFilterSet(FilterSet):
