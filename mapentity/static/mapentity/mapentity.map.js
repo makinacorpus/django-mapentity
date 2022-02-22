@@ -278,7 +278,7 @@ $(window).on('entity:map:list', function (e, data) {
                                             form: $('#mainfilter'),
                                             submitbutton: $('#filter'),
                                             resetbutton: $('#reset'),
-                                            bboxfield: $('#id_bbox'),
+                                            bboxfield: $('#id_in_bbox'),
                                         }
                                     });
     mapsync.on('reloaded', function (data) {
