@@ -15,4 +15,5 @@ class DummyGeojsonSerializer(GeoFeatureModelSerializer, DummySerializer):
     api_geom = rest_gis_fields.GeometryField(read_only=True, precision=7)
 
     class Meta(DummySerializer.Meta):
+        fields = ('id', 'name', 'description', 'public', 'date_update')
         geo_field = "api_geom"
