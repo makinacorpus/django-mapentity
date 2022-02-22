@@ -5,6 +5,10 @@ CHANGELOG
 7.1.2+dev  (XXXX-XX-XX)
 =======================
 
+**Minor changes**
+
+- Reduce test execution time
+
 
 7.1.2      (2022-01-28)
 =======================
