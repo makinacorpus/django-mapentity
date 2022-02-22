@@ -127,4 +127,3 @@ class FilterListMixin:
         self._filterform.helper = FormHelper()
         self._filterform.helper.field_class = 'form-control-sm'
         self._filterform.helper.submit = None
-
