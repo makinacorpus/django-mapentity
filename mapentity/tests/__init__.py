@@ -50,6 +50,7 @@ class MapEntityTest(TestCase):
     api_prefix = '/api/'
     expected_json_geom = {}
     maxDiff = None
+    user = None
 
     def get_expected_json_attrs(self):
         return {}
@@ -58,7 +59,7 @@ class MapEntityTest(TestCase):
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
         os.makedirs(settings.MEDIA_ROOT)
-        if hasattr(self, 'user'):
+        if self.user:
             self.client.force_login(user=self.user)
 
     def tearDown(self):
