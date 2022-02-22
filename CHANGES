@@ -5,6 +5,19 @@ CHANGELOG
 7.1.3+dev  (XXXX-XX-XX)
 =======================
 
+**Breaking Changes:**
+
+- MapentityJSONList is now generated in MapentityViewset. You should update your code to replace JSONList views with MapentityViewset views.
+- Base filters have changed. to care of new design.
+
+**New Features:**
+
+- Server-side list pagination
+
+**Maintenance**
+
+- Update datatables to 1.11.4
+
 **New**
 
 - Support django 4.0
