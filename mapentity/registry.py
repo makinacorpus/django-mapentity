@@ -119,7 +119,7 @@ class MapEntityOptions:
                 geojson_serializer_class = _geojson_serializer
             rest_viewset = dynamic_viewset
 
-        self.rest_router.register(app_settings['DRF_API_URL_PREFIX'] + self.modelname + '/drf/' + self.modelname + 's',
+        self.rest_router.register(r'api/' + self.modelname + '/drf/' + self.modelname + 's',
                                   rest_viewset, basename=f"{self.modelname}-drf")
 
         # Returns Django URL patterns
