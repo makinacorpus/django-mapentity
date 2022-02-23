@@ -97,7 +97,7 @@ class MapEntityFilterSet(BaseMapEntityFilterSet):
         return queryset
 
     class Meta:
-        fields = "__all__"
+        fields = ['in_bbox']
         filter_overrides = {
             ForeignKey: {
                 'filter_class': ModelMultipleChoiceFilter,
