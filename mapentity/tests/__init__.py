@@ -8,6 +8,7 @@ from datetime import datetime
 from io import StringIO
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
+from urllib.parse import quote
 
 from bs4 import BeautifulSoup
 from django.conf import settings
@@ -17,7 +18,7 @@ from django.test.testcases import to_list
 from django.test.utils import override_settings
 from django.utils import html
 from django.utils.encoding import force_str
-from django.utils.http import http_date, urlquote
+from django.utils.http import http_date
 from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from freezegun import freeze_time
@@ -49,6 +50,7 @@ class MapEntityTest(TestCase):
     api_prefix = '/api/'
     expected_json_geom = {}
     maxDiff = None
+    user = None
 
     def get_expected_json_attrs(self):
         return {}
@@ -57,14 +59,16 @@ class MapEntityTest(TestCase):
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
         os.makedirs(settings.MEDIA_ROOT)
+        if self.user:
+            self.client.force_login(user=self.user)
 
     def tearDown(self):
         shutil.rmtree(settings.MEDIA_ROOT)
 
-    def login(self):
-        self.user = self.userfactory(password='booh')
-        success = self.client.login(username=self.user.username, password='booh')
-        self.assertTrue(success)
+    @classmethod
+    def setUpTestData(cls):
+        if cls.userfactory:
+            cls.user = cls.userfactory(password='booh')
 
     def logout(self):
         self.client.logout()
@@ -92,10 +96,8 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         # Make sure database is not empty for this model
-        for i in range(30):
-            self.modelfactory.create()
+        self.modelfactory.create_batch(30)
 
-        self.login()
         response = self.client.get(self.model.get_layer_url())
         self.assertEqual(response.status_code, 200)
         response = self.client.get(self.model.get_jsonlist_url())
@@ -109,7 +111,6 @@ class MapEntityTest(TestCase):
         mock_requests.get.return_value.status_code = 200
         mock_requests.get.return_value.content = b'<p id="properties">Mock</p>'
 
-        self.login()
         obj = self.modelfactory.create()
         response = self.client.get(obj.get_document_url())
         self.assertEqual(response.status_code, 200)
@@ -117,7 +118,6 @@ class MapEntityTest(TestCase):
     def test_bbox_filter(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         params = '?bbox=POLYGON((5+44+0%2C5+45+0%2C6+45+0%2C6+44+0%2C5+44+0))'
         # If no objects exist, should not fail.
         response = self.client.get(self.model.get_jsonlist_url() + params)
@@ -137,7 +137,6 @@ class MapEntityTest(TestCase):
     def test_callback_jsonlist(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         params = '?callback=json_decode'
         # If no objects exist, should not fail.
         response = self.client.get(self.model.get_jsonlist_url() + params)
@@ -147,7 +146,6 @@ class MapEntityTest(TestCase):
     def test_basic_format(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         self.modelfactory.create()
         for fmt in ('csv', 'shp', 'gpx'):
             response = self.client.get(self.model.get_format_list_url() + '?format=' + fmt)
@@ -156,7 +154,6 @@ class MapEntityTest(TestCase):
     def test_gpx_elevation(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         obj = self.modelfactory.create()
         response = self.client.get(self.model.get_format_list_url() + '?format=gpx')
         parsed = BeautifulSoup(response.content, 'lxml')
@@ -168,7 +165,6 @@ class MapEntityTest(TestCase):
     def test_no_basic_format_fail(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         self.modelfactory.create()
 
         response = self.client.get(self.model.get_format_list_url() + '?format=')
@@ -177,8 +173,6 @@ class MapEntityTest(TestCase):
     def test_no_html_in_csv(self):
         if self.model is None:
             return  # Abstract test should not run
-
-        self.login()
 
         self.modelfactory.create()
 
@@ -243,8 +237,6 @@ class MapEntityTest(TestCase):
         if self.model is None:
             return  # Abstract test should not run
 
-        self.login()
-
         obj = self.modelfactory()
 
         response = self.client.get(obj.get_list_url())
@@ -284,7 +276,6 @@ class MapEntityTest(TestCase):
     def test_formfilter_in_list_context(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         response = self.client.get(self.model.get_list_url())
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['filterform'] is not None)
@@ -301,7 +292,6 @@ class MapEntityTest(TestCase):
             return
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
 
         self.obj = self.modelfactory.create()
         list_url = '{api_prefix}{modelname}s.json'.format(api_prefix=self.api_prefix,
@@ -320,7 +310,6 @@ class MapEntityTest(TestCase):
             return
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
 
         self.obj = self.modelfactory.create()
         list_url = '{api_prefix}{modelname}s.geojson'.format(api_prefix=self.api_prefix,
@@ -347,7 +336,6 @@ class MapEntityTest(TestCase):
             return
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
 
         self.obj = self.modelfactory.create()
         detail_url = '{api_prefix}{modelname}s/{id}'.format(api_prefix=self.api_prefix,
@@ -368,7 +356,6 @@ class MapEntityTest(TestCase):
             return
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
 
         self.obj = self.modelfactory.create()
         detail_url = '{api_prefix}{modelname}s/{id}.geojson'.format(api_prefix=self.api_prefix,
@@ -501,7 +488,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         self.assertTrue(os.path.exists(image_path))
 
         mapimage_url = '%s%s?context' % (self.live_server_url, obj.get_detail_url())
-        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % urlquote(mapimage_url)
+        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % quote(mapimage_url)
         url_called = mock_requests.get.call_args_list[0]
         self.assertTrue(url_called.startswith(screenshot_url))
 

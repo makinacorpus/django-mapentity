@@ -4,12 +4,12 @@ import re
 from collections import OrderedDict
 from importlib import import_module
 
-from django.conf.urls import include, re_path
 from django.contrib import auth
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS
 from django.db.utils import ProgrammingError
+from django.urls import re_path, include
 from django.utils.translation import gettext as _
 from django.views.generic.base import View
 from paperclip.settings import get_attachment_model

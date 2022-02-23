@@ -22,7 +22,6 @@ class Tag(models.Model):
 
 
 class MushroomSpot(MapEntityMixin, models.Model):
-    """ Linestring Mapentity model """
     name = models.CharField(max_length=100, default='Empty')
     serialized = models.CharField(max_length=200, null=True, default=None)
     number = models.IntegerField(null=True, default=42)
@@ -49,7 +48,7 @@ class MushroomSpot(MapEntityMixin, models.Model):
 
 
 class WeatherStation(models.Model):
-    """ Not a Mapentity model. should be displayed in menu entries """
+    """ Not a Mapentity model. should not be displayed in menu entries """
     geom = models.PointField(null=True, default=None, srid=2154)
 
 
@@ -60,6 +59,7 @@ class Road(MapEntityMixin, models.Model):
 
 class DummyModel(MapEntityMixin, models.Model):
     name = models.CharField(blank=True, default='', max_length=128)
+    description = models.TextField(blank=True, default='')
     geom = models.PointField(null=True, default=None)
     date_update = models.DateTimeField(auto_now=True)
     public = models.BooleanField(default=False)

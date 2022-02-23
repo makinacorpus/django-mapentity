@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'crispy_forms',
     'rest_framework',
     'embed_video',
+    'tinymce',
     'mapentity',  # Make sure mapentity settings are loaded before leaflet ones
     'leaflet',
     'test_app',
@@ -190,3 +191,6 @@ MAPENTITY_CONFIG = {
     'CAPTURE_SERVER': 'http://localhost/',
     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 }
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'

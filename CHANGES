@@ -2,8 +2,50 @@
 CHANGELOG
 =========
 
-7.0.5+dev  (XXXX-XX-XX)
+7.1.3+dev  (XXXX-XX-XX)
+=======================
+
+
+7.1.3      (2022-02-23)
+=======================
+
+**Minor changes**
+
+- Reduce test execution time
+
+
+7.1.2      (2022-01-28)
+=======================
+
+**New feature**
+
+- Add blocks after attachments detail views
+
+
+7.1.1      (2022-01-26)
+=======================
+
+**New feature**
+
+- Use js for url with tab parameters
+- Add blocks detail views (attachments and properties)
+
+
+7.1.0      (2022-01-13)
+=======================
+
+**Breaking changes**
+
+- New django-tinymce 3+. You should update your project settings if you customize this (and dependencies). https://django-tinymce.readthedocs.io/en/latest/installation.html#configuration
+
+
+7.0.6     (2022-01-07)
 ======================
+
+**Bug fixes**
+
+- Set default config for crispy form and messages tags to match with included bootstrap4
+- Fix shapefile generation for GeometryCollection layers
 
 
 7.0.5     (2021-12-21)
