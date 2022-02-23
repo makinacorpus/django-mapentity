@@ -107,7 +107,7 @@ MapEntity.Context = new function() {
 
         if (datatable && context.sortcolumns) {
             if ($('body').attr('data-modelname') in context.sortcolumns) {
-                datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
+                //datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
             }
             last_sort = context['sortcolumns'];
         }
