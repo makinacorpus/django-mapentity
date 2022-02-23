@@ -157,7 +157,7 @@ class BaseMapEntityMixin(models.Model):
 
     @classmethod
     def get_datatablelist_url(cls):
-        return '/api/' + cls._meta.model_name.lower() + '/drf/' + cls._meta.model_name.lower() + 's.datatables'
+        return reverse(f"{cls._meta.app_label}:{cls._meta.model_name}-drf-list", kwargs={'format': 'datatables'})
 
     @classmethod
     def get_format_list_url(cls):
