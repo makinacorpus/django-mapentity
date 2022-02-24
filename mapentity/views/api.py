@@ -9,7 +9,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
 from rest_framework_datatables.renderers import DatatablesRenderer
-from rest_framework_gis.filters import InBBoxFilter
 
 from mapentity import models as mapentity_models
 from .base import BaseListView
@@ -109,9 +108,13 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             return qs.annotate(api_geom=Transform("geom", API_SRID)).defer("geom")
         return qs
 
+    def get_filter_count_infos(self, qs):
+        """ Override this method to change count info in List dropdown menu """
+        return qs.count()
+
     # @action(detail=False, url_path='(?P<page_length>\d+)/filter_infos', methods=['get'])
     @action(detail=False, methods=['get'])
-    def filter_infos(self, request, page_length, *args, **kwargs):
+    def filter_infos(self, request, *args, **kwargs):
         """ List of all object primary keys according filters """
         qs = self.get_queryset()
         qs = self.filter_queryset(qs)
@@ -121,5 +124,5 @@ class MapEntityViewSet(viewsets.ModelViewSet):
         return Response({
             #'pk_list': qs.values('pk', 'page'),
             'pk_list': qs.values_list('pk', flat=True),
-            'count': qs.count(),
+            'count': self.get_filter_count_infos(qs),
         })
