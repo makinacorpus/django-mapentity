@@ -109,10 +109,17 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             return qs.annotate(api_geom=Transform("geom", API_SRID)).defer("geom")
         return qs
 
-    @action(detail=False)
-    def list_id(self, request, *args, **kwargs):
+    # @action(detail=False, url_path='(?P<page_length>\d+)/filter_infos', methods=['get'])
+    @action(detail=False, methods=['get'])
+    def filter_infos(self, request, page_length, *args, **kwargs):
         """ List of all object primary keys according filters """
         qs = self.get_queryset()
         qs = self.filter_queryset(qs)
-        qs = qs.only('pk')
-        return Response({'pk_list': qs.values_list('pk', flat=True)})
+        # qs = qs.annotate(row_number=Window(expression=RowNumber(),
+        #                                    order_by=[F('pk')]))
+        # qs = qs.annotate(page=F('row_number') / int(page_length) + 1)
+        return Response({
+            #'pk_list': qs.values('pk', 'page'),
+            'pk_list': qs.values_list('pk', flat=True),
+            'count': qs.count(),
+        })
