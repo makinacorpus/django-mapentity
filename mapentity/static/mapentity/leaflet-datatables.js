@@ -156,6 +156,7 @@ L.MapListSync = L.Class.extend({
         $.get($('#mainfilter').attr('action').replace('.datatables', '/filter_infos.json'),
             $('#mainfilter').serialize(),
             function(data) {
+                $('#nbresults').text(data.count);
                 this.layer.updateFromPks(data.pk_list);
                 spinner.stop();
                 self._loading = false;  // loading done.
