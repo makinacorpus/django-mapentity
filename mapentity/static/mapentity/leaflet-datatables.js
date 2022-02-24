@@ -153,7 +153,7 @@ L.MapListSync = L.Class.extend({
         };
 
         // get filtered pks
-        $.get($('#mainfilter').attr('action').replace('.datatables', '/list_id.json'),
+        $.get($('#mainfilter').attr('action').replace('.datatables', '/filter_infos.json'),
             $('#mainfilter').serialize(),
             function(data) {
                 this.layer.updateFromPks(data.pk_list);
