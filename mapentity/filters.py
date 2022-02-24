@@ -5,6 +5,7 @@ from django.forms import HiddenInput
 from django_filters import ModelMultipleChoiceFilter, CharFilter, Filter
 from django_filters.filterset import get_model_field, remote_queryset
 from django_filters.rest_framework import FilterSet
+from rest_framework_gis.filters import InBBoxFilter
 
 from mapentity.settings import app_settings, API_SRID
 from mapentity.widgets import HiddenGeometryWidget
@@ -37,6 +38,21 @@ class PythonPolygonFilter(PolygonFilter):
             else:
                 filtered.append(o.pk)
         return qs.filter(pk__in=filtered)
+
+
+class MapentityInBBoxFilter(InBBoxFilter):
+    """
+    Override DRF gis InBBOXFilter with coreapi field descriptors
+    """
+
+    def get_filter_bbox(self, request):
+        """ Transform bbox to internal SRID to get working """
+        bbox = super().get_filter_bbox(request)
+        if bbox:
+            bbox.srid = 4326
+            if bbox.srid != settings.SRID:
+                bbox.transform(settings.SRID)
+        return bbox
 
 
 class BaseMapEntityFilterSet(FilterSet):

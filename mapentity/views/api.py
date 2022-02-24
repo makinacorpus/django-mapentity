@@ -17,7 +17,7 @@ from .mixins import FilterListMixin, ModelViewMixin, JSONResponseMixin
 from .. import serializers as mapentity_serializers
 from ..decorators import (view_cache_response_content, view_cache_latest,
                           view_permission_required)
-from ..filters import MapEntityFilterSet
+from ..filters import MapEntityFilterSet, MapentityInBBoxFilter
 from ..pagination import MapentityDatatablePagination
 from ..renderers import GeoJSONRenderer
 from ..settings import API_SRID, app_settings
@@ -88,7 +88,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
                         GeoJSONRenderer,
                         DatatablesRenderer, ]
     pagination_class = MapentityDatatablePagination
-    filter_backends = [InBBoxFilter, DatatablesFilterBackend, DjangoFilterBackend]
+    filter_backends = [MapentityInBBoxFilter, DatatablesFilterBackend, DjangoFilterBackend]
     filterset_class = MapEntityFilterSet
     bbox_filter_field = 'geom'
     bbox_filter_include_overlapping = True
