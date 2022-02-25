@@ -66,14 +66,14 @@ class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_JSON_LIST
 
-    def get_context_data(self, **kwargs):
-        """
-        Override the most important part of JSONListView... (paginator)
-        """
-        serializer = mapentity_serializers.DatatablesSerializer()
-        return serializer.serialize(self.get_queryset(),
-                                    fields=self.columns,
-                                    model=self.get_model())
+    # def get_context_data(self, **kwargs):
+    #     """
+    #     Override the most important part of JSONListView... (paginator)
+    #     """
+    #     serializer = mapentity_serializers.DatatablesSerializer()
+    #     return serializer.serialize(self.get_queryset(),
+    #                                 fields=self.columns,
+    #                                 model=self.get_model())
 
     @view_permission_required()
     @view_cache_latest()
