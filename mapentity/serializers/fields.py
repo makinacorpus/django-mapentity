@@ -2,9 +2,17 @@ from rest_framework import serializers
 
 
 class MapentityDateTimeField(serializers.DateTimeField):
-    def __init__(self, format="%d/%m/%Y %H:%M:%S", input_formats=None, default_timezone=None, **kwargs):
+    def __init__(self, *args, **kwargs):
         """ Set default format """
-        super().__init__(format=format, input_formats=input_formats, default_timezone=default_timezone, **kwargs)
+        kwargs.update({'format': "%d/%m/%Y %H:%M:%S"})
+        super().__init__(*args, **kwargs)
+
+
+class MapentityDateField(serializers.DateField):
+    def __init__(self, *args, **kwargs):
+        """ Set default format """
+        kwargs.update({'format': "%d/%m/%Y"})
+        super().__init__(*args, **kwargs)
 
 
 class MapentityBooleanField(serializers.BooleanField):

@@ -11,4 +11,5 @@ class MapentityModelSerializer(ModelSerializer):
         self.serializer_field_mapping.update({
             models.BooleanField: fields.MapentityBooleanField,
             models.DateTimeField: fields.MapentityDateTimeField,
+            models.DateField: fields.MapentityDateField,
         })
