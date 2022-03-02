@@ -56,12 +56,14 @@ jobs:
     strategy:
       matrix:
         python-version: [ '3.6', '3.9', '3.10' ]
-        django-version: [ '2.2.*', '3.2.*' ]
+        django-version: [ '2.2.*', '3.2.*', '4.0.*' ]
         exclude:
           - python-version: '3.10'  # 3.10 is not supported by django 2.2
             django-version: '2.2.*'
           - python-version: '3.9'  # no need to test with 3.9, already tested with 3.6 and 3.10
             django-version: '3.2.*'
+          - python-version: '3.6'
+            django-version: '4.0.*'  # Django 4.0 supports only python >= 3.8
 
     steps:
     - uses: actions/checkout@v2
