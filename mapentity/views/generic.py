@@ -474,7 +474,7 @@ class MapEntityDelete(ModelViewMixin, DeleteView):
 
     def form_valid(self, form):
         """ view not exists for django <= 3.2, but in 4.0 """
-        log_action(self.request, form.instance, DELETION)
+        log_action(self.request, self.object, DELETION)
         # Remove entry from history
         history_delete(self.request, path=self.object.get_detail_url())
         return super().form_valid(form)
