@@ -76,7 +76,6 @@ __all__ = [
     'ServeAttachment',
     'JSSettings',
     'map_screenshot',
-    'convert',
     'history_delete',
 
     'LogEntryList',

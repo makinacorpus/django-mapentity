@@ -22,10 +22,7 @@ $(window).on('entity:view:list', function (e, data) {
             }
         ],  // hide id column (consider first)
         "ajax": {
-            "url": `/api/${data.modelname}/drf/${data.modelname}s.datatables`,
-            "data": function (data){
-                //data.in_bbox= '-50,-25,-40,-10'
-            }
+            "url": `/api/${data.modelname}/drf/${data.modelname}s.datatables`
         },
         responsive: true,
         pageLength: null, // page size is computed from the window size - expandDatatableHeight()
