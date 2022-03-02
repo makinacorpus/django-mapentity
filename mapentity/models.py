@@ -143,7 +143,7 @@ class BaseMapEntityMixin(models.Model):
 
     @classmethod
     def get_layer_url(cls):
-        return reverse(cls._entity.url_name(ENTITY_LAYER))
+        return '/api/' + cls._meta.model_name.lower() + '/drf/' + cls._meta.model_name.lower() + 's.geojson'
 
     @classmethod
     def get_list_url(cls):
@@ -151,7 +151,7 @@ class BaseMapEntityMixin(models.Model):
 
     @classmethod
     def get_datatablelist_url(cls):
-        return reverse(f"{cls._meta.app_label}:{cls._meta.model_name}-drf-list") + ".datatables"
+        return '/api/' + cls._meta.model_name.lower() + '/drf/' + cls._meta.model_name.lower() + 's.datatables'
 
     @classmethod
     def get_format_list_url(cls):
