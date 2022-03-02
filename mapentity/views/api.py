@@ -82,9 +82,9 @@ class MapEntityJsonList(JSONResponseMixin, BaseListView, ListView):
 
 
 class MapEntityViewSet(viewsets.ModelViewSet):
-    renderer_classes = [renderers.BrowsableAPIRenderer,
-                        renderers.JSONRenderer,
+    renderer_classes = [renderers.JSONRenderer,
                         GeoJSONRenderer,
+                        renderers.BrowsableAPIRenderer,
                         DatatablesRenderer, ]
     pagination_class = MapentityDatatablePagination
     filter_backends = [MapentityInBBoxFilter, DatatablesFilterBackend, DjangoFilterBackend]
