@@ -2,8 +2,7 @@ import logging
 
 from django.contrib.gis.db.models.functions import Transform
 from django_filters.rest_framework import DjangoFilterBackend
-from djgeojson.views import GeoJSONLayerView
-from rest_framework import viewsets, renderers
+from rest_framework import generics, viewsets, renderers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
@@ -23,24 +22,13 @@ from ..settings import API_SRID, app_settings
 logger = logging.getLogger(__name__)
 
 
-class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
+class MapEntityLayer(FilterListMixin, ModelViewMixin, generics.ListAPIView):
     """
     Take a class attribute `model` with a `latest_updated` method used for caching.
     """
-
-    force2d = True
     srid = API_SRID
     precision = app_settings.get('GEOJSON_PRECISION')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Backward compatibility with django-geojson 1.X
-        # for JS ObjectsLayer and rando-trekking application
-        # TODO: remove when migrated
-        properties = dict([(k, k) for k in self.properties])
-        if 'id' not in self.properties:
-            properties['id'] = 'pk'
-        self.properties = properties
 
     @classmethod
     def get_entity_kind(cls):
@@ -61,10 +49,10 @@ class MapEntityViewSet(viewsets.ModelViewSet):
                         GeoJSONRenderer,
                         renderers.BrowsableAPIRenderer,
                         DatatablesRenderer, ]
+    geojson_serializer_class = None
     pagination_class = MapentityDatatablePagination
     filter_backends = [DatatablesFilterBackend, DjangoFilterBackend]
     filterset_class = MapEntityFilterSet
-    geojson_serializer_class = None
 
     def get_serializer_class(self):
         """ Use specific Serializer for GeoJSON """
