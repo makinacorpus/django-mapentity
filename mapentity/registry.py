@@ -14,12 +14,13 @@ from django.utils.translation import gettext as _
 from django.views.generic.base import View
 from paperclip.settings import get_attachment_model
 from rest_framework import routers as rest_routers
+from rest_framework.serializers import ModelSerializer
 from rest_framework_gis.fields import GeometryField
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
-from mapentity.serializers import MapentityModelSerializer
+from mapentity.serializers import MapentityDatatableSerializer
 from mapentity.settings import app_settings
 
 logger = logging.getLogger(__name__)
@@ -128,7 +129,7 @@ class MapEntityOptions:
     def get_serializer(self):
         _model = self.model
 
-        class Serializer(MapentityModelSerializer):
+        class Serializer(ModelSerializer):
             class Meta:
                 model = _model
                 id_field = 'id'
