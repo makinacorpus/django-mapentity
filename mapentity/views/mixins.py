@@ -127,3 +127,10 @@ class FilterListMixin:
         self._filterform.helper = FormHelper()
         self._filterform.helper.field_class = 'form-control-sm'
         self._filterform.helper.submit = None
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # Filter queryset from possible serialized form
+        self._filterform = self.filterform(self.request.GET or None,
+                                           queryset=queryset)
+        return self._filterform.qs
