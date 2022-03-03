@@ -129,7 +129,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
         #                                    order_by=[F('pk')]))
         # qs = qs.annotate(page=F('row_number') / int(page_length) + 1)
         return Response({
-            #'pk_list': qs.values('pk', 'page'),
+            # 'pk_list': qs.values('pk', 'page'),
             'pk_list': qs.values_list('pk', flat=True),
             'count': self.get_filter_count_infos(qs),
         })

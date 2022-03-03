@@ -20,7 +20,6 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
-from mapentity.serializers import MapentityDatatableSerializer
 from mapentity.settings import app_settings
 
 logger = logging.getLogger(__name__)
