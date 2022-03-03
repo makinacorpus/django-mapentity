@@ -55,6 +55,9 @@ class MapEntityTest(TestCase):
     def get_expected_json_attrs(self):
         return {}
 
+    def get_expected_geojson_attrs(self):
+        return {}
+
     def setUp(self):
         if os.path.exists(settings.MEDIA_ROOT):
             self.tearDown()
@@ -294,8 +297,8 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         self.obj = self.modelfactory.create()
-        list_url = '{api_prefix}{modelname}s.json'.format(api_prefix=self.api_prefix,
-                                                          modelname=self.model._meta.model_name)
+        list_url = '{api_prefix}{modelname}/drf/{modelname}s.json'.format(api_prefix=self.api_prefix,
+                                                                          modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200)
         content_json = response.json()
@@ -312,8 +315,8 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         self.obj = self.modelfactory.create()
-        list_url = '{api_prefix}{modelname}s.geojson'.format(api_prefix=self.api_prefix,
-                                                             modelname=self.model._meta.model_name)
+        list_url = '{api_prefix}{modelname}/drf/{modelname}s.geojson'.format(api_prefix=self.api_prefix,
+                                                                             modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200)
         content_json = response.json()
@@ -326,7 +329,7 @@ class MapEntityTest(TestCase):
                 'id': self.obj.pk,
                 'type': 'Feature',
                 'geometry': self.expected_json_geom,
-                'properties': self.get_expected_json_attrs(),
+                'properties': self.get_expected_geojson_attrs(),
             }],
         })
 
@@ -338,9 +341,9 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         self.obj = self.modelfactory.create()
-        detail_url = '{api_prefix}{modelname}s/{id}'.format(api_prefix=self.api_prefix,
-                                                            modelname=self.model._meta.model_name,
-                                                            id=self.obj.pk)
+        detail_url = '{api_prefix}{modelname}/drf/{modelname}s/{id}'.format(api_prefix=self.api_prefix,
+                                                                            modelname=self.model._meta.model_name,
+                                                                            id=self.obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
 
@@ -358,9 +361,9 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         self.obj = self.modelfactory.create()
-        detail_url = '{api_prefix}{modelname}s/{id}.geojson'.format(api_prefix=self.api_prefix,
-                                                                    modelname=self.model._meta.model_name,
-                                                                    id=self.obj.pk)
+        detail_url = '{api_prefix}{modelname}/drf/{modelname}s/{id}.geojson'.format(api_prefix=self.api_prefix,
+                                                                                    modelname=self.model._meta.model_name,
+                                                                                    id=self.obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
         content_json = response.json()
@@ -371,7 +374,7 @@ class MapEntityTest(TestCase):
             'id': self.obj.pk,
             'type': 'Feature',
             'geometry': self.expected_json_geom,
-            'properties': self.get_expected_json_attrs(),
+            'properties': self.get_expected_geojson_attrs(),
         })
 
 
