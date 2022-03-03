@@ -288,7 +288,7 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
 
     @property
     def action_time_display(self):
-        return '{0} ({1})'.format(localize(self.action_time),
+        return '{0} ({1})'.format(self.action_time.strftime('%Y-%m-%d %H:%M:%S'),
                                   humanize_timesince(self.action_time))
 
     @property
