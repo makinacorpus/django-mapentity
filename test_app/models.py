@@ -49,7 +49,7 @@ class MushroomSpot(MapEntityMixin, models.Model):
 
 class WeatherStation(models.Model):
     """ Not a Mapentity model. should not be displayed in menu entries """
-    geom = models.PointField(null=True, default=None, srid=2154)
+    geom = models.PointField(null=True, default=None)
 
 
 class Road(MapEntityMixin, models.Model):
