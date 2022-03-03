@@ -73,7 +73,7 @@ L.ObjectsLayer = L.GeoJSON.extend({
         // Optionnaly make them clickable
         if (this.options.objectUrl) {
             this.on('click', function(e) {
-                window.location = this.options.objectUrl(e.layer.properties, e.layer);
+                window.location = this.options.objectUrl(e.layer.feature.id, e.layer);
             }, this);
         }
 
@@ -138,8 +138,8 @@ L.ObjectsLayer = L.GeoJSON.extend({
 
     getPk: function(layer) {
         // pk (primary-key) in properties
-        if (layer.properties && layer.properties.pk)
-            return layer.properties.pk;
+        if (layer.feature && layer.feature.id)
+            return layer.feature.id;
         // id of geojson feature
         if (layer.id !== undefined)
             return layer.id;

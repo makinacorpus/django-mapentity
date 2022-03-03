@@ -18,9 +18,9 @@ class DummySerializer(serializers.ModelSerializer):
 class DummyGeojsonSerializer(MapentityGeojsonModelSerializer):
     api_geom = rest_gis_fields.GeometryField(read_only=True, precision=5)
 
-    class Meta:
+    class Meta(MapentityGeojsonModelSerializer.Meta):
         model = DummyModel
-        fields = ('id',)
+        fields = ('id', 'name')
         geo_field = "api_geom"
 
 
