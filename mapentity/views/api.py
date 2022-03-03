@@ -97,6 +97,13 @@ class MapEntityViewSet(viewsets.ModelViewSet):
         renderer, media_type = self.perform_content_negotiation(self.request)
         if getattr(renderer, 'format') == 'geojson':
             return self.geojson_serializer_class
+
+        elif getattr(renderer, 'format') == 'datatables':
+            # dynamic override of serializer class to match datatable content
+            class DatatablesSerializer(mapentity_serializers.MapentityDatatableSerializer, self.serializer_class):
+                class Meta(self.serializer_class.Meta):
+                    pass
+            return DatatablesSerializer
         else:
             return self.serializer_class
 
