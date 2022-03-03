@@ -238,9 +238,9 @@ $(window).on('entity:map:list', function (e, data) {
      * Objects Layer
      * .......................
      */
-    function getUrl(properties, layer) {
+    function getUrl(id, layer) {
         return window.SETTINGS.urls.detail.replace(new RegExp('modelname', 'g'), data.modelname)
-                                          .replace('0', properties.pk);
+                                          .replace('0', id);
     }
 
     var style = window.SETTINGS.map.styles[data.modelname];
