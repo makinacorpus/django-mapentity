@@ -1,11 +1,9 @@
 from django.conf import settings
 from django.contrib.gis import forms
 from django.db.models.fields.related import ManyToOneRel, ForeignKey
-from django.forms import HiddenInput
-from django_filters import ModelMultipleChoiceFilter, CharFilter, Filter
+from django_filters import ModelMultipleChoiceFilter, Filter
 from django_filters.filterset import get_model_field, remote_queryset
 from django_filters.rest_framework import FilterSet
-from rest_framework_gis.filters import InBBoxFilter
 
 from mapentity.settings import app_settings, API_SRID
 from mapentity.widgets import HiddenGeometryWidget
@@ -38,21 +36,6 @@ class PythonPolygonFilter(PolygonFilter):
             else:
                 filtered.append(o.pk)
         return qs.filter(pk__in=filtered)
-
-
-class MapentityInBBoxFilter(InBBoxFilter):
-    """
-    Override DRF gis InBBOXFilter with coreapi field descriptors
-    """
-
-    def get_filter_bbox(self, request):
-        """ Transform bbox to internal SRID to get working """
-        bbox = super().get_filter_bbox(request)
-        if bbox:
-            bbox.srid = 4326
-            if bbox.srid != settings.SRID:
-                bbox.transform(settings.SRID)
-        return bbox
 
 
 class BaseMapEntityFilterSet(FilterSet):
@@ -106,14 +89,10 @@ class BaseMapEntityFilterSet(FilterSet):
 
 
 class MapEntityFilterSet(BaseMapEntityFilterSet):
-    in_bbox = CharFilter(widget=HiddenInput(), method='filter_in_bbox')  # filterset input for InBBoxFilter
-
-    def filter_in_bbox(self, queryset, name, value):
-        """ Fake filter field. this filter is done by InBBoxFilter """
-        return queryset
+    bbox = PolygonFilter()
 
     class Meta:
-        fields = ['in_bbox']
+        fields = ['bbox']
         filter_overrides = {
             ForeignKey: {
                 'filter_class': ModelMultipleChoiceFilter,

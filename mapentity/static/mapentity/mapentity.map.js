@@ -139,7 +139,11 @@ $(window).on('entity:map', function (e, data) {
 
     map.on("moveend", function () {
         var bounds = map.getBounds();
-        $('#id_in_bbox').val(`${bounds.getSouthWest().lng},${bounds.getSouthWest().lat},${bounds.getNorthEast().lng},${bounds.getNorthEast().lat}`);
+        //$('#id_bbox').val(`${bounds.getSouthWest().lng},${bounds.getSouthWest().lat},${bounds.getNorthEast().lng},${bounds.getNorthEast().lat}`);
+        //var bounds = this.map.getBounds(),
+        var rect = new L.Rectangle([bounds._northEast, bounds._southWest]);
+        //this.options.filter.bboxfield.val(L.Util.getWKT(rect));
+        $('#id_bbox').val(L.Util.getWKT(rect));
     });
 });
 
@@ -278,7 +282,7 @@ $(window).on('entity:map:list', function (e, data) {
                                             form: $('#mainfilter'),
                                             submitbutton: $('#filter'),
                                             resetbutton: $('#reset'),
-                                            bboxfield: $('#id_in_bbox'),
+                                            bboxfield: $('#id_bbox'),
                                         }
                                     });
     mapsync.on('reloaded', function (data) {

@@ -184,7 +184,11 @@ L.MapListSync = L.Class.extend({
         var max_lat = Math.min(bounds._northEast.lat, 90);
         var min_lon = Math.max(bounds._southWest.lng, -180);
         var max_lon = Math.min(bounds._northEast.lng, 180);
-        this.options.filter.bboxfield.val(`${min_lon},${min_lat},${max_lon},${max_lat}`);
+
+        var bounds = this.map.getBounds(),
+            rect = new L.Rectangle([bounds._northEast, bounds._southWest]);
+        this.options.filter.bboxfield.val(L.Util.getWKT(rect));
+        //this.options.filter.bboxfield.val(`${min_lon},${min_lat},${max_lon},${max_lat}`);
     },
 
     _formClear: function ($form) {
