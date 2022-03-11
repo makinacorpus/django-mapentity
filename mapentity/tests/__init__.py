@@ -300,7 +300,7 @@ class MapEntityTest(TestCase):
         list_url = '{api_prefix}{modelname}/drf/{modelname}s.json'.format(api_prefix=self.api_prefix,
                                                                           modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, f"{list_url} not found")
         content_json = response.json()
         if hasattr(self, 'length'):
             length = content_json[0].pop('length')
@@ -318,7 +318,7 @@ class MapEntityTest(TestCase):
         list_url = '{api_prefix}{modelname}/drf/{modelname}s.geojson'.format(api_prefix=self.api_prefix,
                                                                              modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, f"{list_url} not found")
         content_json = response.json()
         if hasattr(self, 'length'):
             length = content_json['features'][0]['properties'].pop('length')
@@ -345,7 +345,7 @@ class MapEntityTest(TestCase):
                                                                             modelname=self.model._meta.model_name,
                                                                             id=self.obj.pk)
         response = self.client.get(detail_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, f"{detail_url} not found")
 
         content_json = response.json()
         if hasattr(self, 'length'):
@@ -366,7 +366,7 @@ class MapEntityTest(TestCase):
             modelname=self.model._meta.model_name,
             id=self.obj.pk)
         response = self.client.get(detail_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, f"{detail_url} not found")
         content_json = response.json()
         if hasattr(self, 'length'):
             length = content_json['properties'].pop('length')
