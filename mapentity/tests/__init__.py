@@ -315,8 +315,8 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         self.obj = self.modelfactory.create()
-        list_url = '{api_prefix}{modelname}/drf/{modelname}s.geojson'.format(api_prefix=self.api_prefix,
-                                                                             modelname=self.model._meta.model_name)
+        list_url = '{api_prefix}{modelname}s.geojson'.format(api_prefix=self.api_prefix,
+                                                             modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200, f"{list_url} not found")
         content_json = response.json()
@@ -361,10 +361,9 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         self.obj = self.modelfactory.create()
-        detail_url = '{api_prefix}{modelname}/drf/{modelname}s/{id}.geojson'.format(
-            api_prefix=self.api_prefix,
-            modelname=self.model._meta.model_name,
-            id=self.obj.pk)
+        detail_url = '{api_prefix}{modelname}s/{id}.geojson'.format(api_prefix=self.api_prefix,
+                                                                    modelname=self.model._meta.model_name,
+                                                                    id=self.obj.pk)
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200, f"{detail_url} not found")
         content_json = response.json()
