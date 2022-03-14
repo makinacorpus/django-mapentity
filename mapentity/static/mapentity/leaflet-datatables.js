@@ -33,8 +33,7 @@ L.MapListSync = L.Class.extend({
             this.options.filter.submitbutton.click(this._onFormSubmit.bind(this));
             this.options.filter.resetbutton.click(this._onFormReset.bind(this));
         }
-
-        //$(this.dt.fnSettings().oInstance).on('filter', this._onListFilter.bind(this));
+        $(this.dt.settings().oInstance).on('filter', this._onListFilter.bind(this));
     },
 
     _onListFilter: function () {
