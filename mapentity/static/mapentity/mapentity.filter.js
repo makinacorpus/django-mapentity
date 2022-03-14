@@ -28,7 +28,7 @@ MapEntity.TogglableFilter = L.Class.extend({
         this.$button.mouseleave(this.hideinfo.bind(this));
 
         $('#mainfilter').find('select,input').change(function (e) {
-            //self.setfield(this);
+            self.setfield(this);
         });
 
         // Use chosen for multiple values

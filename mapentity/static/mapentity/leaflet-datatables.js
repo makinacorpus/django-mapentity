@@ -64,9 +64,9 @@ L.MapListSync = L.Class.extend({
 
     _onFormReset: function (e) {
         this._formClear($(this.options.filter.form)); // clear all fields
-        this._formSetBounds(); // re-fill current bbox
         this._reloadList();
-        this.layer.updateFromPks(Object.keys(this.layer._objects));
+        this._formSetBounds(); // re-fill current bbox
+        //this.layer.updateFromPks(Object.keys(this.layer._objects));
     },
 
     _onObjectOver: function (e) {
@@ -103,6 +103,26 @@ L.MapListSync = L.Class.extend({
     },
 
     _reloadList: function (refreshLayer) {
+        var formData = new FormData(document.querySelector('#mainfilter'));
+        var filter = false;
+
+        for (var value of Array.from(formData)) {
+            if (value[0] !== 'bbox') {
+                if (value[1] !== '') {
+                    filter = true;
+                }
+            }
+        }
+        if (filter) {
+            $('#filters-btn').removeClass('btn-info');
+            $('#filters-btn').addClass('btn-warning');
+        }
+        else {
+            $('#filters-btn').removeClass('btn-warning');
+            $('#filters-btn').addClass('btn-info');
+        }
+
+
         this.dt.ajax.url($('#mainfilter').attr('action') + '?' + $('#mainfilter').serialize()).load();
 
 
