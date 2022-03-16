@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
 from rest_framework_datatables.renderers import DatatablesRenderer
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mapentity import models as mapentity_models
 from .base import BaseListView
@@ -89,12 +90,19 @@ class MapEntityViewSet(viewsets.ModelViewSet):
     pagination_class = MapentityDatatablePagination
     filter_backends = [DatatablesFilterBackend, DjangoFilterBackend]
     filterset_class = MapEntityFilterSet
+    geojson_serializer_class = None
 
     def get_serializer_class(self):
         """ Use specific Serializer for GeoJSON """
         renderer, media_type = self.perform_content_negotiation(self.request)
         if getattr(renderer, 'format') == 'geojson':
-            return self.geojson_serializer_class
+            if self.geojson_serializer_class:
+                return self.geojson_serializer_class
+            else:
+                class GeoJSONSerializer(GeoFeatureModelSerializer, self.serializer_class):
+                    class Meta(self.serializer_class.Meta):
+                        pass
+                return GeoJSONSerializer
 
         elif getattr(renderer, 'format') == 'datatables':
             # dynamic override of serializer class to match datatable content
