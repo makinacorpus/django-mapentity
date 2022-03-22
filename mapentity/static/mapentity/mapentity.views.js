@@ -8,18 +8,18 @@ $(window).on('entity:view:list', function (e, data) {
         'serverSide': true,
         aoColumnDefs: [
             { "bVisible": false, "aTargets": [ 0 ] },  // don't show first column (ID)
-            {
-                "aTargets": [ 1 ],
-                "mRender": function ( column_data, type, full ) {  // render second column as detail link
-                    var value = '';
-                    if (column_data !== '') {
-                        value = column_data;
-                    } else {
-                        value = full.id.toString();
-                    }
-                    return `<a href="/${data.modelname}/${full.id}/">${value}</a>`;
-                }
-            }
+            // {
+            //     "aTargets": [ 1 ],
+            //     "mRender": function ( column_data, type, full ) {  // render second column as detail link
+            //         var value = '';
+            //         if (column_data !== '') {
+            //             value = column_data;
+            //         } else {
+            //             value = full.id.toString();
+            //         }
+            //         return `<a href="/${data.modelname}/${full.id}/">${value}</a>`;
+            //     }
+            // }
         ],  // hide id column (consider first)
         "ajax": {
             "url": `/api/${data.modelname}/drf/${data.modelname}s.datatables`
