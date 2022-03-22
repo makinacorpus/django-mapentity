@@ -13,6 +13,7 @@ CHANGELOG
 **New Features:**
 
 - Server-side list pagination
+- Configure which fields should be order-able
 
 **Maintenance**
 
