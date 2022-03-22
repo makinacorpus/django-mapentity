@@ -54,9 +54,11 @@
         <table id="objects-list" class="table table-striped table-bordered">
           <thead>
           <tr>
-            {% for field in columns %}
-            <th data-data="{{ field }}">{{ model|verbose:field }}</th>
-            {% endfor %}
+              {% block list-fields %}
+                  {% for field in columns %}
+                      <th data-data="{{ field }}" {% if field in unorderable_columns %} data-orderable="false"{% endif %}>{{ model|verbose:field }}</th>
+                  {% endfor %}
+              {% endblock %}
           </tr>
           </thead>
           <tbody>
