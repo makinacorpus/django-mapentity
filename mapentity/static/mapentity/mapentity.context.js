@@ -74,11 +74,13 @@ MapEntity.Context = new function() {
             map.setView(L.latLng(context.mapview.lat, context.mapview.lng), context.mapview.zoom);
             return true;
         } else {
-            map.fitBounds(map.resetviewControl.getBounds());
-            var maxZoom = $(map._container).data('fitmaxzoom');
-            if (map.getZoom() > maxZoom) {
-                console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
-                map.setZoom(maxZoom);
+            if (map.resetviewControl !== null) {
+                map.fitBounds(map.resetviewControl.getBounds());
+                var maxZoom = $(map._container).data('fitmaxzoom');
+                if (map.getZoom() > maxZoom) {
+                    console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
+                    map.setZoom(maxZoom);
+                }
             }
         }
         return false;
