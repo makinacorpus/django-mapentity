@@ -115,7 +115,8 @@ class ValueTableTest(TestCase):
                              f"""
                              <table class="table"><thead><tr><th class="name">name</th></tr>
                              </thead><tbody><tr class="hoverable" data-modelname="dummymodel"
-                              data-pk="{dummy.pk}"><td>foo</td></tr></tbody></table>""")
+                              data-pk="{dummy.pk}"><td><a href="/dummymodel/{dummy.pk}/">
+                              foo</a></td></tr></tbody></table>""")
 
 
 @freeze_time("2021-12-12")
