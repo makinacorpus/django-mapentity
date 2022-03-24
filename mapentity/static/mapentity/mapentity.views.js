@@ -25,7 +25,7 @@ $(window).on('entity:view:list', function (e, data) {
             "url": `/api/${data.modelname}/drf/${data.modelname}s.datatables`
         },
         responsive: true,
-        pageLength: null, // page size is computed from the window size - expandDatatableHeight()
+        pageLength: 7, // page size is computed from the window size - expandDatatableHeight()
         scrollY: '100vh',
         scrollCollapse: true,
         "lengthChange": false, // disable page length selection
