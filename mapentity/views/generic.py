@@ -352,7 +352,7 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
         return response
 
     def form_invalid(self, form):
-        messages.error(self.request, _("Your form contains errors"))
+        messages.error(self.request, _(f"Your form contains errors {form.errors}"))
         return super().form_invalid(form)
 
 
