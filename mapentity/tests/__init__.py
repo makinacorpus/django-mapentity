@@ -21,7 +21,6 @@ from django.utils.encoding import force_str
 from django.utils.http import http_date
 from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
-from freezegun import freeze_time
 
 from .factories import SuperUserFactory
 from ..forms import MapEntityForm
@@ -47,7 +46,7 @@ class MapEntityTest(TestCase):
     model = None
     modelfactory = None
     userfactory = None
-    #api_prefix = '/api/'
+    # api_prefix = '/api/'
     expected_json_geom = {}
     maxDiff = None
     user = None
