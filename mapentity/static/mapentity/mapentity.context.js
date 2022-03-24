@@ -70,20 +70,25 @@ MapEntity.Context = new function() {
 
     self.restoreMapView = function(map, context, kwargs) {
         if (!context) context = self.__loadFullContext(kwargs);
-        if (context && context.mapview) {
-            map.setView(L.latLng(context.mapview.lat, context.mapview.lng), context.mapview.zoom);
-            return true;
-        } else {
-            if (map.resetviewControl !== null) {
-                map.fitBounds(map.resetviewControl.getBounds());
-                var maxZoom = $(map._container).data('fitmaxzoom');
-                if (map.getZoom() > maxZoom) {
-                    console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
-                    map.setZoom(maxZoom);
+        if (context !== null) {
+            if (context && context.mapview) {
+                map.setView(L.latLng(context.mapview.lat, context.mapview.lng), context.mapview.zoom);
+                return true;
+            } else {
+                if (map !== null){
+                    if (map.resetviewControl !== null) {
+                        map.fitBounds(map.resetviewControl.getBounds());
+                        var maxZoom = $(map._container).data('fitmaxzoom');
+                        if (map.getZoom() > maxZoom) {
+                            console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
+                            map.setZoom(maxZoom);
+                        }
+                    }
                 }
             }
+            return false;
         }
-        return false;
+
     };
 
     self.restoreFullContext = function(map, context, kwargs) {
