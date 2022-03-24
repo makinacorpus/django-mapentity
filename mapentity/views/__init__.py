@@ -25,7 +25,7 @@ from .generic import (
     MapEntityUpdate,
     MapEntityDelete,
 )
-from .logentry import LogEntryList
+from .logentry import LogEntryList, LogEntryViewSet
 from .mixins import (
     HttpJSONResponse,
     JSONResponseMixin,
@@ -79,4 +79,5 @@ __all__ = [
     'history_delete',
 
     'LogEntryList',
+    'LogEntryViewSet'
 ]
