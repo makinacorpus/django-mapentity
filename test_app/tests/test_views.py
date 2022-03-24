@@ -470,7 +470,7 @@ class LogViewTest(BaseTest):
     def test_logentry_view(self):
         self.login_as_superuser()
         response = self.client.get('/logentry/list/')
-        self.assertContains(response, '<th data-data="action_flag">action flag</th>')
+        self.assertContains(response, '<th data-data="action_flag" >action flag</th>')
 
     def test_logentry_view_not_logged(self):
         response = self.client.get('/logentry/list/')
