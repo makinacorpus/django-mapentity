@@ -26,7 +26,7 @@ MapEntity.Context = new function() {
         // Sort columns
         if (datatable) {
             context['sortcolumns'] = last_sort;
-            context['sortcolumns'][$('body').attr('data-modelname')] = datatable.fnSettings().aaSorting;
+            // context['sortcolumns'][$('body').attr('data-modelname')] = datatable.fnSettings().aaSorting;
         }
 
         // Extra-info, not restored so far but can be useful for screenshoting
