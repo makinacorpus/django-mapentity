@@ -19,7 +19,7 @@ class PolygonFilter(Filter):
         kwargs.setdefault('lookup_expr', 'intersects')
         super().__init__(*args, **kwargs)
 
-    def filter(self, qs, value):
+    def get_value_with_bounds_fixed(self, value):
         if value:
             # prevent bbox out of bounding (leaflet getBounds)
             xmin, ymin, xmax, ymax = value.extent
@@ -29,13 +29,17 @@ class PolygonFilter(Filter):
             ymax = min(ymax, 90)
             new_bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
             new_bbox.srid = value.srid
-            value = new_bbox
+            return new_bbox
+        return value
+
+    def filter(self, qs, value):
+        value = self.get_value_with_bounds_fixed(value)
         return super().filter(qs, value)
 
 
 class PythonPolygonFilter(PolygonFilter):
-
     def filter(self, qs, value):
+        value = self.get_value_with_bounds_fixed(value)
         if not value:
             return qs
         if not value.srid:
