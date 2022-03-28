@@ -71,13 +71,13 @@ L.MapListSync = L.Class.extend({
     _onObjectOver: function (e) {
         var self = this;
         var search_pk = e.layer.properties.pk;
-        JQDataTable.goToPage(this.dt,
-            function pk_equals(row) {
-                return row[0] === search_pk;
-            }, function($row) {
-                self.selectorOnce.select(search_pk, $row);
-            }
-        );
+        // JQDataTable.goToPage(this.dt,
+        //     function pk_equals(row) {
+        //         return row[0] === search_pk;
+        //     }, function($row) {
+        //         self.selectorOnce.select(search_pk, $row);
+        //     }
+        // );
     },
 
     _onRowCreated: function(nRow, aData, iDataIndex ) {
