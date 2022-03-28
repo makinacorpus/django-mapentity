@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.gis import forms
+from django.contrib.gis.geos import Polygon
 from django.db.models.fields.related import ManyToOneRel, ForeignKey
 from django_filters import ModelMultipleChoiceFilter, Filter
 from django_filters.filterset import get_model_field, remote_queryset
@@ -17,6 +18,19 @@ class PolygonFilter(Filter):
         kwargs.setdefault('widget', HiddenGeometryWidget)
         kwargs.setdefault('lookup_expr', 'intersects')
         super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if value:
+            # prevent bbox out of bounding (leaflet getBounds)
+            xmin, ymin, xmax, ymax = value.extent
+            xmin = max(xmin, -180)
+            xmax = min(xmax, 180)
+            ymin = max(ymin, -90)
+            ymax = min(ymax, 90)
+            new_bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
+            new_bbox.srid = value.srid
+            value = new_bbox
+        return super().filter(qs, value)
 
 
 class PythonPolygonFilter(PolygonFilter):
