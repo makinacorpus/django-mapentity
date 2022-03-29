@@ -66,6 +66,16 @@ class DummyModelFunctionalTest(MapEntityTest):
         ]
     }
 
+    def get_expected_datatables_attrs(self):
+        return {
+            'date_update': '17/03/2020 00:00:00',
+            'description': '',
+            'geom': 'SRID=4326;POINT (0 0)',
+            'id': 1,
+            'name': '<a href="/dummymodel/1/">a dummy model</a>',
+            'public': '<i class="bi bi-x-circle text-danger"></i>'
+        }
+
     def get_good_data(self):
         return {'geom': '{"type": "Point", "coordinates":[0, 0]}'}
 

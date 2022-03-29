@@ -5,7 +5,7 @@ from test_app.models import DummyModel
 
 
 class DummyModelFactory(factory.django.DjangoModelFactory):
-    name = factory.Faker('name')
+    name = 'a dummy model'
 
     geom = Point(0, 0)
 
