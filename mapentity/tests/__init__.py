@@ -21,6 +21,7 @@ from django.utils.encoding import force_str
 from django.utils.http import http_date
 from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
+from freezegun import freeze_time
 
 from .factories import SuperUserFactory
 from ..forms import MapEntityForm
@@ -55,6 +56,9 @@ class MapEntityTest(TestCase):
         return {}
 
     def get_expected_geojson_attrs(self):
+        return {}
+
+    def get_expected_datatables_attrs(self):
         return {}
 
     def setUp(self):
@@ -287,7 +291,23 @@ class MapEntityTest(TestCase):
     #     REST API
     #
     # """
-    #
+
+    @freeze_time("2020-03-17")
+    def test_api_datatables_list_for_model(self):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        self.obj = self.modelfactory.create()
+        list_url = '/api/{modelname}/drf/{modelname}s.datatables'.format(modelname=self.model._meta.model_name)
+        response = self.client.get(list_url)
+        self.assertEqual(response.status_code, 200, f"{list_url} not found")
+        content_json = response.json()
+
+        self.assertEqual(content_json, {'data': [self.get_expected_datatables_attrs()],
+                                        'draw': 1,
+                                        'recordsFiltered': 1,
+                                        'recordsTotal': 1})
+
     # @freeze_time("2020-03-17")
     # def test_api_list_for_model(self):
     #     if self.get_expected_json_attrs is None:
