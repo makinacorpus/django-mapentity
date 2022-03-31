@@ -39,6 +39,18 @@ $(window).on('entity:view:list', function (e, data) {
                 "next":       ">",
                 "previous":   "<"
             },
+        },
+        createdRow: function ( row, data, index ) {
+            // highlight feature on map on row hover
+            var pk = data.id;
+            $(row).hover(
+                function () {
+                    window.objectsLayer.highlight(pk);
+                },
+                function () {
+                    window.objectsLayer.highlight(pk, false);
+                }
+            );
         }
     });
     $("#objects-list_filter").addClass("d-none"); // hide search field

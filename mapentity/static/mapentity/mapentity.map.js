@@ -41,7 +41,6 @@ L.Control.Screenshot = L.Control.extend({
     }
 });
 
-
 /**
  * Shows a static label in the middle of the Polyline.
  * It will be hidden on zoom levels below ``LABEL_MIN_ZOOM``.
@@ -187,7 +186,7 @@ $(window).on('entity:map:detail', function (e, data) {
     function _showSingleObject(geojson) {
         var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
 
-        // Apparence of geometry for export can be controlled via setting
+        // Appearance of geometry for export can be controlled via setting
         if (context && context.print) {
             var specified = window.SETTINGS.map.styles.print[data.modelname];
             if (specified) {
@@ -270,6 +269,7 @@ $(window).on('entity:map:list', function (e, data) {
     map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"));
 
     var dt = MapEntity.mainDatatable;
+    window.objectsLayer = objectsLayer;
 
     /*
      * Assemble components
