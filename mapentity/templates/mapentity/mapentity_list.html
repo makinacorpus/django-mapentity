@@ -56,7 +56,7 @@
           <tr>
               {% block list-fields %}
                   {% for field in columns %}
-                      <th data-data="{{ field }}" {% if field in unorderable_columns %} data-orderable="false"{% endif %}>{{ model|verbose:field }}</th>
+                      <th data-data="{{ field }}" {% if field in unorderable_columns %} data-orderable="false" data-searchable="false"{% endif %}>{{ model|verbose:field }}</th>
                   {% endfor %}
               {% endblock %}
           </tr>
