@@ -114,6 +114,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
 class BaseListView(FilterListMixin, ModelViewMixin):
     columns = None
     unorderable_columns = []
+    searchable_columns = ['id']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

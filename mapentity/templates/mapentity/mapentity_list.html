@@ -56,7 +56,10 @@
           <tr>
               {% block list-fields %}
                   {% for field in columns %}
-                      <th data-data="{{ field }}" {% if field in unorderable_columns %} data-orderable="false" data-searchable="false"{% endif %}>{{ model|verbose:field }}</th>
+                      <th data-data="{{ field }}" {% if field in unorderable_columns %} data-orderable="false" data-searchable="false"{% elif field not in searchable_columns %}
+                          data-searchable="false"{% endif %}>
+                          {{ model|verbose:field }}
+                      </th>
                   {% endfor %}
               {% endblock %}
           </tr>
@@ -67,9 +70,15 @@
 
         <div class="btn-toolbar" role="toolbar" aria-label="">
           <div class="btn-group {% if not can_export %}disabled{% endif %}">
-            <button class="btn btn-light btn-sm" name="csv" title="{% trans 'CSV' %}"><img src="{% static 'paperclip/fileicons/csv.png' %}"></button>
-            <button class="btn btn-light btn-sm" name="shp" title="{% trans 'Shapefile' %}"><img src="{% static 'paperclip/fileicons/shp.png' %}"></button>
-            <button class="btn btn-light btn-sm" name="gpx" title="{% trans 'GPX' %}"><img src="{% static 'paperclip/fileicons/gpx.png' %}"></button>
+            <button class="btn btn-light btn-sm" name="csv" title="{% trans 'CSV' %}">
+                <img src="{% static 'paperclip/fileicons/csv.png' %}" alt="">
+            </button>
+            <button class="btn btn-light btn-sm" name="shp" title="{% trans 'Shapefile' %}">
+                <img src="{% static 'paperclip/fileicons/shp.png' %}" alt="">
+            </button>
+            <button class="btn btn-light btn-sm" name="gpx" title="{% trans 'GPX' %}">
+                <img src="{% static 'paperclip/fileicons/gpx.png' %}" alt="">
+            </button>
           </div>
             <div class="input-group" name="search-group">
                 <div class="input-group-prepend">

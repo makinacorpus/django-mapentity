@@ -72,7 +72,7 @@ class MapEntityList(BaseListView, ListView):
         context['filterform'] = self._filterform  # From FilterListMixin
         context['columns'] = self.columns  # From BaseListView
         context['unorderable_columns'] = self.unorderable_columns  # From BaseListView
-
+        context['searchable_columns'] = self.searchable_columns  # From BaseListView
         context['create_label'] = self.get_model().get_create_label()
 
         model = self.get_model()
