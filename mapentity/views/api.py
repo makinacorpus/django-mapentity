@@ -99,17 +99,13 @@ class MapEntityViewSet(viewsets.ModelViewSet):
         """ Override this method to change count info in List dropdown menu """
         return qs.count()
 
-    # @action(detail=False, url_path='(?P<page_length>\d+)/filter_infos', methods=['get'])
     @action(detail=False, methods=['get'])
     def filter_infos(self, request, *args, **kwargs):
         """ List of all object primary keys according filters """
         qs = self.get_queryset()
         qs = self.filter_queryset(qs)
-        # qs = qs.annotate(row_number=Window(expression=RowNumber(),
-        #                                    order_by=[F('pk')]))
-        # qs = qs.annotate(page=F('row_number') / int(page_length) + 1)
+
         return Response({
-            # 'pk_list': qs.values('pk', 'page'),
             'pk_list': qs.values_list('pk', flat=True),
             'count': self.get_filter_count_infos(qs),
         })
