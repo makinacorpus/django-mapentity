@@ -10,6 +10,7 @@ from .serializers import DummySerializer, DummyGeojsonSerializer, RoadSerializer
 class DummyList(mapentity_views.MapEntityList):
     model = DummyModel
     filterform = DummyModelFilter
+    searchable_columns = ['id', 'name']
 
 
 class DummyLayer(mapentity_views.MapEntityLayer):
