@@ -3,7 +3,7 @@ import logging
 from crispy_forms.helper import FormHelper
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.gis.db.models import GeometryField
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.views.decorators.http import last_modified as cache_last_modified
 
 from ..filters import MapEntityFilterSet
@@ -24,7 +24,7 @@ class JSONResponseMixin:
     """
     A mixin that can be used to render a JSON/JSONP response.
     """
-    response_class = HttpJSONResponse
+    response_class = JsonResponse
 
     def render_to_response(self, context, **response_kwargs):
         """
