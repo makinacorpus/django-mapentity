@@ -40,6 +40,6 @@ if app_settings['ACTION_HISTORY_ENABLED']:
 
     class LogEntryOptions(MapEntityOptions):
         menu = False
-        dynamic_views = ['List', 'JsonList', 'Layer']
+        dynamic_views = ['List', 'Layer']
 
     urlpatterns += registry.register(LogEntry, LogEntryOptions)

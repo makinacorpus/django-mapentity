@@ -24,7 +24,6 @@ from .settings import app_settings, API_SRID
 # Used to create the matching url name
 ENTITY_LAYER = "layer"
 ENTITY_LIST = "list"
-ENTITY_JSON_LIST = "json_list"
 ENTITY_DATATABLE_LIST = "-drf-list"
 ENTITY_FORMAT_LIST = "format_list"
 ENTITY_DETAIL = "detail"
@@ -37,9 +36,8 @@ ENTITY_DELETE = "delete"
 ENTITY_UPDATE_GEOM = "update_geom"
 
 ENTITY_KINDS = (
-    ENTITY_LAYER, ENTITY_LIST, ENTITY_JSON_LIST, ENTITY_DATATABLE_LIST,
-    ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE, ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE,
-    ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
+    ENTITY_LAYER, ENTITY_LIST, ENTITY_DATATABLE_LIST, ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE,
+    ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE, ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
 )
 
 ENTITY_PERMISSION_CREATE = 'add'
@@ -96,7 +94,6 @@ class BaseMapEntityMixin(models.Model):
             ENTITY_DETAIL: ENTITY_PERMISSION_READ,
             ENTITY_LAYER: ENTITY_PERMISSION_READ,
             ENTITY_LIST: ENTITY_PERMISSION_READ,
-            ENTITY_JSON_LIST: ENTITY_PERMISSION_READ,
             ENTITY_DATATABLE_LIST: ENTITY_PERMISSION_READ,
             ENTITY_MARKUP: ENTITY_PERMISSION_READ,
             ENTITY_FORMAT_LIST: ENTITY_PERMISSION_EXPORT,
@@ -151,10 +148,6 @@ class BaseMapEntityMixin(models.Model):
     @classmethod
     def get_list_url(cls):
         return reverse(cls._entity.url_name(ENTITY_LIST))
-
-    @classmethod
-    def get_jsonlist_url(cls):
-        return reverse(cls._entity.url_name(ENTITY_JSON_LIST))
 
     @classmethod
     def get_datatablelist_url(cls):

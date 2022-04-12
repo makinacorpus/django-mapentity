@@ -1,6 +1,5 @@
 from .api import (
     MapEntityLayer,
-    MapEntityJsonList,
     MapEntityViewSet
 )
 from .base import (
@@ -27,7 +26,6 @@ from .generic import (
 )
 from .logentry import LogEntryList, LogEntryViewSet
 from .mixins import (
-    HttpJSONResponse,
     JSONResponseMixin,
     LastModifiedMixin,
     ModelViewMixin,
@@ -36,7 +34,6 @@ from .mixins import (
 MAPENTITY_GENERIC_VIEWS = [
     MapEntityLayer,
     MapEntityList,
-    MapEntityJsonList,
     MapEntityFormat,
     MapEntityMapImage,
     MapEntityDocument,
@@ -62,22 +59,16 @@ __all__ = [
     'MapEntityDetail',
     'MapEntityUpdate',
     'MapEntityDelete',
-
     'MapEntityLayer',
-    'MapEntityJsonList',
     'MapEntityViewSet',
-
-    'HttpJSONResponse',
     'JSONResponseMixin',
     'LastModifiedMixin',
     'ModelViewMixin',
     'MAPENTITY_GENERIC_VIEWS',
-
     'ServeAttachment',
     'JSSettings',
     'map_screenshot',
     'history_delete',
-
     'LogEntryList',
     'LogEntryViewSet'
 ]

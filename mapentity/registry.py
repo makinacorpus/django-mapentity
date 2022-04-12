@@ -95,8 +95,7 @@ class MapEntityOptions:
         for generic_view in generic_views:
             already_defined = any([issubclass(view, generic_view) for view in picked])
             if not already_defined:
-                list_dependencies = (mapentity_views.MapEntityJsonList,
-                                     mapentity_views.MapEntityFormat)
+                list_dependencies = (mapentity_views.MapEntityFormat, )
                 if list_view and generic_view in list_dependencies:
                     # List view depends on JsonList and Format view
                     class dynamic_view(generic_view, list_view):
@@ -158,7 +157,6 @@ class MapEntityOptions:
             mapentity_models.ENTITY_LAYER: r'^api/{modelname}/{modelname}.geojson$',
             mapentity_models.ENTITY_LIST: r'^{modelname}/list/$',
             mapentity_models.ENTITY_DATATABLE_LIST: r'^api/{modelname}/drf/{modelname}s.datatable$',
-            mapentity_models.ENTITY_JSON_LIST: r'^api/{modelname}/{modelname}s.json$',
             mapentity_models.ENTITY_FORMAT_LIST: r'^{modelname}/list/export/$',
             mapentity_models.ENTITY_DETAIL: r'^{modelname}/(?P<pk>\d+)/$',
             mapentity_models.ENTITY_MAPIMAGE: r'^image/{modelname}-(?P<pk>\d+).png$',
