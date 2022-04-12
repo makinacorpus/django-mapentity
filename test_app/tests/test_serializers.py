@@ -80,7 +80,7 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
 
     def test_layer_has_right_projection(self):
         for layer in self.getShapefileLayers().values():
-            self.assertIn(layer.srs.name, ('GCS_WGS_1984', 'WGS_1984'))
+            self.assertEqual(layer.srs.srid, 4326)
             self.assertCountEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean', 'tags'])
 
     def test_geometries_come_from_records(self):
