@@ -24,7 +24,7 @@ class JSONResponseMixin:
     """
     A mixin that can be used to render a JSON/JSONP response.
     """
-    response_class = JsonResponse
+    response_class = HttpJSONResponse
 
     def render_to_response(self, context, **response_kwargs):
         """

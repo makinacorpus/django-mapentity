@@ -26,6 +26,7 @@ from .generic import (
 )
 from .logentry import LogEntryList, LogEntryViewSet
 from .mixins import (
+    HttpJSONResponse,
     JSONResponseMixin,
     LastModifiedMixin,
     ModelViewMixin,
@@ -61,6 +62,7 @@ __all__ = [
     'MapEntityDelete',
     'MapEntityLayer',
     'MapEntityViewSet',
+    'HttpJSONResponse',
     'JSONResponseMixin',
     'LastModifiedMixin',
     'ModelViewMixin',
