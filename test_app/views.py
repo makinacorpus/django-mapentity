@@ -1,7 +1,6 @@
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
-from mapentity.views import MapEntityViewSet, LastModifiedMixin
 from .filters import DummyModelFilter
 from .models import DummyModel, Road
 from .serializers import DummySerializer, DummyGeojsonSerializer, RoadSerializer
@@ -29,7 +28,7 @@ class DummyDocumentWeasyprint(mapentity_views.MapEntityDocumentWeasyprint):
     model = DummyModel
 
 
-class DummyDetail(LastModifiedMixin, mapentity_views.MapEntityDetail):
+class DummyDetail(mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail):
     model = DummyModel
 
 
@@ -45,7 +44,7 @@ class DummyDelete(mapentity_views.MapEntityDelete):
     model = DummyModel
 
 
-class DummyViewSet(MapEntityViewSet):
+class DummyViewSet(mapentity_views.MapEntityViewSet):
     model = DummyModel  # Must be defined to be detected by mapentity
     queryset = DummyModel.objects.all()
     serializer_class = DummySerializer
@@ -54,7 +53,7 @@ class DummyViewSet(MapEntityViewSet):
     filterset_class = DummyModelFilter
 
 
-class RoadViewSet(MapEntityViewSet):
+class RoadViewSet(mapentity_views.MapEntityViewSet):
     model = Road  # Must be defined to be detected by mapentity
     queryset = Road.objects.all()
     serializer_class = RoadSerializer
