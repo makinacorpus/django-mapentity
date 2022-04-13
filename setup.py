@@ -36,7 +36,7 @@ setup(
     download_url="https://pypi.python.org/pypi/mapentity/",
     description="Generic CRUD with maps",
     long_description=(open(os.path.join(here, 'README.rst')).read() + '\n\n' +
-                      open(os.path.join(here, 'CHANGES')).read()),
+                      open(os.path.join(here, 'CHANGES.md')).read()),
     license='BSD, see LICENSE file.',
     setup_requires=['django'],  # allow compilemessages to work in setup.py
     cmdclass={"build": BuildCommand},
