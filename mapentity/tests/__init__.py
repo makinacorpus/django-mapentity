@@ -47,7 +47,6 @@ class MapEntityTest(TestCase):
     model = None
     modelfactory = None
     userfactory = None
-    # api_prefix = '/api/'
     expected_json_geom = {}
     maxDiff = None
     user = None
@@ -277,11 +276,7 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['filterform'] is not None)
 
-    # """
-    #
-    #     REST API
-    #
-    # """
+    # REST API tests
 
     @freeze_time("2020-03-17")
     def test_api_datatables_list_for_model(self):
@@ -298,94 +293,6 @@ class MapEntityTest(TestCase):
                                         'draw': 1,
                                         'recordsFiltered': 1,
                                         'recordsTotal': 1})
-
-    # @freeze_time("2020-03-17")
-    # def test_api_list_for_model(self):
-    #     if self.get_expected_json_attrs is None:
-    #         return
-    #     if self.model is None:
-    #         return  # Abstract test should not run
-    #
-    #     self.obj = self.modelfactory.create()
-    #     list_url = '{api_prefix}{modelname}/drf/{modelname}s.json'.format(api_prefix=self.api_prefix,
-    #                                                                       modelname=self.model._meta.model_name)
-    #     response = self.client.get(list_url)
-    #     self.assertEqual(response.status_code, 200, f"{list_url} not found")
-    #     content_json = response.json()
-    #     if hasattr(self, 'length'):
-    #         length = content_json[0].pop('length')
-    #         self.assertAlmostEqual(length, self.length)
-    #     self.assertEqual(content_json, [{'id': self.obj.pk, **self.get_expected_json_attrs()}])
-    #
-    # @freeze_time("2020-03-17")
-    # def test_api_geojson_list_for_model(self):
-    #     if self.get_expected_json_attrs is None:
-    #         return
-    #     if self.model is None:
-    #         return  # Abstract test should not run
-    #
-    #     self.obj = self.modelfactory.create()
-    #     list_url = '{api_prefix}{modelname}s.geojson'.format(api_prefix=self.api_prefix,
-    #                                                          modelname=self.model._meta.model_name)
-    #     response = self.client.get(list_url)
-    #     self.assertEqual(response.status_code, 200, f"{list_url} not found")
-    #     content_json = response.json()
-    #     if hasattr(self, 'length'):
-    #         length = content_json['features'][0]['properties'].pop('length')
-    #         self.assertAlmostEqual(length, self.length)
-    #     self.assertEqual(content_json, {
-    #         'type': 'FeatureCollection',
-    #         'features': [{
-    #             'id': self.obj.pk,
-    #             'type': 'Feature',
-    #             'geometry': self.expected_json_geom,
-    #             'properties': self.get_expected_geojson_attrs(),
-    #         }],
-    #     })
-    #
-    # @freeze_time("2020-03-17")
-    # def test_api_detail_for_model(self):
-    #     if self.get_expected_json_attrs is None:
-    #         return
-    #     if self.model is None:
-    #         return  # Abstract test should not run
-    #
-    #     self.obj = self.modelfactory.create()
-    #     detail_url = '{api_prefix}{modelname}/drf/{modelname}s/{id}'.format(api_prefix=self.api_prefix,
-    #                                                                         modelname=self.model._meta.model_name,
-    #                                                                         id=self.obj.pk)
-    #     response = self.client.get(detail_url)
-    #     self.assertEqual(response.status_code, 200, f"{detail_url} not found")
-    #
-    #     content_json = response.json()
-    #     if hasattr(self, 'length'):
-    #         length = content_json.pop('length')
-    #         self.assertAlmostEqual(length, self.length)
-    #     self.assertEqual(content_json, {'id': self.obj.pk, **self.get_expected_json_attrs()})
-    #
-    # @freeze_time("2020-03-17")
-    # def test_api_geojson_detail_for_model(self):
-    #     if self.get_expected_json_attrs is None:
-    #         return
-    #     if self.model is None:
-    #         return  # Abstract test should not run
-    #
-    #     self.obj = self.modelfactory.create()
-    #     detail_url = '{api_prefix}{modelname}s/{id}.geojson'.format(api_prefix=self.api_prefix,
-    #                                                                 modelname=self.model._meta.model_name,
-    #                                                                 id=self.obj.pk)
-    #     response = self.client.get(detail_url)
-    #     self.assertEqual(response.status_code, 200, f"{detail_url} not found")
-    #     content_json = response.json()
-    #     if hasattr(self, 'length'):
-    #         length = content_json['properties'].pop('length')
-    #         self.assertAlmostEqual(length, self.length)
-    #     self.assertEqual(content_json, {
-    #         'id': self.obj.pk,
-    #         'type': 'Feature',
-    #         'geometry': self.expected_json_geom,
-    #         'properties': self.get_expected_geojson_attrs(),
-    #     })
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
