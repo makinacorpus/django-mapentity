@@ -41,7 +41,6 @@ L.Control.Screenshot = L.Control.extend({
     }
 });
 
-
 /**
  * Shows a static label in the middle of the Polyline.
  * It will be hidden on zoom levels below ``LABEL_MIN_ZOOM``.
@@ -136,6 +135,15 @@ $(window).on('entity:map', function (e, data) {
 
     map.addControl(new L.Control.FullScreen());
     map.addControl(new L.Control.MeasureControl());
+
+    map.on("moveend", function () {
+        var bounds = map.getBounds();
+        //$('#id_bbox').val(`${bounds.getSouthWest().lng},${bounds.getSouthWest().lat},${bounds.getNorthEast().lng},${bounds.getNorthEast().lat}`);
+        //var bounds = this.map.getBounds(),
+        var rect = new L.Rectangle([bounds._northEast, bounds._southWest]);
+        //this.options.filter.bboxfield.val(L.Util.getWKT(rect));
+        $('#id_bbox').val(L.Util.getWKT(rect));
+    });
 });
 
 
@@ -178,7 +186,7 @@ $(window).on('entity:map:detail', function (e, data) {
     function _showSingleObject(geojson) {
         var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
 
-        // Apparence of geometry for export can be controlled via setting
+        // Appearance of geometry for export can be controlled via setting
         if (context && context.print) {
             var specified = window.SETTINGS.map.styles.print[data.modelname];
             if (specified) {
@@ -261,6 +269,7 @@ $(window).on('entity:map:list', function (e, data) {
     map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"));
 
     var dt = MapEntity.mainDatatable;
+    window.objectsLayer = objectsLayer;
 
     /*
      * Assemble components

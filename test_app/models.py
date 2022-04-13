@@ -49,12 +49,17 @@ class MushroomSpot(MapEntityMixin, models.Model):
 
 class WeatherStation(models.Model):
     """ Not a Mapentity model. should not be displayed in menu entries """
-    geom = models.PointField(null=True, default=None, srid=2154)
+    geom = models.PointField(null=True, default=None)
 
 
 class Road(MapEntityMixin, models.Model):
     """ Linestring Mapentity model """
+    name = models.CharField(max_length=100, default='Empty')
     geom = models.LineStringField(null=True, default=None, srid=2154)
+
+    @property
+    def name_display(self):
+        return _(f'<a href="{self.get_detail_url()}">{self.name}</a>')
 
 
 class DummyModel(MapEntityMixin, models.Model):
@@ -69,6 +74,9 @@ class DummyModel(MapEntityMixin, models.Model):
 
     def is_public(self):
         return self.public
+
+    def name_display(self):
+        return _(f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>')
 
     class Meta:
         verbose_name = _("Dummy Model")

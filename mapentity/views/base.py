@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 
 class ServeAttachment(View):
-
     def get(self, request, *args, **kwargs):
         """
             Serve media/ for authorized users only, since it can contain sensitive
@@ -114,6 +113,8 @@ class JSSettings(JSONResponseMixin, TemplateView):
 
 class BaseListView(FilterListMixin, ModelViewMixin):
     columns = None
+    unorderable_columns = []
+    searchable_columns = ['id']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -20,7 +20,7 @@
             <a class="nav-link {% if entity.modelname == modelname %}active{% endif %}"
                 href="{% url entity.url_list %}" title="{{ entity.label }}">
               <span class="sr-only">{{ entity.label }}</span>
-              <img src="{% static entity.icon %}"/>
+              <img src="{% static entity.icon %}" alt="{{ entity.modelname|truncatechars:3|title }}" />
             </a>
           </li>
           {% endif %}
@@ -51,27 +51,43 @@
         </div>
 
         {% block mainlist %}
-        <div class="table-responsive">
-
         <table id="objects-list" class="table table-striped table-bordered">
           <thead>
           <tr>
-            {% for field in columns %}
-            <th>{{ model|verbose:field }}</th>
-            {% endfor %}
+              {% block list-fields %}
+                  {% for field in columns %}
+                      <th data-data="{{ field }}" {% if field in unorderable_columns %} data-orderable="false" data-searchable="false"{% elif field not in searchable_columns %}
+                          data-searchable="false"{% endif %}>
+                          {{ model|verbose:field }}
+                      </th>
+                  {% endfor %}
+              {% endblock %}
           </tr>
           </thead>
           <tbody>
           </tbody>
         </table>
-        </div>
 
-        <div id="list-download-toolbar">
+        <div class="btn-toolbar" role="toolbar" aria-label="">
           <div class="btn-group {% if not can_export %}disabled{% endif %}">
-            <button class="btn btn-light btn-sm" name="csv" title="{% trans 'CSV' %}"><img src="{% static 'paperclip/fileicons/csv.png' %}"></button>
-            <button class="btn btn-light btn-sm" name="shp" title="{% trans 'Shapefile' %}"><img src="{% static 'paperclip/fileicons/shp.png' %}"></button>
-            <button class="btn btn-light btn-sm" name="gpx" title="{% trans 'GPX' %}"><img src="{% static 'paperclip/fileicons/gpx.png' %}"></button>
+            <button class="btn btn-light btn-sm" name="csv" title="{% trans 'CSV' %}">
+                <img src="{% static 'paperclip/fileicons/csv.png' %}" alt="">
+            </button>
+            <button class="btn btn-light btn-sm" name="shp" title="{% trans 'Shapefile' %}">
+                <img src="{% static 'paperclip/fileicons/shp.png' %}" alt="">
+            </button>
+            <button class="btn btn-light btn-sm" name="gpx" title="{% trans 'GPX' %}">
+                <img src="{% static 'paperclip/fileicons/gpx.png' %}" alt="">
+            </button>
           </div>
+            <div class="input-group" name="search-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text" id="btnGroupAddon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                </div>
+                <input id="object-list-search" type="text" class="form-control" placeholder="{% trans "Search" %}" aria-label="Input group example" aria-describedby="btnGroupAddon">
+            </div>
         </div>
         {% endblock mainlist %}
       </div>
@@ -84,7 +100,7 @@
         <div id="maphead">
           {% smart_include "maphead" %}
         </div>
-        <div id="mainmap"/>
+        <div id="mainmap"></div>
         {% endblock mainmap %}
       </div>
     </div>

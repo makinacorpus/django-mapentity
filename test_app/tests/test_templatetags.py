@@ -42,14 +42,17 @@ class ValueListTest(TestCase):
         self.assertEqual(out.strip(), """<ul>\n    <li>blah</li>\n    </ul>""")
 
     def test_can_specify_field_to_be_used(self):
-        obj = DummyModel(name='blah')
+        obj = DummyModelFactory.create(name='blah')
         out = Template(
             '{% load mapentity_tags %}'
             '{% valuelist items field="name" %}'
         ).render(Context({
             'items': [obj]
         }))
-        self.assertEqual(out.strip(), """<ul>\n    <li>blah</li>\n    </ul>""")
+        self.assertHTMLEqual(out,
+                             f"""
+                             <ul><li class="hoverable" data-modelname="dummymodel" data-pk="{obj.pk}">
+                             <a href="/dummymodel/1/">blah</a></li></ul>""")
 
     def test_can_specify_an_enumeration4(self):
         out = Template(
@@ -115,7 +118,8 @@ class ValueTableTest(TestCase):
                              f"""
                              <table class="table"><thead><tr><th class="name">name</th></tr>
                              </thead><tbody><tr class="hoverable" data-modelname="dummymodel"
-                              data-pk="{dummy.pk}"><td>foo</td></tr></tbody></table>""")
+                              data-pk="{dummy.pk}"><td><a href="/dummymodel/{dummy.pk}/">
+                              foo</a></td></tr></tbody></table>""")
 
 
 @freeze_time("2021-12-12")

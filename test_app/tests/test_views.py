@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 from unittest import mock
@@ -66,6 +65,16 @@ class DummyModelFunctionalTest(MapEntityTest):
             0.0
         ]
     }
+
+    def get_expected_datatables_attrs(self):
+        return {
+            'date_update': '17/03/2020 00:00:00',
+            'description': '',
+            'geom': 'SRID=4326;POINT (0 0)',
+            'id': 1,
+            'name': '<a href="/dummymodel/1/">a dummy model</a>',
+            'public': '<i class="bi bi-x-circle text-danger"></i>'
+        }
 
     def get_good_data(self):
         return {'geom': '{"type": "Point", "coordinates":[0, 0]}'}
@@ -334,26 +343,26 @@ class MapEntityLayerViewTest(BaseTest):
     def test_geojson_layer_returns_all_by_default(self):
         self.login()
         response = self.client.get(DummyModel.get_layer_url())
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
+        self.assertEqual(len(response.json()['features']), 31)
 
     def test_geojson_layer_can_be_filtered(self):
         self.login()
         response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
+        self.assertEqual(len(response.json()['features']), 1)
 
     def test_geojson_layer_with_parameters_is_not_cached(self):
         self.login()
         response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
+        self.assertEqual(len(response.json()['features']), 1)
         response = self.client.get(DummyModel.get_layer_url())
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
+        self.assertEqual(len(response.json()['features']), 31)
 
     def test_geojson_layer_with_parameters_does_not_use_cache(self):
         self.login()
         response = self.client.get(DummyModel.get_layer_url())
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
+        self.assertEqual(len(response.json()['features']), 31)
         response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
+        self.assertEqual(len(response.json()['features']), 1)
 
 
 class DetailViewTest(BaseTest):
@@ -471,7 +480,7 @@ class LogViewTest(BaseTest):
     def test_logentry_view(self):
         self.login_as_superuser()
         response = self.client.get('/logentry/list/')
-        self.assertContains(response, "<th>action flag</th>")
+        self.assertContains(response, '<th data-data="action_flag"')
 
     def test_logentry_view_not_logged(self):
         response = self.client.get('/logentry/list/')

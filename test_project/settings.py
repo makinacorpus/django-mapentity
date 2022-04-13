@@ -37,10 +37,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "debug_toolbar",
     'paperclip',
     'djgeojson',
     'compressor',
     'easy_thumbnails',
+    'django_filters',
     'crispy_forms',
     'rest_framework',
     'embed_video',
@@ -48,10 +50,11 @@ INSTALLED_APPS = (
     'mapentity',  # Make sure mapentity settings are loaded before leaflet ones
     'leaflet',
     'test_app',
-    'modeltranslation'
+    'modeltranslation',
 )
 
 MIDDLEWARE = (
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -90,7 +93,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'test_project.wsgi.application'
-
+INTERNAL_IPS = type(str('c'), (), {'__contains__': lambda *a: True})()
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
@@ -140,7 +143,7 @@ MEDIA_URL = '/media/'
 MEDIA_URL_SECURE = '/media_secure/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SRID = 2154
+SRID = 4326
 COMPRESS_ENABLED = False
 TEST = True
 

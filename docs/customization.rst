@@ -10,10 +10,11 @@ can override CBV methods as usual::
 
     from django.shortcuts import redirect
     from mapentity.views.generic import (
-        MapEntityList, MapEntityLayer, MapEntityJsonList, MapEntityDetail,
+        MapEntityList, MapEntityLayer, MapEntityDetail,
         MapEntityFormat, MapEntityCreate, MapEntityUpdate, MapEntityDocument,
-        MapEntityDelete)
+        MapEntityDelete, MapEntityViewSet)
     from .models import Museum
+    from .serializers import MuseumSerializer
 
 
     def home(request):
@@ -27,10 +28,6 @@ can override CBV methods as usual::
 
     class MuseumLayer(MapEntityLayer):
         model = Museum
-
-
-    class MuseumJsonList(MapEntityJsonList, MuseumList):
-        pass
 
 
     class MuseumDetail(MapEntityDetail):
@@ -55,6 +52,12 @@ can override CBV methods as usual::
 
     class MuseumDelete(MapEntityDelete):
         model = Museum
+
+
+    class MuseumViewSet(MapEntityViewSet):
+        model = Museum
+        serializer_class = MuseumSerializer
+
 
 
 Filters

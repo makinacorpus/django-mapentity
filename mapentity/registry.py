@@ -9,12 +9,12 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS
 from django.db.utils import ProgrammingError
-from django.urls import re_path, include
+from django.urls import re_path, include, path
 from django.utils.translation import gettext as _
 from django.views.generic.base import View
 from paperclip.settings import get_attachment_model
 from rest_framework import routers as rest_routers
-from rest_framework import serializers as rest_serializers
+from rest_framework.serializers import ModelSerializer
 from rest_framework_gis.fields import GeometryField
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
@@ -95,8 +95,7 @@ class MapEntityOptions:
         for generic_view in generic_views:
             already_defined = any([issubclass(view, generic_view) for view in picked])
             if not already_defined:
-                list_dependencies = (mapentity_views.MapEntityJsonList,
-                                     mapentity_views.MapEntityFormat)
+                list_dependencies = (mapentity_views.MapEntityFormat, )
                 if list_view and generic_view in list_dependencies:
                     # List view depends on JsonList and Format view
                     class dynamic_view(generic_view, list_view):
@@ -119,7 +118,8 @@ class MapEntityOptions:
                 geojson_serializer_class = _geojson_serializer
             rest_viewset = dynamic_viewset
 
-        self.rest_router.register(self.modelname + 's', rest_viewset, basename=self.modelname)
+        self.rest_router.register(r'api/' + self.modelname + '/drf/' + self.modelname + 's',
+                                  rest_viewset, basename=f"{self.modelname}-drf")
 
         # Returns Django URL patterns
         return self.__view_classes_to_url(*picked)
@@ -127,7 +127,7 @@ class MapEntityOptions:
     def get_serializer(self):
         _model = self.model
 
-        class Serializer(rest_serializers.ModelSerializer):
+        class Serializer(ModelSerializer):
             class Meta:
                 model = _model
                 id_field = 'id'
@@ -156,7 +156,7 @@ class MapEntityOptions:
         kind_to_urlpath = {
             mapentity_models.ENTITY_LAYER: r'^api/{modelname}/{modelname}.geojson$',
             mapentity_models.ENTITY_LIST: r'^{modelname}/list/$',
-            mapentity_models.ENTITY_JSON_LIST: r'^api/{modelname}/{modelname}s.json$',
+            mapentity_models.ENTITY_DATATABLE_LIST: r'^api/{modelname}/drf/{modelname}s.datatable$',
             mapentity_models.ENTITY_FORMAT_LIST: r'^{modelname}/list/export/$',
             mapentity_models.ENTITY_DETAIL: r'^{modelname}/(?P<pk>\d+)/$',
             mapentity_models.ENTITY_MAPIMAGE: r'^image/{modelname}-(?P<pk>\d+).png$',
@@ -181,7 +181,7 @@ class MapEntityOptions:
 
     def __view_classes_to_url(self, *view_classes):
         return [self.url_for(view_class) for view_class in view_classes] + \
-               [re_path(app_settings['DRF_API_URL_PREFIX'], include(self.rest_router.urls))]
+               [path('', include(self.rest_router.urls))]
 
     def url_shortname(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS

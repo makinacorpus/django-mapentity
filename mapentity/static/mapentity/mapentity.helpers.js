@@ -93,16 +93,12 @@ parseColor = function(color) {
 };
 
 
-function expandDatatableHeight(dTable) {
-    var nTable = $(dTable.fnSettings().nTable),
-        wrapper = nTable.parents('.dataTables_wrapper').first(),
-        extraHead = 30 + nTable.position().top - wrapper.position().top,
-        rowHeight = nTable.find('tbody tr').height();
-
-    var displayLength = Math.floor((wrapper.height() - extraHead) / rowHeight);
-    dTable.fnSettings()._iDisplayLength = Math.max(1, displayLength -1); //<thead>
-    dTable.fnDraw(false);
-};
+function expandDatatableHeight() {
+    var fill_height = $('#objects-list_wrapper').height() - 75;
+    var row_height = 36;
+    var number_of_rows = Math.floor(fill_height / row_height);
+    $('#objects-list').DataTable().page.len(parseInt(number_of_rows.toString())).draw();
+}
 
 
 function tr(s) {

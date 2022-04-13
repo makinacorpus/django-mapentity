@@ -1,5 +1,6 @@
 import logging
 
+from crispy_forms.helper import FormHelper
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.gis.db.models import GeometryField
 from django.http import HttpResponse, HttpResponseNotFound
@@ -107,7 +108,6 @@ class FormViewMixin:
 
 
 class FilterListMixin:
-
     filterform = None
 
     def __init__(self):
@@ -123,7 +123,10 @@ class FilterListMixin:
                     fields = [field.name for field in _model._meta.get_fields() if
                               not isinstance(field, GeometryField) and not isinstance(field, GenericRelation)]
             self.filterform = filterklass
-        self._filterform = self.filterform(None, self.queryset)
+        self._filterform = self.filterform()
+        self._filterform.helper = FormHelper()
+        self._filterform.helper.field_class = 'form-control-sm'
+        self._filterform.helper.submit = None
 
     def get_queryset(self):
         queryset = super().get_queryset()

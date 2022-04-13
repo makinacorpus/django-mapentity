@@ -1,7 +1,7 @@
 MapEntity.History = L.Class.extend({
 
     saveListInfo: function (infos) {
-        $('#nbresults').text(infos.nb);
+        //$('#nbresults').text(infos.nb);
         localStorage.setItem('list-search-results', JSON.stringify(infos));
     },
 
@@ -35,7 +35,7 @@ MapEntity.History = L.Class.extend({
         // Show number of results
         infos = localStorage.getItem('list-search-results') || '{"nb": "?", "model": null}';
         infos = JSON.parse(infos);
-        $('#nbresults').text(infos.nb);
+        //$('#nbresults').text(infos.nb);
         $('#entitylist-dropdown').parent('li').addClass(infos.model);
 
         $('#historylist a').tooltip({'placement': 'bottom'});

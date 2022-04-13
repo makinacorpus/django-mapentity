@@ -50,11 +50,7 @@ def log_action(request, object, action_flag):
 
 
 class MapEntityList(BaseListView, ListView):
-    """
-
-    A generic view list web page.
-
-    """
+    """ A generic view list web page. """
 
     def get_template_names(self):
         return super().get_template_names() + ['mapentity/mapentity_list.html']
@@ -75,14 +71,14 @@ class MapEntityList(BaseListView, ListView):
         context = super().get_context_data(**kwargs)
         context['filterform'] = self._filterform  # From FilterListMixin
         context['columns'] = self.columns  # From BaseListView
-
+        context['unorderable_columns'] = self.unorderable_columns  # From BaseListView
+        context['searchable_columns'] = self.searchable_columns  # From BaseListView
         context['create_label'] = self.get_model().get_create_label()
 
         model = self.get_model()
         perm_create = model.get_permission_codename(mapentity_models.ENTITY_CREATE)
         can_add = user_has_perm(self.request.user, perm_create)
         context['can_add'] = can_add
-
         perm_export = model.get_permission_codename(mapentity_models.ENTITY_FORMAT_LIST)
         can_export = user_has_perm(self.request.user, perm_export)
         context['can_export'] = can_export

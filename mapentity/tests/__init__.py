@@ -47,12 +47,17 @@ class MapEntityTest(TestCase):
     model = None
     modelfactory = None
     userfactory = None
-    api_prefix = '/api/'
     expected_json_geom = {}
     maxDiff = None
     user = None
 
     def get_expected_json_attrs(self):
+        return {}
+
+    def get_expected_geojson_attrs(self):
+        return {}
+
+    def get_expected_datatables_attrs(self):
         return {}
 
     def setUp(self):
@@ -100,7 +105,7 @@ class MapEntityTest(TestCase):
 
         response = self.client.get(self.model.get_layer_url())
         self.assertEqual(response.status_code, 200)
-        response = self.client.get(self.model.get_jsonlist_url())
+        response = self.client.get(self.model.get_datatablelist_url())
         self.assertEqual(response.status_code, 200)
 
     @patch('mapentity.helpers.requests')
@@ -120,28 +125,19 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
         params = '?bbox=POLYGON((5+44+0%2C5+45+0%2C6+45+0%2C6+44+0%2C5+44+0))'
         # If no objects exist, should not fail.
-        response = self.client.get(self.model.get_jsonlist_url() + params)
+        response = self.client.get(self.model.get_datatablelist_url() + params)
         self.assertEqual(response.status_code, 200)
         # If object exists, either :)
         self.modelfactory.create()
-        response = self.client.get(self.model.get_jsonlist_url() + params)
+        response = self.client.get(self.model.get_datatablelist_url() + params)
         self.assertEqual(response.status_code, 200)
         # If bbox is invalid, it should return all
-        allresponse = self.client.get(self.model.get_jsonlist_url())
+        allresponse = self.client.get(self.model.get_datatablelist_url())
         params = '?bbox=POLYGON(prout)'
         with AdjustDebugLevel('django.contrib.gis', logging.CRITICAL):
-            response = self.client.get(self.model.get_jsonlist_url() + params)
+            response = self.client.get(self.model.get_datatablelist_url() + params)
         self.assertEqual(response.status_code, 200)
         response.content = allresponse.content
-
-    def test_callback_jsonlist(self):
-        if self.model is None:
-            return  # Abstract test should not run
-        params = '?callback=json_decode'
-        # If no objects exist, should not fail.
-        response = self.client.get(self.model.get_jsonlist_url() + params)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'json_decode(', response.content)
 
     def test_basic_format(self):
         if self.model is None:
@@ -280,99 +276,23 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['filterform'] is not None)
 
-    """
-
-        REST API
-
-    """
+    # REST API tests
 
     @freeze_time("2020-03-17")
-    def test_api_list_for_model(self):
-        if self.get_expected_json_attrs is None:
-            return
+    def test_api_datatables_list_for_model(self):
         if self.model is None:
             return  # Abstract test should not run
 
         self.obj = self.modelfactory.create()
-        list_url = '{api_prefix}{modelname}s.json'.format(api_prefix=self.api_prefix,
-                                                          modelname=self.model._meta.model_name)
+        list_url = '/api/{modelname}/drf/{modelname}s.datatables'.format(modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, f"{list_url} not found")
         content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json[0].pop('length')
-            self.assertAlmostEqual(length, self.length)
-        self.assertEqual(content_json, [{'id': self.obj.pk, **self.get_expected_json_attrs()}])
 
-    @freeze_time("2020-03-17")
-    def test_api_geojson_list_for_model(self):
-        if self.get_expected_json_attrs is None:
-            return
-        if self.model is None:
-            return  # Abstract test should not run
-
-        self.obj = self.modelfactory.create()
-        list_url = '{api_prefix}{modelname}s.geojson'.format(api_prefix=self.api_prefix,
-                                                             modelname=self.model._meta.model_name)
-        response = self.client.get(list_url)
-        self.assertEqual(response.status_code, 200)
-        content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json['features'][0]['properties'].pop('length')
-            self.assertAlmostEqual(length, self.length)
-        self.assertEqual(content_json, {
-            'type': 'FeatureCollection',
-            'features': [{
-                'id': self.obj.pk,
-                'type': 'Feature',
-                'geometry': self.expected_json_geom,
-                'properties': self.get_expected_json_attrs(),
-            }],
-        })
-
-    @freeze_time("2020-03-17")
-    def test_api_detail_for_model(self):
-        if self.get_expected_json_attrs is None:
-            return
-        if self.model is None:
-            return  # Abstract test should not run
-
-        self.obj = self.modelfactory.create()
-        detail_url = '{api_prefix}{modelname}s/{id}'.format(api_prefix=self.api_prefix,
-                                                            modelname=self.model._meta.model_name,
-                                                            id=self.obj.pk)
-        response = self.client.get(detail_url)
-        self.assertEqual(response.status_code, 200)
-
-        content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json.pop('length')
-            self.assertAlmostEqual(length, self.length)
-        self.assertEqual(content_json, {'id': self.obj.pk, **self.get_expected_json_attrs()})
-
-    @freeze_time("2020-03-17")
-    def test_api_geojson_detail_for_model(self):
-        if self.get_expected_json_attrs is None:
-            return
-        if self.model is None:
-            return  # Abstract test should not run
-
-        self.obj = self.modelfactory.create()
-        detail_url = '{api_prefix}{modelname}s/{id}.geojson'.format(api_prefix=self.api_prefix,
-                                                                    modelname=self.model._meta.model_name,
-                                                                    id=self.obj.pk)
-        response = self.client.get(detail_url)
-        self.assertEqual(response.status_code, 200)
-        content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json['properties'].pop('length')
-            self.assertAlmostEqual(length, self.length)
-        self.assertEqual(content_json, {
-            'id': self.obj.pk,
-            'type': 'Feature',
-            'geometry': self.expected_json_geom,
-            'properties': self.get_expected_json_attrs(),
-        })
+        self.assertEqual(content_json, {'data': [self.get_expected_datatables_attrs()],
+                                        'draw': 1,
+                                        'recordsFiltered': 1,
+                                        'recordsTotal': 1})
 
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
