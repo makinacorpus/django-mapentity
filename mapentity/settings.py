@@ -1,8 +1,8 @@
 from collections import OrderedDict
 from copy import deepcopy
-from django.contrib.messages import constants as messages
 
 from django.conf import settings
+from django.contrib.messages import constants as messages
 
 API_SRID = 4326
 

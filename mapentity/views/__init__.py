@@ -1,5 +1,4 @@
 from .api import (
-    MapEntityLayer,
     MapEntityViewSet
 )
 from .base import (
@@ -33,7 +32,6 @@ from .mixins import (
 )
 
 MAPENTITY_GENERIC_VIEWS = [
-    MapEntityLayer,
     MapEntityList,
     MapEntityFormat,
     MapEntityMapImage,
@@ -60,7 +58,6 @@ __all__ = [
     'MapEntityDetail',
     'MapEntityUpdate',
     'MapEntityDelete',
-    'MapEntityLayer',
     'MapEntityViewSet',
     'HttpJSONResponse',
     'JSONResponseMixin',

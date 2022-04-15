@@ -1,6 +1,6 @@
 from rest_framework_gis.fields import GeometryField
 from rest_framework_gis.serializers import GeoFeatureModelSerializer, GeoFeatureModelListSerializer
-from collections import OrderedDict
+
 from ..settings import app_settings
 
 
@@ -11,13 +11,9 @@ class MapentityGeojsonModelListSerializer(GeoFeatureModelListSerializer):
         """
         app_label = self._kwargs['child'].Meta.model._meta.app_label
         model_name = self._kwargs['child'].Meta.model._meta.model_name
-        return OrderedDict(
-            (
-                ("type", "FeatureCollection"),
-                ("model", f"{app_label}.{model_name}",),
-                ("features", super(GeoFeatureModelListSerializer, self).to_representation(data)),
-            )
-        )
+        repr = super().to_representation(data)
+        repr['model'] = f"{app_label}.{model_name}"
+        return repr
 
 
 class MapentityGeojsonModelSerializer(GeoFeatureModelSerializer):

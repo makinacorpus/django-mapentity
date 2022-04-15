@@ -1,10 +1,8 @@
 from rest_framework import serializers
 from rest_framework_gis import fields as rest_gis_fields
-from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from test_app.models import DummyModel, Road
 from mapentity.serializers import MapentityGeojsonModelSerializer
-from test_app.models import DummyModel
 
 
 class DummySerializer(serializers.ModelSerializer):
