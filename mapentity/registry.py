@@ -16,11 +16,9 @@ from paperclip.settings import get_attachment_model
 from rest_framework import routers as rest_routers
 from rest_framework.serializers import ModelSerializer
 
-from mapentity.serializers import MapentityGeojsonModelSerializer
-
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
-
+from mapentity.serializers import MapentityGeojsonModelSerializer
 from mapentity.settings import app_settings
 
 logger = logging.getLogger(__name__)

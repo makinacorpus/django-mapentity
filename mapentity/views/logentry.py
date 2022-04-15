@@ -7,6 +7,7 @@ from .generic import MapEntityList
 from ..filters import BaseMapEntityFilterSet
 from ..models import LogEntry
 from ..registry import registry
+from ..serializers import MapentityGeojsonModelSerializer
 
 
 class LogEntryFilter(BaseMapEntityFilterSet):
@@ -39,10 +40,16 @@ class LogEntrySerializer(serializers.ModelSerializer):
         model = LogEntry
 
 
+class LogEntryGeoJSONSerializer(MapentityGeojsonModelSerializer):
+    class Meta(MapentityGeojsonModelSerializer.Meta):
+        model = LogEntry
+
+
 class LogEntryViewSet(MapEntityViewSet):
     model = LogEntry
     filterset_class = LogEntryFilter
     serializer_class = LogEntrySerializer
+    geojson_serializer_class = LogEntryGeoJSONSerializer
 
     def get_queryset(self):
         qs = self.model.objects.order_by('-action_time')

@@ -12,10 +12,6 @@ class DummyList(mapentity_views.MapEntityList):
     searchable_columns = ['id', 'name']
 
 
-class DummyLayer(mapentity_views.MapEntityLayer):
-    model = DummyModel
-
-
 class DummyFormat(mapentity_views.MapEntityFormat):
     model = DummyModel
 
