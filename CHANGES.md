@@ -4,6 +4,10 @@ CHANGELOG
 8.0.0+dev  (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Fix download buttons on lists.
+
 
 8.0.0      (2022-04-13)
 -----------------------
