@@ -1,6 +1,4 @@
 import os
-from distutils.command.build import build
-
 from setuptools import setup, find_packages
 
 
@@ -13,14 +11,6 @@ tests_require = [
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
-
-
-class BuildCommand(build):
-    def run(self):
-        """ Compile translation when install or build project. gettext should be installed """
-        super().run()
-        from django.core.management import call_command
-        call_command('compilemessages')
 
 
 with open(os.path.join(here, 'mapentity', 'VERSION')) as version_file:
@@ -37,8 +27,6 @@ setup(
     description="Generic CRUD with maps",
     long_description=(open(os.path.join(here, 'README.rst')).read()),
     license='BSD, see LICENSE file.',
-    setup_requires=['django'],  # allow compilemessages to work in setup.py
-    cmdclass={"build": BuildCommand},
     install_requires=[
         'BeautifulSoup4',
         'cairocffi',
