@@ -108,8 +108,8 @@ class MapEntityForm(TranslatedModelForm):
 
         # If MAX_CHARACTERS is setted, set help text for rich text fields
         textfield_help_text = ''
-        if settings.MAX_CHARACTERS:
-            textfield_help_text = _('%(max)s characters maximum recommended') % {'max': settings.MAX_CHARACTERS}
+        if settings.MAPENTITY_CONFIG['MAX_CHARACTERS']:
+            textfield_help_text = _('%(max)s characters maximum recommended') % {'max': settings.MAPENTITY_CONFIG['MAX_CHARACTERS']}
 
         # Default widgets
         for fieldname, formfield in self.fields.items():

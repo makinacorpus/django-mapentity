@@ -5,6 +5,10 @@
 
 {% block extrahead %}
     {{ block.super }}
+    <script type="text/javascript">
+        var maxCharacters = {{ MAX_CHARACTERS }};
+    </script>
+
 {% endblock extrahead %}
 
 {% block nav-detail %}active{% endblock nav-detail %}

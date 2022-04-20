@@ -104,3 +104,18 @@ function expandDatatableHeight() {
 function tr(s) {
     return MapEntity.i18n[s] || s;
 }
+
+
+function tinyMceInit(editor) {
+    // Overflow on characters count
+    editor.on('WordCountUpdate', function(event) {
+        if (("container" in event.target === true) && (maxCharacters > 0)) {
+            var characters = event.wordCount.characters;
+            if (characters > maxCharacters) {
+                event.target.container.classList.add('cec-overflow');
+            } else {
+                event.target.container.classList.remove('cec-overflow');
+            }
+        }
+    });
+}

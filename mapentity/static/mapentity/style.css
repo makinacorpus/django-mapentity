@@ -786,6 +786,16 @@ label.requiredField .asteriskField {
 
 
 /*
+ * Warning on TinyMCE status bar
+ * for CEC overflow
+ */
+
+.cec-overflow.tox .tox-statusbar {
+    background-color: pink;
+}
+
+
+/*
  * Inline formsets
  * TODO: when move formset to mapentity use crispy forms
  */

@@ -18,5 +18,6 @@ def settings(request):
         MAP_BACKGROUND_FOGGED=app_settings['MAP_BACKGROUND_FOGGED'],
         MAP_FIT_MAX_ZOOM=app_settings['MAP_FIT_MAX_ZOOM'],
         ACTION_HISTORY_ENABLED=app_settings['ACTION_HISTORY_ENABLED'],
+        MAX_CHARACTERS=app_settings['MAX_CHARACTERS'],
         allowed_entities=allowed_entities,
     )
