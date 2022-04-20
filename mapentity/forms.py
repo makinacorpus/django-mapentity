@@ -138,7 +138,6 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.help_text += f", {textfield_help_text}"
                     else:
                         formfield.help_text = textfield_help_text
-                    print(formfield.help_text)
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(self.instance.get_permission_codename(
