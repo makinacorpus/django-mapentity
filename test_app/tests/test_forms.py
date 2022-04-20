@@ -28,3 +28,5 @@ class MapEntityFormTest(TestCase):
         sample_object = DummyModel.objects.create()
         form = DummyForm(instance=sample_object)
         self.assertIn('1200 characters maximum recommended', form.fields['description'].help_text)
+        self.assertIn('Short description, 1200 characters maximum recommended',
+                      form.fields['short_description'].help_text)
