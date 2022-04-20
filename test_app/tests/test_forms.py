@@ -22,3 +22,9 @@ class MapEntityFormTest(TestCase):
         form = DummyForm(instance=sample_object, can_delete=False)
         self.assertFalse(form.can_delete)
         self.assertTrue('<a class="btn disabled delete" href="#">' in form.helper.layout[1][0].html)
+
+    def test_max_characters(self):
+        """Test if help text is set with MAX_CHARACTERS setting"""
+        sample_object = DummyModel.objects.create()
+        form = DummyForm(instance=sample_object)
+        self.assertIn('1200 characters maximum recommended', form.fields['description'].help_text)
