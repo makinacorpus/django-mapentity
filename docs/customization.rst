@@ -220,3 +220,13 @@ You can change the regex, for example if you need to add other behaviour with ea
 .. code-block :: python
 
     MAPENTITY_CONFIG['REGEX_PATH_ATTACHMENTS'] = r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$'
+
+Edition
+'''''''
+
+For rich text fields, it is possible to a max number of caracters (spaces includes).
+A help message will be added, and color of TinyMCE status bar will be colored in pink.
+
+.. code-block :: python
+
+    MAPENTITY_CONFIG['MAX_CHARACTERS'] = 1500
