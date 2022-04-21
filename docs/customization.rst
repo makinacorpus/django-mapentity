@@ -196,7 +196,7 @@ files will be opened in the browser :
     MAPENTITY_CONFIG['SERVE_MEDIA_AS_ATTACHMENT'] = False
 
 
-Paperclip medias (under /paperclip/<app>_<model>/<pk>/<name>.**) are protected by mapentity.
+Paperclip medias (under ``/paperclip/<app>_<model>/<pk>/<name>.**``) are protected by mapentity.
 We use easy_thumbnail to generate thumbnails of pictures.
 These files are generated with a new name with all the characteristics of the thumbnail generated (crop or not, width, height, etc...).
 These files need to be protected as the parent picture. We use a regex to find the parent's picture and all the permissions on this picture.
