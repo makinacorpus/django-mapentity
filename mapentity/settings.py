@@ -44,7 +44,7 @@ app_settings = dict({
     'MAPENTITY_WEASYPRINT': False,
     'MAP_STYLES': _DEFAULT_MAP_STYLES,
     'REGEX_PATH_ATTACHMENTS': r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$',
-    'MAX_CHARACTERS': 0,
+    'MAX_CHARACTERS': None,
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 # default MAP_STYLES should not be replaced but updated by MAPENTITY_CONFIG
