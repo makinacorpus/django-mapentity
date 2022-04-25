@@ -64,7 +64,7 @@ TINYMCE_DEFAULT_CONFIG = {
     "toolbar": "undo redo | formatselect | "
                "bold italic forecolor backcolor | link image media | alignleft aligncenter "
                "alignright alignjustify | bullist numlist outdent indent | "
-               "removeformat | code | wordcount help",
+               "removeformat | code | wordcount | help",
     'paste_auto_cleanup_on_paste': True,
     'forced_root_block': False,
     'width': '95%',
