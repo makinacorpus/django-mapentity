@@ -193,7 +193,6 @@ MAPENTITY_CONFIG = {
     'CONVERSION_SERVER': 'http://localhost/',
     'CAPTURE_SERVER': 'http://localhost/',
     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
-    'MAX_CHARACTERS': 1200,
 }
 
 LOGIN_REDIRECT_URL = '/'

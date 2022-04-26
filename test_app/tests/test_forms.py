@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.conf import settings
 
 from mapentity.forms import MapEntityForm
 from ..models import DummyModel
@@ -23,6 +24,12 @@ class MapEntityFormTest(TestCase):
         self.assertFalse(form.can_delete)
         self.assertTrue('<a class="btn disabled delete" href="#">' in form.helper.layout[1][0].html)
 
+
+class MapEntityRichTextFormTest(TestCase):
+
+    def setUp(self):
+        settings.MAPENTITY_CONFIG['MAX_CHARACTERS'] = 1200
+
     def test_max_characters(self):
         """Test if help text is set with MAX_CHARACTERS setting"""
         sample_object = DummyModel.objects.create()
@@ -30,3 +37,6 @@ class MapEntityFormTest(TestCase):
         self.assertIn('1200 characters maximum recommended', form.fields['description'].help_text)
         self.assertIn('Short description, 1200 characters maximum recommended',
                       form.fields['short_description'].help_text)
+
+    def tearDown(self):
+        settings.MAPENTITY_CONFIG['MAX_CHARACTERS'] = None
