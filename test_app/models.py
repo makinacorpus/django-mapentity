@@ -1,12 +1,16 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import gettext_lazy as _
-from paperclip.models import FileType as BaseFileType, Attachment as BaseAttachment
+from paperclip.models import FileType as BaseFileType, Attachment as BaseAttachment, License as BaseLicense
 
 from mapentity.models import MapEntityMixin
 
 
 class FileType(BaseFileType):
+    pass
+
+
+class License(BaseLicense):
     pass
 
 
