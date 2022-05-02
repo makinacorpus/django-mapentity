@@ -57,7 +57,7 @@ setup(
     tests_require=tests_require,
     extras_require={
         'dev': tests_require + [
-            'django-debug-toolbar',
+            'django-debug-toolbar<3.3', # 3.3.0 is not compatible with Django 2.2
             'flake8'
         ]
     },
