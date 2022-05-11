@@ -38,6 +38,13 @@ $(document).ready(function (e) {
         function() { $(this).children(".autohide").removeClass('hover'); }
     );
 
+    // Split
+    $("#panelleft").resizable({
+        handleSelector: ".splitter",
+        resizeHeight: false
+    });
+
+
 
     // Views
     var context = $('body').data();
