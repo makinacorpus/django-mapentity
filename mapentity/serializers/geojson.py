@@ -11,9 +11,9 @@ class MapentityGeojsonModelListSerializer(GeoFeatureModelListSerializer):
         """
         app_label = self._kwargs['child'].Meta.model._meta.app_label
         model_name = self._kwargs['child'].Meta.model._meta.model_name
-        repr = super().to_representation(data)
-        repr['model'] = f"{app_label}.{model_name}"
-        return repr
+        representation = super().to_representation(data)
+        representation['model'] = f"{app_label}.{model_name}"
+        return representation
 
 
 class MapentityGeojsonModelSerializer(GeoFeatureModelSerializer):

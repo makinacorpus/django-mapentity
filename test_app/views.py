@@ -3,7 +3,7 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from mapentity import views as mapentity_views
 from .filters import DummyModelFilter
 from .models import DummyModel, Road
-from .serializers import DummySerializer, DummyGeojsonSerializer, RoadSerializer
+from .serializers import DummySerializer, RoadSerializer
 
 
 class DummyList(mapentity_views.MapEntityList):
@@ -41,10 +41,8 @@ class DummyDelete(mapentity_views.MapEntityDelete):
 
 
 class DummyViewSet(mapentity_views.MapEntityViewSet):
-    model = DummyModel  # Must be defined to be detected by mapentity
     queryset = DummyModel.objects.all()
     serializer_class = DummySerializer
-    geojson_serializer_class = DummyGeojsonSerializer
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
     filterset_class = DummyModelFilter
 
