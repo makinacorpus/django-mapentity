@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db import DatabaseError
 from netifaces import interfaces, ifaddresses, AF_INET
 
@@ -63,8 +64,11 @@ class AutoLoginMiddleware:
         user = getattr(request, 'user', None)
 
         if user and user.is_anonymous and not is_running_tests:
-            remoteip = request.META.get('REMOTE_ADDR')
-            if remoteip in AUTOLOGIN_IPS:
+            auth_token = request.GET.get("auth_token")
+            print(f"{auth_token=}")
+            # remoteip = request.META.get('REMOTE_ADDR')
+            # if remoteip in AUTOLOGIN_IPS:
+            if PasswordResetTokenGenerator().check_token(get_internal_user(), auth_token):
                 user = get_internal_user()
                 try:
                     user_logged_in.send(self, user=user, request=request)

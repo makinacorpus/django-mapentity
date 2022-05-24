@@ -9,6 +9,7 @@ from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.gis.db.models import GeometryField
 from django.core.exceptions import PermissionDenied
 from django.http import (HttpResponse, HttpResponseBadRequest, Http404)
@@ -21,6 +22,7 @@ from django.views.generic.base import TemplateView
 from paperclip.settings import get_attachment_permission, get_attachment_model
 
 from mapentity import models as mapentity_models
+from mapentity.middleware import get_internal_user
 from .mixins import JSONResponseMixin, FilterListMixin, ModelViewMixin
 from ..decorators import view_permission_required
 from ..helpers import capture_image
@@ -155,6 +157,8 @@ def map_screenshot(request):
         map_url = context.pop('url')
         map_url = request.build_absolute_uri(map_url)
         context['print'] = True
+        context['auth_token'] = PasswordResetTokenGenerator().make_token(get_internal_user())
+        print(f"token={context['auth_token']}")
         printcontext = json.dumps(context)
         contextencoded = quote(printcontext)
         map_url += '?context=%s' % contextencoded
