@@ -93,8 +93,8 @@ MapEntity.GeometryField = L.GeometryField.extend({
         var exclude_current_object = null;
         if (object_pk) {
             exclude_current_object = function (geojson) {
-                if (geojson.properties && geojson.id)
-                    return geojson.id != object_pk;
+                if (geojson.properties && geojson.properties.id)
+                    return geojson.properties.id !== object_pk;
             };
         }
 

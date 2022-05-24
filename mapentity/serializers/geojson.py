@@ -22,4 +22,5 @@ class MapentityGeojsonModelSerializer(GeoFeatureModelSerializer):
     class Meta:
         list_serializer_class = MapentityGeojsonModelListSerializer
         geo_field = 'api_geom'
+        id_field = False
         fields = ['id', ]
