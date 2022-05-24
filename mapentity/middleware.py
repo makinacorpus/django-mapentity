@@ -1,3 +1,4 @@
+import json
 import logging
 import socket
 from urllib.parse import urlparse
@@ -65,10 +66,10 @@ class AutoLoginMiddleware:
 
         if user and user.is_anonymous and not is_running_tests:
             context = request.GET.get("context")
-            auth_token = context.get("auth_token", None)
             print(f"{context=}")
+            auth_token = json.loads(context).get("auth_token", None)
             print(f"{auth_token=}")
-            # remoteip = request.META.get('REMOTE_ADDR')
+            # remoteip = refquest.META.get('REMOTE_ADDR')
             # if remoteip in AUTOLOGIN_IPS:
             if PasswordResetTokenGenerator().check_token(get_internal_user(), auth_token):
                 user = get_internal_user()
