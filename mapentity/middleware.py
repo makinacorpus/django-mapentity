@@ -67,16 +67,17 @@ class AutoLoginMiddleware:
         if user and user.is_anonymous and not is_running_tests:
             context = request.GET.get("context")
             print(f"{context=}")
-            auth_token = json.loads(context).get("auth_token", None)
-            print(f"{auth_token=}")
-            # remoteip = refquest.META.get('REMOTE_ADDR')
-            # if remoteip in AUTOLOGIN_IPS:
-            if PasswordResetTokenGenerator().check_token(get_internal_user(), auth_token):
-                user = get_internal_user()
-                try:
-                    user_logged_in.send(self, user=user, request=request)
-                except DatabaseError as exc:
-                    print(exc)
-                request.user = user
+            if context:
+                auth_token = json.loads(context).get("auth_token", None)
+                print(f"{auth_token=}")
+                # remoteip = refquest.META.get('REMOTE_ADDR')
+                # if remoteip in AUTOLOGIN_IPS:
+                if PasswordResetTokenGenerator().check_token(get_internal_user(), auth_token):
+                    user = get_internal_user()
+                    try:
+                        user_logged_in.send(self, user=user, request=request)
+                    except DatabaseError as exc:
+                        print(exc)
+                    request.user = user
 
         return self.get_response(request)
