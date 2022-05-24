@@ -64,7 +64,9 @@ class AutoLoginMiddleware:
         user = getattr(request, 'user', None)
 
         if user and user.is_anonymous and not is_running_tests:
-            auth_token = request.GET.get("auth_token")
+            context = request.GET.get("context")
+            auth_token = context.get("auth_token", None)
+            print(f"{context=}")
             print(f"{auth_token=}")
             # remoteip = request.META.get('REMOTE_ADDR')
             # if remoteip in AUTOLOGIN_IPS:
