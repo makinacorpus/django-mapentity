@@ -65,29 +65,11 @@ class AutoLoginMiddleware:
         user = getattr(request, 'user', None)
 
         if user and user.is_anonymous and not is_running_tests:
-            print('{}\n{}\r\n{}\r\n\r\n{}'.format(
-                '-----------START-----------',
-                request.method + ' ' + request.get_full_path(),
-                '\r\n'.join('{}: {}'.format(k, v) for k, v in request.headers.items()),
-                request.body,
-                request.session
-            ))
             context = request.GET.get("context")
-            print(f"{context=}")
             if context:
                 auth_token = json.loads(context).get("auth_token", None)
-                print(f"{auth_token=}")
-                # remoteip = refquest.META.get('REMOTE_ADDR')
-                # if remoteip in AUTOLOGIN_IPS:
-                if PasswordResetTokenGenerator().check_token(get_internal_user(), auth_token):
-                    print('authent ok')
+                if auth_token and PasswordResetTokenGenerator().check_token(get_internal_user(), auth_token):
                     user = get_internal_user()
-                    try:
-                        login(request, user)
-                        #user_logged_in.send(self, user=user, request=request)
-                    except DatabaseError as exc:
-                        print(exc)
-                    request.user = user
-                else:
-                    print('authent ko')
+                    login(request, user)
+                    request.session.set_expiry(settings.PASSWORD_RESET_TIMEOUT)
         return self.get_response(request)

@@ -14,6 +14,8 @@ _DEFAULT_MAP_STYLES = {
     'print': {},
 }
 
+_DEFAULT_PASSWORD_RESET_TIMEOUT = 300
+
 app_settings = dict({
     'TITLE': "",
     'HISTORY_ITEMS_MAX': 5,
@@ -44,7 +46,10 @@ app_settings = dict({
     'MAPENTITY_WEASYPRINT': False,
     'MAP_STYLES': _DEFAULT_MAP_STYLES,
     'REGEX_PATH_ATTACHMENTS': r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$',
+    'PASSWORD_RESET_TIMEOUT': _DEFAULT_PASSWORD_RESET_TIMEOUT,
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
+
+setattr(settings, 'PASSWORD_RESET_TIMEOUT', app_settings['PASSWORD_RESET_TIMEOUT'])
 
 # default MAP_STYLES should not be replaced but updated by MAPENTITY_CONFIG
 _MAP_STYLES = deepcopy(_DEFAULT_MAP_STYLES)
