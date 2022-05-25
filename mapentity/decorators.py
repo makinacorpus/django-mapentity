@@ -89,11 +89,10 @@ def view_cache_latest():
 def view_cache_response_content():
     def decorator(view_func):
         def _wrapped_method(self, *args, **kwargs):
-            print("view_cache_response_content", args, kwargs)
-            # Do not cache if filters presents
+            # Do not cache if filters presents of datatables format
             params = self.request.GET.keys()
             with_filters = all([not p.startswith('_') for p in params])
-            if (len(params) > 0 and with_filters) or "geojson" not in self.request.build_absolute_uri():
+            if (len(params) > 0 and with_filters) or "datatables" in self.request.build_absolute_uri():
                 return view_func(self, *args, **kwargs)
 
             # Restore from cache or store view result
