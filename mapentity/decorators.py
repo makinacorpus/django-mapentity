@@ -45,7 +45,7 @@ def view_permission_required(login_url=None, raise_exception=None):
                 if is_handle_object:
                     view_subject = self.get_object()
                 else:
-                    view_subject = self.get_model()
+                    view_subject = self.model
                 get_url_method = getattr(view_subject, 'get_{0}_url'.format(login_url))
                 redirect_url = get_url_method()
 

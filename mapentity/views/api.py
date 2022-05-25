@@ -1,7 +1,6 @@
 import logging
 
 from django.contrib.gis.db.models.functions import Transform
-from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, renderers
 from rest_framework.decorators import action
@@ -10,7 +9,7 @@ from rest_framework_datatables.filters import DatatablesFilterBackend
 from rest_framework_datatables.renderers import DatatablesRenderer
 
 from .. import serializers as mapentity_serializers
-from ..decorators import view_cache_latest, view_cache_response_content
+from ..decorators import view_cache_latest, view_cache_response_content, view_permission_required
 from ..filters import MapEntityFilterSet
 from ..pagination import MapentityDatatablePagination
 from ..renderers import GeoJSONRenderer
@@ -18,31 +17,9 @@ from ..settings import API_SRID
 
 logger = logging.getLogger(__name__)
 
-#
-# class MapEntityLayer(FilterListMixin, ModelViewMixin, generics.ListAPIView):
-#     """
-#     Take a class attribute `model` with a `latest_updated` method used for caching.
-#     """
-#     srid = API_SRID
-#     precision = app_settings.get('GEOJSON_PRECISION')
-#
-#
-#     @classmethod
-#     def get_entity_kind(cls):
-#         return mapentity_models.ENTITY_LAYER
-#
-#     @view_permission_required()
-#     @view_cache_latest()
-#     def dispatch(self, *args, **kwargs):
-#         return super().dispatch(*args, **kwargs)
-#
-#     @view_cache_response_content()
-#     def render_to_response(self, context, **response_kwargs):
-#         return super().render_to_response(context, **response_kwargs)
-#
-
 
 class MapEntityViewSet(viewsets.ModelViewSet):
+    model = None
     renderer_classes = [renderers.JSONRenderer,
                         GeoJSONRenderer,
                         renderers.BrowsableAPIRenderer,
@@ -51,6 +28,10 @@ class MapEntityViewSet(viewsets.ModelViewSet):
     pagination_class = MapentityDatatablePagination
     filter_backends = [DatatablesFilterBackend, DjangoFilterBackend]
     filterset_class = MapEntityFilterSet
+
+    def get_view_perm(self):
+        """ use by view_permission_required decorator """
+        return self.model.get_permission_codename('layer')
 
     def get_serializer_class(self):
         """ Use specific Serializer for GeoJSON """
@@ -98,6 +79,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             'count': self.get_filter_count_infos(qs),
         })
 
+    @view_permission_required()
     @view_cache_latest()
     @view_cache_response_content()
     def list(self, request, *args, **kwargs):
