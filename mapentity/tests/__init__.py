@@ -4,7 +4,6 @@ import logging
 import os
 import shutil
 import time
-from datetime import datetime
 from io import StringIO
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -19,7 +18,6 @@ from django.test.utils import override_settings
 from django.utils import html
 from django.utils.encoding import force_str
 from django.utils.http import http_date
-from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from freezegun import freeze_time
 
@@ -325,26 +323,24 @@ class MapEntityLiveTest(LiveServerTestCase):
                                     allow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-    @patch('mapentity.models.MapEntityMixin.latest_updated')
-    def test_geojson_cache(self, latest_updated):
+    def test_geojson_cache(self):
         if self.model is None:
             return  # Abstract test should not run
 
         self.login()
         self.modelfactory.create()
-        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
 
         latest = self.model.latest_updated()
         geojson_layer_url = self.url_for(self.model.get_layer_url())
 
-        response = self.client.get(geojson_layer_url, allow_redirects=False)
-        self.assertEqual(response.status_code, 200)
+        response_1 = self.client.get(geojson_layer_url, allow_redirects=False)
+        self.assertEqual(response_1.status_code, 200)
 
         # Without headers to cache
-        lastmodified = response.get('Last-Modified')
-        cachecontrol = response.get('Cache-control')
+        lastmodified = response_1.get('Last-Modified')
+        cachecontrol = response_1.get('Cache-control')
         hasher = hashlib.md5()
-        hasher.update(response.content)
+        hasher.update(response_1.content)
         md5sum = hasher.digest()
         self.assertNotEqual(lastmodified, None)
         self.assertCountEqual(cachecontrol.split(', '), ('must-revalidate', 'max-age=0'))
@@ -361,7 +357,6 @@ class MapEntityLiveTest(LiveServerTestCase):
         # Create a new object
         time.sleep(1.1)  # wait some time, last-modified has precision in seconds
         self.modelfactory.create()
-        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
 
         self.assertNotEqual(latest, self.model.latest_updated())
         response = self.client.get(geojson_layer_url)

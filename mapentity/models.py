@@ -118,7 +118,7 @@ class BaseMapEntityMixin(models.Model):
     def latest_updated(cls):
         try:
             fname = app_settings['DATE_UPDATE_FIELD_NAME']
-            return cls.objects.latest(fname).get_date_update()
+            return cls.objects.only(fname).latest(fname).get_date_update()
         except (cls.DoesNotExist, FieldError):
             return None
 
@@ -152,6 +152,11 @@ class BaseMapEntityMixin(models.Model):
     @classmethod
     def get_datatablelist_url(cls):
         return '/api/' + cls._meta.model_name.lower() + '/drf/' + cls._meta.model_name.lower() + 's.datatables'
+
+    def get_layer_detail_url(self):
+        return reverse("{app_name}:{model_name}-drf-detail".format(app_name=self._meta.app_label.lower(),
+                                                                   model_name=self._meta.model_name.lower()),
+                       kwargs={"format": "geojson", "pk": self.pk})
 
     @classmethod
     def get_format_list_url(cls):

@@ -171,19 +171,19 @@ $(window).on('entity:map:detail', function (e, data) {
     });
 
     // Show object geometry in detail map
-    var $singleObject = $container.find('.geojsonfeature'),
-        objectLayer = null;
-    if ($singleObject.length > 0) {
-        objectLayer = _showSingleObject(JSON.parse($singleObject.text()));
-    }
+    console.log(window.SETTINGS);
+    var feature_geojson_url = $("#detailmap").attr('data-feature-url');
+    $.get(feature_geojson_url, function (data) {
+        var objectLayer = _showSingleObject(data);
 
-    $(window).trigger('detailmap:ready', {map: map,
-                                          layer: objectLayer,
-                                          context: context,
-                                          modelname: data.modelname});
-
+        $(window).trigger('detailmap:ready', {map: map,
+                                              layer: objectLayer,
+                                              context: context,
+                                              modelname: data.modelname});
+    });
 
     function _showSingleObject(geojson) {
+        console.log(data);
         var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
 
         // Appearance of geometry for export can be controlled via setting

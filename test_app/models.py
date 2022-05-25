@@ -70,7 +70,7 @@ class DummyModel(MapEntityMixin, models.Model):
     name = models.CharField(blank=True, default='', max_length=128)
     description = models.TextField(blank=True, default='')
     geom = models.PointField(null=True, default=None)
-    date_update = models.DateTimeField(auto_now=True)
+    date_update = models.DateTimeField(auto_now=True, db_index=True)
     public = models.BooleanField(default=False)
 
     def __str__(self):

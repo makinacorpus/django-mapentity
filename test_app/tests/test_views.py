@@ -70,7 +70,7 @@ class DummyModelFunctionalTest(MapEntityTest):
         return {
             'date_update': '17/03/2020 00:00:00',
             'description': '',
-            'geom': 'SRID=4326;POINT (0 0)',
+            'geom': self.obj.geom.ewkt,
             'id': 1,
             'name': '<a href="/dummymodel/1/">a dummy model</a>',
             'public': '<i class="bi bi-x-circle text-danger"></i>'
@@ -285,7 +285,7 @@ class SettingsViewTest(BaseTest):
         view.request = RequestFactory().get('/fake-path')
         context = view.get_context_data()
         self.assertDictEqual(context['urls'], {
-            "layer": "/api/modelname/modelname.geojson",
+            "layer": "/api/modelname/drf/modelnames.geojson",
             "screenshot": "/map_screenshot/",
             "detail": "/modelname/0/",
             "format_list": "/modelname/list/export/",

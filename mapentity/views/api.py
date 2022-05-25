@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib.gis.db.models.functions import Transform
+from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, renderers
 from rest_framework.decorators import action
@@ -9,6 +10,7 @@ from rest_framework_datatables.filters import DatatablesFilterBackend
 from rest_framework_datatables.renderers import DatatablesRenderer
 
 from .. import serializers as mapentity_serializers
+from ..decorators import view_cache_latest, view_cache_response_content
 from ..filters import MapEntityFilterSet
 from ..pagination import MapentityDatatablePagination
 from ..renderers import GeoJSONRenderer
@@ -95,3 +97,8 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             'pk_list': qs.values_list('pk', flat=True),
             'count': self.get_filter_count_infos(qs),
         })
+
+    @view_cache_latest()
+    @view_cache_response_content()
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

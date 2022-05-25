@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     "debug_toolbar",
     'paperclip',
     'compressor',
+    'djgeojson',
     'easy_thumbnails',
     'django_filters',
     'crispy_forms',
