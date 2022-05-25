@@ -73,11 +73,13 @@ class AutoLoginMiddleware:
                 # remoteip = refquest.META.get('REMOTE_ADDR')
                 # if remoteip in AUTOLOGIN_IPS:
                 if PasswordResetTokenGenerator().check_token(get_internal_user(), auth_token):
+                    print('authent ok')
                     user = get_internal_user()
                     try:
                         user_logged_in.send(self, user=user, request=request)
                     except DatabaseError as exc:
                         print(exc)
                     request.user = user
-
+                else:
+                    print('authent ko')
         return self.get_response(request)
