@@ -67,7 +67,7 @@ class AutoLoginMiddleware:
         if user and user.is_anonymous and not is_running_tests:
             print('{}\n{}\r\n{}\r\n\r\n{}'.format(
                 '-----------START-----------',
-                request.method + ' ' + request.get_full_path,
+                request.method + ' ' + request.get_full_path(),
                 '\r\n'.join('{}: {}'.format(k, v) for k, v in request.headers.items()),
                 request.body,
             ))
