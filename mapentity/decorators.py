@@ -67,6 +67,9 @@ def view_permission_required(login_url=None, raise_exception=None):
 def view_cache_latest():
     def decorator(view_func):
         def _wrapped_view(self, request, *args, **kwargs):
+            if kwargs.get('format') == "datatables":
+                # don't cache dataTables
+                return view_func(self, request, *args, **kwargs)
             view_model = self.model
 
             cache_latest = cache_last_modified(lambda x: view_model.latest_updated())
@@ -86,6 +89,7 @@ def view_cache_latest():
 def view_cache_response_content():
     def decorator(view_func):
         def _wrapped_method(self, *args, **kwargs):
+            print("view_cache_response_content", args, kwargs)
             # Do not cache if filters presents
             params = self.request.GET.keys()
             with_filters = all([not p.startswith('_') for p in params])
