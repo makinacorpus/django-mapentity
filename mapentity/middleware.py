@@ -4,7 +4,7 @@ import socket
 from urllib.parse import urlparse
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.signals import user_logged_in
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db import DatabaseError
@@ -70,6 +70,7 @@ class AutoLoginMiddleware:
                 request.method + ' ' + request.get_full_path(),
                 '\r\n'.join('{}: {}'.format(k, v) for k, v in request.headers.items()),
                 request.body,
+                request.session
             ))
             context = request.GET.get("context")
             print(f"{context=}")
@@ -82,7 +83,8 @@ class AutoLoginMiddleware:
                     print('authent ok')
                     user = get_internal_user()
                     try:
-                        user_logged_in.send(self, user=user, request=request)
+                        login(request, user)
+                        #user_logged_in.send(self, user=user, request=request)
                     except DatabaseError as exc:
                         print(exc)
                     request.user = user
