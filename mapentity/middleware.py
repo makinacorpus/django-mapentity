@@ -65,6 +65,12 @@ class AutoLoginMiddleware:
         user = getattr(request, 'user', None)
 
         if user and user.is_anonymous and not is_running_tests:
+            print('{}\n{}\r\n{}\r\n\r\n{}'.format(
+                '-----------START-----------',
+                request.method + ' ' + request.url,
+                '\r\n'.join('{}: {}'.format(k, v) for k, v in request.headers.items()),
+                request.body,
+            ))
             context = request.GET.get("context")
             print(f"{context=}")
             if context:
