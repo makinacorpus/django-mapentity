@@ -158,7 +158,6 @@ def map_screenshot(request):
         map_url = request.build_absolute_uri(map_url)
         context['print'] = True
         context['auth_token'] = PasswordResetTokenGenerator().make_token(get_internal_user())
-        print(f"token={context['auth_token']}")
         printcontext = json.dumps(context)
         contextencoded = quote(printcontext)
         map_url += '?context=%s' % contextencoded
