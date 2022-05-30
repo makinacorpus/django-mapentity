@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import caches
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
@@ -119,10 +120,11 @@ def view_cache_response_content():
 
             response = view_func(self, *args, **kwargs)
             if geojson_lookup:
-                response.accepted_renderer = GeoJSONRenderer()
-                response.accepted_media_type = "application/json"
-                response.renderer_context = {}
-                response.render()
+                if not issubclass(response.__class__, HttpResponse):
+                    response.accepted_renderer = GeoJSONRenderer()
+                    response.accepted_media_type = "application/json"
+                    response.renderer_context = {}
+                    response.render()
                 geojson_cache.set(geojson_lookup, response)
             return response
 
