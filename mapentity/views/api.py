@@ -83,7 +83,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @view_permission_required()
+    #@view_permission_required()
     @view_cache_latest()
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
