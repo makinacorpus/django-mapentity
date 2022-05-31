@@ -1,5 +1,5 @@
 {% extends "mapentity/base_site.html" %}
-{% load i18n static mapentity_tags leaflet_tags geojson_tags %}
+{% load i18n static mapentity_tags leaflet_tags %}
 
 {% block title %}{{ object }} | {{ block.super }}{% endblock title %}
 
@@ -79,7 +79,7 @@
           <tr>
             <td>{{ logentry.action_time }} ({{ logentry.action_time|timesince }})</td>
             <td>{{ logentry.user }}</td>
-            <td>{{ logentry.action_flag_display }}{% if logentry.change_message %} - {{ logentry.change_message }}{% endif %}</td>
+            <td>{{ logentry.action_flag_display }}{% if logentry.change_message %} - {{ logentry.change_message }}{% endif %}</td>
           </tr>
           {% empty %}
           <tr>
