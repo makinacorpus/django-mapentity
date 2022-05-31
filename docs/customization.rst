@@ -10,7 +10,7 @@ can override CBV methods as usual::
 
     from django.shortcuts import redirect
     from mapentity.views.generic import (
-        MapEntityList, MapEntityLayer, MapEntityDetail,
+        MapEntityList, MapEntityDetail,
         MapEntityFormat, MapEntityCreate, MapEntityUpdate, MapEntityDocument,
         MapEntityDelete, MapEntityViewSet)
     from .models import Museum
@@ -24,10 +24,6 @@ can override CBV methods as usual::
     class MuseumList(MapEntityList):
         model = Museum
         columns = ['id', 'name']
-
-
-    class MuseumLayer(MapEntityLayer):
-        model = Museum
 
 
     class MuseumDetail(MapEntityDetail):
