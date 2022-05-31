@@ -2,6 +2,8 @@ name: Documentation
 
 on:
   push:
+    branches:
+      - master
     paths:
       - 'docs/**'
   pull_request:
