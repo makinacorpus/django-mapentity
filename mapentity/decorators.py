@@ -11,6 +11,7 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.http import last_modified as cache_last_modified
 from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import BaseUpdateView
+from rest_framework.response import Response
 
 from . import models as mapentity_models
 from .helpers import user_has_perm
@@ -120,7 +121,7 @@ def view_cache_response_content():
 
             response = view_func(self, *args, **kwargs)
             if geojson_lookup:
-                if not issubclass(response.__class__, HttpResponse):
+                if isinstance(response, Response):
                     response.accepted_renderer = GeoJSONRenderer()
                     response.accepted_media_type = "application/json"
                     response.renderer_context = {}
