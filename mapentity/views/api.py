@@ -80,7 +80,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             'count': self.get_filter_count_infos(qs),
         })
 
-    #@view_cache_response_content()
+    @view_cache_response_content()
     @view_cache_latest()
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)

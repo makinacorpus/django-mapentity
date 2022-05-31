@@ -114,20 +114,18 @@ def view_cache_response_content():
 
             geojson_cache = caches[app_settings['GEOJSON_LAYERS_CACHE_BACKEND']]
 
-            # if geojson_lookup:
-            #     content = geojson_cache.get(geojson_lookup)
-            #     if content:
-            #         return content
-
-            response = view_func(self, *args, **kwargs)
             if geojson_lookup:
-                response.accepted_renderer = GeoJSONRenderer()
-                response.accepted_media_type = "application/json"
-                response.renderer_context = {}
-                response.render()
-                geojson_cache.set(geojson_lookup, response)
-
-            return response
+                response = geojson_cache.get(geojson_lookup)
+                if response:
+                    return response
+                else:
+                    response = view_func(self, *args, **kwargs)
+                    response.accepted_renderer = GeoJSONRenderer()
+                    response.accepted_media_type = "application/json"
+                    response.renderer_context = {}
+                    response.render()
+                    geojson_cache.set(geojson_lookup, response)
+                    return response
 
         return _wrapped_method
     return decorator
