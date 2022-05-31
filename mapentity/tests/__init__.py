@@ -4,6 +4,7 @@ import logging
 import os
 import shutil
 import time
+from datetime import datetime
 from io import StringIO
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -18,6 +19,7 @@ from django.test.utils import override_settings
 from django.utils import html
 from django.utils.encoding import force_str
 from django.utils.http import http_date
+from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from freezegun import freeze_time
 
@@ -323,12 +325,14 @@ class MapEntityLiveTest(LiveServerTestCase):
                                     allow_redirects=False)
         self.assertEqual(response.status_code, 302)
 
-    def test_geojson_cache(self):
+    @patch('mapentity.models.MapEntityMixin.latest_updated')
+    def test_geojson_cache(self, latest_updated):
         if self.model is None:
             return  # Abstract test should not run
 
         self.login()
         self.modelfactory.create()
+        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
 
         latest = self.model.latest_updated()
         geojson_layer_url = self.url_for(self.model.get_layer_url())
@@ -357,6 +361,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         # Create a new object
         time.sleep(1.1)  # wait some time, last-modified has precision in seconds
         self.modelfactory.create()
+        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
 
         self.assertNotEqual(latest, self.model.latest_updated())
         response = self.client.get(geojson_layer_url)
