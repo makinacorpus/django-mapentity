@@ -121,15 +121,12 @@ def view_cache_response_content():
 
             response = view_func(self, *args, **kwargs)
             if geojson_lookup:
-                if isinstance(response, Response):
-                    response.accepted_renderer = GeoJSONRenderer()
-                    response.accepted_media_type = "application/json"
-                    response.renderer_context = {}
-                    response.render()
-                try:
-                    geojson_cache.set(geojson_lookup, response)
-                except Exception as e:
-                    raise Exception(response.__class__)
+                response.accepted_renderer = GeoJSONRenderer()
+                response.accepted_media_type = "application/json"
+                response.renderer_context = {}
+                response.render()
+            geojson_cache.set(geojson_lookup, response)
+
             return response
 
         return _wrapped_method
