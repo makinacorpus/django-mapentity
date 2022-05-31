@@ -94,7 +94,7 @@ def view_cache_response_content():
             # Do not cache if filters presents of datatables format
             params = self.request.GET.keys()
             with_filters = all([not p.startswith('_') for p in params])
-            if (len(params) > 0 and with_filters) or "datatables" in self.request.build_absolute_uri():
+            if (len(params) > 0 and with_filters) or "geojson" not in self.request.build_absolute_uri():
                 return view_func(self, *args, **kwargs)
 
             # Restore from cache or store view result
@@ -114,10 +114,10 @@ def view_cache_response_content():
 
             geojson_cache = caches[app_settings['GEOJSON_LAYERS_CACHE_BACKEND']]
 
-            if geojson_lookup:
-                content = geojson_cache.get(geojson_lookup)
-                if content:
-                    return content
+            # if geojson_lookup:
+            #     content = geojson_cache.get(geojson_lookup)
+            #     if content:
+            #         return content
 
             response = view_func(self, *args, **kwargs)
             if geojson_lookup:
@@ -125,7 +125,7 @@ def view_cache_response_content():
                 response.accepted_media_type = "application/json"
                 response.renderer_context = {}
                 response.render()
-            geojson_cache.set(geojson_lookup, response)
+                geojson_cache.set(geojson_lookup, response)
 
             return response
 

@@ -36,6 +36,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         """ Use specific Serializer for GeoJSON """
         renderer, media_type = self.perform_content_negotiation(self.request)
+        print(getattr(renderer, 'format'), self.format_kwarg)
         if getattr(renderer, 'format') == 'geojson':
             if self.geojson_serializer_class:
                 return self.geojson_serializer_class
@@ -79,11 +80,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             'count': self.get_filter_count_infos(qs),
         })
 
-    @view_cache_response_content()
+    #@view_cache_response_content()
+    @view_cache_latest()
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
-    #@view_permission_required()
-    @view_cache_latest()
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
