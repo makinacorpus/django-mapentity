@@ -1,5 +1,6 @@
 FROM makinacorpus/geodjango:bionic-3.6
 
+
 RUN apt-get update -qq && apt-get install -y -qq \
     libsqlite3-mod-spatialite \
     libjpeg62 libjpeg62-dev zlib1g-dev libcairo2 libpango-1.0-0 \
