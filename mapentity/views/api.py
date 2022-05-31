@@ -9,7 +9,7 @@ from rest_framework_datatables.filters import DatatablesFilterBackend
 from rest_framework_datatables.renderers import DatatablesRenderer
 
 from .. import serializers as mapentity_serializers
-from ..decorators import view_cache_latest, view_cache_response_content, view_permission_required
+from ..decorators import view_cache_latest, view_cache_response_content
 from ..filters import MapEntityFilterSet
 from ..pagination import MapentityDatatablePagination
 from ..renderers import GeoJSONRenderer

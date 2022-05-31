@@ -4,14 +4,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.cache import caches
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import last_modified as cache_last_modified
 from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import BaseUpdateView
-from rest_framework.response import Response
 
 from . import models as mapentity_models
 from .helpers import user_has_perm
