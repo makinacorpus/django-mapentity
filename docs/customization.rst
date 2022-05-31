@@ -8,6 +8,7 @@ Views
 Create a set of class-based views. You can define only some of them. Then you
 can override CBV methods as usual::
 
+
     from django.shortcuts import redirect
     from mapentity.views.generic import (
         MapEntityList, MapEntityDetail,
