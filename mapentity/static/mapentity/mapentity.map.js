@@ -171,7 +171,6 @@ $(window).on('entity:map:detail', function (e, data) {
     });
 
     // Show object geometry in detail map
-    console.log(window.SETTINGS);
     var feature_geojson_url = $("#detailmap").attr('data-feature-url');
     $.get(feature_geojson_url, function (data) {
         var objectLayer = _showSingleObject(data);
