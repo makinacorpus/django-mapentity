@@ -4,6 +4,18 @@ CHANGELOG
 8.0.1+dev  (XXXX-XX-XX)                
 -----------------------
 
+**Improvments**
+
+- New GeoJSON generation based on database
+
+**Warning**
+
+- You need to delete cache after this release upgrade.
+
+**Maintenance**
+
+- django-geojson is not required anymore
+
 
 8.0.1      (2022-04-13)                
 -----------------------
