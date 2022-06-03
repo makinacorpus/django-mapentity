@@ -36,7 +36,6 @@ setup(
         'django-crispy-forms',
         'django-embed-video',
         'django-filter',
-        'django-geojson',
         'django-leaflet>=0.19,<0.20',  # leaflet 0.7.x
         'django-modeltranslation',
         'django-tinymce>=3',
@@ -44,7 +43,6 @@ setup(
         'djangorestframework',
         'djangorestframework-gis',
         'djangorestframework-datatables',
-        'django-modelcluster',
         'easy-thumbnails',
         'fiona',
         'gpxpy',

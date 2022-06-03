@@ -15,11 +15,10 @@ from django.views.generic.base import View
 from paperclip.settings import get_attachment_model
 from rest_framework import routers as rest_routers
 from rest_framework.serializers import ModelSerializer
-from rest_framework_gis.fields import GeometryField
-from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
+from mapentity.serializers import MapentityGeojsonModelSerializer
 from mapentity.settings import app_settings
 
 logger = logging.getLogger(__name__)
@@ -132,21 +131,14 @@ class MapEntityOptions:
                 model = _model
                 id_field = 'id'
                 exclude = []
-
         return Serializer
 
     def get_geojson_serializer(self):
         _model = self.model
 
-        class Serializer(GeoFeatureModelSerializer):
-            api_geom = GeometryField(read_only=True, precision=7)
-
-            class Meta:
+        class Serializer(MapentityGeojsonModelSerializer):
+            class Meta(MapentityGeojsonModelSerializer):
                 model = _model
-                geo_field = 'api_geom'
-                id_field = 'id'
-                exclude = []
-
         return Serializer
 
     def get_queryset(self):

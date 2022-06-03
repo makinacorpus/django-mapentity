@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from rest_framework_gis import fields as rest_gis_fields
-from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
+from mapentity.serializers import MapentityGeojsonModelSerializer
 from test_app.models import DummyModel, Road
 
 
@@ -13,13 +12,10 @@ class DummySerializer(serializers.ModelSerializer):
         model = DummyModel
 
 
-class DummyGeojsonSerializer(GeoFeatureModelSerializer):
-    api_geom = rest_gis_fields.GeometryField(read_only=True, precision=5)
-
-    class Meta:
+class DummyGeojsonSerializer(MapentityGeojsonModelSerializer):
+    class Meta(MapentityGeojsonModelSerializer.Meta):
+        fields = ["id", "name"]
         model = DummyModel
-        fields = ('id',)
-        geo_field = "api_geom"
 
 
 class RoadSerializer(serializers.ModelSerializer):

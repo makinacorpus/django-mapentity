@@ -2,69 +2,36 @@ import logging
 
 from django.contrib.gis.db.models.functions import Transform
 from django_filters.rest_framework import DjangoFilterBackend
-from djgeojson.views import GeoJSONLayerView
 from rest_framework import viewsets, renderers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
+from rest_framework_datatables.pagination import DatatablesPageNumberPagination
 from rest_framework_datatables.renderers import DatatablesRenderer
-from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
-from mapentity import models as mapentity_models
-from .mixins import FilterListMixin, ModelViewMixin
 from .. import serializers as mapentity_serializers
-from ..decorators import (view_cache_response_content, view_cache_latest,
-                          view_permission_required)
+from ..decorators import view_cache_latest, view_cache_response_content
 from ..filters import MapEntityFilterSet
-from ..pagination import MapentityDatatablePagination
 from ..renderers import GeoJSONRenderer
-from ..settings import API_SRID, app_settings
+from ..settings import API_SRID
 
 logger = logging.getLogger(__name__)
 
 
-class MapEntityLayer(FilterListMixin, ModelViewMixin, GeoJSONLayerView):
-    """
-    Take a class attribute `model` with a `latest_updated` method used for caching.
-    """
-
-    force2d = True
-    srid = API_SRID
-    precision = app_settings.get('GEOJSON_PRECISION')
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Backward compatibility with django-geojson 1.X
-        # for JS ObjectsLayer and rando-trekking application
-        # TODO: remove when migrated
-        properties = dict([(k, k) for k in self.properties])
-        if 'id' not in self.properties:
-            properties['id'] = 'pk'
-        self.properties = properties
-
-    @classmethod
-    def get_entity_kind(cls):
-        return mapentity_models.ENTITY_LAYER
-
-    @view_permission_required()
-    @view_cache_latest()
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    @view_cache_response_content()
-    def render_to_response(self, context, **response_kwargs):
-        return super().render_to_response(context, **response_kwargs)
-
-
 class MapEntityViewSet(viewsets.ModelViewSet):
+    model = None
     renderer_classes = [renderers.JSONRenderer,
                         GeoJSONRenderer,
                         renderers.BrowsableAPIRenderer,
                         DatatablesRenderer, ]
-    pagination_class = MapentityDatatablePagination
+    geojson_serializer_class = None
+    pagination_class = DatatablesPageNumberPagination
     filter_backends = [DatatablesFilterBackend, DjangoFilterBackend]
     filterset_class = MapEntityFilterSet
-    geojson_serializer_class = None
+
+    def get_view_perm(self):
+        """ use by view_permission_required decorator """
+        return self.model.get_permission_codename('layer')
 
     def get_serializer_class(self):
         """ Use specific Serializer for GeoJSON """
@@ -73,10 +40,12 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             if self.geojson_serializer_class:
                 return self.geojson_serializer_class
             else:
-                class GeoJSONSerializer(GeoFeatureModelSerializer, self.serializer_class):
-                    class Meta(self.serializer_class.Meta):
-                        pass
-                return GeoJSONSerializer
+                _model = self.serializer_class.Meta.model
+
+                class MapentityGeometrySerializer(mapentity_serializers.MapentityGeojsonModelSerializer):
+                    class Meta(mapentity_serializers.MapentityGeojsonModelSerializer.Meta):
+                        model = _model
+            return MapentityGeometrySerializer
 
         elif getattr(renderer, 'format') == 'datatables':
             # dynamic override of serializer class to match datatable content
@@ -109,3 +78,8 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             'pk_list': qs.values_list('pk', flat=True),
             'count': self.get_filter_count_infos(qs),
         })
+
+    @view_cache_latest()
+    @view_cache_response_content()
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

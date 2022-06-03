@@ -171,19 +171,18 @@ $(window).on('entity:map:detail', function (e, data) {
     });
 
     // Show object geometry in detail map
-    var $singleObject = $container.find('.geojsonfeature'),
-        objectLayer = null;
-    if ($singleObject.length > 0) {
-        objectLayer = _showSingleObject(JSON.parse($singleObject.text()));
-    }
+    var feature_geojson_url = $("#detailmap").attr('data-feature-url');
+    $.get(feature_geojson_url, function (data) {
+        var objectLayer = _showSingleObject(data);
 
-    $(window).trigger('detailmap:ready', {map: map,
-                                          layer: objectLayer,
-                                          context: context,
-                                          modelname: data.modelname});
-
+        $(window).trigger('detailmap:ready', {map: map,
+                                              layer: objectLayer,
+                                              context: context,
+                                              modelname: data.modelname});
+    });
 
     function _showSingleObject(geojson) {
+        console.log(data);
         var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
 
         // Appearance of geometry for export can be controlled via setting
@@ -238,9 +237,9 @@ $(window).on('entity:map:list', function (e, data) {
      * Objects Layer
      * .......................
      */
-    function getUrl(properties, layer) {
+   function getUrl(properties, layer) {
         return window.SETTINGS.urls.detail.replace(new RegExp('modelname', 'g'), data.modelname)
-                                          .replace('0', properties.pk);
+                                          .replace('0', properties.id);
     }
 
     var style = window.SETTINGS.map.styles[data.modelname];

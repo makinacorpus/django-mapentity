@@ -39,7 +39,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     "debug_toolbar",
     'paperclip',
-    'djgeojson',
     'compressor',
     'easy_thumbnails',
     'django_filters',

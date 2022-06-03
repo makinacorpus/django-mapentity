@@ -337,14 +337,14 @@ class MapEntityLiveTest(LiveServerTestCase):
         latest = self.model.latest_updated()
         geojson_layer_url = self.url_for(self.model.get_layer_url())
 
-        response = self.client.get(geojson_layer_url, allow_redirects=False)
-        self.assertEqual(response.status_code, 200)
+        response_1 = self.client.get(geojson_layer_url, allow_redirects=False)
+        self.assertEqual(response_1.status_code, 200)
 
         # Without headers to cache
-        lastmodified = response.get('Last-Modified')
-        cachecontrol = response.get('Cache-control')
+        lastmodified = response_1.get('Last-Modified')
+        cachecontrol = response_1.get('Cache-control')
         hasher = hashlib.md5()
-        hasher.update(response.content)
+        hasher.update(response_1.content)
         md5sum = hasher.digest()
         self.assertNotEqual(lastmodified, None)
         self.assertCountEqual(cachecontrol.split(', '), ('must-revalidate', 'max-age=0'))

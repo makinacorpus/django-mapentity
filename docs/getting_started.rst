@@ -32,7 +32,6 @@ Edit your Django settings to point to your PostGIS database::
 Add these entries to your ``INSTALLED_APPS``::
 
     'paperclip',
-    'djgeojson',
     'compressor',
     'easy_thumbnails',
     'crispy_forms',
