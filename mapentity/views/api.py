@@ -6,12 +6,12 @@ from rest_framework import viewsets, renderers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
+from rest_framework_datatables.pagination import DatatablesPageNumberPagination
 from rest_framework_datatables.renderers import DatatablesRenderer
 
 from .. import serializers as mapentity_serializers
 from ..decorators import view_cache_latest, view_cache_response_content
 from ..filters import MapEntityFilterSet
-from ..pagination import MapentityDatatablePagination
 from ..renderers import GeoJSONRenderer
 from ..settings import API_SRID
 
@@ -25,7 +25,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
                         renderers.BrowsableAPIRenderer,
                         DatatablesRenderer, ]
     geojson_serializer_class = None
-    pagination_class = MapentityDatatablePagination
+    pagination_class = DatatablesPageNumberPagination
     filter_backends = [DatatablesFilterBackend, DjangoFilterBackend]
     filterset_class = MapEntityFilterSet
 
