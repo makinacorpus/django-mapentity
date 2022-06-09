@@ -4,6 +4,10 @@ CHANGELOG
 8.1.0+dev  (XXXX-XX-XX)                
 -----------------------
 
+**Bug fixes**
+
+- Fix Log Entry GeoJSON with no geometry
+
 
 8.1.0      (2022-06-03)                
 -----------------------
