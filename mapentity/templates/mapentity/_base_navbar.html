@@ -84,7 +84,7 @@
           {% endif %}
 
           {% if ACTION_HISTORY_ENABLED %}
-            {% if 'admin.read_logentry' in perms %}
+            {% if 'mapentity.read_logentry' in perms %}
             <li class="dropdown-item">
                 <a class="{% block nav-logbook %}{% endblock nav-logbook %}" href="{% url 'mapentity:logentry_list' %}">
                     {% trans "Logbook" %}

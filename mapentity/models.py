@@ -111,7 +111,7 @@ class BaseMapEntityMixin(models.Model):
         appname = opts.app_label.lower()
         if opts.proxy:
             proxied = opts.proxy_for_model._meta
-            appname = proxied.app_label.lower()
+            appname = proxied.app_label.lower() if proxied.app_label.lower() != "admin" else appname
         return '%s.%s' % (appname, auth.get_permission_codename(perm, opts))
 
     @classmethod
@@ -280,6 +280,9 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
     class Meta:
         proxy = True
         app_label = 'mapentity'
+        permissions = (
+            ('read_logentry', 'Can read log entries'),
+        )
 
     @property
     def action_flag_display(self):
