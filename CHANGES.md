@@ -9,6 +9,7 @@ CHANGELOG
 - Fix Log Entry GeoJSON with no geometry
 - Hide log entry menu for users without permission.
 - Hide "Show full history" from object for users without permission.
+- Hide admin menu entry for users without permission.
 
 8.1.0      (2022-06-03)                
 -----------------------

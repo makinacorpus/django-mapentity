@@ -81,8 +81,6 @@
 
           {% if request.user.is_staff %}
           <li class="dropdown-item"><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-          {% else %}
-          <li class="dropdown-item" class="disabled"><a href="#">{% trans "Admin" %}</a></li>
           {% endif %}
 
           {% if ACTION_HISTORY_ENABLED %}
