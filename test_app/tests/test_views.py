@@ -524,10 +524,9 @@ class LogViewMapentityTest(MapEntityTest):
             'action_time': '10/06/2022 12:40:10',
             'change_message': '',
             'content_type': 12,
-             'id': 1,
-            'object': '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '
-                      "Model <class 'object'></a>",
-            'object_id': f'1',
+            'id': 1,
+            'object': '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>",
+            'object_id': '1',
             'object_repr': "<class 'object'>",
             'user': 'mary_poppins21'
         }
@@ -561,7 +560,6 @@ class LogViewMapentityTest(MapEntityTest):
 
         response = self.client.get(obj.get_list_url())
         self.assertEqual(response.status_code, 200)
-
 
     def test_gpx_elevation(self):
         pass
