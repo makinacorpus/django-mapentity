@@ -309,3 +309,13 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
         else:
             return '<a data-pk="%s" href="%s" >%s %s</a>' % (
                 obj.pk, obj_url, model_str, self.object_repr)
+
+    def get_date_update(self):
+        return self.action_time
+
+    @classmethod
+    def latest_updated(cls):
+        try:
+            return cls.objects.only('action_time').latest('action_time').get_date_update()
+        except (cls.DoesNotExist, FieldError):
+            return None
