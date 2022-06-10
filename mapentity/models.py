@@ -111,7 +111,7 @@ class BaseMapEntityMixin(models.Model):
         appname = opts.app_label.lower()
         if opts.proxy:
             proxied = opts.proxy_for_model._meta
-            appname = proxied.app_label.lower()
+            appname = proxied.app_label.lower() if proxied.app_label.lower() != "admin" else appname
         return '%s.%s' % (appname, auth.get_permission_codename(perm, opts))
 
     @classmethod
@@ -280,6 +280,9 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
     class Meta:
         proxy = True
         app_label = 'mapentity'
+        permissions = (
+            ('read_logentry', 'Can read log entries'),
+        )
 
     @property
     def action_flag_display(self):
@@ -306,3 +309,13 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
         else:
             return '<a data-pk="%s" href="%s" >%s %s</a>' % (
                 obj.pk, obj_url, model_str, self.object_repr)
+
+    def get_date_update(self):
+        return self.action_time
+
+    @classmethod
+    def latest_updated(cls):
+        try:
+            return cls.objects.only('action_time').latest('action_time').get_date_update()
+        except (cls.DoesNotExist, FieldError):
+            return None

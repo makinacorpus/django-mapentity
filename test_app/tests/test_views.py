@@ -2,6 +2,7 @@ import os
 import shutil
 from unittest import mock
 
+import django
 import factory
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -10,9 +11,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
+from django.utils.encoding import force_str
 from faker import Faker
 from faker.providers import geo
+from freezegun import freeze_time
 
+from mapentity.models import LogEntry
 from mapentity.registry import app_settings
 from mapentity.tests import MapEntityTest, MapEntityLiveTest
 from mapentity.tests.factories import SuperUserFactory, UserFactory
@@ -490,3 +494,94 @@ class LogViewTest(BaseTest):
         self.login()
         response = self.client.get('/logentry/list/')
         self.assertRedirects(response, "/login/")
+
+
+class LogViewMapentityTest(MapEntityTest):
+    userfactory = SuperUserFactory
+    model = LogEntry
+    modelfactory = DummyModelFactory
+    expected_json_geom = None
+
+    def get_expected_datatables_attrs(self):
+        data = {
+            'action_flag': 'Addition',
+            'action_time': '10/06/2022 12:40:10',
+            'change_message': '',
+            'content_type': 12,
+            'id': 1,
+            'object': '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>",
+            'object_id': '1',
+            'object_repr': "<class 'object'>",
+            'user': 'mary_poppins21'
+        }
+
+        if django.__version__ < '3.0':
+            data['object'] = '<a data-pk="1" href="/dummymodel/1/" >Dummy '"Model <class 'object'></a>"
+        return data
+
+    def get_good_data(self):
+        return {'geom': None}
+
+    def get_expected_json_attrs(self):
+        return {
+            'action_flag': 'Addition',
+            'action_time': '10/06/2022 12:40:10',
+            'change_message': '',
+            'content_type': 12,
+            'id': 1,
+            'object': '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>",
+            'object_id': '1',
+            'object_repr': "<class 'object'>",
+            'user': 'mary_poppins21'
+        }
+
+    def test_basic_format(self):
+        return None
+
+    @freeze_time("2022-06-10 12:40:10")
+    def test_api_datatables_list_for_model(self):
+        obj = self.modelfactory()
+
+        LogEntry.objects.log_action(
+            user_id=self.user.pk,
+            content_type_id=obj.get_content_type_id(),
+            object_id=obj.pk,
+            object_repr=force_str(object),
+            action_flag=1
+        )
+        super().test_api_datatables_list_for_model()
+
+    def test_crud_status(self):
+        instance = self.modelfactory()
+
+        obj = LogEntry.objects.log_action(
+            user_id=self.user.pk,
+            content_type_id=instance.get_content_type_id(),
+            object_id=instance.pk,
+            object_repr=force_str(instance),
+            action_flag=1
+        )
+
+        response = self.client.get(obj.get_list_url())
+        self.assertEqual(response.status_code, 200)
+
+    def test_gpx_elevation(self):
+        pass
+
+    def test_no_basic_format(self):
+        pass
+
+    def test_no_basic_format_fail(self):
+        pass
+
+    def test_no_html_in_csv(self):
+        pass
+
+
+class LogViewMapentityTestlLiveTest(MapEntityLiveTest):
+    userfactory = SuperUserFactory
+    model = LogEntry
+    modelfactory = DummyModelFactory
+
+    def test_geojson_cache(self):
+        """ no cache in logentry geojson """

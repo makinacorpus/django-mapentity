@@ -1,6 +1,7 @@
 import django_filters
 from django import forms
 from rest_framework import serializers
+from rest_framework_gis import serializers as gis_serializers
 
 from . import MapEntityViewSet
 from .generic import MapEntityList
@@ -41,8 +42,11 @@ class LogEntrySerializer(serializers.ModelSerializer):
 
 
 class LogEntryGeoJSONSerializer(MapentityGeojsonModelSerializer):
+    api_geom = gis_serializers.GeometryField(source='geom')
+
     class Meta(MapentityGeojsonModelSerializer.Meta):
         model = LogEntry
+        fields = ('id', )
 
 
 class LogEntryViewSet(MapEntityViewSet):
