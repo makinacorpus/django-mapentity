@@ -6,6 +6,10 @@ class MapentityDatatablePagination(DatatablesPageNumberPagination):
 
     def get_count_and_total_count(self, queryset, view):
         """ Handle count for all filters """
-        count, total_count = super().get_count_and_total_count(queryset, view)
         count = queryset.count()  # replace count by real count - not only drf-datatables count
+        if hasattr(view, '_datatables_total_count'):
+            total_count = view._datatables_total_count
+            del view._datatables_total_count
+        else:  # pragma: no cover
+            total_count = count
         return count, total_count
