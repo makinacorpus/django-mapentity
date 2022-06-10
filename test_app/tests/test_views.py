@@ -2,6 +2,7 @@ import os
 import shutil
 from unittest import mock
 
+import django
 import factory
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -502,7 +503,7 @@ class LogViewMapentityTest(MapEntityTest):
     expected_json_geom = None
 
     def get_expected_datatables_attrs(self):
-        return {
+        data = {
             'action_flag': 'Addition',
             'action_time': '10/06/2022 12:40:10',
             'change_message': '',
@@ -513,6 +514,10 @@ class LogViewMapentityTest(MapEntityTest):
             'object_repr': "<class 'object'>",
             'user': 'mary_poppins21'
         }
+
+        if django.__version__ < '3.0':
+            data['object'] = '<a data-pk="1" href="/dummymodel/1/" >Dummy '"Model <class 'object'></a>"
+        return data
 
     def get_good_data(self):
         return {'geom': None}
