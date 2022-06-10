@@ -1,12 +1,15 @@
 CHANGELOG
 =========
 
-8.1.1+dev  (XXXX-XX-XX)                
+8.1.2      (2022-06-10)    
 -----------------------
 
+**Bug fixes**
+
+- Refix Page number count on list pagination
 
 
-8.1.1      (2022-06-10)                
+8.1.1      (2022-06-10)
 -----------------------
 
 **Bug fixes**
