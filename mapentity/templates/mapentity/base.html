@@ -2,62 +2,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- version {{ VERSION }} -->
-{% block head %}
+    <!-- version {{ VERSION }} -->
+    {% block head %}
 
-  <title>{% block title %}{{ TITLE }}{% endblock title %}</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="{% media_static_fallback 'upload/favicon.png' 'images/favicon.png' %}" />
+        <title>{% block title %}{{ TITLE }}{% endblock title %}</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta charset="UTF-8">
+        <link rel="icon" type="image/png" href="{% media_static_fallback 'upload/favicon.png' 'images/favicon.png' %}"/>
 
-  {% compress css %}
-    {% if DEBUG %}
-    <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.css' %}">
-    {% else %}
-    <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.min.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.min.css' %}">
-    {% endif %}
-    <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/bootstrap-icons-1.2.2/font/bootstrap-icons.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/chosen-1.8.7/chosen.css' %}">
-    {% leaflet_css plugins="ALL" %}
+        {% compress css %}
+            {% if DEBUG %}
+                <link rel="stylesheet" type="text/css"
+                      href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.css' %}"/>
+                <link rel="stylesheet" type="text/css"
+                      href="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.css' %}">
+            {% else %}
+                <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.min.css' %}"/>
+                <link rel="stylesheet" type="text/css"
+                      href="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.min.css' %}">
+            {% endif %}
+            <link rel="stylesheet" type="text/css"
+                  href="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.css' %}"/>
+            <link rel="stylesheet" type="text/css"
+                  href="{% static 'mapentity/vendor/bootstrap-icons-1.2.2/font/bootstrap-icons.css' %}">
+            <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/chosen-1.8.7/chosen.css' %}">
+            {% leaflet_css plugins="ALL" %}
 
-    <style>
-    {% for entity in allowed_entities %}
-        .list-panel.{{ entity.modelname }},
-        .form-panel.{{ entity.modelname }},
-        .details-panel.{{ entity.modelname }} {
-            background-image: url({% static entity.icon_big %});
-        }
-        li.history.{{ entity.modelname }} > a,
-        li.history.{{ entity.modelname }} button:first-child {
-            background: url({% static entity.icon_small %}) no-repeat;
-            background-position: left center;
-        }
-        .nav-item.{{ entity.modelname }} .btn-list {
-            background-image: url({% static entity.icon_big %});
-        }
-    {% endfor %}
-    {% if not DEBUG %}
-        .map-error { border: 0px;}
-    {% endif %}
-    </style>
-    <link rel="stylesheet" href="{% static 'mapentity/style.css' %}" />
+            <style>
+                {% for entity in allowed_entities %}
+                    .list-panel.{{ entity.modelname }},
+                    .form-panel.{{ entity.modelname }},
+                    .details-panel.{{ entity.modelname }} {
+                        background-image: url({% static entity.icon_big %});
+                    }
+                    li.history.{{ entity.modelname }} > a,
+                    li.history.{{ entity.modelname }} button:first-child {
+                        background: url({% static entity.icon_small %}) no-repeat;
+                        background-position: left center;
+                    }
+                    .nav-item.{{ entity.modelname }} .btn-list {
+                        background-image: url({% static entity.icon_big %});
+                    }
+                {% endfor %}
 
-    {% smart_include "extracss" %}
+                {% if not DEBUG %}
+                    .map-error {
+                        border: 0px;
+                    }
+                {% endif %}
+            </style>
+            <link rel="stylesheet" href="{% static 'mapentity/style.css' %}"/>
 
-  {% endcompress %}
+            {% smart_include "extracss" %}
 
-  {% if DEBUG %}
-      <script type="text/javascript" src="{% static 'mapentity/vendor/jquery/jquery-1.9.1.js' %}"></script>
-  {% else %}
-      <script type="text/javascript" src="{% static 'mapentity/vendor/jquery/jquery-1.9.1.min.js' %}"></script>
-  {% endif %}
-{% endblock head %}
+        {% endcompress %}
 
-{% block extrahead %}
-{% endblock extrahead %}
+        {% if DEBUG %}
+            <script type="text/javascript" src="{% static 'mapentity/vendor/jquery/jquery-1.9.1.js' %}"></script>
+        {% else %}
+            <script type="text/javascript" src="{% static 'mapentity/vendor/jquery/jquery-1.9.1.min.js' %}"></script>
+        {% endif %}
+    {% endblock head %}
+
+    {% block extrahead %}
+    {% endblock extrahead %}
 </head>
 <body data-viewname="{{ viewname }}"
       data-appname="{{ appname }}"
@@ -65,53 +73,62 @@
       data-objectsname="{{ objectsname }}"
       data-pk="{{ object.pk }}">
 
-  {% block content %}
+{% block content %}
     {% block navbar %}
         {% include "mapentity/_base_navbar.html" %}
     {% endblock navbar %}
 
     {% block container %}
-    <div id="container" class="container-fluid {% if MAP_BACKGROUND_FOGGED %}map-fogged{% endif %}">
+        <div id="container" class="container-fluid {% if MAP_BACKGROUND_FOGGED %}map-fogged{% endif %}">
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            {% endfor %}
-        {% endif %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
 
-        <div class="row">
-            {% block mainpanel %}
-            {% endblock mainpanel %}
-        </div><!--/row-->
-    </div><!--/container-->
+            <div class="row">
+                {% block mainpanel %}
+                {% endblock mainpanel %}
+            </div><!--/row-->
+        </div><!--/container-->
     {% endblock container %}
-  {% endblock content %}
+{% endblock content %}
 
 
-  {% block extrabody %}
+{% block extrabody %}
     {{ block.super }}
 
     {# Global Javascript settings #}
-    <script src="{% url JS_SETTINGS_VIEW %}?callback=window.SETTINGS%3D"></script>
+    {% block js_setings_view %}
+        <script src="{% url JS_SETTINGS_VIEW %}?callback=window.SETTINGS%3D"></script>
+    {% endblock %}
     {% block change_style %}{% endblock change_style %}
     {% compress js %}
         {% if DEBUG %}
-          <script type="text/javascript" src="{% static 'mapentity/vendor/bootstrap-4.6.0/js/bootstrap.bundle.js' %}"></script>
-          <script type="text/javascript" src="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.js' %}"></script>
+            <script type="text/javascript"
+                    src="{% static 'mapentity/vendor/bootstrap-4.6.0/js/bootstrap.bundle.js' %}"></script>
+            <script type="text/javascript"
+                    src="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.js' %}"></script>
         {% else %}
-          <script type="text/javascript" src="{% static 'mapentity/vendor/bootstrap-4.6.0/js/bootstrap.bundle.min.js' %}"></script>
-          <script type="text/javascript" src="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
+            <script type="text/javascript"
+                    src="{% static 'mapentity/vendor/bootstrap-4.6.0/js/bootstrap.bundle.min.js' %}"></script>
+            <script type="text/javascript"
+                    src="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
         {% endif %}
         <script type="text/javascript" src="{% static 'mapentity/vendor/popper-1.16.1/popper.min.js' %}"></script>
         <script src="{% static 'mapentity/jquery.hoverIntent.js' %}"></script>
         <script src="{% static 'paperclip/bootstrap-4-confirm.js' %}"></script>
         {% for lang in LANGUAGES %}
-            {% if lang.0 != 'en' %}<script type="text/javascript" src="{% get_static_prefix %}mapentity/vendor/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.{{ lang.0 }}.min.js"  charset="UTF-8"></script>{% endif %}
+            {% if lang.0 != 'en' %}
+                <script type="text/javascript"
+                        src="{% get_static_prefix %}mapentity/vendor/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.{{ lang.0 }}.min.js"
+                        charset="UTF-8"></script>{% endif %}
         {% endfor %}
 
         {% leaflet_js plugins="ALL" %}
@@ -132,17 +149,18 @@
             L.GeometryField.unsavedText = "{% trans 'Map geometry is unsaved' %}";
 
             MapEntity.i18n = {
-              'Objects': "{% trans 'Objects' %}",
-              'Search': "{% trans 'Search' %}",
-              'results': "{% trans 'results' %}",
-              'Current criteria': "{% trans 'Current criteria' %}",
-              'No filter': "{% trans 'No filter' %}",
+                'Objects': "{% trans 'Objects' %}",
+                'Search': "{% trans 'Search' %}",
+                'results': "{% trans 'results' %}",
+                'Current criteria': "{% trans 'Current criteria' %}",
+                'No filter': "{% trans 'No filter' %}",
             };
         </script>
 
         <script type="text/javascript" src="{% static 'mapentity/jquery.deserialize.js' %}"></script>
         <script type="text/javascript" src="{% static 'mapentity/vendor/chosen-1.8.7/chosen.jquery.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'mapentity/leaflet-objectslayer.js' %}"></script>
         <script type="text/javascript" src="{% static 'mapentity/leaflet-serializers.js' %}"></script>
         <script type="text/javascript" src="{% static 'mapentity/leaflet-datatables.js' %}"></script>
@@ -159,7 +177,7 @@
 
     {% smart_include "extrabody" %}
 
-  {% endblock extrabody %}
+{% endblock extrabody %}
 </body>
 </html>
 
