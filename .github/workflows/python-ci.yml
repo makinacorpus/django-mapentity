@@ -83,6 +83,10 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel
         pip install .[dev]
         pip install Django==${{ matrix.django-version }} -U
+        if [[ ${{ matrix.django-version }} == 2.2.* ]]; then
+          # django-modeltranslation 0.18.3 breaks with django < 3.2
+          pip install django-modeltranslation==0.18.2 -U
+        fi
 
     - name: Check pending migrations
       run: |
