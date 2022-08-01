@@ -108,6 +108,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
         # Languages
         dictsettings['languages'] = dict(available=dict(app_settings['TRANSLATED_LANGUAGES']),
                                          default=app_settings['LANGUAGE_CODE'])
+        dictsettings['maxCharacters'] = app_settings['MAX_CHARACTERS']
         return dictsettings
 
 

@@ -109,9 +109,9 @@ function tr(s) {
 function tinyMceInit(editor) {
     // Overflow on characters count
     editor.on('WordCountUpdate', function(event) {
-        if (("container" in event.target) && (maxCharacters > 0)) {
+        if (("container" in event.target) && (window.SETTINGS.maxCharacters > 0)) {
             var characters = event.wordCount.characters;
-            if (characters > maxCharacters) {
+            if (characters > window.SETTINGS.maxCharacters) {
                 event.target.container.classList.add('cec-overflow');
             } else {
                 event.target.container.classList.remove('cec-overflow');
