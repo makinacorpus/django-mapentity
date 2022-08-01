@@ -151,12 +151,25 @@ select[multiple] {
     }
 }
 
+#mainpanel {
+    flex-wrap: nowrap;
+}
+
+#panelleft,
+#panelright {
+    max-width: none;
+    width: 50%;
+}
+
 #panelleft {
     padding-left: 0;
+    flex: 0 0 auto;
 }
 #panelright {
     padding: 0;
+    flex: 1 1 auto;
 }
+
 #mainmap {
     position: absolute;
     top: 0px;
@@ -527,7 +540,17 @@ span.filter-info {
 
 /***** Entity detail ******/
 
-
+#mainpanel .details-panel,
+#mainpanel .map-panel {
+    max-width: none;
+    width: 50%;
+}
+#mainpanel .details-panel {
+    flex: 0 0 auto;
+}
+#mainpanel .map-panel {
+    flex: 1 1 auto;
+}
 
 .details-panel .download-group {
     margin: .75rem 0;

@@ -43,6 +43,10 @@ $(document).ready(function (e) {
         handleSelector: ".splitter",
         resizeHeight: false
     });
+    $(".details-panel").resizable({
+        handleSelector: ".splitter",
+        resizeHeight: false
+    });
 
 
 
