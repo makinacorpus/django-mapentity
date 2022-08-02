@@ -247,8 +247,9 @@ class MapEntityForm(TranslatedModelForm):
             <ul class="nav nav-pills offset-md-3">
             {{% for lang in TRANSLATED_LANGUAGES %}}
                 <li class="nav-item">
-                    <a class="nav-link{{% if lang.0 == '{lang_code}'""" """ %}} active{{% endif %}}" href="#{field}_{{{{ lang.0 }}}}"
-                        data-toggle="tab">{{{{ lang.0 }}}}
+                    <a class="nav-link{{% if lang.0 == '{lang_code}'""" """ %}}
+                       active{{% endif %}}" href="#{field}_{{{{ lang.0 }}}}"
+                       data-toggle="tab">{{{{ lang.0 }}}}
                     </a>
                 </li>
             {{% endfor %}}
