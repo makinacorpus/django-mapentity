@@ -157,7 +157,8 @@ select[multiple] {
 
 #panelleft,
 #panelright {
-    max-width: none;
+    max-width: 70%;
+    min-width: 30%;
     width: 50%;
 }
 
@@ -542,7 +543,8 @@ span.filter-info {
 
 #mainpanel .details-panel,
 #mainpanel .map-panel {
-    max-width: none;
+    max-width: 70%;
+    min-width: 30%;
     width: 50%;
 }
 #mainpanel .details-panel {
