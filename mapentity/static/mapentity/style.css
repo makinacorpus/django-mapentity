@@ -184,7 +184,10 @@ select[multiple] {
 .splitter {
   flex: 0 0 auto;
   width: 18px;
-  background: url(https://raw.githubusercontent.com/RickStrahl/jquery-resizable/master/assets/vsizegrip.png) center center no-repeat #535353;
+  background-color: #DDD;
+  background-image: url(images/drag-horizontal.png);
+  background-position: center center;
+  background-repeat: no-repeat;
   min-height: 200px;
   cursor: col-resize;
 }
