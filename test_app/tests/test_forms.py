@@ -6,9 +6,7 @@ from django.test.utils import override_settings
 
 from mapentity.forms import MapEntityForm
 from ..models import DummyModel
-
-mapentity_config = copy.deepcopy(settings.MAPENTITY_CONFIG)
-mapentity_config['MAX_CHARACTERS'] = 1200
+from mapentity.settings import app_settings
 
 
 class DummyForm(MapEntityForm):
@@ -33,7 +31,10 @@ class MapEntityFormTest(TestCase):
 
 class MapEntityRichTextFormTest(TestCase):
 
-    @override_settings(MAPENTITY_CONFIG=mapentity_config)
+    def setUp(self):
+        app_settings['MAX_CHARACTERS'] = 1200
+
+    @override_settings(MAPENTITY_CONFIG=app_settings)
     def test_max_characters(self):
         """Test if help text is set with MAX_CHARACTERS setting"""
         sample_object = DummyModel.objects.create()
@@ -42,3 +43,6 @@ class MapEntityRichTextFormTest(TestCase):
         self.assertIn('1200 characters maximum recommended', form.fields['description'].help_text)
         self.assertIn('Short description, 1200 characters maximum recommended',
                       form.fields['short_description'].help_text)
+
+    def tearDown(self):
+        app_settings['MAX_CHARACTERS'] = 1200
