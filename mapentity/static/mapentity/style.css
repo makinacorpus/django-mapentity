@@ -151,15 +151,16 @@ select[multiple] {
     }
 }
 
-#mainpanel {
-    flex-wrap: nowrap;
-}
-
-#panelleft,
-#panelright {
-    max-width: 70%;
-    min-width: 30%;
-    width: 50%;
+@media (min-width: 768px) {
+    #mainpanel {
+        flex-wrap: nowrap;
+    }
+    #panelleft,
+    #panelright {
+        max-width: 70%;
+        min-width: 30%;
+        width: 50%;
+    }
 }
 
 #panelleft {
@@ -182,14 +183,20 @@ select[multiple] {
 
 /* splitter for resize */
 .splitter {
-  flex: 0 0 auto;
-  width: 18px;
-  background-color: #DDD;
-  background-image: url(images/drag-horizontal.png);
-  background-position: center center;
-  background-repeat: no-repeat;
-  min-height: 200px;
-  cursor: col-resize;
+    display: none;
+}
+@media (min-width: 768px) {
+    .splitter {
+        display: block;
+        flex: 0 0 auto;
+        width: 18px;
+        background-color: #DDD;
+        background-image: url(images/drag-horizontal.png);
+        background-position: center center;
+        background-repeat: no-repeat;
+        min-height: 200px;
+        cursor: col-resize;
+    }
 }
 
 /* Navbar fixed */
@@ -544,11 +551,13 @@ span.filter-info {
 
 /***** Entity detail ******/
 
-#mainpanel .details-panel,
-#mainpanel .map-panel {
-    max-width: 70%;
-    min-width: 30%;
-    width: 50%;
+@media (min-width: 768px) {
+    #mainpanel .details-panel,
+    #mainpanel .map-panel {
+        max-width: 70%;
+        min-width: 30%;
+        width: 50%;
+    }
 }
 #mainpanel .details-panel {
     flex: 0 0 auto;
