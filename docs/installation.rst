@@ -46,7 +46,7 @@ Create a *virtualenv*, and activate it::
 
 Then install the Python packages::
 
-    $ pip install django-mapentity
+    $ pip install mapentity
 
 Since you will PostgreSQL, also install its python library::
 

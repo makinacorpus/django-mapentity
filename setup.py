@@ -43,7 +43,7 @@ setup(
         'djangorestframework',
         'djangorestframework-gis',
         'djangorestframework-datatables',
-        'easy-thumbnails',
+        'easy-thumbnails[svg]',
         'fiona',
         'gpxpy',
         'netifaces',
