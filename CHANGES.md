@@ -4,6 +4,9 @@ CHANGELOG
 8.1.2+dev  (XXXX-XX-XX)    
 -----------------------
 
+**New Features**
+
+- Add setting MAX_CHARACTERS for rich text fields
 
 8.1.2      (2022-06-10)    
 -----------------------

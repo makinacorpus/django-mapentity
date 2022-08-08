@@ -68,6 +68,7 @@ class Road(MapEntityMixin, models.Model):
 
 class DummyModel(MapEntityMixin, models.Model):
     name = models.CharField(blank=True, default='', max_length=128)
+    short_description = models.TextField(blank=True, default='', help_text=_('Short description'))
     description = models.TextField(blank=True, default='')
     geom = models.PointField(null=True, default=None)
     date_update = models.DateTimeField(auto_now=True, db_index=True)

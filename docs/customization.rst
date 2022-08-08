@@ -185,6 +185,9 @@ The second way overrides these templates for all your models.
 Settings
 -----------
 
+Media
+'''''
+
 Attached files are downloaded by default by browser, with the following line,
 files will be opened in the browser :
 
@@ -192,6 +195,21 @@ files will be opened in the browser :
 
     MAPENTITY_CONFIG['SERVE_MEDIA_AS_ATTACHMENT'] = False
 
+
+Paperclip medias (under ``/paperclip/<app>_<model>/<pk>/<name>.**``) are protected by mapentity.
+We use easy_thumbnail to generate thumbnails of pictures.
+These files are generated with a new name with all the characteristics of the thumbnail generated (crop or not, width, height, etc...).
+These files need to be protected as the parent picture. We use a regex to find the parent's picture and all the permissions on this picture.
+
+You can change the regex, for example if you need to add other behaviour with easy_thumbnail :
+
+.. code-block :: python
+
+    MAPENTITY_CONFIG['REGEX_PATH_ATTACHMENTS'] = r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$'
+
+
+Maps
+''''
 
 All layers colors can be customized from the settings.
 See `Leaflet reference <http://leafletjs.com/reference.html#path>`_ for vectorial
@@ -210,13 +228,13 @@ Or change just one parameter (the opacity for example) :
 
     MAPENTITY_CONFIG['MAP_STYLES'][key]['opacity'] = 0.8
 
-Paperclip medias (under /paperclip/<app>_<model>/<pk>/<name>.**) are protected by mapentity.
-We use easy_thumbnail to generate thumbnails of pictures.
-These files are generated with a new name with all the characteristics of the thumbnail generated (crop or not, width, height, etc...).
-These files need to be protected as the parent picture. We use a regex to find the parent's picture and all the permissions on this picture.
 
-You can change the regex, for example if you need to add other behaviour with easy_thumbnail :
+Edition
+'''''''
+
+For rich text fields, it is possible to a max number of caracters (spaces includes).
+A help message will be added, and color of TinyMCE status bar will be colored in pink.
 
 .. code-block :: python
 
-    MAPENTITY_CONFIG['REGEX_PATH_ATTACHMENTS'] = r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$'
+    MAPENTITY_CONFIG['MAX_CHARACTERS'] = 1500

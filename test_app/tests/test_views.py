@@ -77,7 +77,8 @@ class DummyModelFunctionalTest(MapEntityTest):
             'geom': self.obj.geom.ewkt,
             'id': 1,
             'name': '<a href="/dummymodel/1/">a dummy model</a>',
-            'public': '<i class="bi bi-x-circle text-danger"></i>'
+            'public': '<i class="bi bi-x-circle text-danger"></i>',
+            'short_description': ''
         }
 
     def get_good_data(self):

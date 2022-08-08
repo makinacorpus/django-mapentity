@@ -106,6 +106,12 @@ class MapEntityForm(TranslatedModelForm):
         self.helper = FormHelper()
         self.helper.form_tag = True
 
+        # If MAX_CHARACTERS is setted, set help text for rich text fields
+        textfield_help_text = ''
+        max_characters = settings.MAPENTITY_CONFIG.get('MAX_CHARACTERS', None)
+        if max_characters:
+            textfield_help_text = _('%(max)s characters maximum recommended') % {'max': max_characters}
+
         # Default widgets
         for fieldname, formfield in self.fields.items():
             # Custom code because formfield_callback does not work with inherited forms
@@ -129,6 +135,10 @@ class MapEntityForm(TranslatedModelForm):
                 # Bypass widgets that inherit textareas, such as geometry fields
                 if formfield.widget.__class__ == forms.widgets.Textarea:
                     formfield.widget = TinyMCE()
+                    if formfield.help_text:
+                        formfield.help_text += f", {textfield_help_text}"
+                    else:
+                        formfield.help_text = textfield_help_text
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(self.instance.get_permission_codename(

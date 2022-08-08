@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -15,234 +16,234 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid ""
 "Access to the requested resource is restricted. You have been redirected."
-msgstr "L'accès à la ressource demandée est restreint. Vous avez été redirigé."
+msgstr ""
 
 #, python-format
 msgid "%(max)s characters maximum recommended"
-msgstr "%(max)s caractères maximum recommandés"
+msgstr ""
 
 msgid "Cancel"
-msgstr "Annuler"
+msgstr ""
 
 msgid "Create"
-msgstr "Créer"
+msgstr ""
 
 msgid "Save changes"
-msgstr "Sauvegarder"
+msgstr ""
 
 msgid "Delete"
-msgstr "Supprimer"
+msgstr ""
 
 msgid "Submit attachment"
-msgstr "Soumettre le fichier"
+msgstr ""
 
 msgid "Update attachment"
-msgstr "Modifier le fichier"
+msgstr ""
 
 #, python-format
 msgid "Add a new %s"
-msgstr "Ajouter un nouveau %s"
+msgstr ""
 
 msgid "object"
-msgstr "objet"
+msgstr ""
 
 msgid "Added"
-msgstr "Ajouté"
+msgstr ""
 
 msgid "Changed"
-msgstr "Modifié"
+msgstr ""
 
 msgid "Deleted"
-msgstr "Supprimé"
+msgstr ""
 
 msgid "Modified"
-msgstr "Modifié"
+msgstr ""
 
 msgid "no"
-msgstr "non"
+msgstr ""
 
 msgid "yes"
-msgstr "oui"
+msgstr ""
 
 msgid "Permission denied"
-msgstr "Permission refusée"
+msgstr ""
 
 msgid "Page not found"
-msgstr "Page non trouvée"
+msgstr ""
 
 msgid "Internal error"
-msgstr "Erreur interne"
+msgstr ""
 
 msgid "Details"
-msgstr "Détails"
+msgstr ""
 
 msgid "List"
-msgstr "Liste"
+msgstr ""
 
 msgid "Quick access"
-msgstr "Accès rapide"
+msgstr ""
 
 msgid "Add"
-msgstr "Ajouter"
+msgstr ""
 
 msgid "Admin"
-msgstr "Admin"
+msgstr ""
 
 msgid "Logbook"
-msgstr "Journal"
+msgstr ""
 
 msgid "Logout"
-msgstr "Déconnexion"
+msgstr ""
 
 msgid "None"
-msgstr "Aucun(e)"
+msgstr ""
 
 msgid "Filter"
-msgstr "Filtrer"
+msgstr ""
 
 msgid "Measure distances"
-msgstr "Mesurer les distances"
+msgstr ""
 
 msgid "Save map as image"
-msgstr "Sauvegarder l'image"
+msgstr ""
 
 msgid "Load local file (GPX, KML, GeoJSON)"
-msgstr "Charger un fichier local (GPX, KML, GeoJSON)"
+msgstr ""
 
 msgid "Map geometry is unsaved"
-msgstr "La géométrie n'a pas été sauvegardée"
+msgstr ""
 
 msgid "Objects"
-msgstr "Objets"
+msgstr ""
 
 msgid "Search"
-msgstr "Rechercher"
+msgstr ""
 
 msgid "results"
-msgstr "résultats"
+msgstr ""
 
 msgid "Current criteria"
-msgstr "Critères choisis"
+msgstr ""
 
 msgid "No filter"
-msgstr "Aucun filtre"
+msgstr ""
 
 #, python-format
 msgid "Do you really wish to delete <strong>%(object)s</strong> ?"
-msgstr "Voulez-vous vraiment supprimer <strong>%(object)s</strong> ?"
+msgstr ""
 
 msgid "Yes, delete"
-msgstr "Oui, supprimer"
+msgstr ""
 
 msgid "No, back to edit view"
-msgstr "Non, retour à la vue d'édition"
+msgstr ""
 
 msgid "PDF"
-msgstr "PDF"
+msgstr ""
 
 msgid "ODT"
-msgstr "ODT"
+msgstr ""
 
 msgid "DOC"
-msgstr "DOC"
+msgstr ""
 
 msgid "Properties"
-msgstr "Propriétés"
+msgstr ""
 
 msgid "Attached files"
-msgstr "Fichiers liés"
+msgstr ""
 
 msgid "History"
-msgstr "Historique"
+msgstr ""
 
 msgid "Update"
-msgstr "Modifier"
+msgstr ""
 
 msgid "Date"
-msgstr "Date"
+msgstr ""
 
 msgid "User"
-msgstr "utilisateur"
+msgstr ""
 
 msgid "Action"
-msgstr "Action"
+msgstr ""
 
 msgid "Full history"
-msgstr "Historique complet"
+msgstr ""
 
 msgid "Map"
-msgstr "Carte"
+msgstr ""
 
 msgid "CSV"
-msgstr "CSV"
+msgstr ""
 
 msgid "Shapefile"
-msgstr "Shapefile"
+msgstr ""
 
 msgid "GPX"
-msgstr "GPX"
+msgstr ""
 
 msgid "Last author"
-msgstr "Dernier auteur"
+msgstr ""
 
 msgid "Creator"
-msgstr "Créateur"
+msgstr ""
 
 msgid "Authors"
-msgstr "Auteurs"
+msgstr ""
 
 #, python-format
 msgid "%d year ago"
 msgid_plural "%d years ago"
-msgstr[0] "%d an"
-msgstr[1] "%d ans"
+msgstr[0] ""
+msgstr[1] ""
 
 #, python-format
 msgid "%d week ago"
 msgid_plural "%d weeks ago"
-msgstr[0] "%d semaine"
-msgstr[1] "%d semaines"
+msgstr[0] ""
+msgstr[1] ""
 
 #, python-format
 msgid "%d day ago"
 msgid_plural "%d days ago"
-msgstr[0] "%d jour"
-msgstr[1] "%d jours"
+msgstr[0] ""
+msgstr[1] ""
 
 #, python-format
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
-msgstr[0] "%d heure"
-msgstr[1] "%d heures"
+msgstr[0] ""
+msgstr[1] ""
 
 #, python-format
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
-msgstr[0] "%d minute"
-msgstr[1] "%d minutes"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "just a few seconds ago"
-msgstr "quelques secondes"
+msgstr ""
 
 msgid "Invalid geometry value."
-msgstr "Géométrie invalide"
+msgstr ""
 
 msgid "Created"
-msgstr "Créé"
+msgstr ""
 
 msgid "Your form contains errors"
-msgstr "Le formulaire contient des erreurs"
+msgstr ""
 
 msgid "No map available for this object."
-msgstr "Pas de carte disponible pour cet objet."
+msgstr ""
 
 #, python-format
 msgid "Edit %s"
-msgstr "Éditer %s"
+msgstr ""
 
 msgid "Saved"
-msgstr "Sauvegardé"
+msgstr ""

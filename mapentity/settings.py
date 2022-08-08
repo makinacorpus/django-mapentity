@@ -44,6 +44,7 @@ app_settings = dict({
     'MAPENTITY_WEASYPRINT': False,
     'MAP_STYLES': _DEFAULT_MAP_STYLES,
     'REGEX_PATH_ATTACHMENTS': r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$',
+    'MAX_CHARACTERS': None,
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 # default MAP_STYLES should not be replaced but updated by MAPENTITY_CONFIG
@@ -63,7 +64,7 @@ TINYMCE_DEFAULT_CONFIG = {
     "toolbar": "undo redo | formatselect | "
                "bold italic forecolor backcolor | link image media | alignleft aligncenter "
                "alignright alignjustify | bullist numlist outdent indent | "
-               "removeformat | code | help",
+               "removeformat | code | wordcount | help",
     'paste_auto_cleanup_on_paste': True,
     'forced_root_block': False,
     'width': '95%',
@@ -73,6 +74,7 @@ TINYMCE_DEFAULT_CONFIG = {
                        'img[longdesc|usemap|src|border|alt=|title|hspace|vspace|width|height|align],'
                        'p,em/i,strong/b,div[align],br,ul,li,ol,span[style],'
                        'iframe[src|frameborder=0|alt|title|width|height|align|name]'),
+    'setup': 'tinyMceInit'
 }
 TINYMCE_DEFAULT_CONFIG.update(getattr(settings, 'TINYMCE_DEFAULT_CONFIG', {}))
 setattr(settings, 'TINYMCE_DEFAULT_CONFIG', TINYMCE_DEFAULT_CONFIG)
