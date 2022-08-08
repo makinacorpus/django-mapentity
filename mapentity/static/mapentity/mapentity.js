@@ -38,16 +38,6 @@ $(document).ready(function (e) {
         function() { $(this).children(".autohide").removeClass('hover'); }
     );
 
-    // Split
-    $("#panelleft").resizable({
-        handleSelector: ".splitter",
-        resizeHeight: false
-    });
-    $(".details-panel").resizable({
-        handleSelector: ".splitter",
-        resizeHeight: false
-    });
-
 
 
     // Views
@@ -62,5 +52,22 @@ $(document).ready(function (e) {
         $.extend(data, context);
         $(window).trigger('entity:map', [data]);
         $(window).trigger('entity:map:' + context.viewname, [data]);
+
+        // Split
+        $("#panelleft").resizable({
+            handleSelector: ".splitter",
+            resizeHeight: false,
+            onDragEnd: function (e, $el, opt) {
+                window.maps[0].invalidateSize();
+            }
+        });
+        $(".details-panel").resizable({
+            handleSelector: ".splitter",
+            resizeHeight: false,
+            onDragEnd: function (e, $el, opt) {
+                window.maps[0].invalidateSize();
+            }
+        });
     });
+
 });
