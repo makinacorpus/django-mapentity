@@ -1,12 +1,20 @@
 CHANGELOG
 =========
 
-8.1.2+dev  (XXXX-XX-XX)    
+8.2.0      (2022-08-11)
 -----------------------
 
 **New Features**
 
 - Add setting MAX_CHARACTERS for rich text fields
+- Set map resizable
+- Drop support for Django 2.2
+
+**Maintenance**
+
+- Fix lint errors after pycodestyle upgrade
+- Add svg extra for easy-thumbnail
+
 
 8.1.2      (2022-06-10)    
 -----------------------
