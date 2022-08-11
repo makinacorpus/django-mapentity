@@ -54,20 +54,15 @@ $(document).ready(function (e) {
         $(window).trigger('entity:map:' + context.viewname, [data]);
 
         // Split
-        $("#panelleft").resizable({
+        var resizableOptions = {
             handleSelector: ".splitter",
             resizeHeight: false,
             onDragEnd: function (e, $el, opt) {
                 window.maps[0].invalidateSize();
             }
-        });
-        $(".details-panel").resizable({
-            handleSelector: ".splitter",
-            resizeHeight: false,
-            onDragEnd: function (e, $el, opt) {
-                window.maps[0].invalidateSize();
-            }
-        });
+        }
+        $("#panelleft").resizable(resizableOptions);
+        $(".details-panel").resizable(resizableOptions);
     });
 
 });
