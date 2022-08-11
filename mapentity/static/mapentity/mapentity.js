@@ -39,6 +39,7 @@ $(document).ready(function (e) {
     );
 
 
+
     // Views
     var context = $('body').data();
     console.debug('View ', context.modelname, context.viewname);
@@ -51,5 +52,16 @@ $(document).ready(function (e) {
         $.extend(data, context);
         $(window).trigger('entity:map', [data]);
         $(window).trigger('entity:map:' + context.viewname, [data]);
+
+        // Split
+        var resizableOptions = {
+            handleSelector: ".splitter",
+            resizeHeight: false,
+            onDragEnd: function (e, $el, opt) {
+                window.maps[0].invalidateSize();
+            }
+        }
+        $("#panelleft, .details-panel").resizable(resizableOptions);
     });
+
 });

@@ -151,12 +151,27 @@ select[multiple] {
     }
 }
 
+@media (min-width: 768px) {
+    #mainpanel {
+        flex-wrap: nowrap;
+    }
+    #panelleft,
+    #panelright {
+        max-width: 70%;
+        min-width: 30%;
+        width: 50%;
+    }
+}
+
 #panelleft {
     padding-left: 0;
+    flex: 0 0 auto;
 }
 #panelright {
     padding: 0;
+    flex: 1 1 auto;
 }
+
 #mainmap {
     position: absolute;
     top: 0px;
@@ -165,6 +180,24 @@ select[multiple] {
     right: 0px;
 }
 #detailmap { height: 100%; }
+
+/* splitter for resize */
+.splitter {
+    display: none;
+}
+@media (min-width: 768px) {
+    .splitter {
+        display: block;
+        flex: 0 0 auto;
+        width: 18px;
+        background-color: #DDD;
+        background-image: url(images/drag-horizontal.png);
+        background-position: center center;
+        background-repeat: no-repeat;
+        min-height: 200px;
+        cursor: col-resize;
+    }
+}
 
 /* Navbar fixed */
 
@@ -518,7 +551,20 @@ span.filter-info {
 
 /***** Entity detail ******/
 
-
+@media (min-width: 768px) {
+    #mainpanel .details-panel,
+    #mainpanel .map-panel {
+        max-width: 70%;
+        min-width: 30%;
+        width: 50%;
+    }
+}
+#mainpanel .details-panel {
+    flex: 0 0 auto;
+}
+#mainpanel .map-panel {
+    flex: 1 1 auto;
+}
 
 .details-panel .download-group {
     margin: .75rem 0;
