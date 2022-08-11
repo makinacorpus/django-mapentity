@@ -61,8 +61,7 @@ $(document).ready(function (e) {
                 window.maps[0].invalidateSize();
             }
         }
-        $("#panelleft").resizable(resizableOptions);
-        $(".details-panel").resizable(resizableOptions);
+        $("#panelleft, .details-panel").resizable(resizableOptions);
     });
 
 });
