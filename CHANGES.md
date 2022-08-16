@@ -4,7 +4,7 @@ CHANGELOG
 8.2.1      (2022-08-16)
 -----------------------
 
-**Maintenance**
+**Bug fix**
 
 - Fix SVG extra dependancy not needed ([See issue /SmileyChris/easy-thumbnails#602](https://github.com/SmileyChris/easy-thumbnails/issues/602))
 
