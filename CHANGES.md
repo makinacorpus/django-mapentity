@@ -13,6 +13,7 @@ CHANGELOG
 - Support django 4.1
 - Add block in detail template to allow overriding attachments navigation tab
 - Add blocks buttons detail views
+- Add duplicate action
 
 
 8.2.1      (2022-08-16)
