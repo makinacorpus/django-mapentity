@@ -45,6 +45,8 @@
       </li>
       {% endif %}
       <div class="btn-group ml-auto" role="group">
+        {% block before_buttons_duplicate %}
+        {% endblock %}
         {% if can_add %}
             <form class="btn-success ml-auto" action="{{ object.get_duplicate_url }}" method="post">{% csrf_token %}
               <button class="btn btn-success ml-auto" type="submit"><i class="bi bi-files"></i> {% trans "Duplicate" %}</button>
@@ -57,6 +59,8 @@
         {% else %}
           <span class="btn disabled ml-auto" href="#"><i class="bi bi-pencil-square"></i> {% trans "Update" %}</span>
         {% endif %}
+        {% block after_buttons_update %}
+        {% endblock %}
       </div>
     </ul>
     <div class="tab-content scrollable">
