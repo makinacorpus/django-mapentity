@@ -63,7 +63,7 @@ jobs:
           - python-version: '3.9'  # no need to test with 3.9, already tested with 3.6 and 3.10
             django-version: '3.2.*'
           - python-version: '3.6'
-            django-version: '4.1.*'  # Django 4.0 supports only python >= 3.8
+            django-version: '4.1.*'  # Django 4.1 supports only python >= 3.8
 
     steps:
     - uses: actions/checkout@v2
