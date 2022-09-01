@@ -372,10 +372,6 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
         return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        form = None
-        return self.form_valid(form)
-
-    def form_valid(self, form):
         original_object = self.get_object()
         try:
             clone = original_object.duplicate()

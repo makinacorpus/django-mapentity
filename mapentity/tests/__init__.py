@@ -235,7 +235,7 @@ class MapEntityTest(TestCase):
     def test_duplicate(self):
         if self.model is None:
             return  # Abstract test should not run
-        user = UserFactory(password='booh')
+        user = UserFactory()
         obj = self.modelfactory.create()
         for perm in Permission.objects.exclude(codename=f'add_{obj._meta.model_name}'):
             user.user_permissions.add(perm)
