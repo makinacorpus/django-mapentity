@@ -507,7 +507,7 @@ class LogViewMapentityTest(MapEntityTest):
             'object': '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>",
             'object_id': '1',
             'object_repr': "<class 'object'>",
-            'user': 'mary_poppins21'
+            'user': 'mary_poppins23'
         }
 
         if django.__version__ < '3.0':
