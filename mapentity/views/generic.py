@@ -15,7 +15,7 @@ from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 from django.views import static
 from django.views.generic import View
-from django.views.generic.detail import DetailView
+from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django_weasyprint import WeasyTemplateResponseMixin
@@ -356,11 +356,20 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
         return super().form_invalid(form)
 
 
-class MapEntityDuplicate(MapEntityCreate):
+class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
+    http_method_names = ['post', ]
 
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DUPLICATE
+
+    @classmethod
+    def get_title(cls):
+        return cls.model.get_create_label()
+
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         form = None
