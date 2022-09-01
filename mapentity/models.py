@@ -17,8 +17,9 @@ from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from rest_framework import permissions as rest_permissions
 
+from paperclip.settings import get_attachment_model
 from mapentity.templatetags.mapentity_tags import humanize_timesince
-from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract_attributes_html
+from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract_attributes_html, clone_attachment
 from .settings import app_settings, API_SRID
 
 # Used to create the matching url name
@@ -30,6 +31,7 @@ ENTITY_DETAIL = "detail"
 ENTITY_MAPIMAGE = "mapimage"
 ENTITY_DOCUMENT = "document"
 ENTITY_MARKUP = "markup"
+ENTITY_DUPLICATE = "duplicate"
 ENTITY_CREATE = "add"
 ENTITY_UPDATE = "update"
 ENTITY_DELETE = "delete"
@@ -37,7 +39,7 @@ ENTITY_UPDATE_GEOM = "update_geom"
 
 ENTITY_KINDS = (
     ENTITY_LAYER, ENTITY_LIST, ENTITY_DATATABLE_LIST, ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE,
-    ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE, ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
+    ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE, ENTITY_DUPLICATE, ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
 )
 
 ENTITY_PERMISSION_CREATE = 'add'
@@ -62,7 +64,7 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
         'GET': ['%(app_label)s.read_%(model_name)s'],
         'OPTIONS': ['%(app_label)s.read_%(model_name)s'],
         'HEAD': ['%(app_label)s.read_%(model_name)s'],
-        'POST': ['%(app_label)s.add_%(model_name)s'],
+        'POST': ['%(app_label)s.add_%(model_name)s', '%(app_label)s.duplicate_%(model_name)s'],
         'PUT': ['%(app_label)s.change_%(model_name)s'],
         'PATCH': ['%(app_label)s.change_%(model_name)s'],
         'DELETE': ['%(app_label)s.delete_%(model_name)s'],
@@ -72,6 +74,7 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
 class BaseMapEntityMixin(models.Model):
     _entity = None
     capture_map_image_waitfor = '.leaflet-tile-loaded'
+    can_duplicate = True
 
     class Meta:
         abstract = True
@@ -88,6 +91,7 @@ class BaseMapEntityMixin(models.Model):
     def get_entity_kind_permission(cls, entity_kind):
         operations = {
             ENTITY_CREATE: ENTITY_PERMISSION_CREATE,
+            ENTITY_DUPLICATE: ENTITY_PERMISSION_CREATE,
             ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
             ENTITY_UPDATE_GEOM: ENTITY_PERMISSION_UPDATE_GEOM,
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
@@ -192,6 +196,9 @@ class BaseMapEntityMixin(models.Model):
     def get_delete_url(self):
         return reverse(self._entity.url_name(ENTITY_DELETE), args=[str(self.pk)])
 
+    def get_duplicate_url(self):
+        return reverse(self._entity.url_name(ENTITY_DUPLICATE), args=[str(self.pk)])
+
     def get_map_image_extent(self, srid=API_SRID):
         fieldname = app_settings['GEOM_FIELD_NAME']
         obj = getattr(self, fieldname)
@@ -264,6 +271,47 @@ class BaseMapEntityMixin(models.Model):
     def is_public(self):
         "Override this method to allow unauthenticated access to attachments"
         return False
+
+    def duplicate(self, attrs={}):
+        clone = None
+        if self.can_duplicate:
+            clone = self._meta.model.objects.get(pk=self.pk)
+            clone.pk = None
+            clone.id = None
+            for key, value in attrs.items():
+                setattr(clone, key, value)
+            clone.save()
+
+            # Scan fields to get relations
+            fields = clone._meta.get_fields()
+            for field in fields:
+                # Manage M2M fields by replicating all related records
+                # found on parent "obj" into "clone"
+                if not field.auto_created and field.many_to_many:
+                    for row in getattr(self, field.name).all():
+                        getattr(clone, field.name).add(row)
+
+                # Manage 1-N and 1-1 relations by cloning child objects
+                if field.auto_created and field.is_relation:
+                    if field.many_to_many:
+                        # do nothing
+                        pass
+                    else:
+                        # provide "clone" object to replace "obj"
+                        # on remote field
+                        attrs = {
+                            field.remote_field.name: clone
+                        }
+                        children = field.related_model.objects.filter(**{field.remote_field.name: self})
+
+                        for child in children:
+                            self.duplicate(child, attrs)
+            for attachment in get_attachment_model().objects.filter(object_id=self.pk):
+                attrs_attachment = attrs.get('attachments', {})
+                attrs_attachment["content_object"] = clone
+                clone_attachment(attachment, 'attachment_file', attrs_attachment)
+
+        return clone
 
 
 class MapEntityMixin(BaseMapEntityMixin):

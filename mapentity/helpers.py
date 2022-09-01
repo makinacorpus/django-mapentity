@@ -13,6 +13,7 @@ import requests
 from django.conf import settings
 from django.contrib.gis.gdal.error import GDALException
 from django.contrib.gis.geos import GEOSException, fromstr
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse
 from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import get_template
@@ -299,3 +300,21 @@ def smart_get_template(model, suffix):
         except TemplateDoesNotExist:
             pass
     return None
+
+
+def clone_attachment(attachment, field_file, attrs={}):
+    fields = attachment._meta.get_fields()
+    clone_values = {}
+    for field in fields:
+        if not field.auto_created:
+            if field.name == "pk":
+                continue
+            elif field.name in attrs.keys():
+                clone_values[field.name] = attrs.get(field.name)
+            elif field.name == field_file:
+                attachment_content = getattr(attachment, field_file).read()
+                attachment_name = getattr(attachment, field_file).name.split("/")[-1]
+                clone_values[field_file] = SimpleUploadedFile(attachment_name, attachment_content)
+            else:
+                clone_values[field.name] = getattr(attachment, field.name, None)
+    attachment._meta.model.objects.create(**clone_values)
