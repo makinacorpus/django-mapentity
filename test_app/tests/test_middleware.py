@@ -11,9 +11,8 @@ from django.test.utils import override_settings
 
 from mapentity import middleware
 from mapentity.middleware import AutoLoginMiddleware, get_internal_user
-from mapentity.tests.factories import UserFactory
+from mapentity.tests.factories import AttachmentFactory, UserFactory
 from .factories import DummyModelFactory
-from .test_views import AttachmentFactory
 
 User = get_user_model()
 

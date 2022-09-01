@@ -2,8 +2,11 @@ import factory
 
 from django.contrib.auth import get_user_model
 from django.contrib.gis.geos import Point
+from django.core.files.uploadedfile import SimpleUploadedFile
 from faker import Faker
 from faker.providers import geo
+
+from paperclip.settings import get_attachment_model, get_filetype_model, get_license_model
 
 fake = Faker('fr_FR')
 fake.add_provider(geo)
@@ -63,3 +66,37 @@ class PointFactory(factory.django.DjangoModelFactory):
         point = Point(float(lon), float(lat), srid=4326)
         point.transform(2154)
         return point
+
+
+def get_dummy_uploaded_file(name='file.pdf'):
+    return SimpleUploadedFile(name, b'*' * 300, content_type='application/pdf')
+
+
+class FileTypeFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = get_filetype_model()
+
+
+class LicenseFactory(factory.django.DjangoModelFactory):
+
+    class Meta:
+        model = get_license_model()
+
+
+class AttachmentFactory(factory.django.DjangoModelFactory):
+    """
+    Create an attachment. You must provide an 'obj' keywords,
+    the object (saved in db) to which the attachment will be bound.
+    """
+
+    class Meta:
+        model = get_attachment_model()
+
+    attachment_file = get_dummy_uploaded_file()
+    filetype = factory.SubFactory(FileTypeFactory)
+    license = factory.SubFactory(LicenseFactory)
+
+    creator = factory.SubFactory(UserFactory)
+    title = factory.Sequence("Title {0}".format)
+    legend = factory.Sequence("Legend {0}".format)
