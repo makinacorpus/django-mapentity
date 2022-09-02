@@ -194,7 +194,7 @@ class Registry:
         """ Register model and returns URL patterns
         """
         # Ignore models from not installed apps
-        if not model._meta.installed:
+        if model._meta.app_config is None:
             return []
         # Register once only
         if model in self.registry:

@@ -1,12 +1,12 @@
 CHANGELOG
 =========
 
-8.2.1+dev0  (20xx-xx-xx)
+8.2.1+dev0 (20XX-XX-XX)
 -----------------------
 
 **New Features**
 
-- 
+- Support django 4.1
 
 
 8.2.1      (2022-08-16)
