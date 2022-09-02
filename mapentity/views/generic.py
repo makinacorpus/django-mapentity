@@ -375,16 +375,14 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
         original_object = self.get_object()
         try:
             clone = original_object.duplicate()
-            message = ''
-        except Exception as e:
-            message = e
-            clone = None
-        if clone:
+            if not clone:
+                raise Exception("Duplication is not available for this object")
             log_action(self.request, clone, ADDITION)
             messages.success(self.request, _("Duplicated"))
             return HttpResponseRedirect(clone.get_detail_url())
-        else:
-            messages.error(self.request, f'{_("Failed to duplicate")} {message}')
+
+        except Exception as e:
+            messages.error(self.request, f'{_("Failed to duplicate")} {e}')
             return HttpResponseRedirect(original_object.get_detail_url())
 
 
