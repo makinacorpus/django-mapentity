@@ -272,44 +272,45 @@ class BaseMapEntityMixin(models.Model):
         "Override this method to allow unauthenticated access to attachments"
         return False
 
-    def duplicate(self, attrs={}):
+    def duplicate(self, attachments={}, avoid_fields=[], **kwargs):
         clone = None
         if self.can_duplicate:
             clone = self._meta.model.objects.get(pk=self.pk)
             clone.pk = None
             clone.id = None
-            for key, value in attrs.items():
-                setattr(clone, key, value)
+            for key, value in kwargs.items():
+                if key not in avoid_fields:
+                    setattr(clone, key, value)
             clone.save()
 
             # Scan fields to get relations
             fields = clone._meta.get_fields()
             for field in fields:
-                # Manage M2M fields by replicating all related records
-                # found on parent "obj" into "clone"
-                if not field.auto_created and field.many_to_many:
-                    for row in getattr(self, field.name).all():
-                        getattr(clone, field.name).add(row)
+                if field.name not in avoid_fields:
+                    # Manage M2M fields by replicating all related records
+                    # found on parent "obj" into "clone"
+                    if not field.auto_created and field.many_to_many:
+                        for row in getattr(self, field.name).all():
+                            getattr(clone, field.name).add(row)
 
-                # Manage 1-N and 1-1 relations by cloning child objects
-                if field.auto_created and field.is_relation:
-                    if field.many_to_many:
-                        # do nothing
-                        pass
-                    else:
-                        # provide "clone" object to replace "obj"
-                        # on remote field
-                        attrs = {
-                            field.remote_field.name: clone
-                        }
-                        children = field.related_model.objects.filter(**{field.remote_field.name: self})
+                    # Manage 1-N and 1-1 relations by cloning child objects
+                    if field.auto_created and field.is_relation:
+                        if field.many_to_many:
+                            # do nothing
+                            pass
+                        else:
+                            # provide "clone" object to replace "obj"
+                            # on remote field
+                            attrs = {
+                                field.remote_field.name: clone
+                            }
+                            children = field.related_model.objects.filter(**{field.remote_field.name: self})
 
-                        for child in children:
-                            self.duplicate(child, attrs)
+                            for child in children:
+                                child.duplicate(**attrs)
             for attachment in get_attachment_model().objects.filter(object_id=self.pk):
-                attrs_attachment = attrs.get('attachments', {})
-                attrs_attachment["content_object"] = clone
-                clone_attachment(attachment, 'attachment_file', attrs_attachment)
+                attachments["content_object"] = clone
+                clone_attachment(attachment, 'attachment_file', attachments)
 
         return clone
 
