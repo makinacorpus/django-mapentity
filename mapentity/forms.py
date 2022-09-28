@@ -147,6 +147,14 @@ class MapEntityForm(TranslatedModelForm):
                     self.fields.get(field).widget.modifiable = False
         self._init_layout()
 
+    def get_fieldslayout(self):
+        # Check if fieldslayout is defined, otherwise use Meta.fields
+        fieldslayout = self.fieldslayout
+        if not fieldslayout:
+            # Remove geomfields from left part
+            fieldslayout = [fl for fl in self.orig_fields if fl not in self.geomfields]
+        return fieldslayout
+
     def _init_layout(self):
         """ Setup form buttons, submit URL, layout
         """
@@ -170,13 +178,8 @@ class MapEntityForm(TranslatedModelForm):
         else:
             self.helper.form_action = self.instance.get_add_url()
 
-        # Check if fieldslayout is defined, otherwise use Meta.fields
-        fieldslayout = self.fieldslayout
-        if not fieldslayout:
-            # Remove geomfields from left part
-            fieldslayout = [fl for fl in self.orig_fields if fl not in self.geomfields]
         # Replace native fields in Crispy layout by translated fields
-        fieldslayout = self.__replace_translatable_fields(fieldslayout)
+        fieldslayout = self.__replace_translatable_fields(self.get_fieldslayout())
 
         has_geomfield = len(self.geomfields) > 0
         leftpanel_css = "col-12"
