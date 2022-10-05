@@ -47,7 +47,7 @@
       <div class="btn-group ml-auto" role="group">
         {% block buttons_before_action %}
         {% endblock %}
-        {% if can_add %}
+        {% if can_add and model.can_duplicate %}
             <form class="btn-success ml-auto" action="{{ object.get_duplicate_url }}" method="post">{% csrf_token %}
               <button class="btn btn-success ml-auto" type="submit"><i class="bi bi-files"></i> {% trans "Duplicate" %}</button>
             </form>

@@ -163,6 +163,8 @@ class MapEntityOptions:
             kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = r'^document/{modelname}-(?P<pk>\d+).odt$'
         if self.model.can_duplicate:
             kind_to_urlpath[mapentity_models.ENTITY_DUPLICATE] = r'^{modelname}/duplicate/(?P<pk>\d+)/$'
+        if view_kind == mapentity_models.ENTITY_DUPLICATE and not self.model.can_duplicate:
+            return
         url_path = kind_to_urlpath[view_kind]
         url_path = url_path.format(modelname=self.modelname)
         return url_path

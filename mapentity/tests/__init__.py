@@ -233,7 +233,7 @@ class MapEntityTest(TestCase):
             self.assertIn(b'.modifiable = false;', response.content)
 
     def test_duplicate(self):
-        if self.model is None:
+        if self.model is None or not self.model.can_duplicate:
             return  # Abstract test should not run
         user = UserFactory()
         obj = self.modelfactory.create()
@@ -247,7 +247,7 @@ class MapEntityTest(TestCase):
         self.assertEqual(get_attachment_model().objects.count(), 1)
 
         response = self.client.post(obj.get_duplicate_url())
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 403)
         self.assertEqual(obj._meta.model.objects.count(), 1)
         self.assertEqual(get_attachment_model().objects.count(), 1)
 
