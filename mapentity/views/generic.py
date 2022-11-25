@@ -362,6 +362,7 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DUPLICATE
+
     @classmethod
     def get_title(cls):
         return cls.model.get_create_label()
@@ -378,7 +379,8 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
             if not clone:
                 raise Exception("Duplication is not available for this object")
             log_action(self.request, clone, ADDITION)
-            messages.success(self.request, _(f"{self.get_object()._meta.verbose_name} has been duplicated successfully"))
+            messages.success(self.request, _(f"{self.get_object()._meta.verbose_name} "
+                                             f"has been duplicated successfully"))
             return HttpResponseRedirect(clone.get_detail_url())
 
         except Exception as e:
