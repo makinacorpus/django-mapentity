@@ -251,8 +251,7 @@ class MapEntityTest(TestCase):
         self.assertEqual(obj._meta.model.objects.count(), 1)
         self.assertEqual(get_attachment_model().objects.count(), 1)
 
-        for perm in Permission.objects.filter(codename=f'add_{obj._meta.model_name}'):
-            user.user_permissions.add(perm)
+        user.user_permissions.add(Permission.objects.get(codename=f'add_{obj._meta.model_name}'))
         self.client.force_login(user=user)
 
         response = self.client.post(obj.get_duplicate_url())
