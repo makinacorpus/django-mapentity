@@ -79,46 +79,46 @@ class DuplicateMixin(object):
             return reverse(self._entity.url_name(ENTITY_DUPLICATE), args=[str(self.pk)])
 
     def duplicate(self, **kwargs):
-        clone = None
+        if not self.can_duplicate:
+            return None
         avoid_fields = kwargs.pop('avoid_fields', [])
         attachments = kwargs.pop('attachments', {})
-        if self.can_duplicate:
-            clone = self._meta.model.objects.get(pk=self.pk)
-            clone.pk = None
-            clone.id = None
-            for key, value in kwargs.items():
-                if key not in avoid_fields:
-                    setattr(clone, key, value)
-            clone.save()
+        clone = self._meta.model.objects.get(pk=self.pk)
+        clone.pk = None
+        clone.id = None
+        for key, value in kwargs.items():
+            if key not in avoid_fields:
+                setattr(clone, key, value)
+        clone.save()
 
-            # Scan fields to get relations
-            fields = clone._meta.get_fields()
-            for field in fields:
-                if field.name not in avoid_fields:
-                    # Manage M2M fields by replicating all related records
-                    # found on parent "obj" into "clone"
-                    if not field.auto_created and field.many_to_many:
-                        for row in getattr(self, field.name).all():
-                            getattr(clone, field.name).add(row)
+        # Scan fields to get relations
+        fields = clone._meta.get_fields()
+        for field in fields:
+            if field.name not in avoid_fields:
+                # Manage M2M fields by replicating all related records
+                # found on parent "obj" into "clone"
+                if not field.auto_created and field.many_to_many:
+                    for row in getattr(self, field.name).all():
+                        getattr(clone, field.name).add(row)
 
-                    # Manage 1-N and 1-1 relations by cloning child objects
-                    if field.auto_created and field.is_relation:
-                        if field.many_to_many:
-                            # do nothing
-                            pass
-                        else:
-                            # provide "clone" object to replace "obj"
-                            # on remote field
-                            attrs = {
-                                field.remote_field.name: clone
-                            }
-                            children = field.related_model.objects.filter(**{field.remote_field.name: self})
+                # Manage 1-N and 1-1 relations by cloning child objects
+                if field.auto_created and field.is_relation:
+                    if field.many_to_many:
+                        # do nothing
+                        pass
+                    else:
+                        # provide "clone" object to replace "obj"
+                        # on remote field
+                        attrs = {
+                            field.remote_field.name: clone
+                        }
+                        children = field.related_model.objects.filter(**{field.remote_field.name: self})
 
-                            for child in children:
-                                child.duplicate(**attrs)
-            for attachment in get_attachment_model().objects.filter(object_id=self.pk):
-                attachments["content_object"] = clone
-                clone_attachment(attachment, 'attachment_file', attachments)
+                        for child in children:
+                            child.duplicate(**attrs)
+        for attachment in get_attachment_model().objects.filter(object_id=self.pk):
+            attachments["content_object"] = clone
+            clone_attachment(attachment, 'attachment_file', attachments)
 
         return clone
 
