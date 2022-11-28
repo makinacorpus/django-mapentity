@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-20 13:47+0000\n"
+"POT-Creation-Date: 2022-11-28 10:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -76,9 +76,6 @@ msgstr "Page non trouvée"
 
 msgid "Internal error"
 msgstr "Erreur interne"
-
-msgid "Details"
-msgstr "Détails"
 
 msgid "List"
 msgstr "Liste"
@@ -159,6 +156,9 @@ msgstr "Fichiers liés"
 msgid "History"
 msgstr "Historique"
 
+msgid "Duplicate"
+msgstr "Dupliquer"
+
 msgid "Update"
 msgstr "Modifier"
 
@@ -236,6 +236,15 @@ msgstr "Créé"
 
 msgid "Your form contains errors"
 msgstr "Le formulaire contient des erreurs"
+
+msgid "Duplication is not available for this object"
+msgstr "La duplication n'est pas disponible pour cet objet."
+
+msgid "{self.get_object()._meta.verbose_name} has been duplicated successfully"
+msgstr "{self.get_object()._meta.verbose_name} a été dupliqué avec succès"
+
+msgid "An error occurred during duplication"
+msgstr "Une erreur s'est produite lors de la duplication"
 
 msgid "No map available for this object."
 msgstr "Pas de carte disponible pour cet objet."

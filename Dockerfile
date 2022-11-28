@@ -3,7 +3,8 @@ FROM makinacorpus/geodjango:bionic-3.6
 RUN apt-get update -qq && apt-get install -y -qq \
     libsqlite3-mod-spatialite \
     libjpeg62 libjpeg62-dev zlib1g-dev libcairo2 libpango-1.0-0 \
-    libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info && \
+    libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info \
+    libldap2-dev libsasl2-dev ldap-utils && \
     apt-get clean all && rm -rf /var/apt/lists/* && rm -rf /var/cache/apt/*
 RUN mkdir -p /code
 RUN useradd -ms /bin/bash django
