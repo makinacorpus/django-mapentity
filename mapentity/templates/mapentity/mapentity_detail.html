@@ -30,10 +30,12 @@
         </li>
         {% block before_attachments_extra_tab_nav %}
         {% endblock %}
+        {% block attachments_extra_tab_nav %}
         <li class="nav-item">
           <a id="tab-attachments" class="nav-link" href="#attachments" data-toggle="tab"><i class="bi bi-file-earmark"></i>
             <span class="d-none d-sm-inline">{% trans "Attached files" %} ({{ object.attachments.count }})</span></a>
         </li>
+        {% endblock %}
         {% block after_attachments_extra_tab_nav %}
         {% endblock %}
       {% if ACTION_HISTORY_ENABLED %}

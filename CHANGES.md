@@ -7,6 +7,7 @@ CHANGELOG
 **New Features**
 
 - Support django 4.1
+- Add block in detail template to allow overriding attachments navigation tab
 
 
 8.2.1      (2022-08-16)
