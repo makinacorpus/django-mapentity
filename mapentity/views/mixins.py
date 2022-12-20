@@ -1,7 +1,8 @@
 import logging
 
 from crispy_forms.helper import FormHelper
-from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.fields import GenericRelation, GenericRel, GenericForeignKey
+from django.db.models.fields.files import FileField
 from django.contrib.gis.db.models import GeometryField
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
@@ -120,8 +121,15 @@ class FilterListMixin:
             class filterklass(MapEntityFilterSet):
                 class Meta:
                     model = _model
-                    fields = [field.name for field in _model._meta.get_fields() if
-                              not isinstance(field, GeometryField) and not isinstance(field, GenericRelation)]
+                    fields = [
+                        field.name
+                        for field in _model._meta.get_fields()
+                        if not isinstance(field, GeometryField)
+                        and not isinstance(field, GenericRelation)
+                        and not isinstance(field, GenericForeignKey)
+                        and not isinstance(field, GenericRel)
+                        and not isinstance(field, FileField)
+                    ]
             self.filterform = filterklass
         self._filterform = self.filterform()
         self._filterform.helper = FormHelper()

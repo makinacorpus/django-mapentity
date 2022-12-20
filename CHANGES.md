@@ -4,6 +4,9 @@ CHANGELOG
 8.3.0+dev (20XX-XX-XX)
 -----------------------
 
+**Bug fix**
+
+- Do not try to generate filters in list views for `GenericRelation` fields and `File` fields
 
 8.3.0 (2022-12-12)
 -----------------------
