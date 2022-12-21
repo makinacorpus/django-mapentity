@@ -13,6 +13,7 @@ from django.template.exceptions import TemplateDoesNotExist
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from django.views import static
 from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
@@ -381,10 +382,9 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
                 return HttpResponseRedirect(original_object.get_detail_url())
             log_action(self.request, clone, ADDITION)
             messages.success(self.request,
-                             f"{self.get_object()._meta.verbose_name} " + _("has been duplicated successfully"))
+                             f"{self.get_object()._meta.verbose_name} " + gettext("has been duplicated successfully"))
             return HttpResponseRedirect(clone.get_detail_url())
-        except Exception as e:
-            raise ValueError(e)
+        except Exception:
             messages.error(self.request, _("An error occurred during duplication"))
         return HttpResponseRedirect(original_object.get_detail_url())
 
