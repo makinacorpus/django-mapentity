@@ -240,8 +240,8 @@ msgstr "Le formulaire contient des erreurs"
 msgid "Duplication is not available for this object"
 msgstr "La duplication n'est pas disponible pour cet objet."
 
-msgid "{self.get_object()._meta.verbose_name} has been duplicated successfully"
-msgstr "{self.get_object()._meta.verbose_name} a été dupliqué avec succès"
+msgid "has been duplicated successfully"
+msgstr "a été dupliqué avec succès"
 
 msgid "An error occurred during duplication"
 msgstr "Une erreur s'est produite lors de la duplication"

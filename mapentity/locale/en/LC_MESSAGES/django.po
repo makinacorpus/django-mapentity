@@ -241,7 +241,7 @@ msgstr ""
 msgid "Duplication is not available for this object"
 msgstr ""
 
-msgid "{self.get_object()._meta.verbose_name} has been duplicated successfully"
+msgid "has been duplicated successfully"
 msgstr ""
 
 msgid "An error occurred during duplication"
