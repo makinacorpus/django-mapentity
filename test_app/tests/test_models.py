@@ -54,3 +54,14 @@ class MapEntityDuplicateMixinTest(TestCase):
         sample_object.duplicate(attachments={"title": "test"})
         self.assertEqual(2, DummyModel.objects.count())
         self.assertIn("test", list(Attachment.objects.values_list('title', flat=True)))
+
+    def test_duplicate_rollback_error_attachments(self):
+        sample_object = DummyModelFactory.create()
+        AttachmentFactory.create(content_object=sample_object, title='attachment')
+
+        def raise_error(title):
+            raise Exception(f"This is an exception : {title}")
+
+        with self.assertRaisesRegex(Exception, "This is an exception : attachment"):
+            sample_object.duplicate(attachments={"title": raise_error})
+        self.assertEqual(1, DummyModel.objects.count())

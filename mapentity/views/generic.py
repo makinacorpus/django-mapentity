@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
@@ -374,7 +373,6 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
 
     @view_permission_required()
     def post(self, request, *args, **kwargs):
-        sid = transaction.savepoint()
         original_object = self.get_object()
         try:
             clone = original_object.duplicate(request=request)
@@ -386,9 +384,7 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
                              f"{self.get_object()._meta.verbose_name} " + _("has been duplicated successfully"))
             return HttpResponseRedirect(clone.get_detail_url())
         except Exception:
-            transaction.savepoint_rollback(sid)
             messages.error(self.request, _("An error occurred during duplication"))
-        transaction.savepoint_commit(sid)
         return HttpResponseRedirect(original_object.get_detail_url())
 
 

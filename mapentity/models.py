@@ -9,7 +9,7 @@ from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db import models
+from django.db import models, transaction
 from django.db.utils import OperationalError
 from django.urls import reverse, NoReverseMatch
 from django.utils.formats import localize
@@ -81,52 +81,57 @@ class DuplicateMixin(object):
     def duplicate(self, **kwargs):
         if not self.can_duplicate:
             return None
-        avoid_fields = kwargs.pop('avoid_fields', [])
-        attachments = kwargs.pop('attachments', {})
-        skip_attachments = kwargs.pop('skip_attachments', False)
-        clone = self._meta.model.objects.get(pk=self.pk)
-        clone.pk = None
-        clone.id = None
-        for key, value in kwargs.items():
-            if key not in avoid_fields:
-                if callable(value):
-                    setattr(clone, key, value(getattr(self, key)))
-                else:
-                    setattr(clone, key, value)
-        clone.save()
-
-        # Scan fields to get relations
-        fields = clone._meta.get_fields()
-        for field in fields:
-            if field.name not in avoid_fields:
-                # Manage M2M fields by replicating all related records
-                # found on parent "obj" into "clone"
-                if not field.auto_created and field.many_to_many:
-                    for row in getattr(self, field.name).all():
-                        getattr(clone, field.name).add(row)
-
-                # Manage 1-N and 1-1 relations by cloning child objects
-                if field.auto_created and field.is_relation:
-                    if field.many_to_many:
-                        # do nothing
-                        pass
+        sid = transaction.savepoint()
+        try:
+            avoid_fields = kwargs.pop('avoid_fields', [])
+            attachments = kwargs.pop('attachments', {})
+            skip_attachments = kwargs.pop('skip_attachments', False)
+            clone = self._meta.model.objects.get(pk=self.pk)
+            clone.pk = None
+            clone.id = None
+            for key, value in kwargs.items():
+                if key not in avoid_fields:
+                    if callable(value):
+                        setattr(clone, key, value(getattr(self, key)))
                     else:
-                        # provide "clone" object to replace "obj"
-                        # on remote field
-                        attrs = {
-                            field.remote_field.name: clone,
-                            'skip_attachments': True
-                        }
-                        children = field.related_model.objects.filter(**{field.remote_field.name: self})
+                        setattr(clone, key, value)
+            clone.save()
 
-                        for child in children:
-                            child.duplicate(**attrs)
+            # Scan fields to get relations
+            fields = clone._meta.get_fields()
+            for field in fields:
+                if field.name not in avoid_fields:
+                    # Manage M2M fields by replicating all related records
+                    # found on parent "obj" into "clone"
+                    if not field.auto_created and field.many_to_many:
+                        for row in getattr(self, field.name).all():
+                            getattr(clone, field.name).add(row)
 
-        if not skip_attachments:
-            for attachment in get_attachment_model().objects.filter(object_id=self.pk):
-                attachments["content_object"] = clone
-                clone_attachment(attachment, 'attachment_file', attachments)
+                    # Manage 1-N and 1-1 relations by cloning child objects
+                    if field.auto_created and field.is_relation:
+                        if field.many_to_many:
+                            # do nothing
+                            pass
+                        else:
+                            # provide "clone" object to replace "obj"
+                            # on remote field
+                            attrs = {
+                                field.remote_field.name: clone,
+                                'skip_attachments': True
+                            }
+                            children = field.related_model.objects.filter(**{field.remote_field.name: self})
 
+                            for child in children:
+                                child.duplicate(**attrs)
+
+            if not skip_attachments:
+                for attachment in get_attachment_model().objects.filter(object_id=self.pk):
+                    attachments["content_object"] = clone
+                    clone_attachment(attachment, 'attachment_file', attachments)
+        except Exception:
+            transaction.savepoint_rollback(sid)
+            raise
+        transaction.savepoint_commit(sid)
         return clone
 
 
