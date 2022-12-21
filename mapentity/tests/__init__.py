@@ -269,8 +269,8 @@ class MapEntityTest(TestCase):
         self.assertEqual(get_attachment_model().objects.count(), 2)
         msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
 
-        self.assertEqual(msg[0], f"{self.model._meta.verbose_name} has been duplicated successfully")
-        self.assertEqual(msg[1], "An error occurred during duplication")
+        self.assertIn(f"{self.model._meta.verbose_name} has been duplicated successfully", msg)
+        self.assertIn("An error occurred during duplication", msg)
 
     def test_crud_status(self):
         if self.model is None:
