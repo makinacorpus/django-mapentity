@@ -61,7 +61,8 @@ class DummyModelFunctionalTest(MapEntityTest):
             'id': 1,
             'name': '<a href="/dummymodel/1/">a dummy model</a>',
             'public': '<i class="bi bi-x-circle text-danger"></i>',
-            'short_description': ''
+            'short_description': '',
+            'tags': [self.obj.tags.first().pk]
         }
 
     def get_good_data(self):

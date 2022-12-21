@@ -41,6 +41,10 @@ class DummyDelete(mapentity_views.MapEntityDelete):
     model = DummyModel
 
 
+class DummyDuplicate(mapentity_views.MapEntityDuplicate):
+    model = DummyModel
+
+
 class DummyViewSet(mapentity_views.MapEntityViewSet):
     model = DummyModel
     serializer_class = DummySerializer

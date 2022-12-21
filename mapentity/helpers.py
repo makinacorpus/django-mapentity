@@ -308,10 +308,7 @@ def clone_attachment(attachment, field_file, attrs={}):
     for field in fields:
         if not field.auto_created:
             if field.name in attrs.keys():
-                if callable(attrs.get(field.name)):
-                    clone_values[field.name] = attrs.get(field.name)()
-                else:
-                    clone_values[field.name] = attrs.get(field.name)
+                clone_values[field.name] = attrs.get(field.name)
             elif field.name == field_file:
                 attachment_content = getattr(attachment, field_file).read()
                 attachment_name = getattr(attachment, field_file).name.split("/")[-1]

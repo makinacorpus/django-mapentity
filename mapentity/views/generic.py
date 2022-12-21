@@ -383,7 +383,7 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
                 return HttpResponseRedirect(original_object.get_detail_url())
             log_action(self.request, clone, ADDITION)
             messages.success(self.request,
-                             f"{self.get_object()._meta.verbose_name}" + _("has been duplicated successfully"))
+                             f"{self.get_object()._meta.verbose_name} " + _("has been duplicated successfully"))
             return HttpResponseRedirect(clone.get_detail_url())
         except Exception:
             transaction.savepoint_rollback(sid)

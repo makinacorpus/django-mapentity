@@ -60,6 +60,7 @@ class Road(MapEntityMixin, models.Model):
     """ Linestring Mapentity model """
     name = models.CharField(max_length=100, default='Empty')
     geom = models.LineStringField(null=True, default=None, srid=2154)
+    can_duplicate = False
 
     @property
     def name_display(self):
@@ -73,6 +74,7 @@ class DummyModel(MapEntityMixin, models.Model):
     geom = models.PointField(null=True, default=None)
     date_update = models.DateTimeField(auto_now=True, db_index=True)
     public = models.BooleanField(default=False)
+    tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
         return "{} ({})".format(self.name, self.pk)
@@ -85,6 +87,20 @@ class DummyModel(MapEntityMixin, models.Model):
 
     class Meta:
         verbose_name = _("Dummy Model")
+
+
+class DollModel(MapEntityMixin, models.Model):
+    dummies = models.ManyToManyField(DummyModel)
+
+    def __str__(self):
+        return "Dummies"
+
+
+class ManikinModel(MapEntityMixin, models.Model):
+    dummy = models.ForeignKey(DummyModel, related_name='manikins', null=True, default=None, on_delete=models.SET_NULL)
+
+    def __str__(self):
+        return str(self.dummy)
 
 
 class City(MapEntityMixin, models.Model):

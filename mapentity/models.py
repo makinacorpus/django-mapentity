@@ -83,6 +83,7 @@ class DuplicateMixin(object):
             return None
         avoid_fields = kwargs.pop('avoid_fields', [])
         attachments = kwargs.pop('attachments', {})
+        skip_attachments = kwargs.pop('skip_attachments', False)
         clone = self._meta.model.objects.get(pk=self.pk)
         clone.pk = None
         clone.id = None
@@ -110,15 +111,18 @@ class DuplicateMixin(object):
                         # provide "clone" object to replace "obj"
                         # on remote field
                         attrs = {
-                            field.remote_field.name: clone
+                            field.remote_field.name: clone,
+                            'skip_attachments': True
                         }
                         children = field.related_model.objects.filter(**{field.remote_field.name: self})
 
                         for child in children:
                             child.duplicate(**attrs)
-        for attachment in get_attachment_model().objects.filter(object_id=self.pk):
-            attachments["content_object"] = clone
-            clone_attachment(attachment, 'attachment_file', attachments)
+
+        if not skip_attachments:
+            for attachment in get_attachment_model().objects.filter(object_id=self.pk):
+                attachments["content_object"] = clone
+                clone_attachment(attachment, 'attachment_file', attachments)
 
         return clone
 
@@ -331,6 +335,7 @@ class MapEntityMixin(BaseMapEntityMixin):
 class LogEntry(BaseMapEntityMixin, BaseLogEntry):
     geom = None
     object_verbose_name = _("object")
+    can_duplicate = False
 
     class Meta:
         proxy = True
