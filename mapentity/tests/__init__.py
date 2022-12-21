@@ -12,6 +12,7 @@ from urllib.parse import quote
 
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, LiveServerTestCase
@@ -258,6 +259,18 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(obj._meta.model.objects.count(), 2)
         self.assertEqual(get_attachment_model().objects.count(), 2)
+
+        with patch('mapentity.models.DuplicateMixin.duplicate') as mocked:
+            mocked.side_effect = Exception('Error')
+            response = self.client.post(obj.get_duplicate_url())
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(obj._meta.model.objects.count(), 2)
+        self.assertEqual(get_attachment_model().objects.count(), 2)
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
+
+        self.assertEqual(msg[0], f"{self.model._meta.verbose_name} has been duplicated successfully")
+        self.assertEqual(msg[1], "An error occurred during duplication")
 
     def test_crud_status(self):
         if self.model is None:
