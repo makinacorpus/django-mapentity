@@ -1,10 +1,9 @@
 from django.test import TestCase
-from django.test.utils import override_settings
 
-from mapentity.registry import app_settings
+from mapentity.tests.factories import AttachmentFactory
 
-
-from ..models import Road, DummyModel
+from ..models import Attachment, Road, DummyModel
+from .factories import DummyModelFactory
 
 
 class MapEntityDuplicateMixinTest(TestCase):
@@ -18,3 +17,40 @@ class MapEntityDuplicateMixinTest(TestCase):
         sample_object = DummyModel.objects.create()
         sample_object.duplicate()
         self.assertEqual(2, DummyModel.objects.count())
+
+    def test_duplicate_change_field_callable(self):
+        sample_object = DummyModelFactory.create()
+
+        def upper_name(lower_name):
+            return lower_name.upper()
+
+        sample_object.duplicate(name=upper_name)
+        self.assertEqual(2, DummyModel.objects.count())
+        self.assertIn('A DUMMY MODEL', list(DummyModel.objects.values_list('name', flat=True)))
+
+    def test_duplicate_change_field_not_callable(self):
+        sample_object = DummyModelFactory.create()
+
+        sample_object.duplicate(name="test")
+        self.assertEqual(2, DummyModel.objects.count())
+        self.assertIn('test', list(DummyModel.objects.values_list('name', flat=True)))
+
+    def test_duplicate_change_attachments_callable(self):
+        sample_object = DummyModelFactory.create()
+        AttachmentFactory.create(content_object=sample_object, title='attachment')
+
+        def upper_title(lower_title):
+            return lower_title.upper()
+
+        sample_object.duplicate(attachments={"title": upper_title})
+
+        self.assertEqual(2, DummyModel.objects.count())
+        self.assertIn("ATTACHMENT", list(Attachment.objects.values_list('title', flat=True)))
+
+    def test_duplicate_change_attachments_not_callable(self):
+        sample_object = DummyModelFactory.create()
+        AttachmentFactory.create(content_object=sample_object, title='attachment')
+
+        sample_object.duplicate(attachments={"title": "test"})
+        self.assertEqual(2, DummyModel.objects.count())
+        self.assertIn("test", list(Attachment.objects.values_list('title', flat=True)))
