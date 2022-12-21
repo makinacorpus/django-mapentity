@@ -374,9 +374,9 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
 
     @view_permission_required()
     def post(self, request, *args, **kwargs):
+        sid = transaction.savepoint()
         original_object = self.get_object()
         try:
-            sid = transaction.savepoint()
             clone = original_object.duplicate(request=request)
             if not clone:
                 messages.error(self.request, _("Duplication is not available for this object"))
@@ -388,6 +388,7 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
         except Exception:
             transaction.savepoint_rollback(sid)
             messages.error(self.request, _("An error occurred during duplication"))
+        transaction.savepoint_commit(sid)
         return HttpResponseRedirect(original_object.get_detail_url())
 
 
