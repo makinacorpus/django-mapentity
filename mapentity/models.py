@@ -89,7 +89,10 @@ class DuplicateMixin(object):
         clone.id = None
         for key, value in kwargs.items():
             if key not in avoid_fields:
-                setattr(clone, key, value)
+                if callable(value):
+                    setattr(clone, key, value(getattr(self, key)))
+                else:
+                    setattr(clone, key, value)
         clone.save()
 
         # Scan fields to get relations
