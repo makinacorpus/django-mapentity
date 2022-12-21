@@ -260,6 +260,9 @@ class MapEntityTest(TestCase):
         self.assertEqual(obj._meta.model.objects.count(), 2)
         self.assertEqual(get_attachment_model().objects.count(), 2)
 
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
+        self.assertIn(f"{self.model._meta.verbose_name} has been duplicated successfully", msg)
+
         with patch('mapentity.models.DuplicateMixin.duplicate') as mocked:
             mocked.side_effect = Exception('Error')
             response = self.client.post(obj.get_duplicate_url())
@@ -268,6 +271,9 @@ class MapEntityTest(TestCase):
         self.assertEqual(obj._meta.model.objects.count(), 2)
         self.assertEqual(get_attachment_model().objects.count(), 2)
 
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
+        self.assertIn("An error occurred during duplication", msg)
+
         with patch('mapentity.models.DuplicateMixin.duplicate') as mocked:
             mocked.return_value = None
             response = self.client.post(obj.get_duplicate_url())
@@ -275,11 +281,9 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(obj._meta.model.objects.count(), 2)
         self.assertEqual(get_attachment_model().objects.count(), 2)
-        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
 
-        self.assertIn(f"{self.model._meta.verbose_name} has been duplicated successfully", msg)
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
         self.assertIn("An error occurred during duplication", msg)
-        self.assertIn("Duplication is not available for this object", msg)
 
     def test_crud_status(self):
         if self.model is None:

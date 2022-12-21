@@ -383,7 +383,8 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
             messages.success(self.request,
                              f"{self.get_object()._meta.verbose_name} " + _("has been duplicated successfully"))
             return HttpResponseRedirect(clone.get_detail_url())
-        except Exception:
+        except Exception as e:
+            raise ValueError(e)
             messages.error(self.request, _("An error occurred during duplication"))
         return HttpResponseRedirect(original_object.get_detail_url())
 
