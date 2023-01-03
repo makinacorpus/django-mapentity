@@ -364,10 +364,6 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_DUPLICATE
 
-    @classmethod
-    def get_title(cls):
-        return cls.model.get_create_label()
-
     @view_permission_required()
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
