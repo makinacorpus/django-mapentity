@@ -124,11 +124,16 @@ class FilterListMixin:
                     fields = [
                         field.name
                         for field in _model._meta.get_fields()
-                        if not isinstance(field, GeometryField)
-                        and not isinstance(field, GenericRelation)
-                        and not isinstance(field, GenericForeignKey)
-                        and not isinstance(field, GenericRel)
-                        and not isinstance(field, FileField)
+                        if not isinstance(
+                            field,
+                            (
+                                GeometryField,
+                                GenericRelation,
+                                GenericRel,
+                                GenericForeignKey,
+                                FileField
+                            )
+                        )
                     ]
             self.filterform = filterklass
         self._filterform = self.filterform()
