@@ -74,9 +74,10 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
 class DuplicateMixin(object):
     can_duplicate = True
 
-    if can_duplicate:
-        def get_duplicate_url(self):
+    def get_duplicate_url(self):
+        if self.can_duplicate:
             return reverse(self._entity.url_name(ENTITY_DUPLICATE), args=[str(self.pk)])
+        return None
 
     def duplicate(self, **kwargs):
         if not self.can_duplicate:
