@@ -365,10 +365,6 @@ class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
         return mapentity_models.ENTITY_DUPLICATE
 
     @view_permission_required()
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    @view_permission_required()
     def post(self, request, *args, **kwargs):
         original_object = self.get_object()
         try:
