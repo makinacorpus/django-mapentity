@@ -302,7 +302,9 @@ def smart_get_template(model, suffix):
     return None
 
 
-def clone_attachment(attachment, field_file, attrs={}):
+def clone_attachment(attachment, field_file, attrs=None):
+    if attrs is None:
+        attrs = {}
     fields = attachment._meta.get_fields()
     clone_values = {}
     for field in fields:
