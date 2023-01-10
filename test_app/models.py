@@ -98,6 +98,7 @@ class DollModel(MapEntityMixin, models.Model):
 
 class ManikinModel(MapEntityMixin, models.Model):
     dummy = models.ForeignKey(DummyModel, related_name='manikins', null=True, default=None, on_delete=models.SET_NULL)
+    can_duplicate = False
 
     def __str__(self):
         return str(self.dummy)

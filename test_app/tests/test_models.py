@@ -3,7 +3,7 @@ from django.test import TestCase
 from mapentity.helpers import clone_attachment
 from mapentity.tests.factories import AttachmentFactory
 
-from ..models import Attachment, Road, DummyModel, Sector
+from ..models import Attachment, Road, DummyModel, ManikinModel, Sector
 from .factories import DummyModelFactory, SectorFactory
 
 
@@ -77,3 +77,8 @@ class MapEntityDuplicateMixinTest(TestCase):
         sample_object = SectorFactory.create()
         sample_object.duplicate(skip_attachments=True)
         self.assertEqual(2, Sector.objects.count())
+
+    def test_cant_duplicate_no_url(self):
+        dm = DummyModelFactory.create()
+        mk = ManikinModel.objects.create(dummy=dm)
+        self.assertIsNone(ManikinModel.get_duplicate_url(mk))
