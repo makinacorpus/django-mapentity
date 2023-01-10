@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from mapentity.helpers import clone_attachment
 from mapentity.tests.factories import AttachmentFactory
 
 from ..models import Attachment, Road, DummyModel
@@ -65,3 +66,9 @@ class MapEntityDuplicateMixinTest(TestCase):
         with self.assertRaisesRegex(Exception, "This is an exception : attachment"):
             sample_object.duplicate(attachments={"title": raise_error})
         self.assertEqual(1, DummyModel.objects.count())
+
+    def test_duplicate_attachments(self):
+        sample_object = DummyModelFactory.create()
+        attachment = AttachmentFactory.create(content_object=sample_object, title='attachment')
+        clone_attachment(attachment, 'attachment_file')
+        self.assertEqual(2, Attachment.objects.count())
