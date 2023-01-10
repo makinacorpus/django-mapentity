@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-20 13:47+0000\n"
+"POT-Creation-Date: 2022-11-28 10:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -76,9 +76,6 @@ msgid "Page not found"
 msgstr ""
 
 msgid "Internal error"
-msgstr ""
-
-msgid "Details"
 msgstr ""
 
 msgid "List"
@@ -160,6 +157,9 @@ msgstr ""
 msgid "History"
 msgstr ""
 
+msgid "Duplicate"
+msgstr ""
+
 msgid "Update"
 msgstr ""
 
@@ -236,6 +236,15 @@ msgid "Created"
 msgstr ""
 
 msgid "Your form contains errors"
+msgstr ""
+
+msgid "Duplication is not available for this object"
+msgstr ""
+
+msgid "has been duplicated successfully"
+msgstr ""
+
+msgid "An error occurred during duplication"
 msgstr ""
 
 msgid "No map available for this object."

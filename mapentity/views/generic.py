@@ -7,15 +7,16 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from django.views import static
 from django.views.generic import View
-from django.views.generic.detail import DetailView
+from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django_weasyprint import WeasyTemplateResponseMixin
@@ -356,6 +357,31 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
         return super().form_invalid(form)
 
 
+class MapEntityDuplicate(ModelViewMixin, SingleObjectMixin, View):
+    http_method_names = ['post', ]
+
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_DUPLICATE
+
+    @view_permission_required()
+    def post(self, request, *args, **kwargs):
+        original_object = self.get_object()
+        try:
+            clone = original_object.duplicate(request=request)
+            if not clone:
+                messages.error(self.request, _("Duplication is not available for this object"))
+                return HttpResponseRedirect(original_object.get_detail_url())
+            log_action(self.request, clone, ADDITION)
+            messages.success(self.request,
+                             f"{self.get_object()._meta.verbose_name} " + gettext("has been duplicated successfully"))
+            return HttpResponseRedirect(clone.get_detail_url())
+        except Exception as exc:
+            logger.warning(f"An error occurred during duplication {exc}")
+            messages.error(self.request, _("An error occurred during duplication"))
+        return HttpResponseRedirect(original_object.get_detail_url())
+
+
 class MapEntityDetail(ModelViewMixin, DetailView):
 
     def __init__(self, *args, **kwargs):
@@ -396,6 +422,9 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         perm_update = self.get_model().get_permission_codename(mapentity_models.ENTITY_UPDATE)
         can_edit = user_has_perm(self.request.user, perm_update)
         context['can_edit'] = can_edit
+        perm_create = self.get_model().get_permission_codename(mapentity_models.ENTITY_CREATE)
+        can_add = user_has_perm(self.request.user, perm_create)
+        context['can_add'] = can_add
         context['attachment_form_class'] = AttachmentForm
         context['template_attributes'] = self.template_attributes
         context['mapentity_weasyprint'] = app_settings['MAPENTITY_WEASYPRINT']

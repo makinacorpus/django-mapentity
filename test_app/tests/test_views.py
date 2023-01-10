@@ -19,10 +19,10 @@ from freezegun import freeze_time
 from mapentity.models import LogEntry
 from mapentity.registry import app_settings
 from mapentity.tests import MapEntityTest, MapEntityLiveTest
-from mapentity.tests.factories import SuperUserFactory, UserFactory
+from mapentity.tests.factories import SuperUserFactory, AttachmentFactory
 from mapentity.views import ServeAttachment, Convert, JSSettings
 from .factories import DummyModelFactory
-from ..models import DummyModel, Attachment, FileType
+from ..models import DummyModel, FileType
 from ..views import DummyList, DummyDetail
 
 fake = Faker('fr_FR')
@@ -39,23 +39,6 @@ class FileTypeFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = FileType
-
-
-class AttachmentFactory(factory.django.DjangoModelFactory):
-    """
-    Create an attachment. You must provide an 'obj' keywords,
-    the object (saved in db) to which the attachment will be bound.
-    """
-
-    class Meta:
-        model = Attachment
-
-    attachment_file = get_dummy_uploaded_file()
-    filetype = factory.SubFactory(FileTypeFactory)
-
-    creator = factory.SubFactory(UserFactory)
-    title = factory.Sequence("Title {0}".format)
-    legend = factory.Sequence("Legend {0}".format)
 
 
 class DummyModelFunctionalTest(MapEntityTest):
@@ -78,7 +61,8 @@ class DummyModelFunctionalTest(MapEntityTest):
             'id': 1,
             'name': '<a href="/dummymodel/1/">a dummy model</a>',
             'public': '<i class="bi bi-x-circle text-danger"></i>',
-            'short_description': ''
+            'short_description': '',
+            'tags': [self.obj.tags.first().pk]
         }
 
     def get_good_data(self):
@@ -524,7 +508,7 @@ class LogViewMapentityTest(MapEntityTest):
             'object': '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>",
             'object_id': '1',
             'object_repr': "<class 'object'>",
-            'user': 'mary_poppins21'
+            'user': User.objects.first().username
         }
 
         if django.__version__ < '3.0':

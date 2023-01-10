@@ -9,7 +9,7 @@ from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db import models
+from django.db import models, transaction
 from django.db.utils import OperationalError
 from django.urls import reverse, NoReverseMatch
 from django.utils.formats import localize
@@ -17,8 +17,9 @@ from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from rest_framework import permissions as rest_permissions
 
+from paperclip.settings import get_attachment_model
 from mapentity.templatetags.mapentity_tags import humanize_timesince
-from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract_attributes_html
+from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract_attributes_html, clone_attachment
 from .settings import app_settings, API_SRID
 
 # Used to create the matching url name
@@ -30,6 +31,7 @@ ENTITY_DETAIL = "detail"
 ENTITY_MAPIMAGE = "mapimage"
 ENTITY_DOCUMENT = "document"
 ENTITY_MARKUP = "markup"
+ENTITY_DUPLICATE = "duplicate"
 ENTITY_CREATE = "add"
 ENTITY_UPDATE = "update"
 ENTITY_DELETE = "delete"
@@ -37,7 +39,7 @@ ENTITY_UPDATE_GEOM = "update_geom"
 
 ENTITY_KINDS = (
     ENTITY_LAYER, ENTITY_LIST, ENTITY_DATATABLE_LIST, ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE,
-    ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE, ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
+    ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE, ENTITY_DUPLICATE, ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
 )
 
 ENTITY_PERMISSION_CREATE = 'add'
@@ -69,7 +71,72 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
     }
 
 
-class BaseMapEntityMixin(models.Model):
+class DuplicateMixin(object):
+    can_duplicate = True
+
+    def get_duplicate_url(self):
+        if self.can_duplicate:
+            return reverse(self._entity.url_name(ENTITY_DUPLICATE), args=[str(self.pk)])
+        return None
+
+    def duplicate(self, **kwargs):
+        if not self.can_duplicate:
+            return None
+        sid = transaction.savepoint()
+        try:
+            avoid_fields = kwargs.pop('avoid_fields', [])
+            attachments = kwargs.pop('attachments', {})
+            skip_attachments = kwargs.pop('skip_attachments', False)
+            clone = self._meta.model.objects.get(pk=self.pk)
+            clone.pk = None
+            setattr(clone, clone._meta.pk.name, None)
+            for key, value in kwargs.items():
+                if key not in avoid_fields:
+                    if callable(value):
+                        setattr(clone, key, value(getattr(self, key)))
+                    else:
+                        setattr(clone, key, value)
+            clone.save()
+
+            # Scan fields to get relations
+            fields = clone._meta.get_fields()
+            for field in fields:
+                if field.name not in avoid_fields:
+                    # Manage M2M fields by replicating all related records
+                    # found on parent "obj" into "clone"
+                    if not field.auto_created and field.many_to_many:
+                        for row in getattr(self, field.name).all():
+                            getattr(clone, field.name).add(row)
+
+                    # Manage 1-N and 1-1 relations by cloning child objects
+                    if field.auto_created and field.is_relation:
+                        if field.many_to_many:
+                            # do nothing
+                            pass
+                        else:
+                            # provide "clone" object to replace "obj"
+                            # on remote field
+                            attrs = {
+                                field.remote_field.name: clone,
+                                'skip_attachments': True
+                            }
+                            children = field.related_model.objects.filter(**{field.remote_field.name: self})
+
+                            for child in children:
+                                child.duplicate(**attrs)
+
+            if not skip_attachments:
+                for attachment in get_attachment_model().objects.filter(object_id=self.pk):
+                    attachments["content_object"] = clone
+                    clone_attachment(attachment, 'attachment_file', attachments)
+            transaction.savepoint_commit(sid)
+        except Exception as exc:
+            transaction.savepoint_rollback(sid)
+            raise exc
+        return clone
+
+
+class BaseMapEntityMixin(DuplicateMixin, models.Model):
     _entity = None
     capture_map_image_waitfor = '.leaflet-tile-loaded'
 
@@ -88,6 +155,7 @@ class BaseMapEntityMixin(models.Model):
     def get_entity_kind_permission(cls, entity_kind):
         operations = {
             ENTITY_CREATE: ENTITY_PERMISSION_CREATE,
+            ENTITY_DUPLICATE: ENTITY_PERMISSION_CREATE,
             ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
             ENTITY_UPDATE_GEOM: ENTITY_PERMISSION_UPDATE_GEOM,
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
@@ -276,6 +344,7 @@ class MapEntityMixin(BaseMapEntityMixin):
 class LogEntry(BaseMapEntityMixin, BaseLogEntry):
     geom = None
     object_verbose_name = _("object")
+    can_duplicate = False
 
     class Meta:
         proxy = True

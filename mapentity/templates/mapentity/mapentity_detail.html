@@ -44,11 +44,24 @@
           <span class="d-none d-sm-inline">{% trans "History" %}</span></a>
       </li>
       {% endif %}
-      {% if can_edit %}
-      <a class="btn btn-primary ml-auto" href="{{ object.get_update_url }}"><i class="bi bi-pencil-square"></i> {% trans "Update" %}</a>
-      {% else %}
-      <span class="btn disabled ml-auto" href="#"><i class="bi bi-pencil-square"></i> {% trans "Update" %}</span>
-      {% endif %}
+      <div class="btn-group ml-auto" role="group">
+        {% block buttons_before_action %}
+        {% endblock %}
+        {% if can_add and model.can_duplicate %}
+            <form class="btn-success ml-auto" action="{{ object.get_duplicate_url }}" method="post">{% csrf_token %}
+              <button class="btn btn-success ml-auto" type="submit"><i class="bi bi-files"></i> {% trans "Duplicate" %}</button>
+            </form>
+        {% else %}
+          <span class="btn disabled ml-auto" href="#"><i class="bi bi-files"></i> {% trans "Duplicate" %}</span>
+        {% endif %}
+        {% if can_edit %}
+          <a class="btn btn-primary ml-auto" href="{{ object.get_update_url }}"><i class="bi bi-pencil-square"></i> {% trans "Update" %}</a>
+        {% else %}
+          <span class="btn disabled ml-auto" href="#"><i class="bi bi-pencil-square"></i> {% trans "Update" %}</span>
+        {% endif %}
+        {% block buttons_after_action %}
+        {% endblock %}
+      </div>
     </ul>
     <div class="tab-content scrollable">
 

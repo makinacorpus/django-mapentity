@@ -12,6 +12,8 @@ from urllib.parse import quote
 
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, LiveServerTestCase
 from django.test.testcases import to_list
@@ -23,10 +25,12 @@ from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from freezegun import freeze_time
 
-from .factories import SuperUserFactory
+from .factories import AttachmentFactory, SuperUserFactory, UserFactory
 from ..forms import MapEntityForm
 from ..helpers import smart_urljoin
 from ..settings import app_settings
+
+from paperclip.settings import get_attachment_model
 
 
 class AdjustDebugLevel:
@@ -228,6 +232,58 @@ class MapEntityTest(TestCase):
             self.assertIn(b'.modifiable = true;', response.content)
         else:
             self.assertIn(b'.modifiable = false;', response.content)
+
+    def test_duplicate(self):
+        if self.model is None or not self.model.can_duplicate:
+            return  # Abstract test should not run
+        user = UserFactory()
+        obj = self.modelfactory.create()
+        for perm in Permission.objects.exclude(codename=f'add_{obj._meta.model_name}'):
+            user.user_permissions.add(perm)
+        self.client.force_login(user=user)
+
+        AttachmentFactory.create(content_object=obj, title='attachment')
+
+        self.assertEqual(obj._meta.model.objects.count(), 1)
+        self.assertEqual(get_attachment_model().objects.count(), 1)
+
+        response = self.client.post(obj.get_duplicate_url())
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(obj._meta.model.objects.count(), 1)
+        self.assertEqual(get_attachment_model().objects.count(), 1)
+
+        user.user_permissions.add(Permission.objects.get(codename=f'add_{obj._meta.model_name}'))
+        self.client.force_login(user=user)
+
+        response = self.client.post(obj.get_duplicate_url())
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(obj._meta.model.objects.count(), 2)
+        self.assertEqual(get_attachment_model().objects.count(), 2)
+
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
+        self.assertIn(f"{self.model._meta.verbose_name} has been duplicated successfully", msg)
+
+        with patch('mapentity.models.DuplicateMixin.duplicate') as mocked:
+            mocked.side_effect = Exception('Error')
+            response = self.client.post(obj.get_duplicate_url())
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(obj._meta.model.objects.count(), 2)
+        self.assertEqual(get_attachment_model().objects.count(), 2)
+
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
+        self.assertIn("An error occurred during duplication", msg)
+
+        with patch('mapentity.models.DuplicateMixin.duplicate') as mocked:
+            mocked.return_value = None
+            response = self.client.post(obj.get_duplicate_url())
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(obj._meta.model.objects.count(), 2)
+        self.assertEqual(get_attachment_model().objects.count(), 2)
+
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
+        self.assertIn("An error occurred during duplication", msg)
 
     def test_crud_status(self):
         if self.model is None:
