@@ -129,10 +129,11 @@ class DuplicateMixin(object):
                 for attachment in get_attachment_model().objects.filter(object_id=self.pk):
                     attachments["content_object"] = clone
                     clone_attachment(attachment, 'attachment_file', attachments)
-        except Exception:
+        except Exception as exc:
             transaction.savepoint_rollback(sid)
-            raise
-        transaction.savepoint_commit(sid)
+            raise exc
+        finally:
+            transaction.savepoint_commit(sid)
         return clone
 
 
