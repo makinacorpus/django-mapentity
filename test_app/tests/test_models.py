@@ -3,8 +3,8 @@ from django.test import TestCase
 from mapentity.helpers import clone_attachment
 from mapentity.tests.factories import AttachmentFactory
 
-from ..models import Attachment, Road, DummyModel
-from .factories import DummyModelFactory
+from ..models import Attachment, Road, DummyModel, Sector
+from .factories import DummyModelFactory, SectorFactory
 
 
 class MapEntityDuplicateMixinTest(TestCase):
@@ -72,3 +72,8 @@ class MapEntityDuplicateMixinTest(TestCase):
         attachment = AttachmentFactory.create(content_object=sample_object, title='attachment')
         clone_attachment(attachment, 'attachment_file')
         self.assertEqual(2, Attachment.objects.count())
+
+    def test_duplicate_different_autofield(self):
+        sample_object = SectorFactory.create()
+        sample_object.duplicate(skip_attachments=True)
+        self.assertEqual(2, Sector.objects.count())

@@ -116,3 +116,12 @@ class Supermarket(MapEntityMixin, models.Model):
     geom = models.PolygonField(null=True, default=None, srid=2154)
     parking = models.PointField(null=True, default=None, srid=2154)
     tag = models.ForeignKey(Tag, null=True, default=None, on_delete=models.SET_NULL)
+
+
+class Sector(MapEntityMixin, models.Model):
+    code = models.CharField(primary_key=True, max_length=6)
+    name = models.CharField(max_length=100)
+    skip_attachments = True
+
+    def __str__(self):
+        return self.name

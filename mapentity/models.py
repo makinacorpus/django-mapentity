@@ -89,7 +89,7 @@ class DuplicateMixin(object):
             skip_attachments = kwargs.pop('skip_attachments', False)
             clone = self._meta.model.objects.get(pk=self.pk)
             clone.pk = None
-            clone.id = None
+            setattr(clone, clone._meta.pk.name, None)
             for key, value in kwargs.items():
                 if key not in avoid_fields:
                     if callable(value):

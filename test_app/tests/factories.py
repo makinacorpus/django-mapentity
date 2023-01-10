@@ -1,7 +1,7 @@
 import factory
 import random
 from django.contrib.gis.geos import Point
-from test_app.models import DummyModel, ManikinModel, Tag
+from test_app.models import DummyModel, ManikinModel, Sector, Tag
 
 
 class TagFactory(factory.django.DjangoModelFactory):
@@ -9,6 +9,14 @@ class TagFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Tag
+
+
+class SectorFactory(factory.django.DjangoModelFactory):
+    code = factory.Sequence(lambda n: "#%s" % n)  # id (!) with max_length=6
+    name = factory.Sequence(lambda n: "Name %s" % n)
+
+    class Meta:
+        model = Sector
 
 
 class DummyModelFactory(factory.django.DjangoModelFactory):
