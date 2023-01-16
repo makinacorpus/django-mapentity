@@ -12,6 +12,8 @@ CHANGELOG
 **Bug fix**
 
 - Do not try to generate filters in list views for `GenericRelation` fields and `File` fields
+- Disable scroll propagation on layers list to avoid zoom changes on map
+
 
 
 8.3.0 (2022-12-12)
