@@ -12,7 +12,7 @@ CHANGELOG
 **Bug fix**
 
 - Do not try to generate filters in list views for `GenericRelation` fields and `File` fields
-- Disable scroll propagation on layers list to avoid zoom changes on map
+- Disable scroll propagation on layers list to avoid zoom changes on map (fix https://github.com/GeotrekCE/Geotrek-admin/issues/2687)
 
 
 
