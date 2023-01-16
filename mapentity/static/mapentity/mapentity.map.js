@@ -111,6 +111,9 @@ $(window).on('entity:map', function (e, data) {
     var layerscontrol = L.control.groupedLayers(baseLayers, {'': overlaysLayers});
     map.layerscontrol = layerscontrol.addTo(map);
 
+    // Disable scroll on overlay form to avoid map zoom change when scroll on layers list
+    L.DomEvent.disableScrollPropagation(layerscontrol._container);
+
     if (readonly) {
         // Set map readonly
         map.dragging.disable();
@@ -144,6 +147,7 @@ $(window).on('entity:map', function (e, data) {
         //this.options.filter.bboxfield.val(L.Util.getWKT(rect));
         $('#id_bbox').val(L.Util.getWKT(rect));
     });
+
 });
 
 
