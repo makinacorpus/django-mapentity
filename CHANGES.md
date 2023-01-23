@@ -5,7 +5,13 @@ CHANGELOG
 8.5.0+dev  (202X-XX-XX)
 -----------------------
 
+**Dependencies**
+
 * Drop python 3.6 support
+
+**Bug fixes**
+
+- Redirect on Paperclip form error (to include Paperclip error message on object detail page directly)
 
 
 8.5.0      (2023-02-07)
