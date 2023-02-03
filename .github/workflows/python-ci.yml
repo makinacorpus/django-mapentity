@@ -82,7 +82,7 @@ jobs:
         codecov
 
   publish:
-    needs: [lint, doc_build, test]
+    needs: [lint, test]
     runs-on: ubuntu-20.04
     if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
 
