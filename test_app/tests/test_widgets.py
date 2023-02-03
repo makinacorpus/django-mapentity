@@ -8,10 +8,11 @@ class HiddenGeometryWidgetTestCase(TestCase):
     def test_widget_transform_if_srid(self):
         """ Widget should transform geometry to API_SRID if geos object provided """
         widget = HiddenGeometryWidget()
-        output = widget.render('geometry', Point(0, 0, srid=2154))
+        geom = Point(0, 0, srid=2154)
+        output = widget.render('geometry', geom)
+        geom.transform(4326)
         self.assertEqual(output,
-                         '<input type="hidden" name="geometry" value="SRID=4326;'
-                         'POINT (-1.363081210117898 -5.983856309208756)">')
+                         f'<input type="hidden" name="geometry" value="{geom.ewkt}">')
 
 
 class SelectMultipleWithPopTestCase(TestCase):
