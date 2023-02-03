@@ -10,8 +10,9 @@ class HiddenGeometryWidgetTestCase(TestCase):
         widget = HiddenGeometryWidget()
         geom = Point(0, 0, srid=2154)
         output = widget.render('geometry', geom)
+        geom.transform(4326)
         self.assertEqual(output,
-                         f'<input type="hidden" name="geometry" value="{geom.transform(4326).ewkt}">')
+                         f'<input type="hidden" name="geometry" value="{geom.ewkt}">')
 
 
 class SelectMultipleWithPopTestCase(TestCase):
