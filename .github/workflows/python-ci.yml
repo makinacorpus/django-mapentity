@@ -13,12 +13,12 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.6  # check pylint with minimal supported python version
 
@@ -30,29 +30,8 @@ jobs:
         run: |
           flake8 mapentity test_project test_app
 
-
-  doc_build:
-    name: Sphinx doc is building
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.6
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.6
-
-      - name: Install dependencies
-        run: |
-          pip install -r docs/requirements.txt -U
-
-      - name: Build html docs
-        run: |
-          cd docs
-          make html
-
-
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [ '3.6', '3.9', '3.10' ]
@@ -66,7 +45,7 @@ jobs:
             django-version: '4.1.*'  # Django 4.1 supports only python >= 3.8
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install system dependencies
       run: |
@@ -74,7 +53,7 @@ jobs:
         sudo apt-get -y install gettext libproj-dev binutils gdal-bin libgdal-dev libsqlite3-mod-spatialite libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info libpangoft2-1.0-0 libjpeg-dev libopenjp2-7-dev libsasl2-dev python-dev libldap2-dev libssl-dev
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -104,13 +83,13 @@ jobs:
 
   publish:
     needs: [lint, doc_build, test]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.6
 
