@@ -408,6 +408,7 @@ class MapEntityLiveTest(LiveServerTestCase):
     model = None
     userfactory = None
     modelfactory = None
+    geom = 'POINT(0 0)'
 
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = None
@@ -499,7 +500,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         SuperUserFactory.create(username='Superuser', password='booh')
         self.client.login(username='Superuser', password='booh')
 
-        obj = self.modelfactory.create(geom='POINT(0 0)')
+        obj = self.modelfactory.create(geom=self.geom)
 
         # Initially, map image does not exists
         image_path = obj.get_map_image_path()
@@ -525,7 +526,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         if self.model is None:
             return  # Abstract test should not run
 
-        obj = self.modelfactory.create(geom='POINT(0 0)')
+        obj = self.modelfactory.create(geom=self.geom)
 
         # Mock Screenshot response
         mock_requests.get.return_value.status_code = 200
