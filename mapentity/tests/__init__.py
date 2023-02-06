@@ -51,11 +51,10 @@ class MapEntityTest(TestCase):
     model = None
     modelfactory = None
     userfactory = None
-    expected_json_geom = {}
     maxDiff = None
     user = None
 
-    def get_expected_json_attrs(self):
+    def get_expected_geojson_geom(self):
         return {}
 
     def get_expected_geojson_attrs(self):
@@ -107,7 +106,7 @@ class MapEntityTest(TestCase):
         # Make sure database is not empty for this model
         self.modelfactory.create_batch(30)
 
-        response = self.client.get(self.model.get_layer_url())
+        response = self.client.get(self.model.get_layer_list_url())
         self.assertEqual(response.status_code, 200)
         response = self.client.get(self.model.get_datatablelist_url())
         self.assertEqual(response.status_code, 200)
@@ -294,10 +293,16 @@ class MapEntityTest(TestCase):
         response = self.client.get(obj.get_list_url())
         self.assertEqual(response.status_code, 200)
 
+        response = self.client.get(obj.get_layer_list_url())
+        self.assertEqual(response.status_code, 200)
+
         response = self.client.get(obj.get_detail_url().replace(str(obj.pk), '1234567890'))
         self.assertEqual(response.status_code, 404)
 
         response = self.client.get(obj.get_detail_url())
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(obj.get_layer_detail_url())
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(obj.get_update_url())
@@ -350,6 +355,53 @@ class MapEntityTest(TestCase):
                                         'recordsFiltered': 1,
                                         'recordsTotal': 1})
 
+    @freeze_time("2020-03-17")
+    def test_api_geojson_detail_for_model(self):
+        if self.get_expected_geojson_attrs is None:
+            return
+        if self.model is None:
+            return  # Abstract test should not run
+
+        self.obj = self.modelfactory.create()
+        detail_url = '/api/{modelname}/drf/{modelname}s/{id}.geojson'.format(modelname=self.model._meta.model_name,
+                                                                             id=self.obj.pk)
+        response = self.client.get(detail_url)
+        self.assertEqual(response.status_code, 200, f"{detail_url} not found")
+        content_json = response.json()
+        if hasattr(self, 'length'):
+            length = content_json['properties'].pop('length')
+            self.assertAlmostEqual(length, self.length)
+        self.assertEqual(content_json, {
+            'type': 'Feature',
+            'geometry': self.get_expected_geojson_geom(),
+            'properties': self.get_expected_geojson_attrs(),
+        })
+
+    @freeze_time("2020-03-17")
+    def test_api_geojson_list_for_model(self):
+        if self.get_expected_geojson_attrs is None:
+            return
+        if self.model is None:
+            return  # Abstract test should not run
+
+        self.obj = self.modelfactory.create()
+        list_url = '/api/{modelname}/drf/{modelname}s.geojson'.format(modelname=self.model._meta.model_name)
+        response = self.client.get(list_url)
+        self.assertEqual(response.status_code, 200, f"{list_url} not found")
+        content_json = response.json()
+        if hasattr(self, 'length'):
+            length = content_json['features'][0]['properties'].pop('length')
+            self.assertAlmostEqual(length, self.length)
+        self.assertEqual(content_json, {
+            'type': 'FeatureCollection',
+            'model': f'{self.obj._meta.app_label}.{self.obj._meta.model_name}',
+            'features': [{
+                'type': 'Feature',
+                'geometry': self.get_expected_geojson_geom(),
+                'properties': self.get_expected_geojson_attrs(),
+            }],
+        })
+
 
 @override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class MapEntityLiveTest(LiveServerTestCase):
@@ -391,7 +443,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
 
         latest = self.model.latest_updated()
-        geojson_layer_url = self.url_for(self.model.get_layer_url())
+        geojson_layer_url = self.url_for(self.model.get_layer_list_url())
 
         response_1 = self.client.get(geojson_layer_url, allow_redirects=False)
         self.assertEqual(response_1.status_code, 200)
