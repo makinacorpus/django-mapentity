@@ -23,9 +23,8 @@ from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract
 from .settings import app_settings, API_SRID
 
 # Used to create the matching url name
-ENTITY_LAYER = "layer"
 ENTITY_LIST = "list"
-ENTITY_DATATABLE_LIST = "-drf-list"
+ENTITY_VIEWSET = "drf-viewset"
 ENTITY_FORMAT_LIST = "format_list"
 ENTITY_DETAIL = "detail"
 ENTITY_MAPIMAGE = "mapimage"
@@ -38,7 +37,7 @@ ENTITY_DELETE = "delete"
 ENTITY_UPDATE_GEOM = "update_geom"
 
 ENTITY_KINDS = (
-    ENTITY_LAYER, ENTITY_LIST, ENTITY_DATATABLE_LIST, ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE,
+    ENTITY_LIST, ENTITY_VIEWSET, ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE,
     ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE, ENTITY_DUPLICATE, ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
 )
 
@@ -160,9 +159,8 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
             ENTITY_UPDATE_GEOM: ENTITY_PERMISSION_UPDATE_GEOM,
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
             ENTITY_DETAIL: ENTITY_PERMISSION_READ,
-            ENTITY_LAYER: ENTITY_PERMISSION_READ,
             ENTITY_LIST: ENTITY_PERMISSION_READ,
-            ENTITY_DATATABLE_LIST: ENTITY_PERMISSION_READ,
+            ENTITY_VIEWSET: ENTITY_PERMISSION_READ,
             ENTITY_MARKUP: ENTITY_PERMISSION_READ,
             ENTITY_FORMAT_LIST: ENTITY_PERMISSION_EXPORT,
             ENTITY_MAPIMAGE: ENTITY_PERMISSION_EXPORT,
@@ -214,12 +212,20 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         return '/api/' + cls._meta.model_name.lower() + '/drf/' + cls._meta.model_name.lower() + 's.geojson'
 
     @classmethod
+    def get_layer_list_url(cls):
+        return reverse("{app_name}:{model_name}-drf-list".format(app_name=cls._meta.app_label.lower(),
+                                                                 model_name=cls._meta.model_name.lower()),
+                       kwargs={"format": "geojson"})
+
+    @classmethod
     def get_list_url(cls):
         return reverse(cls._entity.url_name(ENTITY_LIST))
 
     @classmethod
     def get_datatablelist_url(cls):
-        return '/api/' + cls._meta.model_name.lower() + '/drf/' + cls._meta.model_name.lower() + 's.datatables'
+        return reverse("{app_name}:{model_name}-drf-list".format(app_name=cls._meta.app_label.lower(),
+                                                                 model_name=cls._meta.model_name.lower()),
+                       kwargs={"format": "datatables"})
 
     def get_layer_detail_url(self):
         return reverse("{app_name}:{model_name}-drf-detail".format(app_name=self._meta.app_label.lower(),
