@@ -1,12 +1,17 @@
 CHANGELOG
 =========
 
-8.4.0+dev (202X-XX-XX)
+8.5.0      (2023-02-07)
 -----------------------
 
 * Drop django 2.2 support
 
-8.4.0 (2023-01-16)
+**Bug fixes**
+
+- Fix tests derived from MapEntityTest
+
+
+8.4.0      (2023-01-16)
 -----------------------
 
 **New Features**
@@ -21,7 +26,7 @@ CHANGELOG
 
 
 
-8.3.0 (2022-12-12)
+8.3.0      (2022-12-12)
 -----------------------
 
 **New Features**
