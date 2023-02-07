@@ -45,13 +45,13 @@ class DummyModelFunctionalTest(MapEntityTest):
     userfactory = SuperUserFactory
     model = DummyModel
     modelfactory = DummyModelFactory
-    expected_json_geom = {
-        "type": "Point",
-        "coordinates": [
-            0.0,
-            0.0
-        ]
-    }
+
+    def get_expected_geojson_geom(self):
+        return {'coordinates': [self.obj.geom.x, self.obj.geom.y], 'type': 'Point'}
+
+    def get_expected_geojson_attrs(self):
+        return {'id': 1,
+                'name': 'a dummy model'}
 
     def get_expected_datatables_attrs(self):
         return {
@@ -67,13 +67,6 @@ class DummyModelFunctionalTest(MapEntityTest):
 
     def get_good_data(self):
         return {'geom': '{"type": "Point", "coordinates":[0, 0]}'}
-
-    def get_expected_json_attrs(self):
-        return {'date_update': '2020-03-17T00:00:00Z',
-                'description': '',
-                'geom': self.obj.geom.ewkt,
-                'name': self.obj.name,
-                'public': False}
 
 
 class DummyModelLiveTest(MapEntityLiveTest):
@@ -331,26 +324,26 @@ class MapEntityLayerViewTest(BaseTest):
 
     def test_geojson_layer_returns_all_by_default(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_url())
+        response = self.client.get(DummyModel.get_layer_list_url())
         self.assertEqual(len(response.json()['features']), 31)
 
     def test_geojson_layer_can_be_filtered(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
+        response = self.client.get(DummyModel.get_layer_list_url() + '?name=toto')
         self.assertEqual(len(response.json()['features']), 1)
 
     def test_geojson_layer_with_parameters_is_not_cached(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
+        response = self.client.get(DummyModel.get_layer_list_url() + '?name=toto')
         self.assertEqual(len(response.json()['features']), 1)
-        response = self.client.get(DummyModel.get_layer_url())
+        response = self.client.get(DummyModel.get_layer_list_url())
         self.assertEqual(len(response.json()['features']), 31)
 
     def test_geojson_layer_with_parameters_does_not_use_cache(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_url())
+        response = self.client.get(DummyModel.get_layer_list_url())
         self.assertEqual(len(response.json()['features']), 31)
-        response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
+        response = self.client.get(DummyModel.get_layer_list_url() + '?name=toto')
         self.assertEqual(len(response.json()['features']), 1)
 
 
@@ -496,7 +489,7 @@ class LogViewMapentityTest(MapEntityTest):
     userfactory = SuperUserFactory
     model = LogEntry
     modelfactory = DummyModelFactory
-    expected_json_geom = None
+    get_expected_geojson_attrs = None
 
     def get_expected_datatables_attrs(self):
         data = {
@@ -517,19 +510,6 @@ class LogViewMapentityTest(MapEntityTest):
 
     def get_good_data(self):
         return {'geom': None}
-
-    def get_expected_json_attrs(self):
-        return {
-            'action_flag': 'Addition',
-            'action_time': '10/06/2022 12:40:10',
-            'change_message': '',
-            'content_type': 12,
-            'id': 1,
-            'object': '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>",
-            'object_id': '1',
-            'object_repr': "<class 'object'>",
-            'user': 'mary_poppins21'
-        }
 
     def test_basic_format(self):
         return None
