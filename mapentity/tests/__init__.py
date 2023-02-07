@@ -368,9 +368,6 @@ class MapEntityTest(TestCase):
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200, f"{detail_url} not found")
         content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json['properties'].pop('length')
-            self.assertAlmostEqual(length, self.length)
         self.assertEqual(content_json, {
             'type': 'Feature',
             'geometry': self.get_expected_geojson_geom(),
@@ -389,9 +386,6 @@ class MapEntityTest(TestCase):
         response = self.client.get(list_url)
         self.assertEqual(response.status_code, 200, f"{list_url} not found")
         content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json['features'][0]['properties'].pop('length')
-            self.assertAlmostEqual(length, self.length)
         self.assertEqual(content_json, {
             'type': 'FeatureCollection',
             'model': f'{self.obj._meta.app_label}.{self.obj._meta.model_name}',
