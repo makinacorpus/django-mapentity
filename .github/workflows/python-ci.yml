@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: 3.6  # check pylint with minimal supported python version
+          python-version: 3.8  # check pylint with minimal supported python version
 
       - name: Install flake8
         run: |
@@ -34,13 +34,8 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: [ '3.6', '3.9', '3.10' ]
+        python-version: [ '3.8', '3.10' ]
         django-version: [ '3.2.*', '4.1.*' ]
-        exclude:
-          - python-version: '3.9'  # no need to test with 3.9, already tested with 3.6 and 3.10
-            django-version: '3.2.*'
-          - python-version: '3.6'
-            django-version: '4.1.*'  # Django 4.1 supports only python >= 3.8
 
     steps:
     - uses: actions/checkout@v3
@@ -89,7 +84,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.6
+          python-version: 3.8
 
       - name: Install dependencies
         run: |
