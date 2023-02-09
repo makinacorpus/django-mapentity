@@ -1,4 +1,4 @@
-FROM makinacorpus/geodjango:bionic-3.6
+FROM makinacorpus/geodjango:bionic-3.8
 
 RUN apt-get update -qq && apt-get install -y -qq \
     libsqlite3-mod-spatialite \
@@ -12,7 +12,7 @@ COPY . /code/src
 RUN chown -R django:django /code
 
 USER django
-RUN python3.6 -m venv /code/venv
+RUN python3.8 -m venv /code/venv
 
 WORKDIR /code/src
 
@@ -20,4 +20,4 @@ RUN  /code/venv/bin/pip install --no-cache-dir pip setuptools wheel -U
 # Install dev requirements
 RUN /code/venv/bin/pip3 install --no-cache-dir -e .[dev] -U
 
-CMD ["/code/venv/bin/python3.6", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["/code/venv/bin/python3.8", "manage.py", "runserver", "0.0.0.0:8000"]
