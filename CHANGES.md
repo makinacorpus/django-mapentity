@@ -1,8 +1,7 @@
 CHANGELOG
 =========
 
-
-8.5.0+dev  (202X-XX-XX)
+8.5.1+dev      (XXXX-XX-XX)
 -----------------------
 
 **Breaking changes**
@@ -11,9 +10,17 @@ CHANGELOG
   * New explicit dependency to ``crispy-bootstrap4``.
   * You should adapt configuration by adding `crispy_bootstrap4` in your INSTALLED_APPS and check your templates inheritance. 
 
-**Others**
+
+8.5.1      (2023-02-16)
+-----------------------
+
+**Dependencies**
 
 * Drop python 3.6 support
+
+**Bug fixes**
+
+- Redirect on Paperclip form error (to include Paperclip error message on object detail page directly)
 
 
 8.5.0      (2023-02-07)

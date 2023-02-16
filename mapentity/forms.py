@@ -275,9 +275,11 @@ class MapEntityForm(TranslatedModelForm):
 
 
 class AttachmentForm(BaseAttachmentForm):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.redirect_on_error = True
         self.helper = FormHelper(form=self)
         self.helper.form_tag = True
         self.helper.form_class = 'attachment form-horizontal'
