@@ -33,7 +33,7 @@ setup(
         'Django',
         'django-appypod',
         'django-compressor',
-        'django-crispy-forms',
+        'django-crispy-forms<2.0',
         'django-embed-video',
         'django-filter',
         'django-leaflet>=0.19,<0.20',  # leaflet 0.7.x
