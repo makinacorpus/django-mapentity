@@ -356,6 +356,21 @@ class MapEntityTest(TestCase):
                                         'recordsTotal': 1})
 
     @freeze_time("2020-03-17")
+    def test_api_no_format_list_for_model(self):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        self.obj = self.modelfactory.create()
+        list_url = '/api/{modelname}/drf/{modelname}s'.format(modelname=self.model._meta.model_name)
+        response = self.client.get(list_url)
+        self.assertEqual(response.status_code, 200, f"{list_url} not found")
+        content_json = response.json()
+        self.assertEqual(content_json, {'data': [self.get_expected_datatables_attrs()],
+                                        'draw': 1,
+                                        'recordsFiltered': 1,
+                                        'recordsTotal': 1})
+
+    @freeze_time("2020-03-17")
     def test_api_geojson_detail_for_model(self):
         if self.get_expected_geojson_attrs is None:
             return

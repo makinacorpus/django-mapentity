@@ -67,6 +67,9 @@ def view_permission_required(login_url=None, raise_exception=None):
 def view_cache_latest():
     def decorator(view_func):
         def _wrapped_view(self, request, *args, **kwargs):
+            if not kwargs.get('format', None):
+                kwargs['format'] = 'datatables'
+                return view_func(self, request, *args, **kwargs)
             if kwargs.get('format') == "datatables":
                 # don't cache dataTables
                 return view_func(self, request, *args, **kwargs)
@@ -92,7 +95,7 @@ def view_cache_response_content():
             # Do not cache if filters presents of datatables format
             params = self.request.GET.keys()
             with_filters = all([not p.startswith('_') for p in params])
-            if (len(params) > 0 and with_filters) or "datatables" in self.request.build_absolute_uri():
+            if (len(params) > 0 and with_filters) or kwargs.get("format") == "datatables":
                 return view_func(self, *args, **kwargs)
 
             # Restore from cache or store view result
