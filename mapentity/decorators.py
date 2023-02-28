@@ -95,7 +95,8 @@ def view_cache_response_content():
             # Do not cache if filters presents of datatables format
             params = self.request.GET.keys()
             with_filters = all([not p.startswith('_') for p in params])
-            if (len(params) > 0 and with_filters) or kwargs.get("format") == "datatables":
+            if ((len(params) > 0 and with_filters) or kwargs.get("format") == "datatables" or
+                    "datatables" in self.request.build_absolute_uri()):
                 return view_func(self, *args, **kwargs)
 
             # Restore from cache or store view result
