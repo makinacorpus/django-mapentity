@@ -20,10 +20,11 @@ logger = logging.getLogger(__name__)
 
 class MapEntityViewSet(viewsets.ModelViewSet):
     model = None
-    renderer_classes = [renderers.JSONRenderer,
+    renderer_classes = [DatatablesRenderer,
+                        renderers.JSONRenderer,
                         GeoJSONRenderer,
                         renderers.BrowsableAPIRenderer,
-                        DatatablesRenderer, ]
+                        ]
     geojson_serializer_class = None
     pagination_class = MapentityDatatablePagination
     filter_backends = [DatatablesFilterBackend, DjangoFilterBackend]
