@@ -1,8 +1,12 @@
 CHANGELOG
 =========
 
-8.5.1+dev      (XXXX-XX-XX)
+8.5.2      (2023-02-28)
 -----------------------
+
+**Bug fixes**
+
+- Fix default format from API should be datatables when not specified
 
 
 8.5.1      (2023-02-16)
