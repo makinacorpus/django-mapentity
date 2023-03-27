@@ -4,6 +4,10 @@ CHANGELOG
 8.5.2+dev      (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Fix Attachment duplications
+
 
 8.5.2      (2023-02-28)
 -----------------------
