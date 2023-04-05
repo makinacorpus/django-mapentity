@@ -4,6 +4,7 @@ CHANGELOG
 8.5.6+dev  (XXXX-XX-XX)
 ----------------------------
 
+* Support django 4.2 and python 3.11
 
 
 8.5.6      (2023-09-04)
@@ -31,6 +32,8 @@ CHANGELOG
 - Move filter popover close button (related to https://github.com/GeotrekCE/Geotrek-admin/issues/2968)
 - Add a scroll bar into filter form
 - Add a scroll bar into module list (elated to https://github.com/GeotrekCE/Geotrek-admin/issues/2849)
+
+* Support django 4.2 and python 3.11
 
 
 8.5.3      (2023-03-27)
