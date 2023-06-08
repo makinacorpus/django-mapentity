@@ -14,7 +14,8 @@ MapEntity.TogglableFilter = L.Class.extend({
                               placement: 'right',
                               html: true,
                               content: '',
-                              title: 'Useless'
+                              title: 'Useless',
+                              offset: '10',
                           });
         this.hover = $('#filters-hover')
                           .popover({
