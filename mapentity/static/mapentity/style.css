@@ -530,8 +530,8 @@ div.dataTables_wrapper div.dataTables_filter input {
 
 #filters-close {
     position: absolute;
-    right: -20px;
-    top: -25px;
+    right: -15px;
+    top: -20px;
 }
 
 #filters-close a {
