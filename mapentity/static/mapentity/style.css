@@ -107,6 +107,8 @@ select[multiple] {
 
 #entitylist-dropdown .dropdown-menu {
     position: absolute;
+    overflow-y: scroll;
+    max-height: calc(100vh - 50px);
 }
 #entitylist-dropdown .dropdown-item {
     padding: 0.25rem 1rem;
