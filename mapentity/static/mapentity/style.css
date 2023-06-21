@@ -472,7 +472,7 @@ div.dataTables_wrapper div.dataTables_filter input {
 
 #mainfilter {
     padding: .5rem;
-    max-height: calc(100vh - 20px);
+    max-height: calc(100vh - 25px);
     overflow-y: scroll;
 }
 
