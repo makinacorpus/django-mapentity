@@ -4,6 +4,12 @@ CHANGELOG
 8.5.3+dev      (XXXXX-XX-XX)
 -----------------------
 
+**Improvments**
+
+- Move filter popover close button (related to https://github.com/GeotrekCE/Geotrek-admin/issues/2968)
+- Add a scroll bar into filter form
+- Add a scroll bar into module list (elated to https://github.com/GeotrekCE/Geotrek-admin/issues/2849)
+
 
 8.5.3      (2023-03-27)
 -----------------------
