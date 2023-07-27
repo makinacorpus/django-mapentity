@@ -37,34 +37,6 @@ MapEntity.GeometryField = L.GeometryField.extend({
         this._addExtraLayers(map);
     },
 
-    _addExtraControls: function (map) {
-        if (map.attributionControl._map) {
-            map.removeControl(map.attributionControl);
-        }
-        map.addControl(new L.Control.ResetView(this._getResetBounds.bind(this)));
-
-        /*
-         * Allow to load files locally.
-         */
-        var pointToLayer = function (feature, latlng) {
-                return L.circleMarker(latlng, {style: window.SETTINGS.map.styles.filelayer})
-                        .setRadius(window.SETTINGS.map.styles.filelayer.radius);
-            },
-            onEachFeature = function (feature, layer) {
-                if (feature.properties.name) {
-                    layer.bindLabel(feature.properties.name);
-                }
-            },
-            filecontrol = L.Control.fileLayerLoad({
-                fitBounds: true,
-                layerOptions: {style: window.SETTINGS.map.styles.filelayer,
-                               pointToLayer: pointToLayer,
-                               onEachFeature: onEachFeature}
-            });
-        map.filecontrol = filecontrol;
-        map.addControl(filecontrol);
-    },
-
     _addExtraLayers: function (map) {
         // Layer with objects of same type
         var objectsLayer = this.buildObjectsLayer();

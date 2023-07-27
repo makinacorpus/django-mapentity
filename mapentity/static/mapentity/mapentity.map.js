@@ -123,8 +123,6 @@ $(window).on('entity:map', function (e, data) {
         map.boxZoom.disable();
     }
 
-    map.attributionControl.setPrefix('');
-
     var mapBounds = $container.data('mapextent');
     if (mapBounds) {
         map.fitBounds(mapBounds);
@@ -231,7 +229,6 @@ $(window).on('entity:map:list', function (e, data) {
     var map = data.map,
         bounds = L.latLngBounds(data.options.extent);
 
-    map.removeControl(map.attributionControl);
     map.doubleClickZoom.disable();
 
     map.addControl(new L.Control.Information());
