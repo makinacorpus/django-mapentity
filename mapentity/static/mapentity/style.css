@@ -650,10 +650,6 @@ span.filter-info {
     background-color: rgba(240, 240, 240, 0.5);
 }
 
-.map-panel .leaflet-control-attribution {
-    display: none;
-}
-
 .map-panel .leaflet-control-information {
     display: block;
 }

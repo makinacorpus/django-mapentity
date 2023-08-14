@@ -4,7 +4,7 @@ CHANGELOG
 8.5.4+dev 	(20XX-XX-XX)
 ----------------------------
 
-- 
+- Fix hidden base layer attributions (#271)
 
 8.5.4      (2023-07-03)
 -----------------------
