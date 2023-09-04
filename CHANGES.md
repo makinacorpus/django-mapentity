@@ -2,8 +2,11 @@ CHANGELOG
 =========
 
 8.5.5+dev  (XXXX-XX-XX)
-----------------------------
+-----------------------
 
+**Bug fixes**
+
+- Fix Control Information error and revert code (#272)
 
 
 8.5.5 	   (2023-09-04)
