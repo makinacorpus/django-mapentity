@@ -12,6 +12,7 @@ CHANGELOG
 **Bug fixes**
 
 - Fix hidden base layer attributions (#271)
+- Fix Control Information error and revert code (#272)
 
 
 8.5.4      (2023-07-03)
