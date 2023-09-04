@@ -2,8 +2,11 @@ CHANGELOG
 =========
 
 8.5.5+dev  (XXXX-XX-XX)
-----------------------------
+-----------------------
 
+**Bug fixes**
+
+- Fix Control Information error and revert code (#272)
 
 
 8.5.5 	   (2023-09-04)
@@ -12,7 +15,6 @@ CHANGELOG
 **Bug fixes**
 
 - Fix hidden base layer attributions (#271)
-- Fix Control Information error and revert code (#272)
 
 
 8.5.4      (2023-07-03)
