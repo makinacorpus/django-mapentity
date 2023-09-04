@@ -231,7 +231,6 @@ $(window).on('entity:map:list', function (e, data) {
 
     map.doubleClickZoom.disable();
 
-    map.addControl(new L.Control.Information());
     map.addControl(new L.Control.ResetView(bounds));
 
     /*

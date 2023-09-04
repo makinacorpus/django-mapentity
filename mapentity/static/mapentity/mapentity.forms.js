@@ -38,7 +38,7 @@ MapEntity.GeometryField = L.GeometryField.extend({
     },
 
     _addExtraControls: function (map) {
-        /*
+            /*
             * Allow to load files locally.
             */
         var pointToLayer = function (feature, latlng) {
