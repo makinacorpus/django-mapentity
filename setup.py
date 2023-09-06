@@ -31,6 +31,7 @@ setup(
         'BeautifulSoup4',
         'cairocffi',
         'Django',
+        'tzdata',
         'django-appypod',
         'django-compressor',
         'django-crispy-forms<2.0',
