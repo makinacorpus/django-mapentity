@@ -13,7 +13,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +62,6 @@ jobs:
 
     - name: Test with coverage
       run: |
-        ./manage.py shell -c "import django;django.db.connection.cursor().execute('SELECT InitSpatialMetaData(1);')";
         coverage run ./manage.py test -v3
         coverage report -m
 
