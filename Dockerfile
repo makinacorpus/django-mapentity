@@ -6,10 +6,12 @@ RUN apt-get update -qq && apt-get install -y -qq \
     libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info \
     libldap2-dev libsasl2-dev && \
     apt-get clean all && rm -rf /var/apt/lists/* && rm -rf /var/cache/apt/*
+
 RUN mkdir -p /code
 RUN useradd -ms /bin/bash django
-COPY . /code/src
 RUN chown -R django:django /code
+
+COPY --chown=django:django . /code/src
 
 USER django
 RUN python3.8 -m venv /code/venv
