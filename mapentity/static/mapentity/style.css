@@ -107,6 +107,8 @@ select[multiple] {
 
 #entitylist-dropdown .dropdown-menu {
     position: absolute;
+    overflow-y: scroll;
+    max-height: calc(100vh - 50px);
 }
 #entitylist-dropdown .dropdown-item {
     padding: 0.25rem 1rem;
@@ -464,11 +466,14 @@ div.dataTables_wrapper div.dataTables_filter input {
 #filters-panel {
     width: 240px;
     max-width: 480px;
+    padding-top: 10px;
+    background-color: #f5f5f5;
 }
 
 #mainfilter {
-    background-color: #f5f5f5;
     padding: .5rem;
+    max-height: calc(100vh - 25px);
+    overflow-y: scroll;
 }
 
 #mainfilter label {
@@ -528,20 +533,22 @@ div.dataTables_wrapper div.dataTables_filter input {
 
 #filters-close {
     position: absolute;
-    right: -20px;
-    top: -25px;
+    top: -20px;
+    right: -15px;
 }
 
 #filters-close a {
-    padding: 4px;
     font-size: 20px;
     color: #666;
+    background-color: #f5f5f5;
+    border-radius: 50%;
 }
 
 .popover {
     border: 5px solid rgba(0, 0, 0, 0.5);
     font-size: 14px;
     max-width: none;
+    margin-top: 5px;
 }
 
 span.filter-info {
@@ -641,10 +648,6 @@ span.filter-info {
 
 .details-panel .hover {
     background-color: rgba(240, 240, 240, 0.5);
-}
-
-.map-panel .leaflet-control-attribution {
-    display: none;
 }
 
 .map-panel .leaflet-control-information {

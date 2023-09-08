@@ -1,14 +1,64 @@
 CHANGELOG
 =========
 
-8.5.1+dev      (XXXX-XX-XX)
------------------------
+8.5.6+dev  (XXXX-XX-XX)
+----------------------------
 
 **Breaking changes**
 
 * Compatibility with new django-crispy-forms (2.0.0+)
   * New explicit dependency to ``crispy-bootstrap4``.
   * You should adapt configuration by adding `crispy_bootstrap4` in your INSTALLED_APPS and check your templates inheritance. 
+
+**Maintenance**
+
+* Support django 4.2 and python 3.11
+* Drop django 3.1 support
+
+
+8.5.6      (2023-09-04)
+-----------------------
+
+**Bug fixes**
+
+- Fix Control Information error and revert code (#272)
+
+
+8.5.5 	   (2023-09-04)
+-----------------------
+**DO NOT USE IT**
+
+**Bug fixes**
+
+- Fix hidden base layer attributions (#271)
+
+
+8.5.4      (2023-07-03)
+-----------------------
+
+**Improvments**
+
+- Move filter popover close button (related to https://github.com/GeotrekCE/Geotrek-admin/issues/2968)
+- Add a scroll bar into filter form
+- Add a scroll bar into module list (elated to https://github.com/GeotrekCE/Geotrek-admin/issues/2849)
+
+* Support django 4.2 and python 3.11
+
+
+8.5.3      (2023-03-27)
+-----------------------
+
+**Bug fixes**
+
+- Fix Attachment duplications
+
+
+8.5.2      (2023-02-28)
+-----------------------
+
+**Bug fixes**
+
+- Fix default format from API should be datatables when not specified
 
 
 8.5.1      (2023-02-16)

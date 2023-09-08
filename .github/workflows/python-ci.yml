@@ -13,10 +13,10 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -31,19 +31,19 @@ jobs:
           flake8 mapentity test_project test_app
 
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04  # wait for spatialite fix
     strategy:
       matrix:
-        python-version: [ '3.8', '3.10' ]
-        django-version: [ '3.2.*', '4.1.*' ]
+        python-version: [ '3.8', '3.11' ]
+        django-version: [ '3.2.*', '4.2.*' ]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get -y install gettext libproj-dev binutils gdal-bin libgdal-dev libsqlite3-mod-spatialite libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info libpangoft2-1.0-0 libjpeg-dev libopenjp2-7-dev libsasl2-dev python-dev libldap2-dev libssl-dev
+        sudo apt-get -y install gettext libproj-dev binutils gdal-bin libgdal-dev libsqlite3-mod-spatialite libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info libpangoft2-1.0-0 libjpeg-dev libopenjp2-7-dev libsasl2-dev python3-dev libldap2-dev libssl-dev
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -55,10 +55,6 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel
         pip install .[dev]
         pip install Django==${{ matrix.django-version }} -U
-        if [[ ${{ matrix.django-version }} == 2.2.* ]]; then
-          # django-modeltranslation 0.18.3 breaks with django < 3.2
-          pip install django-modeltranslation==0.18.2 -U
-        fi
 
     - name: Check pending migrations
       run: |
@@ -76,11 +72,11 @@ jobs:
 
   publish:
     needs: [lint, test]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

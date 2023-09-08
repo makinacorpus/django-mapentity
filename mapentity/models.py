@@ -125,7 +125,8 @@ class DuplicateMixin(object):
                                 child.duplicate(**attrs)
 
             if not skip_attachments:
-                for attachment in get_attachment_model().objects.filter(object_id=self.pk):
+                for attachment in get_attachment_model().objects.filter(object_id=self.pk,
+                                                                        content_type_id=self.get_content_type_id()):
                     attachments["content_object"] = clone
                     clone_attachment(attachment, 'attachment_file', attachments)
             transaction.savepoint_commit(sid)

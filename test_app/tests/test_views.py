@@ -527,6 +527,19 @@ class LogViewMapentityTest(MapEntityTest):
         )
         super().test_api_datatables_list_for_model()
 
+    @freeze_time("2022-06-10 12:40:10")
+    def test_api_no_format_list_for_model(self):
+        obj = self.modelfactory()
+
+        LogEntry.objects.log_action(
+            user_id=self.user.pk,
+            content_type_id=obj.get_content_type_id(),
+            object_id=obj.pk,
+            object_repr=force_str(object),
+            action_flag=1
+        )
+        super().test_api_no_format_list_for_model()
+
     def test_crud_status(self):
         instance = self.modelfactory()
 

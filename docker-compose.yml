@@ -11,7 +11,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${WEB_PORT:-8000}:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./:/code/src
     depends_on:
@@ -22,7 +22,7 @@ services:
     networks:
       default:
         aliases:
-          - ${SERVER_NAME}
+          - mapentity.local
 
 volumes:
   postgres:
