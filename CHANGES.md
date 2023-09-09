@@ -4,9 +4,18 @@ CHANGELOG
 8.5.6+dev  (XXXX-XX-XX)
 ----------------------------
 
-* Support django 4.2 and python 3.11
-* Drop django 3.1 support
-* Ease quickstart for developers
+**Feature**
+
+- Modify TinyMCE configuration to add browser spelling check for textAreas (related to https://github.com/GeotrekCE/Geotrek-admin/issues/1189)
+
+**Maintenance**
+
+- Support django 4.2 and python 3.11
+- Drop django 3.1 support
+
+**Documentation**
+
+- Ease quickstart for developers
 
 **Minor fixes**
 
