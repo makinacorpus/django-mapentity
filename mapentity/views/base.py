@@ -6,12 +6,13 @@ import re
 from datetime import datetime
 from io import BytesIO
 from urllib.parse import quote
+from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.db.models import GeometryField
 from django.core.exceptions import PermissionDenied
-from django.http import (HttpResponse, HttpResponseBadRequest, Http404)
+from django.http import (HttpResponse, HttpResponseBadRequest, Http404, JsonResponse)
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views import static, View
@@ -187,3 +188,17 @@ def history_delete(request, path=None):
             history = [h for h in history if h['path'] != path]
             request.session['history'] = history
     return HttpResponse()
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+@login_required
+def tinymce_upload(request):
+    file = request.FILES.get('file')
+    filename = f"tinymce/{uuid4()}/{str(file)}"
+    path = f"{settings.MEDIA_URL}{filename}"
+    location = f"{settings.MEDIA_ROOT}/{filename}"
+    os.makedirs(os.path.dirname(location), exist_ok=True)
+    with open(location, "wb+") as destination:
+        destination.write(file.read())
+    return JsonResponse({"location": request.build_absolute_uri(path)})

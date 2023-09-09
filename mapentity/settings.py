@@ -74,7 +74,13 @@ TINYMCE_DEFAULT_CONFIG = {
                        'img[longdesc|usemap|src|border|alt=|title|hspace|vspace|width|height|align],'
                        'p,em/i,strong/b,div[align],br,ul,li,ol,span[style],'
                        'iframe[src|frameborder=0|alt|title|width|height|align|name]'),
-    'setup': 'tinyMceInit'
+    'setup': 'tinyMceInit',
+    'image_title': True,
+    'image_caption': True,
+    'automatic_uploads': True,
+    'convert_urls': False,
+    'file_picker_types': 'image media',
+    'images_upload_url': '/tinymce/upload/',
 }
 TINYMCE_DEFAULT_CONFIG.update(getattr(settings, 'TINYMCE_DEFAULT_CONFIG', {}))
 setattr(settings, 'TINYMCE_DEFAULT_CONFIG', TINYMCE_DEFAULT_CONFIG)
