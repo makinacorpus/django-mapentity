@@ -25,6 +25,7 @@ from .mixins import JSONResponseMixin, FilterListMixin, ModelViewMixin
 from ..decorators import view_permission_required
 from ..helpers import capture_image
 from ..settings import app_settings
+from ..tokens import TokenManager
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +159,9 @@ def map_screenshot(request):
         context['print'] = True
         printcontext = json.dumps(context)
         contextencoded = quote(printcontext)
-        map_url += '?context=%s' % contextencoded
+        map_url += "?auth_token=" + TokenManager.generate_token()
+        map_url += '&context=%s' % contextencoded
+
         logger.debug("Capture %s" % map_url)
 
         # Capture image and return it

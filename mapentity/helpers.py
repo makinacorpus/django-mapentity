@@ -20,8 +20,8 @@ from django.template.loader import get_template
 from django.urls import resolve
 from django.utils import timezone
 from django.utils.translation import get_language
-
 from .settings import app_settings, API_SRID
+from .tokens import TokenManager
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +85,6 @@ def is_file_uptodate(path, date_update, delete_empty=True):
 def get_source(url, headers):
     logger.info("Request to: %s" % url)
     source = requests.get(url, headers=headers)
-
     status_error = 'Request on %s failed (status=%s)' % (url, source.status_code)
     assert source.status_code == 200, status_error
 
@@ -99,7 +98,6 @@ def download_to_stream(url, stream, silent=False, headers=None):
     """ Download url and writes response to stream.
     """
     source = None
-
     try:
         try:
             source = get_source(url, headers)
@@ -144,9 +142,9 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False):
         mimetype = types_map[extension]
 
     fromparam = ("&from=%s" % quote(from_type)) if from_type is not None else ''
-    params = 'url={url}{fromparam}&to={to}'.format(url=quote(url),
-                                                   fromparam=fromparam,
-                                                   to=quote(mimetype))
+    auth_token = TokenManager.generate_token()
+    url += "?auth_token=" + auth_token
+    params = f"to={quote(mimetype)}&url={quote(url)}{fromparam}"
     url = '{server}/?{params}'.format(server=app_settings['CONVERSION_SERVER'],
                                       params=params)
     return url
@@ -207,8 +205,8 @@ def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet
         _printcontext.update(printcontext)
     serialized = json.dumps(_printcontext)
     # Run head-less capture (takes time)
-    url += '?lang={}&context={}'.format(get_language(), quote(serialized))
-
+    auth_token = TokenManager.generate_token()
+    url += f"?lang={get_language()}&auth_token={auth_token}&context={quote(serialized)}"
     with open(destination, 'wb') as fd:
         capture_image(url, fd,
                       selector='.map-panel',
