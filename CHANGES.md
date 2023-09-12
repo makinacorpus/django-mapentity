@@ -8,6 +8,10 @@ CHANGELOG
 * Drop django 3.1 support
 * Ease quickstart for developers
 
+**Minor fixes**
+
+- Improve authentication mechanism for screamshotter and convertit
+
 
 8.5.6      (2023-09-04)
 -----------------------
