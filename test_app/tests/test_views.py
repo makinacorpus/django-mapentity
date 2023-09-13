@@ -139,7 +139,7 @@ class ConvertTest(BaseTest):
         self.client.get('/convert/?url=http://geotrek.fr',
                         HTTP_ACCEPT_LANGUAGE='it')
         host = app_settings['CONVERSION_SERVER']
-        url = f"{host}/?to=application/pdf&url=http%3A//geotrek.fr%3Fauth_token%3Da_temp0rary_t0k3n"
+        url = f"{host}/?to=application/pdf&url=http%3A//geotrek.fr?auth_token=a_temp0rary_t0k3n"
         get_mocked.assert_called_with(url,
                                       headers={'Accept-Language': 'it'})
 
@@ -153,7 +153,7 @@ class ConvertTest(BaseTest):
         self.login()
         self.client.get('/convert/?url=/path/1/')
         host = app_settings['CONVERSION_SERVER']
-        url = f"{host}/?to=application/pdf&url=http%3A//testserver/path/1/%3Fauth_token%3Da_temp0rary_t0k3n"
+        url = f"{host}/?to=application/pdf&url=http%3A//testserver/path/1/?auth_token=a_temp0rary_t0k3n"
         get_mocked.assert_called_with(url,
                                       headers={})
 

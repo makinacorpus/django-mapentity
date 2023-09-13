@@ -143,10 +143,9 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False, auth_token=Non
 
     fromparam = ("&from=%s" % quote(from_type)) if from_type is not None else ''
     token_param = "?auth_token={}".format(auth_token) if auth_token else ''
-    params = f"to={quote(mimetype)}&url={quote(url)}{token_param}{fromparam}"
+    params = f"to={quote(mimetype)}&url={fromparam}{quote(url)}{token_param}"
     url = '{server}/?{params}'.format(server=app_settings['CONVERSION_SERVER'],
                                       params=params)
-    print(url)
     return url
 
 
