@@ -133,7 +133,7 @@ def download_to_stream(url, stream, silent=False, headers=None):
     return source
 
 
-def convertit_url(url, from_type=None, to_type=None, proxy=False, auth_token=None):
+def convertit_url(url, from_type=None, to_type=None, proxy=False):
     if not to_type:
         to_type = 'application/pdf'
     mimetype = to_type
@@ -142,8 +142,9 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False, auth_token=Non
         mimetype = types_map[extension]
 
     fromparam = ("&from=%s" % quote(from_type)) if from_type is not None else ''
-    token_param = "?auth_token={}".format(auth_token) if auth_token else ''
-    params = f"to={quote(mimetype)}&url={fromparam}{quote(url)}{token_param}"
+    params = 'url={url}{fromparam}&to={to}'.format(url=quote(url),
+                                                   fromparam=fromparam,
+                                                   to=quote(mimetype))
     url = '{server}/?{params}'.format(server=app_settings['CONVERSION_SERVER'],
                                       params=params)
     return url

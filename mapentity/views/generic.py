@@ -290,7 +290,8 @@ class Convert(View):
         fromtype = request.GET.get('from')
         format = request.GET.get('to', self.format)
         auth_token = TokenManager.generate_token()
-        url = convertit_url(source, from_type=fromtype, to_type=format, auth_token=auth_token)
+        source_url = f"{source}?auth_token={auth_token}"
+        url = convertit_url(source_url, from_type=fromtype, to_type=format)
 
         response = HttpResponse()
         received = download_to_stream(url, response,
