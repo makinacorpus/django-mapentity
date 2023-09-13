@@ -22,4 +22,8 @@ RUN  /code/venv/bin/pip install --no-cache-dir pip setuptools wheel -U
 # Install dev requirements
 RUN /code/venv/bin/pip3 install --no-cache-dir -e .[dev] -U
 
-CMD ["/code/venv/bin/python3.8", "manage.py", "runserver", "0.0.0.0:8000"]
+# Activate venv through entrypoint
+COPY --chown=django:django docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+CMD ["manage.py", "runserver", "0.0.0.0:8000"]

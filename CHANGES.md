@@ -14,6 +14,7 @@ CHANGELOG
 
 * Support django 4.2 and python 3.11
 * Drop django 3.1 support
+* Ease quickstart for developers
 
 
 8.5.6      (2023-09-04)
