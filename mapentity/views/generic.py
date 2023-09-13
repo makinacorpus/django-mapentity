@@ -22,6 +22,8 @@ from django.views.generic.list import ListView
 from django_weasyprint import WeasyTemplateResponseMixin
 from djappypod.response import OdtTemplateResponse
 
+from mapentity.tokens import TokenManager
+
 from .base import history_delete, BaseListView
 from .mixins import (ModelViewMixin, FormViewMixin)
 from .. import models as mapentity_models
@@ -287,7 +289,8 @@ class Convert(View):
 
         fromtype = request.GET.get('from')
         format = request.GET.get('to', self.format)
-        url = convertit_url(source, from_type=fromtype, to_type=format)
+        auth_token = TokenManager.generate_token()
+        url = convertit_url(source, from_type=fromtype, to_type=format, auth_token=auth_token)
 
         response = HttpResponse()
         received = download_to_stream(url, response,

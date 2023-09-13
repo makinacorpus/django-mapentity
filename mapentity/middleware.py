@@ -38,13 +38,18 @@ class AutoLoginMiddleware:
         if request.user.is_anonymous:
             auth_token = request.GET.get("auth_token")
             if auth_token:
+                print("TOKEN")
                 internal_user = get_internal_user()
                 if TokenManager.verify_token(auth_token):
+                    print("BON TOKEN")
                     login(request, internal_user)
                     request.user = internal_user
                     logger.info(f"authentified {auth_token}")
                     # token is deleted after one authentication
+                    print("PRESQUE SUPPRIME")
                     TokenManager.delete_token(auth_token)
+                    print("SUPPRIME")
                 else:
                     logger.warning(f"not authentified {auth_token}")
+        print(self.get_response(request))
         return self.get_response(request)
