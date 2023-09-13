@@ -4,6 +4,14 @@ CHANGELOG
 8.5.6+dev  (XXXX-XX-XX)
 ----------------------------
 
+**Breaking changes**
+
+* Compatibility with new django-crispy-forms (2.0.0+)
+  * New explicit dependency to ``crispy-bootstrap4``.
+  * You should adapt configuration by adding `crispy_bootstrap4` in your INSTALLED_APPS and check your templates inheritance. 
+
+**Maintenance**
+
 * Support django 4.2 and python 3.11
 * Drop django 3.1 support
 * Ease quickstart for developers

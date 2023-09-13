@@ -35,6 +35,7 @@ Add these entries to your ``INSTALLED_APPS``::
     'compressor',
     'easy_thumbnails',
     'crispy_forms',
+    'crispy_bootstrap4',
     'rest_framework',
     'embed_video',
     'modeltranslation'
