@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from django.conf import settings
 from django.contrib import messages
@@ -21,6 +22,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django_weasyprint import WeasyTemplateResponseMixin
 from djappypod.response import OdtTemplateResponse
+
+from mapentity.tokens import TokenManager
 
 from .base import history_delete, BaseListView
 from .mixins import (ModelViewMixin, FormViewMixin)
@@ -287,7 +290,21 @@ class Convert(View):
 
         fromtype = request.GET.get('from')
         format = request.GET.get('to', self.format)
-        url = convertit_url(source, from_type=fromtype, to_type=format)
+
+        # Parse and unparse to add the auth_token inside the URL
+        parse_url = urlparse(source)
+        url_parameters = parse_qs(parse_url.query)
+
+        # Adds the token
+        auth_token = TokenManager.generate_token()
+        url_parameters["auth_token"] = [auth_token]
+
+        query = urlencode(url_parameters, doseq=True)
+        new_query_with_token = parse_url._replace(query=query)
+        url_with_token = urlunparse(new_query_with_token)
+
+        source_url = f"{url_with_token}"
+        url = convertit_url(source_url, from_type=fromtype, to_type=format)
 
         response = HttpResponse()
         received = download_to_stream(url, response,
