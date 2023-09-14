@@ -129,24 +129,32 @@ class ConvertTest(BaseTest):
         self.assertEqual(response.status_code, 405)
 
     @mock.patch('mapentity.helpers.requests.get')
-    def test_convert_view_uses_original_request_headers(self, get_mocked):
+    @mock.patch('mapentity.tokens.TokenManager.generate_token')
+    def test_convert_view_uses_original_request_headers(self, token_mocked, get_mocked):
+        token_mocked.return_value = "a_temp0rary_t0k3n"
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
         get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=http://geotrek.fr',
                         HTTP_ACCEPT_LANGUAGE='it')
-        get_mocked.assert_called_with('http://localhost//?url=http%3A//geotrek.fr&to=application/pdf',
+        host = app_settings['CONVERSION_SERVER']
+        url = f"{host}/?url=http%3A//geotrek.fr%3Fauth_token%3Da_temp0rary_t0k3n&to=application/pdf"
+        get_mocked.assert_called_with(url,
                                       headers={'Accept-Language': 'it'})
 
     @mock.patch('mapentity.helpers.requests.get')
-    def test_convert_view_builds_absolute_url_from_relative(self, get_mocked):
+    @mock.patch('mapentity.tokens.TokenManager.generate_token')
+    def test_convert_view_builds_absolute_url_from_relative(self, token_mocked, get_mocked):
+        token_mocked.return_value = "a_temp0rary_t0k3n"
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
         get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=/path/1/')
-        get_mocked.assert_called_with('http://localhost//?url=http%3A//testserver/path/1/&to=application/pdf',
+        host = app_settings['CONVERSION_SERVER']
+        url = f"{host}/?url=http%3A//testserver/path/1/%3Fauth_token%3Da_temp0rary_t0k3n&to=application/pdf"
+        get_mocked.assert_called_with(url,
                                       headers={})
 
 
@@ -385,11 +393,13 @@ class DetailViewTest(BaseTest):
                             '<img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
         self.assertContains(response,
                             '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
-                            ' href="/convert/?url=/document/dummymodel-{}.odt&to=doc">'
+                            ' href="/convert/?url=/document/dummymodel-{}.odt'
+                            '&from=application/vnd.oasis.opendocument.text&to=doc">'
                             '<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
         self.assertContains(response,
                             '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
-                            ' href="/convert/?url=/document/dummymodel-{}.odt">'
+                            ' href="/convert/?url=/document/dummymodel-{}.odt'
+                            '&from=application/vnd.oasis.opendocument.text">'
                             '<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
 
     def test_export_buttons_weasyprint(self):
