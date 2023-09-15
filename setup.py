@@ -47,11 +47,10 @@ setup(
         'easy-thumbnails',
         'fiona',
         'gpxpy',
-        'netifaces',
         'lxml',
         'paperclip',
         'requests',
-        'WeasyPrint',
+        'weasyprint',
     ],
     tests_require=tests_require,
     extras_require={
