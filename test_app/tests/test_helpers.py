@@ -4,6 +4,7 @@ from unittest import mock
 from django.test import TestCase
 
 from mapentity.helpers import (
+    capture_map_image,
     capture_url,
     convertit_url,
     user_has_perm,
@@ -24,6 +25,13 @@ class MapEntityCaptureHelpersTest(TestCase):
     def test_capture_url_is_escaped(self):
         url = capture_url('http://geotrek.fr')
         self.assertIn('http%3A//geotrek.fr', url)
+
+    @mock.patch('mapentity.helpers.open')
+    @mock.patch('mapentity.helpers.capture_image')
+    def test_capture_url_has_auth_token(self, mocked_capture, mocked_open):
+        capture_map_image('', '')
+        url, _ = mocked_capture.call_args[0]
+        self.assertIn("auth_token", url)
 
     def test_capture_url_with_no_params(self):
         url = capture_url('http://geotrek.fr')

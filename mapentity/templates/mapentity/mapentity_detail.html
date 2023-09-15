@@ -13,8 +13,8 @@
       <a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank" href="{{ object.get_document_url }}"><img src="{% static "paperclip/fileicons/pdf.png" %}"/> {% trans "PDF" %}</a>
       {% else %}
       <a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank" href="{{ object.get_document_url }}"><img src="{% static "paperclip/fileicons/odt.png" %}"/> {% trans "ODT" %}</a>
-      <a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank" href="{% url 'mapentity:convert' %}?url={{ object.get_document_url|urlencode }}&to=doc"><img src="{% static 'paperclip/fileicons/doc.png' %}"/> {% trans "DOC" %}</a>
-      <a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank" href="{% url 'mapentity:convert' %}?url={{ object.get_document_url|urlencode }}"><img src="{% static 'paperclip/fileicons/pdf.png' %}"/> {% trans "PDF" %}</a>
+      <a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank" href="{% url 'mapentity:convert' %}?url={{ object.get_document_url|urlencode }}&from=application/vnd.oasis.opendocument.text&to=doc"><img src="{% static 'paperclip/fileicons/doc.png' %}"/> {% trans "DOC" %}</a>
+      <a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank" href="{% url 'mapentity:convert' %}?url={{ object.get_document_url|urlencode }}&from=application/vnd.oasis.opendocument.text"><img src="{% static 'paperclip/fileicons/pdf.png' %}"/> {% trans "PDF" %}</a>
       {% endif %}
       {% endblock download %}
     </div>
