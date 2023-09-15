@@ -3,7 +3,7 @@ from django.urls import path, re_path, include
 
 from .registry import registry
 from .settings import app_settings
-from .views import (map_screenshot, history_delete,
+from .views import (map_screenshot, history_delete, tinymce_upload,
                     ServeAttachment, JSSettings, Convert)
 
 if app_settings['ACTION_HISTORY_ENABLED']:
@@ -23,6 +23,7 @@ urlpatterns = [
     path('convert/', Convert.as_view(), name='convert'),
     path('history/delete/', history_delete, name='history_delete'),
     path('api/auth/', include('rest_framework.urls')),
+    path('tinymce/upload/', tinymce_upload, name='tinymce_upload'),
     # See default value in app_settings.JS_SETTINGS.
     # Will be overriden, most probably.
     path('api/settings.json', JSSettings.as_view(), name='js_settings'),

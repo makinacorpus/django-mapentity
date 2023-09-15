@@ -6,6 +6,7 @@ from .base import (
     JSSettings,
     map_screenshot,
     history_delete,
+    tinymce_upload,
 )
 from .generic import (
     Convert,

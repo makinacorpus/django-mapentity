@@ -4,9 +4,18 @@ CHANGELOG
 8.5.6+dev  (XXXX-XX-XX)
 ----------------------------
 
-* Support django 4.2 and python 3.11
-* Drop django 3.1 support
-* Ease quickstart for developers
+**Feature**
+
+- Allow the user to upload file from TinyMCE editor to insert local images directly into the text area
+
+**Maintenance**
+
+- Support django 4.2 and python 3.11
+- Drop django 3.1 support
+
+**Documentation**
+
+- Ease quickstart for developers
 
 **Minor fixes**
 
