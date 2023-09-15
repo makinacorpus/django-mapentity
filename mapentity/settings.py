@@ -69,6 +69,8 @@ TINYMCE_DEFAULT_CONFIG = {
     'forced_root_block': False,
     'width': '95%',
     'resize': "both",
+    'browser_spellcheck': True,
+    'contextmenu': False,
     'valid_elements': ('@[id|class|style|title|dir<ltr?rtl|lang|xml::lang],'
                        'a[rel|rev|charset|hreflang|tabindex|accesskey|type|name|href|target|title|class],'
                        'img[longdesc|usemap|src|border|alt=|title|hspace|vspace|width|height|align],'
