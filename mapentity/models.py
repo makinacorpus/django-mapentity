@@ -19,7 +19,6 @@ from rest_framework import permissions as rest_permissions
 
 from paperclip.settings import get_attachment_model
 from mapentity.templatetags.mapentity_tags import humanize_timesince
-from mapentity.tokens import TokenManager
 from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract_attributes_html, clone_attachment
 from .settings import app_settings, API_SRID
 
@@ -261,9 +260,6 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
 
     def get_document_url(self):
         return reverse(self._entity.url_name(ENTITY_DOCUMENT), args=[str(self.pk)])
-
-    def get_token(self):
-        return TokenManager.generate_token()
 
     def get_update_url(self):
         return reverse(self._entity.url_name(ENTITY_UPDATE), args=[str(self.pk)])
