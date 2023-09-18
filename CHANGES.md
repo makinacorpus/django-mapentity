@@ -4,6 +4,10 @@ CHANGELOG
 8.6.0+dev  (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Fix new authentication system
+
 
 8.6.0      (2023-09-15)
 -----------------------

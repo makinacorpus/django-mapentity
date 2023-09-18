@@ -42,9 +42,9 @@ class AutoLoginMiddleware:
                 if TokenManager.verify_token(auth_token):
                     login(request, internal_user)
                     request.user = internal_user
-                    logger.info(f"authentified {auth_token}")
+                    logger.info(f"authenticated {auth_token}")
                     # token is deleted after one authentication
                     TokenManager.delete_token(auth_token)
                 else:
-                    logger.warning(f"not authentified {auth_token}")
+                    logger.warning(f"not authenticated {auth_token}")
         return self.get_response(request)
