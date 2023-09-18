@@ -174,15 +174,14 @@ def capture_url(url, width=None, height=None, selector=None, waitfor=None):
                                                          height=height,
                                                          selector=selector,
                                                          waitfor=waitfor)
-    capture_url = '{server}/?url={url}{params}'.format(server=server,
-                                                       url=quote(url),
-                                                       params=params)
-    return capture_url
+    final_url = '{server}/?url={url}{params}'.format(server=server,
+                                                     url=quote(url),
+                                                     params=params)
+    return final_url
 
 
 def capture_image(url, stream, **kwargs):
-    """Capture url to stream.
-    """
+    """ Capture url to stream. """
     url = capture_url(url, **kwargs)
     download_to_stream(url, stream)
 

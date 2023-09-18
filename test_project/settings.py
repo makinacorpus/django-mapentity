@@ -190,8 +190,8 @@ LEAFLET_CONFIG = {
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 MAPENTITY_CONFIG = {
-    'CONVERSION_SERVER': 'http://localhost/',
-    'CAPTURE_SERVER': 'http://localhost/',
+    'CONVERSION_SERVER': 'http://convertit:6543',
+    'CAPTURE_SERVER': 'http://screamshotter:8000',
     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 }
 
