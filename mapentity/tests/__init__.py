@@ -155,7 +155,7 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
         obj = self.modelfactory.create()
         response = self.client.get(self.model.get_format_list_url() + '?format=gpx')
-        parsed = BeautifulSoup(response.content, 'lxml')
+        parsed = BeautifulSoup(response.content, features="xml")
         if hasattr(obj, 'geom_3d'):
             self.assertGreater(len(parsed.findAll('ele')), 0)
         else:
