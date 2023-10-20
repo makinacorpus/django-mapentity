@@ -3,6 +3,7 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
 from .filters import DummyModelFilter
+from .forms import RoadForm
 from .models import DummyModel, Road
 from .serializers import DummySerializer, RoadSerializer, DummyGeojsonSerializer
 
@@ -57,6 +58,11 @@ class DummyViewSet(mapentity_views.MapEntityViewSet):
         if self.format_kwarg == "geojson":
             qs = qs.annotate(api_geom=Transform("geom", 4326))
         return qs
+
+
+class RoadCreate(mapentity_views.MapEntityCreate):
+    model = Road
+    form_class = RoadForm
 
 
 class RoadViewSet(mapentity_views.MapEntityViewSet):

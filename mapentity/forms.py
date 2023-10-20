@@ -51,11 +51,12 @@ class TranslatedModelForm(forms.ModelForm):
             native = self.fields.pop(modelfield)
             # Add translated fields (e.g. `name_fr`, `name_en`...)
             for translated_language in app_settings['TRANSLATED_LANGUAGES']:
-                lang = translated_language[0]
+                lang = translated_language[0].replace('-', '_')
                 name = '{0}_{1}'.format(modelfield, lang)
                 # Add to form.fields{}
                 translated = copy.deepcopy(native)
-                translated.required = native.required and (lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
+                translated.required = native.required and (
+                            lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))
                 translated.label = "{0} [{1}]".format(translated.label, lang)
                 self.fields[name] = translated
                 # Keep track of replacements
@@ -77,7 +78,7 @@ class TranslatedModelForm(forms.ModelForm):
         if self.instance:
             for fields in self._translated.values():
                 for field in fields:
-                    self.fields[field].initial = getattr(self.instance, field)
+                    self.fields[field].initial = getattr(self.instance, field.replace("-", "_"))
 
 
 class SubmitButton(HTML):
@@ -92,7 +93,6 @@ class SubmitButton(HTML):
 
 
 class MapEntityForm(TranslatedModelForm):
-
     fieldslayout = None
     geomfields = []
     leftpanel_scrollable = True
@@ -236,7 +236,8 @@ class MapEntityForm(TranslatedModelForm):
             else:
                 # Add translated fields to layout
                 if field in self._translated:
-                    field_is_required = self.fields[f"{field}_{settings.MODELTRANSLATION_DEFAULT_LANGUAGE}"].required
+                    field_is_required = self.fields[
+                        f"{field}_{settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_')}"].required
                     # Only if they are required or not hidden
                     if field_is_required or field not in self.hidden_fields:
                         newlayout.append(self.__tabbed_layout_for_field(field))
@@ -247,7 +248,8 @@ class MapEntityForm(TranslatedModelForm):
     def __tabbed_layout_for_field(self, field):
         fields = []
         for replacement in self._translated[field]:
-            active = "active" if replacement.endswith('_{0}'.format(settings.MODELTRANSLATION_DEFAULT_LANGUAGE)) else ""
+            active = "active" if replacement.endswith(
+                '_{0}'.format(settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))) else ""
             fields.append(Div(replacement,
                               css_class="tab-pane " + active,
                               css_id=replacement))
@@ -255,11 +257,11 @@ class MapEntityForm(TranslatedModelForm):
         layout = Div(
             HTML("""
             <ul class="nav nav-pills offset-md-3">
-            {{% for lang in TRANSLATED_LANGUAGES %}}
+            {{% for lang in LANGUAGES_NAMES %}}
                 <li class="nav-item">
                     <a class="nav-link{{% if lang.0 == '{lang_code}'""" """ %}}
                        active{{% endif %}}" href="#{field}_{{{{ lang.0 }}}}"
-                       data-toggle="tab">{{{{ lang.0 }}}}
+                       data-toggle="tab">{{{{ lang.1 }}}}
                     </a>
                 </li>
             {{% endfor %}}
