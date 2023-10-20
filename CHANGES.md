@@ -4,6 +4,10 @@ CHANGELOG
 8.6.1+dev  (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Support sub languages
+
 
 8.6.1      (2023-09-18)
 -----------------------
