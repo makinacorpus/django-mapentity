@@ -52,12 +52,13 @@ class TranslatedModelForm(forms.ModelForm):
             native = self.fields.pop(modelfield)
             # Add translated fields (e.g. `name_fr`, `name_en`...)
             for translated_language in app_settings['TRANSLATED_LANGUAGES']:
-                name = build_localized_fieldname(modelfield, translated_language)
+                lang = translated_language[0]
+                name = build_localized_fieldname(modelfield, lang)
                 # Add to form.fields{}
                 translated = copy.deepcopy(native)
                 translated.required = native.required and (
-                            translated_language == settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
-                translated.label = "{0} [{1}]".format(translated.label, translated_language)
+                            lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
+                translated.label = "{0} [{1}]".format(translated.label, lang)
                 self.fields[name] = translated
                 # Keep track of replacements
                 self._translated.setdefault(modelfield, []).append(name)
