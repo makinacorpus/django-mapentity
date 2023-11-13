@@ -53,12 +53,12 @@ class TranslatedModelForm(forms.ModelForm):
             # Add translated fields (e.g. `name_fr`, `name_en`...)
             for translated_language in app_settings['TRANSLATED_LANGUAGES']:
                 lang = translated_language[0]
-                name = build_localized_fieldname(modelfield, lang)
+                name = build_localized_fieldname(modelfield, lang.replace('-', '_'))
                 # Add to form.fields{}
                 translated = copy.deepcopy(native)
                 translated.required = native.required and (
-                            lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
-                translated.label = "{0} [{1}]".format(translated.label, lang)
+                            lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))
+                translated.label = "{0} [{1}]".format(translated.label, lang.replace('-', '_'))
                 self.fields[name] = translated
                 # Keep track of replacements
                 self._translated.setdefault(modelfield, []).append(name)
@@ -238,7 +238,7 @@ class MapEntityForm(TranslatedModelForm):
                 # Add translated fields to layout
                 if field in self._translated:
                     field_is_required = self.fields[
-                        build_localized_fieldname(field, settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
+                        build_localized_fieldname(field, settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))
                     ].required
                     # Only if they are required or not hidden
                     if field_is_required or field not in self.hidden_fields:
@@ -258,17 +258,18 @@ class MapEntityForm(TranslatedModelForm):
 
         layout = Div(
             HTML("""
+            {{% load mapentity_tags %}}
             <ul class="nav nav-pills offset-md-3">
             {{% for lang in LANGUAGES_NAMES %}}
                 <li class="nav-item">
-                    <a class="nav-link{{% if lang.0 == '{lang_code}'""" """ %}}
-                       active{{% endif %}}" href="#{field}_{{{{ lang.0 }}}}"
-                       data-toggle="tab">{{{{ lang.1 }}}}
+                    <a class="nav-link{{% if lang.0|replace:"-|_" == '{lang_code}'""" """ %}}
+                       active{{% endif %}}" href="#{field}_{{{{ lang.0|replace:"-|_" }}}}"
+                       data-toggle="tab">{{{{ lang.1|replace:"-|_" }}}}
                     </a>
                 </li>
             {{% endfor %}}
             </ul>
-            """.format(lang_code=settings.MODELTRANSLATION_DEFAULT_LANGUAGE, field=field)),
+            """.format(lang_code=settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'), field=field)),
             Div(
                 *fields,
                 css_class="tab-content"
