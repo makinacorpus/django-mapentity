@@ -106,15 +106,18 @@ class MapEntityForm(TranslatedModelForm):
         self.helper.form_tag = True
 
         # If MAX_CHARACTERS is setted, set help text for rich text fields
-        textfield_help_text = ''
-        max_characters = settings.MAPENTITY_CONFIG.get('MAX_CHARACTERS', None)
-        if max_characters:
-            textfield_help_text = _('%(max)s characters maximum recommended') % {'max': max_characters}
-
+        max_characters_config = settings.MAPENTITY_CONFIG.get('MAX_CHARACTERS', {}) or {}
         # Default widgets
         for fieldname, formfield in self.fields.items():
+            textfield_help_text = ''
             # Custom code because formfield_callback does not work with inherited forms
             if formfield:
+                # set max character limit :
+                if self._meta.model._meta.db_table in max_characters_config:
+                    for conf in max_characters_config[self._meta.model._meta.db_table]:
+                        if fieldname == conf["field"]:
+                            textfield_help_text = _('%(max)s characters maximum recommended') % {'max': conf["value"]}
+
                 # Assign map widget to all geometry fields
                 try:
                     formmodel = self._meta.model
