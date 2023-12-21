@@ -4,6 +4,7 @@ CHANGELOG
 8.6.1+dev  (XXXX-XX-XX)
 -----------------------
 
+- Fix of the widget `SelectMultipleWithPop` which did not add the newly created element in the related list (#1299)
 
 8.6.1      (2023-09-18)
 -----------------------
