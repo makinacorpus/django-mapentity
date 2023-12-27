@@ -6,7 +6,7 @@ CHANGELOG
 
 **Bug fixes**
 
-- Support sub languages
+- Support sub languages (see https://github.com/GeotrekCE/Geotrek-admin/issues/3801)
 
 
 8.6.1      (2023-09-18)
