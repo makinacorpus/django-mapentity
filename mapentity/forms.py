@@ -53,7 +53,7 @@ class TranslatedModelForm(forms.ModelForm):
             # Add translated fields (e.g. `name_fr`, `name_en`...)
             for translated_language in app_settings['TRANSLATED_LANGUAGES']:
                 lang = translated_language[0]
-                name = build_localized_fieldname(modelfield, lang.replace('-', '_'))
+                name = build_localized_fieldname(modelfield, lang)
                 # Add to form.fields{}
                 translated = copy.deepcopy(native)
                 translated.required = native.required and (
@@ -238,7 +238,7 @@ class MapEntityForm(TranslatedModelForm):
                 # Add translated fields to layout
                 if field in self._translated:
                     field_is_required = self.fields[
-                        build_localized_fieldname(field, settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))
+                        build_localized_fieldname(field, settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
                     ].required
                     # Only if they are required or not hidden
                     if field_is_required or field not in self.hidden_fields:
