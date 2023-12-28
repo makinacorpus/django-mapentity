@@ -13,7 +13,6 @@ from paperclip.forms import AttachmentForm as BaseAttachmentForm
 from tinymce.widgets import TinyMCE
 
 from .models import ENTITY_PERMISSION_UPDATE_GEOM
-from .settings import app_settings
 from .widgets import MapWidget
 
 if 'modeltranslation' in settings.INSTALLED_APPS:
@@ -51,8 +50,7 @@ class TranslatedModelForm(forms.ModelForm):
             # Remove form native field (e.g. `name`)
             native = self.fields.pop(modelfield)
             # Add translated fields (e.g. `name_fr`, `name_en`...)
-            for translated_language in app_settings['TRANSLATED_LANGUAGES']:
-                lang = translated_language[0]
+            for lang in settings.MODELTRANSLATION_LANGUAGES:
                 name = build_localized_fieldname(modelfield, lang)
                 # Add to form.fields{}
                 translated = copy.deepcopy(native)
@@ -260,11 +258,11 @@ class MapEntityForm(TranslatedModelForm):
             HTML("""
             {{% load mapentity_tags %}}
             <ul class="nav nav-pills offset-md-3">
-            {{% for lang in TRANSLATED_LANGUAGES %}}
+            {{% for lang in MODELTRANSLATION_LANGUAGES %}}
                 <li class="nav-item">
-                    <a class="nav-link{{% if lang.0|replace:"-|_" == '{lang_code}'""" """ %}}
-                       active{{% endif %}}" href="#{field}_{{{{ lang.0|replace:"-|_" }}}}"
-                       data-toggle="tab">{{{{ lang.0 }}}}
+                    <a class="nav-link{{% if lang|replace:"-|_" == '{lang_code}'""" """ %}}
+                       active{{% endif %}}" href="#{field}_{{{{ lang|replace:"-|_" }}}}"
+                       data-toggle="tab">{{{{ lang }}}}
                     </a>
                 </li>
             {{% endfor %}}

@@ -114,8 +114,8 @@ DATABASES = {
 LANGUAGES = (
     ('en', "English"),
     ('fr', "French"),
-    ('zh-hant', "Traditional Chinese"),
 )
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
