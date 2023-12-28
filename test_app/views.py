@@ -3,7 +3,7 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
 from .filters import DummyModelFilter
-from .forms import RoadForm
+from .forms import DummyModelForm, RoadForm
 from .models import DummyModel, Road
 from .serializers import DummySerializer, RoadSerializer, DummyGeojsonSerializer
 
@@ -32,10 +32,12 @@ class DummyDetail(mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDe
 
 class DummyCreate(mapentity_views.MapEntityCreate):
     model = DummyModel
+    form_class = DummyModelForm
 
 
 class DummyUpdate(mapentity_views.MapEntityUpdate):
     model = DummyModel
+    form_class = DummyModelForm
 
 
 class DummyDelete(mapentity_views.MapEntityDelete):

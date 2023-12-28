@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-from django.conf.global_settings import LANGUAGES as LANGUAGES_LIST
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -115,6 +114,7 @@ DATABASES = {
 LANGUAGES = (
     ('en', "English"),
     ('fr', "French"),
+    ('zh-hant', "Traditional Chinese"),
 )
 LANGUAGE_CODE = 'en-us'
 
@@ -200,6 +200,3 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 MODELTRANSLATION_LANGUAGES = ('en', 'fr', 'zh-hant')
-MAPENTITY_CONFIG['TRANSLATED_LANGUAGES'] = [
-    language for language in LANGUAGES_LIST if language[0] in MODELTRANSLATION_LANGUAGES
-]

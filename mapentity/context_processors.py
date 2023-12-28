@@ -20,8 +20,4 @@ def settings(request):
         ACTION_HISTORY_ENABLED=app_settings['ACTION_HISTORY_ENABLED'],
         MAX_CHARACTERS=app_settings['MAX_CHARACTERS'],
         allowed_entities=allowed_entities,
-        LANGUAGES_NAMES=[
-            (lang[0].replace('-', '_'), lang[0])
-            for lang in app_settings['TRANSLATED_LANGUAGES']
-        ],
     )

@@ -1,10 +1,15 @@
 from modeltranslation.translator import TranslationOptions, translator
 
-from test_app.models import Road
+from test_app.models import DummyModel, Road
 
 
-class RoadTO(TranslationOptions):
+class DummyModelTO(TranslationOptions):
     fields = ('name', )
 
 
-translator.register(Road, RoadTO)
+class RoadModelTO(TranslationOptions):
+    fields = ('name', )
+
+
+translator.register(DummyModel, DummyModelTO)
+translator.register(Road, RoadModelTO)

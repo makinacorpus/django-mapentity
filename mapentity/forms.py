@@ -58,7 +58,7 @@ class TranslatedModelForm(forms.ModelForm):
                 translated = copy.deepcopy(native)
                 translated.required = native.required and (
                             lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))
-                translated.label = "{0} [{1}]".format(translated.label, lang.replace('-', '_'))
+                translated.label = "{0} [{1}]".format(translated.label, lang)
                 self.fields[name] = translated
                 # Keep track of replacements
                 self._translated.setdefault(modelfield, []).append(name)
@@ -260,11 +260,11 @@ class MapEntityForm(TranslatedModelForm):
             HTML("""
             {{% load mapentity_tags %}}
             <ul class="nav nav-pills offset-md-3">
-            {{% for lang in LANGUAGES_NAMES %}}
+            {{% for lang in TRANSLATED_LANGUAGES %}}
                 <li class="nav-item">
                     <a class="nav-link{{% if lang.0|replace:"-|_" == '{lang_code}'""" """ %}}
                        active{{% endif %}}" href="#{field}_{{{{ lang.0|replace:"-|_" }}}}"
-                       data-toggle="tab">{{{{ lang.1|replace:"-|_" }}}}
+                       data-toggle="tab">{{{{ lang.0 }}}}
                     </a>
                 </li>
             {{% endfor %}}
