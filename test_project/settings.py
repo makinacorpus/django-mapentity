@@ -115,6 +115,7 @@ LANGUAGES = (
     ('en', "English"),
     ('fr', "French"),
 )
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -197,3 +198,5 @@ MAPENTITY_CONFIG = {
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+MODELTRANSLATION_LANGUAGES = ('en', 'fr', 'zh-hant')

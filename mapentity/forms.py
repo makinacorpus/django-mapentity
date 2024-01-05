@@ -8,11 +8,11 @@ from django.conf import settings
 from django.contrib.gis.db.models.fields import GeometryField
 from django.core.exceptions import FieldDoesNotExist
 from django.utils.translation import gettext_lazy as _
+from modeltranslation.utils import build_localized_fieldname
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 from tinymce.widgets import TinyMCE
 
 from .models import ENTITY_PERMISSION_UPDATE_GEOM
-from .settings import app_settings
 from .widgets import MapWidget
 
 if 'modeltranslation' in settings.INSTALLED_APPS:
@@ -50,12 +50,12 @@ class TranslatedModelForm(forms.ModelForm):
             # Remove form native field (e.g. `name`)
             native = self.fields.pop(modelfield)
             # Add translated fields (e.g. `name_fr`, `name_en`...)
-            for translated_language in app_settings['TRANSLATED_LANGUAGES']:
-                lang = translated_language[0]
-                name = '{0}_{1}'.format(modelfield, lang)
+            for lang in settings.MODELTRANSLATION_LANGUAGES:
+                name = build_localized_fieldname(modelfield, lang)
                 # Add to form.fields{}
                 translated = copy.deepcopy(native)
-                translated.required = native.required and (lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
+                translated.required = native.required and (
+                            lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))
                 translated.label = "{0} [{1}]".format(translated.label, lang)
                 self.fields[name] = translated
                 # Keep track of replacements
@@ -77,7 +77,7 @@ class TranslatedModelForm(forms.ModelForm):
         if self.instance:
             for fields in self._translated.values():
                 for field in fields:
-                    self.fields[field].initial = getattr(self.instance, field)
+                    self.fields[field].initial = getattr(self.instance, field.replace("-", "_"))
 
 
 class SubmitButton(HTML):
@@ -92,7 +92,6 @@ class SubmitButton(HTML):
 
 
 class MapEntityForm(TranslatedModelForm):
-
     fieldslayout = None
     geomfields = []
     leftpanel_scrollable = True
@@ -236,7 +235,9 @@ class MapEntityForm(TranslatedModelForm):
             else:
                 # Add translated fields to layout
                 if field in self._translated:
-                    field_is_required = self.fields[f"{field}_{settings.MODELTRANSLATION_DEFAULT_LANGUAGE}"].required
+                    field_is_required = self.fields[
+                        build_localized_fieldname(field, settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
+                    ].required
                     # Only if they are required or not hidden
                     if field_is_required or field not in self.hidden_fields:
                         newlayout.append(self.__tabbed_layout_for_field(field))
@@ -247,24 +248,26 @@ class MapEntityForm(TranslatedModelForm):
     def __tabbed_layout_for_field(self, field):
         fields = []
         for replacement in self._translated[field]:
-            active = "active" if replacement.endswith('_{0}'.format(settings.MODELTRANSLATION_DEFAULT_LANGUAGE)) else ""
+            active = "active" if replacement.endswith(
+                '_{0}'.format(settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))) else ""
             fields.append(Div(replacement,
                               css_class="tab-pane " + active,
                               css_id=replacement))
 
         layout = Div(
             HTML("""
+            {{% load mapentity_tags %}}
             <ul class="nav nav-pills offset-md-3">
-            {{% for lang in TRANSLATED_LANGUAGES %}}
+            {{% for lang in MODELTRANSLATION_LANGUAGES %}}
                 <li class="nav-item">
-                    <a class="nav-link{{% if lang.0 == '{lang_code}'""" """ %}}
-                       active{{% endif %}}" href="#{field}_{{{{ lang.0 }}}}"
-                       data-toggle="tab">{{{{ lang.0 }}}}
+                    <a class="nav-link{{% if lang|replace:"-|_" == '{lang_code}'""" """ %}}
+                       active{{% endif %}}" href="#{field}_{{{{ lang|replace:"-|_" }}}}"
+                       data-toggle="tab">{{{{ lang }}}}
                     </a>
                 </li>
             {{% endfor %}}
             </ul>
-            """.format(lang_code=settings.MODELTRANSLATION_DEFAULT_LANGUAGE, field=field)),
+            """.format(lang_code=settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'), field=field)),
             Div(
                 *fields,
                 css_class="tab-content"

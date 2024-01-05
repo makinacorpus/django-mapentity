@@ -60,6 +60,9 @@ class DummyModelFunctionalTest(MapEntityTest):
             'geom': self.obj.geom.ewkt,
             'id': 1,
             'name': '<a href="/dummymodel/1/">a dummy model</a>',
+            'name_en': 'a dummy model',
+            'name_fr': '',
+            'name_zh_hant': '',
             'public': '<i class="bi bi-x-circle text-danger"></i>',
             'short_description': '',
             'tags': [self.obj.tags.first().pk]
