@@ -109,11 +109,21 @@ function tr(s) {
 function tinyMceInit(editor) {
     var context = $('body').data();
     editor.on('WordCountUpdate', function(event) {
-        if (("container" in event.target) && (window.SETTINGS.maxCharacters)) {
+        console.log(window.SETTINGS);
+        // DEPRECATED paramters maxCharacters -> to remove
+        if (("container" in event.target) && (window.SETTINGS.maxCharacters > 0)) {
+            var characters = event.wordCount.characters;
+            if (characters > window.SETTINGS.maxCharacters) {
+                event.target.container.classList.add('cec-overflow');
+            } else {
+                event.target.container.classList.remove('cec-overflow');
+            }
+        }
+        if (("container" in event.target) && (window.SETTINGS.maxCharactersByField)) {
             var fullTableName = context.appname+"_"+context.modelname
-            if (fullTableName in window.SETTINGS.maxCharacters) {
+            if (fullTableName in window.SETTINGS.maxCharactersByField) {
                 var currenInputName = event.target.container.previousSibling.name;
-                window.SETTINGS.maxCharacters[fullTableName].forEach(config => {
+                window.SETTINGS.maxCharactersByField[fullTableName].forEach(config => {
                     if(config.field == currenInputName) {
                         var statusBar = $(event.target.container).find(".tox-statusbar__wordcount");
                         $(event.target.container).find(".injectedCount").remove()

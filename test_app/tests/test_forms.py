@@ -36,15 +36,16 @@ class MapEntityFormTest(TestCase):
 
 
 class MapEntityRichTextFormTest(TestCase):
+    old_setting = app_settings.copy()
+    old_setting["MAX_CHARACTERS"] = 10
+    new_setting = app_settings.copy()
+    new_setting['MAX_CHARACTERS_BY_FIELD'] = {
+        "test_app_dummymodel": [{'field': 'short_description', 'value': 5}]
+    }
 
-    def setUp(self):
-        app_settings['MAX_CHARACTERS'] = {
-            "test_app_dummymodel": [{'field': 'short_description', 'value': 5}]
-        }
-
-    @override_settings(MAPENTITY_CONFIG=app_settings)
-    def test_max_characters(self):
-        """Test if help text is set with MAX_CHARACTERS setting"""
+    @override_settings(MAPENTITY_CONFIG=new_setting)
+    def test_max_characters_by_field(self):
+        """Test if help text is set with MAX_CHARACTERS_BY_FIELD setting"""
         sample_object = DummyModel.objects.create()
 
         form = DummyForm(instance=sample_object)
@@ -52,6 +53,14 @@ class MapEntityRichTextFormTest(TestCase):
         self.assertIn('Short description, 5 characters maximum recommended',
                       form.fields['short_description'].help_text)
 
-    def tearDown(self):
-        app_settings['MAX_CHARACTERS'] = 1200
+    @override_settings(MAPENTITY_CONFIG=old_setting)
+    def test_max_characters_global(self):
+        """Test if help text is set with MAX_CHARACTERS setting -> deprecated paramter"""
+        sample_object = DummyModel.objects.create()
 
+        form = DummyForm(instance=sample_object)
+        for field_name in ["description", "short_description"]:
+            self.assertIn(
+                '10 characters maximum recommended',
+                form.fields[field_name].help_text
+            )

@@ -1,5 +1,7 @@
 import copy
 
+from warnings import warn
+
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Button, HTML, Submit
@@ -106,15 +108,25 @@ class MapEntityForm(TranslatedModelForm):
         self.helper.form_tag = True
 
         # If MAX_CHARACTERS is setted, set help text for rich text fields
-        max_characters_config = settings.MAPENTITY_CONFIG.get('MAX_CHARACTERS', {}) or {}
+        global_help_text = ''
+        max_characters = settings.MAPENTITY_CONFIG.get('MAX_CHARACTERS', None)
+        if max_characters:
+            warn(
+                "Parameters MAX_CHARACTERS is deprecated, please use MAX_CHARACTERS_BY_FIELD instead",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            global_help_text = _('%(max)s characters maximum recommended') % {'max': max_characters}
+
+        max_characters_by_field_config = settings.MAPENTITY_CONFIG.get('MAX_CHARACTERS_BY_FIELD', {}) or {}
         # Default widgets
         for fieldname, formfield in self.fields.items():
             textfield_help_text = ''
             # Custom code because formfield_callback does not work with inherited forms
             if formfield:
                 # set max character limit :
-                if self._meta.model._meta.db_table in max_characters_config:
-                    for conf in max_characters_config[self._meta.model._meta.db_table]:
+                if self._meta.model._meta.db_table in max_characters_by_field_config:
+                    for conf in max_characters_by_field_config[self._meta.model._meta.db_table]:
                         if fieldname == conf["field"]:
                             textfield_help_text = _('%(max)s characters maximum recommended') % {'max': conf["value"]}
 
@@ -137,6 +149,8 @@ class MapEntityForm(TranslatedModelForm):
                 # Bypass widgets that inherit textareas, such as geometry fields
                 if formfield.widget.__class__ == forms.widgets.Textarea:
                     formfield.widget = TinyMCE()
+                    if max_characters:
+                        textfield_help_text = global_help_text
                     if formfield.help_text:
                         formfield.help_text += f", {textfield_help_text}"
                     else:

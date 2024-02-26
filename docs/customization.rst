@@ -232,9 +232,12 @@ Or change just one parameter (the opacity for example) :
 Edition
 '''''''
 
-For rich text fields, it is possible to a max number of caracters (spaces includes).
-A help message will be added, and color of TinyMCE status bar will be colored in pink.
+For rich text fields, it is possible to indicate a max number of characters on a specified field (spaces includes).
+A help message will be added, and color of TinyMCE status bar and border will be colored in red.
 
 .. code-block :: python
 
-    MAPENTITY_CONFIG['MAX_CHARACTERS'] = 1500
+    MAPENTITY_CONFIG['MAX_CHARACTERS_BY_FIELD'] = { 
+        "tourism_touristicevent": [{'field': 'description_teaser_fr', 'value': 50}, {'field': 'accessibility_fr', 'value': 25}],
+        "trekking_trek": [{'field': 'description_teaser_fr', 'value': 150}],
+    }
