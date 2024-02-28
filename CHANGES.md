@@ -1,12 +1,13 @@
 CHANGELOG
 =========
 
-8.6.2+dev      (XXXX-XX-XX)
+8.7.0      (2024-02-28)
 -----------------------
 
 - Fix of the widget `SelectMultipleWithPop` which did not add the newly created element in the related list (#1299)
 - Add `MAX_CHARACTERS_BY_FIELD` to control the max length of a rich text field. 
 - Deprecate the `MAX_CHARACTERS` parameter
+
 
 8.6.2      (2024-01-05)
 -----------------------
