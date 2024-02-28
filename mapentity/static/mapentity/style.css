@@ -842,6 +842,11 @@ label.requiredField .asteriskField {
 .cec-overflow.tox .tox-statusbar {
     background-color: pink;
 }
+.tox.is-invalid {
+    border-color: #dc3545!important;
+
+}
+
 
 
 /*

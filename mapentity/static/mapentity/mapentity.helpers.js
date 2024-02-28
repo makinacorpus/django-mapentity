@@ -107,14 +107,37 @@ function tr(s) {
 
 
 function tinyMceInit(editor) {
-    // Overflow on characters count
+    var context = $('body').data();
     editor.on('WordCountUpdate', function(event) {
+        console.log(window.SETTINGS);
+        // DEPRECATED paramters maxCharacters -> to remove
         if (("container" in event.target) && (window.SETTINGS.maxCharacters > 0)) {
             var characters = event.wordCount.characters;
             if (characters > window.SETTINGS.maxCharacters) {
                 event.target.container.classList.add('cec-overflow');
             } else {
                 event.target.container.classList.remove('cec-overflow');
+            }
+        }
+        if (("container" in event.target) && (window.SETTINGS.maxCharactersByField)) {
+            var fullTableName = context.appname+"_"+context.modelname
+            if (fullTableName in window.SETTINGS.maxCharactersByField) {
+                var currenInputName = event.target.container.previousSibling.name;
+                window.SETTINGS.maxCharactersByField[fullTableName].forEach(config => {
+                    if(config.field == currenInputName) {
+                        var statusBar = $(event.target.container).find(".tox-statusbar__wordcount");
+                        $(event.target.container).find(".injectedCount").remove()
+                        $("<p class='injectedCount'>"+event.wordCount.characters+"/"+config.value+" characters</p>").insertBefore(statusBar)
+                        if(event.wordCount.characters > config.value) {
+
+                            event.target.container.classList.add('cec-overflow');
+                            event.target.container.classList.add('is-invalid');
+                        } else {
+                            event.target.container.classList.remove('cec-overflow');
+                            event.target.container.classList.remove('is-invalid');
+                        }
+                    }
+                })
             }
         }
     });

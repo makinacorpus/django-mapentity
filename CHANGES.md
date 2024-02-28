@@ -5,6 +5,8 @@ CHANGELOG
 -----------------------
 
 - Fix of the widget `SelectMultipleWithPop` which did not add the newly created element in the related list (#1299)
+- Add `MAX_CHARACTERS_BY_FIELD` to control the max length of a rich text field. 
+- Deprecate the `MAX_CHARACTERS` parameter
 
 8.6.2      (2024-01-05)
 -----------------------
@@ -12,6 +14,7 @@ CHANGELOG
 **Bug fixes**
 
 - Support sub languages (see https://github.com/GeotrekCE/Geotrek-admin/issues/3801)
+
 
 
 8.6.1      (2023-09-18)
