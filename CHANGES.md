@@ -4,6 +4,9 @@ CHANGELOG
 8.7.0+dev  (XXXX-XX-XX)
 -----------------------
 
+**Feature**
+
+- Add current object in detail leaflet overlay (related to https://github.com/GeotrekCE/Geotrek-admin/issues/1300)
 
 8.7.0      (2024-02-28)
 -----------------------
