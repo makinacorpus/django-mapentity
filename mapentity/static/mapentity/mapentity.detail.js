@@ -17,8 +17,14 @@ $(document).ready(function () {
         var loaded_layer = false;
         var map = data.map;
 
-        var style = L.Util.extend({ clickable: false },
-            window.SETTINGS.map.styles[modelname] || {});
+
+        var style = window.SETTINGS.map.styles[modelname];
+        if (style === undefined) {
+            style = window.SETTINGS.map.styles.others;
+        }
+        if (!(typeof window.SETTINGS.map.styles.others === "function")) {
+            var style = L.Util.extend({}, style);
+        }
 
         var layer = new L.ObjectsLayer(null, {
             modelname: modelname,

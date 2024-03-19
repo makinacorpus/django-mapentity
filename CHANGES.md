@@ -4,6 +4,10 @@ CHANGELOG
 8.7.1+dev  (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- 'Others' color config to use with leaflet overlay (#290)
+
 8.7.1  (2024-03-13)
 -------------------
 
