@@ -7,6 +7,7 @@ CHANGELOG
 **Bug fixes**
 
 - 'Others' color config to use with leaflet overlay (#290)
+- Current object not mixed with other overlays (#292)
 
 8.7.1  (2024-03-13)
 -------------------

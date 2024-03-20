@@ -348,10 +348,6 @@ $(window).on('entity:map:list', function (e, data) {
         }
     );
 
-    // Change the group layer "Objects" (current object list) in first position
-    var allOverlaysLayers = document.getElementsByClassName('leaflet-control-layers-overlays')[0];
-    allOverlaysLayers.insertBefore(allOverlaysLayers.lastChild, allOverlaysLayers.firstChild);
-
     $(window).unload(function () {
         MapEntity.Context.saveFullContext(map, {
             filter: '#mainfilter',
