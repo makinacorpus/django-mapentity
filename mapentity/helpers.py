@@ -225,7 +225,7 @@ def extract_attributes_html(url, request):
     response = func(request, *args, **kwargs)
     response.render()
 
-    soup = bs4.BeautifulSoup(response.content, 'lxml')
+    soup = bs4.BeautifulSoup(response.content, features='html.parser')
     details = soup.find(id="properties")
     if details is None:
         raise ValueError('Content is of detail page is invalid')
