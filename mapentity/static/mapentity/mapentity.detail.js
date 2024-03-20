@@ -33,12 +33,6 @@ $(document).ready(function () {
         });
         map.layerscontrol.addOverlay(layer, objectsname, verbosename);
 
-        // Change the group layer "verbosename" (current object list) in first position
-        var allOverlaysLayers = document.getElementsByClassName('leaflet-control-layers-overlays')[0];
-        if (allOverlaysLayers) {
-            allOverlaysLayers.insertBefore(allOverlaysLayers.lastChild, allOverlaysLayers.firstChild);
-        }
-
         // Add object family layer (without current object) 
         map.on('layeradd', function (e) {
             var options = e.layer.options || { 'modelname': 'None' };

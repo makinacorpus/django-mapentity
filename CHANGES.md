@@ -8,6 +8,7 @@ CHANGELOG
 
 - Form clearing not handling number fields
 - Fix weasyprint html public view by converting file:// schemes with http://
+- Revert fixing current object order in overlays menu (#292)
 
 
 8.7.2  (2024-03-22)
