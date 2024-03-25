@@ -245,7 +245,7 @@ class MapEntityMarkupWeasyprint(MapEntityWeasyprint):
 
     def render_to_response(self, context, **response_kwargs):
         response = super().render_to_response(context, **response_kwargs)
-        response.rendered_content = self.patch_static_file_paths(response.rendered_content)
+        response.content = self.patch_static_file_paths(response.rendered_content)
         return response
 
 
