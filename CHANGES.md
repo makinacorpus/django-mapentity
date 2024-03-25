@@ -1,19 +1,29 @@
 CHANGELOG
 =========
 
-8.7.2  (2024-03-22)
--------------------
+8.7.2+dev   2024-03-22)
+-----------------------
+
+**Bug fixes**
+
+- Fix weasyprint html public view by converting file:// schemes with http://
+
+
+8.7.2      (2024-03-22)
+-----------------------
 
 **Bug fixes**
 
 - 'Others' color config to use with leaflet overlay (#290)
 
-8.7.1  (2024-03-13)
--------------------
+
+8.7.1      (2024-03-13)
+-----------------------
 
 **Feature**
 
 - Add current object in detail leaflet overlay (related to https://github.com/GeotrekCE/Geotrek-admin/issues/1300)
+
 
 8.7.0      (2024-02-28)
 -----------------------
@@ -29,7 +39,6 @@ CHANGELOG
 **Bug fixes**
 
 - Support sub languages (see https://github.com/GeotrekCE/Geotrek-admin/issues/3801)
-
 
 
 8.6.1      (2023-09-18)
