@@ -4,6 +4,10 @@ CHANGELOG
 8.7.2+dev  (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Form clearing not handling number fields
+
 8.7.2  (2024-03-22)
 -------------------
 
