@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-8.7.2+dev   2024-03-22)
+8.7.2+dev  (XXXX-XX-XX)
 -----------------------
 
 **Bug fixes**
@@ -9,8 +9,8 @@ CHANGELOG
 - Fix weasyprint html public view by converting file:// schemes with http://
 
 
-8.7.2      (2024-03-22)
------------------------
+8.7.2  (2024-03-22)
+-------------------
 
 **Bug fixes**
 
