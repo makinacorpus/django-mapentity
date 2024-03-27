@@ -6,6 +6,7 @@ CHANGELOG
 
 **Bug fixes**
 
+- Form clearing not handling number fields
 - Fix weasyprint html public view by converting file:// schemes with http://
 
 
