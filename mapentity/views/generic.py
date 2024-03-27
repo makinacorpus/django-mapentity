@@ -238,6 +238,18 @@ class MapEntityMarkupWeasyprint(MapEntityWeasyprint):
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_MARKUP
 
+    def patch_static_file_paths(self, content):
+        """ Patch weasyprint renderer content to switch file://xxx paths to html scheme """
+        file_paths_media = f"file://{settings.MEDIA_ROOT}"
+        new_content = content.replace(file_paths_media, settings.MEDIA_URL)
+        file_paths_static = f"file://{settings.STATIC_ROOT}"
+        return new_content.replace(file_paths_static, settings.STATIC_URL)
+
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        response.content = self.patch_static_file_paths(response.rendered_content)
+        return response
+
 
 class MapEntityDocumentOdt(MapEntityDocumentBase):
     response_class = OdtTemplateResponse

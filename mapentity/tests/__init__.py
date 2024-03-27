@@ -18,6 +18,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, LiveServerTestCase
 from django.test.testcases import to_list
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils import html
 from django.utils.encoding import force_str
 from django.utils.http import http_date
@@ -28,6 +29,7 @@ from freezegun import freeze_time
 from .factories import AttachmentFactory, SuperUserFactory, UserFactory
 from ..forms import MapEntityForm
 from ..helpers import smart_urljoin
+from ..models import ENTITY_MARKUP
 from ..settings import app_settings
 
 from paperclip.settings import get_attachment_model
@@ -121,6 +123,18 @@ class MapEntityTest(TestCase):
 
         obj = self.modelfactory.create()
         response = self.client.get(obj.get_document_url())
+        self.assertEqual(response.status_code, 200)
+
+    @patch('mapentity.helpers.requests')
+    def test_document_markup(self, mock_requests):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        mock_requests.get.return_value.status_code = 200
+        mock_requests.get.return_value.content = b'<p id="properties">Mock</p>'
+
+        obj = self.modelfactory.create()
+        response = self.client.get(reverse(obj._entity.url_name(ENTITY_MARKUP), args=[obj.pk]))
         self.assertEqual(response.status_code, 200)
 
     def test_bbox_filter(self):
