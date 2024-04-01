@@ -191,7 +191,7 @@ Media
 Attached files are downloaded by default by browser, with the following line,
 files will be opened in the browser :
 
-.. code-block :: python
+.. code-block:: python
 
     MAPENTITY_CONFIG['SERVE_MEDIA_AS_ATTACHMENT'] = False
 
@@ -203,7 +203,7 @@ These files need to be protected as the parent picture. We use a regex to find t
 
 You can change the regex, for example if you need to add other behaviour with easy_thumbnail :
 
-.. code-block :: python
+.. code-block:: python
 
     MAPENTITY_CONFIG['REGEX_PATH_ATTACHMENTS'] = r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$'
 
@@ -218,13 +218,13 @@ layer style.
 The styles are loaded in leaflet map in js and can be use with window.SETTINGS.map.styles
 
 
-.. code-block :: python
+.. code-block:: python
 
     MAPENTITY_CONFIG['MAP_STYLES'][key] = {'color': 'red', 'weight': 5}
 
 Or change just one parameter (the opacity for example) :
 
-.. code-block :: python
+.. code-block:: python
 
     MAPENTITY_CONFIG['MAP_STYLES'][key]['opacity'] = 0.8
 
@@ -232,10 +232,10 @@ Or change just one parameter (the opacity for example) :
 Edition
 '''''''
 
-For rich text fields, it is possible to indicate a max number of characters on a specified field (spaces includes).
-A help message will be added, and color of TinyMCE status bar and border will be colored in red.
+For rich text fields, it is possible to indicate a max number of characters on a specified field (spaces included).  
+A help message will be added, and color of TinyMCE status bar and border will be colored in red when max number of characters reached.
 
-.. code-block :: python
+.. code-block:: python
 
     MAPENTITY_CONFIG['MAX_CHARACTERS_BY_FIELD'] = { 
         "tourism_touristicevent": [{'field': 'description_teaser_fr', 'value': 50}, {'field': 'accessibility_fr', 'value': 25}],
