@@ -73,10 +73,6 @@ MapEntity.GeometryField = L.GeometryField.extend({
         var nameHTML = '<span style="color: '+ style['color'] + ';">&#x25A3;</span>&nbsp;' + objectsname;
         map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"))
 
-        // Change the group layer "Objects" (current object list) in first position
-        var allOverlaysLayers = document.getElementsByClassName('leaflet-control-layers-overlays')[0];
-        allOverlaysLayers.insertBefore(allOverlaysLayers.lastChild, allOverlaysLayers.firstChild);
-
         var url = this.modelLayerUrl();
         objectsLayer.load(url);
     },
