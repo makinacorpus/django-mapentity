@@ -7,7 +7,9 @@ from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
+from django.core.files.storage import default_storage
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
@@ -196,13 +198,14 @@ class MapEntityDocumentBase(ModelViewMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['datetime'] = datetime.now()
         context['objecticon'] = os.path.join(settings.STATIC_ROOT, self.get_entity().icon_big)
-        context['logo_path'] = os.path.join(settings.MEDIA_ROOT, 'upload/logo-header.png')
-        if not os.path.exists(context['logo_path']):
-            context['logo_path'] = os.path.join(settings.STATIC_ROOT, 'images/logo-header.png')
-        context['STATIC_URL'] = self.request.build_absolute_uri(settings.STATIC_URL)
-        context['STATIC_ROOT'] = settings.STATIC_ROOT
-        context['MEDIA_URL'] = self.request.build_absolute_uri(settings.MEDIA_URL)
-        context['MEDIA_ROOT'] = settings.MEDIA_ROOT
+        if default_storage.exists('upload/logo-header.png'):
+            context['logo_path'] = default_storage.path('upload/logo-header.png')
+        else:
+            context['logo_path'] = staticfiles_storage.path('upload/logo-header.png')
+        context['STATIC_URL'] = staticfiles_storage.base_url
+        context['STATIC_ROOT'] = staticfiles_storage.location
+        context['MEDIA_URL'] = default_storage.base_url
+        context['MEDIA_ROOT'] = default_storage.location
         return context
 
 
@@ -240,10 +243,10 @@ class MapEntityMarkupWeasyprint(MapEntityWeasyprint):
 
     def patch_static_file_paths(self, content):
         """ Patch weasyprint renderer content to switch file://xxx paths to html scheme """
-        file_paths_media = f"file://{settings.MEDIA_ROOT}"
-        new_content = content.replace(file_paths_media, settings.MEDIA_URL)
-        file_paths_static = f"file://{settings.STATIC_ROOT}"
-        return new_content.replace(file_paths_static, settings.STATIC_URL)
+        file_paths_media = f"file://{default_storage.location}"
+        new_content = content.replace(file_paths_media, default_storage.base_url)
+        file_paths_static = f"file://{staticfiles_storage.location}"
+        return new_content.replace(file_paths_static, staticfiles_storage.base_url)
 
     def render_to_response(self, context, **response_kwargs):
         response = super().render_to_response(context, **response_kwargs)

@@ -1,16 +1,15 @@
 import json
 import logging
 import math
-import os
 import string
 import time
-from datetime import datetime
 from mimetypes import types_map
 from urllib.parse import urljoin, quote
 
 import bs4
 import requests
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.contrib.gis.gdal.error import GDALException
 from django.contrib.gis.geos import GEOSException, fromstr
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -18,8 +17,8 @@ from django.http import HttpResponse
 from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import get_template
 from django.urls import resolve
-from django.utils import timezone
 from django.utils.translation import get_language
+
 from .settings import app_settings, API_SRID
 from .tokens import TokenManager
 
@@ -66,19 +65,18 @@ def smart_urljoin(base, path):
 
 
 def is_file_uptodate(path, date_update, delete_empty=True):
-    if not os.path.exists(path):
+    if not default_storage.exists(path):
         return False
 
     if date_update is None:
         return False
 
-    if os.path.getsize(path) == 0:
+    if default_storage.size(path) == 0:
         if delete_empty:
-            os.remove(path)
+            default_storage.delete(path)
         return False
 
-    modified = datetime.utcfromtimestamp(os.path.getmtime(path))
-    modified = modified.replace(tzinfo=timezone.utc)
+    modified = default_storage.get_modified_time(path)
     return modified > date_update
 
 

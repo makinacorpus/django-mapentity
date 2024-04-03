@@ -9,6 +9,7 @@ from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist
+from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.utils import OperationalError
 from django.urls import reverse, NoReverseMatch
@@ -203,9 +204,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
 
     def delete(self, *args, **kwargs):
         # Delete map image capture when delete object
-        image_path = self.get_map_image_path()
-        if os.path.exists(image_path):
-            os.unlink(image_path)
+        default_storage.delete(self.get_map_image_path())
         super().delete(*args, **kwargs)
 
     @classmethod
@@ -299,14 +298,15 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         else:
             size = app_settings['MAP_CAPTURE_SIZE']
         printcontext = self.get_printcontext() if hasattr(self, 'get_printcontext') else None
-        capture_map_image(url, path, size=size, waitfor=self.capture_map_image_waitfor, printcontext=printcontext)
+        capture_map_image(url,
+                          default_storage.path(path),
+                          size=size,
+                          waitfor=self.capture_map_image_waitfor,
+                          printcontext=printcontext)
         return True
 
     def get_map_image_path(self):
-        basefolder = os.path.join(settings.MEDIA_ROOT, 'maps')
-        if not os.path.exists(basefolder):
-            os.makedirs(basefolder)
-        return os.path.join(basefolder, '%s-%s.png' % (self._meta.model_name, self.pk))
+        return os.path.join('maps', '%s-%s.png' % (self._meta.model_name, self.pk))
 
     def get_attributes_html(self, request):
         return extract_attributes_html(self.get_detail_url(), request)
