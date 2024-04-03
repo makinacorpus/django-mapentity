@@ -1,14 +1,14 @@
-import os
 from unittest import mock
 
+from django.core.files.storage import default_storage
 from django.test import TestCase
 
 from mapentity.helpers import (
     capture_map_image,
     capture_url,
     convertit_url,
+    download_content,
     user_has_perm,
-    download_to_stream
 )
 from mapentity.registry import app_settings
 
@@ -26,11 +26,11 @@ class MapEntityCaptureHelpersTest(TestCase):
         url = capture_url('http://geotrek.fr')
         self.assertIn('http%3A//geotrek.fr', url)
 
-    @mock.patch('mapentity.helpers.open')
     @mock.patch('mapentity.helpers.capture_image')
-    def test_capture_url_has_auth_token(self, mocked_capture, mocked_open):
-        capture_map_image('', '')
-        url, _ = mocked_capture.call_args[0]
+    def test_capture_url_has_auth_token(self, mocked_capture):
+        mocked_capture.return_value = b'*'
+        capture_map_image('', default_storage.get_available_name('test.png'))
+        url = mocked_capture.call_args[0][0]
         self.assertIn("auth_token", url)
 
     def test_capture_url_with_no_params(self):
@@ -98,5 +98,5 @@ class DownloadStreamTest(TestCase):
         # Required to specified language for example
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = "x"
-        download_to_stream('http://google.com', open(os.devnull, 'w'), silent=True, headers={'Accept-language': 'fr'})
+        download_content('http://google.com', silent=True, headers={'Accept-language': 'fr'})
         get_mocked.assert_called_with('http://google.com', headers={'Accept-language': 'fr'})

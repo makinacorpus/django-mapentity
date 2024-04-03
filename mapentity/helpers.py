@@ -4,22 +4,22 @@ import math
 import string
 import time
 from mimetypes import types_map
-from urllib.parse import urljoin, quote
+from urllib.parse import quote, urljoin
 
 import bs4
 import requests
 from django.conf import settings
-from django.core.files.storage import default_storage
 from django.contrib.gis.gdal.error import GDALException
 from django.contrib.gis.geos import GEOSException, fromstr
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import HttpResponse
 from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import get_template
 from django.urls import resolve
 from django.utils.translation import get_language
 
-from .settings import app_settings, API_SRID
+from .settings import API_SRID, app_settings
 from .tokens import TokenManager
 
 logger = logging.getLogger(__name__)
@@ -89,12 +89,11 @@ def get_source(url, headers):
     content_error = 'Request on %s returned empty content' % url
     assert len(source.content) > 0, content_error
 
-    return source
+    return source.content
 
 
-def download_to_stream(url, stream, silent=False, headers=None):
-    """ Download url and writes response to stream.
-    """
+def download_content(url, silent=False, headers=None):
+    """ Download URL and return content."""
     source = None
     try:
         try:
@@ -109,24 +108,7 @@ def download_to_stream(url, stream, silent=False, headers=None):
             logger.info('Response: %s' % source.text[:150])
 
         if not silent:
-            raise
-
-    if source is None:
-        return source
-
-    try:
-        stream.write(source.content)
-        stream.flush()
-    except IOError as e:
-        logger.exception(e)
-        if not silent:
-            raise
-
-    if isinstance(stream, HttpResponse):
-        stream.status_code = source.status_code
-        # Copy headers
-        for header, value in source.headers.items():
-            stream[header] = value
+            raise e
 
     return source
 
@@ -148,16 +130,9 @@ def convertit_url(url, from_type=None, to_type=None, proxy=False):
     return url
 
 
-def convertit_download(url, destination, from_type=None, to_type='application/pdf', headers=None):
-    # Mock for tests
-    if getattr(settings, 'TEST', False):
-        with open(destination, 'w') as out_file:
-            out_file.write("Mock\n")
-            return
-
+def convertit_download(url, from_type=None, to_type='application/pdf', headers=None):
     url = convertit_url(url, from_type, to_type)
-    fd = open(destination, 'wb') if isinstance(destination, str) else destination
-    download_to_stream(url, fd, headers=headers)
+    return download_content(url, headers=headers)
 
 
 def capture_url(url, width=None, height=None, selector=None, waitfor=None):
@@ -178,10 +153,10 @@ def capture_url(url, width=None, height=None, selector=None, waitfor=None):
     return final_url
 
 
-def capture_image(url, stream, **kwargs):
+def capture_image(url, **kwargs):
     """ Capture url to stream. """
     url = capture_url(url, **kwargs)
-    download_to_stream(url, stream)
+    return download_content(url)
 
 
 def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet-tile-loaded', printcontext=None):
@@ -204,10 +179,8 @@ def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet
     # Run head-less capture (takes time)
     auth_token = TokenManager.generate_token()
     url += f"?lang={get_language()}&auth_token={auth_token}&context={quote(serialized)}"
-    with open(destination, 'wb') as fd:
-        capture_image(url, fd,
-                      selector='.map-panel',
-                      waitfor=waitfor)
+    map_image = capture_image(url, selector='.map-panel', waitfor=waitfor)
+    default_storage.save(destination, ContentFile(map_image))
 
 
 def extract_attributes_html(url, request):

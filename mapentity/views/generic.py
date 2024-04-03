@@ -33,7 +33,7 @@ from .. import models as mapentity_models
 from .. import serializers as mapentity_serializers
 from ..decorators import save_history, view_permission_required
 from ..forms import AttachmentForm
-from ..helpers import convertit_url, download_to_stream, user_has_perm
+from ..helpers import convertit_url, download_content, user_has_perm
 from ..helpers import suffix_for, name_for, smart_get_template
 from ..models import LogEntry, ADDITION, CHANGE, DELETION
 from ..settings import app_settings
@@ -322,11 +322,12 @@ class Convert(View):
         url = convertit_url(source_url, from_type=fromtype, to_type=format)
 
         response = HttpResponse()
-        received = download_to_stream(url, response,
-                                      silent=True,
-                                      headers=self.request_headers())
+        received = download_content(url,
+                                    silent=True,
+                                    headers=self.request_headers())
         if received:
-            filename = os.path.basename(received.url)
+            response = HttpResponse(received)
+            filename = os.path.basename(url)
             response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 

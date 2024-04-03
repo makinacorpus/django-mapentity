@@ -3,8 +3,7 @@ import logging
 import mimetypes
 import os
 import re
-from datetime import datetime
-from io import BytesIO
+
 from urllib.parse import quote
 
 from django.conf import settings
@@ -14,6 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import (HttpResponse, HttpResponseBadRequest, Http404)
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils import timezone
 from django.views import static, View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -169,10 +169,9 @@ def map_screenshot(request):
         width = context.get('viewport', {}).get('width')
         height = context.get('viewport', {}).get('height')
 
-        stream = BytesIO()
-        capture_image(map_url, stream, width=width, height=height, selector=selector)
-        response = HttpResponse(stream.getvalue(), content_type='image/png')
-        response['Content-Disposition'] = 'attachment; filename=%s.png' % datetime.now().strftime('%Y%m%d-%H%M%S')
+        map_image = capture_image(map_url, width=width, height=height, selector=selector)
+        response = HttpResponse(map_image, content_type='image/png')
+        response['Content-Disposition'] = 'attachment; filename=%s.png' % timezone.now().isoformat()
         return response
 
     except Exception as exc:
