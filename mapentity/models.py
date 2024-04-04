@@ -204,7 +204,9 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
 
     def delete(self, *args, **kwargs):
         # Delete map image capture when delete object
-        default_storage.delete(self.get_map_image_path())
+        image_path = self.get_map_image_path()
+        if default_storage.exists(image_path):
+            default_storage.delete(image_path)
         super().delete(*args, **kwargs)
 
     @classmethod
