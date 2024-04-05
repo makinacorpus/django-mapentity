@@ -225,7 +225,7 @@ class MapEntityWeasyprint(MapEntityDocumentBase):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['map_path'] = self.get_object().get_map_image_path()
+        context['map_path'] = default_storage.path(self.get_object().get_map_image_path())
         context['template_attributes'] = self.template_attributes
         context['template_css'] = self.template_css
         return context
