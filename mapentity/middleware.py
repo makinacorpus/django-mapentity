@@ -1,7 +1,8 @@
 import logging
+from hashlib import sha256
 
-from django.conf import settings
 from django.contrib.auth import get_user_model, login
+from django.core.cache import cache
 
 from .settings import app_settings
 from .tokens import TokenManager
@@ -10,24 +11,25 @@ logger = logging.getLogger(__name__)
 
 
 def get_internal_user():
-    if not hasattr(get_internal_user, 'instance'):
-        username = app_settings['INTERNAL_USER']
-        User = get_user_model()
+    User = get_user_model()
+    cache_key = sha256(app_settings['INTERNAL_USER'].encode()).hexdigest()
 
-        internal_user, created = User.objects.get_or_create(
-            username=username,
-            defaults={'password': settings.SECRET_KEY,
-                      'is_active': True,
-                      'is_staff': False}
-        )
+    id = 0
 
-        get_internal_user.instance = internal_user
-    return get_internal_user.instance
+    if cache_key in cache:
+        id = int(cache.get(cache_key))
 
-
-def clear_internal_user_cache():
-    if hasattr(get_internal_user, 'instance'):
-        del get_internal_user.instance
+    internal_user, created = User.objects.get_or_create(
+        id=int(id),
+        defaults={
+            'username': app_settings['INTERNAL_USER'],
+            'password': '',
+            'is_active': True
+        }
+    )
+    if created:
+        cache.set(cache_key, internal_user.pk)
+    return internal_user
 
 
 class AutoLoginMiddleware:
