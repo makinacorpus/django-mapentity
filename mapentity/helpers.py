@@ -180,6 +180,8 @@ def capture_map_image(url, destination, size=None, aspect=1.0, waitfor='.leaflet
     auth_token = TokenManager.generate_token()
     url += f"?lang={get_language()}&auth_token={auth_token}&context={quote(serialized)}"
     map_image = capture_image(url, selector='.map-panel', waitfor=waitfor)
+    if default_storage.exists(destination):
+        default_storage.delete(destination)
     default_storage.save(destination, ContentFile(map_image))
 
 
