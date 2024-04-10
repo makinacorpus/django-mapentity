@@ -37,6 +37,10 @@ jobs:
         python-version: [ '3.8', '3.11' ]
         django-version: [ '3.2.*', '4.2.*' ]
 
+    env:
+      PYTHON: ${{ matrix.python-version }}
+      DJANGO: ${{ matrix.django-version }}
+
     steps:
     - uses: actions/checkout@v4
 
@@ -62,13 +66,16 @@ jobs:
 
     - name: Test with coverage
       run: |
-        coverage run ./manage.py test -v3
-        coverage report -m
+        coverage run --parallel-mode --concurrency=multiprocessing ./manage.py test --parallel -v 3
+        coverage combine
+        coverage xml -o coverage.xml
 
-    - name: Coverage upload
-      run: |
-        pip install codecov
-        codecov
+    - uses: codecov/codecov-action@v4
+      with:
+        files: ./coverage.xml
+        env_vars: PYTHON,DJANGO
+        token: ${{ secrets.CODECOV_TOKEN }} # not usually required for public repos
+        fail_ci_if_error: true # optional (default = false)
 
   publish:
     needs: [lint, test]

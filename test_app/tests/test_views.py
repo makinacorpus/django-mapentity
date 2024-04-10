@@ -1,15 +1,13 @@
 import os
-import shutil
 from unittest import mock
 
 import django
 import factory
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.utils.encoding import force_str
 from faker import Faker
@@ -18,12 +16,13 @@ from freezegun import freeze_time
 
 from mapentity.models import LogEntry
 from mapentity.registry import app_settings
-from mapentity.tests import MapEntityTest, MapEntityLiveTest
-from mapentity.tests.factories import SuperUserFactory, AttachmentFactory
-from mapentity.views import ServeAttachment, Convert, JSSettings
-from .factories import DummyModelFactory
+from mapentity.tests import MapEntityLiveTest, MapEntityTest
+from mapentity.tests.factories import AttachmentFactory, SuperUserFactory
+from mapentity.views import Convert, JSSettings, ServeAttachment
+
 from ..models import DummyModel, FileType
-from ..views import DummyList, DummyDetail
+from ..views import DummyDetail, DummyList
+from .factories import DummyModelFactory
 
 fake = Faker('fr_FR')
 fake.add_provider(geo)
@@ -161,25 +160,15 @@ class ConvertTest(BaseTest):
                                       headers={})
 
 
-@override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class AttachmentTest(BaseTest):
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         self.obj = DummyModelFactory.create()
-        """
-        if os.path.exists(settings.MEDIA_ROOT):
-            self.tearDown()
-        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}'.format(self.obj.pk)))
-        self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk))
-        self.url = '/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk)
-        open(self.file, 'wb').write(b'*' * 300)
-        """
         self.attachment = AttachmentFactory.create(content_object=self.obj)
         self.url = "/media/%s" % self.attachment.attachment_file
         call_command('update_permissions_mapentity')
 
     def tearDown(self):
-        shutil.rmtree(settings.MEDIA_ROOT)
         app_settings['SENDFILE_HTTP_HEADER'] = None
 
     def download(self, url):

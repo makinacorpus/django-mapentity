@@ -4,7 +4,7 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from mapentity.helpers import user_has_perm
-from mapentity.middleware import get_internal_user, clear_internal_user_cache
+from mapentity.middleware import get_internal_user
 from mapentity.tests.factories import UserFactory
 from ..models import DummyModel
 
@@ -43,7 +43,6 @@ class ModelPermissionsTest(TestCase):
 
 class NavBarPermissionsTest(TestCase):
     def setUp(self):
-        clear_internal_user_cache()
         call_command('update_permissions_mapentity')
 
     def test_navbar_permissions(self):

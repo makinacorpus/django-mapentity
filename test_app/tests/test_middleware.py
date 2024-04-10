@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase
 
-from mapentity.middleware import get_internal_user, clear_internal_user_cache
+from mapentity.middleware import get_internal_user
 from mapentity.tests.factories import SuperUserFactory
 from mapentity.tokens import TokenManager
 
@@ -15,7 +15,6 @@ class AutoLoginMiddlewareTest(TestCase):
         cls.user = SuperUserFactory()
 
     def setUp(self):
-        clear_internal_user_cache()
         call_command('update_permissions_mapentity')
 
     def test_user_authenticated_no_token(self):
