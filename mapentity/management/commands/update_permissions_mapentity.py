@@ -8,6 +8,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
+from mapentity.middleware import get_internal_user
 from mapentity.registry import create_mapentity_model_permissions, registry
 
 logger = logging.getLogger(__name__)
@@ -28,11 +29,11 @@ class Command(BaseCommand):
 
         # Make sure apps are registered at this point
         import_module(settings.ROOT_URLCONF)
-
+        internal_user = get_internal_user()
         # For all models registered, add missing bits
         for model in registry.registry.keys():
             if not model._meta.abstract:
-                create_mapentity_model_permissions(model)
+                create_mapentity_model_permissions(model, internal_user)
 
         logger.info("Done.")
 

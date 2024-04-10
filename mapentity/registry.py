@@ -17,7 +17,6 @@ from rest_framework import routers as rest_routers
 from rest_framework.serializers import ModelSerializer
 
 from mapentity import models as mapentity_models
-from mapentity.middleware import get_internal_user
 from mapentity.serializers import MapentityGeojsonModelSerializer
 from mapentity.settings import app_settings
 
@@ -232,7 +231,7 @@ class Registry:
 registry = Registry()
 
 
-def create_mapentity_model_permissions(model):
+def create_mapentity_model_permissions(model, internal_user):
     """
     Create all the necessary permissions for the specified model.
 
@@ -254,7 +253,6 @@ def create_mapentity_model_permissions(model):
 
     db = DEFAULT_DB_ALIAS
 
-    internal_user = get_internal_user()
     perms_manager = Permission.objects.using(db)
 
     permissions = set()
