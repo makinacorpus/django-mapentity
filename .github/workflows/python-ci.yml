@@ -70,7 +70,7 @@ jobs:
         coverage combine
         coverage xml -o coverage.xml
 
-    - uses: codecov/codecov-action@v3.1.4
+    - uses: codecov/codecov-action@v4
       with:
         files: ./coverage.xml
         env_vars: PYTHON,DJANGO
