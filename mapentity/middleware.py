@@ -32,9 +32,6 @@ def get_internal_user():
     return internal_user
 
 
-internal_user = get_internal_user()
-
-
 class AutoLoginMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response

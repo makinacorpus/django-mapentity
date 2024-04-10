@@ -17,7 +17,7 @@ from rest_framework import routers as rest_routers
 from rest_framework.serializers import ModelSerializer
 
 from mapentity import models as mapentity_models
-from mapentity.middleware import internal_user
+from mapentity.middleware import get_internal_user
 from mapentity.serializers import MapentityGeojsonModelSerializer
 from mapentity.settings import app_settings
 
@@ -253,6 +253,7 @@ def create_mapentity_model_permissions(model):
         return
 
     db = DEFAULT_DB_ALIAS
+    internal_user = get_internal_user()
     perms_manager = Permission.objects.using(db)
 
     permissions = set()
@@ -280,15 +281,22 @@ def create_mapentity_model_permissions(model):
                                                                          content_type=ctype)
 
         if not internal_user_permission.exists():
-            permission = perms_manager.get(codename=codename, content_type=ctype)
-            internal_user.user_permissions.add(permission)
-            logger.info("Added permission %s to internal user %s" % (codename,
-                                                                     internal_user))
+            try:
+                permission = perms_manager.get(codename=codename, content_type=ctype)
+                internal_user.user_permissions.add(permission)
+                logger.info("Added permission %s to internal user %s" % (codename,
+                                                                         internal_user))
+            except Exception:
+                pass
 
     attachmenttype = ContentType.objects.db_manager(db).get_for_model(get_attachment_model())
     read_perm = dict(codename='read_attachment', content_type=attachmenttype)
     if not internal_user.user_permissions.filter(**read_perm).exists():
         permission = perms_manager.get(**read_perm)
-        internal_user.user_permissions.add(permission)
-        logger.info("Added permission %s to internal user %s" % (permission.codename,
-                                                                 internal_user))
+        try:
+            internal_user.user_permissions.add(permission)
+            logger.info("Added permission %s to internal user %s" % (permission.codename,
+                                                                     internal_user))
+
+        except Exception:
+            pass
