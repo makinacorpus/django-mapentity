@@ -1,8 +1,23 @@
 CHANGELOG
 =========
 
-8.7.3+dev  (XXXX-XX-XX)
+8.8.0      (2024-04-10)
 -----------------------
+
+**Improvements**
+
+- Refactor storage usage with default_storage and staticfiles_storage
+
+**Tests**
+
+- Use temporary media folder for tests
+- Make `MapentityTestCase` more consistent
+
+**CI**
+
+- Parallelize tests in CI
+- Fix codecov
+
 
 8.7.3  (2024-04-02)
 -------------------
