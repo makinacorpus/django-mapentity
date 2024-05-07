@@ -4,6 +4,10 @@ CHANGELOG
 8.8.0+dev  (XXXX-XX-XX)
 -----------------------
 
+**Hotfix**
+
+- Fix new internal user cache 
+
 
 8.8.0      (2024-04-10)
 -----------------------
