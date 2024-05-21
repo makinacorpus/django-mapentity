@@ -76,7 +76,7 @@ class MapEntityList(BaseListView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['filterform'] = self._filterform  # From FilterListMixin
-        context['columns'] = self.columns  # From BaseListView
+        context['columns'] = self.get_columns()  # From BaseListView
         context['unorderable_columns'] = self.unorderable_columns  # From BaseListView
         context['searchable_columns'] = self.searchable_columns  # From BaseListView
         context['create_label'] = self.get_model().get_create_label()
@@ -131,14 +131,14 @@ class MapEntityFormat(BaseListView, ListView):
         serializer = mapentity_serializers.CSVSerializer()
         response = HttpResponse(content_type='text/csv')
         serializer.serialize(queryset=self.get_queryset(), stream=response,
-                             model=self.get_model(), fields=self.columns, ensure_ascii=True)
+                             model=self.get_model(), fields=self.get_columns(), ensure_ascii=True)
         return response
 
     def shape_view(self, request, context, **kwargs):
         serializer = mapentity_serializers.ZipShapeSerializer()
         response = HttpResponse(content_type='application/zip')
         serializer.serialize(queryset=self.get_queryset(), model=self.get_model(),
-                             stream=response, fields=self.columns)
+                             stream=response, fields=self.get_columns())
         response['Content-length'] = str(len(response.content))
         return response
 

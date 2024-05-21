@@ -4,6 +4,10 @@ CHANGELOG
 8.8.1+dev  (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Add a get_columns method to change column list dynamically.
+
 
 8.8.1  (2024-05-07)
 -------------------

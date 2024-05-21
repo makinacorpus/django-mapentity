@@ -131,6 +131,9 @@ class BaseListView(FilterListMixin, ModelViewMixin):
             self.columns.remove('id')
             self.columns.insert(0, 'id')
 
+    def get_columns(self):
+        return self.columns
+
     @view_permission_required()
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
