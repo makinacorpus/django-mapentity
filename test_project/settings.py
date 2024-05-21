@@ -68,6 +68,7 @@ MIDDLEWARE = (
     'mapentity.middleware.AutoLoginMiddleware',
 )
 
+
 ROOT_URLCONF = 'test_project.urls'
 
 TEMPLATES = [
