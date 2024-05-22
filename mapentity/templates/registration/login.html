@@ -20,7 +20,7 @@
                 {% csrf_token %}
                 {{ form|crispy }}
                 <div class="text-right">
-                    <button type="submit" class="btn btn-primary">Login</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Login" %}</button>
                 </div>
             </form>
 

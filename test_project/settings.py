@@ -199,7 +199,9 @@ MAPENTITY_CONFIG = {
     'CAPTURE_SERVER': 'http://screamshotter:8000',
     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 }
-
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'test_project', 'locale'),
+)
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
