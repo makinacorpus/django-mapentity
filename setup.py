@@ -8,6 +8,7 @@ tests_require = [
     'freezegun',
     'factory_boy',
     'coverage',
+    'tblib'
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
