@@ -216,6 +216,7 @@ class CSVSerializerTests(TestCase):
         self.stream.close()
 
     def test_content(self):
+        translation.activate('en')
         self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
                                   fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
         self.assertEquals(self.stream.getvalue(),
@@ -224,7 +225,7 @@ class CSVSerializerTests(TestCase):
 
     @override_settings(USE_L10N=True)
     def test_content_fr(self):
-        translation.activate('fr-fr')
+        translation.activate('fr')
         self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
                                   fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
         self.assertEquals(self.stream.getvalue(),
