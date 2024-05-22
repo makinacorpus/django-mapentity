@@ -64,6 +64,10 @@ jobs:
         pip install .[dev]
         pip install Django==${{ matrix.django-version }} -U
 
+    - name: Compile messages
+      run: |
+        ./manage.py compilemessages
+
     - name: Check pending migrations
       run: |
         ./manage.py makemigrations --check
