@@ -84,8 +84,9 @@ jobs:
   publish:
     needs: [lint, test]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -93,13 +94,14 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install dependencies
+      - name: Compile messages
         run: |
-          python -m pip install setuptools wheel twine -U
-      - name: Build and publish
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          pip install django
+          django-admin compilemessages
+
+      - name: Build package
         run: |
           python setup.py sdist
-          twine upload dist/*
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
