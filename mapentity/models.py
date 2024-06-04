@@ -308,6 +308,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         return True
 
     def get_map_image_path(self):
+        """ Get relative path to map image in storage."""
         return os.path.join('maps', '%s-%s.png' % (self._meta.model_name, self.pk))
 
     def get_attributes_html(self, request):
@@ -341,6 +342,11 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def is_public(self):
         "Override this method to allow unauthenticated access to attachments"
         return False
+
+    @property
+    def map_image_path(self):
+        """ Get full path to map image in storage. """
+        return default_storage.path(self.get_map_image_path())
 
 
 class MapEntityMixin(BaseMapEntityMixin):
