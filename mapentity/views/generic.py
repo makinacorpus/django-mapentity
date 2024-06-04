@@ -2,7 +2,6 @@ import json
 import logging
 import os
 from datetime import datetime
-from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from django.conf import settings
@@ -328,10 +327,7 @@ class Convert(View):
                                     headers=self.request_headers())
         if received:
             response = HttpResponse(received)
-            filename = Path(os.path.basename(parse_url.path))
-            # change suffix according format
-            filename = filename.with_suffix(f".{format}")
-            print(filename)
+            filename = os.path.basename(received.url)
             response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
