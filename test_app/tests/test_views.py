@@ -500,14 +500,14 @@ class LogViewMapentityTest(MapEntityTest):
             'change_message': '',
             'content_type': 12,
             'id': 1,
-            'object': '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>",
+            'object': '<a data-pk="1" href="/dummymodel/1/" >Test_App | Dummy '"Model <class 'object'></a>",
             'object_id': '1',
             'object_repr': "<class 'object'>",
             'user': User.objects.first().username
         }
 
-        if django.__version__ < '3.0':
-            data['object'] = '<a data-pk="1" href="/dummymodel/1/" >Dummy '"Model <class 'object'></a>"
+        if django.__version__ < '5.0':
+            data['object'] = '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>"
         return data
 
     def get_good_data(self):

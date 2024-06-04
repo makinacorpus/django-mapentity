@@ -2,7 +2,6 @@ import csv
 import hashlib
 import logging
 import time
-from datetime import datetime
 from io import StringIO
 from unittest.mock import patch
 from urllib.parse import quote
@@ -18,7 +17,7 @@ from django.urls import reverse
 from django.utils import html
 from django.utils.encoding import force_str
 from django.utils.http import http_date
-from django.utils.timezone import utc
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from freezegun import freeze_time
 from paperclip.settings import get_attachment_model
@@ -451,7 +450,7 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         self.login()
         self.modelfactory.create()
-        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
+        latest_updated.return_value = now()
 
         latest = self.model.latest_updated()
         geojson_layer_url = self.url_for(self.model.get_layer_list_url())
@@ -480,7 +479,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         # Create a new object
         time.sleep(1.1)  # wait some time, last-modified has precision in seconds
         self.modelfactory.create()
-        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
+        latest_updated.return_value = now()
 
         self.assertNotEqual(latest, self.model.latest_updated())
         response = self.client.get(geojson_layer_url)

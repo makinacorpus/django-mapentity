@@ -14,7 +14,6 @@ from django.db import models, transaction
 from django.db.utils import OperationalError
 from django.urls import reverse, NoReverseMatch
 from django.utils.formats import localize
-from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from rest_framework import permissions as rest_permissions
 
@@ -193,7 +192,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def get_date_update(self):
         try:
             fname = app_settings['DATE_UPDATE_FIELD_NAME']
-            return getattr(self, fname).replace(tzinfo=utc)
+            return getattr(self, fname)
         except AttributeError:
             return None
 

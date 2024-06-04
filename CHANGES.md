@@ -4,6 +4,11 @@ CHANGELOG
 8.8.2+dev  (XXXX-XX-XX)
 -----------------------
 
+**Features**
+
+- Add django 5.0 support
+- Drop django 3.2 support
+
 *Bug fixes*
 
 - Fix map in ODT / PDF documents by using absolute path in storage
