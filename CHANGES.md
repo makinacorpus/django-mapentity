@@ -4,6 +4,10 @@ CHANGELOG
 8.8.2+dev  (XXXX-XX-XX)
 -----------------------
 
+*Bug fixes*
+
+- Fix map in ODT / PDF documents by using absolute path in storage
+
 
 8.8.2      (2024-05-22)
 -----------------------
