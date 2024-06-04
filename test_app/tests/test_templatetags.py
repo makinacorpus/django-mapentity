@@ -4,7 +4,6 @@ from django.template import Template, Context
 from django.template.exceptions import TemplateSyntaxError
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import translation
 from django.utils.timezone import make_aware
 
 from ..models import DummyModel
