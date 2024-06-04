@@ -507,7 +507,7 @@ class LogViewMapentityTest(MapEntityTest):
         }
 
         if django.__version__ < '5.0':
-            data['object'] = '<a data-pk="1" href="/dummymodel/1/" >Test_app | Dummy '"Model <class 'object'></a>"
+            data['object'] = '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>"
         return data
 
     def get_good_data(self):
