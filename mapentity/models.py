@@ -14,7 +14,7 @@ from django.db import models, transaction
 from django.db.utils import OperationalError
 from django.urls import reverse, NoReverseMatch
 from django.utils.formats import localize
-from django.utils.timezone import utc
+from datetime.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from rest_framework import permissions as rest_permissions
 
