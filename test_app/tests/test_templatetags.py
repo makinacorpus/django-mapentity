@@ -4,7 +4,6 @@ from django.template import Template, Context
 from django.template.exceptions import TemplateSyntaxError
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import translation
 from django.utils.timezone import make_aware
 
 from ..models import DummyModel
@@ -18,11 +17,6 @@ from tempfile import TemporaryDirectory
 
 
 class ValueListTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        translation.deactivate()
-
     def test_empty_list_should_show_none(self):
         out = Template(
             '{% load mapentity_tags %}'
@@ -92,11 +86,6 @@ class ValueListTest(TestCase):
 
 
 class ValueTableTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        translation.deactivate()
-
     def test_empty_objects_should_show_none(self):
         out = Template(
             '{% load mapentity_tags %}'

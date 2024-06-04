@@ -190,7 +190,7 @@ class MapEntityTest(TestCase):
         for line in lines:
             for col in line:
                 # the col should not contains any html tags
-                self.assertEquals(force_str(col), html.strip_tags(force_str(col)))
+                self.assertEqual(force_str(col), html.strip_tags(force_str(col)))
 
     def _post_form(self, url):
         # no data

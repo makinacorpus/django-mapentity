@@ -216,19 +216,17 @@ class CSVSerializerTests(TestCase):
         self.stream.close()
 
     def test_content(self):
-        translation.activate('en')
         self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
                                   fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
-        self.assertEquals(self.stream.getvalue(),
-                          ('ID,name,number,size,boolean,tags\r\n{},'
-                           'Empty,42,3.14159,yes,"Tag1,Tag2"\r\n').format(self.point.pk))
+        self.assertEqual(self.stream.getvalue(),
+                         ('ID,name,number,size,boolean,tags\r\n{},'
+                          'Empty,42,3.14159,yes,"Tag1,Tag2"\r\n').format(self.point.pk))
 
     @override_settings(USE_L10N=True)
     def test_content_fr(self):
-        translation.activate('fr')
-        self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
-                                  fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
-        self.assertEquals(self.stream.getvalue(),
-                          ('ID,name,number,size,boolean,tags\r\n{},'
-                           'Empty,42,"3,14159",oui,"Tag1,Tag2"\r\n').format(self.point.pk))
-        translation.deactivate()
+        with translation.override('fr'):
+            self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
+                                      fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
+            self.assertEqual(self.stream.getvalue(),
+                             ('ID,name,number,size,boolean,tags\r\n{},'
+                              'Empty,42,"3,14159",oui,"Tag1,Tag2"\r\n').format(self.point.pk))

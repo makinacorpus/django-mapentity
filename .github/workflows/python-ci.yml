@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-20.04  # wait for spatialite fix
     strategy:
       matrix:
-        python-version: [ '3.8', '3.10', '3.11' ]
+        python-version: [ '3.8', '3.10', '3.12' ]
         django-version: [ '4.2.*', '5.0.*' ]
         exclude:
             - python-version: '3.8'

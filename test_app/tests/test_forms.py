@@ -32,7 +32,7 @@ class MapEntityFormTest(TestCase):
         # Test fields for sublanguages are correctly overridden in forms
         form = DummyForm(instance=self.sample_object)
         self.assertIn('name_zh_hant', form.fields)
-        self.assertEquals('Name [zh-hant]', form.fields['name_zh_hant'].label)
+        self.assertEqual('Name [zh-hant]', form.fields['name_zh_hant'].label)
 
 
 class MapEntityRichTextFormTest(TestCase):
