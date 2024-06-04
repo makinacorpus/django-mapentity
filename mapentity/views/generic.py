@@ -327,8 +327,10 @@ class Convert(View):
                                     headers=self.request_headers())
         if received:
             response = HttpResponse(received)
-            filename = os.path.basename(received.url)
-            response['Content-Disposition'] = 'attachment; filename=%s' % filename
+            parsed_url = urlparse(source_url)
+            original_filename = os.path.basename(parsed_url.path)
+            converted_filename = f"{os.path.splitext(original_filename)[0]}.{format}"
+            response['Content-Disposition'] = 'attachment; filename=%s' % converted_filename
         return response
 
     def request_headers(self):
