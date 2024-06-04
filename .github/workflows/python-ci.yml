@@ -40,9 +40,9 @@ jobs:
       matrix:
         python-version: [ '3.8', '3.10', '3.11' ]
         django-version: [ '4.2.*', '5.0.*' ]
-      exclude:
-        - python-version: '3.8'
-          django-version: '5.0.*'
+        exclude:
+            - python-version: '3.8'
+              django-version: '5.0.*'
 
     env:
       PYTHON: ${{ matrix.python-version }}
