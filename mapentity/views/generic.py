@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime
+from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from django.conf import settings
@@ -201,7 +202,7 @@ class MapEntityDocumentBase(ModelViewMixin, DetailView):
         if default_storage.exists('upload/logo-header.png'):
             context['logo_path'] = default_storage.path('upload/logo-header.png')
         else:
-            context['logo_path'] = staticfiles_storage.path('upload/logo-header.png')
+            context['logo_path'] = staticfiles_storage.path('images/logo-header.png')
         context['STATIC_URL'] = staticfiles_storage.base_url
         context['STATIC_ROOT'] = staticfiles_storage.location
         context['MEDIA_URL'] = default_storage.base_url
@@ -327,7 +328,10 @@ class Convert(View):
                                     headers=self.request_headers())
         if received:
             response = HttpResponse(received)
-            filename = os.path.basename(url)
+            filename = Path(os.path.basename(parse_url.path))
+            # change suffix according format
+            filename = filename.with_suffix(f".{format}")
+            print(filename)
             response['Content-Disposition'] = 'attachment; filename=%s' % filename
         return response
 
