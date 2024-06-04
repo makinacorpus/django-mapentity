@@ -382,7 +382,7 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
 
     @property
     def object_display(self):
-        model_str = str(self.content_type)
+        model_str = str(self.content_type).lower()
         try:
             obj = self.get_edited_object()
             assert obj._entity, 'Unregistered model %s' % model_str
