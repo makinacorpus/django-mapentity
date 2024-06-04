@@ -167,7 +167,7 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
             if not self.request.user.has_perm('%s.read_%s' % (obj._meta.app_label, obj._meta.model_name)):
                 raise PermissionDenied
         obj.prepare_map_image(self.request.build_absolute_uri('/'))
-        path = obj.get_map_image_path().replace(settings.MEDIA_ROOT, '').lstrip('/')
+        path = obj.get_map_image_path()
         if settings.DEBUG or not app_settings['SENDFILE_HTTP_HEADER']:
             response = static.serve(self.request, path, settings.MEDIA_ROOT)
         else:
@@ -201,7 +201,7 @@ class MapEntityDocumentBase(ModelViewMixin, DetailView):
         if default_storage.exists('upload/logo-header.png'):
             context['logo_path'] = default_storage.path('upload/logo-header.png')
         else:
-            context['logo_path'] = staticfiles_storage.path('upload/logo-header.png')
+            context['logo_path'] = staticfiles_storage.path('images/logo-header.png')
         context['STATIC_URL'] = staticfiles_storage.base_url
         context['STATIC_ROOT'] = staticfiles_storage.location
         context['MEDIA_URL'] = default_storage.base_url
@@ -225,7 +225,7 @@ class MapEntityWeasyprint(MapEntityDocumentBase):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['map_path'] = default_storage.path(self.get_object().get_map_image_path())
+        context['map_path'] = self.get_object().map_image_path
         context['template_attributes'] = self.template_attributes
         context['template_css'] = self.template_css
         return context
@@ -327,8 +327,10 @@ class Convert(View):
                                     headers=self.request_headers())
         if received:
             response = HttpResponse(received)
-            filename = os.path.basename(url)
-            response['Content-Disposition'] = 'attachment; filename=%s' % filename
+            parsed_url = urlparse(source_url)
+            original_filename = os.path.basename(parsed_url.path)
+            converted_filename = f"{os.path.splitext(original_filename)[0]}.{format}"
+            response['Content-Disposition'] = 'attachment; filename=%s' % converted_filename
         return response
 
     def request_headers(self):
