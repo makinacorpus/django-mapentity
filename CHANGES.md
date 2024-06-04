@@ -1,17 +1,23 @@
 CHANGELOG
 =========
 
-8.8.2+dev  (XXXX-XX-XX)
+8.9.0      (2024-06-04)
 -----------------------
 
 **Features**
 
 - Add django 5.0 support
 - Drop django 3.2 support
+- Add python 3.12 support
 
 *Bug fixes*
 
 - Fix map in ODT / PDF documents by using absolute path in storage
+- Fix converted document name (DOC and PDF)
+
+**Tests**
+
+- Fix flaky translations in tests
 
 
 8.8.2      (2024-05-22)
