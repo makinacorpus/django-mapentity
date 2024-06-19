@@ -4,6 +4,10 @@ CHANGELOG
 8.9.0+dev  (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Increase filters popup size, to display full select dropdowns
+
 
 8.9.0      (2024-06-04)
 -----------------------

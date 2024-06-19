@@ -476,6 +476,10 @@ div.dataTables_wrapper div.dataTables_filter input {
     overflow-y: scroll;
 }
 
+#mainfilter .form-group > p:last-child:has(.chosen-container-multi) {
+    padding-bottom: 12rem;
+}
+
 #mainfilter label {
     /* sr-only */
     position: absolute;
