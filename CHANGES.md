@@ -4,6 +4,10 @@ CHANGELOG
 8.9.0+dev  (XXXX-XX-XX)
 -----------------------
 
+*Bug fixes*
+
+- Fix storage usage to deals with django >= 4.2.14
+
 
 8.9.0      (2024-06-04)
 -----------------------
