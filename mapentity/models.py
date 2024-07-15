@@ -300,7 +300,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
             size = app_settings['MAP_CAPTURE_SIZE']
         printcontext = self.get_printcontext() if hasattr(self, 'get_printcontext') else None
         capture_map_image(url,
-                          default_storage.path(path),
+                          path,
                           size=size,
                           waitfor=self.capture_map_image_waitfor,
                           printcontext=printcontext)
