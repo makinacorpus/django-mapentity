@@ -39,7 +39,7 @@ setup(
         'django-embed-video',
         'django-filter',
         'django-leaflet>=0.19,<0.20',  # leaflet 0.7.x
-        'django-modeltranslation',
+        'django-modeltranslation<0.19.5',  # does not support python 3.8
         'django-tinymce>=3',
         'django-weasyprint',
         'djangorestframework',
