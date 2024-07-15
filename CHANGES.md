@@ -8,6 +8,10 @@ CHANGELOG
 
 - Fix storage usage to deals with django >= 4.2.14
 
+**Tests**
+
+- Fix tests useless warnings
+
 
 8.9.1      (2024-06-28)
 -----------------------
