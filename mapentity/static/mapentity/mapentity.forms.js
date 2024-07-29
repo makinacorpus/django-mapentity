@@ -1,5 +1,12 @@
 if (!window.MapEntity) window.MapEntity = {};
 
+// Disable button if submit event on form
+Array.from(document.getElementsByClassName("mapentity-form")).forEach(function (formElement) {
+    formElement.addEventListener('submit', function () {
+        formElement.querySelector("button[type=submit]").setAttribute("disabled", true);
+    }, false);
+});
+
 MapEntity.GeometryField = L.GeometryField.extend({
 
     initialize: function () {

@@ -7,6 +7,8 @@ CHANGELOG
 **Bug fixes**
 
 - Use HTML tag for create/update button
+- Prevent multiple submissions of create/update form
+
 
 8.9.2      (2024-07-15)
 -----------------------

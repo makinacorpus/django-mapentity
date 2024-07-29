@@ -227,7 +227,7 @@ class MapEntityForm(TranslatedModelForm):
 
         # Main form layout
         self.helper.help_text_inline = True
-        self.helper.form_class = 'form-horizontal'
+        self.helper.form_class = 'form-horizontal mapentity-form'
         self.helper.form_style = "default"
         self.helper.label_class = 'col-md-3'
         self.helper.field_class = 'controls col-md-9'
