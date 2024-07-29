@@ -7,7 +7,7 @@ CHANGELOG
 **Bug fixes**
 
 - Change a balise to button balise on create or update button
-
+- Prevent multiple submissions of create/update form
 
 8.9.2      (2024-07-15)
 -----------------------
