@@ -4,6 +4,9 @@ CHANGELOG
 8.9.2+dev  (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Use HTML tag for create/update button
 
 
 8.9.2      (2024-07-15)
