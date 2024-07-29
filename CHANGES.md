@@ -4,6 +4,9 @@ CHANGELOG
 8.9.2+dev  (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Change a balise to button balise on create or update button
 
 
 8.9.2      (2024-07-15)
