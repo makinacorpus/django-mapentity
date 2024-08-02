@@ -13,3 +13,4 @@ __pycache__
 /README.html
 /.coverage
 *.mo
+coverage.xml
