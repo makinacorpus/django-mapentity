@@ -3,8 +3,8 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
 from .filters import DummyModelFilter
-from .forms import DummyModelForm, RoadForm
-from .models import DummyModel, Road
+from .forms import DummyModelForm, RoadForm, MushroomSpotForm
+from .models import DummyModel, Road, MushroomSpot
 from .serializers import DummySerializer, RoadSerializer, DummyGeojsonSerializer
 
 
@@ -72,3 +72,13 @@ class RoadViewSet(mapentity_views.MapEntityViewSet):
     queryset = Road.objects.all()
     serializer_class = RoadSerializer
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
+
+class MushroomSpotCreate(mapentity_views.MapEntityCreate):
+    model = MushroomSpot
+    form_class = MushroomSpotForm
+
+
+class MushroomSpotUpdate(mapentity_views.MapEntityUpdate):
+    model = MushroomSpot
+    form_class = MushroomSpotForm

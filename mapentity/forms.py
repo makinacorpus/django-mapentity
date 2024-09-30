@@ -95,11 +95,13 @@ class SubmitButton(HTML):
 
 class MapEntityForm(TranslatedModelForm):
     fieldslayout = None
-    geomfields = ['geom', ]
+    geomfields = None
     leftpanel_scrollable = True
     hidden_fields = []
 
     def __init__(self, *args, **kwargs):
+        if self.geomfields is None:
+            self.geomfields = ['geom']
         self.user = kwargs.pop('user', None)
         self.can_delete = kwargs.pop('can_delete', True)
 
