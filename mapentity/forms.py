@@ -95,7 +95,7 @@ class SubmitButton(HTML):
 
 class MapEntityForm(TranslatedModelForm):
     fieldslayout = None
-    geomfields = []
+    geomfields = ['geom', ]
     leftpanel_scrollable = True
     hidden_fields = []
 
