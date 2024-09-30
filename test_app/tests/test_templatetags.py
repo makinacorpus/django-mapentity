@@ -4,7 +4,6 @@ from django.template import Template, Context
 from django.template.exceptions import TemplateSyntaxError
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import translation
 from django.utils.timezone import make_aware
 
 from ..models import DummyModel
@@ -18,11 +17,6 @@ from tempfile import TemporaryDirectory
 
 
 class ValueListTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        translation.deactivate()
-
     def test_empty_list_should_show_none(self):
         out = Template(
             '{% load mapentity_tags %}'
@@ -92,11 +86,6 @@ class ValueListTest(TestCase):
 
 
 class ValueTableTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        translation.deactivate()
-
     def test_empty_objects_should_show_none(self):
         out = Template(
             '{% load mapentity_tags %}'
@@ -245,16 +234,14 @@ class MediaStaticFallbackPathTest(TestCase):
         self.assertEqual(os.path.join(d.name, 'foo.png'), out)
 
     def test_media_static_find_path(self):
-        d = TemporaryDirectory()
-        with override_settings(MEDIA_ROOT=d.name):
-            with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
-                f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
-                        b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
-            out = Template(
-                '{% load mapentity_tags %}'
-                '{% media_static_fallback_path "exist.png" "foo.png" %}'
-            ).render(Context({}))
-            self.assertEqual(out, f.name)
+        with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
+            f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
+                    b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{% media_static_fallback_path "exist.png" "foo.png" %}'
+        ).render(Context({}))
+        self.assertEqual(out, f.name)
 
 
 class MediaStaticFallbackTest(TestCase):
@@ -267,16 +254,14 @@ class MediaStaticFallbackTest(TestCase):
         self.assertEqual(out, "/static/foo.png")
 
     def test_media_static_find(self):
-        d = TemporaryDirectory()
-        with override_settings(MEDIA_ROOT=d.name):
-            with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
-                f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
-                        b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
-                out = Template(
-                    '{% load mapentity_tags %}'
-                    '{% media_static_fallback "exist.png" "foo.png" %}'
-                ).render(Context({}))
-                self.assertEqual(out, '/media/exist.png')
+        with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
+            f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
+                    b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
+            out = Template(
+                '{% load mapentity_tags %}'
+                '{% media_static_fallback "exist.png" "foo.png" %}'
+            ).render(Context({}))
+            self.assertEqual(out, '/media/exist.png')
 
 
 class SmartIncludeTest(TestCase):

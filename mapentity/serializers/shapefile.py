@@ -199,7 +199,12 @@ def create_shape_format_layer(directory, headers, geom_type, srid, srid_out=None
         'geometry': geom_type,
         'properties': properties_schema,
     }
-    shape = fiona.open(directory, layer=geom_type, mode='w', driver='ESRI Shapefile', schema=schema, encoding='UTF-8',
+    shape = fiona.open(os.path.join(directory, f"{geom_type}.shp"),
+                       layer=geom_type,
+                       mode='w',
+                       driver='ESRI Shapefile',
+                       schema=schema,
+                       encoding='UTF-8',
                        crs=from_epsg(srid))
     return shape, headers
 

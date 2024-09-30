@@ -1,9 +1,9 @@
-import os
-
 from django import template
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import FieldDoesNotExist
+from django.core.files.storage import default_storage
 from django.template import Context
 from django.template.exceptions import TemplateDoesNotExist
 from django.utils.timezone import now
@@ -75,16 +75,16 @@ def field_verbose_name(obj, field):
 
 @register.simple_tag()
 def media_static_fallback(media_file, static_file, *args, **kwarg):
-    if os.path.exists(os.path.join(settings.MEDIA_ROOT, media_file)):
-        return os.path.join(settings.MEDIA_URL, media_file)
-    return os.path.join(settings.STATIC_URL, static_file)
+    if default_storage.exists(media_file):
+        return default_storage.url(media_file)
+    return staticfiles_storage.url(static_file)
 
 
 @register.simple_tag()
 def media_static_fallback_path(media_file, static_file, *args, **kwarg):
-    if os.path.exists(os.path.join(settings.MEDIA_ROOT, media_file)):
-        return os.path.join(settings.MEDIA_ROOT, media_file)
-    return os.path.join(settings.STATIC_ROOT, static_file)
+    if default_storage.exists(media_file):
+        return default_storage.path(media_file)
+    return staticfiles_storage.path(static_file)
 
 
 @register.filter(name='timesince')
@@ -203,3 +203,16 @@ def valuetable(items, columns='', enumeration=False):
         'records': records,
         'modelname': modelname
     }
+
+
+@register.filter
+def replace(value, arg):
+    """
+    Replacing filter
+    Use `{{ "aaa"|replace:"a|b" }}`
+    """
+    if len(arg.split('|')) != 2:
+        return value
+
+    what, to = arg.split('|')
+    return value.replace(what, to)

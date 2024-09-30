@@ -1,5 +1,7 @@
 import copy
 
+from warnings import warn
+
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Button, HTML, Submit
@@ -8,11 +10,11 @@ from django.conf import settings
 from django.contrib.gis.db.models.fields import GeometryField
 from django.core.exceptions import FieldDoesNotExist
 from django.utils.translation import gettext_lazy as _
+from modeltranslation.utils import build_localized_fieldname
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 from tinymce.widgets import TinyMCE
 
 from .models import ENTITY_PERMISSION_UPDATE_GEOM
-from .settings import app_settings
 from .widgets import MapWidget
 
 if 'modeltranslation' in settings.INSTALLED_APPS:
@@ -50,12 +52,12 @@ class TranslatedModelForm(forms.ModelForm):
             # Remove form native field (e.g. `name`)
             native = self.fields.pop(modelfield)
             # Add translated fields (e.g. `name_fr`, `name_en`...)
-            for translated_language in app_settings['TRANSLATED_LANGUAGES']:
-                lang = translated_language[0]
-                name = '{0}_{1}'.format(modelfield, lang)
+            for lang in settings.MODELTRANSLATION_LANGUAGES:
+                name = build_localized_fieldname(modelfield, lang)
                 # Add to form.fields{}
                 translated = copy.deepcopy(native)
-                translated.required = native.required and (lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
+                translated.required = native.required and (
+                            lang == settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))
                 translated.label = "{0} [{1}]".format(translated.label, lang)
                 self.fields[name] = translated
                 # Keep track of replacements
@@ -77,7 +79,7 @@ class TranslatedModelForm(forms.ModelForm):
         if self.instance:
             for fields in self._translated.values():
                 for field in fields:
-                    self.fields[field].initial = getattr(self.instance, field)
+                    self.fields[field].initial = getattr(self.instance, field.replace("-", "_"))
 
 
 class SubmitButton(HTML):
@@ -92,7 +94,6 @@ class SubmitButton(HTML):
 
 
 class MapEntityForm(TranslatedModelForm):
-
     fieldslayout = None
     geomfields = []
     leftpanel_scrollable = True
@@ -107,15 +108,28 @@ class MapEntityForm(TranslatedModelForm):
         self.helper.form_tag = True
 
         # If MAX_CHARACTERS is setted, set help text for rich text fields
-        textfield_help_text = ''
+        global_help_text = ''
         max_characters = settings.MAPENTITY_CONFIG.get('MAX_CHARACTERS', None)
         if max_characters:
-            textfield_help_text = _('%(max)s characters maximum recommended') % {'max': max_characters}
+            warn(
+                "Parameters MAX_CHARACTERS is deprecated, please use MAX_CHARACTERS_BY_FIELD instead",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            global_help_text = _('%(max)s characters maximum recommended') % {'max': max_characters}
 
+        max_characters_by_field_config = settings.MAPENTITY_CONFIG.get('MAX_CHARACTERS_BY_FIELD', {}) or {}
         # Default widgets
         for fieldname, formfield in self.fields.items():
+            textfield_help_text = ''
             # Custom code because formfield_callback does not work with inherited forms
             if formfield:
+                # set max character limit :
+                if self._meta.model._meta.db_table in max_characters_by_field_config:
+                    for conf in max_characters_by_field_config[self._meta.model._meta.db_table]:
+                        if fieldname == conf["field"]:
+                            textfield_help_text = _('%(max)s characters maximum recommended') % {'max': conf["value"]}
+
                 # Assign map widget to all geometry fields
                 try:
                     formmodel = self._meta.model
@@ -135,6 +149,8 @@ class MapEntityForm(TranslatedModelForm):
                 # Bypass widgets that inherit textareas, such as geometry fields
                 if formfield.widget.__class__ == forms.widgets.Textarea:
                     formfield.widget = TinyMCE()
+                    if max_characters:
+                        textfield_help_text = global_help_text
                     if formfield.help_text:
                         formfield.help_text += f", {textfield_help_text}"
                     else:
@@ -236,7 +252,9 @@ class MapEntityForm(TranslatedModelForm):
             else:
                 # Add translated fields to layout
                 if field in self._translated:
-                    field_is_required = self.fields[f"{field}_{settings.MODELTRANSLATION_DEFAULT_LANGUAGE}"].required
+                    field_is_required = self.fields[
+                        build_localized_fieldname(field, settings.MODELTRANSLATION_DEFAULT_LANGUAGE)
+                    ].required
                     # Only if they are required or not hidden
                     if field_is_required or field not in self.hidden_fields:
                         newlayout.append(self.__tabbed_layout_for_field(field))
@@ -247,24 +265,26 @@ class MapEntityForm(TranslatedModelForm):
     def __tabbed_layout_for_field(self, field):
         fields = []
         for replacement in self._translated[field]:
-            active = "active" if replacement.endswith('_{0}'.format(settings.MODELTRANSLATION_DEFAULT_LANGUAGE)) else ""
+            active = "active" if replacement.endswith(
+                '_{0}'.format(settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'))) else ""
             fields.append(Div(replacement,
                               css_class="tab-pane " + active,
                               css_id=replacement))
 
         layout = Div(
             HTML("""
+            {{% load mapentity_tags %}}
             <ul class="nav nav-pills offset-md-3">
-            {{% for lang in TRANSLATED_LANGUAGES %}}
+            {{% for lang in MODELTRANSLATION_LANGUAGES %}}
                 <li class="nav-item">
-                    <a class="nav-link{{% if lang.0 == '{lang_code}'""" """ %}}
-                       active{{% endif %}}" href="#{field}_{{{{ lang.0 }}}}"
-                       data-toggle="tab">{{{{ lang.0 }}}}
+                    <a class="nav-link{{% if lang|replace:"-|_" == '{lang_code}'""" """ %}}
+                       active{{% endif %}}" href="#{field}_{{{{ lang|replace:"-|_" }}}}"
+                       data-toggle="tab">{{{{ lang }}}}
                     </a>
                 </li>
             {{% endfor %}}
             </ul>
-            """.format(lang_code=settings.MODELTRANSLATION_DEFAULT_LANGUAGE, field=field)),
+            """.format(lang_code=settings.MODELTRANSLATION_DEFAULT_LANGUAGE.replace('-', '_'), field=field)),
             Div(
                 *fields,
                 css_class="tab-content"

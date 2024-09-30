@@ -1,36 +1,32 @@
 import csv
 import hashlib
 import logging
-import os
-import shutil
 import time
-from datetime import datetime
 from io import StringIO
-from tempfile import TemporaryDirectory
 from unittest.mock import patch
 from urllib.parse import quote
 
 from bs4 import BeautifulSoup
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase, LiveServerTestCase
+from django.core.files.storage import default_storage
+from django.test import LiveServerTestCase, TestCase
 from django.test.testcases import to_list
-from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils import html
 from django.utils.encoding import force_str
 from django.utils.http import http_date
-from django.utils.timezone import utc
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from freezegun import freeze_time
+from paperclip.settings import get_attachment_model
 
-from .factories import AttachmentFactory, SuperUserFactory, UserFactory
 from ..forms import MapEntityForm
 from ..helpers import smart_urljoin
+from ..models import ENTITY_MARKUP
 from ..settings import app_settings
-
-from paperclip.settings import get_attachment_model
+from .factories import AttachmentFactory, SuperUserFactory, UserFactory
 
 
 class AdjustDebugLevel:
@@ -46,7 +42,6 @@ class AdjustDebugLevel:
         self.logger.setLevel(self.old_level)
 
 
-@override_settings(MEDIA_ROOT=TemporaryDirectory().name)
 class MapEntityTest(TestCase):
     model = None
     modelfactory = None
@@ -64,14 +59,8 @@ class MapEntityTest(TestCase):
         return {}
 
     def setUp(self):
-        if os.path.exists(settings.MEDIA_ROOT):
-            self.tearDown()
-        os.makedirs(settings.MEDIA_ROOT)
         if self.user:
             self.client.force_login(user=self.user)
-
-    def tearDown(self):
-        shutil.rmtree(settings.MEDIA_ROOT)
 
     @classmethod
     def setUpTestData(cls):
@@ -123,6 +112,18 @@ class MapEntityTest(TestCase):
         response = self.client.get(obj.get_document_url())
         self.assertEqual(response.status_code, 200)
 
+    @patch('mapentity.helpers.requests')
+    def test_document_markup(self, mock_requests):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        mock_requests.get.return_value.status_code = 200
+        mock_requests.get.return_value.content = b'<p id="properties">Mock</p>'
+
+        obj = self.modelfactory.create()
+        response = self.client.get(reverse(obj._entity.url_name(ENTITY_MARKUP), args=[obj.pk]))
+        self.assertEqual(response.status_code, 200)
+
     def test_bbox_filter(self):
         if self.model is None:
             return  # Abstract test should not run
@@ -155,7 +156,7 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
         obj = self.modelfactory.create()
         response = self.client.get(self.model.get_format_list_url() + '?format=gpx')
-        parsed = BeautifulSoup(response.content, 'lxml')
+        parsed = BeautifulSoup(response.content, features='xml')
         if hasattr(obj, 'geom_3d'):
             self.assertGreater(len(parsed.findAll('ele')), 0)
         else:
@@ -189,7 +190,7 @@ class MapEntityTest(TestCase):
         for line in lines:
             for col in line:
                 # the col should not contains any html tags
-                self.assertEquals(force_str(col), html.strip_tags(force_str(col)))
+                self.assertEqual(force_str(col), html.strip_tags(force_str(col)))
 
     def _post_form(self, url):
         # no data
@@ -412,7 +413,6 @@ class MapEntityTest(TestCase):
         })
 
 
-@override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class MapEntityLiveTest(LiveServerTestCase):
     model = None
     userfactory = None
@@ -450,7 +450,7 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         self.login()
         self.modelfactory.create()
-        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
+        latest_updated.return_value = now()
 
         latest = self.model.latest_updated()
         geojson_layer_url = self.url_for(self.model.get_layer_list_url())
@@ -479,7 +479,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         # Create a new object
         time.sleep(1.1)  # wait some time, last-modified has precision in seconds
         self.modelfactory.create()
-        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
+        latest_updated.return_value = now()
 
         self.assertNotEqual(latest, self.model.latest_updated())
         response = self.client.get(geojson_layer_url)
@@ -513,9 +513,9 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         # Initially, map image does not exists
         image_path = obj.get_map_image_path()
-        if os.path.exists(image_path):
-            os.remove(image_path)
-        self.assertFalse(os.path.exists(image_path))
+        if default_storage.exists(image_path):
+            default_storage.delete(image_path)
+        self.assertFalse(default_storage.exists(image_path))
 
         # Mock Screenshot response
         mock_requests.get.return_value.status_code = 200
@@ -523,7 +523,7 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         response = self.client.get(obj.map_image_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(os.path.exists(image_path))
+        self.assertTrue(default_storage.exists(image_path))
 
         mapimage_url = '%s%s?context' % (self.live_server_url, obj.get_detail_url())
         screenshot_url = 'http://0.0.0.0:8001/?url=%s' % quote(mapimage_url)

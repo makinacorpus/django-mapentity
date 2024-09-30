@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
+from tempfile import TemporaryDirectory
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -66,6 +69,7 @@ MIDDLEWARE = (
     'mapentity.middleware.AutoLoginMiddleware',
 )
 
+
 ROOT_URLCONF = 'test_project.urls'
 
 TEMPLATES = [
@@ -116,6 +120,7 @@ LANGUAGES = (
     ('en', "English"),
     ('fr', "French"),
 )
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -191,10 +196,17 @@ LEAFLET_CONFIG = {
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 MAPENTITY_CONFIG = {
-    'CONVERSION_SERVER': 'http://localhost/',
-    'CAPTURE_SERVER': 'http://localhost/',
+    'CONVERSION_SERVER': 'http://convertit:6543',
+    'CAPTURE_SERVER': 'http://screamshotter:8000',
     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 }
-
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'test_project', 'locale'),
+)
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+MODELTRANSLATION_LANGUAGES = ('en', 'fr', 'zh-hant')
+
+if 'test' in sys.argv:
+    MEDIA_ROOT = TemporaryDirectory().name

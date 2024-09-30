@@ -9,11 +9,11 @@ from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist
+from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.utils import OperationalError
 from django.urls import reverse, NoReverseMatch
 from django.utils.formats import localize
-from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from rest_framework import permissions as rest_permissions
 
@@ -192,7 +192,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def get_date_update(self):
         try:
             fname = app_settings['DATE_UPDATE_FIELD_NAME']
-            return getattr(self, fname).replace(tzinfo=utc)
+            return getattr(self, fname)
         except AttributeError:
             return None
 
@@ -204,8 +204,8 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def delete(self, *args, **kwargs):
         # Delete map image capture when delete object
         image_path = self.get_map_image_path()
-        if os.path.exists(image_path):
-            os.unlink(image_path)
+        if default_storage.exists(image_path):
+            default_storage.delete(image_path)
         super().delete(*args, **kwargs)
 
     @classmethod
@@ -299,14 +299,16 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         else:
             size = app_settings['MAP_CAPTURE_SIZE']
         printcontext = self.get_printcontext() if hasattr(self, 'get_printcontext') else None
-        capture_map_image(url, path, size=size, waitfor=self.capture_map_image_waitfor, printcontext=printcontext)
+        capture_map_image(url,
+                          path,
+                          size=size,
+                          waitfor=self.capture_map_image_waitfor,
+                          printcontext=printcontext)
         return True
 
     def get_map_image_path(self):
-        basefolder = os.path.join(settings.MEDIA_ROOT, 'maps')
-        if not os.path.exists(basefolder):
-            os.makedirs(basefolder)
-        return os.path.join(basefolder, '%s-%s.png' % (self._meta.model_name, self.pk))
+        """ Get relative path to map image in storage."""
+        return os.path.join('maps', '%s-%s.png' % (self._meta.model_name, self.pk))
 
     def get_attributes_html(self, request):
         return extract_attributes_html(self.get_detail_url(), request)
@@ -339,6 +341,11 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def is_public(self):
         "Override this method to allow unauthenticated access to attachments"
         return False
+
+    @property
+    def map_image_path(self):
+        """ Get full path to map image in storage. """
+        return default_storage.path(self.get_map_image_path())
 
 
 class MapEntityMixin(BaseMapEntityMixin):

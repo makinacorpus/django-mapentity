@@ -347,6 +347,7 @@ $(window).on('entity:map:list', function (e, data) {
             prefix: 'list',
         }
     );
+
     $(window).unload(function () {
         MapEntity.Context.saveFullContext(map, {
             filter: '#mainfilter',

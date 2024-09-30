@@ -11,6 +11,10 @@ on:
   schedule:
     - cron: '0 2 * * *'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -18,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.8  # check pylint with minimal supported python version
 
@@ -34,19 +38,26 @@ jobs:
     runs-on: ubuntu-20.04  # wait for spatialite fix
     strategy:
       matrix:
-        python-version: [ '3.8', '3.11' ]
-        django-version: [ '3.2.*', '4.2.*' ]
+        python-version: [ '3.8', '3.10', '3.12' ]
+        django-version: [ '4.2.*', '5.0.*' ]
+        exclude:
+            - python-version: '3.8'
+              django-version: '5.0.*'
+
+    env:
+      PYTHON: ${{ matrix.python-version }}
+      DJANGO: ${{ matrix.django-version }}
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Install system dependencies
       run: |
-        sudo apt-get update
+        sudo apt-get -qq update
         sudo apt-get -y install gettext libproj-dev binutils gdal-bin libgdal-dev libsqlite3-mod-spatialite libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info libpangoft2-1.0-0 libjpeg-dev libopenjp2-7-dev libsasl2-dev python3-dev libldap2-dev libssl-dev
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -56,39 +67,50 @@ jobs:
         pip install .[dev]
         pip install Django==${{ matrix.django-version }} -U
 
+    - name: Compile messages
+      run: |
+        ./manage.py compilemessages
+
     - name: Check pending migrations
       run: |
         ./manage.py makemigrations --check
 
     - name: Test with coverage
       run: |
-        coverage run ./manage.py test -v3
-        coverage report -m
+        coverage run --parallel-mode --concurrency=multiprocessing ./manage.py test --parallel -v 3
+        coverage combine
+        coverage xml -o coverage.xml
 
-    - name: Coverage upload
-      run: |
-        pip install codecov
-        codecov
+    - uses: codecov/codecov-action@v4
+      with:
+        files: ./coverage.xml
+        env_vars: PYTHON,DJANGO
+        token: ${{ secrets.CODECOV_TOKEN }} # not usually required for public repos
+        fail_ci_if_error: true # optional (default = false)
 
   publish:
     needs: [lint, test]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.8
 
-      - name: Install dependencies
+      - name: Compile messages
         run: |
-          python -m pip install setuptools wheel twine -U
-      - name: Build and publish
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          pip install django
+          sudo apt-get -qq update
+          sudo apt-get -y install gettext
+          django-admin compilemessages
+
+      - name: Build package
         run: |
           python setup.py sdist
-          twine upload dist/*
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

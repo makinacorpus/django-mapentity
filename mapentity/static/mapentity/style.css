@@ -476,6 +476,10 @@ div.dataTables_wrapper div.dataTables_filter input {
     overflow-y: scroll;
 }
 
+#mainfilter .form-group > p:last-child:has(.chosen-container-multi) {
+    padding-bottom: 12rem;
+}
+
 #mainfilter label {
     /* sr-only */
     position: absolute;
@@ -842,6 +846,11 @@ label.requiredField .asteriskField {
 .cec-overflow.tox .tox-statusbar {
     background-color: pink;
 }
+.tox.is-invalid {
+    border-color: #dc3545!important;
+
+}
+
 
 
 /*

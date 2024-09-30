@@ -1,15 +1,13 @@
 import os
-import shutil
 from unittest import mock
 
 import django
 import factory
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.utils.encoding import force_str
 from faker import Faker
@@ -18,12 +16,13 @@ from freezegun import freeze_time
 
 from mapentity.models import LogEntry
 from mapentity.registry import app_settings
-from mapentity.tests import MapEntityTest, MapEntityLiveTest
-from mapentity.tests.factories import SuperUserFactory, AttachmentFactory
-from mapentity.views import ServeAttachment, Convert, JSSettings
-from .factories import DummyModelFactory
+from mapentity.tests import MapEntityLiveTest, MapEntityTest
+from mapentity.tests.factories import AttachmentFactory, SuperUserFactory
+from mapentity.views import Convert, JSSettings, ServeAttachment
+
 from ..models import DummyModel, FileType
-from ..views import DummyList, DummyDetail
+from ..views import DummyDetail, DummyList
+from .factories import DummyModelFactory
 
 fake = Faker('fr_FR')
 fake.add_provider(geo)
@@ -60,6 +59,9 @@ class DummyModelFunctionalTest(MapEntityTest):
             'geom': self.obj.geom.ewkt,
             'id': 1,
             'name': '<a href="/dummymodel/1/">a dummy model</a>',
+            'name_en': 'a dummy model',
+            'name_fr': '',
+            'name_zh_hant': '',
             'public': '<i class="bi bi-x-circle text-danger"></i>',
             'short_description': '',
             'tags': [self.obj.tags.first().pk]
@@ -129,46 +131,44 @@ class ConvertTest(BaseTest):
         self.assertEqual(response.status_code, 405)
 
     @mock.patch('mapentity.helpers.requests.get')
-    def test_convert_view_uses_original_request_headers(self, get_mocked):
+    @mock.patch('mapentity.tokens.TokenManager.generate_token')
+    def test_convert_view_uses_original_request_headers(self, token_mocked, get_mocked):
+        token_mocked.return_value = "a_temp0rary_t0k3n"
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
         get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=http://geotrek.fr',
                         HTTP_ACCEPT_LANGUAGE='it')
-        get_mocked.assert_called_with('http://localhost//?url=http%3A//geotrek.fr&to=application/pdf',
+        host = app_settings['CONVERSION_SERVER']
+        url = f"{host}/?url=http%3A//geotrek.fr%3Fauth_token%3Da_temp0rary_t0k3n&to=application/pdf"
+        get_mocked.assert_called_with(url,
                                       headers={'Accept-Language': 'it'})
 
     @mock.patch('mapentity.helpers.requests.get')
-    def test_convert_view_builds_absolute_url_from_relative(self, get_mocked):
+    @mock.patch('mapentity.tokens.TokenManager.generate_token')
+    def test_convert_view_builds_absolute_url_from_relative(self, token_mocked, get_mocked):
+        token_mocked.return_value = "a_temp0rary_t0k3n"
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
         get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=/path/1/')
-        get_mocked.assert_called_with('http://localhost//?url=http%3A//testserver/path/1/&to=application/pdf',
+        host = app_settings['CONVERSION_SERVER']
+        url = f"{host}/?url=http%3A//testserver/path/1/%3Fauth_token%3Da_temp0rary_t0k3n&to=application/pdf"
+        get_mocked.assert_called_with(url,
                                       headers={})
 
 
-@override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class AttachmentTest(BaseTest):
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         self.obj = DummyModelFactory.create()
-        """
-        if os.path.exists(settings.MEDIA_ROOT):
-            self.tearDown()
-        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}'.format(self.obj.pk)))
-        self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk))
-        self.url = '/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk)
-        open(self.file, 'wb').write(b'*' * 300)
-        """
         self.attachment = AttachmentFactory.create(content_object=self.obj)
         self.url = "/media/%s" % self.attachment.attachment_file
         call_command('update_permissions_mapentity')
 
     def tearDown(self):
-        shutil.rmtree(settings.MEDIA_ROOT)
         app_settings['SENDFILE_HTTP_HEADER'] = None
 
     def download(self, url):
@@ -385,11 +385,13 @@ class DetailViewTest(BaseTest):
                             '<img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
         self.assertContains(response,
                             '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
-                            ' href="/convert/?url=/document/dummymodel-{}.odt&to=doc">'
+                            ' href="/convert/?url=/document/dummymodel-{}.odt'
+                            '&from=application/vnd.oasis.opendocument.text&to=doc">'
                             '<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
         self.assertContains(response,
                             '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
-                            ' href="/convert/?url=/document/dummymodel-{}.odt">'
+                            ' href="/convert/?url=/document/dummymodel-{}.odt'
+                            '&from=application/vnd.oasis.opendocument.text">'
                             '<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
 
     def test_export_buttons_weasyprint(self):
@@ -498,14 +500,14 @@ class LogViewMapentityTest(MapEntityTest):
             'change_message': '',
             'content_type': 12,
             'id': 1,
-            'object': '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>",
+            'object': '<a data-pk="1" href="/dummymodel/1/" >Test_App | Dummy '"Model <class 'object'></a>",
             'object_id': '1',
             'object_repr': "<class 'object'>",
             'user': User.objects.first().username
         }
 
-        if django.__version__ < '3.0':
-            data['object'] = '<a data-pk="1" href="/dummymodel/1/" >Dummy '"Model <class 'object'></a>"
+        if django.__version__ < '5.0':
+            data['object'] = '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>"
         return data
 
     def get_good_data(self):

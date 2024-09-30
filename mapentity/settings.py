@@ -45,6 +45,7 @@ app_settings = dict({
     'MAP_STYLES': _DEFAULT_MAP_STYLES,
     'REGEX_PATH_ATTACHMENTS': r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$',
     'MAX_CHARACTERS': None,
+    'MAX_CHARACTERS_BY_FIELD': {},
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 # default MAP_STYLES should not be replaced but updated by MAPENTITY_CONFIG
@@ -69,6 +70,8 @@ TINYMCE_DEFAULT_CONFIG = {
     'forced_root_block': False,
     'width': '95%',
     'resize': "both",
+    'browser_spellcheck': True,
+    'contextmenu': False,
     'valid_elements': ('@[id|class|style|title|dir<ltr?rtl|lang|xml::lang],'
                        'a[rel|rev|charset|hreflang|tabindex|accesskey|type|name|href|target|title|class],'
                        'img[longdesc|usemap|src|border|alt=|title|hspace|vspace|width|height|align],'

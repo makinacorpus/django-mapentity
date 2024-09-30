@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-8.5.6+dev  (XXXX-XX-XX)
-----------------------------
+8.9.2+dev  (XXXX-XX-XX)
+-----------------------
 
 **Breaking changes**
 
@@ -12,9 +12,151 @@ CHANGELOG
 
 **Maintenance**
 
-* Support django 4.2 and python 3.11
-* Drop django 3.1 support
 * Ease quickstart for developers
+
+
+8.9.2      (2024-07-15)
+-----------------------
+
+*Bug fixes*
+
+- Fix storage usage to deals with django >= 4.2.14
+
+**Tests**
+
+- Fix tests useless warnings
+
+
+8.9.1      (2024-06-28)
+-----------------------
+
+**Improvements**
+
+- Increase filters popup size, to display full select dropdowns
+
+
+8.9.0      (2024-06-04)
+-----------------------
+
+**Features**
+
+- Add django 5.0 support
+- Drop django 3.2 support
+- Add python 3.12 support
+
+*Bug fixes*
+
+- Fix map in ODT / PDF documents by using absolute path in storage
+- Fix converted document name (DOC and PDF)
+
+**Tests**
+
+- Fix flaky translations in tests
+
+
+8.8.2      (2024-05-22)
+-----------------------
+
+**Improvements**
+
+- Add a get_columns method to change column list dynamically.
+
+
+8.8.1  (2024-05-07)
+-------------------
+
+**Hotfix**
+
+- Fix new internal user cache 
+
+
+8.8.0      (2024-04-10)
+-----------------------
+
+**Improvements**
+
+- Refactor storage usage with default_storage and staticfiles_storage
+
+**Tests**
+
+- Use temporary media folder for tests
+- Make `MapentityTestCase` more consistent
+
+**CI**
+
+- Parallelize tests in CI
+- Fix codecov
+
+
+8.7.3  (2024-04-02)
+-------------------
+
+**Bug fixes**
+
+- Form clearing not handling number fields
+- Fix weasyprint html public view by converting file:// schemes with http://
+- Revert fixing current object order in overlays menu (#292)
+
+
+8.7.2  (2024-03-22)
+-------------------
+
+**Bug fixes**
+
+- 'Others' color config to use with leaflet overlay (#290)
+
+
+8.7.1      (2024-03-13)
+-----------------------
+
+**Feature**
+
+- Add current object in detail leaflet overlay (related to https://github.com/GeotrekCE/Geotrek-admin/issues/1300)
+
+
+8.7.0      (2024-02-28)
+-----------------------
+
+- Fix of the widget `SelectMultipleWithPop` which did not add the newly created element in the related list (#1299)
+- Add `MAX_CHARACTERS_BY_FIELD` to control the max length of a rich text field. 
+- Deprecate the `MAX_CHARACTERS` parameter
+
+
+8.6.2      (2024-01-05)
+-----------------------
+
+**Bug fixes**
+
+- Support sub languages (see https://github.com/GeotrekCE/Geotrek-admin/issues/3801)
+
+
+8.6.1      (2023-09-18)
+-----------------------
+
+**Bug fixes**
+
+- Fix new authentication system
+
+
+8.6.0      (2023-09-15)
+-----------------------
+
+**Feature**
+
+- Modify TinyMCE configuration to add browser spelling check for textAreas (related to https://github.com/GeotrekCE/Geotrek-admin/issues/1189)
+
+**Maintenance**
+
+- Support django 4.2 and python 3.11
+- Drop django 3.1 support
+
+**Documentation**
+
+- Ease quickstart for developers
+
+**Minor fixes**
+
+- Improve authentication mechanism for screamshotter and convertit
 
 
 8.5.6      (2023-09-04)
@@ -27,6 +169,7 @@ CHANGELOG
 
 8.5.5 	   (2023-09-04)
 -----------------------
+
 **DO NOT USE IT**
 
 **Bug fixes**

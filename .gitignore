@@ -12,3 +12,4 @@ __pycache__
 /docs/_build/
 /README.html
 /.coverage
+*.mo
