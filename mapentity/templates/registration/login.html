@@ -1,5 +1,6 @@
 {% extends "mapentity/base_site.html" %}
-{% load i18n crispy_forms_tags mapentity_tags %}
+{% load crispy_forms_filters %}
+{% load i18n mapentity_tags %}
 
 {% block content %}
 <div class="container">
@@ -15,7 +16,7 @@
     {% endif %}
     <div class="row justify-content-center">
         <div class="col-12 col-sm-8 col-md-6 col-lg-4">
-            <img src="{% media_static_fallback 'upload/logo-login.png' 'images/logo-login.png' %}" />
+            <img class="img-thumbnail" src="{% media_static_fallback 'upload/logo-login.png' 'images/logo-login.png' %}" alt="logo" />
             <form action="" method="post" class="login-form">
                 {% csrf_token %}
                 {{ form|crispy }}
