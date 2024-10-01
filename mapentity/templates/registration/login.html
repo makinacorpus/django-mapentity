@@ -2,34 +2,74 @@
 {% load crispy_forms_filters %}
 {% load i18n mapentity_tags %}
 
+{% block extrahead %}
+    <style>
+    .card {
+  flex-direction: row;
+  align-items: center;
+}
+.card-title {
+  font-weight: bold;
+}
+.card img {
+  width: 30%;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: calc(0.25rem - 1px);
+}
+@media only screen and (max-width: 768px) {
+  a {
+    display: none;
+  }
+  .card-body {
+    padding: 0.5em 1.2em;
+  }
+  .card-body .card-text {
+    margin: 0;
+  }
+  .card img {
+    width: 50%;
+  }
+}
+@media only screen and (max-width: 1200px) {
+  .card img {
+    width: 40%;
+  }
+}
+    </style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        {% endfor %}
-    {% endif %}
-    <div class="row justify-content-center">
-        <div class="col-12 col-sm-8 col-md-6 col-lg-4">
-            <img class="img-thumbnail" src="{% media_static_fallback 'upload/logo-login.png' 'images/logo-login.png' %}" alt="logo" />
-            <form action="" method="post" class="login-form">
-                {% csrf_token %}
-                {{ form|crispy }}
-                <div class="text-right">
-                    <button type="submit" class="btn btn-primary">{% trans "Login" %}</button>
+    <div class="container-fluid">
+    <br>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-            </form>
-
-            <p>Version {{ VERSION }}</p>
+            {% endfor %}
+        {% endif %}
+        <div class="row">
+            <div class="col-12 col-md-6 offset-md-3">
+                <div class="card">
+                    <img class="img-rounded"
+                         src="{% media_static_fallback 'upload/logo-login.png' 'images/logo-login.png' %}" alt="logo"/>
+                    <div class="card-body">
+                        <form action="" method="post" class="form-horizontal">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-primary">{% trans "Login" %}</button>
+                            </div>
+                        </form>
+                        <p class="card-text">Version {{ VERSION }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
-
     </div>
-</div>
 {% endblock content %}
 
 {% block extrabody %}
