@@ -4,7 +4,7 @@ L.Util.getWKT = function(layer) {
         return 'POINT(' + coord2str(layer.getLatLng()) + ')';
     else if (layer instanceof L.Polygon) {
         var closed = layer.getLatLngs();
-        if (!closed[0].equals(closed[closed.length-1])) {
+        if (JSON.stringify(closed[0] !== JSON.stringify(closed[closed.length-1]))) {
             closed.push(closed[0]);
         }
         return 'POLYGON(' + coord2str(closed) + ')';
