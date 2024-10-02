@@ -15,7 +15,7 @@ _DEFAULT_MAP_STYLES = {
 }
 
 app_settings = dict({
-    'TITLE': "",
+    'TITLE': "Mapentity",
     'HISTORY_ITEMS_MAX': 5,
     'CONVERSION_SERVER': 'http://convertit/',
     'CAPTURE_SERVER': 'http://screamshotter/',
