@@ -14,6 +14,7 @@ CHANGELOG
 
 - Due to new crispy forms, there is new login form
 - Use HTML `button` tag for create/update forms
+- Prevent multiple submissions of create/update form
 
 
 8.9.2      (2024-07-15)
