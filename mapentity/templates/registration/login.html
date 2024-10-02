@@ -1,4 +1,5 @@
 {% extends "mapentity/base_site.html" %}
+
 {% load crispy_forms_filters %}
 {% load i18n mapentity_tags %}
 
@@ -45,6 +46,8 @@
     </style>
 {% endblock %}
 
+{% block body_classes %}bg-light{% endblock %}
+
 {% block content %}
     <div class="container-fluid">
         <br>
@@ -61,14 +64,14 @@
         <div class="row">
             <div class="col-12 col-md-6 offset-md-3">
                 <div class="card">
-                    <img class="img-thumbnail"
+                    <img class="img-rounded p-2"
                          src="{% media_static_fallback 'upload/logo-login.png' 'images/logo-login.png' %}" alt="logo"/>
                     <div class="card-body">
                         <form action="" method="post" class="form-horizontal">
                             {% csrf_token %}
                             {{ form|crispy }}
                             <div class="text-right">
-                                <button type="submit" class="btn btn-primary">{% trans "Login" %}</button>
+                                <button type="submit" class="btn btn-success"><i class="bi bi-box-arrow-in-right"></i> {% trans "Login" %}</button>
                             </div>
                         </form>
                         <p class="card-text">
