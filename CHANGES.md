@@ -13,6 +13,7 @@ CHANGELOG
 **Improvements**
 
 - Due to new crispy forms, there is new login form
+- Use HTML `button` tag for create/update forms
 
 
 8.9.2      (2024-07-15)
