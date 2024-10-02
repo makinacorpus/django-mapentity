@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-8.9.2+dev  (XXXX-XX-XX)
+8.10.0     (2024-10-02)
 -----------------------
 
 **Breaking changes**
