@@ -4,9 +4,9 @@ CHANGELOG
 8.9.2+dev  (XXXX-XX-XX)
 -----------------------
 
-**Bug fixes**
+**Improvements**
 
-- Use HTML tag for create/update button
+- Use HTML `button` tag for create/update forms
 
 
 8.9.2      (2024-07-15)
