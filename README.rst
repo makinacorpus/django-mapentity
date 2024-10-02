@@ -7,7 +7,7 @@ that powers
 - `Georiviere <https://github.com/Georiviere/Georiviere-admin>`_.
 
 
-Works with Python 3.6+ and Django 2.2+
+Works with Python 3.8+ and Django 3.2+
 
 .. image:: https://img.shields.io/pypi/v/mapentity.svg
     :target: https://pypi.python.org/pypi/mapentity

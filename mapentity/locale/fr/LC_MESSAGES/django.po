@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-07 16:33+0000\n"
+"POT-Creation-Date: 2024-05-22 13:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,14 +21,18 @@ msgid ""
 "Access to the requested resource is restricted. You have been redirected."
 msgstr "L'accès à la ressource demandée est restreint. Vous avez été redirigé."
 
+#, python-format
+msgid "%(max)s characters maximum recommended"
+msgstr "%(max)s caractères maximum recommandés"
+
+msgid "Cancel"
+msgstr "Annuler"
+
 msgid "Create"
 msgstr "Créer"
 
 msgid "Save changes"
 msgstr "Sauvegarder"
-
-msgid "Cancel"
-msgstr "Annuler"
 
 msgid "Delete"
 msgstr "Supprimer"
@@ -55,9 +59,6 @@ msgstr "Modifié"
 msgid "Deleted"
 msgstr "Supprimé"
 
-msgid "None"
-msgstr "Aucun(e)"
-
 msgid "Modified"
 msgstr "Modifié"
 
@@ -66,18 +67,6 @@ msgstr "non"
 
 msgid "yes"
 msgstr "oui"
-
-msgid "administration"
-msgstr "administration"
-
-msgid "Back to application"
-msgstr "Retour à l'application"
-
-msgid "Change password"
-msgstr "Changer le mot de passe"
-
-msgid "Log out"
-msgstr "Se déconnecter"
 
 msgid "Permission denied"
 msgstr "Permission refusée"
@@ -88,11 +77,11 @@ msgstr "Page non trouvée"
 msgid "Internal error"
 msgstr "Erreur interne"
 
-msgid "Details"
-msgstr "Détails"
-
 msgid "List"
 msgstr "Liste"
+
+msgid "Quick access"
+msgstr "Accès rapide"
 
 msgid "Add"
 msgstr "Ajouter"
@@ -105,6 +94,9 @@ msgstr "Journal"
 
 msgid "Logout"
 msgstr "Déconnexion"
+
+msgid "None"
+msgstr "Aucun(e)"
 
 msgid "Filter"
 msgstr "Filtrer"
@@ -164,6 +156,9 @@ msgstr "Fichiers liés"
 msgid "History"
 msgstr "Historique"
 
+msgid "Duplicate"
+msgstr "Dupliquer"
+
 msgid "Update"
 msgstr "Modifier"
 
@@ -199,6 +194,9 @@ msgstr "Créateur"
 
 msgid "Authors"
 msgstr "Auteurs"
+
+msgid "Login"
+msgstr "Connexion"
 
 #, python-format
 msgid "%d year ago"
@@ -241,6 +239,15 @@ msgstr "Créé"
 
 msgid "Your form contains errors"
 msgstr "Le formulaire contient des erreurs"
+
+msgid "Duplication is not available for this object"
+msgstr "La duplication n'est pas disponible pour cet objet."
+
+msgid "has been duplicated successfully"
+msgstr "a été dupliqué avec succès"
+
+msgid "An error occurred during duplication"
+msgstr "Une erreur s'est produite lors de la duplication"
 
 msgid "No map available for this object."
 msgstr "Pas de carte disponible pour cet objet."

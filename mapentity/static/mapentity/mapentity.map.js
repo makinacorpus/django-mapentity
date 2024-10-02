@@ -41,7 +41,6 @@ L.Control.Screenshot = L.Control.extend({
     }
 });
 
-
 /**
  * Shows a static label in the middle of the Polyline.
  * It will be hidden on zoom levels below ``LABEL_MIN_ZOOM``.
@@ -112,6 +111,9 @@ $(window).on('entity:map', function (e, data) {
     var layerscontrol = L.control.groupedLayers(baseLayers, {'': overlaysLayers});
     map.layerscontrol = layerscontrol.addTo(map);
 
+    // Disable scroll on overlay form to avoid map zoom change when scroll on layers list
+    L.DomEvent.disableScrollPropagation(layerscontrol._container);
+
     if (readonly) {
         // Set map readonly
         map.dragging.disable();
@@ -120,8 +122,6 @@ $(window).on('entity:map', function (e, data) {
         map.scrollWheelZoom.disable();
         map.boxZoom.disable();
     }
-
-    map.attributionControl.setPrefix('');
 
     var mapBounds = $container.data('mapextent');
     if (mapBounds) {
@@ -146,6 +146,18 @@ $(window).on('entity:map', function (e, data) {
             }),
         }
     }));
+
+
+    map.on("moveend", function () {
+        var bounds = map.getBounds();
+        //$('#id_bbox').val(`${bounds.getSouthWest().lng},${bounds.getSouthWest().lat},${bounds.getNorthEast().lng},${bounds.getNorthEast().lat}`);
+        //var bounds = this.map.getBounds(),
+        var rect = new L.Rectangle([bounds._northEast, bounds._southWest]);
+        //this.options.filter.bboxfield.val(L.Util.getWKT(rect));
+        $('#id_bbox').val(L.Util.getWKT(rect));
+    });
+
+
 });
 
 
@@ -173,22 +185,21 @@ $(window).on('entity:map:detail', function (e, data) {
     });
 
     // Show object geometry in detail map
-    var $singleObject = $container.find('.geojsonfeature'),
-        objectLayer = null;
-    if ($singleObject.length > 0) {
-        objectLayer = _showSingleObject(JSON.parse($singleObject.text()));
-    }
+    var feature_geojson_url = $("#detailmap").attr('data-feature-url');
+    $.get(feature_geojson_url, function (data) {
+        var objectLayer = _showSingleObject(data);
 
-    $(window).trigger('detailmap:ready', {map: map,
-                                          layer: objectLayer,
-                                          context: context,
-                                          modelname: data.modelname});
-
+        $(window).trigger('detailmap:ready', {map: map,
+                                              layer: objectLayer,
+                                              context: context,
+                                              modelname: data.modelname});
+    });
 
     function _showSingleObject(geojson) {
+        console.log(data);
         var DETAIL_STYLE = L.Util.extend(window.SETTINGS.map.styles.detail, {clickable: false});
 
-        // Apparence of geometry for export can be controlled via setting
+        // Appearance of geometry for export can be controlled via setting
         if (context && context.print) {
             var specified = window.SETTINGS.map.styles.print[data.modelname];
             if (specified) {
@@ -230,19 +241,17 @@ $(window).on('entity:map:list', function (e, data) {
     var map = data.map,
         bounds = L.latLngBounds(data.options.extent);
 
-    map.removeControl(map.attributionControl);
     map.doubleClickZoom.disable();
 
-    map.addControl(new L.Control.Information());
     map.addControl(new L.Control.ResetView(bounds));
 
     /*
      * Objects Layer
      * .......................
      */
-    function getUrl(properties, layer) {
+   function getUrl(properties, layer) {
         return window.SETTINGS.urls.detail.replace(new RegExp('modelname', 'g'), data.modelname)
-                                          .replace('0', properties.pk);
+                                          .replace('0', properties.id);
     }
 
     var style = window.SETTINGS.map.styles[data.modelname];
@@ -271,6 +280,7 @@ $(window).on('entity:map:list', function (e, data) {
     map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"));
 
     var dt = MapEntity.mainDatatable;
+    window.objectsLayer = objectsLayer;
 
     /*
      * Assemble components
@@ -353,6 +363,7 @@ $(window).on('entity:map:list', function (e, data) {
             prefix: 'list',
         }
     );
+
     $(window).unload(function () {
         MapEntity.Context.saveFullContext(map, {
             filter: '#mainfilter',

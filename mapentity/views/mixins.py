@@ -1,6 +1,8 @@
 import logging
 
-from django.contrib.contenttypes.fields import GenericRelation
+from crispy_forms.helper import FormHelper
+from django.contrib.contenttypes.fields import GenericRelation, GenericRel, GenericForeignKey
+from django.db.models.fields.files import FileField
 from django.contrib.gis.db.models import GeometryField
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
@@ -83,6 +85,7 @@ class ModelViewMixin:
         if model:
             context['model'] = model
             context['appname'] = model._meta.app_label.lower()
+            context['app_verbose_name'] = model._meta.app_config.verbose_name
             context['modelname'] = model._meta.object_name.lower()
             context['objectname'] = model._meta.verbose_name
             context['objectsname'] = model._meta.verbose_name_plural
@@ -107,7 +110,6 @@ class FormViewMixin:
 
 
 class FilterListMixin:
-
     filterform = None
 
     def __init__(self):
@@ -120,10 +122,25 @@ class FilterListMixin:
             class filterklass(MapEntityFilterSet):
                 class Meta:
                     model = _model
-                    fields = [field.name for field in _model._meta.get_fields() if
-                              not isinstance(field, GeometryField) and not isinstance(field, GenericRelation)]
+                    fields = [
+                        field.name
+                        for field in _model._meta.get_fields()
+                        if not isinstance(
+                            field,
+                            (
+                                GeometryField,
+                                GenericRelation,
+                                GenericRel,
+                                GenericForeignKey,
+                                FileField
+                            )
+                        )
+                    ]
             self.filterform = filterklass
-        self._filterform = self.filterform(None, self.queryset)
+        self._filterform = self.filterform()
+        self._filterform.helper = FormHelper()
+        self._filterform.helper.field_class = 'form-control-sm'
+        self._filterform.helper.submit = None
 
     def get_queryset(self):
         queryset = super().get_queryset()

@@ -138,8 +138,8 @@ L.ObjectsLayer = L.GeoJSON.extend({
 
     getPk: function(layer) {
         // pk (primary-key) in properties
-        if (layer.properties && layer.properties.pk)
-            return layer.properties.pk;
+        if (layer.properties && layer.properties.id)
+            return layer.properties.id;
         // id of geojson feature
         if (layer.id !== undefined)
             return layer.id;

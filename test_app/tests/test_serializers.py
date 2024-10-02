@@ -20,8 +20,9 @@ class CommonShapefileSerializerMixin(object):
     def getShapefileLayers(self):
         shapefiles = self.serializer.path_directory
         shapefiles = [shapefile for shapefile in os.listdir(shapefiles) if shapefile[-3:] == "shp"]
-        datasources = [gdal.DataSource(os.path.join(self.serializer.path_directory, s)) for s in shapefiles]
-        layers = [ds[0] for ds in datasources]
+        layers = {
+            s: gdal.DataSource(os.path.join(self.serializer.path_directory, s))[0] for s in shapefiles
+        }
         return layers
 
 
@@ -38,6 +39,8 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
                                                               '1 2, 1 1))' % settings.SRID)
         self.multipolygon = MushroomSpot.objects.create(serialized='SRID=%s;MULTIPOLYGON(((1 1, 2 2, '
                                                                    '1 2, 1 1)))' % settings.SRID)
+        self.geometrycollection = MushroomSpot.objects.create(
+            serialized='SRID=%s;GEOMETRYCOLLECTION(POINT(0 0), POLYGON((1 1, 2 2, 1 2, 1 1))))' % settings.SRID)
         MushroomSpot.geomfield = GeometryField(name='geom', srid=settings.SRID)
 
         self.serializer = ZipShapeSerializer()
@@ -50,38 +53,38 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
         MushroomSpot.objects.create()
         self.serializer.serialize(MushroomSpot.objects.all(), stream=response,
                                   fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
-        l_point, l_linestring, l_m_point, l_m_linestring, l_polygon, l_m_polygon = self.getShapefileLayers()
-        self.assertEqual(len(l_point), 1)
-        self.assertEqual(len(l_linestring), 1)
-        self.assertEqual(len(l_m_point), 1)
-        self.assertEqual(len(l_m_linestring), 1)
-        self.assertEqual(len(l_polygon), 1)
-        self.assertEqual(len(l_m_polygon), 1)
+        layers = self.getShapefileLayers()
+        self.assertEqual(len(layers['Point.shp']), 1)
+        self.assertEqual(len(layers['LineString.shp']), 1)
+        self.assertEqual(len(layers['Polygon.shp']), 1)
+        self.assertEqual(len(layers['MultiPoint.shp']), 2)
+        self.assertEqual(len(layers['MultiLineString.shp']), 1)
+        self.assertEqual(len(layers['MultiPolygon.shp']), 2)
 
     def test_serializer_creates_one_layer_per_type(self):
         self.assertEqual(len(self.getShapefileLayers()), 6)
 
     def test_each_layer_has_records_by_type(self):
-        l_point, l_linestring, l_m_point, l_m_linestring, l_polygon, l_m_polygon = self.getShapefileLayers()
-        self.assertEqual(len(l_point), 1)
-        self.assertEqual(len(l_linestring), 1)
-        self.assertEqual(len(l_m_point), 1)
-        self.assertEqual(len(l_m_linestring), 1)
-        self.assertEqual(len(l_polygon), 1)
-        self.assertEqual(len(l_m_polygon), 1)
+        layers = self.getShapefileLayers()
+        self.assertEqual(len(layers['Point.shp']), 1)
+        self.assertEqual(len(layers['LineString.shp']), 1)
+        self.assertEqual(len(layers['Polygon.shp']), 1)
+        self.assertEqual(len(layers['MultiPoint.shp']), 2)
+        self.assertEqual(len(layers['MultiLineString.shp']), 1)
+        self.assertEqual(len(layers['MultiPolygon.shp']), 2)
 
     def test_each_layer_has_a_different_geometry_type(self):
-        layer_types = [layer.geom_type.name for layer in self.getShapefileLayers()]
+        layer_types = [layer.geom_type.name for layer in self.getShapefileLayers().values()]
 
         self.assertCountEqual(layer_types, ['Polygon', 'LineString', 'LineString', 'Point', 'MultiPoint', 'Polygon'])
 
     def test_layer_has_right_projection(self):
-        for layer in self.getShapefileLayers():
-            self.assertIn(layer.srs.name, ('RGF_1993_Lambert_93', 'RGF93_Lambert_93', 'RGF93 / Lambert-93'))
+        for layer in self.getShapefileLayers().values():
+            self.assertEqual(layer.srs.srid, 4326)
             self.assertCountEqual(layer.fields, ['id', 'name', 'number', 'size', 'boolean', 'tags'])
 
     def test_geometries_come_from_records(self):
-        layers = self.getShapefileLayers()
+        layers = self.getShapefileLayers().values()
         geom_type_layer = {layer.name: layer for layer in layers}
         feature = geom_type_layer['Point'][0]
         self.assertEqual(str(feature['id']), str(self.point1.pk))
@@ -108,7 +111,7 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
         self.assertTrue(feature.geom.geos.equals(self.multipolygon.geom))
 
     def test_attributes(self):
-        l_point, l_linestring, l_m_point, l_m_linestring, l_polygon, l_m_polygon = self.getShapefileLayers()
+        l_point = self.getShapefileLayers()['Point.shp']
         feature = l_point[0]
         self.assertEqual(feature['name'].value, self.point1.name)
 
@@ -167,8 +170,7 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         self.serializer.serialize(Supermarket.objects.all(), stream=response,
                                   fields=['id'], delete=False)
         layers = self.getShapefileLayers()
-        layer = layers[0]
-        self.assertEqual(layer.name, 'Polygon')
+        self.assertIn('Polygon.shp', layers)
 
         self.serializer = ZipShapeSerializer()
         Supermarket.geomfield = GeometryField(name='parking', srid=settings.SRID)
@@ -176,8 +178,7 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
                                   fields=['id'], delete=False)
         layers = self.getShapefileLayers()
         delattr(Supermarket, 'geomfield')
-        layer = layers[0]
-        self.assertEqual(layer.name, 'Point')
+        self.assertIn('Point.shp', layers)
 
     def test_serializer_foreign_key(self):
         self.serializer = ZipShapeSerializer()
@@ -185,7 +186,7 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         self.serializer.serialize(Supermarket.objects.all(), stream=response,
                                   fields=['id', 'tag'], delete=False)
         layers = self.getShapefileLayers()
-        layer = layers[0]
+        layer = layers['Polygon.shp']
         feature = layer[0]
         if VERSION[0] >= 3:
             self.assertEqual(feature['tag'].value, None)
@@ -198,7 +199,7 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         self.serializer.serialize(Supermarket.objects.all(), stream=response,
                                   fields=['id', 'tag'], delete=False)
         layers = self.getShapefileLayers()
-        layer = layers[0]
+        layer = layers['Polygon.shp']
         feature = layer[0]
         self.assertEqual(feature['tag'].value, "Tag")
 
@@ -217,16 +218,15 @@ class CSVSerializerTests(TestCase):
     def test_content(self):
         self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
                                   fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
-        self.assertEquals(self.stream.getvalue(),
-                          ('ID,name,number,size,boolean,tags\r\n{},'
-                           'Empty,42,3.14159,yes,"Tag1,Tag2"\r\n').format(self.point.pk))
+        self.assertEqual(self.stream.getvalue(),
+                         ('ID,name,number,size,boolean,tags\r\n{},'
+                          'Empty,42,3.14159,yes,"Tag1,Tag2"\r\n').format(self.point.pk))
 
     @override_settings(USE_L10N=True)
     def test_content_fr(self):
-        translation.activate('fr-fr')
-        self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
-                                  fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
-        self.assertEquals(self.stream.getvalue(),
-                          ('ID,name,number,size,boolean,tags\r\n{},'
-                           'Empty,42,"3,14159",oui,"Tag1,Tag2"\r\n').format(self.point.pk))
-        translation.deactivate()
+        with translation.override('fr'):
+            self.serializer.serialize(MushroomSpot.objects.all(), stream=self.stream,
+                                      fields=['id', 'name', 'number', 'size', 'boolean', 'tags'], delete=False)
+            self.assertEqual(self.stream.getvalue(),
+                             ('ID,name,number,size,boolean,tags\r\n{},'
+                              'Empty,42,"3,14159",oui,"Tag1,Tag2"\r\n').format(self.point.pk))

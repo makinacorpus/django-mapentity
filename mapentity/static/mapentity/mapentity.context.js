@@ -26,7 +26,7 @@ MapEntity.Context = new function() {
         // Sort columns
         if (datatable) {
             context['sortcolumns'] = last_sort;
-            context['sortcolumns'][$('body').attr('data-modelname')] = datatable.fnSettings().aaSorting;
+            // context['sortcolumns'][$('body').attr('data-modelname')] = datatable.fnSettings().aaSorting;
         }
 
         // Extra-info, not restored so far but can be useful for screenshoting
@@ -70,18 +70,25 @@ MapEntity.Context = new function() {
 
     self.restoreMapView = function(map, context, kwargs) {
         if (!context) context = self.__loadFullContext(kwargs);
-        if (context && context.mapview) {
-            map.setView(L.latLng(context.mapview.lat, context.mapview.lng), context.mapview.zoom);
-            return true;
-        } else {
-            map.fitBounds(map.resetviewControl.getBounds());
-            var maxZoom = $(map._container).data('fitmaxzoom');
-            if (map.getZoom() > maxZoom) {
-                console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
-                map.setZoom(maxZoom);
+        if (context !== null) {
+            if (context && context.mapview) {
+                map.setView(L.latLng(context.mapview.lat, context.mapview.lng), context.mapview.zoom);
+                return true;
+            } else {
+                if (map !== null){
+                    if (map.resetviewControl !== null) {
+                        map.fitBounds(map.resetviewControl.getBounds());
+                        var maxZoom = $(map._container).data('fitmaxzoom');
+                        if (map.getZoom() > maxZoom) {
+                            console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
+                            map.setZoom(maxZoom);
+                        }
+                    }
+                }
             }
+            return false;
         }
-        return false;
+
     };
 
     self.restoreFullContext = function(map, context, kwargs) {
@@ -107,7 +114,7 @@ MapEntity.Context = new function() {
 
         if (datatable && context.sortcolumns) {
             if ($('body').attr('data-modelname') in context.sortcolumns) {
-                datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
+                //datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
             }
             last_sort = context['sortcolumns'];
         }

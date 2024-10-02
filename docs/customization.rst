@@ -8,12 +8,14 @@ Views
 Create a set of class-based views. You can define only some of them. Then you
 can override CBV methods as usual::
 
+
     from django.shortcuts import redirect
     from mapentity.views.generic import (
-        MapEntityList, MapEntityLayer, MapEntityJsonList, MapEntityDetail,
+        MapEntityList, MapEntityDetail,
         MapEntityFormat, MapEntityCreate, MapEntityUpdate, MapEntityDocument,
-        MapEntityDelete)
+        MapEntityDelete, MapEntityViewSet)
     from .models import Museum
+    from .serializers import MuseumSerializer
 
 
     def home(request):
@@ -23,14 +25,6 @@ can override CBV methods as usual::
     class MuseumList(MapEntityList):
         model = Museum
         columns = ['id', 'name']
-
-
-    class MuseumLayer(MapEntityLayer):
-        model = Museum
-
-
-    class MuseumJsonList(MapEntityJsonList, MuseumList):
-        pass
 
 
     class MuseumDetail(MapEntityDetail):
@@ -55,6 +49,12 @@ can override CBV methods as usual::
 
     class MuseumDelete(MapEntityDelete):
         model = Museum
+
+
+    class MuseumViewSet(MapEntityViewSet):
+        model = Museum
+        serializer_class = MuseumSerializer
+
 
 
 Filters
@@ -185,13 +185,31 @@ The second way overrides these templates for all your models.
 Settings
 -----------
 
+Media
+'''''
+
 Attached files are downloaded by default by browser, with the following line,
 files will be opened in the browser :
 
-.. code-block :: python
+.. code-block:: python
 
     MAPENTITY_CONFIG['SERVE_MEDIA_AS_ATTACHMENT'] = False
 
+
+Paperclip medias (under ``/paperclip/<app>_<model>/<pk>/<name>.**``) are protected by mapentity.
+We use easy_thumbnail to generate thumbnails of pictures.
+These files are generated with a new name with all the characteristics of the thumbnail generated (crop or not, width, height, etc...).
+These files need to be protected as the parent picture. We use a regex to find the parent's picture and all the permissions on this picture.
+
+You can change the regex, for example if you need to add other behaviour with easy_thumbnail :
+
+.. code-block:: python
+
+    MAPENTITY_CONFIG['REGEX_PATH_ATTACHMENTS'] = r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$'
+
+
+Maps
+''''
 
 All layers colors can be customized from the settings.
 See `Leaflet reference <http://leafletjs.com/reference.html#path>`_ for vectorial
@@ -200,23 +218,26 @@ layer style.
 The styles are loaded in leaflet map in js and can be use with window.SETTINGS.map.styles
 
 
-.. code-block :: python
+.. code-block:: python
 
     MAPENTITY_CONFIG['MAP_STYLES'][key] = {'color': 'red', 'weight': 5}
 
 Or change just one parameter (the opacity for example) :
 
-.. code-block :: python
+.. code-block:: python
 
     MAPENTITY_CONFIG['MAP_STYLES'][key]['opacity'] = 0.8
 
-Paperclip medias (under /paperclip/<app>_<model>/<pk>/<name>.**) are protected by mapentity.
-We use easy_thumbnail to generate thumbnails of pictures.
-These files are generated with a new name with all the characteristics of the thumbnail generated (crop or not, width, height, etc...).
-These files need to be protected as the parent picture. We use a regex to find the parent's picture and all the permissions on this picture.
 
-You can change the regex, for example if you need to add other behaviour with easy_thumbnail :
+Edition
+'''''''
 
-.. code-block :: python
+For rich text fields, it is possible to indicate a max number of characters on a specified field (spaces included).  
+A help message will be added, and color of TinyMCE status bar and border will be colored in red when max number of characters reached.
 
-    MAPENTITY_CONFIG['REGEX_PATH_ATTACHMENTS'] = r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$'
+.. code-block:: python
+
+    MAPENTITY_CONFIG['MAX_CHARACTERS_BY_FIELD'] = { 
+        "tourism_touristicevent": [{'field': 'description_teaser_fr', 'value': 50}, {'field': 'accessibility_fr', 'value': 25}],
+        "trekking_trek": [{'field': 'description_teaser_fr', 'value': 150}],
+    }

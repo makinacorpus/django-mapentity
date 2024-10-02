@@ -1,8 +1,8 @@
 from collections import OrderedDict
 from copy import deepcopy
-from django.contrib.messages import constants as messages
 
 from django.conf import settings
+from django.contrib.messages import constants as messages
 
 API_SRID = 4326
 
@@ -44,6 +44,8 @@ app_settings = dict({
     'MAPENTITY_WEASYPRINT': False,
     'MAP_STYLES': _DEFAULT_MAP_STYLES,
     'REGEX_PATH_ATTACHMENTS': r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$',
+    'MAX_CHARACTERS': None,
+    'MAX_CHARACTERS_BY_FIELD': {},
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
 
 # default MAP_STYLES should not be replaced but updated by MAPENTITY_CONFIG
@@ -54,26 +56,28 @@ app_settings['MAP_STYLES'] = _MAP_STYLES
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 TINYMCE_DEFAULT_CONFIG = {
-    'theme': 'advanced',
-    'theme_advanced_buttons1': 'bold,italic,forecolor,separator,bullist,numlist,link,media,separator,undo,redo,\
-separator,cleanup,code',
-    'theme_advanced_buttons2': '',
-    'theme_advanced_buttons3': '',
-    'theme_advanced_statusbar_location': 'bottom',
-    'theme_advanced_toolbar_location': 'top',
-    'theme_advanced_toolbar_align': 'center',
-    'theme_advanced_resizing': True,
-    'theme_advanced_resize_horizontal': False,
-    'forced_root_block': False,
-    'plugins': 'media,paste',
+    "theme": "silver",
+    "height": 500,
+    "menubar": False,
+    "plugins": "advlist,autolink,lists,link,image,charmap,print,preview,anchor,"
+               "searchreplace,visualblocks,code,fullscreen,insertdatetime,media,table,paste,"
+               "code,help,wordcount,textcolor",
+    "toolbar": "undo redo | formatselect | "
+               "bold italic forecolor backcolor | link image media | alignleft aligncenter "
+               "alignright alignjustify | bullist numlist outdent indent | "
+               "removeformat | code | wordcount | help",
     'paste_auto_cleanup_on_paste': True,
+    'forced_root_block': False,
     'width': '95%',
     'resize': "both",
+    'browser_spellcheck': True,
+    'contextmenu': False,
     'valid_elements': ('@[id|class|style|title|dir<ltr?rtl|lang|xml::lang],'
                        'a[rel|rev|charset|hreflang|tabindex|accesskey|type|name|href|target|title|class],'
                        'img[longdesc|usemap|src|border|alt=|title|hspace|vspace|width|height|align],'
                        'p,em/i,strong/b,div[align],br,ul,li,ol,span[style],'
                        'iframe[src|frameborder=0|alt|title|width|height|align|name]'),
+    'setup': 'tinyMceInit'
 }
 TINYMCE_DEFAULT_CONFIG.update(getattr(settings, 'TINYMCE_DEFAULT_CONFIG', {}))
 setattr(settings, 'TINYMCE_DEFAULT_CONFIG', TINYMCE_DEFAULT_CONFIG)

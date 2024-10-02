@@ -3,8 +3,7 @@ import logging
 import mimetypes
 import os
 import re
-from datetime import datetime
-from io import BytesIO
+
 from urllib.parse import quote
 
 from django.conf import settings
@@ -14,6 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import (HttpResponse, HttpResponseBadRequest, Http404)
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils import timezone
 from django.views import static, View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -25,12 +25,12 @@ from .mixins import JSONResponseMixin, FilterListMixin, ModelViewMixin
 from ..decorators import view_permission_required
 from ..helpers import capture_image
 from ..settings import app_settings
+from ..tokens import TokenManager
 
 logger = logging.getLogger(__name__)
 
 
 class ServeAttachment(View):
-
     def get(self, request, *args, **kwargs):
         """
             Serve media/ for authorized users only, since it can contain sensitive
@@ -96,7 +96,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
         options = MapEntityOptions(ModelName)
 
         dictsettings['urls']['static'] = settings.STATIC_URL
-        dictsettings['urls']['layer'] = '{}{}'.format(root_url, options._url_path(mapentity_models.ENTITY_LAYER)[1:-1])
+        dictsettings['urls']['layer'] = options.model.get_layer_url()
         dictsettings['urls']['detail'] = '{}modelname/0/'.format(root_url)
         dictsettings['urls']['format_list'] = '{}{}'.format(
             root_url, options._url_path(mapentity_models.ENTITY_FORMAT_LIST)[1:-1]
@@ -109,11 +109,16 @@ class JSSettings(JSONResponseMixin, TemplateView):
         # Languages
         dictsettings['languages'] = dict(available=dict(app_settings['TRANSLATED_LANGUAGES']),
                                          default=app_settings['LANGUAGE_CODE'])
+        # MAX_CHARACTERS paramters is deprecated : to remove
+        dictsettings['maxCharacters'] = app_settings['MAX_CHARACTERS']
+        dictsettings['maxCharactersByField'] = app_settings['MAX_CHARACTERS_BY_FIELD']
         return dictsettings
 
 
 class BaseListView(FilterListMixin, ModelViewMixin):
     columns = None
+    unorderable_columns = []
+    searchable_columns = ['id']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -125,6 +130,9 @@ class BaseListView(FilterListMixin, ModelViewMixin):
             # Id column should be the first one
             self.columns.remove('id')
             self.columns.insert(0, 'id')
+
+    def get_columns(self):
+        return self.columns
 
     @view_permission_required()
     def dispatch(self, *args, **kwargs):
@@ -156,17 +164,17 @@ def map_screenshot(request):
         context['print'] = True
         printcontext = json.dumps(context)
         contextencoded = quote(printcontext)
-        map_url += '?context=%s' % contextencoded
+        map_url += f"?auth_token={TokenManager.generate_token()}&context={contextencoded}"
+
         logger.debug("Capture %s" % map_url)
 
         # Capture image and return it
         width = context.get('viewport', {}).get('width')
         height = context.get('viewport', {}).get('height')
 
-        stream = BytesIO()
-        capture_image(map_url, stream, width=width, height=height, selector=selector)
-        response = HttpResponse(stream.getvalue(), content_type='image/png')
-        response['Content-Disposition'] = 'attachment; filename=%s.png' % datetime.now().strftime('%Y%m%d-%H%M%S')
+        map_image = capture_image(map_url, width=width, height=height, selector=selector)
+        response = HttpResponse(map_image, content_type='image/png')
+        response['Content-Disposition'] = 'attachment; filename=%s.png' % timezone.now().isoformat()
         return response
 
     except Exception as exc:

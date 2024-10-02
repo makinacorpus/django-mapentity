@@ -1,31 +1,32 @@
 import csv
 import hashlib
 import logging
-import os
-import shutil
 import time
-from datetime import datetime
 from io import StringIO
-from tempfile import TemporaryDirectory
 from unittest.mock import patch
+from urllib.parse import quote
 
 from bs4 import BeautifulSoup
-from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase, LiveServerTestCase
+from django.core.files.storage import default_storage
+from django.test import LiveServerTestCase, TestCase
 from django.test.testcases import to_list
-from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils import html
 from django.utils.encoding import force_str
-from django.utils.http import http_date, urlquote
-from django.utils.timezone import utc
+from django.utils.http import http_date
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from freezegun import freeze_time
+from paperclip.settings import get_attachment_model
 
-from .factories import SuperUserFactory
 from ..forms import MapEntityForm
 from ..helpers import smart_urljoin
+from ..models import ENTITY_MARKUP
 from ..settings import app_settings
+from .factories import AttachmentFactory, SuperUserFactory, UserFactory
 
 
 class AdjustDebugLevel:
@@ -41,30 +42,30 @@ class AdjustDebugLevel:
         self.logger.setLevel(self.old_level)
 
 
-@override_settings(MEDIA_ROOT=TemporaryDirectory().name)
 class MapEntityTest(TestCase):
     model = None
     modelfactory = None
     userfactory = None
-    api_prefix = '/api/'
-    expected_json_geom = {}
     maxDiff = None
+    user = None
 
-    def get_expected_json_attrs(self):
+    def get_expected_geojson_geom(self):
+        return {}
+
+    def get_expected_geojson_attrs(self):
+        return {}
+
+    def get_expected_datatables_attrs(self):
         return {}
 
     def setUp(self):
-        if os.path.exists(settings.MEDIA_ROOT):
-            self.tearDown()
-        os.makedirs(settings.MEDIA_ROOT)
+        if self.user:
+            self.client.force_login(user=self.user)
 
-    def tearDown(self):
-        shutil.rmtree(settings.MEDIA_ROOT)
-
-    def login(self):
-        self.user = self.userfactory(password='booh')
-        success = self.client.login(username=self.user.username, password='booh')
-        self.assertTrue(success)
+    @classmethod
+    def setUpTestData(cls):
+        if cls.userfactory:
+            cls.user = cls.userfactory(password='booh')
 
     def logout(self):
         self.client.logout()
@@ -92,13 +93,11 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         # Make sure database is not empty for this model
-        for i in range(30):
-            self.modelfactory.create()
+        self.modelfactory.create_batch(30)
 
-        self.login()
-        response = self.client.get(self.model.get_layer_url())
+        response = self.client.get(self.model.get_layer_list_url())
         self.assertEqual(response.status_code, 200)
-        response = self.client.get(self.model.get_jsonlist_url())
+        response = self.client.get(self.model.get_datatablelist_url())
         self.assertEqual(response.status_code, 200)
 
     @patch('mapentity.helpers.requests')
@@ -109,45 +108,44 @@ class MapEntityTest(TestCase):
         mock_requests.get.return_value.status_code = 200
         mock_requests.get.return_value.content = b'<p id="properties">Mock</p>'
 
-        self.login()
         obj = self.modelfactory.create()
         response = self.client.get(obj.get_document_url())
+        self.assertEqual(response.status_code, 200)
+
+    @patch('mapentity.helpers.requests')
+    def test_document_markup(self, mock_requests):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        mock_requests.get.return_value.status_code = 200
+        mock_requests.get.return_value.content = b'<p id="properties">Mock</p>'
+
+        obj = self.modelfactory.create()
+        response = self.client.get(reverse(obj._entity.url_name(ENTITY_MARKUP), args=[obj.pk]))
         self.assertEqual(response.status_code, 200)
 
     def test_bbox_filter(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         params = '?bbox=POLYGON((5+44+0%2C5+45+0%2C6+45+0%2C6+44+0%2C5+44+0))'
         # If no objects exist, should not fail.
-        response = self.client.get(self.model.get_jsonlist_url() + params)
+        response = self.client.get(self.model.get_datatablelist_url() + params)
         self.assertEqual(response.status_code, 200)
         # If object exists, either :)
         self.modelfactory.create()
-        response = self.client.get(self.model.get_jsonlist_url() + params)
+        response = self.client.get(self.model.get_datatablelist_url() + params)
         self.assertEqual(response.status_code, 200)
         # If bbox is invalid, it should return all
-        allresponse = self.client.get(self.model.get_jsonlist_url())
+        allresponse = self.client.get(self.model.get_datatablelist_url())
         params = '?bbox=POLYGON(prout)'
         with AdjustDebugLevel('django.contrib.gis', logging.CRITICAL):
-            response = self.client.get(self.model.get_jsonlist_url() + params)
+            response = self.client.get(self.model.get_datatablelist_url() + params)
         self.assertEqual(response.status_code, 200)
         response.content = allresponse.content
-
-    def test_callback_jsonlist(self):
-        if self.model is None:
-            return  # Abstract test should not run
-        self.login()
-        params = '?callback=json_decode'
-        # If no objects exist, should not fail.
-        response = self.client.get(self.model.get_jsonlist_url() + params)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'json_decode(', response.content)
 
     def test_basic_format(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         self.modelfactory.create()
         for fmt in ('csv', 'shp', 'gpx'):
             response = self.client.get(self.model.get_format_list_url() + '?format=' + fmt)
@@ -156,10 +154,9 @@ class MapEntityTest(TestCase):
     def test_gpx_elevation(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         obj = self.modelfactory.create()
         response = self.client.get(self.model.get_format_list_url() + '?format=gpx')
-        parsed = BeautifulSoup(response.content, 'lxml')
+        parsed = BeautifulSoup(response.content, features='xml')
         if hasattr(obj, 'geom_3d'):
             self.assertGreater(len(parsed.findAll('ele')), 0)
         else:
@@ -168,7 +165,6 @@ class MapEntityTest(TestCase):
     def test_no_basic_format_fail(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         self.modelfactory.create()
 
         response = self.client.get(self.model.get_format_list_url() + '?format=')
@@ -177,8 +173,6 @@ class MapEntityTest(TestCase):
     def test_no_html_in_csv(self):
         if self.model is None:
             return  # Abstract test should not run
-
-        self.login()
 
         self.modelfactory.create()
 
@@ -196,7 +190,7 @@ class MapEntityTest(TestCase):
         for line in lines:
             for col in line:
                 # the col should not contains any html tags
-                self.assertEquals(force_str(col), html.strip_tags(force_str(col)))
+                self.assertEqual(force_str(col), html.strip_tags(force_str(col)))
 
     def _post_form(self, url):
         # no data
@@ -239,21 +233,77 @@ class MapEntityTest(TestCase):
         else:
             self.assertIn(b'.modifiable = false;', response.content)
 
+    def test_duplicate(self):
+        if self.model is None or not self.model.can_duplicate:
+            return  # Abstract test should not run
+        user = UserFactory()
+        obj = self.modelfactory.create()
+        for perm in Permission.objects.exclude(codename=f'add_{obj._meta.model_name}'):
+            user.user_permissions.add(perm)
+        self.client.force_login(user=user)
+
+        AttachmentFactory.create(content_object=obj, title='attachment')
+
+        self.assertEqual(obj._meta.model.objects.count(), 1)
+        self.assertEqual(get_attachment_model().objects.count(), 1)
+
+        response = self.client.post(obj.get_duplicate_url())
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(obj._meta.model.objects.count(), 1)
+        self.assertEqual(get_attachment_model().objects.count(), 1)
+
+        user.user_permissions.add(Permission.objects.get(codename=f'add_{obj._meta.model_name}'))
+        self.client.force_login(user=user)
+
+        response = self.client.post(obj.get_duplicate_url())
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(obj._meta.model.objects.count(), 2)
+        self.assertEqual(get_attachment_model().objects.count(), 2)
+
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
+        self.assertIn(f"{self.model._meta.verbose_name} has been duplicated successfully", msg)
+
+        with patch('mapentity.models.DuplicateMixin.duplicate') as mocked:
+            mocked.side_effect = Exception('Error')
+            response = self.client.post(obj.get_duplicate_url())
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(obj._meta.model.objects.count(), 2)
+        self.assertEqual(get_attachment_model().objects.count(), 2)
+
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
+        self.assertIn("An error occurred during duplication", msg)
+
+        with patch('mapentity.models.DuplicateMixin.duplicate') as mocked:
+            mocked.return_value = None
+            response = self.client.post(obj.get_duplicate_url())
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(obj._meta.model.objects.count(), 2)
+        self.assertEqual(get_attachment_model().objects.count(), 2)
+
+        msg = [str(message) for message in messages.get_messages(response.wsgi_request)]
+        self.assertIn("An error occurred during duplication", msg)
+
     def test_crud_status(self):
         if self.model is None:
             return  # Abstract test should not run
-
-        self.login()
 
         obj = self.modelfactory()
 
         response = self.client.get(obj.get_list_url())
         self.assertEqual(response.status_code, 200)
 
+        response = self.client.get(obj.get_layer_list_url())
+        self.assertEqual(response.status_code, 200)
+
         response = self.client.get(obj.get_detail_url().replace(str(obj.pk), '1234567890'))
         self.assertEqual(response.status_code, 404)
 
         response = self.client.get(obj.get_detail_url())
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(obj.get_layer_detail_url())
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(obj.get_update_url())
@@ -284,115 +334,90 @@ class MapEntityTest(TestCase):
     def test_formfilter_in_list_context(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
         response = self.client.get(self.model.get_list_url())
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['filterform'] is not None)
 
-    """
-
-        REST API
-
-    """
+    # REST API tests
 
     @freeze_time("2020-03-17")
-    def test_api_list_for_model(self):
-        if self.get_expected_json_attrs is None:
-            return
+    def test_api_datatables_list_for_model(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
 
         self.obj = self.modelfactory.create()
-        list_url = '{api_prefix}{modelname}s.json'.format(api_prefix=self.api_prefix,
-                                                          modelname=self.model._meta.model_name)
+        list_url = '/api/{modelname}/drf/{modelname}s.datatables'.format(modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, f"{list_url} not found")
         content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json[0].pop('length')
-            self.assertAlmostEqual(length, self.length)
-        self.assertEqual(content_json, [{'id': self.obj.pk, **self.get_expected_json_attrs()}])
+
+        self.assertEqual(content_json, {'data': [self.get_expected_datatables_attrs()],
+                                        'draw': 1,
+                                        'recordsFiltered': 1,
+                                        'recordsTotal': 1})
 
     @freeze_time("2020-03-17")
-    def test_api_geojson_list_for_model(self):
-        if self.get_expected_json_attrs is None:
-            return
+    def test_api_no_format_list_for_model(self):
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
 
         self.obj = self.modelfactory.create()
-        list_url = '{api_prefix}{modelname}s.geojson'.format(api_prefix=self.api_prefix,
-                                                             modelname=self.model._meta.model_name)
+        list_url = '/api/{modelname}/drf/{modelname}s'.format(modelname=self.model._meta.model_name)
         response = self.client.get(list_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, f"{list_url} not found")
         content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json['features'][0]['properties'].pop('length')
-            self.assertAlmostEqual(length, self.length)
-        self.assertEqual(content_json, {
-            'type': 'FeatureCollection',
-            'features': [{
-                'id': self.obj.pk,
-                'type': 'Feature',
-                'geometry': self.expected_json_geom,
-                'properties': self.get_expected_json_attrs(),
-            }],
-        })
-
-    @freeze_time("2020-03-17")
-    def test_api_detail_for_model(self):
-        if self.get_expected_json_attrs is None:
-            return
-        if self.model is None:
-            return  # Abstract test should not run
-        self.login()
-
-        self.obj = self.modelfactory.create()
-        detail_url = '{api_prefix}{modelname}s/{id}'.format(api_prefix=self.api_prefix,
-                                                            modelname=self.model._meta.model_name,
-                                                            id=self.obj.pk)
-        response = self.client.get(detail_url)
-        self.assertEqual(response.status_code, 200)
-
-        content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json.pop('length')
-            self.assertAlmostEqual(length, self.length)
-        self.assertEqual(content_json, {'id': self.obj.pk, **self.get_expected_json_attrs()})
+        self.assertEqual(content_json, {'data': [self.get_expected_datatables_attrs()],
+                                        'draw': 1,
+                                        'recordsFiltered': 1,
+                                        'recordsTotal': 1})
 
     @freeze_time("2020-03-17")
     def test_api_geojson_detail_for_model(self):
-        if self.get_expected_json_attrs is None:
+        if self.get_expected_geojson_attrs is None:
             return
         if self.model is None:
             return  # Abstract test should not run
-        self.login()
 
         self.obj = self.modelfactory.create()
-        detail_url = '{api_prefix}{modelname}s/{id}.geojson'.format(api_prefix=self.api_prefix,
-                                                                    modelname=self.model._meta.model_name,
-                                                                    id=self.obj.pk)
+        detail_url = '/api/{modelname}/drf/{modelname}s/{id}.geojson'.format(modelname=self.model._meta.model_name,
+                                                                             id=self.obj.pk)
         response = self.client.get(detail_url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200, f"{detail_url} not found")
         content_json = response.json()
-        if hasattr(self, 'length'):
-            length = content_json['properties'].pop('length')
-            self.assertAlmostEqual(length, self.length)
         self.assertEqual(content_json, {
-            'id': self.obj.pk,
             'type': 'Feature',
-            'geometry': self.expected_json_geom,
-            'properties': self.get_expected_json_attrs(),
+            'geometry': self.get_expected_geojson_geom(),
+            'properties': self.get_expected_geojson_attrs(),
+        })
+
+    @freeze_time("2020-03-17")
+    def test_api_geojson_list_for_model(self):
+        if self.get_expected_geojson_attrs is None:
+            return
+        if self.model is None:
+            return  # Abstract test should not run
+
+        self.obj = self.modelfactory.create()
+        list_url = '/api/{modelname}/drf/{modelname}s.geojson'.format(modelname=self.model._meta.model_name)
+        response = self.client.get(list_url)
+        self.assertEqual(response.status_code, 200, f"{list_url} not found")
+        content_json = response.json()
+        self.assertEqual(content_json, {
+            'type': 'FeatureCollection',
+            'model': f'{self.obj._meta.app_label}.{self.obj._meta.model_name}',
+            'features': [{
+                'type': 'Feature',
+                'geometry': self.get_expected_geojson_geom(),
+                'properties': self.get_expected_geojson_attrs(),
+            }],
         })
 
 
-@override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class MapEntityLiveTest(LiveServerTestCase):
     model = None
     userfactory = None
     modelfactory = None
+    geom = 'POINT(0 0)'
 
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = None
@@ -425,19 +450,19 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         self.login()
         self.modelfactory.create()
-        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
+        latest_updated.return_value = now()
 
         latest = self.model.latest_updated()
-        geojson_layer_url = self.url_for(self.model.get_layer_url())
+        geojson_layer_url = self.url_for(self.model.get_layer_list_url())
 
-        response = self.client.get(geojson_layer_url, allow_redirects=False)
-        self.assertEqual(response.status_code, 200)
+        response_1 = self.client.get(geojson_layer_url, allow_redirects=False)
+        self.assertEqual(response_1.status_code, 200)
 
         # Without headers to cache
-        lastmodified = response.get('Last-Modified')
-        cachecontrol = response.get('Cache-control')
+        lastmodified = response_1.get('Last-Modified')
+        cachecontrol = response_1.get('Cache-control')
         hasher = hashlib.md5()
-        hasher.update(response.content)
+        hasher.update(response_1.content)
         md5sum = hasher.digest()
         self.assertNotEqual(lastmodified, None)
         self.assertCountEqual(cachecontrol.split(', '), ('must-revalidate', 'max-age=0'))
@@ -454,7 +479,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         # Create a new object
         time.sleep(1.1)  # wait some time, last-modified has precision in seconds
         self.modelfactory.create()
-        latest_updated.return_value = datetime.utcnow().replace(tzinfo=utc)
+        latest_updated.return_value = now()
 
         self.assertNotEqual(latest, self.model.latest_updated())
         response = self.client.get(geojson_layer_url)
@@ -484,13 +509,13 @@ class MapEntityLiveTest(LiveServerTestCase):
         SuperUserFactory.create(username='Superuser', password='booh')
         self.client.login(username='Superuser', password='booh')
 
-        obj = self.modelfactory.create(geom='POINT(0 0)')
+        obj = self.modelfactory.create(geom=self.geom)
 
         # Initially, map image does not exists
         image_path = obj.get_map_image_path()
-        if os.path.exists(image_path):
-            os.remove(image_path)
-        self.assertFalse(os.path.exists(image_path))
+        if default_storage.exists(image_path):
+            default_storage.delete(image_path)
+        self.assertFalse(default_storage.exists(image_path))
 
         # Mock Screenshot response
         mock_requests.get.return_value.status_code = 200
@@ -498,10 +523,10 @@ class MapEntityLiveTest(LiveServerTestCase):
 
         response = self.client.get(obj.map_image_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(os.path.exists(image_path))
+        self.assertTrue(default_storage.exists(image_path))
 
         mapimage_url = '%s%s?context' % (self.live_server_url, obj.get_detail_url())
-        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % urlquote(mapimage_url)
+        screenshot_url = 'http://0.0.0.0:8001/?url=%s' % quote(mapimage_url)
         url_called = mock_requests.get.call_args_list[0]
         self.assertTrue(url_called.startswith(screenshot_url))
 
@@ -510,7 +535,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         if self.model is None:
             return  # Abstract test should not run
 
-        obj = self.modelfactory.create(geom='POINT(0 0)')
+        obj = self.modelfactory.create(geom=self.geom)
 
         # Mock Screenshot response
         mock_requests.get.return_value.status_code = 200

@@ -38,14 +38,9 @@ MapEntity.GeometryField = L.GeometryField.extend({
     },
 
     _addExtraControls: function (map) {
-        if (map.attributionControl._map) {
-            map.removeControl(map.attributionControl);
-        }
-        map.addControl(new L.Control.ResetView(this._getResetBounds.bind(this)));
-
-        /*
-         * Allow to load files locally.
-         */
+            /*
+            * Allow to load files locally.
+            */
         var pointToLayer = function (feature, latlng) {
                 return L.circleMarker(latlng, {style: window.SETTINGS.map.styles.filelayer})
                         .setRadius(window.SETTINGS.map.styles.filelayer.radius);
@@ -58,8 +53,8 @@ MapEntity.GeometryField = L.GeometryField.extend({
             filecontrol = L.Control.fileLayerLoad({
                 fitBounds: true,
                 layerOptions: {style: window.SETTINGS.map.styles.filelayer,
-                               pointToLayer: pointToLayer,
-                               onEachFeature: onEachFeature}
+                            pointToLayer: pointToLayer,
+                            onEachFeature: onEachFeature}
             });
         map.filecontrol = filecontrol;
         map.addControl(filecontrol);
@@ -93,8 +88,8 @@ MapEntity.GeometryField = L.GeometryField.extend({
         var exclude_current_object = null;
         if (object_pk) {
             exclude_current_object = function (geojson) {
-                if (geojson.properties && geojson.properties.pk)
-                    return geojson.properties.pk != object_pk;
+                if (geojson.properties && geojson.properties.id)
+                    return geojson.properties.id !== object_pk;
             };
         }
 

@@ -13,6 +13,7 @@ from django.views.generic.edit import BaseUpdateView
 
 from . import models as mapentity_models
 from .helpers import user_has_perm
+from .renderers import GeoJSONRenderer
 from .settings import app_settings
 
 
@@ -44,7 +45,7 @@ def view_permission_required(login_url=None, raise_exception=None):
                 if is_handle_object:
                     view_subject = self.get_object()
                 else:
-                    view_subject = self.get_model()
+                    view_subject = self.model
                 get_url_method = getattr(view_subject, 'get_{0}_url'.format(login_url))
                 redirect_url = get_url_method()
 
@@ -66,7 +67,13 @@ def view_permission_required(login_url=None, raise_exception=None):
 def view_cache_latest():
     def decorator(view_func):
         def _wrapped_view(self, request, *args, **kwargs):
-            view_model = self.get_model()
+            if not kwargs.get('format', None):
+                kwargs['format'] = 'datatables'
+                return view_func(self, request, *args, **kwargs)
+            if kwargs.get('format') == "datatables":
+                # don't cache dataTables
+                return view_func(self, request, *args, **kwargs)
+            view_model = self.model
 
             cache_latest = cache_last_modified(lambda x: view_model.latest_updated())
             cbv_cache_latest = method_decorator(cache_latest)
@@ -75,7 +82,7 @@ def view_cache_latest():
             @cbv_cache_latest
             def decorated(self, request, *args, **kwargs):
                 return view_func(self, request, *args, **kwargs)
-
+            kwargs.pop('format')
             return decorated(self, request, *args, **kwargs)
 
         return _wrapped_view
@@ -85,13 +92,11 @@ def view_cache_latest():
 def view_cache_response_content():
     def decorator(view_func):
         def _wrapped_method(self, *args, **kwargs):
-            response_class = self.response_class
-            response_kwargs = dict()
-
-            # Do not cache if filters presents
+            # Do not cache if filters presents of datatables format
             params = self.request.GET.keys()
             with_filters = all([not p.startswith('_') for p in params])
-            if len(params) > 0 and with_filters:
+            if ((len(params) > 0 and with_filters) or kwargs.get("format") == "datatables" or
+                    "datatables" in self.request.build_absolute_uri()):
                 return view_func(self, *args, **kwargs)
 
             # Restore from cache or store view result
@@ -99,7 +104,7 @@ def view_cache_response_content():
             if hasattr(self, 'view_cache_key'):
                 geojson_lookup = self.view_cache_key()
             elif not self.request.GET:  # Do not cache filtered responses
-                view_model = self.get_model()
+                view_model = self.model
                 language = self.request.LANGUAGE_CODE
                 latest_saved = view_model.latest_updated()
                 if latest_saved:
@@ -114,11 +119,15 @@ def view_cache_response_content():
             if geojson_lookup:
                 content = geojson_cache.get(geojson_lookup)
                 if content:
-                    return response_class(content=content, **response_kwargs)
+                    return content
 
             response = view_func(self, *args, **kwargs)
             if geojson_lookup:
-                geojson_cache.set(geojson_lookup, response.content)
+                response.accepted_renderer = GeoJSONRenderer()
+                response.accepted_media_type = "application/json"
+                response.renderer_context = {}
+                response.render()
+                geojson_cache.set(geojson_lookup, response)
             return response
 
         return _wrapped_method

@@ -1,26 +1,28 @@
-import json
 import os
-import shutil
 from unittest import mock
 
+import django
 import factory
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase, RequestFactory
+from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
+from django.utils.encoding import force_str
 from faker import Faker
 from faker.providers import geo
+from freezegun import freeze_time
 
+from mapentity.models import LogEntry
 from mapentity.registry import app_settings
-from mapentity.tests import MapEntityTest, MapEntityLiveTest
-from mapentity.tests.factories import SuperUserFactory, UserFactory
-from mapentity.views import ServeAttachment, Convert, JSSettings
+from mapentity.tests import MapEntityLiveTest, MapEntityTest
+from mapentity.tests.factories import AttachmentFactory, SuperUserFactory
+from mapentity.views import Convert, JSSettings, ServeAttachment
+
+from ..models import DummyModel, FileType
+from ..views import DummyDetail, DummyList
 from .factories import DummyModelFactory
-from ..models import DummyModel, Attachment, FileType
-from ..views import DummyList, DummyDetail
 
 fake = Faker('fr_FR')
 fake.add_provider(geo)
@@ -38,43 +40,35 @@ class FileTypeFactory(factory.django.DjangoModelFactory):
         model = FileType
 
 
-class AttachmentFactory(factory.django.DjangoModelFactory):
-    """
-    Create an attachment. You must provide an 'obj' keywords,
-    the object (saved in db) to which the attachment will be bound.
-    """
-
-    class Meta:
-        model = Attachment
-
-    attachment_file = get_dummy_uploaded_file()
-    filetype = factory.SubFactory(FileTypeFactory)
-
-    creator = factory.SubFactory(UserFactory)
-    title = factory.Sequence("Title {0}".format)
-    legend = factory.Sequence("Legend {0}".format)
-
-
 class DummyModelFunctionalTest(MapEntityTest):
     userfactory = SuperUserFactory
     model = DummyModel
     modelfactory = DummyModelFactory
-    expected_json_geom = {
-        "type": "Point",
-        "coordinates": [
-            0.0,
-            0.0
-        ]
-    }
+
+    def get_expected_geojson_geom(self):
+        return {'coordinates': [self.obj.geom.x, self.obj.geom.y], 'type': 'Point'}
+
+    def get_expected_geojson_attrs(self):
+        return {'id': 1,
+                'name': 'a dummy model'}
+
+    def get_expected_datatables_attrs(self):
+        return {
+            'date_update': '17/03/2020 00:00:00',
+            'description': '',
+            'geom': self.obj.geom.ewkt,
+            'id': 1,
+            'name': '<a href="/dummymodel/1/">a dummy model</a>',
+            'name_en': 'a dummy model',
+            'name_fr': '',
+            'name_zh_hant': '',
+            'public': '<i class="bi bi-x-circle text-danger"></i>',
+            'short_description': '',
+            'tags': [self.obj.tags.first().pk]
+        }
 
     def get_good_data(self):
         return {'geom': '{"type": "Point", "coordinates":[0, 0]}'}
-
-    def get_expected_json_attrs(self):
-        return {'date_update': '2020-03-17T00:00:00Z',
-                'geom': self.obj.geom.ewkt,
-                'name': self.obj.name,
-                'public': False}
 
 
 class DummyModelLiveTest(MapEntityLiveTest):
@@ -137,46 +131,44 @@ class ConvertTest(BaseTest):
         self.assertEqual(response.status_code, 405)
 
     @mock.patch('mapentity.helpers.requests.get')
-    def test_convert_view_uses_original_request_headers(self, get_mocked):
+    @mock.patch('mapentity.tokens.TokenManager.generate_token')
+    def test_convert_view_uses_original_request_headers(self, token_mocked, get_mocked):
+        token_mocked.return_value = "a_temp0rary_t0k3n"
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
         get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=http://geotrek.fr',
                         HTTP_ACCEPT_LANGUAGE='it')
-        get_mocked.assert_called_with('http://localhost//?url=http%3A//geotrek.fr&to=application/pdf',
+        host = app_settings['CONVERSION_SERVER']
+        url = f"{host}/?url=http%3A//geotrek.fr%3Fauth_token%3Da_temp0rary_t0k3n&to=application/pdf"
+        get_mocked.assert_called_with(url,
                                       headers={'Accept-Language': 'it'})
 
     @mock.patch('mapentity.helpers.requests.get')
-    def test_convert_view_builds_absolute_url_from_relative(self, get_mocked):
+    @mock.patch('mapentity.tokens.TokenManager.generate_token')
+    def test_convert_view_builds_absolute_url_from_relative(self, token_mocked, get_mocked):
+        token_mocked.return_value = "a_temp0rary_t0k3n"
         get_mocked.return_value.status_code = 200
         get_mocked.return_value.content = 'x'
         get_mocked.return_value.url = 'x'
         self.login()
         self.client.get('/convert/?url=/path/1/')
-        get_mocked.assert_called_with('http://localhost//?url=http%3A//testserver/path/1/&to=application/pdf',
+        host = app_settings['CONVERSION_SERVER']
+        url = f"{host}/?url=http%3A//testserver/path/1/%3Fauth_token%3Da_temp0rary_t0k3n&to=application/pdf"
+        get_mocked.assert_called_with(url,
                                       headers={})
 
 
-@override_settings(MEDIA_ROOT='/tmp/mapentity-media')
 class AttachmentTest(BaseTest):
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = 'X-Accel-Redirect'
         self.obj = DummyModelFactory.create()
-        """
-        if os.path.exists(settings.MEDIA_ROOT):
-            self.tearDown()
-        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}'.format(self.obj.pk)))
-        self.file = os.path.join(settings.MEDIA_ROOT, 'paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk))
-        self.url = '/media/paperclip/test_app_dummymodel/{}/file.pdf'.format(self.obj.pk)
-        open(self.file, 'wb').write(b'*' * 300)
-        """
         self.attachment = AttachmentFactory.create(content_object=self.obj)
         self.url = "/media/%s" % self.attachment.attachment_file
         call_command('update_permissions_mapentity')
 
     def tearDown(self):
-        shutil.rmtree(settings.MEDIA_ROOT)
         app_settings['SENDFILE_HTTP_HEADER'] = None
 
     def download(self, url):
@@ -275,7 +267,7 @@ class SettingsViewTest(BaseTest):
         view.request = RequestFactory().get('/fake-path')
         context = view.get_context_data()
         self.assertDictEqual(context['urls'], {
-            "layer": "/api/modelname/modelname.geojson",
+            "layer": "/api/modelname/drf/modelnames.geojson",
             "screenshot": "/map_screenshot/",
             "detail": "/modelname/0/",
             "format_list": "/modelname/list/export/",
@@ -332,27 +324,27 @@ class MapEntityLayerViewTest(BaseTest):
 
     def test_geojson_layer_returns_all_by_default(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_url())
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
+        response = self.client.get(DummyModel.get_layer_list_url())
+        self.assertEqual(len(response.json()['features']), 31)
 
     def test_geojson_layer_can_be_filtered(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
+        response = self.client.get(DummyModel.get_layer_list_url() + '?name=toto')
+        self.assertEqual(len(response.json()['features']), 1)
 
     def test_geojson_layer_with_parameters_is_not_cached(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
-        response = self.client.get(DummyModel.get_layer_url())
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
+        response = self.client.get(DummyModel.get_layer_list_url() + '?name=toto')
+        self.assertEqual(len(response.json()['features']), 1)
+        response = self.client.get(DummyModel.get_layer_list_url())
+        self.assertEqual(len(response.json()['features']), 31)
 
     def test_geojson_layer_with_parameters_does_not_use_cache(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_url())
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 31)
-        response = self.client.get(DummyModel.get_layer_url() + '?name=toto')
-        self.assertEqual(len(json.loads(response.content.decode())['features']), 1)
+        response = self.client.get(DummyModel.get_layer_list_url())
+        self.assertEqual(len(response.json()['features']), 31)
+        response = self.client.get(DummyModel.get_layer_list_url() + '?name=toto')
+        self.assertEqual(len(response.json()['features']), 1)
 
 
 class DetailViewTest(BaseTest):
@@ -387,14 +379,20 @@ class DetailViewTest(BaseTest):
 
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
-        self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" href="/document/dummymodel-{}.odt">\
-<img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
-        self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" \
-href="/convert/?url=/document/dummymodel-{}.odt&to=doc">\
-<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
-        self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" \
-href="/convert/?url=/document/dummymodel-{}.odt">\
-<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
+        self.assertContains(response,
+                            '<a class="btn btn-light btn-sm" rel="noopener noreferrer"'
+                            ' target="_blank" href="/document/dummymodel-{}.odt">'
+                            '<img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
+        self.assertContains(response,
+                            '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
+                            ' href="/convert/?url=/document/dummymodel-{}.odt'
+                            '&from=application/vnd.oasis.opendocument.text&to=doc">'
+                            '<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
+        self.assertContains(response,
+                            '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
+                            ' href="/convert/?url=/document/dummymodel-{}.odt'
+                            '&from=application/vnd.oasis.opendocument.text">'
+                            '<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
 
     def test_export_buttons_weasyprint(self):
         self.login()
@@ -407,16 +405,23 @@ href="/convert/?url=/document/dummymodel-{}.odt">\
         app_settings['MAPENTITY_WEASYPRINT'] = tmp
 
         if app_settings['MAPENTITY_WEASYPRINT']:
-            self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" href="/document/dummymodel-{}.pdf">\
-<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
+            self.assertContains(response,
+                                '<a class="btn btn-light btn-sm" target="_blank"'
+                                ' href="/document/dummymodel-{}.pdf">'
+                                '<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
         else:
-            self.assertContains(response, '<a class="btn btn-light btn-sm" target="_blank" href="/document/dummymodel-{}.odt">\
-<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
-        self.assertNotContains(response, '<a class="btn btn-light btn-sm" target="_blank" \
-href="/convert/?url=/document/dummymodel-{}.odt&to=doc">\
-<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
-        self.assertNotContains(response, '<a class="btn btn-light btn-sm" target="_blank" \
-href="/document/dummymodel-{}.odt"><img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
+            self.assertContains(response,
+                                '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
+                                ' href="/document/dummymodel-{}.odt">'
+                                '<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>'.format(self.object.pk))
+        self.assertNotContains(response,
+                               '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
+                               ' href="/convert/?url=/document/dummymodel-{}.odt&to=doc">'
+                               '<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>'.format(self.object.pk))
+        self.assertNotContains(response,
+                               '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
+                               ' href="/document/dummymodel-{}.odt">'
+                               '<img src="/static/paperclip/fileicons/odt.png"/> ODT</a>'.format(self.object.pk))
 
     def test_detail_fragment(self):
         self.login()
@@ -470,7 +475,7 @@ class LogViewTest(BaseTest):
     def test_logentry_view(self):
         self.login_as_superuser()
         response = self.client.get('/logentry/list/')
-        self.assertContains(response, "<th>action flag</th>")
+        self.assertContains(response, '<th data-data="action_flag"')
 
     def test_logentry_view_not_logged(self):
         response = self.client.get('/logentry/list/')
@@ -480,3 +485,94 @@ class LogViewTest(BaseTest):
         self.login()
         response = self.client.get('/logentry/list/')
         self.assertRedirects(response, "/login/")
+
+
+class LogViewMapentityTest(MapEntityTest):
+    userfactory = SuperUserFactory
+    model = LogEntry
+    modelfactory = DummyModelFactory
+    get_expected_geojson_attrs = None
+
+    def get_expected_datatables_attrs(self):
+        data = {
+            'action_flag': 'Addition',
+            'action_time': '10/06/2022 12:40:10',
+            'change_message': '',
+            'content_type': 12,
+            'id': 1,
+            'object': '<a data-pk="1" href="/dummymodel/1/" >Test_App | Dummy '"Model <class 'object'></a>",
+            'object_id': '1',
+            'object_repr': "<class 'object'>",
+            'user': User.objects.first().username
+        }
+
+        if django.__version__ < '5.0':
+            data['object'] = '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '"Model <class 'object'></a>"
+        return data
+
+    def get_good_data(self):
+        return {'geom': None}
+
+    def test_basic_format(self):
+        return None
+
+    @freeze_time("2022-06-10 12:40:10")
+    def test_api_datatables_list_for_model(self):
+        obj = self.modelfactory()
+
+        LogEntry.objects.log_action(
+            user_id=self.user.pk,
+            content_type_id=obj.get_content_type_id(),
+            object_id=obj.pk,
+            object_repr=force_str(object),
+            action_flag=1
+        )
+        super().test_api_datatables_list_for_model()
+
+    @freeze_time("2022-06-10 12:40:10")
+    def test_api_no_format_list_for_model(self):
+        obj = self.modelfactory()
+
+        LogEntry.objects.log_action(
+            user_id=self.user.pk,
+            content_type_id=obj.get_content_type_id(),
+            object_id=obj.pk,
+            object_repr=force_str(object),
+            action_flag=1
+        )
+        super().test_api_no_format_list_for_model()
+
+    def test_crud_status(self):
+        instance = self.modelfactory()
+
+        obj = LogEntry.objects.log_action(
+            user_id=self.user.pk,
+            content_type_id=instance.get_content_type_id(),
+            object_id=instance.pk,
+            object_repr=force_str(instance),
+            action_flag=1
+        )
+
+        response = self.client.get(obj.get_list_url())
+        self.assertEqual(response.status_code, 200)
+
+    def test_gpx_elevation(self):
+        pass
+
+    def test_no_basic_format(self):
+        pass
+
+    def test_no_basic_format_fail(self):
+        pass
+
+    def test_no_html_in_csv(self):
+        pass
+
+
+class LogViewMapentityTestlLiveTest(MapEntityLiveTest):
+    userfactory = SuperUserFactory
+    model = LogEntry
+    modelfactory = DummyModelFactory
+
+    def test_geojson_cache(self):
+        """ no cache in logentry geojson """

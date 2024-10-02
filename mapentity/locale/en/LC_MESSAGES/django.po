@@ -1,0 +1,261 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-05-22 13:37+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid ""
+"Access to the requested resource is restricted. You have been redirected."
+msgstr ""
+
+#, python-format
+msgid "%(max)s characters maximum recommended"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Create"
+msgstr ""
+
+msgid "Save changes"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Submit attachment"
+msgstr ""
+
+msgid "Update attachment"
+msgstr ""
+
+#, python-format
+msgid "Add a new %s"
+msgstr ""
+
+msgid "object"
+msgstr ""
+
+msgid "Added"
+msgstr ""
+
+msgid "Changed"
+msgstr ""
+
+msgid "Deleted"
+msgstr ""
+
+msgid "Modified"
+msgstr ""
+
+msgid "no"
+msgstr ""
+
+msgid "yes"
+msgstr ""
+
+msgid "Permission denied"
+msgstr ""
+
+msgid "Page not found"
+msgstr ""
+
+msgid "Internal error"
+msgstr ""
+
+msgid "List"
+msgstr ""
+
+msgid "Quick access"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Admin"
+msgstr ""
+
+msgid "Logbook"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "None"
+msgstr ""
+
+msgid "Filter"
+msgstr ""
+
+msgid "Measure distances"
+msgstr ""
+
+msgid "Save map as image"
+msgstr ""
+
+msgid "Load local file (GPX, KML, GeoJSON)"
+msgstr ""
+
+msgid "Map geometry is unsaved"
+msgstr ""
+
+msgid "Objects"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "results"
+msgstr ""
+
+msgid "Current criteria"
+msgstr ""
+
+msgid "No filter"
+msgstr ""
+
+#, python-format
+msgid "Do you really wish to delete <strong>%(object)s</strong> ?"
+msgstr ""
+
+msgid "Yes, delete"
+msgstr ""
+
+msgid "No, back to edit view"
+msgstr ""
+
+msgid "PDF"
+msgstr ""
+
+msgid "ODT"
+msgstr ""
+
+msgid "DOC"
+msgstr ""
+
+msgid "Properties"
+msgstr ""
+
+msgid "Attached files"
+msgstr ""
+
+msgid "History"
+msgstr ""
+
+msgid "Duplicate"
+msgstr ""
+
+msgid "Update"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Action"
+msgstr ""
+
+msgid "Full history"
+msgstr ""
+
+msgid "Map"
+msgstr ""
+
+msgid "CSV"
+msgstr ""
+
+msgid "Shapefile"
+msgstr ""
+
+msgid "GPX"
+msgstr ""
+
+msgid "Last author"
+msgstr ""
+
+msgid "Creator"
+msgstr ""
+
+msgid "Authors"
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+#, python-format
+msgid "%d year ago"
+msgid_plural "%d years ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%d week ago"
+msgid_plural "%d weeks ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%d day ago"
+msgid_plural "%d days ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%d hour ago"
+msgid_plural "%d hours ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "%d minute ago"
+msgid_plural "%d minutes ago"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "just a few seconds ago"
+msgstr ""
+
+msgid "Invalid geometry value."
+msgstr ""
+
+msgid "Created"
+msgstr ""
+
+msgid "Your form contains errors"
+msgstr ""
+
+msgid "Duplication is not available for this object"
+msgstr ""
+
+msgid "has been duplicated successfully"
+msgstr ""
+
+msgid "An error occurred during duplication"
+msgstr ""
+
+msgid "No map available for this object."
+msgstr ""
+
+#, python-format
+msgid "Edit %s"
+msgstr ""
+
+msgid "Saved"
+msgstr ""

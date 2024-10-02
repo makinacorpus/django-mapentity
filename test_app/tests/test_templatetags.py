@@ -4,7 +4,6 @@ from django.template import Template, Context
 from django.template.exceptions import TemplateSyntaxError
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import translation
 from django.utils.timezone import make_aware
 
 from ..models import DummyModel
@@ -18,11 +17,6 @@ from tempfile import TemporaryDirectory
 
 
 class ValueListTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        translation.deactivate()
-
     def test_empty_list_should_show_none(self):
         out = Template(
             '{% load mapentity_tags %}'
@@ -42,14 +36,17 @@ class ValueListTest(TestCase):
         self.assertEqual(out.strip(), """<ul>\n    <li>blah</li>\n    </ul>""")
 
     def test_can_specify_field_to_be_used(self):
-        obj = DummyModel(name='blah')
+        obj = DummyModelFactory.create(name='blah')
         out = Template(
             '{% load mapentity_tags %}'
             '{% valuelist items field="name" %}'
         ).render(Context({
             'items': [obj]
         }))
-        self.assertEqual(out.strip(), """<ul>\n    <li>blah</li>\n    </ul>""")
+        self.assertHTMLEqual(out,
+                             f"""
+                             <ul><li class="hoverable" data-modelname="dummymodel" data-pk="{obj.pk}">
+                             <a href="/dummymodel/1/">blah</a></li></ul>""")
 
     def test_can_specify_an_enumeration4(self):
         out = Template(
@@ -89,11 +86,6 @@ class ValueListTest(TestCase):
 
 
 class ValueTableTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        translation.deactivate()
-
     def test_empty_objects_should_show_none(self):
         out = Template(
             '{% load mapentity_tags %}'
@@ -115,7 +107,8 @@ class ValueTableTest(TestCase):
                              f"""
                              <table class="table"><thead><tr><th class="name">name</th></tr>
                              </thead><tbody><tr class="hoverable" data-modelname="dummymodel"
-                              data-pk="{dummy.pk}"><td>foo</td></tr></tbody></table>""")
+                              data-pk="{dummy.pk}"><td><a href="/dummymodel/{dummy.pk}/">
+                              foo</a></td></tr></tbody></table>""")
 
 
 @freeze_time("2021-12-12")
@@ -241,16 +234,14 @@ class MediaStaticFallbackPathTest(TestCase):
         self.assertEqual(os.path.join(d.name, 'foo.png'), out)
 
     def test_media_static_find_path(self):
-        d = TemporaryDirectory()
-        with override_settings(MEDIA_ROOT=d.name):
-            with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
-                f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
-                        b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
-            out = Template(
-                '{% load mapentity_tags %}'
-                '{% media_static_fallback_path "exist.png" "foo.png" %}'
-            ).render(Context({}))
-            self.assertEqual(out, f.name)
+        with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
+            f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
+                    b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{% media_static_fallback_path "exist.png" "foo.png" %}'
+        ).render(Context({}))
+        self.assertEqual(out, f.name)
 
 
 class MediaStaticFallbackTest(TestCase):
@@ -263,16 +254,14 @@ class MediaStaticFallbackTest(TestCase):
         self.assertEqual(out, "/static/foo.png")
 
     def test_media_static_find(self):
-        d = TemporaryDirectory()
-        with override_settings(MEDIA_ROOT=d.name):
-            with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
-                f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
-                        b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
-                out = Template(
-                    '{% load mapentity_tags %}'
-                    '{% media_static_fallback "exist.png" "foo.png" %}'
-                ).render(Context({}))
-                self.assertEqual(out, '/media/exist.png')
+        with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
+            f.write(b'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/'
+                    b'w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==')
+            out = Template(
+                '{% load mapentity_tags %}'
+                '{% media_static_fallback "exist.png" "foo.png" %}'
+            ).render(Context({}))
+            self.assertEqual(out, '/media/exist.png')
 
 
 class SmartIncludeTest(TestCase):

@@ -1,6 +1,4 @@
 import os
-from distutils.command.build import build
-
 from setuptools import setup, find_packages
 
 
@@ -10,17 +8,10 @@ tests_require = [
     'freezegun',
     'factory_boy',
     'coverage',
+    'tblib'
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
-
-
-class BuildCommand(build):
-    def run(self):
-        """ Compile translation when install or build project. gettext should be installed """
-        super().run()
-        from django.core.management import call_command
-        call_command('compilemessages')
 
 
 with open(os.path.join(here, 'mapentity', 'VERSION')) as version_file:
@@ -35,48 +26,44 @@ setup(
     url='https://github.com/makinacorpus/django-mapentity',
     download_url="https://pypi.python.org/pypi/mapentity/",
     description="Generic CRUD with maps",
-    long_description=(open(os.path.join(here, 'README.rst')).read() + '\n\n' +
-                      open(os.path.join(here, 'CHANGES')).read()),
+    long_description=(open(os.path.join(here, 'README.rst')).read()),
     license='BSD, see LICENSE file.',
-    setup_requires=['django'],  # allow compilemessages to work in setup.py
-    cmdclass={"build": BuildCommand},
     install_requires=[
         'BeautifulSoup4',
         'cairocffi',
         'Django',
+        'tzdata',
         'django-appypod',
         'django-compressor',
-        'django-crispy-forms',
+        'django-crispy-forms<2.0',
         'django-embed-video',
         'django-filter',
-        'django-geojson',
         'django-leaflet',
-        'django-modeltranslation',
-        'django-tinymce<3.0',
+        'django-modeltranslation<0.19.5',  # does not support python 3.8
+        'django-tinymce>=3',
         'django-weasyprint',
         'djangorestframework',
         'djangorestframework-gis',
-        'django-modelcluster',
+        'djangorestframework-datatables',
         'easy-thumbnails',
         'fiona',
         'gpxpy',
-        'netifaces',
         'lxml',
         'paperclip',
         'requests',
-        'WeasyPrint<53',  # 53 required pango 1.44+ not available on old ubuntu
+        'weasyprint',
     ],
     tests_require=tests_require,
     extras_require={
         'dev': tests_require + [
-            'django-debug-toolbar',
+            'django-debug-toolbar<3.3', # 3.3.0 is not compatible with Django 2.2
             'flake8'
         ]
     },
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     classifiers=['Topic :: Utilities',
                  'Natural Language :: English',
                  'Operating System :: OS Independent',

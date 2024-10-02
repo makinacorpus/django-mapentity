@@ -1,0 +1,30 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  doc:
+    name: Documentation
+    runs-on: ubuntu-20.04
+    container:
+      image: python:3.8
+      env:
+        LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build documentation
+        run: |
+          cd docs/
+          pip install -r ./requirements.txt -U
+          make html

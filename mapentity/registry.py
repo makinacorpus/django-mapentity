@@ -4,22 +4,21 @@ import re
 from collections import OrderedDict
 from importlib import import_module
 
-from django.conf.urls import include, re_path
 from django.contrib import auth
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS
 from django.db.utils import ProgrammingError
+from django.urls import re_path, include, path
 from django.utils.translation import gettext as _
 from django.views.generic.base import View
 from paperclip.settings import get_attachment_model
 from rest_framework import routers as rest_routers
-from rest_framework import serializers as rest_serializers
-from rest_framework_gis.fields import GeometryField
-from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from rest_framework.serializers import ModelSerializer
 
 from mapentity import models as mapentity_models
 from mapentity.middleware import get_internal_user
+from mapentity.serializers import MapentityGeojsonModelSerializer
 from mapentity.settings import app_settings
 
 logger = logging.getLogger(__name__)
@@ -95,8 +94,7 @@ class MapEntityOptions:
         for generic_view in generic_views:
             already_defined = any([issubclass(view, generic_view) for view in picked])
             if not already_defined:
-                list_dependencies = (mapentity_views.MapEntityJsonList,
-                                     mapentity_views.MapEntityFormat)
+                list_dependencies = (mapentity_views.MapEntityFormat, )
                 if list_view and generic_view in list_dependencies:
                     # List view depends on JsonList and Format view
                     class dynamic_view(generic_view, list_view):
@@ -119,7 +117,8 @@ class MapEntityOptions:
                 geojson_serializer_class = _geojson_serializer
             rest_viewset = dynamic_viewset
 
-        self.rest_router.register(self.modelname + 's', rest_viewset, basename=self.modelname)
+        self.rest_router.register(r'api/' + self.modelname + '/drf/' + self.modelname + 's',
+                                  rest_viewset, basename=f"{self.modelname}-drf")
 
         # Returns Django URL patterns
         return self.__view_classes_to_url(*picked)
@@ -127,26 +126,19 @@ class MapEntityOptions:
     def get_serializer(self):
         _model = self.model
 
-        class Serializer(rest_serializers.ModelSerializer):
+        class Serializer(ModelSerializer):
             class Meta:
                 model = _model
                 id_field = 'id'
                 exclude = []
-
         return Serializer
 
     def get_geojson_serializer(self):
         _model = self.model
 
-        class Serializer(GeoFeatureModelSerializer):
-            api_geom = GeometryField(read_only=True, precision=7)
-
-            class Meta:
+        class Serializer(MapentityGeojsonModelSerializer):
+            class Meta(MapentityGeojsonModelSerializer):
                 model = _model
-                geo_field = 'api_geom'
-                id_field = 'id'
-                exclude = []
-
         return Serializer
 
     def get_queryset(self):
@@ -154,9 +146,8 @@ class MapEntityOptions:
 
     def _url_path(self, view_kind):
         kind_to_urlpath = {
-            mapentity_models.ENTITY_LAYER: r'^api/{modelname}/{modelname}.geojson$',
             mapentity_models.ENTITY_LIST: r'^{modelname}/list/$',
-            mapentity_models.ENTITY_JSON_LIST: r'^api/{modelname}/{modelname}s.json$',
+            mapentity_models.ENTITY_VIEWSET: r'^api/{modelname}/drf/{modelname}$',
             mapentity_models.ENTITY_FORMAT_LIST: r'^{modelname}/list/export/$',
             mapentity_models.ENTITY_DETAIL: r'^{modelname}/(?P<pk>\d+)/$',
             mapentity_models.ENTITY_MAPIMAGE: r'^image/{modelname}-(?P<pk>\d+).png$',
@@ -169,6 +160,10 @@ class MapEntityOptions:
             kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = r'^document/{modelname}-(?P<pk>\d+).pdf$'
         else:
             kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = r'^document/{modelname}-(?P<pk>\d+).odt$'
+        if self.model.can_duplicate:
+            kind_to_urlpath[mapentity_models.ENTITY_DUPLICATE] = r'^{modelname}/duplicate/(?P<pk>\d+)/$'
+        if view_kind == mapentity_models.ENTITY_DUPLICATE and not self.model.can_duplicate:
+            return
         url_path = kind_to_urlpath[view_kind]
         url_path = url_path.format(modelname=self.modelname)
         return url_path
@@ -181,7 +176,7 @@ class MapEntityOptions:
 
     def __view_classes_to_url(self, *view_classes):
         return [self.url_for(view_class) for view_class in view_classes] + \
-               [re_path(app_settings['DRF_API_URL_PREFIX'], include(self.rest_router.urls))]
+               [path('', include(self.rest_router.urls))]
 
     def url_shortname(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS
@@ -202,7 +197,7 @@ class Registry:
         """ Register model and returns URL patterns
         """
         # Ignore models from not installed apps
-        if not model._meta.installed:
+        if model._meta.app_config is None:
             return []
         # Register once only
         if model in self.registry:
@@ -258,7 +253,6 @@ def create_mapentity_model_permissions(model):
         return
 
     db = DEFAULT_DB_ALIAS
-
     internal_user = get_internal_user()
     perms_manager = Permission.objects.using(db)
 
@@ -287,15 +281,22 @@ def create_mapentity_model_permissions(model):
                                                                          content_type=ctype)
 
         if not internal_user_permission.exists():
-            permission = perms_manager.get(codename=codename, content_type=ctype)
-            internal_user.user_permissions.add(permission)
-            logger.info("Added permission %s to internal user %s" % (codename,
-                                                                     internal_user))
+            try:
+                permission = perms_manager.get(codename=codename, content_type=ctype)
+                internal_user.user_permissions.add(permission)
+                logger.info("Added permission %s to internal user %s" % (codename,
+                                                                         internal_user))
+            except Exception:
+                pass
 
     attachmenttype = ContentType.objects.db_manager(db).get_for_model(get_attachment_model())
     read_perm = dict(codename='read_attachment', content_type=attachmenttype)
     if not internal_user.user_permissions.filter(**read_perm).exists():
         permission = perms_manager.get(**read_perm)
-        internal_user.user_permissions.add(permission)
-        logger.info("Added permission %s to internal user %s" % (permission.codename,
-                                                                 internal_user))
+        try:
+            internal_user.user_permissions.add(permission)
+            logger.info("Added permission %s to internal user %s" % (permission.codename,
+                                                                     internal_user))
+
+        except Exception:
+            pass

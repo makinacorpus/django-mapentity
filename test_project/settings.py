@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
+from tempfile import TemporaryDirectory
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,20 +40,23 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "debug_toolbar",
     'paperclip',
-    'djgeojson',
     'compressor',
     'easy_thumbnails',
+    'django_filters',
     'crispy_forms',
     'rest_framework',
     'embed_video',
+    'tinymce',
     'mapentity',  # Make sure mapentity settings are loaded before leaflet ones
     'leaflet',
     'test_app',
-    'modeltranslation'
+    'modeltranslation',
 )
 
 MIDDLEWARE = (
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -61,6 +67,7 @@ MIDDLEWARE = (
     'django.middleware.locale.LocaleMiddleware',
     'mapentity.middleware.AutoLoginMiddleware',
 )
+
 
 ROOT_URLCONF = 'test_project.urls'
 
@@ -89,7 +96,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'test_project.wsgi.application'
-
+INTERNAL_IPS = type(str('c'), (), {'__contains__': lambda *a: True})()
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
@@ -112,6 +119,7 @@ LANGUAGES = (
     ('en', "English"),
     ('fr', "French"),
 )
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -139,7 +147,7 @@ MEDIA_URL = '/media/'
 MEDIA_URL_SECURE = '/media_secure/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SRID = 2154
+SRID = 4326
 COMPRESS_ENABLED = False
 TEST = True
 
@@ -148,6 +156,7 @@ MAPENTITY_CONFIG = {
 }
 
 PAPERCLIP_FILETYPE_MODEL = 'test_app.FileType'
+PAPERCLIP_LICENSE_MODEL = 'test_app.License'
 PAPERCLIP_ATTACHMENT_MODEL = 'test_app.Attachment'
 
 if os.path.exists('/usr/lib/x86_64-linux-gnu/mod_spatialite.so'):
@@ -186,10 +195,17 @@ LEAFLET_CONFIG = {
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 MAPENTITY_CONFIG = {
-    'CONVERSION_SERVER': 'http://localhost/',
-    'CAPTURE_SERVER': 'http://localhost/',
+    'CONVERSION_SERVER': 'http://convertit:6543',
+    'CAPTURE_SERVER': 'http://screamshotter:8000',
     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 }
-
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'test_project', 'locale'),
+)
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+MODELTRANSLATION_LANGUAGES = ('en', 'fr', 'zh-hant')
+
+if 'test' in sys.argv:
+    MEDIA_ROOT = TemporaryDirectory().name

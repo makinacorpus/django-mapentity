@@ -1,15 +1,16 @@
 from django.conf import settings
 from django.contrib.gis import forms
+from django.contrib.gis.geos import Polygon
 from django.db.models.fields.related import ManyToOneRel, ForeignKey
-from django_filters import FilterSet, Filter, ModelMultipleChoiceFilter
+from django_filters import ModelMultipleChoiceFilter, Filter
 from django_filters.filterset import get_model_field, remote_queryset
+from django_filters.rest_framework import FilterSet
 
-from .settings import app_settings, API_SRID
-from .widgets import HiddenGeometryWidget
+from mapentity.settings import app_settings, API_SRID
+from mapentity.widgets import HiddenGeometryWidget
 
 
 class PolygonFilter(Filter):
-
     field_class = forms.PolygonField
 
     def __init__(self, *args, **kwargs):
@@ -18,10 +19,27 @@ class PolygonFilter(Filter):
         kwargs.setdefault('lookup_expr', 'intersects')
         super().__init__(*args, **kwargs)
 
-
-class PythonPolygonFilter(PolygonFilter):
+    def get_value_with_bounds_fixed(self, value):
+        if value:
+            # prevent bbox out of bounding (leaflet getBounds)
+            xmin, ymin, xmax, ymax = value.extent
+            xmin = max(xmin, -180)
+            xmax = min(xmax, 180)
+            ymin = max(ymin, -90)
+            ymax = min(ymax, 90)
+            new_bbox = Polygon.from_bbox((xmin, ymin, xmax, ymax))
+            new_bbox.srid = value.srid
+            return new_bbox
+        return value
 
     def filter(self, qs, value):
+        value = self.get_value_with_bounds_fixed(value)
+        return super().filter(qs, value)
+
+
+class PythonPolygonFilter(PolygonFilter):
+    def filter(self, qs, value):
+        value = self.get_value_with_bounds_fixed(value)
         if not value:
             return qs
         if not value.srid:
@@ -57,7 +75,8 @@ class BaseMapEntityFilterSet(FilterSet):
             elif isinstance(field, forms.ChoiceField):
                 self.__set_placeholder(field, field.widget)
             elif isinstance(field, forms.NullBooleanField):
-                choices = [('1', field.label)] + field.widget.choices[1:]
+                # use label as undefined value for NullBooleanField
+                choices = [(None, field.label)] + field.widget.choices[1:]
                 field.widget.choices = choices
                 self.__set_placeholder(field, field.widget)
             else:

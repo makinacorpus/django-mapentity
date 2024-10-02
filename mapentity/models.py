@@ -9,36 +9,36 @@ from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db import models
+from django.core.files.storage import default_storage
+from django.db import models, transaction
 from django.db.utils import OperationalError
 from django.urls import reverse, NoReverseMatch
 from django.utils.formats import localize
-from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from rest_framework import permissions as rest_permissions
 
+from paperclip.settings import get_attachment_model
 from mapentity.templatetags.mapentity_tags import humanize_timesince
-from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract_attributes_html
+from .helpers import smart_urljoin, is_file_uptodate, capture_map_image, extract_attributes_html, clone_attachment
 from .settings import app_settings, API_SRID
 
 # Used to create the matching url name
-ENTITY_LAYER = "layer"
 ENTITY_LIST = "list"
-ENTITY_JSON_LIST = "json_list"
+ENTITY_VIEWSET = "drf-viewset"
 ENTITY_FORMAT_LIST = "format_list"
 ENTITY_DETAIL = "detail"
 ENTITY_MAPIMAGE = "mapimage"
 ENTITY_DOCUMENT = "document"
 ENTITY_MARKUP = "markup"
+ENTITY_DUPLICATE = "duplicate"
 ENTITY_CREATE = "add"
 ENTITY_UPDATE = "update"
 ENTITY_DELETE = "delete"
 ENTITY_UPDATE_GEOM = "update_geom"
 
 ENTITY_KINDS = (
-    ENTITY_LAYER, ENTITY_LIST, ENTITY_JSON_LIST,
-    ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE, ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE,
-    ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
+    ENTITY_LIST, ENTITY_VIEWSET, ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE,
+    ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE, ENTITY_DUPLICATE, ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
 )
 
 ENTITY_PERMISSION_CREATE = 'add'
@@ -70,7 +70,73 @@ class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
     }
 
 
-class BaseMapEntityMixin(models.Model):
+class DuplicateMixin(object):
+    can_duplicate = True
+
+    def get_duplicate_url(self):
+        if self.can_duplicate:
+            return reverse(self._entity.url_name(ENTITY_DUPLICATE), args=[str(self.pk)])
+        return None
+
+    def duplicate(self, **kwargs):
+        if not self.can_duplicate:
+            return None
+        sid = transaction.savepoint()
+        try:
+            avoid_fields = kwargs.pop('avoid_fields', [])
+            attachments = kwargs.pop('attachments', {})
+            skip_attachments = kwargs.pop('skip_attachments', False)
+            clone = self._meta.model.objects.get(pk=self.pk)
+            clone.pk = None
+            setattr(clone, clone._meta.pk.name, None)
+            for key, value in kwargs.items():
+                if key not in avoid_fields:
+                    if callable(value):
+                        setattr(clone, key, value(getattr(self, key)))
+                    else:
+                        setattr(clone, key, value)
+            clone.save()
+
+            # Scan fields to get relations
+            fields = clone._meta.get_fields()
+            for field in fields:
+                if field.name not in avoid_fields:
+                    # Manage M2M fields by replicating all related records
+                    # found on parent "obj" into "clone"
+                    if not field.auto_created and field.many_to_many:
+                        for row in getattr(self, field.name).all():
+                            getattr(clone, field.name).add(row)
+
+                    # Manage 1-N and 1-1 relations by cloning child objects
+                    if field.auto_created and field.is_relation:
+                        if field.many_to_many:
+                            # do nothing
+                            pass
+                        else:
+                            # provide "clone" object to replace "obj"
+                            # on remote field
+                            attrs = {
+                                field.remote_field.name: clone,
+                                'skip_attachments': True
+                            }
+                            children = field.related_model.objects.filter(**{field.remote_field.name: self})
+
+                            for child in children:
+                                child.duplicate(**attrs)
+
+            if not skip_attachments:
+                for attachment in get_attachment_model().objects.filter(object_id=self.pk,
+                                                                        content_type_id=self.get_content_type_id()):
+                    attachments["content_object"] = clone
+                    clone_attachment(attachment, 'attachment_file', attachments)
+            transaction.savepoint_commit(sid)
+        except Exception as exc:
+            transaction.savepoint_rollback(sid)
+            raise exc
+        return clone
+
+
+class BaseMapEntityMixin(DuplicateMixin, models.Model):
     _entity = None
     capture_map_image_waitfor = '.leaflet-tile-loaded'
 
@@ -89,15 +155,14 @@ class BaseMapEntityMixin(models.Model):
     def get_entity_kind_permission(cls, entity_kind):
         operations = {
             ENTITY_CREATE: ENTITY_PERMISSION_CREATE,
+            ENTITY_DUPLICATE: ENTITY_PERMISSION_CREATE,
             ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
             ENTITY_UPDATE_GEOM: ENTITY_PERMISSION_UPDATE_GEOM,
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
             ENTITY_DETAIL: ENTITY_PERMISSION_READ,
-            ENTITY_LAYER: ENTITY_PERMISSION_READ,
             ENTITY_LIST: ENTITY_PERMISSION_READ,
-            ENTITY_JSON_LIST: ENTITY_PERMISSION_READ,
+            ENTITY_VIEWSET: ENTITY_PERMISSION_READ,
             ENTITY_MARKUP: ENTITY_PERMISSION_READ,
-
             ENTITY_FORMAT_LIST: ENTITY_PERMISSION_EXPORT,
             ENTITY_MAPIMAGE: ENTITY_PERMISSION_EXPORT,
             ENTITY_DOCUMENT: ENTITY_PERMISSION_EXPORT,
@@ -113,21 +178,21 @@ class BaseMapEntityMixin(models.Model):
         appname = opts.app_label.lower()
         if opts.proxy:
             proxied = opts.proxy_for_model._meta
-            appname = proxied.app_label.lower()
+            appname = proxied.app_label.lower() if proxied.app_label.lower() != "admin" else appname
         return '%s.%s' % (appname, auth.get_permission_codename(perm, opts))
 
     @classmethod
     def latest_updated(cls):
         try:
             fname = app_settings['DATE_UPDATE_FIELD_NAME']
-            return cls.objects.latest(fname).get_date_update()
+            return cls.objects.only(fname).latest(fname).get_date_update()
         except (cls.DoesNotExist, FieldError):
             return None
 
     def get_date_update(self):
         try:
             fname = app_settings['DATE_UPDATE_FIELD_NAME']
-            return getattr(self, fname).replace(tzinfo=utc)
+            return getattr(self, fname)
         except AttributeError:
             return None
 
@@ -139,21 +204,34 @@ class BaseMapEntityMixin(models.Model):
     def delete(self, *args, **kwargs):
         # Delete map image capture when delete object
         image_path = self.get_map_image_path()
-        if os.path.exists(image_path):
-            os.unlink(image_path)
+        if default_storage.exists(image_path):
+            default_storage.delete(image_path)
         super().delete(*args, **kwargs)
 
     @classmethod
     def get_layer_url(cls):
-        return reverse(cls._entity.url_name(ENTITY_LAYER))
+        return '/api/' + cls._meta.model_name.lower() + '/drf/' + cls._meta.model_name.lower() + 's.geojson'
+
+    @classmethod
+    def get_layer_list_url(cls):
+        return reverse("{app_name}:{model_name}-drf-list".format(app_name=cls._meta.app_label.lower(),
+                                                                 model_name=cls._meta.model_name.lower()),
+                       kwargs={"format": "geojson"})
 
     @classmethod
     def get_list_url(cls):
         return reverse(cls._entity.url_name(ENTITY_LIST))
 
     @classmethod
-    def get_jsonlist_url(cls):
-        return reverse(cls._entity.url_name(ENTITY_JSON_LIST))
+    def get_datatablelist_url(cls):
+        return reverse("{app_name}:{model_name}-drf-list".format(app_name=cls._meta.app_label.lower(),
+                                                                 model_name=cls._meta.model_name.lower()),
+                       kwargs={"format": "datatables"})
+
+    def get_layer_detail_url(self):
+        return reverse("{app_name}:{model_name}-drf-detail".format(app_name=self._meta.app_label.lower(),
+                                                                   model_name=self._meta.model_name.lower()),
+                       kwargs={"format": "geojson", "pk": self.pk})
 
     @classmethod
     def get_format_list_url(cls):
@@ -221,14 +299,16 @@ class BaseMapEntityMixin(models.Model):
         else:
             size = app_settings['MAP_CAPTURE_SIZE']
         printcontext = self.get_printcontext() if hasattr(self, 'get_printcontext') else None
-        capture_map_image(url, path, size=size, waitfor=self.capture_map_image_waitfor, printcontext=printcontext)
+        capture_map_image(url,
+                          path,
+                          size=size,
+                          waitfor=self.capture_map_image_waitfor,
+                          printcontext=printcontext)
         return True
 
     def get_map_image_path(self):
-        basefolder = os.path.join(settings.MEDIA_ROOT, 'maps')
-        if not os.path.exists(basefolder):
-            os.makedirs(basefolder)
-        return os.path.join(basefolder, '%s-%s.png' % (self._meta.model_name, self.pk))
+        """ Get relative path to map image in storage."""
+        return os.path.join('maps', '%s-%s.png' % (self._meta.model_name, self.pk))
 
     def get_attributes_html(self, request):
         return extract_attributes_html(self.get_detail_url(), request)
@@ -262,6 +342,11 @@ class BaseMapEntityMixin(models.Model):
         "Override this method to allow unauthenticated access to attachments"
         return False
 
+    @property
+    def map_image_path(self):
+        """ Get full path to map image in storage. """
+        return default_storage.path(self.get_map_image_path())
+
 
 class MapEntityMixin(BaseMapEntityMixin):
     attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
@@ -273,10 +358,14 @@ class MapEntityMixin(BaseMapEntityMixin):
 class LogEntry(BaseMapEntityMixin, BaseLogEntry):
     geom = None
     object_verbose_name = _("object")
+    can_duplicate = False
 
     class Meta:
         proxy = True
         app_label = 'mapentity'
+        permissions = (
+            ('read_logentry', 'Can read log entries'),
+        )
 
     @property
     def action_flag_display(self):
@@ -303,3 +392,13 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
         else:
             return '<a data-pk="%s" href="%s" >%s %s</a>' % (
                 obj.pk, obj_url, model_str, self.object_repr)
+
+    def get_date_update(self):
+        return self.action_time
+
+    @classmethod
+    def latest_updated(cls):
+        try:
+            return cls.objects.only('action_time').latest('action_time').get_date_update()
+        except (cls.DoesNotExist, FieldError):
+            return None
