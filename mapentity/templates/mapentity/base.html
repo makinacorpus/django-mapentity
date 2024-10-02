@@ -72,7 +72,7 @@
       data-app-verbosename="{{ app_verbose_name }}"
       data-modelname="{{ modelname }}"
       data-objectsname="{{ objectsname }}"
-      data-pk="{{ object.pk }}">
+      data-pk="{{ object.pk }}" class="{% block body_classes %}{% endblock %}">
 
 {% block content %}
     {% block navbar %}

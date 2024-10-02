@@ -96,11 +96,13 @@ class SubmitButton(HTML):
 
 class MapEntityForm(TranslatedModelForm):
     fieldslayout = None
-    geomfields = []
+    geomfields = None
     leftpanel_scrollable = True
     hidden_fields = []
 
     def __init__(self, *args, **kwargs):
+        if self.geomfields is None:
+            self.geomfields = ['geom']
         self.user = kwargs.pop('user', None)
         self.can_delete = kwargs.pop('can_delete', True)
 
@@ -222,7 +224,7 @@ class MapEntityForm(TranslatedModelForm):
         formactions = FormActions(
             *actions,
             css_class="form-actions",
-            template='mapentity/crispy_forms/bootstrap4/layout/formactions.html'
+            template='mapentity/crispy_bootstrap4/bootstrap4/layout/formactions.html'
         )
 
         # Main form layout

@@ -1,5 +1,5 @@
 from django.conf import settings as settings_  # import the settings file
-
+from mapentity import __version__
 from .registry import registry
 from .settings import app_settings
 
@@ -12,7 +12,7 @@ def settings(request):
     return dict(
         TITLE=app_settings['TITLE'],
         DEBUG=settings_.DEBUG,
-        VERSION=getattr(settings_, 'VERSION', 'unknown'),
+        VERSION=getattr(settings_, 'VERSION', __version__),
         JS_SETTINGS_VIEW=app_settings['JS_SETTINGS_VIEW'],
         TRANSLATED_LANGUAGES=app_settings['TRANSLATED_LANGUAGES'],
         MODELTRANSLATION_LANGUAGES=settings_.MODELTRANSLATION_LANGUAGES,
