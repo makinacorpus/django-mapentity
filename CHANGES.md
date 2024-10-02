@@ -10,6 +10,10 @@ CHANGELOG
   * New explicit dependency to ``crispy-bootstrap4``.
   * You should adapt configuration by adding `crispy_bootstrap4` in your INSTALLED_APPS and check your templates inheritance.
 
+**Improvements**
+
+- Due to new crispy forms, there is new login form
+
 
 8.9.2      (2024-07-15)
 -----------------------
