@@ -1,12 +1,19 @@
 CHANGELOG
 =========
 
-8.9.2+dev  (XXXX-XX-XX)
+8.10.0     (2024-10-02)
 -----------------------
 
-**Bug fixes**
+**Breaking changes**
 
-- Use HTML tag for create/update button
+* Compatibility with new django-crispy-forms (2.0.0+)
+  * New explicit dependency to ``crispy-bootstrap4``.
+  * You should adapt configuration by adding `crispy_bootstrap4` in your INSTALLED_APPS and check your templates inheritance.
+
+**Improvements**
+
+- Due to new crispy forms, there is new login form
+- Use HTML `button` tag for create/update forms
 - Prevent multiple submissions of create/update form
 
 

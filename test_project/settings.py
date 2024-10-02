@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     'django_filters',
     'crispy_forms',
+    'crispy_bootstrap4',
     'rest_framework',
     'embed_video',
     'tinymce',

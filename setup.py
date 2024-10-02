@@ -35,7 +35,8 @@ setup(
         'tzdata',
         'django-appypod',
         'django-compressor',
-        'django-crispy-forms<2.0',
+        'django-crispy-forms>=2.0',
+        'crispy-bootstrap4',
         'django-embed-video',
         'django-filter',
         'django-leaflet>=0.19,<0.20',  # leaflet 0.7.x
