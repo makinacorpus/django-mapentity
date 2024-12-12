@@ -297,6 +297,10 @@ $(window).on('entity:map:list', function (e, data) {
     mapsync.on('reloaded', function (data) {
         t.setsubmit();
     });
+    // On first click on Filter button, load HTML content for form
+    t.$button.click(function (e) {
+         t.load_filter_form(mapsync);
+    });
 
     // Map screenshot button
     var screenshot = new L.Control.Screenshot(window.SETTINGS.urls.screenshot, function () {
