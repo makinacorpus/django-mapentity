@@ -10,6 +10,7 @@ from .base import (
 from .generic import (
     Convert,
     MapEntityList,
+    MapEntityFilter,
     MapEntityFormat,
     MapEntityMapImage,
     MapEntityDocument,
@@ -34,6 +35,7 @@ from .mixins import (
 
 MAPENTITY_GENERIC_VIEWS = [
     MapEntityList,
+    MapEntityFilter,
     MapEntityFormat,
     MapEntityMapImage,
     MapEntityDocument,
@@ -48,6 +50,7 @@ MAPENTITY_GENERIC_VIEWS = [
 __all__ = [
     'Convert',
     'MapEntityList',
+    'MapEntityFilter',
     'MapEntityFormat',
     'MapEntityMapImage',
     'MapEntityDocument',

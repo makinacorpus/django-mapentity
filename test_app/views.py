@@ -2,15 +2,17 @@ from django.contrib.gis.db.models.functions import Transform
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
-from .filters import DummyModelFilter
-from .forms import DummyModelForm, RoadForm, MushroomSpotForm
-from .models import DummyModel, Road, MushroomSpot
-from .serializers import DummySerializer, RoadSerializer, DummyGeojsonSerializer
+
+from .filters import DummyModelBboxFilter, DummyModelFilter, MushroomSpotBboxFilter, RoadBboxFilter, CityBboxFilter
+from .forms import DummyModelForm, MushroomSpotForm, RoadForm
+from .models import DummyModel, MushroomSpot, Road, City
+from .serializers import (DummyGeojsonSerializer, DummySerializer,
+                          RoadSerializer)
 
 
 class DummyList(mapentity_views.MapEntityList):
     model = DummyModel
-    filterform = DummyModelFilter
+    filterform = DummyModelBboxFilter
     searchable_columns = ['id', 'name']
 
 
@@ -62,6 +64,11 @@ class DummyViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
+class DummyModelFilterView(mapentity_views.MapEntityFilter):
+    model = DummyModel
+    filterset_class = DummyModelFilter
+
+
 class RoadCreate(mapentity_views.MapEntityCreate):
     model = Road
     form_class = RoadForm
@@ -82,3 +89,23 @@ class MushroomSpotCreate(mapentity_views.MapEntityCreate):
 class MushroomSpotUpdate(mapentity_views.MapEntityUpdate):
     model = MushroomSpot
     form_class = MushroomSpotForm
+
+
+class MushroomSpotFilterView(mapentity_views.MapEntityFilter):
+    model = MushroomSpot
+    filterset_class = MushroomSpotBboxFilter
+
+
+class CitySpotUpdate(mapentity_views.MapEntityUpdate):
+    model = MushroomSpot
+    form_class = MushroomSpotForm
+
+
+class CityFilterView(mapentity_views.MapEntityFilter):
+    model = City
+    filterset_class = CityBboxFilter
+
+
+class RoadFilterView(mapentity_views.MapEntityFilter):
+    model = Road
+    filterset_class = RoadBboxFilter

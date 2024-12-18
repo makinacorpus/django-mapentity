@@ -147,6 +147,7 @@ class MapEntityOptions:
     def _url_path(self, view_kind):
         kind_to_urlpath = {
             mapentity_models.ENTITY_LIST: r'^{modelname}/list/$',
+            mapentity_models.ENTITY_FILTER: r'^{modelname}/filter/$',
             mapentity_models.ENTITY_VIEWSET: r'^api/{modelname}/drf/{modelname}$',
             mapentity_models.ENTITY_FORMAT_LIST: r'^{modelname}/list/export/$',
             mapentity_models.ENTITY_DETAIL: r'^{modelname}/(?P<pk>\d+)/$',
