@@ -3,16 +3,15 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
 
-from .filters import DummyModelBboxFilter, DummyModelFilter, MushroomSpotBboxFilter, RoadBboxFilter, CityBboxFilter
+from .filters import DummyModelFilter
 from .forms import DummyModelForm, MushroomSpotForm, RoadForm
-from .models import DummyModel, MushroomSpot, Road, City
+from .models import City, DummyModel, MushroomSpot, Road
 from .serializers import (DummyGeojsonSerializer, DummySerializer,
                           RoadSerializer)
 
 
 class DummyList(mapentity_views.MapEntityList):
     model = DummyModel
-    filterform = DummyModelBboxFilter
     searchable_columns = ['id', 'name']
 
 
@@ -93,19 +92,11 @@ class MushroomSpotUpdate(mapentity_views.MapEntityUpdate):
 
 class MushroomSpotFilterView(mapentity_views.MapEntityFilter):
     model = MushroomSpot
-    filterset_class = MushroomSpotBboxFilter
-
-
-class CitySpotUpdate(mapentity_views.MapEntityUpdate):
-    model = MushroomSpot
-    form_class = MushroomSpotForm
 
 
 class CityFilterView(mapentity_views.MapEntityFilter):
     model = City
-    filterset_class = CityBboxFilter
 
 
 class RoadFilterView(mapentity_views.MapEntityFilter):
     model = Road
-    filterset_class = RoadBboxFilter
