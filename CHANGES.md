@@ -4,6 +4,11 @@ CHANGELOG
 8.10.0+dev (XXXX-XX-XX)
 -----------------------
 
+**Performances**
+
+- Delay loading filter options only when opening form
+
+
 8.10.0     (2024-10-02)
 -----------------------
 

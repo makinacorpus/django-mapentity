@@ -9,6 +9,7 @@ MapEntity.TogglableFilter = L.Class.extend({
 
         this.fields = {};
         this.visible = false;
+        this.loaded_form = false;
         this.popover = $('#filters-popover')
                           .popover({
                               placement: 'right',
@@ -85,6 +86,34 @@ MapEntity.TogglableFilter = L.Class.extend({
 
     tip: function () {
         return $(this.popover.data('bs.popover').tip);
+    },
+
+    load_filter_form: function (mapsync) {
+        var self = this;
+        // On first click on Filter button, load HTML content for form
+        if (!self.loaded_form) {
+            var filter_url = $('#mainfilter').attr('filter-url');
+            $.get(filter_url)
+                .done(response => {
+                    // Replace simple form that contains only BBOX with full form, including attributes
+                    $('#mainfilter').replaceWith(response);
+                    // Update L.MapListSync to refresh datatable on change
+                    mapsync.options.filter.form = $('#mainfilter');
+                    // Bind new form buttons to keep refreshing list on click
+                    $("#filter").click(function(e) {
+                        mapsync._onFormSubmit(e);
+                    });
+                    $("#reset").click(function(e) {
+                        mapsync._onFormReset(e);
+                    });
+                    // Bind setfields to update list of enabled fields displayed on hover
+                    $('#mainfilter').find('select,input').change(function () {
+                        self.setfield(this);
+                    });
+                    self.loaded_form = true;
+                })
+                .fail(xhr => console.error('Error:', xhr.status));
+        }
     },
 
     showinfo: function () {

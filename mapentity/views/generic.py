@@ -4,39 +4,47 @@ import os
 from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
+from crispy_forms.helper import FormHelper
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.fields import (GenericForeignKey, GenericRel,
+                                                GenericRelation)
+from django.contrib.gis.db.models import GeometryField
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.db.models.fields.files import FileField
+from django.http import (HttpResponse, HttpResponseBadRequest,
+                         HttpResponseRedirect)
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
-from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django.views import static
 from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
+from django_filters.views import FilterView
 from django_weasyprint import WeasyTemplateResponseMixin
 from djappypod.response import OdtTemplateResponse
 
 from mapentity.tokens import TokenManager
 
-from .base import history_delete, BaseListView
-from .mixins import (ModelViewMixin, FormViewMixin)
 from .. import models as mapentity_models
 from .. import serializers as mapentity_serializers
 from ..decorators import save_history, view_permission_required
+from ..filters import MapEntityFilterSet
 from ..forms import AttachmentForm
-from ..helpers import convertit_url, download_content, user_has_perm
-from ..helpers import suffix_for, name_for, smart_get_template
-from ..models import LogEntry, ADDITION, CHANGE, DELETION
+from ..helpers import (convertit_url, download_content, name_for,
+                       smart_get_template, suffix_for, user_has_perm)
+from ..models import ADDITION, CHANGE, DELETION, LogEntry
 from ..settings import app_settings
+from .base import BaseListView, history_delete
+from .mixins import FormViewMixin, ModelViewMixin
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +83,9 @@ class MapEntityList(BaseListView, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['filterform'] = self._filterform  # From FilterListMixin
+        context['filter'] = self._filterform  # From FilterListMixin
+        if hasattr(self.get_model(), "get_filter_url"):
+            context["filter_url"] = f"{app_settings['ROOT_URL']}{self.get_model().get_filter_url()}"
         context['columns'] = self.get_columns()  # From BaseListView
         context['unorderable_columns'] = self.unorderable_columns  # From BaseListView
         context['searchable_columns'] = self.searchable_columns  # From BaseListView
@@ -470,6 +480,50 @@ class MapEntityDetail(ModelViewMixin, DetailView):
                 context['mapheight'] = int(mapcontext['mapsize']['height'])
 
         return context
+
+
+class MapEntityFilter(ModelViewMixin, FilterView):
+    filterset_class = None
+
+    def __init__(self):
+        _model = self.model
+        if _model is None:
+            _model = self.queryset.model
+        if self.filterset_class is None:
+            class filterklass(MapEntityFilterSet):
+                class Meta:
+                    model = _model
+                    fields = [
+                        field.name
+                        for field in _model._meta.get_fields()
+                        if not isinstance(
+                            field,
+                            (
+                                GeometryField,
+                                GenericRelation,
+                                GenericRel,
+                                GenericForeignKey,
+                                FileField
+                            )
+                        )
+                    ]
+
+            self.filterset_class = filterklass
+        self._filterform = self.filterset_class()
+        self._filterform.helper = FormHelper()
+        self._filterform.helper.field_class = 'form-control-sm'
+        self._filterform.helper.submit = None
+
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_FILTER
+
+    def get_template_names(self):
+        return super().get_template_names() + ['mapentity/mapentity_filter.html']
+
+    @view_permission_required(login_url=mapentity_models.ENTITY_FILTER)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 class MapEntityUpdate(ModelViewMixin, FormViewMixin, UpdateView):

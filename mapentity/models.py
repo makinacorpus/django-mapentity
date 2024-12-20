@@ -27,6 +27,7 @@ ENTITY_LIST = "list"
 ENTITY_VIEWSET = "drf-viewset"
 ENTITY_FORMAT_LIST = "format_list"
 ENTITY_DETAIL = "detail"
+ENTITY_FILTER = "filter"
 ENTITY_MAPIMAGE = "mapimage"
 ENTITY_DOCUMENT = "document"
 ENTITY_MARKUP = "markup"
@@ -37,7 +38,7 @@ ENTITY_DELETE = "delete"
 ENTITY_UPDATE_GEOM = "update_geom"
 
 ENTITY_KINDS = (
-    ENTITY_LIST, ENTITY_VIEWSET, ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE,
+    ENTITY_LIST, ENTITY_FILTER, ENTITY_VIEWSET, ENTITY_FORMAT_LIST, ENTITY_DETAIL, ENTITY_MAPIMAGE,
     ENTITY_DOCUMENT, ENTITY_MARKUP, ENTITY_CREATE, ENTITY_DUPLICATE, ENTITY_UPDATE, ENTITY_DELETE, ENTITY_UPDATE_GEOM
 )
 
@@ -161,6 +162,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
             ENTITY_DETAIL: ENTITY_PERMISSION_READ,
             ENTITY_LIST: ENTITY_PERMISSION_READ,
+            ENTITY_FILTER: ENTITY_PERMISSION_READ,
             ENTITY_VIEWSET: ENTITY_PERMISSION_READ,
             ENTITY_MARKUP: ENTITY_PERMISSION_READ,
             ENTITY_FORMAT_LIST: ENTITY_PERMISSION_EXPORT,
@@ -350,6 +352,10 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
 
 class MapEntityMixin(BaseMapEntityMixin):
     attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
+
+    @classmethod
+    def get_filter_url(cls):
+        return reverse(cls._entity.url_name(ENTITY_FILTER))
 
     class Meta:
         abstract = True
