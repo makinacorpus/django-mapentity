@@ -4,9 +4,17 @@ CHANGELOG
 8.10.0+dev (XXXX-XX-XX)
 -----------------------
 
+**Breaking Changes**
+
+- `MapEntityList` view now needs an extra `MapEntityFilter` view to maintain filtering functionalities. If you customize the `FilterSet`, it must be added to: `MapEntityFormatList`, `MapEntityFilter`, and `MapEntityViewSet`. See the "Filters" section in documentation : https://django-mapentity.readthedocs.io/en/stable/customization.html#filters
+
 **UI/UX**
 
 - Move an object's related objects from the properties tab into their own tab
+
+**Performances**
+
+- Delay loading filter options only when opening form
 
 
 8.10.0     (2024-10-02)

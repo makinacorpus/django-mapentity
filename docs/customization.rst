@@ -67,20 +67,36 @@ geographical data. Create a file ``filters.py`` in your app::
     from mapentity.filters import MapEntityFilterSet
 
 
-    class MuseumFilter(MapEntityFilterSet):
+    class MuseumFilterSet(MapEntityFilterSet):
         class Meta:
             model = Museum
             fields = ('name', )
 
 
-Then update ``views.py`` to use your custom filter in your curstom views::
+Then update ``views.py`` to use your custom filter in your custom views::
 
-    from .filters import MuseumFilter
+    from .filters import MuseumFilterSet
+
 
     class MuseumList(MapEntityList):
         model = Museum
-        filterform = MuseumFilter
         columns = ['id', 'name']
+
+
+    class MuseumFilter(MapEntityFilter):
+        model = Museum
+        filterset_class = MuseumFilterSet
+
+
+    class MuseumFormatList(MapEntityFormatList):
+        model = Museum
+        filterset_class = MuseumFilterSet
+
+
+    class MuseumViewSet(MapEntityViewSet):
+        model = Museum
+        filterset_class = MuseumFilterSet
+
 
 
 Forms

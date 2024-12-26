@@ -336,7 +336,7 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
         response = self.client.get(self.model.get_list_url())
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['filterform'] is not None)
+        self.assertTrue(response.context['filter'] is not None)
 
     # REST API tests
 

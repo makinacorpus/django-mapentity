@@ -20,8 +20,8 @@ from mapentity.tests import MapEntityLiveTest, MapEntityTest
 from mapentity.tests.factories import AttachmentFactory, SuperUserFactory
 from mapentity.views import Convert, JSSettings, ServeAttachment
 
-from ..models import DummyModel, FileType
-from ..views import DummyDetail, DummyList
+from ..models import DummyModel, FileType, City
+from ..views import DummyDetail, DummyList, DummyModelFilter, RoadList
 from .factories import DummyModelFactory
 
 fake = Faker('fr_FR')
@@ -311,6 +311,24 @@ class ListViewTest(BaseTest):
         self.assertTrue(b'btn-group disabled' in html.content)
         self.assertTrue(b'Add a new dummy model' in html.content)
 
+    def test_list_view_creates_minimal_generic_filter(self):
+        request = RequestFactory().get('/fake-path')
+        request.user = self.user
+        request.session = {}
+        view = DummyList.as_view()
+        response = view(request)
+        self.assertNotContains(response, '<input type="text" name="name"')
+        self.assertContains(response, '<input type="hidden" name="bbox"')
+
+    def test_list_view_overrides_minimal_generic_filter(self):
+        request = RequestFactory().get('/fake-path')
+        request.user = self.user
+        request.session = {}
+        view = RoadList.as_view()
+        response = view(request)
+        self.assertContains(response, '<input type="text" name="name"')
+        self.assertContains(response, '<input type="hidden" name="bbox"')
+
 
 class MapEntityLayerViewTest(BaseTest):
     def setUp(self):
@@ -464,6 +482,11 @@ class ViewPermissionsTest(BaseTest):
         self.assertRedirects(response, '/dummymodel/%s/' % (self.object.pk),
                              target_status_code=302)  # --> login
 
+    def test_unauthorized_filter_view_redirects_to_login(self):
+        filter_url = '/dummymodel/filter/'
+        response = self.client.get(filter_url)
+        self.assertRedirects(response, '/login/')
+
     def test_unauthorized_delete_view_redirects_to_detail(self):
         delete_url = '/dummymodel/delete/%s/' % self.object.pk
         response = self.client.get(delete_url)
@@ -576,3 +599,23 @@ class LogViewMapentityTestlLiveTest(MapEntityLiveTest):
 
     def test_geojson_cache(self):
         """ no cache in logentry geojson """
+
+
+class FilterViewTest(BaseTest):
+    def setUp(self):
+        self.login()
+        self.user.is_superuser = True
+        self.user.save()
+
+    def test_mapentity_template_is_last_candidate(self):
+        filterview = DummyModelFilter()
+        filterview.object_list = DummyModel.objects.all()  # Add this line
+        filterview.model = DummyModel
+        self.assertEqual(filterview.get_template_names(),
+                         ['test_app/dummymodel_filter.html',
+                          'mapentity/mapentity_filter.html'])
+
+    def test_filter_view_creates_full_generic_filter(self):
+        response = self.client.get(City.get_filter_url())
+        self.assertContains(response, '<input type="text" name="name"')
+        self.assertContains(response, '<input type="hidden" name="bbox"')
