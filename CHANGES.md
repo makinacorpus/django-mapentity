@@ -4,6 +4,11 @@ CHANGELOG
 8.10.0+dev (XXXX-XX-XX)
 -----------------------
 
+**UI/UX**
+
+- Move an object's related objects from the properties tab into their own tab
+
+
 8.10.0     (2024-10-02)
 -----------------------
 
@@ -72,7 +77,7 @@ CHANGELOG
 
 **Hotfix**
 
-- Fix new internal user cache 
+- Fix new internal user cache
 
 
 8.8.0      (2024-04-10)
@@ -123,7 +128,7 @@ CHANGELOG
 -----------------------
 
 - Fix of the widget `SelectMultipleWithPop` which did not add the newly created element in the related list (#1299)
-- Add `MAX_CHARACTERS_BY_FIELD` to control the max length of a rich text field. 
+- Add `MAX_CHARACTERS_BY_FIELD` to control the max length of a rich text field.
 - Deprecate the `MAX_CHARACTERS` parameter
 
 
@@ -279,7 +284,7 @@ CHANGELOG
 - Add svg extra for easy-thumbnail
 
 
-8.1.2      (2022-06-10)    
+8.1.2      (2022-06-10)
 -----------------------
 
 **Bug fixes**
@@ -301,7 +306,7 @@ CHANGELOG
 - Fix exception recursion in default error 500 view
 
 
-8.1.0      (2022-06-03)                
+8.1.0      (2022-06-03)
 -----------------------
 
 **Improvments**
@@ -317,7 +322,7 @@ CHANGELOG
 - django-geojson is not required anymore
 
 
-8.0.1      (2022-04-13)                
+8.0.1      (2022-04-13)
 -----------------------
 
 **Bug fixes**
