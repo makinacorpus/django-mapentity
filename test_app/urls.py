@@ -1,5 +1,6 @@
+from test_app.models import City, DummyModel, MushroomSpot, Road
+
 from mapentity.registry import registry
-from test_app.models import DummyModel, MushroomSpot, Road, City
 
 app_name = 'test_app'
 

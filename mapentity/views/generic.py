@@ -10,33 +10,36 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import (HttpResponse, HttpResponseBadRequest,
+                         HttpResponseRedirect)
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
-from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from django.views import static
 from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
+from django_filters.views import FilterView
 from django_weasyprint import WeasyTemplateResponseMixin
 from djappypod.response import OdtTemplateResponse
 
 from mapentity.tokens import TokenManager
 
-from .base import history_delete, BaseListView
-from .mixins import (ModelViewMixin, FormViewMixin)
 from .. import models as mapentity_models
 from .. import serializers as mapentity_serializers
 from ..decorators import save_history, view_permission_required
+
 from ..forms import AttachmentForm
-from ..helpers import convertit_url, download_content, user_has_perm
-from ..helpers import suffix_for, name_for, smart_get_template
-from ..models import LogEntry, ADDITION, CHANGE, DELETION
+from ..helpers import (convertit_url, download_content, name_for,
+                       smart_get_template, suffix_for, user_has_perm)
+from ..models import ADDITION, CHANGE, DELETION, LogEntry
 from ..settings import app_settings
+from .base import BaseListView, history_delete
+from .mixins import FilterListMixin, FormViewMixin, ModelViewMixin
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +78,9 @@ class MapEntityList(BaseListView, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['filterform'] = self._filterform  # From FilterListMixin
+        context['filter'] = self._filterform  # From FilterListMixin
+        if hasattr(self.get_model(), "get_filter_url"):
+            context["filter_url"] = f"{app_settings['ROOT_URL']}{self.get_model().get_filter_url()}"
         context['columns'] = self.get_columns()  # From BaseListView
         context['unorderable_columns'] = self.unorderable_columns  # From BaseListView
         context['searchable_columns'] = self.searchable_columns  # From BaseListView
@@ -90,6 +95,9 @@ class MapEntityList(BaseListView, ListView):
         context['can_export'] = can_export
 
         return context
+
+    def get_filterset_class(self):
+        return self.get_minimal_filterset()
 
 
 class MapEntityFormat(BaseListView, ListView):
@@ -148,6 +156,9 @@ class MapEntityFormat(BaseListView, ListView):
         serializer.serialize(self.get_queryset(), model=self.get_model(), stream=response,
                              gpx_field=app_settings['GPX_FIELD_NAME'])
         return response
+
+    def get_filterset_class(self):
+        return self.get_full_filterset()
 
 
 class MapEntityMapImage(ModelViewMixin, DetailView):
@@ -470,6 +481,23 @@ class MapEntityDetail(ModelViewMixin, DetailView):
                 context['mapheight'] = int(mapcontext['mapsize']['height'])
 
         return context
+
+
+class MapEntityFilter(ModelViewMixin, FilterListMixin, FilterView):
+
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_FILTER
+
+    def get_template_names(self):
+        return super().get_template_names() + ['mapentity/mapentity_filter.html']
+
+    @view_permission_required(login_url='login')
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_filterset_class(self):
+        return self.get_full_filterset()
 
 
 class MapEntityUpdate(ModelViewMixin, FormViewMixin, UpdateView):

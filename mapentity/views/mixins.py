@@ -1,9 +1,10 @@
 import logging
 
 from crispy_forms.helper import FormHelper
-from django.contrib.contenttypes.fields import GenericRelation, GenericRel, GenericForeignKey
-from django.db.models.fields.files import FileField
+from django.contrib.contenttypes.fields import (GenericForeignKey, GenericRel,
+                                                GenericRelation)
 from django.contrib.gis.db.models import GeometryField
+from django.db.models.fields.files import FileField
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.http import last_modified as cache_last_modified
 
@@ -110,15 +111,13 @@ class FormViewMixin:
 
 
 class FilterListMixin:
-    filterform = None
+    filterset_class = None
 
-    def __init__(self):
-
+    def get_full_filterset(self):
         _model = self.model
         if _model is None:
             _model = self.queryset.model
-
-        if self.filterform is None:
+        if self.filterset_class is None:
             class filterklass(MapEntityFilterSet):
                 class Meta:
                     model = _model
@@ -136,8 +135,28 @@ class FilterListMixin:
                             )
                         )
                     ]
-            self.filterform = filterklass
-        self._filterform = self.filterform()
+
+            return filterklass
+        return self.filterset_class
+
+    def get_minimal_filterset(self):
+        _model = self.model
+        if _model is None:
+            _model = self.queryset.model
+
+        if self.filterset_class is None:
+            class filterklass(MapEntityFilterSet):
+                class Meta:
+                    model = _model
+                    fields = MapEntityFilterSet.Meta.fields
+                    filter_overrides = MapEntityFilterSet.Meta.filter_overrides
+
+            return filterklass
+        return self.filterset_class
+
+    def __init__(self):
+        self.filterset_class = self.get_filterset_class()
+        self._filterform = self.filterset_class()
         self._filterform.helper = FormHelper()
         self._filterform.helper.field_class = 'form-control-sm'
         self._filterform.helper.submit = None
@@ -145,6 +164,6 @@ class FilterListMixin:
     def get_queryset(self):
         queryset = super().get_queryset()
         # Filter queryset from possible serialized form
-        self._filterform = self.filterform(self.request.GET or None,
-                                           queryset=queryset)
+        self._filterform = self.filterset_class(self.request.GET or None,
+                                                queryset=queryset)
         return self._filterform.qs
