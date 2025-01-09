@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-8.10.0+dev (XXXX-XX-XX)
+8.11.0      (2025-01-09)
 -----------------------
 
 **Breaking Changes**
