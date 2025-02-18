@@ -1,4 +1,4 @@
-FROM makinacorpus/geodjango:bionic-3.8
+FROM makinacorpus/geodjango:focal-3.10
 
 RUN apt-get update -qq && apt-get install -y -qq \
     libsqlite3-mod-spatialite \
@@ -14,7 +14,7 @@ RUN chown -R django:django /code
 COPY --chown=django:django . /code/src
 
 USER django
-RUN python3.8 -m venv /code/venv
+RUN python3.10-m venv /code/venv
 
 WORKDIR /code/src
 

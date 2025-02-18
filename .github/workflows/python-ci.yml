@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.8  # check pylint with minimal supported python version
+          python-version: 3.10
 
       - name: Install flake8
         run: |
@@ -35,7 +35,7 @@ jobs:
           flake8 mapentity test_project test_app
 
   test:
-    runs-on: ubuntu-20.04  # wait for spatialite fix
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [ '3.9', '3.10', '3.12' ]
@@ -99,7 +99,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: 3.10
 
       - name: Compile messages
         run: |
