@@ -1,21 +1,18 @@
+import json
+import os
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import FieldDoesNotExist
 from django.template import Template, Context
 from django.template.exceptions import TemplateSyntaxError
-from django.templatetags import static
 from django.test import TestCase
-from django.test.utils import override_settings
 from django.utils.timezone import make_aware
-
-from ..models import DummyModel
-from .factories import DummyModelFactory
-
-from datetime import datetime
 from freezegun import freeze_time
-import json
-import os
-from tempfile import TemporaryDirectory
+
+from .factories import DummyModelFactory
+from ..models import DummyModel
 
 
 class ValueListTest(TestCase):
