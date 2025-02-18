@@ -1,8 +1,9 @@
 from django.conf import settings
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import FieldDoesNotExist
 from django.template import Template, Context
 from django.template.exceptions import TemplateSyntaxError
-from django.templatetags.static import static
+from django.templatetags import static
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.timezone import make_aware
@@ -225,14 +226,12 @@ class HumanizeTimesinceTest(TestCase):
 
 class MediaStaticFallbackPathTest(TestCase):
     def test_media_static_fallback_path(self):
-        d = TemporaryDirectory()
-        with override_settings(STATIC_ROOT=d.name):
-            out = Template(
-                '{% load mapentity_tags %}'
-                '{% media_static_fallback_path "doesnotexist.png" "foo.png" %}'
-            ).render(Context({}))
+        out = Template(
+            '{% load mapentity_tags %}'
+            '{% media_static_fallback_path "doesnotexist.png" "foo.png" %}'
+        ).render(Context({}))
 
-        self.assertEqual(static("foo.png"), out)
+        self.assertEqual(staticfiles_storage.path("foo.png"), out)
 
     def test_media_static_find_path(self):
         with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
