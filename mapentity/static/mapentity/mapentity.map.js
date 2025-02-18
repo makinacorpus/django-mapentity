@@ -97,7 +97,7 @@ $(window).on('entity:map', function (e, data) {
 
     // Replace default layer switcher with Leaflet.GroupedLayerSwitcher
     if (map.layerscontrol) {
-        map.layerscontrol.removeFrom(map);
+        map.removeControl(map.layerscontrol);
     }
     var baseLayers = {};
     var overlaysLayers = {};
@@ -135,7 +135,18 @@ $(window).on('entity:map', function (e, data) {
     }
 
     map.addControl(new L.Control.FullScreen());
-    map.addControl(new L.Control.MeasureControl());
+    map.addControl(new L.Control.MeasureControl({
+        position: 'topleft',
+        handler: {
+            shapeOptions: {
+                color: '#f06eaa'
+            },
+            icon: new L.DivIcon({
+                iconSize: new L.Point(8, 8),
+            }),
+        }
+    }));
+
 
     map.on("moveend", function () {
         var bounds = map.getBounds();
@@ -145,6 +156,7 @@ $(window).on('entity:map', function (e, data) {
         //this.options.filter.bboxfield.val(L.Util.getWKT(rect));
         $('#id_bbox').val(L.Util.getWKT(rect));
     });
+
 
 });
 
@@ -326,10 +338,14 @@ $(window).on('entity:map:list', function (e, data) {
             }
         },
         filecontrol = L.Control.fileLayerLoad({
+            addToMap: true,
+            layer: L.geoJSON().addTo(map),
             fitBounds: true,
-            layerOptions: {style: window.SETTINGS.map.styles.filelayer,
-                           pointToLayer: pointToLayer,
-                           onEachFeature: onEachFeature}
+            layerOptions: {
+                style: window.SETTINGS.map.styles.filelayer,
+                pointToLayer: pointToLayer,
+                onEachFeature: onEachFeature
+            }
         });
     map.filecontrol = filecontrol;
     map.addControl(filecontrol);

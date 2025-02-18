@@ -22,9 +22,9 @@ L.LayerIndexMixin = {
     searchBuffer: function (latlng, radius) {
         /* Caution: radius is in degrees */
         var around = L.latLngBounds([latlng.lat - radius,
-                                     latlng.lng - radius],
-                                    [latlng.lat + radius,
-                                     latlng.lng + radius]);
+                latlng.lng - radius],
+            [latlng.lat + radius,
+                latlng.lng + radius]);
         return this.search(around);
     },
 
@@ -38,8 +38,18 @@ L.LayerIndexMixin = {
         this._rtree.insert(this._rtbounds(bounds), layer);
     },
 
-    unindexLayer: function (bounds, layer) {
-        /* If layer is not provided, does wide-area remove */
+    unindexLayer: function (layer, options) {
+        var bounds;
+        if (options && options.bounds) {
+            bounds = options.bounds;
+        } else if (options && options.latlng) {
+            bounds = new L.LatLngBounds(options.latlng, options.latlng);
+        } else if (options && options.latlngs) {
+            bounds = new L.LatLngBounds(options.latlngs);
+        } else {
+            bounds = this._layerBounds(layer);
+        }
+
         this._rtree.remove(this._rtbounds(bounds), layer);
     },
 
@@ -76,8 +86,8 @@ L.LayerIndexMixin = {
 
     _rtbounds: function (bounds) {
         return {x: bounds.getSouthWest().lng,
-                y: bounds.getSouthWest().lat,
-                w: bounds.getSouthEast().lng - bounds.getSouthWest().lng,
-                h: bounds.getNorthWest().lat - bounds.getSouthWest().lat};
-    },
+            y: bounds.getSouthWest().lat,
+            w: bounds.getSouthEast().lng - bounds.getSouthWest().lng,
+            h: bounds.getNorthWest().lat - bounds.getSouthWest().lat};
+    }
 };
