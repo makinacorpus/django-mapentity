@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.template import Template, Context
 from django.template.exceptions import TemplateSyntaxError
+from django.templatetags.static import static
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.timezone import make_aware
@@ -231,7 +232,7 @@ class MediaStaticFallbackPathTest(TestCase):
                 '{% media_static_fallback_path "doesnotexist.png" "foo.png" %}'
             ).render(Context({}))
 
-        self.assertEqual(os.path.join(d.name, 'foo.png'), out)
+        self.assertEqual(static("foo.png"), out)
 
     def test_media_static_find_path(self):
         with open(os.path.join(settings.MEDIA_ROOT, 'exist.png'), mode='wb') as f:
