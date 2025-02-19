@@ -35,7 +35,12 @@ jobs:
           flake8 mapentity test_project test_app
 
   test:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: python:${{ matrix.python-version }}-bookworm
+      env:
+        LANG: C.UTF-8
+
     strategy:
       matrix:
         python-version: [ '3.9', '3.10', '3.12' ]
