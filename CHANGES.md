@@ -2,7 +2,7 @@ CHANGELOG
 =========
 
 
-8.11.0+dev (XXXX-XX-XX)
+8.11.1     (2025-02-19)
 -----------------------
 
 **Improvements**
@@ -11,7 +11,7 @@ CHANGELOG
 - Drop python 3.8 test suite
 
 
-8.11.0      (2025-01-09)
+8.11.0     (2025-01-09)
 -----------------------
 
 **Breaking Changes**
