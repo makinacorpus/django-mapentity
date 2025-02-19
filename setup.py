@@ -31,7 +31,7 @@ setup(
     install_requires=[
         'BeautifulSoup4',
         'cairocffi',
-        'Django',
+        'Django<5.1',
         'tzdata',
         'django-appypod',
         'django-compressor',
@@ -40,7 +40,7 @@ setup(
         'django-embed-video',
         'django-filter',
         'django-leaflet>=0.19,<0.20',  # leaflet 0.7.x
-        'django-modeltranslation<0.19.5',  # does not support python 3.8
+        'django-modeltranslation',
         'django-tinymce>=3',
         'django-weasyprint',
         'djangorestframework',
@@ -57,14 +57,14 @@ setup(
     tests_require=tests_require,
     extras_require={
         'dev': tests_require + [
-            'django-debug-toolbar<3.3', # 3.3.0 is not compatible with Django 2.2
+            'django-debug-toolbar',
             'flake8'
         ]
     },
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    python_requires='>=3.8',
+    python_requires='>=3.9',
     classifiers=['Topic :: Utilities',
                  'Natural Language :: English',
                  'Operating System :: OS Independent',

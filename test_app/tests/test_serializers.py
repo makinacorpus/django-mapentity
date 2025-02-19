@@ -2,7 +2,6 @@ import os
 from io import StringIO
 from unittest.mock import patch
 
-from django import VERSION
 from django.conf import settings
 from django.contrib.gis import gdal
 from django.contrib.gis.db.models import GeometryField
@@ -13,7 +12,7 @@ from django.utils import translation
 
 from mapentity.registry import app_settings
 from mapentity.serializers import ZipShapeSerializer, CSVSerializer
-from ..models import MushroomSpot, Tag, Supermarket
+from test_app.models import MushroomSpot, Tag, Supermarket
 
 
 class CommonShapefileSerializerMixin(object):
@@ -28,19 +27,21 @@ class CommonShapefileSerializerMixin(object):
 
 class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
     def setUp(self):
-        self.point1 = MushroomSpot.objects.create(serialized='SRID=%s;POINT(0 0)' % settings.SRID)
+        self.point1 = MushroomSpot.objects.create(serialized=f'SRID={settings.SRID};POINT(0 0)')
         self.point1.tags.add(Tag.objects.create(label="Tag1"))
         self.point1.tags.add(Tag.objects.create(label="Tag2"))
-        self.line1 = MushroomSpot.objects.create(serialized='SRID=%s;LINESTRING(0 0, 10 0)' % settings.SRID)
-        self.multipoint = MushroomSpot.objects.create(serialized='SRID=%s;MULTIPOINT((1 1), (2 2))' % settings.SRID)
-        self.multiline = MushroomSpot.objects.create(serialized='SRID=%s;MULTILINESTRING((1 1, 2 2), '
-                                                                '(3 3, 4 4))' % settings.SRID)
-        self.polygon = MushroomSpot.objects.create(serialized='SRID=%s;POLYGON((1 1, 2 2, '
-                                                              '1 2, 1 1))' % settings.SRID)
-        self.multipolygon = MushroomSpot.objects.create(serialized='SRID=%s;MULTIPOLYGON(((1 1, 2 2, '
-                                                                   '1 2, 1 1)))' % settings.SRID)
+        self.line1 = MushroomSpot.objects.create(serialized=f'SRID={settings.SRID};LINESTRING(0 0, 10 0)')
+        self.multipoint = MushroomSpot.objects.create(serialized=f'SRID={settings.SRID};MULTIPOINT((1 1), (2 2))')
+        self.multiline = MushroomSpot.objects.create(
+            serialized=f'SRID={settings.SRID};MULTILINESTRING((1 1, 2 2), (3 3, 4 4))'
+        )
+        self.polygon = MushroomSpot.objects.create(serialized=f'SRID={settings.SRID};POLYGON((1 1, 2 2, 1 2, 1 1))')
+        self.multipolygon = MushroomSpot.objects.create(
+            serialized=f'SRID={settings.SRID};MULTIPOLYGON(((1 1, 2 2, 1 2, 1 1)))'
+        )
         self.geometrycollection = MushroomSpot.objects.create(
-            serialized='SRID=%s;GEOMETRYCOLLECTION(POINT(0 0), POLYGON((1 1, 2 2, 1 2, 1 1))))' % settings.SRID)
+            serialized=f'SRID={settings.SRID};GEOMETRYCOLLECTION(POINT(0 0), POLYGON((1 1, 2 2, 1 2, 1 1))))'
+        )
         MushroomSpot.geomfield = GeometryField(name='geom', srid=settings.SRID)
 
         self.serializer = ZipShapeSerializer()
@@ -188,10 +189,7 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
         layers = self.getShapefileLayers()
         layer = layers['Polygon.shp']
         feature = layer[0]
-        if VERSION[0] >= 3:
-            self.assertEqual(feature['tag'].value, None)
-        else:
-            self.assertEqual(feature['tag'].value, "")
+        self.assertEqual(feature['tag'].value, None)
 
         self.serializer = ZipShapeSerializer()
         tag = Tag.objects.create(label="Tag")
