@@ -5,6 +5,10 @@ CHANGELOG
 8.11.0+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Add python 3.13 test suite
+- Drop python 3.8 test suite
 
 
 8.11.0      (2025-01-09)
