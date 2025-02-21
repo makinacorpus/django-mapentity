@@ -422,11 +422,6 @@ class MapEntityLiveTest(LiveServerTestCase):
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = None
 
-    def _pre_setup(self):
-        # Workaround https://code.djangoproject.com/ticket/10827
-        ContentType.objects.clear_cache()
-        return super()._pre_setup()
-
     def url_for(self, path):
         return smart_urljoin(self.live_server_url, path)
 
