@@ -221,7 +221,7 @@ You can change the regex, for example if you need to add other behaviour with ea
 
 .. code-block:: python
 
-    MAPENTITY_CONFIG['REGEX_PATH_ATTACHMENTS'] = r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$'
+    MAPENTITY_CONFIG['REGEX_PATH_ATTACHMENTS'] = r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg|bmp|webp)$'
 
 
 Maps
