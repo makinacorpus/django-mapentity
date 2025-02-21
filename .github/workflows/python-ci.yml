@@ -47,7 +47,7 @@ jobs:
         django-version: [ '4.2.*', '5.2b1' ]
         exclude:
             - python-version: '3.9'
-              django-version: '5.2.*'
+              django-version: '5.2b1'
 
     env:
       PYTHON: ${{ matrix.python-version }}
