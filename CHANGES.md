@@ -1,13 +1,13 @@
 CHANGELOG
 =========
 
-8.11.1+dev (XXXX−XX−XX)
+8.12.0     (2025-02-21)
 -----------------------
 
 **Improvements**
 
 - Add python django 5.1
-- Accept webp as picture attachment format
+- Accept WebP as picture attachment format
 
 
 8.11.1     (2025-02-19)
