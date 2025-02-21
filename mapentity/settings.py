@@ -43,7 +43,7 @@ app_settings = dict({
     'DRF_API_URL_PREFIX': r'^api/',
     'MAPENTITY_WEASYPRINT': False,
     'MAP_STYLES': _DEFAULT_MAP_STYLES,
-    'REGEX_PATH_ATTACHMENTS': r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg)$',
+    'REGEX_PATH_ATTACHMENTS': r'\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg|bmp|webp)$',
     'MAX_CHARACTERS': None,
     'MAX_CHARACTERS_BY_FIELD': {},
 }, **getattr(settings, 'MAPENTITY_CONFIG', {}))
