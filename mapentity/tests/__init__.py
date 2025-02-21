@@ -9,7 +9,6 @@ from urllib.parse import quote
 from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 from django.core.files.storage import default_storage
 from django.test import LiveServerTestCase, TestCase
 from django.test.testcases import to_list
