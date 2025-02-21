@@ -31,7 +31,7 @@ setup(
     install_requires=[
         'BeautifulSoup4',
         'cairocffi',
-        'Django<5.1',
+        'Django',
         'tzdata',
         'django-appypod',
         'django-compressor',

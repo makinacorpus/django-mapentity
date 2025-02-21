@@ -9,7 +9,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db import DEFAULT_DB_ALIAS
 from django.db.utils import ProgrammingError
-from django.urls import re_path, include, path
+from django.urls import re_path
 from django.utils.translation import gettext as _
 from django.views.generic.base import View
 from paperclip.settings import get_attachment_model
@@ -116,7 +116,6 @@ class MapEntityOptions:
                 serializer_class = _serializer
                 geojson_serializer_class = _geojson_serializer
             rest_viewset = dynamic_viewset
-
         self.rest_router.register(r'api/' + self.modelname + '/drf/' + self.modelname + 's',
                                   rest_viewset, basename=f"{self.modelname}-drf")
 
@@ -161,10 +160,7 @@ class MapEntityOptions:
             kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = r'^document/{modelname}-(?P<pk>\d+).pdf$'
         else:
             kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = r'^document/{modelname}-(?P<pk>\d+).odt$'
-        if self.model.can_duplicate:
-            kind_to_urlpath[mapentity_models.ENTITY_DUPLICATE] = r'^{modelname}/duplicate/(?P<pk>\d+)/$'
-        if view_kind == mapentity_models.ENTITY_DUPLICATE and not self.model.can_duplicate:
-            return
+        kind_to_urlpath[mapentity_models.ENTITY_DUPLICATE] = r'^{modelname}/duplicate/(?P<pk>\d+)/$'
         url_path = kind_to_urlpath[view_kind]
         url_path = url_path.format(modelname=self.modelname)
         return url_path
@@ -176,8 +172,7 @@ class MapEntityOptions:
         return re_path(url_path, view_class.as_view(), name=url_name)
 
     def __view_classes_to_url(self, *view_classes):
-        return [self.url_for(view_class) for view_class in view_classes] + \
-               [path('', include(self.rest_router.urls))]
+        return [self.url_for(view_class) for view_class in view_classes] + self.rest_router.urls
 
     def url_shortname(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS

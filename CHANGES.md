@@ -4,6 +4,10 @@ CHANGELOG
 8.11.1+dev (XXXX−XX−XX)
 -----------------------
 
+**Improvements**
+
+- Add python django 5.1
+
 
 8.11.1     (2025-02-19)
 -----------------------
