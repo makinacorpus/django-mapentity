@@ -93,6 +93,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mapentity/
+
     if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
     steps:
       - uses: actions/checkout@v4
