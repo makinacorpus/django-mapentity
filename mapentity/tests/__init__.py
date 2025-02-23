@@ -9,7 +9,6 @@ from urllib.parse import quote
 from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 from django.core.files.storage import default_storage
 from django.test import LiveServerTestCase, TestCase
 from django.test.testcases import to_list
@@ -421,11 +420,6 @@ class MapEntityLiveTest(LiveServerTestCase):
 
     def setUp(self):
         app_settings['SENDFILE_HTTP_HEADER'] = None
-
-    def _pre_setup(self):
-        # Workaround https://code.djangoproject.com/ticket/10827
-        ContentType.objects.clear_cache()
-        return super()._pre_setup()
 
     def url_for(self, path):
         return smart_urljoin(self.live_server_url, path)
