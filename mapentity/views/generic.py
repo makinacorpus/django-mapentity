@@ -79,8 +79,6 @@ class MapEntityList(BaseListView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['filter'] = self._filterform  # From FilterListMixin
-        if hasattr(self.get_model(), "get_filter_url"):
-            context["filter_url"] = f"{app_settings['ROOT_URL']}{self.get_model().get_filter_url()}"
         context['columns'] = self.get_columns()  # From BaseListView
         context['unorderable_columns'] = self.unorderable_columns  # From BaseListView
         context['searchable_columns'] = self.searchable_columns  # From BaseListView

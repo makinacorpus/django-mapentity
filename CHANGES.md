@@ -4,13 +4,21 @@ CHANGELOG
 8.12.0+dev (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Fix log entry filter view
+
+**Improvements**
+
+- Support Django 5.2
+
 
 8.12.0     (2025-02-21)
 -----------------------
 
 **Improvements**
 
-- Add python django 5.1
+- Support Django 5.1
 - Accept WebP as picture attachment format
 
 

@@ -1,15 +1,9 @@
 import os
 from setuptools import setup, find_packages
 
+from docs.conf import exclude_patterns
 
 here = os.path.abspath(os.path.dirname(__file__))
-
-tests_require = [
-    'freezegun',
-    'factory_boy',
-    'coverage',
-    'tblib'
-]
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -54,11 +48,14 @@ setup(
         'requests',
         'weasyprint',
     ],
-    tests_require=tests_require,
     extras_require={
-        'dev': tests_require + [
+        'dev': [
             'django-debug-toolbar',
-            'flake8'
+            'flake8',
+            'freezegun',
+            'factory_boy',
+            'coverage',
+            'tblib'
         ]
     },
     packages=find_packages(),
