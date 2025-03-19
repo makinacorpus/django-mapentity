@@ -36,10 +36,4 @@ if settings.DEBUG or app_settings['SENDFILE_HTTP_HEADER']:
 
 
 if app_settings['ACTION_HISTORY_ENABLED']:
-    from mapentity.registry import MapEntityOptions
-
-    class LogEntryOptions(MapEntityOptions):
-        menu = False
-        dynamic_views = ['List', ]
-
-    urlpatterns += registry.register(LogEntry, LogEntryOptions)
+    urlpatterns += registry.register(LogEntry, menu=False)

@@ -230,6 +230,10 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
                                                                  model_name=cls._meta.model_name.lower()),
                        kwargs={"format": "datatables"})
 
+    @classmethod
+    def get_filter_url(cls):
+        return reverse(cls._entity.url_name(ENTITY_FILTER))
+
     def get_layer_detail_url(self):
         return reverse("{app_name}:{model_name}-drf-detail".format(app_name=self._meta.app_label.lower(),
                                                                    model_name=self._meta.model_name.lower()),
@@ -352,10 +356,6 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
 
 class MapEntityMixin(BaseMapEntityMixin):
     attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
-
-    @classmethod
-    def get_filter_url(cls):
-        return reverse(cls._entity.url_name(ENTITY_FILTER))
 
     class Meta:
         abstract = True

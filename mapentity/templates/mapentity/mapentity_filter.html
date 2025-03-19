@@ -1,7 +1,7 @@
 {% load i18n static %}
 
 {% block mainfilter %}
-<form id="mainfilter" action="{{ model.get_datatablelist_url }}" filter-url="{{ filter_url }}">
+<form id="mainfilter" action="{{ model.get_datatablelist_url }}" filter-url="{{ model.get_filter_url }}">
     <div class="left form-group">
         {{ filter.form.as_p }}
     </div>

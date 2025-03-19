@@ -3,7 +3,7 @@ from django import forms
 from rest_framework import serializers
 from rest_framework_gis import serializers as gis_serializers
 
-from . import MapEntityViewSet
+from . import MapEntityViewSet, MapEntityFilter
 from .generic import MapEntityList
 from ..filters import BaseMapEntityFilterSet
 from ..models import LogEntry
@@ -11,7 +11,7 @@ from ..registry import registry
 from ..serializers import MapentityGeojsonModelSerializer
 
 
-class LogEntryFilter(BaseMapEntityFilterSet):
+class LogEntryFilterSet(BaseMapEntityFilterSet):
     content_type = django_filters.NumberFilter(widget=forms.HiddenInput)
     object_id = django_filters.NumberFilter(widget=forms.HiddenInput)
 
@@ -20,9 +20,14 @@ class LogEntryFilter(BaseMapEntityFilterSet):
         fields = ('user', 'content_type', 'object_id')
 
 
+class LogEntryFilter(MapEntityFilter):
+    model = LogEntry
+    filterset_class = LogEntryFilterSet
+
+
 class LogEntryList(MapEntityList):
     queryset = LogEntry.objects.order_by('-action_time')
-    filterform = LogEntryFilter
+    filterform = LogEntryFilterSet
     columns = ('id', 'action_time', 'user', 'object', 'action_flag')
     unorderable_columns = ('object', )
 
@@ -51,7 +56,7 @@ class LogEntryGeoJSONSerializer(MapentityGeojsonModelSerializer):
 
 class LogEntryViewSet(MapEntityViewSet):
     model = LogEntry
-    filterset_class = LogEntryFilter
+    filterset_class = LogEntryFilterSet
     serializer_class = LogEntrySerializer
     geojson_serializer_class = LogEntryGeoJSONSerializer
 
