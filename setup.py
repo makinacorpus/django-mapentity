@@ -1,10 +1,6 @@
 import os
 from setuptools import setup, find_packages
 
-from docs.conf import exclude_patterns
-
-here = os.path.abspath(os.path.dirname(__file__))
-
 here = os.path.abspath(os.path.dirname(__file__))
 
 
