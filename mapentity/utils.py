@@ -12,8 +12,9 @@ def get_internal_user():
 
     internal_user = None
 
-    if cache.get(cache_key) is not None:
-        user_id = int(cache.get(cache_key))
+    cached_value = cache.get(cache_key)
+    if cached_value is not None:
+        user_id = int(cached_value)
         try:
             internal_user = User.objects.get(pk=user_id)
         except User.DoesNotExist:
