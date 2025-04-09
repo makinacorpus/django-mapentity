@@ -4,7 +4,7 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from mapentity.helpers import user_has_perm
-from mapentity.middleware import get_internal_user
+from mapentity.utils import get_internal_user
 from mapentity.tests.factories import UserFactory
 from ..models import DummyModel
 
