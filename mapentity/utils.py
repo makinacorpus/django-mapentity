@@ -28,6 +28,5 @@ def get_internal_user():
                 'is_active': True
             }
         )
-        if created:
-            cache.set(cache_key, internal_user.pk)
+        cache.set(cache_key, internal_user.pk)
     return internal_user
