@@ -4,6 +4,10 @@ CHANGELOG
 8.12.2+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Prevent changes on internal user (used to authenticate map screenshots)
+
 
 8.12.2     (2025-03-19)
 -----------------------

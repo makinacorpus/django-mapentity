@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase
 
-from mapentity.middleware import get_internal_user
+from mapentity.utils import get_internal_user
 from mapentity.tests.factories import SuperUserFactory
 from mapentity.tokens import TokenManager
 
