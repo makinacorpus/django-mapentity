@@ -25,7 +25,12 @@ def get_internal_user():
             username=app_settings['INTERNAL_USER'],
             defaults={
                 'password': '',
-                'is_active': True
+                'is_active': True,
+                'is_staff': False,
+                'is_superuser': False,
+                'email': '',
+                'first_name': "Don't",
+                'last_name': "delete me",
             }
         )
         cache.set(cache_key, internal_user.pk)
