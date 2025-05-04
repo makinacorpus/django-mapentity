@@ -8,6 +8,16 @@ console.debug = function () {
     }
 };
 
+/*
+Il vérifie si Function.prototype.bind n'est pas déjà défini
+(ce qui peut être le cas dans des environnements JavaScript plus anciens) et,
+si nécessaire, il fournit une implémentation polyfill de Function.prototype.bind.
+Cela garantit que la méthode bind est disponible pour toutes les fonctions dans
+l'environnement JavaScript
+
+Ce helper peut être supprimer, Function.prototype.bind est globalement prise en charge
+par la majorité des navigateurs maintenant
+ */
 if (!Function.prototype.bind) {
     Function.prototype.bind = function (oThis) {
     if (typeof this !== "function") {
@@ -33,6 +43,32 @@ if (!Function.prototype.bind) {
 /**
  * Get URL parameter in Javascript
  * source: http://stackoverflow.com/questions/1403888/get-url-parameter-with-jquery
+ */
+
+/*
+La fonction `getURLParameter` extrait la valeur d'un paramètre spécifique dans l'URL actuelle. Voici son fonctionnement détaillé :
+
+1. Extraction du paramètre :
+   Elle utilise une expression régulière pour rechercher le paramètre spécifié (`name`) dans la chaîne de requête de l'URL (`location.search`).
+
+2. Décodage :
+   La valeur trouvée est ensuite décodée avec `decodeURIComponent` pour gérer les caractères encodés dans l'URL.
+
+3. Conversion JSON (optionnelle) :
+   Si la valeur décodée est une chaîne, elle tente de la convertir en objet JSON avec `JSON.parse`. Si cela échoue (par exemple, si ce n'est pas un JSON valide), elle retourne simplement la chaîne.
+
+4. Retour :
+   Si le paramètre n'est pas trouvé, elle retourne `null`.
+
+### Ancien ou nouveau ?
+Cette fonction est **ancienne**. Elle repose sur des techniques classiques de manipulation d'URL en JavaScript, mais elle n'utilise pas les API modernes comme `URLSearchParams`, qui est plus lisible et largement supportée dans les navigateurs récents. Voici un exemple équivalent moderne :
+
+```javascript
+function getURLParameter(name) {
+    return new URLSearchParams(window.location.search).get(name);
+}
+```
+L'utilisation de `URLSearchParams` est recommandée pour les projets récents.
  */
 function getURLParameter(name) {
     var paramEncoded = (RegExp('[?|&]' + name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1],
@@ -92,20 +128,25 @@ parseColor = function(color) {
     return cache.slice(0,3 + !!$.support.rgba);
 };
 
-
 function expandDatatableHeight() {
+    // Calculate the available height for the table by subtracting 75 from the container height
     var fill_height = $('#objects-list_wrapper').height() - 75;
+    // Define the height of a single table row
     var row_height = 36;
+    // Calculate the number of rows that can fit in the available space
     var number_of_rows = Math.floor(fill_height / row_height);
+    // Update the number of rows displayed in the table and redraw
     $('#objects-list').DataTable().page.len(parseInt(number_of_rows.toString())).draw();
 }
 
-
+// translation langue
 function tr(s) {
     return MapEntity.i18n[s] || s;
 }
 
-
+//cette fonction personnalise TinyMCE pour gérer les limites de caractères et améliorer
+// l'expérience utilisateur avec des validations visuelles.
+// ceci pourrait être réécrit en js ou gardé tel quel pour garantir la compatibilité
 function tinyMceInit(editor) {
     var context = $('body').data();
     editor.on('WordCountUpdate', function(event) {
