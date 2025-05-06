@@ -1,0 +1,23 @@
+.layer-switcher-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    font-size: 13px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.layer-switcher-menu h4 {
+    margin: 6px 0 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.layer-switcher-btn {
+    background: white;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}

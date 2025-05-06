@@ -17,8 +17,8 @@ class LayerSwitcherControl {
         const img = document.createElement('img');
         img.src = '/static/mapentity/images/layers-2x.png'; // mets le chemin de ton icône ici
         img.alt = 'Couches';
-        img.style.width = '20px';
-        img.style.height = '20px';
+        img.style.width = '25px';
+        img.style.height = '25px';
         button.appendChild(img);
         this._container.appendChild(button);
 
@@ -36,14 +36,12 @@ class LayerSwitcherControl {
         // Toggle affichage menu
         button.addEventListener('click', () => {
             menu.style.display = (menu.style.display === 'none') ? 'block' : 'none';
-            img.style.visibility = (menu.style.display === 'none') ? 'visible' : 'hidden'; // Masquer l'icône lorsque le menu est ouvert
         });
 
         // Fermer le menu si on clique ailleurs
         document.addEventListener('click', (e) => {
             if (!this._container.contains(e.target)) {
                 menu.style.display = 'none';
-                img.style.visibility = 'visible'; // Rendre l'icône visible lorsque le menu est fermé
             }
         });
 

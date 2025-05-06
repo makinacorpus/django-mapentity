@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const layerSwitcher = new LayerSwitcherControl(myMap);
         myMap.getMap().addControl(layerSwitcher, 'top-right');
 
-
         });
 
 });

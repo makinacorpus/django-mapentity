@@ -1,11 +1,11 @@
 class MaplibreMap {
-    constructor(id) {
+       constructor(id, bounds = [[-180, -90], [180, 90]]) { // Bounds par défaut couvrant le monde entier
         this.id = id;
         this.map = null;
-        this.resetViewControl = null;
+        this.bounds = bounds;
         this.layers = {
-            baseLayers : {},
-            overlays : {}
+            baseLayers: {},
+            overlays: {}
         };
 
         this._init();
@@ -18,21 +18,22 @@ class MaplibreMap {
             return;
         }
 
-         // const center = container.dataset.center ? JSON.parse(container.dataset.center) : [0, 0];
-        // const zoom = container.dataset.zoom ? parseFloat(container.dataset.zoom) : 2;
-        // const bounds = container.dataset.mapextent ? JSON.parse(container.dataset.mapextent) : null;
-
+        //  Initialisation de la carte
         this.map = new maplibregl.Map({
             container: this.id,
             style: 'https://demotiles.maplibre.org/style.json',
             center: [0, 0],
             zoom: 2,
-            extent : (-180, -90, 180, 90)
         });
+
 
         // add base control
         this.map.addControl(new maplibregl.NavigationControl(), 'top-left');
         this.map.addControl(new maplibregl.FullscreenControl(), 'top-left');
+
+         // Ajouter le contrôle de réinitialisation de la vue
+        const resetViewControl = new ResetMapLibreViewControl(this.bounds);
+        this.map.addControl(resetViewControl, 'top-left');
 
         // add scale control
         const scale = new maplibregl.ScaleControl({
@@ -40,11 +41,7 @@ class MaplibreMap {
             unit: 'metric'
         });
         this.map.addControl(scale, 'bottom-left');
-
-         // Ajouter le calque contrôle personnalisé
-        // const layerSwitcher = new LayerSwitcherControl(map);
-        // this.map.getMap().addControl(layerSwitcher, 'top-right');
-        // this.map.addControl(new LayerSwitcherControl(), 'top-right');
+        // scale.setUnit('imperial'); // imperial ou metric, imperial -> miles, metric -> km
 
     }
 
@@ -117,5 +114,9 @@ class MaplibreMap {
 
     getLayers() {
         return this.layers;
+    }
+
+        getBounds() {
+        return this.bounds;
     }
 }

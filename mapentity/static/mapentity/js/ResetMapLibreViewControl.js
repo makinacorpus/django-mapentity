@@ -5,37 +5,38 @@ class ResetMapLibreViewControl {
         this._container = null;
     }
 
-     onAdd(map) {
-        this.map = map;
+    onAdd(map) {
+        this._map = map; // Corriger la référence à la carte
 
-        const container = document.createElement('button');
-        container.className = 'maplibregl-ctrl-icon maplibregl-resetview';
-        container.type = 'button';
-        container.title = 'Réinitialiser la vue';
+        // Créer le conteneur principal
+        this._container = document.createElement('div');
+        this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group maplibregl-resetview';
 
-        container.onclick = () => this.reset();
+        // Bouton pour réinitialiser la carte
+        const button = document.createElement('button');
+        button.className = 'maplibregl-ctrl-icon maplibregl-resetview';
+        const img = document.createElement('img');
+        img.src = '/static/mapentity/images/reset-view.png';
+        img.alt = 'Reset View';
+        img.style.width = '25px';
+        img.style.height = '25px';
+        img.style.padding = '2px';
+        button.appendChild(img);
+        this._container.appendChild(button);
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'maplibregl-ctrl-group maplibregl-ctrl';
-        wrapper.appendChild(container);
+        // Ajouter l'événement de clic pour réinitialiser la carte
+        button.onclick = () => this.reset();
 
-        return wrapper;
-    }
-
-    onRemove(){
-        if(this._container && this._container.parentNode){
-            this._container.parentNode.removeChild(this._container);
-        }
-        this._map = null;
+        return this._container;
     }
 
     reset() {
-        if (this.map && this.bounds) {
-            this.map.fitBounds(this.bounds, { padding: 20 });
+        if (this._map && this._bounds) {
+            this._map.fitBounds(this._bounds, { padding: 20 });
         }
     }
 
-    getBounds(){
+    getBounds() {
         return this._bounds;
     }
 }
