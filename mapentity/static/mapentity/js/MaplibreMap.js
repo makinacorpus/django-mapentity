@@ -32,8 +32,16 @@ class MaplibreMap {
         this.map.addControl(new maplibregl.FullscreenControl(), 'top-left');
 
          // Ajouter le contrôle de réinitialisation de la vue
-        const resetViewControl = new ResetMapLibreViewControl(this.bounds);
-        this.map.addControl(resetViewControl, 'top-left');
+        this.map.addControl(new ResetMapLibreViewControl(this.bounds), 'top-left');
+
+
+         // Ajouter le contrôle de mesure
+        // this.map.addControl(new MeasureMaplibreControl(), 'top-left');
+
+        // Création et ajout du contrôleur de mesure
+        const measureControl = new MeasureMaplibreControl();
+        this.map.addControl(measureControl, 'top-left');
+
 
         // add scale control
         const scale = new maplibregl.ScaleControl({

@@ -1,3 +1,4 @@
+/* Layer Switcher Styles */
 .layer-switcher-menu {
     position: absolute;
     top: 100%;
@@ -21,3 +22,18 @@
     cursor: pointer;
     padding: 4px;
 }
+
+/* Mesure controller */
+
+.measure-control-btn {
+    background: white;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.measure-control-btn img {
+    vertical-align: middle;
+}
+
+
