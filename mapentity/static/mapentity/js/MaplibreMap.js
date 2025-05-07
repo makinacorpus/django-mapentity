@@ -1,8 +1,7 @@
 class MaplibreMap {
-       constructor(id, bounds = [[-180, -90], [180, 90]]) { // Bounds par défaut couvrant le monde entier
+       constructor(id) {
         this.id = id;
         this.map = null;
-        this.bounds = bounds;
         this.layers = {
             baseLayers: {},
             overlays: {}
@@ -22,26 +21,17 @@ class MaplibreMap {
         this.map = new maplibregl.Map({
             container: this.id,
             style: 'https://demotiles.maplibre.org/style.json',
-            center: [0, 0],
-            zoom: 2,
+            center: [2.3522, 48.8566],
+            zoom: 8,
         });
-
 
         // add base control
         this.map.addControl(new maplibregl.NavigationControl(), 'top-left');
         this.map.addControl(new maplibregl.FullscreenControl(), 'top-left');
 
-         // Ajouter le contrôle de réinitialisation de la vue
-        this.map.addControl(new ResetMapLibreViewControl(this.bounds), 'top-left');
-
-
-         // Ajouter le contrôle de mesure
-        // this.map.addControl(new MeasureMaplibreControl(), 'top-left');
-
         // Création et ajout du contrôleur de mesure
         const measureControl = new MeasureMaplibreControl();
         this.map.addControl(measureControl, 'top-left');
-
 
         // add scale control
         const scale = new maplibregl.ScaleControl({
@@ -72,11 +62,6 @@ class MaplibreMap {
         });
 
         this.layers.baseLayers[name] = id;
-
-        //  FUTUR appel d’API :
-        // fetch('/api/basemaps').then(res => res.json()).then(basemaps => {
-        //     basemaps.forEach(b => this.addBaseLayer(b.name, b.config));
-        // });
     }
 
     //  Ajoute un calque GeoJSON (overlay), avec catégorie
@@ -105,10 +90,6 @@ class MaplibreMap {
         }
         this.layers.overlays[category][name] = layerId;
 
-        // FUTUR appel d’API pour les overlays :
-        // fetch('/api/geojson/overlay1').then(res => res.json()).then(data => {
-        //     map.addOverlay("Batiments", data, "Structures");
-        // });
     }
 
     // Méthode utilitaire pour changer la visibilité
@@ -124,7 +105,4 @@ class MaplibreMap {
         return this.layers;
     }
 
-        getBounds() {
-        return this.bounds;
-    }
 }
