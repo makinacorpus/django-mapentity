@@ -288,7 +288,7 @@ $(window).on('entity:map:list', function (e, data) {
 
     // Ajoute le calque des objets à la carte
     map.addLayer(objectsLayer);
-    objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname));
+    objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname)); // chargement des données via url
 
     // Ajoute une légende pour le calque des objets
     var nameHTML = '<span style="color: '+ style['color'] + ';">&#x25A3;</span>&nbsp;' + data.objectsname;
@@ -357,6 +357,9 @@ $(window).on('entity:map:list', function (e, data) {
                 layer.bindLabel(feature.properties.name);
             }
         },
+
+        // filecontrol est un contrôle de chargement de fichiers,
+        // elle est pour le moins qu'un calque posé au dessus de la carte
         filecontrol = L.Control.fileLayerLoad({
             fitBounds: true,
             layerOptions: {style: window.SETTINGS.map.styles.filelayer,
