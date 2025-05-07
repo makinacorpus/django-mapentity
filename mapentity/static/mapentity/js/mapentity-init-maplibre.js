@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-   // Instancier la carte
+        // Instancier la carte
         const myMap = new MaplibreMap('map');
-
         // Attendre que la carte soit chargée avant d'ajouter les couches
         myMap.getMap().on('load', () => {
             // Test base layer (à activer dans addBaseLayer manuellement avec "visibility": "visible" si besoin)
@@ -11,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
                 attribution: '&copy; OpenStreetMap contributors'
             });
-
             // Test overlay
             const sampleGeoJson = {
                 "type": "FeatureCollection",
@@ -37,10 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             myMap.addOverlay("Zone A", sampleGeoJson, "Zones Test");
 
-                   // Ajouter le contrôle personnalisé
+            // Ajouter le contrôle personnalisé
         const layerSwitcher = new LayerSwitcherControl(myMap);
         myMap.getMap().addControl(layerSwitcher, 'top-right');
 
-        });
+        // Bounds pour le contrôle de réinitialisation
+        bounds = [[-180, -90], [180, 90]];
+        // Ajouter le contrôle de réinitialisation de la vue
+        myMap.getMap().addControl(new ResetMapLibreViewControl(bounds), 'top-left');
 
+        });
 });
