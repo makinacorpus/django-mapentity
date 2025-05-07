@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-07 13:03+0000\n"
+"POT-Creation-Date: 2025-05-07 15:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -153,15 +153,6 @@ msgstr "Fichiers liés"
 msgid "History"
 msgstr "Historique"
 
-msgid "Actions"
-msgstr "Actions"
-
-msgid "Edit"
-msgstr "Modifier"
-
-msgid "Duplicate"
-msgstr "Dupliquer"
-
 msgid "PDF"
 msgstr "PDF"
 
@@ -170,6 +161,21 @@ msgstr "ODT"
 
 msgid "DOC"
 msgstr "DOC"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "You have not permission to edit this object."
+msgstr "Vous n'avez pas la permission de modifier cet objet."
+
+msgid "Duplicate"
+msgstr "Dupliquer"
+
+msgid "You have not permission to duplicate this object."
+msgstr "Vous n'avez pas la permission de dupliquer cet objet."
 
 msgid "Date"
 msgstr "Date"
@@ -261,6 +267,7 @@ msgstr "Une erreur s'est produite lors de la duplication"
 msgid "No map available for this object."
 msgstr "Pas de carte disponible pour cet objet."
 
+#, python-format
 msgid "Edit %(object)s"
 msgstr "Modifier %(object)s"
 
