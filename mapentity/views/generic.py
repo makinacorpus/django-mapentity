@@ -508,7 +508,7 @@ class MapEntityUpdate(ModelViewMixin, FormViewMixin, UpdateView):
         return super().get_template_names() + ['mapentity/mapentity_form.html']
 
     def get_title(self):
-        return _("Edit %s") % self.get_object()
+        return _("Edit %(object)s") % {"object": self.get_object()}
 
     @view_permission_required(login_url=mapentity_models.ENTITY_DETAIL)
     def dispatch(self, *args, **kwargs):

@@ -24,7 +24,7 @@
             <link rel="stylesheet" type="text/css"
                   href="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.css' %}"/>
             <link rel="stylesheet" type="text/css"
-                  href="{% static 'mapentity/vendor/bootstrap-icons-1.2.2/font/bootstrap-icons.css' %}">
+                  href="{% static 'mapentity/vendor/bootstrap-icons-1.12.1/bootstrap-icons.min.css' %}">
             <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/chosen-1.8.7/chosen.css' %}">
             {% leaflet_css plugins="ALL" %}
 
@@ -84,7 +84,7 @@
 
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                         {{ message }}
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
