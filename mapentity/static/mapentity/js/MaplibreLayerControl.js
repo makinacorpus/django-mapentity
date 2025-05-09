@@ -1,4 +1,4 @@
-class LayerSwitcherControl {
+class MaplibreLayerSwitcherControl {
     constructor(mapInstance) {
         this.mapInstance = mapInstance;
         this._container = null;
