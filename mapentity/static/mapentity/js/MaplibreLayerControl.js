@@ -1,4 +1,4 @@
-class MaplibreLayerSwitcherControl {
+class MaplibreLayerControl {
     constructor(mapInstance) {
         this.mapInstance = mapInstance;
         this._container = null;
@@ -54,7 +54,9 @@ class MaplibreLayerSwitcherControl {
     }
 
     _populateMenu(container) {
-        const layers = this.mapInstance.getLayers();
+        const objectsLayer = this.mapInstance.getObjectsLayer();
+        const layers = objectsLayer.getLayers();
+        console.log('Layers:', layers); // Log pour vérifier la structure des layers
 
         const createSection = (title) => {
             const section = document.createElement('div');
@@ -68,16 +70,19 @@ class MaplibreLayerSwitcherControl {
 
         // Base Layers
         const baseSection = createSection('Base Layers');
-        for (const [name, id] of Object.entries(layers.baseLayers)) {
-            const label = document.createElement('label');
-            const input = document.createElement('input');
-            input.type = 'checkbox';
-            input.checked = false;
-            input.dataset.layerId = id;
-            label.appendChild(input);
-            label.append(` ${name}`);
-            baseSection.appendChild(label);
-            baseSection.appendChild(document.createElement('br'));
+        for (const name in layers.baseLayers) {
+            if (layers.baseLayers.hasOwnProperty(name)) {
+                const id = layers.baseLayers[name];
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.checked = false;
+                input.dataset.layerId = id;
+                label.appendChild(input);
+                label.append(` ${name}`);
+                baseSection.appendChild(label);
+                baseSection.appendChild(document.createElement('br'));
+            }
         }
         container.appendChild(baseSection);
 
@@ -87,22 +92,31 @@ class MaplibreLayerSwitcherControl {
 
         // Overlays
         const overlaySection = createSection('Overlays');
-        for (const [category, group] of Object.entries(layers.overlays)) {
-            const catTitle = document.createElement('strong');
-            catTitle.textContent = category;
-            overlaySection.appendChild(catTitle);
-            overlaySection.appendChild(document.createElement('br'));
+        for (const category in layers.overlays) {
+            if (layers.overlays.hasOwnProperty(category)) {
+                console.log('Category:', category); // Log pour vérifier la catégorie
+                const group = layers.overlays[category];
 
-            for (const [name, id] of Object.entries(group)) {
-                const label = document.createElement('label');
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.checked = true;
-                input.dataset.layerId = id;
-                label.appendChild(input);
-                label.append(` ${name}`);
-                overlaySection.appendChild(label);
+                const catTitle = document.createElement('strong');
+                catTitle.textContent = category;
+                overlaySection.appendChild(catTitle);
                 overlaySection.appendChild(document.createElement('br'));
+
+                for (const name in group) {
+                    if (group.hasOwnProperty(name)) {
+                        const id = group[name];
+                        console.log('Overlay:', name, id); // Log pour vérifier chaque overlay
+                        const label = document.createElement('label');
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.checked = true;
+                        input.dataset.layerId = id;
+                        label.appendChild(input);
+                        label.append(` ${name}`);
+                        overlaySection.appendChild(label);
+                        overlaySection.appendChild(document.createElement('br'));
+                    }
+                }
             }
         }
         container.appendChild(overlaySection);
@@ -111,7 +125,7 @@ class MaplibreLayerSwitcherControl {
         container.addEventListener('change', (e) => {
             if (e.target.matches('input[type="checkbox"]')) {
                 const layerId = e.target.dataset.layerId;
-                this.mapInstance.toggleLayer(layerId, e.target.checked);
+                objectsLayer.toggleLayer(layerId, e.target.checked);
             }
         });
     }
