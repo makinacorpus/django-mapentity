@@ -1,8 +1,8 @@
-class MeasureMaplibreControl {
+class MaplibreMeasureControl {
     constructor() {
         this._map = null;
         this._container = null;
-        this._distanceDisplay = new DistanceDisplay();
+        this._distanceDisplay = new MaplibreMeasureDistanceDisplay();
         this._drawing = false;
         this._geojson = {
             'type': 'FeatureCollection',
