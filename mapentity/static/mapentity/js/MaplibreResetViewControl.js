@@ -1,4 +1,4 @@
-class ResetMapLibreViewControl {
+class MaplibreResetViewControl {
     constructor(bounds) {
         this._bounds = bounds;
         this._map = null;
