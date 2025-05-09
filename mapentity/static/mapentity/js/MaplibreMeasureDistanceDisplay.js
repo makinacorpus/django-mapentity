@@ -1,4 +1,4 @@
-class DistanceDisplay {
+class MaplibreMeasureDistanceDisplay {
     constructor() {
         this._container = null;
     }
