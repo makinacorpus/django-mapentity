@@ -4,21 +4,16 @@ class MaplibreObjectsLayer {
         this._objects = {};
         this._current_objects = {};
         this.loading = false;
-        this.options = {
-            indexing: true,
-            highlight: true,
-            objectUrl: null,
-            style: options.style || {}, // Utiliser le style fourni
-            modelname: options.modelname || 'Autres',
-            ...options
-        };
+        this.options = {...options }; // Utiliser l'opérateur de décomposition pour créer une copie de l'objet options
 
         this._onEachFeature = this.options.onEachFeature;
         this._pointToLayer = this.options.pointToLayer;
+
         this.layers = {
             baseLayers: {},
             overlays: {}
         };
+
         this._originalStyles = {}; // Stocker les styles originaux
 
         if (typeof geojson === 'string') {
@@ -62,22 +57,6 @@ class MaplibreObjectsLayer {
         }
     }
 
-    addData(geojson) {
-        geojson.features.forEach(feature => {
-            this._mapObjects(feature);
-            if (this._onEachFeature) {
-                this._onEachFeature(feature);
-            }
-            this.addLayer(feature);
-        });
-    }
-
-    _mapObjects(feature) {
-        const pk = this.getPk(feature);
-        this._objects[pk] = feature;
-        this._current_objects[pk] = feature;
-        feature.properties = feature.properties || {};
-    }
 
     load(url) {
         console.log("Loading data from URL: " + url);
@@ -92,17 +71,23 @@ class MaplibreObjectsLayer {
             });
     }
 
-    getLayer(pk) {
-        return this._objects[pk];
+    addData(geojson) {
+        geojson.features.forEach(feature => {
+            // this._mapObjects(feature);
+            // if (this._onEachFeature) {
+            //     this._onEachFeature(feature);
+            // }
+            this.addLayer(feature);
+        });
     }
 
-    getPk(feature) {
-        return feature.properties.id || feature.id || this._generateUniqueId(feature);
-    }
+    // _mapObjects(feature) {
+    //     const pk = this.getPk(feature);
+    //     this._objects[pk] = feature;
+    //     this._current_objects[pk] = feature;
+    //     feature.properties = feature.properties || {};
+    // }
 
-    _generateUniqueId(feature) {
-        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    }
 
     updateFromPks(pks) {
         const new_objects = {};
@@ -123,16 +108,6 @@ class MaplibreObjectsLayer {
         this._current_objects = new_objects;
     }
 
-    getCurrentLayers() {
-        return this._current_objects;
-    }
-
-    jumpTo(pk) {
-        const layer = this.getLayer(pk);
-        if (layer) {
-            this._map.fitBounds(layer.getBounds());
-        }
-    }
 
     highlight(pk, on = true) {
         const layerId = this._current_objects[pk];
@@ -179,50 +154,50 @@ class MaplibreObjectsLayer {
         }
     }
 
-    select(pk, on = true) {
-        const layerId = this._current_objects[pk];
-        if (layerId) {
-            const layer = this._map.getLayer(layerId);
-            if (layer) {
-                const type = layer.type;
-
-                if (on) {
-                    // Appliquer le style de sélection
-                    const selectStyle = {
-                        'fill-color': 'red',
-                        'fill-opacity': 1,
-                        'line-color': 'red',
-                        'line-width': 7,
-                        'circle-color': 'red',
-                        'circle-radius': 9
-                    };
-
-                    if (type === 'fill') {
-                        this._map.setPaintProperty(layerId, 'fill-color', selectStyle['fill-color']);
-                        this._map.setPaintProperty(layerId, 'fill-opacity', selectStyle['fill-opacity']);
-                    } else if (type === 'line') {
-                        this._map.setPaintProperty(layerId, 'line-color', selectStyle['line-color']);
-                        this._map.setPaintProperty(layerId, 'line-width', selectStyle['line-width']);
-                    } else if (type === 'circle') {
-                        this._map.setPaintProperty(layerId, 'circle-color', selectStyle['circle-color']);
-                        this._map.setPaintProperty(layerId, 'circle-radius', selectStyle['circle-radius']);
-                    }
-                } else {
-                    // Restaurer le style par défaut
-                    if (type === 'fill') {
-                        this._map.setPaintProperty(layerId, 'fill-color', this._originalStyles[pk]['fill-color']);
-                        this._map.setPaintProperty(layerId, 'fill-opacity', this._originalStyles[pk]['fill-opacity']);
-                    } else if (type === 'line') {
-                        this._map.setPaintProperty(layerId, 'line-color', this._originalStyles[pk]['line-color']);
-                        this._map.setPaintProperty(layerId, 'line-width', this._originalStyles[pk]['line-width']);
-                    } else if (type === 'circle') {
-                        this._map.setPaintProperty(layerId, 'circle-color', this._originalStyles[pk]['circle-color']);
-                        this._map.setPaintProperty(layerId, 'circle-radius', this._originalStyles[pk]['circle-radius']);
-                    }
-                }
-            }
-        }
-    }
+    // select(pk, on = true) {
+    //     const layerId = this._current_objects[pk];
+    //     if (layerId) {
+    //         const layer = this._map.getLayer(layerId);
+    //         if (layer) {
+    //             const type = layer.type;
+    //
+    //             if (on) {
+    //                 // Appliquer le style de sélection
+    //                 const selectStyle = {
+    //                     'fill-color': 'red',
+    //                     'fill-opacity': 1,
+    //                     'line-color': 'red',
+    //                     'line-width': 7,
+    //                     'circle-color': 'red',
+    //                     'circle-radius': 9
+    //                 };
+    //
+    //                 if (type === 'fill') {
+    //                     this._map.setPaintProperty(layerId, 'fill-color', selectStyle['fill-color']);
+    //                     this._map.setPaintProperty(layerId, 'fill-opacity', selectStyle['fill-opacity']);
+    //                 } else if (type === 'line') {
+    //                     this._map.setPaintProperty(layerId, 'line-color', selectStyle['line-color']);
+    //                     this._map.setPaintProperty(layerId, 'line-width', selectStyle['line-width']);
+    //                 } else if (type === 'circle') {
+    //                     this._map.setPaintProperty(layerId, 'circle-color', selectStyle['circle-color']);
+    //                     this._map.setPaintProperty(layerId, 'circle-radius', selectStyle['circle-radius']);
+    //                 }
+    //             } else {
+    //                 // Restaurer le style par défaut
+    //                 if (type === 'fill') {
+    //                     this._map.setPaintProperty(layerId, 'fill-color', this._originalStyles[pk]['fill-color']);
+    //                     this._map.setPaintProperty(layerId, 'fill-opacity', this._originalStyles[pk]['fill-opacity']);
+    //                 } else if (type === 'line') {
+    //                     this._map.setPaintProperty(layerId, 'line-color', this._originalStyles[pk]['line-color']);
+    //                     this._map.setPaintProperty(layerId, 'line-width', this._originalStyles[pk]['line-width']);
+    //                 } else if (type === 'circle') {
+    //                     this._map.setPaintProperty(layerId, 'circle-color', this._originalStyles[pk]['circle-color']);
+    //                     this._map.setPaintProperty(layerId, 'circle-radius', this._originalStyles[pk]['circle-radius']);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     addLayer(feature, category = null) {
         const pk = this.getPk(feature);
@@ -271,8 +246,11 @@ class MaplibreObjectsLayer {
 
         this._map.addLayer(layerConfig);
         this._current_objects[pk] = layerId;
+        console.log(this._current_objects[pk]);
 
+        // Le problème vient certainement de la
         const categoryName = category || this.options.modelname;
+        console.log(categoryName);
         if (!this.layers.overlays[categoryName]) {
             this.layers.overlays[categoryName] = {};
         }
@@ -316,8 +294,30 @@ class MaplibreObjectsLayer {
         this._map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
     }
 
-
     getLayers() {
         return this.layers;
     }
+
+    getLayer(pk) {
+        return this._objects[pk];
+    }
+
+    getPk(feature) {
+        return feature.properties.id || feature.id || this._generateUniqueId(feature);
+    }
+
+    _generateUniqueId(feature) {
+        return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    }
+
+    getCurrentLayers() {
+        return this._current_objects;
+    }
+
+    // jumpTo(pk) {
+    //     const layer = this.getLayer(pk);
+    //     if (layer) {
+    //         this._map.fitBounds(layer.getBounds());
+    //     }
+    // }
 }
