@@ -314,10 +314,10 @@ class MaplibreObjectsLayer {
         return this._current_objects;
     }
 
-    // jumpTo(pk) {
-    //     const layer = this.getLayer(pk);
-    //     if (layer) {
-    //         this._map.fitBounds(layer.getBounds());
-    //     }
-    // }
+    jumpTo(pk) {
+        const layer = this.getLayer(pk);
+        if (layer) {
+            this._map.fitBounds(layer.getBounds());
+        }
+    }
 }
