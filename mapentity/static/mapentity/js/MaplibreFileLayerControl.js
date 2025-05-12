@@ -1,4 +1,4 @@
-class MaplibreFileLayerLoadControl {
+class MaplibreFileLayerControl {
     static TITLE = 'Load local file (GPX, KML, GeoJSON)';
     static LABEL = '&#8965;';
 
@@ -12,7 +12,7 @@ class MaplibreFileLayerLoadControl {
     }
 
     onAdd(map) {
-        console.log('Adding MaplibreFileLayerLoadControl to map:', map); // Log the map instance
+        console.log('Adding MaplibreFileLayerControl to map:', map); // Log the map instance
         this.loader = new MaplibreFileLoader(map, { layerOptions: this.options.layerOptions });
 
         // Initialize Drag-and-drop
