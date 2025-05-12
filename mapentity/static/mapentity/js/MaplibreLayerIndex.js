@@ -1,5 +1,3 @@
-// import RTree from '/static/mapentity/js/rtree.js';
-
 class MaplibreLayerIndex {
     constructor(options = {}) {
         this.options = options;
@@ -46,6 +44,7 @@ class MaplibreLayerIndex {
         }, (a, b) => a.layer === b.layer);
     }
 
+    // c'est à peu près la fonction calculeBounds qui vient d'être effectué dans MaplibreFileLoader
     _layerBounds(layer) {
         // Introspects layer and returns its bounds.
         let bounds = null;
