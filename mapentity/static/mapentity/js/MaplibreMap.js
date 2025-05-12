@@ -3,12 +3,13 @@ class MaplibreMap {
         this.id = id;
         this.map = null;
         this.objectsLayer = null;
-
+        this.container = null;
         this._init();
     }
 
     _init() {
         const mapContainer = document.getElementById(this.id);
+        this.container = mapContainer; // Store the container reference
         if(!mapContainer) {
             console.error(`Map container with id ${this.id} not found.`);
             return;
@@ -49,5 +50,8 @@ class MaplibreMap {
 
     getObjectsLayer() {
         return this.objectsLayer;
+    }
+    getContainer() {
+        return this.container;
     }
 }
