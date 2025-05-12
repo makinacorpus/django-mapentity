@@ -53,5 +53,27 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ajouter un contrôle pour réinitialiser la vue
         const bounds = [[-180, -90], [180, 90]];
         myMap.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
+
+
+        // MaplibreFileLayerControl
+        var pointToLayer = function (feature, latlng) {
+            return L.circleMarker(latlng, {style: window.SETTINGS.map.styles.filelayer})
+                    .setRadius(window.SETTINGS.map.styles.filelayer.radius);
+        },
+        onEachFeature = function (feature, layer) {
+            // Ajoute une étiquette si l'objet a un nom
+            // if (feature.properties.name) {
+            //     layer.bindLabel(feature.properties.name);
+            // }
+        };
+
+        const fileLayerLoadControl = new MaplibreFileLayerControl({
+            layerOptions: {
+                style: window.SETTINGS.map.styles.filelayer,
+                pointToLayer: pointToLayer,
+                onEachFeature: onEachFeature
+            }
+        });
+        myMap.getMap().addControl(fileLayerLoadControl, 'top-left');
     });
 });
