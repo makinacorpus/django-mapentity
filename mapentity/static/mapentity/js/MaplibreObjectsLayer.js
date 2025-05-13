@@ -4,17 +4,17 @@ class MaplibreObjectsLayer {
         this._objects = {};
         this._current_objects = {};
         this.loading = false;
-        this.options = {...options }; // Utiliser l'opérateur de décomposition pour créer une copie de l'objet options
+        this.options = { ...options }; // Use the spread operator to create a copy of the options object
 
+        // gère le bind des les labels sur les couches
         this._onEachFeature = this.options.onEachFeature;
+        // pointToLayer est simplement une fonction qui change le style du curseur une fois sur le layer
         this._pointToLayer = this.options.pointToLayer;
 
         this.layers = {
             baseLayers: {},
             overlays: {}
         };
-
-        this._originalStyles = {}; // Stocker les styles originaux
 
         if (typeof geojson === 'string') {
             this.load(geojson);
@@ -37,7 +37,8 @@ class MaplibreObjectsLayer {
         });
         if (features.length > 0) {
             const feature = features[0];
-            const pk = this.getPk(feature);
+            const primaryKey = this.getPrimaryKey(feature);
+            console.log('Clicked feature:', primaryKey);
             if (this.options.objectUrl) {
                 window.location = this.options.objectUrl(feature.properties, feature);
             }
@@ -45,18 +46,27 @@ class MaplibreObjectsLayer {
     }
 
     _onMouseMove(e) {
+        console.log('Mouse move event:', e);
         const features = this._map.queryRenderedFeatures(e.point, {
             layers: Object.values(this._current_objects)
         });
+
+        // Reset hover state for all features
+        Object.keys(this._current_objects).forEach(primaryKey => {
+            this.highlight(primaryKey, false);
+        });
+
+        // Set hover state for the hovered feature
         if (features.length > 0) {
+             this._map.getCanvas().style.cursor = 'pointer'; // Change cursor to pointer
             const feature = features[0];
-            const pk = this.getPk(feature);
-            this.highlight(pk, true);
+            const primaryKey = this.getPrimaryKey(feature);
+            console.log('Hovered feature:', primaryKey);
+            this.highlight(primaryKey, true);
         } else {
-            this.highlight(null, false);
+            this._map.getCanvas().style.cursor = ''; // Reset cursor
         }
     }
-
 
     load(url) {
         console.log("Loading data from URL: " + url);
@@ -73,137 +83,57 @@ class MaplibreObjectsLayer {
 
     addData(geojson) {
         geojson.features.forEach(feature => {
-            // this._mapObjects(feature);
-            // if (this._onEachFeature) {
-            //     this._onEachFeature(feature);
-            // }
             this.addLayer(feature);
         });
     }
 
-    // _mapObjects(feature) {
-    //     const pk = this.getPk(feature);
-    //     this._objects[pk] = feature;
-    //     this._current_objects[pk] = feature;
-    //     feature.properties = feature.properties || {};
-    // }
+    // ça marche
+    highlight(primaryKey, on = true) {
+        if (primaryKey && this._current_objects[primaryKey]) {
+            const layerId = this._current_objects[primaryKey];
+            const sourceId = layerId.replace(/^layer-/, 'source-');
+            const source = this._map.getSource(sourceId);
+            if (source && source._data) {
+                const featureId = this.getPrimaryKey(source._data);
+                console.log(`Setting hover state for ${primaryKey}: ${on}`);
 
+                // Set the hover state for the feature
+                console.log('sourceId:', sourceId);
+                console.log('featureId:', featureId);
+                this._map.setFeatureState(
+                    { source: sourceId, id: featureId },
+                    { hover: on }
+                );
+            }
+        }
 
-    updateFromPks(pks) {
-        const new_objects = {};
-        pks.forEach(pk => {
-            const layer = this._objects[pk];
-            if (layer) {
-                new_objects[pk] = layer;
-                if (!this._current_objects[pk]) {
-                    this.addLayer(layer);
-                }
-            }
-        });
-        Object.keys(this._current_objects).forEach(pk => {
-            if (!new_objects[pk]) {
-                this.removeLayer(this._current_objects[pk]);
-            }
-        });
-        this._current_objects = new_objects;
     }
+    // ça devrait marcher reste à d'abord faire la synchronisation pour que ça le fasse
+    select(primaryKey, on = true) {
+        if (primaryKey && this._current_objects[primaryKey]) {
+            const layerId = this._current_objects[primaryKey];
+            const sourceId = layerId.replace(/^layer-/, 'source-');
+            const source = this._map.getSource(sourceId);
+            if (source && source._data) {
+                const featureId = this.getPrimaryKey(source._data);
+                console.log(`Setting select state for ${primaryKey}: ${on}`);
 
-
-    highlight(pk, on = true) {
-        const layerId = this._current_objects[pk];
-        if (layerId) {
-            const layer = this._map.getLayer(layerId);
-            if (layer) {
-                const type = layer.type;
-
-                if (on) {
-                    // Appliquer le style de surbrillance
-                    const highlightStyle = {
-                        'fill-color': 'red',
-                        'fill-opacity': 1,
-                        'line-color': 'red',
-                        'line-width': 5,
-                        'circle-color': 'red',
-                        'circle-radius': 7
-                    };
-
-                    if (type === 'fill') {
-                        this._map.setPaintProperty(layerId, 'fill-color', highlightStyle['fill-color']);
-                        this._map.setPaintProperty(layerId, 'fill-opacity', highlightStyle['fill-opacity']);
-                    } else if (type === 'line') {
-                        this._map.setPaintProperty(layerId, 'line-color', highlightStyle['line-color']);
-                        this._map.setPaintProperty(layerId, 'line-width', highlightStyle['line-width']);
-                    } else if (type === 'circle') {
-                        this._map.setPaintProperty(layerId, 'circle-color', highlightStyle['circle-color']);
-                        this._map.setPaintProperty(layerId, 'circle-radius', highlightStyle['circle-radius']);
-                    }
-                } else {
-                    // Restaurer le style par défaut
-                    if (type === 'fill') {
-                        this._map.setPaintProperty(layerId, 'fill-color', this._originalStyles[pk]['fill-color']);
-                        this._map.setPaintProperty(layerId, 'fill-opacity', this._originalStyles[pk]['fill-opacity']);
-                    } else if (type === 'line') {
-                        this._map.setPaintProperty(layerId, 'line-color', this._originalStyles[pk]['line-color']);
-                        this._map.setPaintProperty(layerId, 'line-width', this._originalStyles[pk]['line-width']);
-                    } else if (type === 'circle') {
-                        this._map.setPaintProperty(layerId, 'circle-color', this._originalStyles[pk]['circle-color']);
-                        this._map.setPaintProperty(layerId, 'circle-radius', this._originalStyles[pk]['circle-radius']);
-                    }
-                }
+                // Set the select state for the feature
+                this._map.setFeatureState(
+                    { source: sourceId, id: featureId },
+                    { select: on }
+                );
             }
         }
     }
 
-    // select(pk, on = true) {
-    //     const layerId = this._current_objects[pk];
-    //     if (layerId) {
-    //         const layer = this._map.getLayer(layerId);
-    //         if (layer) {
-    //             const type = layer.type;
-    //
-    //             if (on) {
-    //                 // Appliquer le style de sélection
-    //                 const selectStyle = {
-    //                     'fill-color': 'red',
-    //                     'fill-opacity': 1,
-    //                     'line-color': 'red',
-    //                     'line-width': 7,
-    //                     'circle-color': 'red',
-    //                     'circle-radius': 9
-    //                 };
-    //
-    //                 if (type === 'fill') {
-    //                     this._map.setPaintProperty(layerId, 'fill-color', selectStyle['fill-color']);
-    //                     this._map.setPaintProperty(layerId, 'fill-opacity', selectStyle['fill-opacity']);
-    //                 } else if (type === 'line') {
-    //                     this._map.setPaintProperty(layerId, 'line-color', selectStyle['line-color']);
-    //                     this._map.setPaintProperty(layerId, 'line-width', selectStyle['line-width']);
-    //                 } else if (type === 'circle') {
-    //                     this._map.setPaintProperty(layerId, 'circle-color', selectStyle['circle-color']);
-    //                     this._map.setPaintProperty(layerId, 'circle-radius', selectStyle['circle-radius']);
-    //                 }
-    //             } else {
-    //                 // Restaurer le style par défaut
-    //                 if (type === 'fill') {
-    //                     this._map.setPaintProperty(layerId, 'fill-color', this._originalStyles[pk]['fill-color']);
-    //                     this._map.setPaintProperty(layerId, 'fill-opacity', this._originalStyles[pk]['fill-opacity']);
-    //                 } else if (type === 'line') {
-    //                     this._map.setPaintProperty(layerId, 'line-color', this._originalStyles[pk]['line-color']);
-    //                     this._map.setPaintProperty(layerId, 'line-width', this._originalStyles[pk]['line-width']);
-    //                 } else if (type === 'circle') {
-    //                     this._map.setPaintProperty(layerId, 'circle-color', this._originalStyles[pk]['circle-color']);
-    //                     this._map.setPaintProperty(layerId, 'circle-radius', this._originalStyles[pk]['circle-radius']);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 
     addLayer(feature, category = null) {
-        const pk = this.getPk(feature);
-        const layerId = `layer-${pk}`;
-        const sourceId = `source-${pk}`;
+        const primaryKey = this.getPrimaryKey(feature);
+        const layerId = `layer-${primaryKey}`;
+        const sourceId = `source-${primaryKey}`;
 
+        feature.id = primaryKey;
         this._map.addSource(sourceId, {
             type: 'geojson',
             data: feature
@@ -219,7 +149,12 @@ class MaplibreObjectsLayer {
                 source: sourceId,
                 paint: {
                     'fill-color': this.options.style.color || '#888888',
-                    'fill-opacity': 0.4
+                    'fill-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        1,
+                        0.4
+                    ]
                 }
             };
         } else if (geometryType === 'LineString') {
@@ -229,7 +164,12 @@ class MaplibreObjectsLayer {
                 source: sourceId,
                 paint: {
                     'line-color': this.options.style.color || '#B42222',
-                    'line-width': 2
+                    'line-width': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        5,
+                        2
+                    ]
                 }
             };
         } else if (geometryType === 'Point') {
@@ -238,27 +178,37 @@ class MaplibreObjectsLayer {
                 type: 'circle',
                 source: sourceId,
                 paint: {
-                    'circle-radius': 6,
-                    'circle-color': this.options.style.color || '#B42222'
+                    'circle-radius': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        9,
+                        6
+                    ],
+                    'circle-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        '#FF0000', // Red color for hover
+                        this.options.style.color || '#B42222'
+                    ]
                 }
             };
         }
 
         this._map.addLayer(layerConfig);
-        this._current_objects[pk] = layerId;
-        console.log(this._current_objects[pk]);
+        this._current_objects[primaryKey] = layerId;
 
-        // Le problème vient certainement de la
-        const categoryName = category || this.options.modelname;
-        console.log(categoryName);
-        if (!this.layers.overlays[categoryName]) {
-            this.layers.overlays[categoryName] = {};
-        }
-        this.layers.overlays[categoryName][pk] = layerId;
+        // reste à gérer ceci
 
-        // Stocker le style par défaut
-        this._originalStyles[pk] = layerConfig.paint;
+        // const categoryName = category || this.options.modelname;
+        // console.log('categoryName:', categoryName);
+        // if (!this.layers.overlays[categoryName]) {
+        //     this.layers.overlays[categoryName] = {};
+        // }
+        // this.layers.overlays[categoryName][primaryKey] = layerId;
+        // console.log('Layers id:', this.layers.overlays[categoryName]);
+        // console.log('Layers Overlays:', this.layers.overlays);
     }
+
 
     addBaseLayer(name, layerConfig) {
         const { id, tiles, tileSize = 256, attribution = '' } = layerConfig;
@@ -298,11 +248,11 @@ class MaplibreObjectsLayer {
         return this.layers;
     }
 
-    getLayer(pk) {
-        return this._objects[pk];
+    getLayer(primaryKey) {
+        return this._objects[primaryKey];
     }
 
-    getPk(feature) {
+    getPrimaryKey(feature) {
         return feature.properties.id || feature.id || this._generateUniqueId(feature);
     }
 
@@ -314,10 +264,32 @@ class MaplibreObjectsLayer {
         return this._current_objects;
     }
 
-    jumpTo(pk) {
-        const layer = this.getLayer(pk);
-        if (layer) {
-            this._map.fitBounds(layer.getBounds());
-        }
+    // pas encore utilisée pour le moment
+
+    // cela ne marchera pas car je ne peux pas calculer le bounds du layer et que fitbounds n'est pas dans _map
+    // jumpTo(primaryKey) {
+    //     const layer = this.getLayer(primaryKey);
+    //     if (layer) {
+    //         this._map.fitBounds(layer.getBounds());
+    //     }
+    // }
+
+    updateFromPks(primaryKeys) {
+        const new_objects = {};
+        primaryKeys.forEach(primaryKey => {
+            const layer = this._objects[primaryKey];
+            if (layer) {
+                new_objects[primaryKey] = layer;
+                if (!this._current_objects[primaryKey]) {
+                    this.addLayer(layer);
+                }
+            }
+        });
+        Object.keys(this._current_objects).forEach(primaryKey => {
+            if (!new_objects[primaryKey]) {
+                this.removeLayer(this._current_objects[primaryKey]);
+            }
+        });
+        this._current_objects = new_objects;
     }
 }
