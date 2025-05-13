@@ -98,6 +98,7 @@ class MaplibreMeasureControl {
                 },
                 filter: ['in', '$type', 'LineString']
             });
+
         });
 
         return this._container;
@@ -159,8 +160,7 @@ class MaplibreMeasureControl {
         const features = this._map.queryRenderedFeatures(e.point, {
             layers: ['measure-points']
         });
-        // UI indicator for clicking/hovering a point on the map
-        // this._map.getCanvas().style.cursor = features.length ? 'pointer' : 'crosshair';
+
     }
 
     _finishMeasure() {

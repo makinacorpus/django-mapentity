@@ -126,6 +126,8 @@ class MaplibreLayerControl {
             if (e.target.matches('input[type="checkbox"]')) {
                 const layerId = e.target.dataset.layerId;
                 objectsLayer.toggleLayer(layerId, e.target.checked);
+                console.log(`Layer ${layerId} toggled: ${e.target.checked}`); // Log pour vérifier le toggle
+                this.mapInstance.getMap().moveLayer(layerId, 'measure-points');
             }
         });
     }
