@@ -38,7 +38,7 @@ class MaplibreObjectsLayer {
         if (features.length > 0) {
             const feature = features[0];
             const primaryKey = this.getPrimaryKey(feature);
-            console.log('Clicked feature:', primaryKey);
+            // console.log('Clicked feature:', primaryKey);
             if (this.options.objectUrl) {
                 window.location = this.options.objectUrl(feature.properties, feature);
             }
@@ -46,7 +46,7 @@ class MaplibreObjectsLayer {
     }
 
     _onMouseMove(e) {
-        console.log('Mouse move event:', e);
+        // console.log('Mouse move event:', e);
         const features = this._map.queryRenderedFeatures(e.point, {
             layers: Object.values(this._current_objects)
         });
@@ -61,11 +61,12 @@ class MaplibreObjectsLayer {
              this._map.getCanvas().style.cursor = 'pointer'; // Change cursor to pointer
             const feature = features[0];
             const primaryKey = this.getPrimaryKey(feature);
-            console.log('Hovered feature:', primaryKey);
+            // console.log('Hovered feature:', primaryKey);
             this.highlight(primaryKey, true);
-        } else {
-            this._map.getCanvas().style.cursor = ''; // Reset cursor
         }
+        // else {
+        //     this._map.getCanvas().style.cursor = ''; // Reset cursor
+        // }
     }
 
     load(url) {
@@ -75,6 +76,7 @@ class MaplibreObjectsLayer {
             .then(response => response.json())
             .then(data => {
                 this.addData(data);
+                this._map.fire('layers:added', { layers: this.getLayers() }); // Émettre un événement lorsque de nouvelles couches sont ajoutées
             })
             .catch(error => {
                 console.error("Could not load url '" + url + "'", error);
@@ -87,7 +89,6 @@ class MaplibreObjectsLayer {
         });
     }
 
-    // ça marche
     highlight(primaryKey, on = true) {
         if (primaryKey && this._current_objects[primaryKey]) {
             const layerId = this._current_objects[primaryKey];
@@ -95,11 +96,7 @@ class MaplibreObjectsLayer {
             const source = this._map.getSource(sourceId);
             if (source && source._data) {
                 const featureId = this.getPrimaryKey(source._data);
-                console.log(`Setting hover state for ${primaryKey}: ${on}`);
-
                 // Set the hover state for the feature
-                console.log('sourceId:', sourceId);
-                console.log('featureId:', featureId);
                 this._map.setFeatureState(
                     { source: sourceId, id: featureId },
                     { hover: on }
@@ -110,25 +107,27 @@ class MaplibreObjectsLayer {
     }
     // ça devrait marcher reste à d'abord faire la synchronisation pour que ça le fasse
     select(primaryKey, on = true) {
-        if (primaryKey && this._current_objects[primaryKey]) {
-            const layerId = this._current_objects[primaryKey];
-            const sourceId = layerId.replace(/^layer-/, 'source-');
-            const source = this._map.getSource(sourceId);
-            if (source && source._data) {
-                const featureId = this.getPrimaryKey(source._data);
-                console.log(`Setting select state for ${primaryKey}: ${on}`);
+        // if (primaryKey && this._current_objects[primaryKey]) {
+        //     const layerId = this._current_objects[primaryKey];
+        //     const sourceId = layerId.replace(/^layer-/, 'source-');
+        //     const source = this._map.getSource(sourceId);
+        //     if (source && source._data) {
+        //         const featureId = this.getPrimaryKey(source._data);
+        //         // console.log(`Setting select state for ${primaryKey}: ${on}`);
+        //
+        //         // Set the select state for the feature
+        //         this._map.setFeatureState(
+        //             { source: sourceId, id: featureId },
+        //             { select: on }
+        //         );
+        //     }
+        // }
 
-                // Set the select state for the feature
-                this._map.setFeatureState(
-                    { source: sourceId, id: featureId },
-                    { select: on }
-                );
-            }
-        }
+        this.highlight(primaryKey, on);
     }
 
 
-    addLayer(feature, category = null) {
+    addLayer(feature, categoryName = null) {
         const primaryKey = this.getPrimaryKey(feature);
         const layerId = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
@@ -195,18 +194,16 @@ class MaplibreObjectsLayer {
         }
 
         this._map.addLayer(layerConfig);
+
+        // dans current_objects on va stocker le layerId
         this._current_objects[primaryKey] = layerId;
 
-        // reste à gérer ceci
-
-        // const categoryName = category || this.options.modelname;
-        // console.log('categoryName:', categoryName);
-        // if (!this.layers.overlays[categoryName]) {
-        //     this.layers.overlays[categoryName] = {};
-        // }
-        // this.layers.overlays[categoryName][primaryKey] = layerId;
-        // console.log('Layers id:', this.layers.overlays[categoryName]);
-        // console.log('Layers Overlays:', this.layers.overlays);
+        // Ensure overlays is structured as a key-value object and iterable
+        const category = categoryName || this.options.modelname;
+        if (!this.layers.overlays[category]) {
+            this.layers.overlays[category] = {};
+        }
+        this.layers.overlays[category][primaryKey] = layerId;
     }
 
 
@@ -228,6 +225,7 @@ class MaplibreObjectsLayer {
         });
 
         this.layers.baseLayers[name] = id;
+        // console.log('base layers:', this.layers.baseLayers[name]);
     }
 
     removeLayer(layerId) {
@@ -291,5 +289,6 @@ class MaplibreObjectsLayer {
             }
         });
         this._current_objects = new_objects;
+        this._map.fire('layers:added', { layers: this.getLayers() }); // Émettre un événement lorsque de nouvelles couches sont ajoutées
     }
 }
