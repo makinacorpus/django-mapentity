@@ -32,7 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Instancier la carte
     const myMap = new MaplibreMap('map');
-    myMap.setObjectsLayer(objectsLayer, myMap);
+    // myMap.setObjectsLayer(objectsLayer, myMap);
+
+    // Initialiser la couche d'objets
+    objectsLayer.initialize(myMap.getMap());
 
     // Une fois la carte chargée
     myMap.getMap().on('load', () => {
@@ -45,10 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Charger dynamiquement les objets depuis le backend en utilisant la méthode load
         objectsLayer.load(layerUrl);
-
-        // Contrôle pour changer les couches
-        const layerSwitcher = new MaplibreLayerControl(myMap);
-        myMap.getMap().addControl(layerSwitcher, 'top-right');
 
         // Ajouter un contrôle pour réinitialiser la vue
         const bounds = [[-180, -90], [180, 90]];
@@ -75,5 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         myMap.getMap().addControl(fileLayerLoadControl, 'top-left');
+
+        // Contrôle pour changer les couches
+        const layerSwitcher = new MaplibreLayerControl(objectsLayer);
+        myMap.getMap().addControl(layerSwitcher, 'top-right');
     });
 });
