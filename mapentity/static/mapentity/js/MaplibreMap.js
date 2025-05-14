@@ -2,7 +2,6 @@ class MaplibreMap {
     constructor(id) {
         this.id = id;
         this.map = null;
-        this.objectsLayer = null;
         this.container = null;
         this._init();
     }
@@ -43,14 +42,6 @@ class MaplibreMap {
         return this.map;
     }
 
-   setObjectsLayer(objectsLayer) {
-        this.objectsLayer = objectsLayer;
-        this.objectsLayer.initialize(this.map); // Initialiser manuellement la couche
-    }
-
-    getObjectsLayer() {
-        return this.objectsLayer;
-    }
     getContainer() {
         return this.container;
     }
