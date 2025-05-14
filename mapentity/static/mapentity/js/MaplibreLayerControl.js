@@ -1,6 +1,6 @@
 class MaplibreLayerControl {
-    constructor(mapInstance) {
-        this.mapInstance = mapInstance;
+    constructor(objectsLayer) {
+        this.objectsLayer = objectsLayer;
         this._container = null;
     }
 
@@ -31,7 +31,8 @@ class MaplibreLayerControl {
         this._container.appendChild(menu);
 
         // Remplir dynamiquement le menu
-        this._populateMenu(menu);
+        this._populateBaseLayers(menu);
+        this._populateOverlays(menu);
 
         // Toggle affichage menu
         button.addEventListener('click', () => {
@@ -45,6 +46,11 @@ class MaplibreLayerControl {
             }
         });
 
+        // Écouter l'événement layers:added
+        this._map.on('layers:added', (e) => {
+            this._populateOverlays(menu);
+        });
+
         return this._container;
     }
 
@@ -53,82 +59,67 @@ class MaplibreLayerControl {
         this._map = undefined;
     }
 
-    _populateMenu(container) {
-        const objectsLayer = this.mapInstance.getObjectsLayer();
-        const layers = objectsLayer.getLayers();
-        console.log('Layers:', layers); // Log pour vérifier la structure des layers
-
-        const createSection = (title) => {
-            const section = document.createElement('div');
-            if (title) {
-                const h4 = document.createElement('h4');
-                h4.textContent = title;
-                section.appendChild(h4);
-            }
-            return section;
-        };
+    _populateBaseLayers(container) {
+        const layers = this.objectsLayer.getLayers();
 
         // Base Layers
-        const baseSection = createSection('Base Layers');
-        for (const name in layers.baseLayers) {
-            if (layers.baseLayers.hasOwnProperty(name)) {
-                const id = layers.baseLayers[name];
-                const label = document.createElement('label');
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.checked = false;
-                input.dataset.layerId = id;
-                label.appendChild(input);
-                label.append(` ${name}`);
-                baseSection.appendChild(label);
-                baseSection.appendChild(document.createElement('br'));
-            }
+        for (const [name, id] of Object.entries(layers.baseLayers)) {
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = false;
+            input.dataset.layerId = id;
+            label.appendChild(input);
+            label.append(` ${name}`);
+            container.appendChild(label);
+            container.appendChild(document.createElement('br'));
+
+            // Add event listener to toggle the base layer
+            input.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                this.objectsLayer.toggleLayer(id, isChecked);
+                console.log(`Base Layer ${id} toggled: ${isChecked}`);
+                this._map.moveLayer(id, 'measure-points');
+            });
         }
-        container.appendChild(baseSection);
+    }
+
+    _populateOverlays(container) {
+        const layers = this.objectsLayer.getLayers();
 
         // Ligne horizontale pour séparer les sections
         const hr = document.createElement('hr');
+        hr.style.margin = 0;
         container.appendChild(hr);
 
         // Overlays
-        const overlaySection = createSection('Overlays');
-        for (const category in layers.overlays) {
-            if (layers.overlays.hasOwnProperty(category)) {
-                console.log('Category:', category); // Log pour vérifier la catégorie
-                const group = layers.overlays[category];
+        for (const [category, group] of Object.entries(layers.overlays)) {
+            // Display category name prominently
+            const categoryTitle = document.createElement('div');
+            categoryTitle.textContent = category;
+            categoryTitle.style.fontWeight = 'bold';
+            categoryTitle.style.marginBottom = '5px';
+            container.appendChild(categoryTitle);
 
-                const catTitle = document.createElement('strong');
-                catTitle.textContent = category;
-                overlaySection.appendChild(catTitle);
-                overlaySection.appendChild(document.createElement('br'));
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = true;
+            input.dataset.category = category;
+            label.appendChild(input);
+            label.append(` ${category}`);
+            container.appendChild(label);
+            container.appendChild(document.createElement('br'));
 
-                for (const name in group) {
-                    if (group.hasOwnProperty(name)) {
-                        const id = group[name];
-                        console.log('Overlay:', name, id); // Log pour vérifier chaque overlay
-                        const label = document.createElement('label');
-                        const input = document.createElement('input');
-                        input.type = 'checkbox';
-                        input.checked = true;
-                        input.dataset.layerId = id;
-                        label.appendChild(input);
-                        label.append(` ${name}`);
-                        overlaySection.appendChild(label);
-                        overlaySection.appendChild(document.createElement('br'));
-                    }
+            // Add event listener to toggle all layers in the category
+            input.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                for (const [name, id] of Object.entries(group)) {
+                    this.objectsLayer.toggleLayer(id, isChecked);
+                    console.log(`Layer ${id} toggled: ${isChecked}`);
+                    this._map.moveLayer(id, 'measure-points');
                 }
-            }
+            });
         }
-        container.appendChild(overlaySection);
-
-        // Gérer toggle
-        container.addEventListener('change', (e) => {
-            if (e.target.matches('input[type="checkbox"]')) {
-                const layerId = e.target.dataset.layerId;
-                objectsLayer.toggleLayer(layerId, e.target.checked);
-                console.log(`Layer ${layerId} toggled: ${e.target.checked}`); // Log pour vérifier le toggle
-                this.mapInstance.getMap().moveLayer(layerId, 'measure-points');
-            }
-        });
     }
 }
