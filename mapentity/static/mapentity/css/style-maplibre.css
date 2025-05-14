@@ -37,3 +37,15 @@
 }
 
 
+/*.custom-popup .maplibregl-popup-content {*/
+/*    background: rgba(0, 0, 0, 0.8); !* Semi-transparent black background *!*/
+/*    color: white; !* White text *!*/
+/*    padding: 10px;*/
+/*    border-radius: 5px;*/
+/*}*/
+
+/*.custom-popup .maplibregl-popup-tip {*/
+/*    border-top-color: rgba(0, 0, 0, 0.8); !* Match the popup background *!*/
+/*}*/
+
+
