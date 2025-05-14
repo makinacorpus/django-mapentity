@@ -37,15 +37,19 @@
 }
 
 
-/*.custom-popup .maplibregl-popup-content {*/
-/*    background: rgba(0, 0, 0, 0.8); !* Semi-transparent black background *!*/
-/*    color: white; !* White text *!*/
-/*    padding: 10px;*/
-/*    border-radius: 5px;*/
-/*}*/
+.custom-popup .maplibregl-popup-content {
+    background: rgba(0, 0, 0.8, 0.8); /* Semi-transparent black background */
+    color: white; /* White text */
+    padding: 10px;
+    border-radius: 5px;
+}
 
-/*.custom-popup .maplibregl-popup-tip {*/
-/*    border-top-color: rgba(0, 0, 0, 0.8); !* Match the popup background *!*/
-/*}*/
+.custom-popup .maplibregl-popup-tip {
+    border-top-color: rgba(0, 0, 0, 0.8); /* Match the popup background */
+}
 
-
+.measure-control-btn-active {
+    background-color: #007cbf;
+    border: 1px solid #005a94;
+    box-shadow: 0 0 0 2px rgba(0, 123, 191, 0.4);
+}
