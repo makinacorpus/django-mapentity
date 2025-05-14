@@ -65,7 +65,6 @@ class MaplibreObjectsLayer {
                 ? feature.geometry.coordinates
                 : turf.centroid(feature).geometry.coordinates;
 
-            console.log(feature)
             const description = feature.properties.name || 'No data available';
 
             this.currentPopup = new maplibregl.Popup({
@@ -80,7 +79,6 @@ class MaplibreObjectsLayer {
         } else {
             // Si aucune feature n'est survolée, supprimer le popup et remettre le curseur par défaut
             this._map.getCanvas().style.cursor = '';
-            console.log('else dans objectlayer', this._map.getCanvas().style.cursor);
             if (this.currentPopup) {
                 this.currentPopup.remove();
                 this.currentPopup = null;
