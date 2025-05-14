@@ -5,12 +5,7 @@ class MaplibreObjectsLayer {
         this._current_objects = {};
         this.loading = false;
         this.options = { ...options }; // Use the spread operator to create a copy of the options object
-
-        // gère le bind des les labels sur les couches
-        this._onEachFeature = this.options.onEachFeature;
-        // pointToLayer est simplement une fonction qui change le style du curseur une fois sur le layer
-        this._pointToLayer = this.options.pointToLayer;
-
+        this.currentPopup = null;
         this.layers = {
             baseLayers: {},
             overlays: {}
@@ -38,7 +33,6 @@ class MaplibreObjectsLayer {
         if (features.length > 0) {
             const feature = features[0];
             const primaryKey = this.getPrimaryKey(feature);
-            // console.log('Clicked feature:', primaryKey);
             if (this.options.objectUrl) {
                 window.location = this.options.objectUrl(feature.properties, feature);
             }
@@ -46,7 +40,6 @@ class MaplibreObjectsLayer {
     }
 
     _onMouseMove(e) {
-        // console.log('Mouse move event:', e);
         const features = this._map.queryRenderedFeatures(e.point, {
             layers: Object.values(this._current_objects)
         });
@@ -56,18 +49,45 @@ class MaplibreObjectsLayer {
             this.highlight(primaryKey, false);
         });
 
-        // Set hover state for the hovered feature
         if (features.length > 0) {
-             this._map.getCanvas().style.cursor = 'pointer'; // Change cursor to pointer
+            this._map.getCanvas().style.cursor = 'pointer'; // Change cursor to pointer
             const feature = features[0];
             const primaryKey = this.getPrimaryKey(feature);
-            // console.log('Hovered feature:', primaryKey);
             this.highlight(primaryKey, true);
+
+            // Supprimer le popup précédent s'il existe
+            if (this.currentPopup) {
+                this.currentPopup.remove();
+                this.currentPopup = null;
+            }
+
+            const coordinates = feature.geometry.type === 'Point'
+                ? feature.geometry.coordinates
+                : turf.centroid(feature).geometry.coordinates;
+
+            console.log(feature)
+            const description = feature.properties.name || 'No data available';
+
+            this.currentPopup = new maplibregl.Popup({
+                closeButton: false,
+                closeOnClick: false,
+                className: 'custom-popup'
+            })
+                .setLngLat(coordinates)
+                .setHTML(`<div class="popup-content">${description}</div>`)
+                .addTo(this._map);
+
+        } else {
+            // Si aucune feature n'est survolée, supprimer le popup et remettre le curseur par défaut
+            this._map.getCanvas().style.cursor = '';
+            console.log('else dans objectlayer', this._map.getCanvas().style.cursor);
+            if (this.currentPopup) {
+                this.currentPopup.remove();
+                this.currentPopup = null;
+            }
         }
-        // else {
-        //     this._map.getCanvas().style.cursor = ''; // Reset cursor
-        // }
     }
+
 
     load(url) {
         console.log("Loading data from URL: " + url);
@@ -103,29 +123,11 @@ class MaplibreObjectsLayer {
                 );
             }
         }
-
     }
-    // ça devrait marcher reste à d'abord faire la synchronisation pour que ça le fasse
-    select(primaryKey, on = true) {
-        // if (primaryKey && this._current_objects[primaryKey]) {
-        //     const layerId = this._current_objects[primaryKey];
-        //     const sourceId = layerId.replace(/^layer-/, 'source-');
-        //     const source = this._map.getSource(sourceId);
-        //     if (source && source._data) {
-        //         const featureId = this.getPrimaryKey(source._data);
-        //         // console.log(`Setting select state for ${primaryKey}: ${on}`);
-        //
-        //         // Set the select state for the feature
-        //         this._map.setFeatureState(
-        //             { source: sourceId, id: featureId },
-        //             { select: on }
-        //         );
-        //     }
-        // }
 
+    select(primaryKey, on = true) {
         this.highlight(primaryKey, on);
     }
-
 
     addLayer(feature, categoryName = null) {
         const primaryKey = this.getPrimaryKey(feature);
@@ -194,7 +196,6 @@ class MaplibreObjectsLayer {
         }
 
         this._map.addLayer(layerConfig);
-
         // dans current_objects on va stocker le layerId
         this._current_objects[primaryKey] = layerId;
 
@@ -205,7 +206,6 @@ class MaplibreObjectsLayer {
         }
         this.layers.overlays[category][primaryKey] = layerId;
     }
-
 
     addBaseLayer(name, layerConfig) {
         const { id, tiles, tileSize = 256, attribution = '' } = layerConfig;
@@ -225,7 +225,6 @@ class MaplibreObjectsLayer {
         });
 
         this.layers.baseLayers[name] = id;
-        // console.log('base layers:', this.layers.baseLayers[name]);
     }
 
     removeLayer(layerId) {
@@ -261,16 +260,6 @@ class MaplibreObjectsLayer {
     getCurrentLayers() {
         return this._current_objects;
     }
-
-    // pas encore utilisée pour le moment
-
-    // cela ne marchera pas car je ne peux pas calculer le bounds du layer et que fitbounds n'est pas dans _map
-    // jumpTo(primaryKey) {
-    //     const layer = this.getLayer(primaryKey);
-    //     if (layer) {
-    //         this._map.fitBounds(layer.getBounds());
-    //     }
-    // }
 
     updateFromPks(primaryKeys) {
         const new_objects = {};

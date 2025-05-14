@@ -46,19 +46,23 @@ class MaplibreMeasureControl {
         // Ajouter l'événement de clic pour activer/désactiver le mode de mesure
         const onClick = (e) => this._onClick(e); // fonction passe plat pour utiliser la methode _onClick
         const onMouseMove = (e) => this._onMouseMove(e); // fonction passe plat pour utiliser la methode _onMouseMove
+
         button.onclick = () => {
             console.log(this._drawing);
             this._drawing = !this._drawing;
 
             if (this._drawing) {
+                console.log(this._drawing);
                 this._map.getCanvas().style.cursor = 'crosshair';
+                console.log(this._map.getCanvas().style.cursor);
                 this._map.on('click', onClick);
                 this._map.on('mousemove', onMouseMove);
                 this._distanceContainer.style.display = 'block'; // Afficher le conteneur de distance
                 const mapcontainer = document.getElementById(this._map.getContainer().id);
                 mapcontainer.appendChild(this._distanceContainer); // Ajouter le conteneur de distance à la carte
             } else {
-                this._map.getCanvas().style.cursor = 'pointer'; // à changer
+                this._map.getCanvas().style.cursor = ''; // à changer
+                 console.log('else dans measurecontrol', this._map.getCanvas().style.cursor);
                 this._map.off('click', onClick);
                 this._map.off('mousemove', onMouseMove);
                 console.log(this._map);
