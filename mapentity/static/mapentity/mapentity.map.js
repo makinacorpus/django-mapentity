@@ -50,56 +50,56 @@ L.Control.Screenshot = L.Control.extend({
  * Affiche une étiquette statique au milieu de la polyline.
  * Elle sera masquée pour les niveaux de zoom inférieurs à ``LABEL_MIN_ZOOM``.
  */
-MapEntity.showLineLabel = function (layer, options) {
-    var LABEL_MIN_ZOOM = 6; // Niveau de zoom minimum pour afficher l'étiquette
-
-    // Convertit la couleur en format RGB
-    var rgb = parseColor(options.color);
-
-    // Lie une étiquette au calque avec les options spécifiées
-    layer.bindLabel(options.text, {noHide: true, className: options.className});
-
-    // Sauvegarde la méthode originale `onAdd` du calque
-    var __layerOnAdd = layer.onAdd;
-    layer.onAdd = function (map) {
-        __layerOnAdd.call(layer, map); // Appelle la méthode originale
-        if (map.getZoom() >= LABEL_MIN_ZOOM) {
-            layer._showLabel(); // Affiche l'étiquette si le zoom est suffisant
-        }
-        map.on('zoomend', hideOnZoomOut); // Ajoute un gestionnaire d'événement pour le zoom
-    };
-
-    // Sauvegarde la méthode originale `onRemove` du calque
-    var __layerOnRemove = layer.onRemove;
-    layer.onRemove = function () {
-        layer._map.off('zoomend', hideOnZoomOut); // Supprime le gestionnaire d'événement
-        if (layer._hideLabel) layer._hideLabel(); // Masque l'étiquette si elle est visible
-        __layerOnRemove.call(layer); // Appelle la méthode originale
-    };
-
-    // Sauvegarde la méthode originale `_showLabel` du calque
-    var __layerShowLabel = layer._showLabel;
-    layer._showLabel = function () {
-        __layerShowLabel.call(layer, {latlng: midLatLng(layer)}); // Affiche l'étiquette au milieu de la polyline
-        layer.label._container.title = options.title; // Définit le titre de l'étiquette
-        layer.label._container.style.backgroundColor = 'rgba('+rgb.join(',')+ ',0.8)'; // Définit la couleur de fond
-        layer.label._container.style.borderColor = 'rgba('+rgb.join(',')+ ',0.6)'; // Définit la couleur de la bordure
-    };
-
-    // Fonction pour masquer l'étiquette si le zoom est insuffisant
-    function hideOnZoomOut() {
-        if (layer._map.getZoom() < LABEL_MIN_ZOOM)
-            if (layer._hideLabel) layer._hideLabel(); // Masque l'étiquette
-        else
-            if (layer._showLabel) layer._showLabel(); // Affiche l'étiquette
-    }
-
-    // Fonction pour calculer le point médian de la polyline
-    function midLatLng(line) {
-        var mid = Math.floor(line.getLatLngs().length/2); // Calcule l'indice du point médian
-        return L.latLng(line.getLatLngs()[mid]); // Retourne les coordonnées du point médian
-    }
-};
+// MapEntity.showLineLabel = function (layer, options) {
+//     var LABEL_MIN_ZOOM = 6; // Niveau de zoom minimum pour afficher l'étiquette
+//
+//     // Convertit la couleur en format RGB
+//     var rgb = parseColor(options.color);
+//
+//     // Lie une étiquette au calque avec les options spécifiées
+//     layer.bindLabel(options.text, {noHide: true, className: options.className});
+//
+//     // Sauvegarde la méthode originale `onAdd` du calque
+//     var __layerOnAdd = layer.onAdd;
+//     layer.onAdd = function (map) {
+//         __layerOnAdd.call(layer, map); // Appelle la méthode originale
+//         if (map.getZoom() >= LABEL_MIN_ZOOM) {
+//             layer._showLabel(); // Affiche l'étiquette si le zoom est suffisant
+//         }
+//         map.on('zoomend', hideOnZoomOut); // Ajoute un gestionnaire d'événement pour le zoom
+//     };
+//
+//     // Sauvegarde la méthode originale `onRemove` du calque
+//     var __layerOnRemove = layer.onRemove;
+//     layer.onRemove = function () {
+//         layer._map.off('zoomend', hideOnZoomOut); // Supprime le gestionnaire d'événement
+//         if (layer._hideLabel) layer._hideLabel(); // Masque l'étiquette si elle est visible
+//         __layerOnRemove.call(layer); // Appelle la méthode originale
+//     };
+//
+//     // Sauvegarde la méthode originale `_showLabel` du calque
+//     var __layerShowLabel = layer._showLabel;
+//     layer._showLabel = function () {
+//         __layerShowLabel.call(layer, {latlng: midLatLng(layer)}); // Affiche l'étiquette au milieu de la polyline
+//         layer.label._container.title = options.title; // Définit le titre de l'étiquette
+//         layer.label._container.style.backgroundColor = 'rgba('+rgb.join(',')+ ',0.8)'; // Définit la couleur de fond
+//         layer.label._container.style.borderColor = 'rgba('+rgb.join(',')+ ',0.6)'; // Définit la couleur de la bordure
+//     };
+//
+//     // Fonction pour masquer l'étiquette si le zoom est insuffisant
+//     function hideOnZoomOut() {
+//         if (layer._map.getZoom() < LABEL_MIN_ZOOM)
+//             if (layer._hideLabel) layer._hideLabel(); // Masque l'étiquette
+//         else
+//             if (layer._showLabel) layer._showLabel(); // Affiche l'étiquette
+//     }
+//
+//     // Fonction pour calculer le point médian de la polyline
+//     function midLatLng(line) {
+//         var mid = Math.floor(line.getLatLngs().length/2); // Calcule l'indice du point médian
+//         return L.latLng(line.getLatLngs()[mid]); // Retourne les coordonnées du point médian
+//     }
+// };
 
 
 // Écouteur d'événement pour l'initialisation de la carte
