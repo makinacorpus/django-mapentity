@@ -3,19 +3,12 @@ class MaplibreObjectsLayer {
         this._map = null;
         this._objects = {};
         this._current_objects = {};
-        this.loading = false;
         this.options = { ...options }; // Use the spread operator to create a copy of the options object
         this.currentPopup = null;
         this.layers = {
             baseLayers: {},
             overlays: {}
         };
-
-        if (typeof geojson === 'string') {
-            this.load(geojson);
-        } else if (geojson) {
-            this.addData(geojson);
-        }
     }
 
     initialize(map) {
@@ -87,19 +80,19 @@ class MaplibreObjectsLayer {
     }
 
 
-    load(url) {
+    async load(url) {
         console.log("Loading data from URL: " + url);
         this.loading = true;
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                this.addData(data);
-                this._map.fire('layers:added', { layers: this.getLayers() }); // Émettre un événement lorsque de nouvelles couches sont ajoutées
-            })
-            .catch(error => {
-                console.error("Could not load url '" + url + "'", error);
-            });
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            this.addData(data);
+            this._map.fire('layers:added', { layers: this.getLayers() }); // Émettre un événement lorsque de nouvelles couches sont ajoutées
+        } catch (error) {
+            console.error("Could not load url '" + url + "'", error);
+        }
     }
+
 
     addData(geojson) {
         geojson.features.forEach(feature => {
