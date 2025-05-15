@@ -72,12 +72,27 @@ processors::
                 …
                 'context_processors': [
                     …
-                    "django.core.context_processors.request",
                     "mapentity.context_processors.settings",
                 ]
             }
         }
     ]
+
+
+Add the `MAPENTITY_CONFIG` variable::
+
+    MAPENTITY_CONFIG = {}
+
+Define a configuration for leaflet::
+
+    LEAFLET_CONFIG = {
+    'SRID': 3857,
+    'TILES': [
+        ('OSM', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
+        ('OSM N&B', 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
+    ],
+    # 'SPATIAL_EXTENT': (1.3, 43.7, 1.5, 43.5),
+    }
 
 
 Model
@@ -122,7 +137,10 @@ Register your MapEntity views in ``main/urls.py``:
 .. code-block:: python
 
     from main.models import Museum
-    from mapentity import registry
+    from mapentity.registry import registry
+
+    app_name = "main"
+
 
     urlpatterns = registry.register(Museum)
 
@@ -133,16 +151,20 @@ Then glue everything together in your project's ``urls.py``:
 
     from django.conf.urls import patterns, include, url
     from django.contrib import admin
+    from django.contrib.auth import views as auth_views
 
     admin.autodiscover()
 
     urlpatterns = [
         '',
-        path('', 'main.views.home', name='home'),
+        path('', RedirectView.as_view(url=reverse_lazy('main:museum_list'), permanent=True), name='home'),
         path('login/',  'django.contrib.auth.views.login', name='login'),
         path('logout/', 'django.contrib.auth.views.logout', name='logout',),
         path('', include('mapentity.urls')),
         path('paperclip/', include('paperclip.urls')),
+        path('i18n/', include('django.conf.urls.i18n')),
+        path('login/', auth_views.LoginView.as_view(), name='login'),
+        path('logout/', auth_views.LogoutView.as_view(), {'next_page': '/'}, name='logout',),
         path('admin', admin.site.urls),
     ]
 
