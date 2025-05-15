@@ -26,10 +26,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Instancier la carte
     const myMap = new MaplibreMap('map');
-    // myMap.setObjectsLayer(objectsLayer, myMap);
 
     // Initialiser la couche d'objets
     objectsLayer.initialize(myMap.getMap());
+
+    // Initialiser la table de données principale
+    const mainDatatable = $('#objects-list').DataTable({
+        'processing': true,
+        'serverSide': true,
+        aoColumnDefs: [
+            { "bVisible": false, "aTargets": [0] },  // don't show first column (ID)
+        ],
+        "ajax": {
+            "url": `/api/${modelName}/drf/${modelName}s.datatables`
+        },
+        responsive: true,
+        pageLength: 7, // page size is computed from the window size - expandDatatableHeight()
+        scrollY: '100vh',
+        scrollCollapse: true,
+        "lengthChange": false, // disable page length selection
+        "language": {
+            "paginate": {
+                "first": "<<",
+                "last": ">>",
+                "next": ">",
+                "previous": "<"
+            },
+        },
+        createdRow: function (row, data, index) {
+            // highlight feature on map on row hover
+            var pk = data.id;
+            $(row).hover(
+                function () {
+                    objectsLayer.highlight(pk);
+                },
+                function () {
+                    objectsLayer.highlight(pk, false);
+                }
+            );
+        }
+    });
 
     // Une fois la carte chargée
     myMap.getMap().on('load', () => {
@@ -43,10 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Charger dynamiquement les objets depuis le backend en utilisant la méthode load
         objectsLayer.load(layerUrl);
 
+        // Ajouter la couche d'objets à la carte
+        const mapsync = new MaplibreMapListSync(mainDatatable, myMap.getMap(), objectsLayer);
+
         // Ajouter un contrôle pour réinitialiser la vue
         const bounds = [[-180, -90], [180, 90]];
         myMap.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
-
 
         const fileLayerLoadControl = new MaplibreFileLayerControl({
             layerOptions: {
