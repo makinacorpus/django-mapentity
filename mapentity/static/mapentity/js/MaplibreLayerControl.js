@@ -15,7 +15,7 @@ class MaplibreLayerControl {
         const button = document.createElement('button');
         button.className = 'layer-switcher-btn';
         const img = document.createElement('img');
-        img.src = '/static/mapentity/images/layers-2x.png'; // mets le chemin de ton icône ici
+        img.src = '/static/mapentity/images/layers-2x.png';
         img.alt = 'Couches';
         img.style.width = '25px';
         img.style.height = '25px';
@@ -25,9 +25,9 @@ class MaplibreLayerControl {
         // Dropdown menu
         const menu = document.createElement('div');
         menu.className = 'layer-switcher-menu';
-        menu.style.display = 'none'; // masqué par défaut
-        menu.style.width = '200px'; // Augmenter la largeur du menu
-        menu.style.padding = '5px'; // Ajouter du padding pour plus d'espace
+        menu.style.display = 'none';
+        menu.style.width = '200px';
+        menu.style.padding = '5px';
         this._container.appendChild(menu);
 
         // Remplir dynamiquement le menu
@@ -47,7 +47,7 @@ class MaplibreLayerControl {
         });
 
         // Écouter l'événement layers:added
-        this._map.on('layers:added', (e) => {
+        this._map.on('layers:added', () => {
             this._populateOverlays(menu);
         });
 
@@ -62,7 +62,6 @@ class MaplibreLayerControl {
     _populateBaseLayers(container) {
         const layers = this.objectsLayer.getLayers();
 
-        // Base Layers
         for (const [name, id] of Object.entries(layers.baseLayers)) {
             const label = document.createElement('label');
             const input = document.createElement('input');
@@ -74,12 +73,16 @@ class MaplibreLayerControl {
             container.appendChild(label);
             container.appendChild(document.createElement('br'));
 
-            // Add event listener to toggle the base layer
             input.addEventListener('change', (e) => {
                 const isChecked = e.target.checked;
                 this.objectsLayer.toggleLayer(id, isChecked);
                 console.log(`Base Layer ${id} toggled: ${isChecked}`);
-                this._map.moveLayer(id, 'measure-points');
+
+                // Assure que baseLayer est en-dessous de measure-points
+                if (isChecked && this._map.getLayer('measure-points')) {
+                    this._map.moveLayer('measure-points');
+                    this._map.moveLayer('measure-lines');
+                }
             });
         }
     }
@@ -87,14 +90,11 @@ class MaplibreLayerControl {
     _populateOverlays(container) {
         const layers = this.objectsLayer.getLayers();
 
-        // Ligne horizontale pour séparer les sections
         const hr = document.createElement('hr');
         hr.style.margin = 0;
         container.appendChild(hr);
 
-        // Overlays
         for (const [category, group] of Object.entries(layers.overlays)) {
-            // Display category name prominently
             const categoryTitle = document.createElement('div');
             categoryTitle.textContent = category;
             categoryTitle.style.fontWeight = 'bold';
@@ -111,13 +111,21 @@ class MaplibreLayerControl {
             container.appendChild(label);
             container.appendChild(document.createElement('br'));
 
-            // Add event listener to toggle all layers in the category
             input.addEventListener('change', (e) => {
                 const isChecked = e.target.checked;
+
                 for (const [name, id] of Object.entries(group)) {
                     this.objectsLayer.toggleLayer(id, isChecked);
-                    console.log(`Layer ${id} toggled: ${isChecked}`);
-                    this._map.moveLayer(id, 'measure-points');
+                    console.log(`Overlay Layer ${id} toggled: ${isChecked}`);
+
+                    if (isChecked) {
+                        // Place l’overlay juste avant 'measure-points' pour qu’il soit au-dessus des baseLayers
+                        if (this._map.getLayer('measure-points')) {
+                            // this._map.moveLayer(id, 'measure-points');
+                            this._map.moveLayer('measure-points');
+                            this._map.moveLayer('measure-lines');
+                        }
+                    }
                 }
             });
         }
