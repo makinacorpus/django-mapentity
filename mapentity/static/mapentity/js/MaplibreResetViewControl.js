@@ -35,4 +35,8 @@ class MaplibreResetViewControl {
             this._map.fitBounds(this._bounds, { padding: 20 });
         }
     }
+
+    getBounds() {
+        return this._bounds;
+    }
 }
