@@ -6,11 +6,12 @@
     //
     // Requires CSS for .enumeration-icon marker icons
 
+    // LayerGroup : natif à leaflet
+
     var __addLayer = L.LayerGroup.prototype.addLayer;
 
     L.LayerGroup.include({
 
-        //
         // Override addLayer() to keep track of group's layers order.
         addLayer: function (layer) {
             if (this.__layerArray === undefined){
@@ -20,7 +21,6 @@
             this.__layerArray.push(layer);
         },
 
-        //
         // Helper to iterate layers in order
         enumerateLayers: function (fn, context) {
             var layers = this.__layerArray || [];
@@ -29,7 +29,6 @@
             }
         },
 
-        //
         // Add marker to show enumeration
         showEnumeration: function () {
             if (!this._map)

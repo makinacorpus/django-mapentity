@@ -2,6 +2,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+    <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+    <link href='/static/mapentity/css/style-maplibre.css' rel='stylesheet' />
+
     <!-- version {{ VERSION }} -->
     {% block head %}
 
@@ -101,8 +107,11 @@
     {% endblock container %}
 {% endblock content %}
 
+<div id='map' style='width: 50%; height: 700px; margin-top: 100px'></div>
+
 
 {% block extrabody %}
+
     {{ block.super }}
 
     {# Global Javascript settings #}
@@ -174,6 +183,20 @@
 
         {% smart_include "extrajs" %}
 
+
+
+
+        <script src="/static/mapentity/js/MaplibreFileLoader.js"></script>
+        <script src="/static/mapentity/js/MaplibreFileLayerControl.js"></script>
+{#        <script src="/static/mapentity/js/MaplibreMapListSync.js"></script>#}
+        <script src="/static/mapentity/js/MaplibreLayerIndex.js"></script>
+        <script src="/static/mapentity/js/MaplibreObjectsLayer.js"></script>
+        <script src="/static/mapentity/js/MaplibreMeasureDistanceDisplay.js"></script>
+        <script src="/static/mapentity/js/MaplibreMeasureControl.js"></script>
+        <script src="/static/mapentity/js/MaplibreResetViewControl.js"></script>
+        <script src="/static/mapentity/js/MaplibreMap.js"></script>
+        <script src="/static/mapentity/js/MaplibreLayerControl.js"></script>
+        <script src="/static/mapentity/js/mapentity-init-maplibre.js"></script>
     {% endcompress %}
 
     {% smart_include "extrabody" %}
@@ -181,4 +204,5 @@
 {% endblock extrabody %}
 </body>
 </html>
+
 

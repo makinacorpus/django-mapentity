@@ -53,8 +53,13 @@ _MAP_STYLES = deepcopy(_DEFAULT_MAP_STYLES)
 _MAP_STYLES.update(app_settings['MAP_STYLES'])
 app_settings['MAP_STYLES'] = _MAP_STYLES
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+for name, override in getattr(settings, 'MAP_STYLES', {}).items():
+    # fallback old settings MAP_STYLES
+    merged = app_settings['MAP_STYLES'].get(name, {})
+    merged.update(override)
+    app_settings['MAP_STYLES'][name] = merged
 
+## config Tinymce
 TINYMCE_DEFAULT_CONFIG = {
     "theme": "silver",
     "height": 500,
@@ -82,7 +87,7 @@ TINYMCE_DEFAULT_CONFIG = {
 TINYMCE_DEFAULT_CONFIG.update(getattr(settings, 'TINYMCE_DEFAULT_CONFIG', {}))
 setattr(settings, 'TINYMCE_DEFAULT_CONFIG', TINYMCE_DEFAULT_CONFIG)
 
-
+# config Rest_Framework
 REST_FRAMEWORK_DEFAULT_CONFIG = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
@@ -97,12 +102,7 @@ REST_FRAMEWORK_DEFAULT_CONFIG = {
 REST_FRAMEWORK_DEFAULT_CONFIG.update(getattr(settings, 'REST_FRAMEWORK', {}))
 setattr(settings, 'REST_FRAMEWORK', REST_FRAMEWORK_DEFAULT_CONFIG)
 
-for name, override in getattr(settings, 'MAP_STYLES', {}).items():
-    # fallback old settings MAP_STYLES
-    merged = app_settings['MAP_STYLES'].get(name, {})
-    merged.update(override)
-    app_settings['MAP_STYLES'][name] = merged
-
+# leaflet plugins integration
 _LEAFLET_PLUGINS = OrderedDict([
     ('leaflet.overintent', {
         'js': 'mapentity/Leaflet.OverIntent/leaflet.overintent.js',
@@ -172,6 +172,8 @@ _MESSAGE_TAGS = getattr(settings, 'MESSAGE_TAGS', {
 setattr(settings, 'MESSAGE_TAGS', _MESSAGE_TAGS)
 
 # crispy form default config with bootstrap4
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 _CRISPY_ALLOWED_TEMPLATE_PACKS = getattr(settings, 'CRISPY_ALLOWED_TEMPLATE_PACKS', ('bootstrap4', ))
 setattr(settings, 'CRISPY_ALLOWED_TEMPLATE_PACKS', _CRISPY_ALLOWED_TEMPLATE_PACKS)
 
