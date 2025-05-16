@@ -49,19 +49,19 @@ class MaplibreMapListSync {
     // }
 
     _onRowCreated(nRow, aData, iDataIndex) {
-        var self = this;
+        // var self = this;
         var pk = aData[0];
         $(nRow).hover(
             function() {
-                self.layer.highlight(pk);
+                this.layer.highlight(pk);
             },
             function() {
-                self.layer.highlight(pk, false);
+                this.layer.highlight(pk, false);
             }
         );
 
         $(nRow).click(function() {
-            self.selectorOnce.select(pk, $(nRow));
+            this.selectorOnce.select(pk, $(nRow));
         });
 
         // $(nRow).dblclick(function() {
@@ -169,7 +169,7 @@ class MaplibreMapListSync {
     // }
 
     __initSelectorOnce() {
-        var self = this;
+        // var self = this;
         var selectorOnce = (function() {
             var current = { 'pk': null, 'row': null };
 
@@ -191,7 +191,7 @@ class MaplibreMapListSync {
 
             function toggleSelectObject(pk, on) {
                 on = on === undefined ? true : on;
-                self.layer.select(pk, on);
+                this.layer.select(pk, on);
             }
 
             return {
