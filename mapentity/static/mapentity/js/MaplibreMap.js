@@ -1,15 +1,16 @@
 class MaplibreMap {
-    constructor(id) {
+    constructor(id, bounds = null) {
         this.id = id;
         this.map = null;
         this.container = null;
+        this.bounds = bounds;
         this._init();
     }
 
     _init() {
         const mapContainer = document.getElementById(this.id);
-        this.container = mapContainer; // Store the container reference
-        if(!mapContainer) {
+        this.container = mapContainer;
+        if (!mapContainer) {
             console.error(`Map container with id ${this.id} not found.`);
             return;
         }
@@ -22,20 +23,28 @@ class MaplibreMap {
             zoom: 6,
         });
 
-        // add base control
+        // Ajouter les contrôles standards
         this.map.addControl(new maplibregl.NavigationControl(), 'top-left');
         this.map.addControl(new maplibregl.FullscreenControl(), 'top-left');
 
-        // Création et ajout du contrôleur de mesure
+        // Contrôle de mesure
         const measureControl = new MaplibreMeasureControl();
         this.map.addControl(measureControl, 'top-left');
 
-        // add scale control
+        // Contrôle d’échelle
         const scale = new maplibregl.ScaleControl({
             maxWidth: 80,
             unit: 'metric'
         });
         this.map.addControl(scale, 'bottom-left');
+
+        if (this.bounds) {
+            this.map.fitBounds(this.bounds, {
+                padding: 20,
+                linear: true,
+                duration: 1000
+            });
+        }
     }
 
     getMap() {
@@ -44,5 +53,9 @@ class MaplibreMap {
 
     getContainer() {
         return this.container;
+    }
+
+    getBounds() {
+        return this.bounds;
     }
 }

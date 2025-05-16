@@ -1,13 +1,13 @@
 class MaplibreResetViewControl {
-    constructor(bounds) {
-        this._bounds = bounds;
+    constructor() {
+        this._bounds = null;
         this._map = null;
         this._container = null;
     }
 
     onAdd(map) {
         this._map = map; // Corriger la référence à la carte
-
+        this._bounds = map.getBounds();
         // Créer le conteneur principal
         this._container = document.createElement('div');
         this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group maplibregl-resetview';
@@ -31,12 +31,8 @@ class MaplibreResetViewControl {
     }
 
     reset() {
-        if (this._map && this._bounds) {
+        if (this._map) {
             this._map.fitBounds(this._bounds, { padding: 20 });
         }
-    }
-
-    getBounds() {
-        return this._bounds;
     }
 }
