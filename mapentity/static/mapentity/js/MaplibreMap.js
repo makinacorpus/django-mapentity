@@ -4,6 +4,7 @@ class MaplibreMap {
         this.map = null;
         this.container = null;
         this.bounds = bounds;
+        this.resetViewControl = null; // modifier ceci, mettre en place un objet dans lequel seraa stocké tous les controllers ajoutés pour suivre leur trace
         this._init();
     }
 
@@ -19,7 +20,7 @@ class MaplibreMap {
         this.map = new maplibregl.Map({
             container: this.id,
             style: 'https://demotiles.maplibre.org/style.json',
-            center: [1.4442, 43.6045],
+            center: [1.3952, 43.5963],
             zoom: 6,
         });
 
@@ -57,5 +58,13 @@ class MaplibreMap {
 
     getBounds() {
         return this.bounds;
+    }
+
+    setResetViewControl(control) {
+        this.resetViewControl = control;
+    }
+
+    getResetViewControl() {
+        return this.resetViewControl;
     }
 }
