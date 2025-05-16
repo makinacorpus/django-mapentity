@@ -107,7 +107,7 @@
     {% endblock container %}
 {% endblock content %}
 
-<div id='map' style='width: 80%; height: 700px; margin-top: 100px'></div>
+<div id='map' style='width: 50%; height: 700px; margin-top: 100px'></div>
 
 
 {% block extrabody %}
@@ -143,12 +143,12 @@
 
         {% leaflet_js plugins="ALL" %}
 
-{#        <script type="text/javascript" src="{% static 'mapentity/mapentity.helpers.js' %}"></script>#}
-{#        <script type="text/javascript" src="{% static 'mapentity/mapentity.views.js' %}"></script>#}
-{#        <script type="text/javascript" src="{% static 'mapentity/mapentity.history.js' %}"></script>#}
-{#        <script type="text/javascript" src="{% static 'mapentity/mapentity.map.js' %}"></script>#}
-{#        <script type="text/javascript" src="{% static 'mapentity/mapentity.context.js' %}"></script>#}
-{#        <script type="text/javascript" src="{% static 'mapentity/mapentity.filter.js' %}"></script>#}
+        <script type="text/javascript" src="{% static 'mapentity/mapentity.helpers.js' %}"></script>
+        <script type="text/javascript" src="{% static 'mapentity/mapentity.views.js' %}"></script>
+        <script type="text/javascript" src="{% static 'mapentity/mapentity.history.js' %}"></script>
+        <script type="text/javascript" src="{% static 'mapentity/mapentity.map.js' %}"></script>
+        <script type="text/javascript" src="{% static 'mapentity/mapentity.context.js' %}"></script>
+        <script type="text/javascript" src="{% static 'mapentity/mapentity.filter.js' %}"></script>
 
         <script type="text/javascript">
             L.Icon.Default.imagePath = "{% static 'leaflet/images/' %}";
@@ -188,7 +188,7 @@
 
         <script src="/static/mapentity/js/MaplibreFileLoader.js"></script>
         <script src="/static/mapentity/js/MaplibreFileLayerControl.js"></script>
-        <script src="/static/mapentity/js/MaplibreMapListSync.js"></script>
+{#        <script src="/static/mapentity/js/MaplibreMapListSync.js"></script>#}
         <script src="/static/mapentity/js/MaplibreLayerIndex.js"></script>
         <script src="/static/mapentity/js/MaplibreObjectsLayer.js"></script>
         <script src="/static/mapentity/js/MaplibreMeasureDistanceDisplay.js"></script>
