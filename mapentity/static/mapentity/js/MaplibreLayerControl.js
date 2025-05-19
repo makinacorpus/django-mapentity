@@ -62,10 +62,14 @@ class MaplibreLayerControl {
     _populateBaseLayers(container) {
         const layers = this.objectsLayer.getLayers();
 
+        // Group name for radio buttons
+        const radioGroupName = 'baseLayer';
+
         for (const [name, id] of Object.entries(layers.baseLayers)) {
             const label = document.createElement('label');
             const input = document.createElement('input');
-            input.type = 'checkbox';
+            input.type = 'radio';
+            input.name = radioGroupName; // Same name for all radio buttons in the group
             input.checked = false;
             input.dataset.layerId = id;
             label.appendChild(input);
@@ -75,13 +79,20 @@ class MaplibreLayerControl {
 
             input.addEventListener('change', (e) => {
                 const isChecked = e.target.checked;
-                this.objectsLayer.toggleLayer(id, isChecked);
-                console.log(`Base Layer ${id} toggled: ${isChecked}`);
+                if (isChecked) {
+                    // Hide all base layers
+                    Object.values(layers.baseLayers).forEach(layerId => {
+                        this.objectsLayer.toggleLayer(layerId, false);
+                    });
+                    // Show the selected base layer
+                    this.objectsLayer.toggleLayer(id, true);
+                    console.log(`Base Layer ${id} toggled: ${isChecked}`);
 
-                // Assure que baseLayer est en-dessous de measure-points
-                if (isChecked && this._map.getLayer('measure-points')) {
-                    this._map.moveLayer('measure-points');
-                    this._map.moveLayer('measure-lines');
+                    // Ensure baseLayer is below measure-points
+                    if (this._map.getLayer('measure-points')) {
+                        this._map.moveLayer('measure-points');
+                        this._map.moveLayer('measure-lines');
+                    }
                 }
             });
         }
@@ -121,7 +132,6 @@ class MaplibreLayerControl {
                     if (isChecked) {
                         // Place l’overlay juste avant 'measure-points' pour qu’il soit au-dessus des baseLayers
                         if (this._map.getLayer('measure-points')) {
-                            // this._map.moveLayer(id, 'measure-points');
                             this._map.moveLayer('measure-points');
                             this._map.moveLayer('measure-lines');
                         }
