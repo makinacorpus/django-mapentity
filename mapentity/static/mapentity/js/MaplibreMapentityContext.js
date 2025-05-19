@@ -9,7 +9,7 @@ class MaplibreMapentityContext {
      * sorted columns, additional information such as the full URL, and a timestamp.
      */
     getFullContext(map, kwargs = {}) {
-        const context = {};
+        let context = {};
         const filter = kwargs.filter; // Optional filter passed in the arguments
         const datatable = kwargs.datatable; // Optional datatable passed in the arguments
 
@@ -20,36 +20,67 @@ class MaplibreMapentityContext {
             'zoom': map.getZoom()
         };
 
+        console.log('Map view:', context['mapview']); // Log the map view for debugging
+
         // Visible layers by their name
         const layers = [];
-        document.querySelectorAll('form.leaflet-control-layers-list input:checked').forEach(input => {
+        document.querySelectorAll('div.layer-switcher-menu').forEach(input => {
             layers.push(input.parentNode.textContent.trim()); // Add the names of checked layers
         });
-        context['maplayers'] = layers;
+
+        const layerList = layers[0].split(" ");
+
+        context['maplayers'] = layerList;
+        console.log('maplayers:', context['maplayers']);
 
         // Form filters
         if (filter) {
-            // Exclude the bbox field, as it comes from the map view
-            const fields = Array.from(new FormData(filter)).filter(field => field.name !== 'bbox');
-            context['filter'] = new URLSearchParams(fields).toString(); // Serialize the remaining fields
+
+            const form = document.getElementById(filter);
+            console.log('filter:', form);
+              // A voir une fois que filter sera mise en place
+
+            const formData = new FormData(form);
+            // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox'
+            const fields = Array.from(formData).filter(([name, _]) => name !== 'bbox');
+            // Convertir les champs filtrés en URLSearchParams
+            context['filter'] = new URLSearchParams(fields).toString();
+
+
+            //       const filter = document.getElementById('mainfilter');
+            // console.log('form', filter);
+            // const inputs = filter.querySelectorAll('input, select, textarea');
+            // const fields = Array.from(inputs)
+            //     .filter(input => input.name && input.name !== 'bbox')
+            //     .map(input => [input.name, input.value]);
+            //
+            // context['filter'] = new URLSearchParams(fields).toString();
         }
+
+        console.log('filter:', context['filter']); // Log the filter for debugging
 
         // Sorted columns
         if (datatable) {
             context['sortcolumns'] = this.last_sort; // Use the last sort configuration
-
         }
+
+        console.log('sortcolumns:', context['sortcolumns']); // Log the sorted columns for debugging
 
         // Additional information useful for screenshots
         context['fullurl'] = window.location.toString(); // Full URL
+        console.log(context['fullurl']);
         context['url'] = window.location.pathname.toString(); // URL path
+        console.log(context['url']);
         context['viewport'] = {
             'width': window.innerWidth,
             'height': window.innerHeight
         }; // Window dimensions
 
+        console.log('viewport:', context['viewport']); // Log the viewport for debugging
+
         // Add a timestamp
         context['timestamp'] = new Date().getTime();
+        console.log('timestamp:', context['timestamp']); // Log the timestamp for debugging
 
         return context; // Return the context object
     }
@@ -184,7 +215,7 @@ class MaplibreMapentityContext {
         if (context.maplayers) {
             const layers = context.maplayers;
             layers.push(objectsname); // Add the objects name to the layers.
-            document.querySelectorAll('form.leaflet-control-layers-list input:checkbox').forEach(input => {
+            document.querySelectorAll('div.layer-switcher-menu input:checkbox').forEach(input => {
                 // Uncheck layers that do not match the objects name.
                 if (input.parentNode.textContent.trim() !== objectsname) {
                     input.removeAttribute('checked');
@@ -192,7 +223,7 @@ class MaplibreMapentityContext {
             });
             // Check layers corresponding to the names in the context.
             for (const layer of layers) {
-                document.querySelectorAll('form.leaflet-control-layers-list input').forEach(input => {
+                document.querySelectorAll('div.layer-switch-menu input').forEach(input => {
                     if (input.parentNode.textContent.trim() === layer) {
                         input.setAttribute('checked', 'checked');
                     }
@@ -205,9 +236,9 @@ class MaplibreMapentityContext {
         }
 
         // Disable tile animations if the context is in print mode.
-        if (context.print) {
-            map.getContainer().classList.remove('leaflet-fade-anim');
-        }
+        // if (context.print) {
+        //     map.getContainer().classList.remove('leaflet-fade-anim');
+        // }
         // Trigger a change event on the filter selections.
         filter.querySelectorAll('select').forEach(select => {
             select.dispatchEvent(new Event('change'));
@@ -216,4 +247,4 @@ class MaplibreMapentityContext {
 }
 
 // Usage example:
-// const mapEntityContext = new MapEntityContext();
+// const MaplibreMapentityContext = new MaplibreMapentityContext();
