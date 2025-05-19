@@ -13,8 +13,10 @@ can override CBV methods as usual::
     from mapentity.views.generic import (
         MapEntityList, MapEntityDetail,
         MapEntityFormat, MapEntityCreate, MapEntityUpdate, MapEntityDocument,
-        MapEntityDelete, MapEntityViewSet)
+        MapEntityDelete)
     from .models import Museum
+    from mapentity.views.api import MapEntityViewSet
+
     from .serializers import MuseumSerializer
 
 
@@ -54,8 +56,32 @@ can override CBV methods as usual::
     class MuseumViewSet(MapEntityViewSet):
         model = Museum
         serializer_class = MuseumSerializer
+        geojson_serializer_class = MuseumGeojsonSerializer
+
+        queryset = Museum.objects.all()
 
 
+Serializers
+------------
+
+You must define a least a regular and a geosjon serializer::
+
+
+    from rest_framework import serializers
+    from mapentity.serializers import MapentityGeojsonModelSerializer
+
+
+    from .models import Museum
+
+    class MuseumSerializer(serializers.ModelSerializer):
+        class Meta:
+            fields = "__all__"
+            model = Museum
+
+    class MuseumGeojsonSerializer(MapentityGeojsonModelSerializer):
+        class Meta(MapentityGeojsonModelSerializer.Meta):
+            fields = ["id", "name"]
+            model = Museum
 
 Filters
 -------
