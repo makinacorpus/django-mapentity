@@ -18,20 +18,15 @@
 
         {% compress css %}
             {% if DEBUG %}
-                <link rel="stylesheet" type="text/css"
-                      href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.css' %}"/>
-                <link rel="stylesheet" type="text/css"
-                      href="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.css' %}">
+                <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.css' %}"/>
+                <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.css' %}">
             {% else %}
                 <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.min.css' %}"/>
-                <link rel="stylesheet" type="text/css"
-                      href="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.min.css' %}">
+                <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.min.css' %}">
             {% endif %}
-            <link rel="stylesheet" type="text/css"
-                  href="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.css' %}"/>
-            <link rel="stylesheet" type="text/css"
-                  href="{% static 'mapentity/vendor/bootstrap-icons-1.2.2/font/bootstrap-icons.css' %}">
-            <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/chosen-1.8.7/chosen.css' %}">
+            <link rel="stylesheet" href="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.css' %}"/>
+            <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-icons-1.2.2/font/bootstrap-icons.css' %}">
+            <link rel="stylesheet" href="{% static 'mapentity/vendor/chosen-1.8.7/chosen.css' %}">
             {% leaflet_css plugins="ALL" %}
 
             <style>
@@ -64,9 +59,9 @@
         {% endcompress %}
 
         {% if DEBUG %}
-            <script type="text/javascript" src="{% static 'mapentity/vendor/jquery/jquery-1.9.1.js' %}"></script>
+            <script src="{% static 'mapentity/vendor/jquery/jquery-1.9.1.js' %}"></script>
         {% else %}
-            <script type="text/javascript" src="{% static 'mapentity/vendor/jquery/jquery-1.9.1.min.js' %}"></script>
+            <script src="{% static 'mapentity/vendor/jquery/jquery-1.9.1.min.js' %}"></script>
         {% endif %}
     {% endblock head %}
 
@@ -78,7 +73,8 @@
       data-app-verbosename="{{ app_verbose_name }}"
       data-modelname="{{ modelname }}"
       data-objectsname="{{ objectsname }}"
-      data-pk="{{ object.pk }}" class="{% block body_classes %}{% endblock %}">
+      data-pk="{{ object.pk }}"
+      class="{% block body_classes %}{% endblock %}">
 
 {% block content %}
     {% block navbar %}
@@ -107,7 +103,7 @@
     {% endblock container %}
 {% endblock content %}
 
-<div id='map' style='width: 50%; height: 700px; margin-top: 100px'></div>
+{#<div id='map' style='width: 50%; height: 700px; margin-top: 100px'></div>#}
 
 
 {% block extrabody %}
@@ -118,72 +114,70 @@
     {% block js_setings_view %}
         <script src="{% url JS_SETTINGS_VIEW %}?callback=window.SETTINGS%3D"></script>
     {% endblock %}
+
     {% block change_style %}{% endblock change_style %}
+
     {% compress js %}
+
         {% if DEBUG %}
-            <script type="text/javascript"
-                    src="{% static 'mapentity/vendor/bootstrap-4.6.0/js/bootstrap.bundle.js' %}"></script>
-            <script type="text/javascript"
-                    src="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.js' %}"></script>
+            <script src="{% static 'mapentity/vendor/bootstrap-4.6.0/js/bootstrap.bundle.js' %}"></script>
+            <script src="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.js' %}"></script>
         {% else %}
-            <script type="text/javascript"
-                    src="{% static 'mapentity/vendor/bootstrap-4.6.0/js/bootstrap.bundle.min.js' %}"></script>
-            <script type="text/javascript"
-                    src="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
+            <script src="{% static 'mapentity/vendor/bootstrap-4.6.0/js/bootstrap.bundle.min.js' %}"></script>
+            <script src="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/js/bootstrap-datepicker.min.js' %}"></script>
         {% endif %}
-        <script type="text/javascript" src="{% static 'mapentity/vendor/popper-1.16.1/popper.min.js' %}"></script>
-        <script src="{% static 'mapentity/jquery.hoverIntent.js' %}"></script>
+
+        <script src="{% static 'mapentity/vendor/popper-1.16.1/popper.min.js' %}"></script>
         <script src="{% static 'paperclip/bootstrap-4-confirm.js' %}"></script>
+
         {% for lang in LANGUAGES %}
             {% if lang.0 != 'en' %}
-                <script type="text/javascript"
-                        src="{% get_static_prefix %}mapentity/vendor/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.{{ lang.0 }}.min.js"
+                <script src="{% get_static_prefix %}mapentity/vendor/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.{{ lang.0 }}.min.js"
                         charset="UTF-8"></script>{% endif %}
         {% endfor %}
 
         {% leaflet_js plugins="ALL" %}
 
-{#        <script type="text/javascript" src="{% static 'mapentity/mapentity.helpers.js' %}"></script>#}
+
+        <script  src="{% static 'mapentity/vendor/jquery-resizable.min.js' %}"></script>
+        <script  src="{% static 'mapentity/vendor/chosen-1.8.7/chosen.jquery.min.js' %}"></script>
+        <script  src="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.js' %}"></script>
+
+        {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.helpers.js' %}"></script>#}
 {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.views.js' %}"></script>#}
 {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.history.js' %}"></script>#}
 {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.map.js' %}"></script>#}
 {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.context.js' %}"></script>#}
 {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.filter.js' %}"></script>#}
 
-        <script type="text/javascript">
-            L.Icon.Default.imagePath = "{% static 'leaflet/images/' %}";
-            L.Control.MeasureControl.TITLE = "{% trans 'Measure distances' %}";
-            L.Control.Screenshot.TITLE = "{% trans 'Save map as image' %}";
-            L.Control.FileLayerLoad.LABEL = '<i class="bi bi-folder2-open"></i>';
-            L.Control.FileLayerLoad.TITLE = "{% trans 'Load local file (GPX, KML, GeoJSON)' %}";
-            L.GeometryField.unsavedText = "{% trans 'Map geometry is unsaved' %}";
-
-            MapEntity.i18n = {
-                'Objects': "{% trans 'Objects' %}",
-                'Search': "{% trans 'Search' %}",
-                'results': "{% trans 'results' %}",
-                'Current criteria': "{% trans 'Current criteria' %}",
-                'No filter': "{% trans 'No filter' %}",
-            };
-        </script>
-
-        <script type="text/javascript" src="{% static 'mapentity/jquery.deserialize.js' %}"></script>
-        <script type="text/javascript" src="{% static 'mapentity/vendor/jquery-resizable.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'mapentity/vendor/chosen-1.8.7/chosen.jquery.min.js' %}"></script>
-        <script type="text/javascript"
-                src="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'mapentity/leaflet-objectslayer.js' %}"></script>
-        <script type="text/javascript" src="{% static 'mapentity/leaflet-serializers.js' %}"></script>
-        <script type="text/javascript" src="{% static 'mapentity/leaflet-datatables.js' %}"></script>
-        <script type="text/javascript" src="{% static 'mapentity/leaflet.enumeration.js' %}"></script>
+{#        <script>#}
+{#            L.Icon.Default.imagePath = "{% static 'leaflet/images/' %}";#}
+{#            L.Control.MeasureControl.TITLE = "{% trans 'Measure distances' %}";#}
+{#            L.Control.Screenshot.TITLE = "{% trans 'Save map as image' %}";#}
+{#            L.Control.FileLayerLoad.LABEL = '<i class="bi bi-folder2-open"></i>';#}
+{#            L.Control.FileLayerLoad.TITLE = "{% trans 'Load local file (GPX, KML, GeoJSON)' %}";#}
+{#            L.GeometryField.unsavedText = "{% trans 'Map geometry is unsaved' %}";#}
+{##}
+{#            MapEntity.i18n = {#}
+{#                'Objects': "{% trans 'Objects' %}",#}
+{#                'Search': "{% trans 'Search' %}",#}
+{#                'results': "{% trans 'results' %}",#}
+{#                'Current criteria': "{% trans 'Current criteria' %}",#}
+{#                'No filter': "{% trans 'No filter' %}",#}
+{#            };#}
+{#        </script>#}
+ {#        <script src="{% static 'mapentity/jquery.hoverIntent.js' %}"></script>#}
+        {#        <script  src="{% static 'mapentity/jquery.deserialize.js' %}"></script>#}
+{#        <script  src="{% static 'mapentity/leaflet-objectslayer.js' %}"></script>#}
+{#        <script  src="{% static 'mapentity/leaflet-serializers.js' %}"></script>#}
+{#        <script  src="{% static 'mapentity/leaflet-datatables.js' %}"></script>#}
+{#        <script  src="{% static 'mapentity/leaflet.enumeration.js' %}"></script>#}
 
         <!-- Forms -->
-        <script src="{% static 'mapentity/RelatedObjectLookups.js' %}"></script>
-        <script src="{% static 'mapentity/jquery.formset-patched.js' %}"></script>
+{#        <script src="{% static 'mapentity/RelatedObjectLookups.js' %}"></script>#}
+{#        <script src="{% static 'mapentity/jquery.formset-patched.js' %}"></script>#}
 
         {% smart_include "extrajs" %}
-
-
 
 
         <script src="/static/mapentity/js/MaplibreMapentityContext.js"></script>

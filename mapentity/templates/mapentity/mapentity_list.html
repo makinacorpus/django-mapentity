@@ -102,7 +102,7 @@
         <div id="maphead">
           {% smart_include "maphead" %}
         </div>
-        <div id="mainmap" data-mapid="mainmap"></div>
+        <div id="mainmap" data-map-id="mainmap"></div>
         {% endblock mainmap %}
       </div>
     </div>
@@ -114,5 +114,5 @@
 {% block extrabody %}
 {{ block.super }}
 
-{% leaflet_map "mainmap" fitextent=False creatediv=False %}
+{#{% leaflet_map "mainmap" fitextent=False creatediv=False %}#}
 {% endblock extrabody %}
