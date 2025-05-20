@@ -25,10 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // bounds pour la carte
-    const bounds = [[1.3, 43.7], [1.5, 43.5]];
+    const bounds = [
+      [1.0722, 43.6045],   // coin bas gauche
+      [1.8162, 44.5045]    // coin haut droit
+    ];
 
     // Instancier la carte
-    const myMap = new MaplibreMap('map', bounds);
+    const myMap = new MaplibreMap('mainmap', bounds);
 
     // Initialiser la couche d'objets
     objectsLayer.initialize(myMap.getMap());
@@ -73,6 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Maplibre History
     // const history = new MaplibreMapentityHistory();
     // history.render();
+
+     var context = $('body').data();
+     console.log('context : ' , JSON.stringify(context));
+    var context2 = $('#mainmap').data();
+    console.log('context2 : ', context2);
+    var context3 = $('#detailmap').data();
+    console.log('context3 : ', context3);
+    console.debug('View ', context.modelname, context.viewname);
 
     // Une fois la carte chargée
     myMap.getMap().on('load', () => {

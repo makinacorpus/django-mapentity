@@ -21,7 +21,7 @@ class MaplibreMap {
             container: this.id,
             style: 'https://demotiles.maplibre.org/style.json',
             center: [1.3952, 43.5963],
-            zoom: 6,
+            zoom: 5,
         });
 
         // Ajouter les contrôles standards
@@ -39,13 +39,13 @@ class MaplibreMap {
         });
         this.map.addControl(scale, 'bottom-left');
 
-        if (this.bounds) {
-            this.map.fitBounds(this.bounds, {
-                padding: 20,
-                linear: true,
-                duration: 1000
-            });
-        }
+        // if (this.bounds) {
+        //     this.map.fitBounds(this.bounds, {
+        //         padding: 20,
+        //         linear: true,
+        //         duration: 1000
+        //     });
+        // }
     }
 
     getMap() {
