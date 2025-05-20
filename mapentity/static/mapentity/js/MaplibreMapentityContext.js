@@ -245,6 +245,3 @@ class MaplibreMapentityContext {
         });
     }
 }
-
-// Usage example:
-// const MaplibreMapentityContext = new MaplibreMapentityContext();
