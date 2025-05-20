@@ -157,7 +157,7 @@ L.ObjectsLayer = L.GeoJSON.extend({
         @param url: The URL from which to load the GeoJSON data
      */
     load: function (url) {
-        console.log("load", url); // Log the URL being loaded
+        console.log("load load", url); // Log the URL being loaded
 
         // Function to handle successful data loading
         var jsonLoad = function (data) {

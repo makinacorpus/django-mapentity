@@ -70,7 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
+    // Maplibre History
+    // const history = new MaplibreMapentityHistory();
+    // history.render();
 
     // Une fois la carte chargée
     myMap.getMap().on('load', () => {
@@ -90,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Charger dynamiquement les objets depuis le backend en utilisant la méthode load
         objectsLayer.load(layerUrl);
 
-        // Ajouter la couche d'objets à la carte
+        // Initialisation de la synchronisation de la carte avec la table
         const mapsync = new MaplibreMapListSync(mainDatatable, myMap.getMap(), objectsLayer);
 
         // Ajouter un contrôle pour réinitialiser la vue
@@ -122,6 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
             filter: 'mainfilter', // id du formulaire de filtre
             datatable: mainDatatable
         });
+
+           // Gestion des événements de rechargement
+        // mapsync.on('reloaded', function () {
+        //     // Affiche et sauvegarde le nombre de résultats
+        //     history.saveListInfo({model: modelName,
+        //                                     nb: 7});
+        //     // Affiche les informations sur le calque
+        //     // objectsLayer.fire('info', {info : (7 + ' ' + tr("results"))});
+        // });
 
     });
 });

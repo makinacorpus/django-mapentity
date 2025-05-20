@@ -288,6 +288,7 @@ $(window).on('entity:map:list', function (e, data) {
 
     // Ajoute le calque des objets à la carte
     map.addLayer(objectsLayer);
+    // console.log('Ajout de la couche d\'objets', window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname));
     objectsLayer.load(window.SETTINGS.urls.layer.replace(new RegExp('modelname', 'g'), data.modelname)); // chargement des données via url
 
     // Ajoute une légende pour le calque des objets

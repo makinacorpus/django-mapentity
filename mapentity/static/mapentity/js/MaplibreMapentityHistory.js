@@ -1,7 +1,5 @@
 class MaplibreMapentityHistory {
-    constructor() {
-        // Constructor can be used to initialize any necessary properties
-    }
+    constructor() { }
 
     // Saves search result information (e.g., number of results, model type) to localStorage.
     saveListInfo(infos) {
@@ -32,7 +30,7 @@ class MaplibreMapentityHistory {
             });
 
             const closeCurrent = window.location.href.includes(path);
-
+            console.log('closeCurrent dans maplibre', closeCurrent);
             if (closeCurrent) {
                 // If the current page is being closed
                 if (entries.length > 2) {
@@ -74,6 +72,37 @@ class MaplibreMapentityHistory {
             dropdownParent.classList.add(infos.model);
         }
 
+        // Initialize tooltips for history list links
+       // document.querySelectorAll('#historylist a').forEach(link => {
+       //     link.addEventListener('mouseenter', () => {
+       //         const tooltipText = link.getAttribute('title');
+       //         if(!tooltipText) return;
+       //
+       //         // création de l'élément tooltip
+       //         const tooltip = document.createElement('div');
+       //         tooltip.classList = 'custom-tooltip';
+       //         tooltip.innerText = tooltipText;
+       //
+       //         // positionnement
+       //         const rect = link.getBoundingClientRect(); // get the position of the link
+       //         tooltip.style.left = `${rect.left + window.scrollX + rect.width/2}px`; // center the tooltip
+       //          tooltip.style.top = `${rect.top + window.scrollY - 5}px`; // bottom placement
+       //
+       //         // centrer horizontallement
+       //         tooltip.style.transform = 'translateX(-50%)';
+       //
+       //         // stokcker la référence pour la suppression
+       //         link._tooltip = tooltip;
+       //     });
+       //
+       //     link.addEventListener('mouseleave', () => {
+       //         if(link._tooltip) {
+       //             document.body.removeChild(link._tooltip);
+       //             delete link._tooltip;
+       //         }
+       //     });
+       // });
+
         // Set up click event for the close button to remove history entries
         document.querySelectorAll('#historylist button.close').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -110,7 +139,3 @@ class MaplibreMapentityHistory {
         });
     }
 }
-
-// Usage example:
-// const mapEntityHistory = new MaplibreMapEntityHistory();
-// mapEntityHistory.render();

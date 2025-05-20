@@ -42,6 +42,8 @@ $(document).ready(function (e) {
 
     // Gestion des vues
     var context = $('body').data();
+    // var context2 = $('#mainmap').data();
+    // console.log(context2);
     console.debug('View ', context.modelname, context.viewname);
     $(window).trigger('entity:view:' + context.viewname, [context]);
 
@@ -49,8 +51,12 @@ $(document).ready(function (e) {
     $(window).on('map:init', function (e) {
         var data = e.originalEvent ?
                    e.originalEvent.detail : e.detail;
+
+        console.log('data', data);
+        console.log('context', context);
         // Fusionner les données de contexte avec les données de l'événement
         $.extend(data, context);
+        console.log('data après extension', data);
         $(window).trigger('entity:map', [data]);
         $(window).trigger('entity:map:' + context.viewname, [data]);
 
