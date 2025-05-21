@@ -16,7 +16,7 @@ class MaplibreMeasureControl {
             }
         };
         this._distanceContainer = null;
-        this._button = null; // Bouton accessible dans toute la classe
+        this._button = null;
     }
 
     onAdd(map) {
@@ -39,7 +39,7 @@ class MaplibreMeasureControl {
 
         this._container.appendChild(this._button);
 
-        // Distance container
+        // Container pour la distance
         this._distanceContainer = this._distanceDisplay.createContainer();
         this._distanceContainer.style.display = 'none';
 

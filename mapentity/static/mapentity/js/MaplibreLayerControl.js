@@ -62,14 +62,13 @@ class MaplibreLayerControl {
     _populateBaseLayers(container) {
         const layers = this.objectsLayer.getLayers();
 
-        // Group name for radio buttons
         const radioGroupName = 'baseLayer';
 
         for (const [name, id] of Object.entries(layers.baseLayers)) {
             const label = document.createElement('label');
             const input = document.createElement('input');
             input.type = 'radio';
-            input.name = radioGroupName; // Same name for all radio buttons in the group
+            input.name = radioGroupName;
             input.checked = false;
             input.dataset.layerId = id;
             label.appendChild(input);
@@ -80,15 +79,15 @@ class MaplibreLayerControl {
             input.addEventListener('change', (e) => {
                 const isChecked = e.target.checked;
                 if (isChecked) {
-                    // Hide all base layers
+                    // Cacher tous les autres baseLayers
                     Object.values(layers.baseLayers).forEach(layerId => {
                         this.objectsLayer.toggleLayer(layerId, false);
                     });
-                    // Show the selected base layer
+                    // Montrer le baseLayer sélectionné
                     this.objectsLayer.toggleLayer(id, true);
                     console.log(`Base Layer ${id} toggled: ${isChecked}`);
 
-                    // Ensure baseLayer is below measure-points
+                    // S'assurer que mesure est au-dessus de tous les autres
                     if (this._map.getLayer('measure-points')) {
                         this._map.moveLayer('measure-points');
                         this._map.moveLayer('measure-lines');

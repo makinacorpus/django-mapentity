@@ -3,7 +3,7 @@ class MaplibreObjectsLayer {
         this._map = null;
         this._objects = {};
         this._current_objects = {};
-        this.options = { ...options }; // Use the spread operator to create a copy of the options object
+        this.options = { ...options };
         this.currentPopup = null;
         this.layers = {
             baseLayers: {},
@@ -190,7 +190,7 @@ class MaplibreObjectsLayer {
         // dans current_objects on va stocker le layerId
         this._current_objects[primaryKey] = layerId;
 
-        // Ensure overlays is structured as a key-value object and iterable
+        // Si la couche est déjà présente, on ne l'ajoute pas
         const category = categoryName || this.options.modelname;
         if (!this.layers.overlays[category]) {
             this.layers.overlays[category] = {};

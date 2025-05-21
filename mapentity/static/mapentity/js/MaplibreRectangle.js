@@ -11,7 +11,7 @@ class MaplibreRectangle {
     }
 
     _boundsToCoordinates(bounds) {
-        // Convert bounds to an array of coordinates representing the rectangle
+
         const sw = bounds[0]; // Southwest corner
         const ne = bounds[1]; // Northeast corner
 
@@ -20,12 +20,12 @@ class MaplibreRectangle {
             [sw[0], ne[1]], // Northwest
             [ne[0], ne[1]], // Northeast
             [ne[0], sw[1]], // Southeast
-            [sw[0], sw[1]]  // Close the polygon
+            [sw[0], sw[1]]  // Fermeture du polygon
         ];
     }
 
     getWKT() {
-        // Use the getWKT function to get the WKT representation of rectangle
+        // Utilisation de la fonction getWKT pour récupérer les coordonnées sous format WKT
         return getWKT({
             type: 'Polygon',
             coordinates: [this.coordinates]

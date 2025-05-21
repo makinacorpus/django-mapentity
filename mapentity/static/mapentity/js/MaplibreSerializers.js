@@ -1,4 +1,4 @@
-// Define a utility function to generate WKT (Well-Known Text) representations of geometries.
+// Fonction utilitaire pour convertir les géométries en WKT
 function getWKT(geometry){
     if(geometry.type === 'Point'){
         return `POINT(${geometry.cordinates.join(' ')})`;

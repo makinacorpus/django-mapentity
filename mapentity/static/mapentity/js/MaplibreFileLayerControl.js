@@ -12,16 +12,17 @@ class MaplibreFileLayerControl {
     }
 
     onAdd(map) {
-        console.log('Adding MaplibreFileLayerControl to map:', map); // Log the map instance
+        console.log('Adding MaplibreFileLayerControl to map:', map);
         this.loader = new MaplibreFileLoader(map, { layerOptions: this.options.layerOptions });
 
-        // Initialize Drag-and-drop
+        // Initialisation du Drag-and-drop
         this._initDragAndDrop(map);
 
-        // Initialize map control
+        // Initialisation du conteneur
         return this.initContainer(map);
     }
 
+    // Initialisation du drag and drop
     _initDragAndDrop(map) {
         const fileLoader = this.loader;
         const dropbox = map.getContainer();
@@ -61,11 +62,11 @@ class MaplibreFileLayerControl {
 
 
     initContainer(map) {
-        // Create the container for the control
+        // Creation du conteneur principal
         this._container = document.createElement('div');
         this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group maplibregl-filelayerload';
 
-        // Create a button for the control
+        // Création du bouton pour charger un fichier
         const button = document.createElement('button');
         button.className = 'maplibregl-ctrl-icon maplibregl-filelayerload';
         const img = document.createElement('img');
@@ -77,19 +78,19 @@ class MaplibreFileLayerControl {
         button.appendChild(img);
         this._container.appendChild(button);
 
-        // Create an invisible file input
+        // Création de l'input de type file
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = '.gpx,.kml,.geojson';
         fileInput.style.display = 'none';
 
-        // Load on file change
+        // chargement du fichier lors d'un upload
         const fileLoader = this.loader;
         fileInput.addEventListener("change", function (e) {
             fileLoader.load(this.files[0]);
         }, false);
 
-        // Bind click on hidden file input to the button
+        // Ajout de l'événement de clic pour charger le fichier
         button.onclick = () => fileInput.click();
 
         this._container.appendChild(fileInput);

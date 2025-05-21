@@ -39,7 +39,7 @@ class MaplibreMap {
         });
         this.map.addControl(scale, 'bottom-left');
 
-        // If bounds are provided, fit the map to those bounds
+        // Si des limites initiales sont fournies, ajuster la vue de la carte
         if (this.boundsInit) {
             this.map.on('load', () => {
                 this.map.fitBounds(this.boundsInit, { padding: 0 });
