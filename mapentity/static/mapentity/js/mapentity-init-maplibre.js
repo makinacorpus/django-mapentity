@@ -24,11 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         highlight: true,
     });
 
-    // bounds pour la carte
-    const bounds = [
-      [1.0722, 43.6045],   // coin bas gauche
-      [1.8162, 44.5045]    // coin haut droit
-    ];
+    // Bounds pour la carte
+    const bounds = [[-3.630430, 40.120372], [3.208008, 45.061882]];
 
     // Instancier la carte
     const myMap = new MaplibreMap('mainmap', bounds);
@@ -37,11 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     objectsLayer.initialize(myMap.getMap());
 
     // Initialiser la table de données principale
-    const mainDatatable = $('#objects-list').DataTable({
+    const mainDatatable = new DataTable('#objects-list', {
         'processing': true,
         'serverSide': true,
-        aoColumnDefs: [
-            { "bVisible": false, "aTargets": [0] },  // don't show first column (ID)
+        columnDefs: [
+            { "visible": false, "targets": [0] },  // don't show first column (ID)
         ],
         "ajax": {
             "url": `/api/${modelName}/drf/${modelName}s.datatables`
@@ -60,28 +57,22 @@ document.addEventListener('DOMContentLoaded', () => {
             },
         },
         createdRow: function (row, data, index) {
-            // highlight feature on map on row hover
-            var pk = data.id;
-            $(row).hover(
-                function () {
-                    objectsLayer.highlight(pk);
-                },
-                function () {
-                    objectsLayer.highlight(pk, false);
-                }
-            );
+            // Highlight feature on map on row hover
+            const pk = data.id;
+            row.addEventListener('mouseenter', () => {
+                objectsLayer.highlight(pk);
+            });
+            row.addEventListener('mouseleave', () => {
+                objectsLayer.highlight(pk, false);
+            });
         }
     });
 
-    // Maplibre History
-    // const history = new MaplibreMapentityHistory();
-    // history.render();
-
-     var context = $('body').data();
-     console.log('context : ' , JSON.stringify(context));
-    var context2 = $('#mainmap').data();
+    var context = document.body.dataset;
+    console.log('context : ', JSON.stringify(context));
+    var context2 = document.getElementById('mainmap').dataset;
     console.log('context2 : ', context2);
-    var context3 = $('#detailmap').data();
+    var context3 = document.getElementById('detailmap')?.dataset;
     console.log('context3 : ', context3);
     console.debug('View ', context.modelname, context.viewname);
 
@@ -107,8 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const mapsync = new MaplibreMapListSync(mainDatatable, myMap.getMap(), objectsLayer);
 
         // Ajouter un contrôle pour réinitialiser la vue
-
-        myMap.getMap().addControl(new MaplibreResetViewControl(), 'top-left');
+        myMap.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
         const fileLayerLoadControl = new MaplibreFileLayerControl({
             layerOptions: {
@@ -121,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const layerSwitcher = new MaplibreLayerControl(objectsLayer);
         myMap.getMap().addControl(layerSwitcher, 'top-right');
 
-        context = new MaplibreMapentityContext();
+        const context = new MaplibreMapentityContext();
 
         context.getFullContext(myMap.getMap(), {
             filter: 'mainfilter', // id du formulaire de filtre
@@ -129,21 +119,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         context['selector'] = '#map';
-        console.log('context : ' , JSON.stringify(context));
+        console.log('context : ', JSON.stringify(context));
 
         context.saveFullContext(myMap.getMap(), {
             filter: 'mainfilter', // id du formulaire de filtre
             datatable: mainDatatable
         });
 
-           // Gestion des événements de rechargement
-        // mapsync.on('reloaded', function () {
-        //     // Affiche et sauvegarde le nombre de résultats
-        //     history.saveListInfo({model: modelName,
-        //                                     nb: 7});
-        //     // Affiche les informations sur le calque
-        //     // objectsLayer.fire('info', {info : (7 + ' ' + tr("results"))});
+        // fire an event when the map is moved
+        // myMap.getMap().on("moveend", function () {
+        // la construction du rectangle n'est nécessaire que pour le filtre des données.
+        // Elle permet de spécifier au back de faire la recherche dans une zone donnée
+        //     const rect = new MaplibreRectangle(bounds);
+        //     const wkt = rect.getWKT();
+        //     // Update the hidden input field with the WKT representation
+        //     document.getElementById('id_bbox').value = wkt;
         // });
 
+        // Ensure the map stays within the defined bounds
+        myMap.getMap().on('moveend', function() {
+            const currentBounds = myMap.getMap().getBounds();
+            if (!currentBounds.contains(bounds[0]) || !currentBounds.contains(bounds[1])) {
+                myMap.getMap().fire('reset-view');
+            }
+        });
     });
 });

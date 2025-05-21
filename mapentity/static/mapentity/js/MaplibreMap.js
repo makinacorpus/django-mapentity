@@ -1,10 +1,10 @@
 class MaplibreMap {
-    constructor(id, bounds = null) {
+    constructor(id, boundsInit = null) {
         this.id = id;
+        this.boundsInit = boundsInit;
         this.map = null;
         this.container = null;
-        this.bounds = bounds;
-        this.resetViewControl = null; // modifier ceci, mettre en place un objet dans lequel seraa stocké tous les controllers ajoutés pour suivre leur trace
+        this.resetViewControl = null; // modifier ceci, mettre en place un objet dans lequel sera stocké tous les controllers ajoutés pour suivre leur trace
         this._init();
     }
 
@@ -39,13 +39,12 @@ class MaplibreMap {
         });
         this.map.addControl(scale, 'bottom-left');
 
-        // if (this.bounds) {
-        //     this.map.fitBounds(this.bounds, {
-        //         padding: 20,
-        //         linear: true,
-        //         duration: 1000
-        //     });
-        // }
+        // If bounds are provided, fit the map to those bounds
+        if (this.boundsInit) {
+            this.map.on('load', () => {
+                this.map.fitBounds(this.boundsInit, { padding: 0 });
+            });
+        }
     }
 
     getMap() {
@@ -54,10 +53,6 @@ class MaplibreMap {
 
     getContainer() {
         return this.container;
-    }
-
-    getBounds() {
-        return this.bounds;
     }
 
     setResetViewControl(control) {
