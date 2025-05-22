@@ -68,13 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    var context = document.body.dataset;
-    console.log('context : ', JSON.stringify(context));
-    var context2 = document.getElementById('mainmap').dataset;
-    console.log('context2 : ', context2);
-    var context3 = document.getElementById('detailmap')?.dataset;
-    console.log('context3 : ', context3);
-    console.debug('View ', context.modelname, context.viewname);
+    // var context = document.body.dataset;
+    // console.log('context : ', JSON.stringify(context));
+    // var context2 = document.getElementById('mainmap').dataset;
+    // console.log('context2 : ', context2);
+    // var context3 = document.getElementById('detailmap')?.dataset;
+    // console.log('context3 : ', context3);
+    // console.debug('View ', context.modelname, context.viewname);
 
     // Une fois la carte chargée
     myMap.getMap().on('load', () => {
@@ -93,9 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Charger dynamiquement les objets depuis le backend en utilisant la méthode load
         objectsLayer.load(layerUrl);
-
-        // Initialisation de la synchronisation de la carte avec la table
-        const mapsync = new MaplibreMapListSync(mainDatatable, myMap.getMap(), objectsLayer);
 
         // Ajouter un contrôle pour réinitialiser la vue
         myMap.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
@@ -126,6 +123,20 @@ document.addEventListener('DOMContentLoaded', () => {
             datatable: mainDatatable
         });
 
+        // Gestion de History
+        const history = new MaplibreMapentityHistory();
+        // Gestion des Filtres
+         const togglableFiltre = new MaplibreMapentityTogglableFiltre();
+        // Initialisation de la synchronisation de la carte avec la table
+        const mapsync = new MaplibreMapListSync(mainDatatable, myMap.getMap(),
+            objectsLayer, togglableFiltre, history);
+
+        // Charge le formulaire de filtre au premier clic sur le bouton
+        togglableFiltre.button.addEventListener('click', function (e) {
+            console.log('Chargement du formulaire de filtre');
+            togglableFiltre.load_filter_form(mapsync);
+        });
+
         // fire an event when the map is moved
         // myMap.getMap().on("moveend", function () {
         // la construction du rectangle n'est nécessaire que pour le filtre des données.
@@ -137,11 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // });
 
         // Ensure the map stays within the defined bounds
-        myMap.getMap().on('moveend', function() {
-            const currentBounds = myMap.getMap().getBounds();
-            if (!currentBounds.contains(bounds[0]) || !currentBounds.contains(bounds[1])) {
-                myMap.getMap().fire('reset-view');
-            }
-        });
+        // myMap.getMap().on('moveend', function() {
+        //     const currentBounds = myMap.getMap().getBounds();
+        //     if (!currentBounds.contains(bounds[0]) || !currentBounds.contains(bounds[1])) {
+        //         myMap.getMap().fire('reset-view');
+        //     }
+        // });
     });
 });

@@ -20,8 +20,6 @@ class MaplibreMapentityContext {
             'zoom': map.getZoom()
         };
 
-        console.log('Map view:', context['mapview']); // Log the map view for debugging
-
         // Visible layers by their name
         const layers = [];
         document.querySelectorAll('div.layer-switcher-menu').forEach(input => {
@@ -30,14 +28,10 @@ class MaplibreMapentityContext {
 
         const layerList = layers[0].split(" ");
 
-        context['maplayers'] = layerList;
-        console.log('maplayers:', context['maplayers']);
-
         // Form filters
         if (filter) {
 
             const form = document.getElementById(filter);
-            console.log('filter:', form);
               // A voir une fois que filter sera mise en place
 
             const formData = new FormData(form);
@@ -57,30 +51,21 @@ class MaplibreMapentityContext {
             // context['filter'] = new URLSearchParams(fields).toString();
         }
 
-        console.log('filter:', context['filter']); // Log the filter for debugging
-
         // Sorted columns
         if (datatable) {
             context['sortcolumns'] = this.last_sort; // Use the last sort configuration
         }
 
-        console.log('sortcolumns:', context['sortcolumns']); // Log the sorted columns for debugging
-
         // Additional information useful for screenshots
         context['fullurl'] = window.location.toString(); // Full URL
-        console.log(context['fullurl']);
         context['url'] = window.location.pathname.toString(); // URL path
-        console.log(context['url']);
         context['viewport'] = {
             'width': window.innerWidth,
             'height': window.innerHeight
         }; // Window dimensions
 
-        console.log('viewport:', context['viewport']); // Log the viewport for debugging
-
         // Add a timestamp
         context['timestamp'] = new Date().getTime();
-        console.log('timestamp:', context['timestamp']); // Log the timestamp for debugging
 
         return context; // Return the context object
     }

@@ -296,7 +296,7 @@ $(window).on('entity:map:list', function (e, data) {
     map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"));
 
     // Initialise la table de données principale
-    var dt = MapEntity.mainDatatable;
+    var dt = MapEnmouseintenttity.mainDatatable;
     window.objectsLayer = objectsLayer;
 
     /*
