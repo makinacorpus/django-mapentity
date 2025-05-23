@@ -97,7 +97,14 @@ class MaplibreObjectsLayer {
     addData(geojson) {
         geojson.features.forEach(feature => {
             this.addLayer(feature);
+            this._mapObjects(feature);
         });
+    }
+     _mapObjects(feature) {
+        const pk = this.getPrimaryKey(feature);
+        this._objects[pk] = feature;
+        // this._current_objects[pk] = feature;
+        feature.properties = feature.properties || {};
     }
 
     highlight(primaryKey, on = true) {
@@ -238,6 +245,8 @@ class MaplibreObjectsLayer {
 
     getLayer(primaryKey) {
         return this._objects[primaryKey];
+        console.log('objects', this._objects);
+        console.log('primaryKey', primaryKey);
     }
 
     getPrimaryKey(feature) {
@@ -270,5 +279,86 @@ class MaplibreObjectsLayer {
         });
         this._current_objects = new_objects;
         this._map.fire('layers:added', { layers: this.getLayers() }); // Émettre un événement lorsque de nouvelles couches sont ajoutées
+    }
+
+    // Fit the map to the bounds of the layer we clicked on
+    jumpTo(pk) {
+        const layer = this.getLayer(pk);
+        console.log('jumpTo', layer);
+        if (layer) {
+            const bounds = this.calculateBounds(layer);
+            if (bounds) {
+                this._map.fitBounds(bounds, { padding: 50 });
+            }
+        }
+    }
+
+    calculateBounds(geojson) {
+        if (!geojson) return null;
+
+        const bounds = new maplibregl.LngLatBounds();
+
+        // Handle single feature
+        if (geojson.geometry) {
+            const coords = geojson.geometry.coordinates;
+            const type = geojson.geometry.type;
+
+            if (!coords || !type) return null;
+
+            let flattened = [];
+
+            switch (type) {
+                case 'Point':
+                    flattened = [coords];
+                    break;
+                case 'MultiPoint':
+                case 'LineString':
+                    flattened = coords;
+                    break;
+                case 'Polygon':
+                case 'MultiLineString':
+                    flattened = coords.flat();
+                    break;
+                case 'MultiPolygon':
+                    flattened = coords.flat(2);
+                    break;
+                default:
+                    return null;
+            }
+
+            flattened.forEach(coord => bounds.extend(coord));
+        } else if (geojson.features) {
+            // Handle multiple features
+            geojson.features.forEach(feature => {
+                const coords = feature.geometry?.coordinates;
+                const type = feature.geometry?.type;
+                if (!coords || !type) return;
+
+                let flattened = [];
+
+                switch (type) {
+                    case 'Point':
+                        flattened = [coords];
+                        break;
+                    case 'MultiPoint':
+                    case 'LineString':
+                        flattened = coords;
+                        break;
+                    case 'Polygon':
+                    case 'MultiLineString':
+                        flattened = coords.flat();
+                        break;
+                    case 'MultiPolygon':
+                        flattened = coords.flat(2);
+                        break;
+                    default:
+                        return;
+                }
+
+                flattened.forEach(coord => bounds.extend(coord));
+            });
+        }
+
+        return bounds.isEmpty() ? null : bounds;
     }
 }

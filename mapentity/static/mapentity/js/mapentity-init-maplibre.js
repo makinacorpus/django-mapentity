@@ -34,39 +34,90 @@ document.addEventListener('DOMContentLoaded', () => {
     objectsLayer.initialize(myMap.getMap());
 
     // Initialiser la table de données principale
+
+    // Sélectionneur unique défini globalement
+    const selectorOnce = (() => {
+        let current = { 'pk': null, 'row': null };
+
+        const toggleSelectRow = (prevRow, nextRow) => {
+            const animateRow = (row, adding) => {
+                if (!row) return;
+                row.style.display = 'none';
+                setTimeout(() => {
+                    row.style.display = '';
+                    row.classList.toggle('success', adding);
+                }, 100);
+            };
+
+            animateRow(prevRow, false);
+            animateRow(nextRow, true);
+        };
+
+        const toggleSelectObject = (pk, on = true) => {
+            console.log('toggleSelectObject', pk);
+            objectsLayer.select(pk, on);
+        };
+
+        return {
+            select: (pk, row) => {
+                if (pk === current.pk) {
+                    pk = null;
+                    row = null;
+                }
+
+                const prev = current;
+                current = { pk, row };
+
+                toggleSelectRow(prev.row, row);
+
+                if (prev.pk && prev.row) toggleSelectObject(prev.pk, false);
+                if (row && pk) toggleSelectObject(pk, true);
+            }
+        };
+    })();
+
+
+    // Initialisation du DataTable
     const mainDatatable = new DataTable('#objects-list', {
-        'processing': true,
-        'serverSide': true,
+        processing: true,
+        serverSide: true,
         columnDefs: [
-            { "visible": false, "targets": [0] },  // don't show first column (ID)
+            { visible: false, targets: [0] }
         ],
-        "ajax": {
-            "url": `/api/${modelName}/drf/${modelName}s.datatables`
+        ajax: {
+            url: `/api/${modelName}/drf/${modelName}s.datatables`
         },
         responsive: true,
-        pageLength: 7, // page size is computed from the window size - expandDatatableHeight()
+        pageLength: 7,
         scrollY: '100vh',
         scrollCollapse: true,
-        "lengthChange": false, // disable page length selection
-        "language": {
-            "paginate": {
-                "first": "<<",
-                "last": ">>",
-                "next": ">",
-                "previous": "<"
+        lengthChange: false,
+        language: {
+            paginate: {
+                first: "<<",
+                last: ">>",
+                next: ">",
+                previous: "<"
             },
         },
         createdRow: function (row, data, index) {
-            // Highlight feature on map on row hover
             const pk = data.id;
+
             row.addEventListener('mouseenter', () => {
                 objectsLayer.highlight(pk);
             });
             row.addEventListener('mouseleave', () => {
                 objectsLayer.highlight(pk, false);
             });
+            row.addEventListener('click', () => {
+                selectorOnce.select(pk, row);
+            });
+            row.addEventListener('dblclick', () => {
+                objectsLayer.jumpTo(pk);
+            });
         }
     });
+
 
     // var context = document.body.dataset;
     // console.log('context : ', JSON.stringify(context));
@@ -129,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
          const togglableFiltre = new MaplibreMapentityTogglableFiltre();
         // Initialisation de la synchronisation de la carte avec la table
         const mapsync = new MaplibreMapListSync(mainDatatable, myMap.getMap(),
-            objectsLayer, togglableFiltre, history);
+            objectsLayer, togglableFiltre, history, bounds);
 
         // Charge le formulaire de filtre au premier clic sur le bouton
         togglableFiltre.button.addEventListener('click', function (e) {

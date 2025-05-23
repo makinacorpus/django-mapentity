@@ -1,3 +1,4 @@
+// A Supprimer car ce dernier ne sert à rien si fait le calcule de bounds dans le MaplibreObjectsLayer
 class MaplibreLayerIndex {
     constructor(options = {}) {
         this.options = options;
