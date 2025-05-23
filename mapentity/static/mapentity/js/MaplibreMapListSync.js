@@ -21,7 +21,6 @@ class MaplibreMapListSync {
     }
 
     initialize() {
-        // this.selectorOnce = this.__initSelectorOnce();
 
         this.map.onMoveEnd = (e) => this._onMapViewChanged(e);
 
