@@ -1,11 +1,10 @@
 class MaplibreMapListSync {
-    constructor(datatable, map, objectsLayer, togglableFiltre, history, bounds) {
+    constructor(datatable, map, objectsLayer, togglableFiltre, history) {
         this.dt = datatable;
         this.map = map;
         this.layer = objectsLayer;
         this.togglableFiltre = togglableFiltre; // Initialize the filter
         this.history = history;
-        this.bounds = bounds;
         this.options = {
             filter: {
                 form: document.getElementById('mainfilter'),
@@ -20,9 +19,9 @@ class MaplibreMapListSync {
         this.initialize();
     }
 
-    initialize() {
+     initialize() {
 
-        this.map.onMoveEnd = (e) => this._onMapViewChanged(e);
+        this.map.on('moveend', (e) => this._onMapViewChanged(e));
 
         if (this.options.filter) {
             this.options.filter.submitbutton.addEventListener('click', (e) => this._onFormSubmit(e));
@@ -46,21 +45,22 @@ class MaplibreMapListSync {
     }
 
     _handleReloaded(nbrecords) {
-        // Affiche et sauvegarde le nombre de résultats
-        this.history.saveListInfo({ model: this.options.modelname, nb: nbrecords });
-        // Call the setsubmit method of the togglableFiltre object
-        this.togglableFiltre.setsubmit();
+            // Affiche et sauvegarde le nombre de résultats
+            this.history.saveListInfo({ model: this.options.modelname, nb: nbrecords });
+            // Call the setsubmit method of the togglableFiltre object
+            this.togglableFiltre.setsubmit();
     }
 
     _onMapViewChanged(e) {
-        if (!this.map.loaded()) {
-            // MapLibre equivalent of leaflet bug handling
-            setTimeout(() => this.map.onMoveEnd(e), 20);
+        if (!this.map || !this.map.loaded()) {
+            setTimeout(() => this._onMapViewChanged(e), 20);
             return;
         }
-        // If the map is loaded, we can set the bounds of the filter form
+
+        // Une fois la carte prête, on met à jour les bornes du formulaire de filtre
         this._formSetBounds();
-        // And reload the list
+
+        // Et on recharge la liste d’entités affichées
         this._reloadList();
     }
 
@@ -139,18 +139,23 @@ class MaplibreMapListSync {
             console.warn("Map view not set, cannot get bounds.");
             return;
         }
+        // Récupérer les limites géographiques actuelles de la carte
+        const bounds = this.map.getBounds(); // Le bounds utilisé doit être celle étudiée à la carte car elle est dynamique.
 
-        // Clamp latitude and longitude values to valid ranges
-        const min_lon = Math.max(this.bounds[0][0], -180);
-        const min_lat = Math.max(this.bounds[0][1], -90);
-        const max_lon = Math.min(this.bounds[1][0], 180);
-        const max_lat = Math.min(this.bounds[1][1], 90);
+        // Extraire les coordonnées et les borner aux valeurs valides
+        const min_lon = Math.max(bounds.getWest(), -180);
+        const min_lat = Math.max(bounds.getSouth(), -90);
+        const max_lon = Math.min(bounds.getEast(), 180);
+        const max_lat = Math.min(bounds.getNorth(), 90);
 
-        // Create a rectangle representing the map bounds
+        // Créer un rectangle MaplibreRectangle à partir de ces coordonnées
         const rect = new MaplibreRectangle([[min_lon, min_lat], [max_lon, max_lat]]);
 
-        // Update the filter's bounding box field with the WKT representation of the rectangle
-        this.options.filter.bboxfield.value = rect.getWKT();
+        // Vérifier que bboxfield existe avant d'y accéder
+        if (this.options.filter && this.options.filter.bboxfield) {
+            // Mettre à jour le champ bbox du filtre avec le WKT du rectangle
+            this.options.filter.bboxfield.value = rect.getWKT();
+        }
     }
 
     _formClear(form) {

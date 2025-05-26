@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
          const togglableFiltre = new MaplibreMapentityTogglableFiltre();
         // Initialisation de la synchronisation de la carte avec la table
         const mapsync = new MaplibreMapListSync(mainDatatable, myMap.getMap(),
-            objectsLayer, togglableFiltre, history, bounds);
+            objectsLayer, togglableFiltre, history);
 
         // Charge le formulaire de filtre au premier clic sur le bouton
         togglableFiltre.button.addEventListener('click', function (e) {
