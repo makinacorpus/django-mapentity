@@ -1,7 +1,7 @@
 class MaplibreMap {
     constructor(id, boundsInit = null) {
         this.id = id;
-        this.boundsInit = boundsInit;
+        // this.boundsInit = boundsInit;
         this.map = null;
         this.container = null;
         this.resetViewControl = null; // modifier ceci, mettre en place un objet dans lequel sera stocké tous les controllers ajoutés pour suivre leur trace
@@ -40,11 +40,11 @@ class MaplibreMap {
         this.map.addControl(scale, 'bottom-left');
 
         // Si des limites initiales sont fournies, ajuster la vue de la carte
-        if (this.boundsInit) {
-            this.map.on('load', () => {
-                this.map.fitBounds(this.boundsInit, { padding: 0 });
-            });
-        }
+        // if (this.boundsInit) {
+        //     this.map.on('load', () => {
+        //         this.map.fitBounds(this.boundsInit, { padding: 0 });
+        //     });
+        // }
     }
 
     getMap() {
@@ -53,10 +53,6 @@ class MaplibreMap {
 
     getContainer() {
         return this.container;
-    }
-
-    setResetViewControl(control) {
-        this.resetViewControl = control;
     }
 
     getResetViewControl() {
