@@ -4,196 +4,482 @@ class MaplibreMapentityTogglableFiltre {
         this.fields = {};
         this.visible = false;
         this.loaded_form = false;
-        this.popover = document.getElementById('filters-popover');
-        this.hover = document.getElementById('filters-hover');
-        this.isOutsideClickHandlerAttached = false;
 
-        // this.button.addEventListener('mouseenter', () => this.showinfo());
-        // this.button.addEventListener('mouseleave', () => this.hideinfo());
+        // Vérification que les éléments existent
+        if (!this.button) {
+            console.error('Required button element not found');
+            return;
+        }
 
-        document.querySelectorAll('#mainfilter select, #mainfilter input').forEach(element => {
-            element.addEventListener('change', () => this.setfield(element));
+        this.initPopover();
+        this.initEventListeners();
+    }
+
+    initPopover() {
+        // Vérifier que jQuery et Bootstrap sont disponibles
+        if (typeof $ === 'undefined') {
+            console.error('jQuery not available for popover');
+            return;
+        }
+
+        // Vérifier que les éléments existent
+        const popoverEl = document.getElementById('filters-popover');
+        const hoverEl = document.getElementById('filters-hover');
+
+        if (!popoverEl || !hoverEl) {
+            console.error('Popover elements not found');
+            return;
+        }
+
+        // Initialiser le popover principal
+        this.popover = $('#filters-popover').popover({
+            placement: 'bottom',
+            html: true,
+            content: '',
+            title: 'useless',
+            // trigger: 'manual'  // Ne pas utiliser 'manual' pour le popover principal
         });
 
-        document.getElementById('filters-close').addEventListener('click', () => this.close());
+        // Initialiser le hover popover
+        this.hover = $('#filters-hover').popover({
+            placement: 'bottom',
+            html: true,
+            content: () => this.infos(),
+            title: 'Critères actuels',
+            trigger: 'manual'
+        });
+    }
 
+    initEventListeners() {
+        // Events pour le hover info
+        this.button.addEventListener('mouseenter', () => this.showinfo());
+        this.button.addEventListener('mouseleave', () => this.hideinfo());
+
+        // Event pour le toggle principal
         this.button.addEventListener('click', (e) => {
             e.stopPropagation();
+            console.log("Toggle filters button clicked");
             this.toggle();
+        });
+
+        // Event pour fermer
+        const closeBtn = document.getElementById('filters-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.toggle());
+        }
+
+        // Events pour les champs existants
+        this.attachFieldEvents();
+    }
+
+    attachFieldEvents() {
+        document.querySelectorAll('#mainfilter select, #mainfilter input').forEach(element => {
+            element.addEventListener('change', () => this.setfield(element));
         });
     }
 
     tip() {
-        return this.popover;
+        // Retourner l'élément tip du popover Bootstrap
+        try {
+            if (this.popover && this.popover.length > 0) {
+                const popoverData = this.popover.data('bs.popover');
+                console.log('Popover data:', popoverData);
+                if (popoverData && popoverData.tip) {
+                    console.log('Popover tip found:', popoverData.tip);
+                    return $(popoverData.tip);
+                }
+            }
+        } catch (error) {
+            console.error('Error getting popover tip:', error);
+        }
+        return null;
     }
 
     async load_filter_form(mapsync) {
         const mainfilter = document.getElementById('mainfilter');
-        if (!this.loaded_form) {
-            const filterUrl = mainfilter.getAttribute('filter-url');
-            try {
-                const response = await fetch(filterUrl);
-                if (!response.ok) throw new Error('Network response was not ok');
+        if (!mainfilter || this.loaded_form) {
+            return;
+        }
 
-                const responseText = await response.text();
-                document.querySelector('#filters-panel .filter-spinner-container').style.display = 'none';
+        const filterUrl = mainfilter.getAttribute('filter-url');
+        if (!filterUrl) {
+            console.error('Filter URL not found');
+            return;
+        }
 
-                mainfilter.outerHTML = responseText;
-                const newMainFilter = document.getElementById('mainfilter');
+        console.log('Loading filter form from:', filterUrl);
+        try {
+            const response = await fetch(filterUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
+            const responseText = await response.text();
+
+            // Cacher le spinner
+            const spinner = document.querySelector('#filters-panel .filter-spinner-container');
+            if (spinner) {
+                spinner.style.display = 'none';
+            }
+
+            // Remplacer le contenu
+            mainfilter.outerHTML = responseText;
+            const newMainFilter = document.getElementById('mainfilter');
+
+            if (!newMainFilter) {
+                throw new Error('New main filter not found after replacement');
+            }
+
+            // Configuration mapsync
+            if (mapsync?.options?.filter) {
                 mapsync.options.filter.form = newMainFilter;
+            }
 
-                document.getElementById('filter').addEventListener('click', (e) => mapsync._onFormSubmit(e));
-                document.getElementById('reset').addEventListener('click', (e) => mapsync._onFormReset(e));
+            // Attacher les événements aux boutons
+            this.attachFormEvents(mapsync, newMainFilter);
 
-                document.querySelectorAll('#mainfilter select, #mainfilter input').forEach(element => {
-                    element.addEventListener('change', () => this.setfield(element));
-                });
+            // Gestion des select multiples avec Chosen
+            this.setupChosenSelects(newMainFilter);
 
-                newMainFilter.addEventListener('reset', () => {
-                    setTimeout(() => {
-                        newMainFilter.querySelectorAll('select[multiple]').forEach(select => {
-                            select.dispatchEvent(new Event('chosen:updated'));
-                        });
-                    }, 1);
-                });
+            // Réorganiser les filtres right
+            this.reorganizeRightFilters(newMainFilter);
 
+            // Dispatch custom event
+            this.dispatchFilterEvent();
+
+            this.loaded_form = true;
+
+        } catch (error) {
+            console.error('Error loading filter form:', error);
+            this.showError('Erreur lors du chargement des filtres');
+        }
+    }
+
+    attachFormEvents(mapsync, newMainFilter) {
+        // Events pour submit et reset
+        const filterBtn = document.getElementById('filter');
+        const resetBtn = document.getElementById('reset');
+
+        if (filterBtn && mapsync?._onFormSubmit) {
+            filterBtn.addEventListener('click', (e) => mapsync._onFormSubmit(e));
+        }
+
+        if (resetBtn && mapsync?._onFormReset) {
+            resetBtn.addEventListener('click', (e) => mapsync._onFormReset(e));
+        }
+
+        // Events pour les champs
+        newMainFilter.querySelectorAll('select, input').forEach(element => {
+            element.addEventListener('change', () => this.setfield(element));
+        });
+
+        // Event pour reset avec timeout pour Chosen
+        newMainFilter.addEventListener('reset', () => {
+            setTimeout(() => {
                 newMainFilter.querySelectorAll('select[multiple]').forEach(select => {
-                    select.addEventListener('change', (e) => {
-                        const name = e.target.getAttribute('name');
-                        const container = document.querySelector(`div#id_${name}_chzn > ul`);
-                        const hasSelectedOption = Array.from(e.target.options).some(option => option.selected);
-                        container.classList.toggle('filter-set', hasSelectedOption);
-                    });
+                    const event = new Event('chosen:updated');
+                    select.dispatchEvent(event);
                 });
+            }, 1);
+        });
+    }
 
-                newMainFilter.querySelectorAll('.right-filter').forEach(filter => {
-                    filter.remove();
-                    document.querySelector('#mainfilter > .right').appendChild(filter);
-                });
+    setupChosenSelects(newMainFilter) {
+        // Gestion des select multiples avec Chosen (si disponible)
+        const multipleSelects = newMainFilter.querySelectorAll('select[multiple]');
 
-                const context = document.body.dataset;
-                window.dispatchEvent(new CustomEvent('entity:view:filter', { detail: { modelname: context.modelname } }));
-                this.loaded_form = true;
+        multipleSelects.forEach(select => {
+            // Si Chosen est disponible
+            if (typeof $.fn.chosen === 'function') {
+                $(select).chosen();
+            }
 
+            // Event listener pour la classe filter-set
+            select.addEventListener('change', (e) => {
+                const name = e.target.getAttribute('name');
+                const container = document.querySelector(`div#id_${name}_chzn > ul`);
+                const hasSelectedOption = Array.from(e.target.options).some(option => option.selected);
+
+                if (container) {
+                    container.classList.toggle('filter-set', hasSelectedOption);
+                }
+            });
+        });
+    }
+
+    reorganizeRightFilters(newMainFilter) {
+        const rightContainer = document.querySelector('#mainfilter > .right');
+        if (!rightContainer) return;
+
+        newMainFilter.querySelectorAll('.right-filter').forEach(filter => {
+            const p = filter.closest('p');
+            if (p) {
+                rightContainer.appendChild(p);
+            }
+        });
+    }
+
+    // Méthode pour dispatcher un événement de filtre, y jeter un oeil une fois que tout sera en place
+    dispatchFilterEvent() {
+        const context = document.body.dataset;
+        if (context?.modelname) {
+            window.dispatchEvent(new CustomEvent('entity:view:filter', {
+                detail: { modelname: context.modelname }
+            }));
+        }
+    }
+
+    showError(message) {
+        console.error(message);
+    }
+
+    showinfo() {
+        // Si le popover principal est visible, ne pas montrer le hover
+        if (this.visible) {
+            return;
+        }
+
+        if (!this.hover) {
+            console.warn('Hover popover not initialized');
+            return;
+        }
+
+        try {
+            this.hover.popover('show');
+        } catch (error) {
+            console.error('Error showing info popover:', error);
+        }
+    }
+
+    hideinfo() {
+        if (this.hover) {
+            try {
+                this.hover.popover('hide');
             } catch (error) {
-                console.error('Error loading filter form:', error);
+                console.error('Error hiding info popover:', error);
             }
         }
     }
 
-    handleOutsideClick = (e) => {
-        if (!this.tip().contains(e.target) && !this.button.contains(e.target)) {
-            this.close();
-        }
-    }
-
-    showinfo = () => {
-        if (this.visible) return;
-        this.hover.innerHTML = this.infos();
-        this.hover.style.display = 'block';
-    }
-
-    hideinfo = () => {
-        this.hover.style.display = 'none';
-    }
-
-    infos = () => {
+    infos() {
         if (Object.keys(this.fields).length === 0) {
-            return "<p>No filter</p>";
+            return '<p>Aucun filtre</p>';
         }
 
-        const p = '<p><span class="filter-info">%name%</span>: %value%</p>';
         return Object.values(this.fields).map(f => {
-            let value = f.value
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#x27;');
-            return p.replace('%name%', f.label).replace('%value%', value);
+            const safeValue = this.escapeHtml(f.value);
+            const safeLabel = this.escapeHtml(f.label);
+            return `<p><span class="filter-info">${safeLabel}</span>: ${safeValue}</p>`;
         }).join('');
     }
 
-    toggle = () => {
-        this.visible ? this.close() : this.open();
+    escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+
+        return String(str).replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;'
+        }[char]));
     }
 
-    open = () => {
-        if (this.visible) return;
+    toggle() {
+        if (!this.popover) {
+            console.warn('Popover not initialized');
+            return;
+        }
 
+        if (this.visible) {
+            this.hidePopover();
+        } else {
+            console.log("Showing filters popover");
+            this.showPopover();
+        }
+
+        this.visible = !this.visible;
+    }
+
+    showPopover() {
+        // Cacher le hover info d'abord
         this.hideinfo();
-        this.tip().innerHTML = '<div class="arrow"/>';
-        this.tip().appendChild(document.querySelector('#filters-wrapper #filters-panel'));
 
-        this.tip().style.display = 'block';
-        this.tip().style.width = `${this.tip().querySelector('#filters-panel form').offsetWidth}px`;
-        this.visible = true;
+        if (!this.popover) {
+            console.error('Popover not initialized');
+            return;
+        }
 
-        if (!this.isOutsideClickHandlerAttached) {
-            document.addEventListener('click', this.handleOutsideClick);
-            this.isOutsideClickHandlerAttached = true;
+        try {
+            // Afficher le popover
+            this.popover.popover('show');
+
+            // Attendre que le popover soit créé dans le DOM
+            setTimeout(() => {
+                const tip = this.tip();
+                if (tip && tip.length > 0) {
+                    this.setupPopoverContent();
+                    this.attachOutsideClickListener();
+                } else {
+                    console.error('Popover tip still not found after show');
+                }
+            }, 100); // Augmenter le délai
+
+        } catch (error) {
+            console.error('Error showing popover:', error);
         }
     }
 
-    close = () => {
-        if (!this.visible) return;
+    hidePopover() {
+        const tip = this.tip();
 
-        const panel = this.tip().querySelector('#filters-panel');
-        if (panel) {
-            document.getElementById('filters-wrapper').appendChild(panel);
+        // Remettre le panel dans le wrapper avant de fermer
+        if (tip && tip.length > 0) {
+            const panel = tip.find('#filters-panel');
+            const wrapper = document.getElementById('filters-wrapper');
+            if (panel.length > 0 && wrapper) {
+                wrapper.appendChild(panel[0]);
+            }
         }
 
-        this.tip().style.display = 'none';
-        this.visible = false;
+        // Cacher le popover
+        try {
+            this.popover.popover('hide');
+        } catch (error) {
+            console.error('Error hiding popover:', error);
+        }
 
-        if (this.isOutsideClickHandlerAttached) {
-            document.removeEventListener('click', this.handleOutsideClick);
-            this.isOutsideClickHandlerAttached = false;
+        // Retirer l'event listener
+        this.removeOutsideClickListener();
+    }
+
+    setupPopoverContent() {
+        const tip = this.tip();
+        if (!tip || tip.length === 0) {
+            console.warn('Popover tip not found for setup');
+            return;
+        }
+
+        try {
+            // Vider le contenu et ajouter la flèche
+            tip.empty().append('<div class="arrow"/>');
+
+            // Déplacer le panel du wrapper vers le tip
+            const panel = $('#filters-wrapper #filters-panel');
+            if (panel.length > 0) {
+                tip.append(panel.detach());
+
+                // Ajuster la largeur basée sur le formulaire
+                const form = panel.find('form');
+                if (form.length > 0) {
+                    const formWidth = form.outerWidth();
+                    tip.width(formWidth);
+                }
+            } else {
+                console.warn('Filters panel not found in wrapper');
+            }
+        } catch (error) {
+            console.error('Error setting up popover content:', error);
         }
     }
 
-    setfield = (field) => {
-        const label = field.dataset.label;
-        const name = field.getAttribute('name');
-        let val = field.value;
-        let set = val !== '' && val != [''];
+    attachOutsideClickListener() {
+        // Utiliser la méthode jQuery pour les événements avec namespace
+        $(document).on('click.filtersOutside', (e) => {
+            const tip = this.tip();
+            const target = e.target;
 
-        if (field.tagName === 'INPUT' && field.type === 'hidden') {
+            if (!tip || tip.length === 0) return;
+
+            // Vérifier si le clic est à l'extérieur
+            const isOutsideTip = tip.has(target).length === 0;
+            const isOutsideButton = !this.button.contains(target);
+
+            if (isOutsideTip && isOutsideButton) {
+                this.toggle();
+            }
+        });
+    }
+
+    removeOutsideClickListener() {
+        $(document).off('click.filtersOutside');
+    }
+
+    setfield(field) {
+        if (!field || !field.name) return false;
+
+        const $field = $(field);
+        const name = field.name;
+        const label = $field.data('label') || name;
+        let val = $field.val();
+        let set = val !== '' && val !== null && !Array.isArray(val) || (Array.isArray(val) && val.length > 0 && val[0] !== '');
+
+        // Logique pour différents types de champs (comme dans l'original)
+        if ($field.is('input[type=hidden]')) {
             set = false;
-        } else if (field.tagName === 'SELECT' && field.multiple) {
-            set = Array.from(field.options).some(option => option.selected);
-        } else if (field.tagName === 'SELECT') {
-            set = val !== field.querySelector('option')?.value;
+        } else if ($field.is('select[multiple]')) {
+            set = val !== null && val.length > 0;
+        } else if ($field.is('select')) {
+            const firstOptionVal = $field.find('option').first().val();
+            set = val !== firstOptionVal;
         }
 
+        // Déterminer la valeur d'affichage
         let value = val;
         if (field.tagName === 'SELECT') {
-            value = Array.from(field.options)
-                .filter(option => option.selected)
-                .map(option => option.textContent)
+            value = $field.find('option:selected').toArray()
+                .map(option => $(option).text())
                 .join(', ');
         }
 
+        // Mettre à jour les champs et classes
         if (set) {
-            this.fields[name] = { name: name, val: val, value: value, label: label };
-            field.classList.add('filter-set');
+            this.fields[name] = { name, val, value, label };
+            $field.addClass('filter-set');
         } else {
             delete this.fields[name];
-            field.classList.remove('filter-set');
+            $field.removeClass('filter-set');
         }
 
         this.setsubmit();
         return set;
     }
 
-    setsubmit = () => {
-        if (Object.keys(this.fields).length === 0) {
-            this.button.classList.add('btn-info');
-            this.button.classList.remove('btn-warning');
+    setsubmit() {
+        const btn = document.getElementById('filters-btn');
+        if (!btn) return;
+
+        const hasFilters = Object.keys(this.fields).length > 0;
+
+        if (hasFilters) {
+            btn.classList.remove('btn-info');
+            btn.classList.add('btn-warning');
         } else {
-            this.button.classList.remove('btn-info');
-            this.button.classList.add('btn-warning');
+            btn.classList.add('btn-info');
+            btn.classList.remove('btn-warning');
         }
     }
+
+    // Méthode pour nettoyer les ressources
+    // destroy() {
+    //     this.hideinfo();
+    //     this.hidePopover();
+    //     this.removeOutsideClickListener();
+    //
+    //     if (this.popover) {
+    //         try {
+    //             this.popover.popover('dispose');
+    //         } catch (error) {
+    //             console.error('Error destroying popover:', error);
+    //         }
+    //     }
+    //
+    //     if (this.hover) {
+    //         try {
+    //             this.hover.popover('dispose');
+    //         } catch (error) {
+    //             console.error('Error destroying hover popover:', error);
+    //         }
+    //     }
+    // }
 }
