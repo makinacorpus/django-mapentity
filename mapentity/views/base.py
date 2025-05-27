@@ -65,19 +65,20 @@ class ServeAttachment(View):
                 os.path.basename(path))
         return response
 
-
+# API settings
 class JSSettings(JSONResponseMixin, TemplateView):
     """
     Javascript settings, in JSON format.
     Likely to be overriden. Contains only necessary stuff
     for mapentity.
     """
-
+    # context data
     def get_context_data(self):
         dictsettings = {}
         dictsettings['debug'] = settings.DEBUG
         dictsettings['map'] = dict(
-            extent=getattr(settings, 'LEAFLET_CONFIG', {}).get('SPATIAL_EXTENT'),
+            maplibre_config = app_settings['MAPLIBRE_CONFIG'],
+            # extent=getattr(settings, 'LEAFLET_CONFIG', {}).get('SPATIAL_EXTENT'),
             styles=app_settings['MAP_STYLES'],
         )
 
