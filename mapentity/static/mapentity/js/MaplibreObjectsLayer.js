@@ -103,7 +103,6 @@ class MaplibreObjectsLayer {
      _mapObjects(feature) {
         const pk = this.getPrimaryKey(feature);
         this._objects[pk] = feature;
-        // this._current_objects[pk] = feature;
         feature.properties = feature.properties || {};
     }
 
@@ -132,7 +131,9 @@ class MaplibreObjectsLayer {
         const layerId = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
 
-        feature.id = primaryKey;
+        if(!feature.id){
+            feature.id = primaryKey;
+        }
         this._map.addSource(sourceId, {
             type: 'geojson',
             data: feature
@@ -194,6 +195,7 @@ class MaplibreObjectsLayer {
         }
 
         this._map.addLayer(layerConfig);
+
         // dans current_objects on va stocker le layerId
         this._current_objects[primaryKey] = layerId;
 
@@ -263,22 +265,28 @@ class MaplibreObjectsLayer {
 
     updateFromPks(primaryKeys) {
         const new_objects = {};
+
+        // Construire new_objects avec les layers qui doivent être visibles
         primaryKeys.forEach(primaryKey => {
             const layer = this._objects[primaryKey];
             if (layer) {
                 new_objects[primaryKey] = layer;
+                // Si la layer n'existe pas encore dans current_objects, l'ajouter
                 if (!this._current_objects[primaryKey]) {
                     this.addLayer(layer);
                 }
             }
         });
+
+        // Supprimer les layers qui ne sont plus dans primaryKeys
         Object.keys(this._current_objects).forEach(primaryKey => {
             if (!new_objects[primaryKey]) {
                 this.removeLayer(this._current_objects[primaryKey]);
+                // Supprimer la référence de current_objects afin de garder la cohérence
+                delete this._current_objects[primaryKey];
             }
         });
-        this._current_objects = new_objects;
-        this._map.fire('layers:added', { layers: this.getLayers() }); // Émettre un événement lorsque de nouvelles couches sont ajoutées
+
     }
 
     // Fit the map to the bounds of the layer we clicked on
