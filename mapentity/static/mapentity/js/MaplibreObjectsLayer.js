@@ -282,8 +282,14 @@ class MaplibreObjectsLayer {
         Object.keys(this._current_objects).forEach(primaryKey => {
             if (!new_objects[primaryKey]) {
                 this.removeLayer(this._current_objects[primaryKey]);
-                // Supprimer la référence de current_objects afin de garder la cohérence
+                // Supprimer la référence de current_objects
                 delete this._current_objects[primaryKey];
+
+                // Supprimer aussi des overlays
+                const category = this.options.modelname;
+                if (this.layers.overlays[category] && this.layers.overlays[category][primaryKey]) {
+                    delete this.layers.overlays[category][primaryKey];
+                }
             }
         });
 
