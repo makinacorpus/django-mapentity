@@ -40,15 +40,6 @@ class MaplibreMapentityContext {
             // Convertir les champs filtrés en URLSearchParams
             context['filter'] = new URLSearchParams(fields).toString();
 
-
-            //       const filter = document.getElementById('mainfilter');
-            // console.log('form', filter);
-            // const inputs = filter.querySelectorAll('input, select, textarea');
-            // const fields = Array.from(inputs)
-            //     .filter(input => input.name && input.name !== 'bbox')
-            //     .map(input => [input.name, input.value]);
-            //
-            // context['filter'] = new URLSearchParams(fields).toString();
         }
 
         // Sorted columns
