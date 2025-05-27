@@ -118,9 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
+    const settings = window.SETTINGS;
+    console.log(settings);
     // var context = document.body.dataset;
-    // console.log('context : ', JSON.stringify(context));
+    // console.log('context init : ', JSON.stringify(context));
     // var context2 = document.getElementById('mainmap').dataset;
     // console.log('context2 : ', context2);
     // var context3 = document.getElementById('detailmap')?.dataset;
