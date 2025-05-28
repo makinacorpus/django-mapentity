@@ -61,10 +61,16 @@ class MaplibreLayerControl {
 
     _populateBaseLayers(container) {
         const layers = this.objectsLayer.getLayers();
-
         const radioGroupName = 'baseLayer';
 
-        for (const [name, id] of Object.entries(layers.baseLayers)) {
+        // Obtenir les entrées des baseLayers
+        const baseLayerEntries = Object.entries(layers.baseLayers);
+
+        // Variable pour stocker la première couche
+        let firstLayerId = null;
+        let firstInput = null;
+
+        for (const [index, [name, id]] of baseLayerEntries.entries()) {
             const label = document.createElement('label');
             const input = document.createElement('input');
             input.type = 'radio';
@@ -75,6 +81,12 @@ class MaplibreLayerControl {
             label.append(` ${name}`);
             container.appendChild(label);
             container.appendChild(document.createElement('br'));
+
+            // Stocker la référence de la première couche
+            if (index === 0) {
+                firstLayerId = id;
+                firstInput = input;
+            }
 
             input.addEventListener('change', (e) => {
                 const isChecked = e.target.checked;
@@ -93,6 +105,33 @@ class MaplibreLayerControl {
                         this._map.moveLayer('measure-lines');
                     }
                 }
+            });
+        }
+
+        // Sélectionner automatiquement la première couche de base
+        if (firstLayerId && firstInput) {
+            // Marquer le premier radio button comme sélectionné
+            firstInput.checked = true;
+
+            // Cacher toutes les couches de base d'abord
+            Object.values(layers.baseLayers).forEach(layerId => {
+                this.objectsLayer.toggleLayer(layerId, false);
+            });
+
+            // Activer la première couche
+            this.objectsLayer.toggleLayer(firstLayerId, true);
+            console.log(`Default Base Layer ${firstLayerId} activated`);
+
+            // S'assurer que mesure est au-dessus
+            if (this._map.getLayer('measure-points')) {
+                this._map.moveLayer('measure-points');
+                this._map.moveLayer('measure-lines');
+            }
+
+            // Déclencher un événement personnalisé pour signaler la sélection par défaut
+            this._map.fire('baseLayerSelected', {
+                layerId: firstLayerId,
+                isDefault: true
             });
         }
     }
@@ -129,7 +168,7 @@ class MaplibreLayerControl {
                     console.log(`Overlay Layer ${id} toggled: ${isChecked}`);
 
                     if (isChecked) {
-                        // Place l’overlay juste avant 'measure-points' pour qu’il soit au-dessus des baseLayers
+                        // Place l'overlay juste avant 'measure-points' pour qu'il soit au-dessus des baseLayers
                         if (this._map.getLayer('measure-points')) {
                             this._map.moveLayer('measure-points');
                             this._map.moveLayer('measure-lines');

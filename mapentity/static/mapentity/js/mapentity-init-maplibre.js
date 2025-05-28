@@ -33,7 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialiser la couche d'objets
     objectsLayer.initialize(myMap.getMap());
 
-    // Initialiser la table de données principale
+    // Ajouter une couche de fond OSM
+    window.SETTINGS.map.maplibreConfig.TILES.forEach((tile) => {
+            const [tileName, tileUrl, tileAttribution] = tile;
+            objectsLayer.addBaseLayer(tileName, {
+                id: tileName + '-base',
+                tiles: [tileUrl],
+                attribution: tileAttribution
+            });
+        });
 
     // Sélectionneur unique défini globalement
     const selectorOnce = (() => {
@@ -126,16 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Une fois la carte chargée
     myMap.getMap().on('load', () => {
-        // Ajouter une couche de fond OSM
-
-        window.SETTINGS.map.maplibreConfig.TILES.forEach((tile) => {
-            const [tileName, tileUrl, tileAttribution] = tile;
-            objectsLayer.addBaseLayer(tileName, {
-                id: tileName + '-base',
-                tiles: [tileUrl],
-                attribution: tileAttribution
-            });
-        });
 
         // Charger dynamiquement les objets depuis le backend en utilisant la méthode load
         objectsLayer.load(layerUrl);
