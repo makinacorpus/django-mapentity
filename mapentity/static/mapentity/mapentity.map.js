@@ -1,50 +1,50 @@
-// Définition d'une nouvelle classe de contrôle Leaflet pour la capture d'écran
-L.Control.Screenshot = L.Control.extend({
-    includes: L.Mixin.Events, // Inclut les événements de mixin Leaflet
-    options: {
-        position: 'topleft', // Position du contrôle sur la carte
-    },
-    statics: {
-        TITLE:  'Screenshot' // Titre du contrôle
-    },
-
-    // Initialisation du contrôle avec une URL et une fonction de contexte
-    initialize: function (url, getcontext) {
-        this.url = url; // URL pour envoyer les données de capture
-        this.getcontext = getcontext; // Fonction pour obtenir le contexte de capture
-    },
-
-    // Fonction pour effectuer une capture d'écran
-    screenshot: function () {
-        // Effet visuel de capture d'écran
-        $('<div id="overlay" style="z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;"> </div>')
-            .appendTo(document.body) // Ajoute un overlay blanc au document
-            .fadeOut(); // Fait disparaître l'overlay
-
-        var fullContext = this.getcontext(); // Récupère le contexte complet
-        // Hack pour télécharger une réponse en pièce jointe via Ajax
-        $('<form action="' + this.url + '" method="post">' +
-        '<textarea name="printcontext">' + fullContext + '</textarea>' +
-        '</form>').appendTo('body').submit().remove(); // Soumet et supprime le formulaire
-        this.fire('triggered'); // Déclenche un événement personnalisé
-    },
-
-    // Ajout du contrôle à la carte
-    onAdd: function(map) {
-        this.map = map; // Référence à la carte
-        this._container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-control leaflet-bar'); // Conteneur du contrôle
-        var link = L.DomUtil.create('a', 'leaflet-control-zoom-out screenshot-control', this._container); // Lien pour le contrôle
-        link.href = '#'; // Lien vide
-        link.title = L.Control.Screenshot.TITLE; // Titre du lien
-
-        // Ajout des événements au lien
-        L.DomEvent
-            .addListener(link, 'click', L.DomEvent.stopPropagation) // Empêche la propagation de l'événement
-            .addListener(link, 'click', L.DomEvent.preventDefault) // Empêche le comportement par défaut
-            .addListener(link, 'click', this.screenshot, this); // Appelle la fonction de capture
-        return this._container; // Retourne le conteneur du contrôle
-    }
-});
+// // Définition d'une nouvelle classe de contrôle Leaflet pour la capture d'écran
+// L.Control.Screenshot = L.Control.extend({
+//     includes: L.Mixin.Events, // Inclut les événements de mixin Leaflet
+//     options: {
+//         position: 'topleft', // Position du contrôle sur la carte
+//     },
+//     statics: {
+//         TITLE:  'Screenshot' // Titre du contrôle
+//     },
+//
+//     // Initialisation du contrôle avec une URL et une fonction de contexte
+//     initialize: function (url, getcontext) {
+//         this.url = url; // URL pour envoyer les données de capture
+//         this.getcontext = getcontext; // Fonction pour obtenir le contexte de capture
+//     },
+//
+//     // Fonction pour effectuer une capture d'écran
+//     screenshot: function () {
+//         // Effet visuel de capture d'écran
+//         $('<div id="overlay" style="z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;"> </div>')
+//             .appendTo(document.body) // Ajoute un overlay blanc au document
+//             .fadeOut(); // Fait disparaître l'overlay
+//
+//         var fullContext = this.getcontext(); // Récupère le contexte complet
+//         // Hack pour télécharger une réponse en pièce jointe via Ajax
+//         $('<form action="' + this.url + '" method="post">' +
+//         '<textarea name="printcontext">' + fullContext + '</textarea>' +
+//         '</form>').appendTo('body').submit().remove(); // Soumet et supprime le formulaire
+//         this.fire('triggered'); // Déclenche un événement personnalisé
+//     },
+//
+//     // Ajout du contrôle à la carte
+//     onAdd: function(map) {
+//         this.map = map; // Référence à la carte
+//         this._container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-control leaflet-bar'); // Conteneur du contrôle
+//         var link = L.DomUtil.create('a', 'leaflet-control-zoom-out screenshot-control', this._container); // Lien pour le contrôle
+//         link.href = '#'; // Lien vide
+//         link.title = L.Control.Screenshot.TITLE; // Titre du lien
+//
+//         // Ajout des événements au lien
+//         L.DomEvent
+//             .addListener(link, 'click', L.DomEvent.stopPropagation) // Empêche la propagation de l'événement
+//             .addListener(link, 'click', L.DomEvent.preventDefault) // Empêche le comportement par défaut
+//             .addListener(link, 'click', this.screenshot, this); // Appelle la fonction de capture
+//         return this._container; // Retourne le conteneur du contrôle
+//     }
+// });
 
 /**
  * Affiche une étiquette statique au milieu de la polyline.
@@ -296,7 +296,7 @@ $(window).on('entity:map:list', function (e, data) {
     map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"));
 
     // Initialise la table de données principale
-    var dt = MapEnmouseintenttity.mainDatatable;
+    var dt = MapEntity.mainDatatable;
     window.objectsLayer = objectsLayer;
 
     /*
