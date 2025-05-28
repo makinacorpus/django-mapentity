@@ -17,12 +17,32 @@ class MaplibreMap {
         }
 
         // Initialisation de la carte
+        const [tileName, tileUrl, tileAttribution] = window.SETTINGS.map.maplibreConfig.TILES[0];
+
         this.map = new maplibregl.Map({
             container: this.id,
-            style: 'https://demotiles.maplibre.org/style.json',
-            center: [1.3952, 43.5963],
-            zoom: 5,
+            style: {
+                version: 8,
+                sources: {
+                    [tileName.toLowerCase()]: {
+                        type: 'raster',
+                        tiles: [tileUrl],
+                        tileSize: 256,
+                        attribution: tileAttribution
+                    }
+                },
+                layers: [
+                    {
+                        id: `${tileName.toLowerCase()}-layer`,
+                        type: 'raster',
+                        source: tileName.toLowerCase(),
+                    }
+                ]
+            },
+            center: window.SETTINGS.map.maplibreConfig.DEFAULT_CENTER,
+            zoom: window.SETTINGS.map.maplibreConfig.DEFAULT_ZOOM
         });
+
 
         // Ajouter les contrôles standards
         this.map.addControl(new maplibregl.NavigationControl(), 'top-left');

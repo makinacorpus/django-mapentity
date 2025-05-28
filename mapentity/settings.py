@@ -32,6 +32,8 @@ _DEFAULT_MAPLIBRE_CONFIG = {
     'DEFAULT_ZOOM': 5,
     'SCALE': 'metric',
     'TILES': _DEFAULT_TILES,
+    'MAINMAPID' : 'mainmap',
+    'DETAILMAPID': 'detailmap'
 }
 
 # Merge sécurisé : MAPLIBRE_CONFIG_OVERRIDES

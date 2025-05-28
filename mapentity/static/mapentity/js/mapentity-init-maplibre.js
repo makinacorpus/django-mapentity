@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Bounds pour la carte
-    const bounds = [[-3.630430, 40.120372], [3.208008, 45.061882]];
+    const bounds = [window.SETTINGS.map.maplibreConfig.BOUNDS[0], window.SETTINGS.map.maplibreConfig.BOUNDS[1]];
 
     // Instancier la carte
     const myMap = new MaplibreMap('mainmap', bounds);
@@ -122,25 +122,19 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(settings);
     // var context = document.body.dataset;
     // console.log('context init : ', JSON.stringify(context));
-    // var context2 = document.getElementById('mainmap').dataset;
-    // console.log('context2 : ', context2);
-    // var context3 = document.getElementById('detailmap')?.dataset;
-    // console.log('context3 : ', context3);
-    // console.debug('View ', context.modelname, context.viewname);
+
 
     // Une fois la carte chargée
     myMap.getMap().on('load', () => {
         // Ajouter une couche de fond OSM
-        objectsLayer.addBaseLayer('OSM', {
-            id: 'osm-base',
-            tiles: ['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            attribution: '&copy; OpenStreetMap contributors'
-        });
 
-        objectsLayer.addBaseLayer('topo', {
-            id: 'topo-base',
-            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
-            attribution: '&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.'
+        window.SETTINGS.map.maplibreConfig.TILES.forEach((tile) => {
+            const [tileName, tileUrl, tileAttribution] = tile;
+            objectsLayer.addBaseLayer(tileName, {
+                id: tileName + '-base',
+                tiles: [tileUrl],
+                attribution: tileAttribution
+            });
         });
 
         // Charger dynamiquement les objets depuis le backend en utilisant la méthode load
