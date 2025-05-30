@@ -207,7 +207,9 @@ select[multiple] {
     padding-top: 60px;
 }
 
-
+form.mapentity-form > div.container-fluid {
+    background-color: #fff;
+}
 
 /**** Maps ****/
 
