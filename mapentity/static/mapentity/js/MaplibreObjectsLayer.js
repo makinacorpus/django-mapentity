@@ -95,10 +95,15 @@ class MaplibreObjectsLayer {
 
 
     addData(geojson) {
-        geojson.features.forEach(feature => {
-            this.addLayer(feature);
-            this._mapObjects(feature);
-        });
+        if(geojson.type === 'Feature') {
+            this.addLayer(geojson);
+        }else{
+            geojson.features.forEach(feature => {
+                this.addLayer(feature);
+                this._mapObjects(feature);
+            });
+        }
+
     }
      _mapObjects(feature) {
         const pk = this.getPrimaryKey(feature);

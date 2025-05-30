@@ -81,9 +81,6 @@ $(window).on('entity:view:list', function (e, data) {
 
 
 $(window).on('entity:view:detail', function (e, data) {
-    //
-    // Throw event when record is hovered
-    // (used in Leaflet.ObjectLayer and below)
     $('.hoverable').hoverIntent(
         function on() {
             var modelname = $(this).data('modelname');
@@ -97,7 +94,6 @@ $(window).on('entity:view:detail', function (e, data) {
         }
     );
 
-    //
     // Highlight (e.g. table rows) when record is hovered
     $(window).on('entity:mouseover', function (e, data) {
         var modelname = data.modelname;

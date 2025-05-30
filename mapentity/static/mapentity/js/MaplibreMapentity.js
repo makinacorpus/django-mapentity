@@ -37,6 +37,11 @@ document.addEventListener('DOMContentLoaded', function() {
         history.render();
     }
 
+    const mapentityContext = new MaplibreMapentityContext();
+    if(mapentityContext){
+        window.MapEntity.currentMapentityContext = mapentityContext;
+    }
+
 
     // Faire disparaître les messages de succès/informations après un délai
     const alertBox = document.querySelector('#alert-box');
@@ -126,10 +131,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 style = { ...style };  // créer une copie propre
             }
 
+            let detailStyle = window.SETTINGS.map.styles.detail;
+            if(typeof detailStyle !== "function") {
+                detailStyle = { ...detailStyle };
+            }
+
             // Créer une instance de MaplibreObjectsLayer
             const objectsLayer = new MaplibreObjectsLayer(null, {
                 objectUrl: getObjectUrl,
                 style: style,
+                detailStyle: detailStyle,
                 modelname: modelName,
             });
 
@@ -157,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const mergedData = Object.assign({}, context, data, {
                 map: map,
                 objectsLayer: objectsLayer,
-                layerControl: layerControl,
+                // layerControl: layerControl,
                 mapId: mapId
             });
             console.log('data après extension', mergedData);

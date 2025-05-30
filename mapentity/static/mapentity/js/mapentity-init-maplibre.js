@@ -20,8 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
         objectUrl: getObjectUrl,
         style: style,
         modelname: modelName,
-        indexing: true,
-        highlight: true,
     });
 
     // Bounds pour la carte
@@ -125,12 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-
-    const settings = window.SETTINGS;
-    console.log(settings);
-    // var context = document.body.dataset;
-    // console.log('context init : ', JSON.stringify(context));
-
 
     // Une fois la carte chargée
     myMap.getMap().on('load', () => {

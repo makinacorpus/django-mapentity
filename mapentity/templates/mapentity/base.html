@@ -103,9 +103,6 @@
     {% endblock container %}
 {% endblock content %}
 
-{#<div id='map' style='width: 50%; height: 700px; margin-top: 100px'></div>#}
-
-
 {% block extrabody %}
 
     {{ block.super }}
@@ -166,7 +163,7 @@
 {#                'No filter': "{% trans 'No filter' %}",#}
 {#            };#}
 {#        </script>#}
- {#        <script src="{% static 'mapentity/jquery.hoverIntent.js' %}"></script>#}
+{#         <script src="{% static 'mapentity/jquery.hoverIntent.js' %}"></script>#}
         {#        <script  src="{% static 'mapentity/jquery.deserialize.js' %}"></script>#}
 {#        <script  src="{% static 'mapentity/leaflet-objectslayer.js' %}"></script>#}
 {#        <script  src="{% static 'mapentity/leaflet-serializers.js' %}"></script>#}
@@ -181,6 +178,7 @@
 
 
 
+        <script src="/static/mapentity/js/MaplibreMapentityHelpers.js"></script>
         <script src="/static/mapentity/js/MaplibreSerializers.js"></script>
         <script src="/static/mapentity/js/MaplibreRectangle.js"></script>
         <script src="/static/mapentity/js/MaplibreMapentityContext.js"></script>
