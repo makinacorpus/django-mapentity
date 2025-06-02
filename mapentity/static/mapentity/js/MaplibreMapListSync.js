@@ -90,11 +90,11 @@ class MaplibreMapListSync {
         }
 
         if (filter) {
-            document.getElementById('filters-btn').classList.remove('btn-info'); // peut être remplacé par toggleable.button.ClassList.remove('btn-info'); idem pour les autres.
-            document.getElementById('filters-btn').classList.add('btn-warning');
+            this.togglableFiltre.button.classList.remove('btn-info'); // peut être remplacé par toggleable.button.ClassList.remove('btn-info'); idem pour les autres.
+            this.togglableFiltre.button.classList.add('btn-warning');
         } else {
-            document.getElementById('filters-btn').classList.remove('btn-warning');
-            document.getElementById('filters-btn').classList.add('btn-info');
+            this.togglableFiltre.button.classList.remove('btn-warning');
+            this.togglableFiltre.button.classList.add('btn-info');
         }
 
         // Update the datatables URL with the filter parameters

@@ -26,17 +26,22 @@ class MaplibreResetViewControl {
         // Ajouter l'événement de clic pour réinitialiser la carte
         button.onclick = () => this.reset()
 
-        map.on('reset-view', () => {
-            this.reset();
-        });
-
         return this._container;
     }
 
     reset() {
-        if (this._map) {
-            this._map.fitBounds(this._bounds, { padding: 0 });
+        if (!this._bounds) {
+            console.warn('No bounds set for reset view control.');
+            return;
         }
+
+        if (!this._map) {
+            console.warn('Map instance is not set for reset view control.');
+            return;
+        }
+
+        // Réinitialiser la vue de la carte aux limites définies
+        this._map.fitBounds(this._bounds, { padding: 0 });
     }
 
     getBounds() {

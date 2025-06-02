@@ -1,105 +1,105 @@
-// // Définition d'une nouvelle classe de contrôle Leaflet pour la capture d'écran
-// L.Control.Screenshot = L.Control.extend({
-//     includes: L.Mixin.Events, // Inclut les événements de mixin Leaflet
-//     options: {
-//         position: 'topleft', // Position du contrôle sur la carte
-//     },
-//     statics: {
-//         TITLE:  'Screenshot' // Titre du contrôle
-//     },
-//
-//     // Initialisation du contrôle avec une URL et une fonction de contexte
-//     initialize: function (url, getcontext) {
-//         this.url = url; // URL pour envoyer les données de capture
-//         this.getcontext = getcontext; // Fonction pour obtenir le contexte de capture
-//     },
-//
-//     // Fonction pour effectuer une capture d'écran
-//     screenshot: function () {
-//         // Effet visuel de capture d'écran
-//         $('<div id="overlay" style="z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;"> </div>')
-//             .appendTo(document.body) // Ajoute un overlay blanc au document
-//             .fadeOut(); // Fait disparaître l'overlay
-//
-//         var fullContext = this.getcontext(); // Récupère le contexte complet
-//         // Hack pour télécharger une réponse en pièce jointe via Ajax
-//         $('<form action="' + this.url + '" method="post">' +
-//         '<textarea name="printcontext">' + fullContext + '</textarea>' +
-//         '</form>').appendTo('body').submit().remove(); // Soumet et supprime le formulaire
-//         this.fire('triggered'); // Déclenche un événement personnalisé
-//     },
-//
-//     // Ajout du contrôle à la carte
-//     onAdd: function(map) {
-//         this.map = map; // Référence à la carte
-//         this._container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-control leaflet-bar'); // Conteneur du contrôle
-//         var link = L.DomUtil.create('a', 'leaflet-control-zoom-out screenshot-control', this._container); // Lien pour le contrôle
-//         link.href = '#'; // Lien vide
-//         link.title = L.Control.Screenshot.TITLE; // Titre du lien
-//
-//         // Ajout des événements au lien
-//         L.DomEvent
-//             .addListener(link, 'click', L.DomEvent.stopPropagation) // Empêche la propagation de l'événement
-//             .addListener(link, 'click', L.DomEvent.preventDefault) // Empêche le comportement par défaut
-//             .addListener(link, 'click', this.screenshot, this); // Appelle la fonction de capture
-//         return this._container; // Retourne le conteneur du contrôle
-//     }
-// });
+// Définition d'une nouvelle classe de contrôle Leaflet pour la capture d'écran
+L.Control.Screenshot = L.Control.extend({
+    includes: L.Mixin.Events, // Inclut les événements de mixin Leaflet
+    options: {
+        position: 'topleft', // Position du contrôle sur la carte
+    },
+    statics: {
+        TITLE:  'Screenshot' // Titre du contrôle
+    },
+
+    // Initialisation du contrôle avec une URL et une fonction de contexte
+    initialize: function (url, getcontext) {
+        this.url = url; // URL pour envoyer les données de capture
+        this.getcontext = getcontext; // Fonction pour obtenir le contexte de capture
+    },
+
+    // Fonction pour effectuer une capture d'écran
+    screenshot: function () {
+        // Effet visuel de capture d'écran
+        $('<div id="overlay" style="z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;"> </div>')
+            .appendTo(document.body) // Ajoute un overlay blanc au document
+            .fadeOut(); // Fait disparaître l'overlay
+
+        var fullContext = this.getcontext(); // Récupère le contexte complet
+        // Hack pour télécharger une réponse en pièce jointe via Ajax
+        $('<form action="' + this.url + '" method="post">' +
+        '<textarea name="printcontext">' + fullContext + '</textarea>' +
+        '</form>').appendTo('body').submit().remove(); // Soumet et supprime le formulaire
+        this.fire('triggered'); // Déclenche un événement personnalisé
+    },
+
+    // Ajout du contrôle à la carte
+    onAdd: function(map) {
+        this.map = map; // Référence à la carte
+        this._container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-control leaflet-bar'); // Conteneur du contrôle
+        var link = L.DomUtil.create('a', 'leaflet-control-zoom-out screenshot-control', this._container); // Lien pour le contrôle
+        link.href = '#'; // Lien vide
+        link.title = L.Control.Screenshot.TITLE; // Titre du lien
+
+        // Ajout des événements au lien
+        L.DomEvent
+            .addListener(link, 'click', L.DomEvent.stopPropagation) // Empêche la propagation de l'événement
+            .addListener(link, 'click', L.DomEvent.preventDefault) // Empêche le comportement par défaut
+            .addListener(link, 'click', this.screenshot, this); // Appelle la fonction de capture
+        return this._container; // Retourne le conteneur du contrôle
+    }
+});
 
 /**
  * Affiche une étiquette statique au milieu de la polyline.
  * Elle sera masquée pour les niveaux de zoom inférieurs à ``LABEL_MIN_ZOOM``.
  */
-// MapEntity.showLineLabel = function (layer, options) {
-//     var LABEL_MIN_ZOOM = 6; // Niveau de zoom minimum pour afficher l'étiquette
-//
-//     // Convertit la couleur en format RGB
-//     var rgb = parseColor(options.color);
-//
-//     // Lie une étiquette au calque avec les options spécifiées
-//     layer.bindLabel(options.text, {noHide: true, className: options.className});
-//
-//     // Sauvegarde la méthode originale `onAdd` du calque
-//     var __layerOnAdd = layer.onAdd;
-//     layer.onAdd = function (map) {
-//         __layerOnAdd.call(layer, map); // Appelle la méthode originale
-//         if (map.getZoom() >= LABEL_MIN_ZOOM) {
-//             layer._showLabel(); // Affiche l'étiquette si le zoom est suffisant
-//         }
-//         map.on('zoomend', hideOnZoomOut); // Ajoute un gestionnaire d'événement pour le zoom
-//     };
-//
-//     // Sauvegarde la méthode originale `onRemove` du calque
-//     var __layerOnRemove = layer.onRemove;
-//     layer.onRemove = function () {
-//         layer._map.off('zoomend', hideOnZoomOut); // Supprime le gestionnaire d'événement
-//         if (layer._hideLabel) layer._hideLabel(); // Masque l'étiquette si elle est visible
-//         __layerOnRemove.call(layer); // Appelle la méthode originale
-//     };
-//
-//     // Sauvegarde la méthode originale `_showLabel` du calque
-//     var __layerShowLabel = layer._showLabel;
-//     layer._showLabel = function () {
-//         __layerShowLabel.call(layer, {latlng: midLatLng(layer)}); // Affiche l'étiquette au milieu de la polyline
-//         layer.label._container.title = options.title; // Définit le titre de l'étiquette
-//         layer.label._container.style.backgroundColor = 'rgba('+rgb.join(',')+ ',0.8)'; // Définit la couleur de fond
-//         layer.label._container.style.borderColor = 'rgba('+rgb.join(',')+ ',0.6)'; // Définit la couleur de la bordure
-//     };
-//
-//     // Fonction pour masquer l'étiquette si le zoom est insuffisant
-//     function hideOnZoomOut() {
-//         if (layer._map.getZoom() < LABEL_MIN_ZOOM)
-//             if (layer._hideLabel) layer._hideLabel(); // Masque l'étiquette
-//         else
-//             if (layer._showLabel) layer._showLabel(); // Affiche l'étiquette
-//     }
-//
-//     // Fonction pour calculer le point médian de la polyline
-//     function midLatLng(line) {
-//         var mid = Math.floor(line.getLatLngs().length/2); // Calcule l'indice du point médian
-//         return L.latLng(line.getLatLngs()[mid]); // Retourne les coordonnées du point médian
-//     }
-// };
+MapEntity.showLineLabel = function (layer, options) {
+    var LABEL_MIN_ZOOM = 6; // Niveau de zoom minimum pour afficher l'étiquette
+
+    // Convertit la couleur en format RGB
+    var rgb = parseColor(options.color);
+
+    // Lie une étiquette au calque avec les options spécifiées
+    layer.bindLabel(options.text, {noHide: true, className: options.className});
+
+    // Sauvegarde la méthode originale `onAdd` du calque
+    var __layerOnAdd = layer.onAdd;
+    layer.onAdd = function (map) {
+        __layerOnAdd.call(layer, map); // Appelle la méthode originale
+        if (map.getZoom() >= LABEL_MIN_ZOOM) {
+            layer._showLabel(); // Affiche l'étiquette si le zoom est suffisant
+        }
+        map.on('zoomend', hideOnZoomOut); // Ajoute un gestionnaire d'événement pour le zoom
+    };
+
+    // Sauvegarde la méthode originale `onRemove` du calque
+    var __layerOnRemove = layer.onRemove;
+    layer.onRemove = function () {
+        layer._map.off('zoomend', hideOnZoomOut); // Supprime le gestionnaire d'événement
+        if (layer._hideLabel) layer._hideLabel(); // Masque l'étiquette si elle est visible
+        __layerOnRemove.call(layer); // Appelle la méthode originale
+    };
+
+    // Sauvegarde la méthode originale `_showLabel` du calque
+    var __layerShowLabel = layer._showLabel;
+    layer._showLabel = function () {
+        __layerShowLabel.call(layer, {latlng: midLatLng(layer)}); // Affiche l'étiquette au milieu de la polyline
+        layer.label._container.title = options.title; // Définit le titre de l'étiquette
+        layer.label._container.style.backgroundColor = 'rgba('+rgb.join(',')+ ',0.8)'; // Définit la couleur de fond
+        layer.label._container.style.borderColor = 'rgba('+rgb.join(',')+ ',0.6)'; // Définit la couleur de la bordure
+    };
+
+    // Fonction pour masquer l'étiquette si le zoom est insuffisant
+    function hideOnZoomOut() {
+        if (layer._map.getZoom() < LABEL_MIN_ZOOM)
+            if (layer._hideLabel) layer._hideLabel(); // Masque l'étiquette
+        else
+            if (layer._showLabel) layer._showLabel(); // Affiche l'étiquette
+    }
+
+    // Fonction pour calculer le point médian de la polyline
+    function midLatLng(line) {
+        var mid = Math.floor(line.getLatLngs().length/2); // Calcule l'indice du point médian
+        return L.latLng(line.getLatLngs()[mid]); // Retourne les coordonnées du point médian
+    }
+};
 
 
 // Écouteur d'événement pour l'initialisation de la carte

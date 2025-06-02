@@ -1,7 +1,9 @@
 class MaplibreMap {
-    constructor(id, boundsInit = null) {
+    constructor(id, mapCenter, mapZoom, mapMaxBounds) {
         this.id = id;
-        // this.boundsInit = boundsInit;
+        this.mapCenter = mapCenter ;
+        this.mapZoom = mapZoom ;
+        this.mapMaxBounds = mapMaxBounds;
         this.map = null;
         this.container = null;
         this.resetViewControl = null; // modifier ceci, mettre en place un objet dans lequel sera stocké tous les controllers ajoutés pour suivre leur trace
@@ -18,10 +20,10 @@ class MaplibreMap {
 
         this.map = new maplibregl.Map({
             container: this.id,
-            center: window.SETTINGS.map.maplibreConfig.DEFAULT_CENTER,
-            zoom: window.SETTINGS.map.maplibreConfig.DEFAULT_ZOOM
+            center: this.mapCenter,
+            zoom: this.mapZoom,
+            maxBounds: this.mapMaxBounds,
         });
-
 
         // Ajouter les contrôles standards
         this.map.addControl(new maplibregl.NavigationControl(), 'top-left');
@@ -31,19 +33,6 @@ class MaplibreMap {
         const measureControl = new MaplibreMeasureControl();
         this.map.addControl(measureControl, 'top-left');
 
-        // Contrôle d’échelle
-        const scale = new maplibregl.ScaleControl({
-            maxWidth: 80,
-            unit: 'metric'
-        });
-        this.map.addControl(scale, 'bottom-left');
-
-        // Si des limites initiales sont fournies, ajuster la vue de la carte
-        // if (this.boundsInit) {
-        //     this.map.on('load', () => {
-        //         this.map.fitBounds(this.boundsInit, { padding: 0 });
-        //     });
-        // }
     }
 
     getMap() {

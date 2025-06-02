@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Gestion des vues
     const bodyElement = document.body;
+
     const context = {
         modelname: bodyElement.dataset.modelname || bodyElement.getAttribute('data-modelname'),
         viewname: bodyElement.dataset.viewname || bodyElement.getAttribute('data-viewname')
@@ -97,9 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.debug('View ', context.modelname, context.viewname);
 
     // Initialisation automatique de la carte
-    function initializeMap(data = {}) {
-        console.log('data', data);
-        console.log('context', context);
+    function initializeMap() {
 
         // Déterminer l'identifiant de la carte en fonction de la vue
         const mapId = context.viewname === 'detail' ? 'detailmap' : 'mainmap';
@@ -112,9 +111,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
+            const {BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES} = window.SETTINGS.map.maplibreConfig;
             // Initialisation de la carte
-            const bounds = [window.SETTINGS.map.maplibreConfig.BOUNDS[0], window.SETTINGS.map.maplibreConfig.BOUNDS[1]];
-            const map = new MaplibreMap(mapId, bounds);
+            const bounds = [BOUNDS[0],BOUNDS[1]];
+            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds);
 
             // Initialisation des URLs dynamiques
             const modelName = context.modelname;
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             objectsLayer.initialize(map.getMap());
 
             // Ajouter une couche de fond OSM
-            window.SETTINGS.map.maplibreConfig.TILES.forEach((tile) => {
+            TILES.forEach((tile) => {
                 const [tileName, tileUrl, tileAttribution] = tile;
                 objectsLayer.addBaseLayer(tileName, {
                     id: tileName + '-base',
@@ -161,14 +161,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const layerControl = new MaplibreLayerControl(objectsLayer);
             map.getMap().addControl(layerControl, 'top-right');
 
-                    // Ajouter un contrôle pour réinitialiser la vue
+            // metriques de la carte
+            const unit = SCALE || 'metric';
+            const scale = new maplibregl.ScaleControl({
+                maxWidth: 80,
+                unit: unit
+            });
+            map.getMap().addControl(scale, 'bottom-left');
+
+
+            // Ajouter un contrôle pour réinitialiser la vue
             map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
             // Fusionner les données de contexte avec les données de l'événement
-            const mergedData = Object.assign({}, context, data, {
+            const mergedData = Object.assign({}, context, {
                 map: map,
                 objectsLayer: objectsLayer,
-                // layerControl: layerControl,
                 mapId: mapId
             });
             console.log('data après extension', mergedData);
@@ -178,13 +186,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 detail: mergedData
             });
             window.dispatchEvent(viewEvent);
+
             // Déclencher les événements de carte
             const mapViewEvent = new CustomEvent('entity:map:' + context.viewname, {
                 detail: mergedData
             });
             window.dispatchEvent(mapViewEvent);
 
-            // Gestion des panneaux redimensionnables
+            // Gestion des panneaux redimensionnables : impacte les panneaux de gauche et de droite de l'application
             const resizableElements = document.querySelectorAll("#panelleft, .details-panel");
 
             resizableElements.forEach(function(element) {
@@ -194,20 +203,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     resizeHeight: false,
                     onDragEnd: function(e, el, opt) {
                         // Réinitialiser la taille de la carte après le redimensionnement
-                        if (map && map.getMap() && map.getMap().resize) {
+                        if (map && map.getMap()) {
                             map.getMap().resize();
                         }
                     }
                 };
 
                 // Appliquer le plugin resizable si disponible
-                if (window.jQuery && window.jQuery.fn.resizable) {
-                    window.jQuery(element).resizable(resizableOptions);
-                }
+                window.jQuery(element).resizable(resizableOptions);
             });
 
             console.log('Carte initialisée avec succès:', mapId);
-            return { map, objectsLayer, layerControl, context: mergedData };
+            return { map, objectsLayer, context: mergedData };
 
         } catch (error) {
             console.error('Erreur lors de l\'initialisation de la carte:', error);

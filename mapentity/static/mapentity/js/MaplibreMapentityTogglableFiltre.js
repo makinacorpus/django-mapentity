@@ -459,27 +459,4 @@ class MaplibreMapentityTogglableFiltre {
             btn.classList.remove('btn-warning');
         }
     }
-
-    // Méthode pour nettoyer les ressources
-    // destroy() {
-    //     this.hideinfo();
-    //     this.hidePopover();
-    //     this.removeOutsideClickListener();
-    //
-    //     if (this.popover) {
-    //         try {
-    //             this.popover.popover('dispose');
-    //         } catch (error) {
-    //             console.error('Error destroying popover:', error);
-    //         }
-    //     }
-    //
-    //     if (this.hover) {
-    //         try {
-    //             this.hover.popover('dispose');
-    //         } catch (error) {
-    //             console.error('Error destroying hover popover:', error);
-    //         }
-    //     }
-    // }
 }
