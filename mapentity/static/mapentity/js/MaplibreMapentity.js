@@ -37,12 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
         history.render();
     }
 
-    const mapentityContext = new MaplibreMapentityContext();
-    if(mapentityContext){
-        window.MapEntity.currentMapentityContext = mapentityContext;
-    }
-
-
     // Faire disparaître les messages de succès/informations après un délai
     const alertBox = document.querySelector('#alert-box');
     if (alertBox) {
@@ -120,6 +114,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const modelName = context.modelname;
             const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelName);
 
+            const mapentityContext = new MaplibreMapentityContext(bounds);
+
+            // maxZoom devrait venir des options de la carte de django-leaflet
+            // var maxZoom = document.querySelector('#mainmap').dataset.fitmaxzoom;
+            // console.log('maxZoom:', maxZoom);
+            // if (map.getMap().getZoom() > maxZoom) {
+            //     console.log('Limited zoom to ', maxZoom, '. Was ', map.getMap().getZoom());
+            //     map.getMap().setZoom(maxZoom); // Limite le zoom maximum
+            // }
+
             // Définir une fonction pour générer les URLs de détails d'un objet
             const getObjectUrl = (properties) => {
                 return objectUrlTemplate.replace('0', properties.id);
@@ -127,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Récupérer le style défini dans les settings (ou fallback)
             let style = window.SETTINGS.map.styles[modelName] || window.SETTINGS.map.styles.others;
-           // Style par défaut dans leaflet-objectsLayer
+
+            // Style par défaut dans leaflet-objectsLayer
             //  styles =  {
            //  'default': {'color': 'blue', 'weight': 2, 'opacity': 0.8},
            //  'highlight' : {'color': 'red', 'weight': 5, 'opacity': 1},
@@ -227,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             console.log('Carte initialisée avec succès:', mapId);
-            return { map, objectsLayer, context: mergedData };
+            return { map, objectsLayer, context: mergedData, mapentityContext };
 
         } catch (error) {
             console.error('Erreur lors de l\'initialisation de la carte:', error);

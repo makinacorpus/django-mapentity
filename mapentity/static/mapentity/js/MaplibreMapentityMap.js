@@ -89,7 +89,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const mapViewContext = getURLParameter('context');
-            const mapentityContext = window.MapEntity.currentMapentityContext;
+            const mapentityContext = window.MapEntity.currentMap.mapentityContext;
+
+            // Obtenir le contexte de la carte - A voir encore
+            // mapentityContext.getFullContext(map.getMap(), {
+            //     filter: 'mainfilter',
+            //     datatable: mainDatatable
+            // });
+
             if (mapViewContext) {
                 mapentityContext.restoreFullContext(
                     map.getMap(),
@@ -112,6 +119,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Bouton de capture d'écran pour la carte
             // En course de développement
+
+
 
         });
     });

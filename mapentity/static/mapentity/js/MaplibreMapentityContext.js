@@ -1,6 +1,7 @@
 class MaplibreMapentityContext {
-    constructor() {
+    constructor(bounds) {
         this.last_sort = {};
+        this.bounds = bounds;
     }
 
     /*
@@ -27,6 +28,8 @@ class MaplibreMapentityContext {
         });
 
         const layerList = layers[0].split(" ");
+        context['maplayers'] = layerList; // Store the list of visible layers
+        console.log('Visible layers:', context['maplayers']);
 
         // Form filters
         if (filter) {
@@ -58,6 +61,7 @@ class MaplibreMapentityContext {
         // Add a timestamp
         context['timestamp'] = new Date().getTime();
 
+        console.log('Full context:', context); // Log the full context for debugging
         return context; // Return the context object
     }
 
@@ -123,19 +127,25 @@ class MaplibreMapentityContext {
             } else {
                 // If the map is defined.
                 if (map !== null) {
+
+                    map.fitBounds(this.bounds, {padding : 0}); // Adjust the map to fit the predefined bounds.
+
+                    // Pas utile du moment maxZoom n'est pas défini dans les options de la carte
+                    // de plus les bounds rend impossible de zoomer au delà de la limite, si la distance définie
+                    // par bounds vaut environ 50km, on ne peut pas zoomer au delà de 50km
                     // If the reset view control is available.
-                    if (map.getResetViewControl() !== null) {
-                        // Adjust the map to fit the bounds defined by the control.
-                        map.fitBounds(map.getResetViewControl().getBounds());
-                        // Get the maximum allowed zoom level.
-                        const maxZoom = map.getContainer().getAttribute('data-fitmaxzoom');
-                        // If the current zoom level exceeds the maximum allowed.
-                        if (map.getZoom() > maxZoom) {
-                            // Display a message in the console and adjust the zoom level.
-                            console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
-                            map.setZoom(maxZoom);
-                        }
-                    }
+                    // if (map.getResetViewControl() !== null) {
+                    //     // Adjust the map to fit the bounds defined by the control.
+                    //     map.fitBounds(map.getResetViewControl().getBounds());
+                    //     // Get the maximum allowed zoom level.
+                    //     const maxZoom = map.getContainer().getAttribute('data-fitmaxzoom');
+                    //     // If the current zoom level exceeds the maximum allowed.
+                    //     if (map.getZoom() > maxZoom) {
+                    //         // Display a message in the console and adjust the zoom level.
+                    //         console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
+                    //         map.setZoom(maxZoom);
+                    //     }
+                    // }
                 }
             }
             return false; // Indicate that the restoration failed.
@@ -191,12 +201,13 @@ class MaplibreMapentityContext {
         if (context.maplayers) {
             const layers = context.maplayers;
             layers.push(objectsname); // Add the objects name to the layers.
-            document.querySelectorAll('div.layer-switcher-menu input:checkbox').forEach(input => {
-                // Uncheck layers that do not match the objects name.
+            document.querySelectorAll('div.layer-switcher-menu input[type="checkbox"]').forEach(input => {
+                // Uncheck layers that do not match the object's name.
                 if (input.parentNode.textContent.trim() !== objectsname) {
-                    input.removeAttribute('checked');
+                    input.checked = false;
                 }
             });
+
             // Check layers corresponding to the names in the context.
             for (const layer of layers) {
                 document.querySelectorAll('div.layer-switch-menu input').forEach(input => {
@@ -205,10 +216,12 @@ class MaplibreMapentityContext {
                     }
                 });
             }
+
             // Update layer controls if available.
-            if ((map.layerscontrol !== undefined) && !!map.layerscontrol._map) {
-                map.layerscontrol._onInputClick();
-            }
+            // if ((map.layerscontrol !== undefined) && !!map.layerscontrol._map) {
+            //     map.layerscontrol._onInputClick();
+            // }
+
         }
 
         // Disable tile animations if the context is in print mode.
