@@ -127,6 +127,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Récupérer le style défini dans les settings (ou fallback)
             let style = window.SETTINGS.map.styles[modelName] || window.SETTINGS.map.styles.others;
+           // Style par défaut dans leaflet-objectsLayer
+            //  styles =  {
+           //  'default': {'color': 'blue', 'weight': 2, 'opacity': 0.8},
+           //  'highlight' : {'color': 'red', 'weight': 5, 'opacity': 1},
+           //  'select' : {'color': 'red', 'weight': 7, 'opacity': 1}
+           // };
+
             if (typeof style !== "function") {
                 style = { ...style };  // créer une copie propre
             }

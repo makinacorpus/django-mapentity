@@ -8,7 +8,7 @@ L.ObjectsLayer = L.GeoJSON.extend({
         objectUrl: null,
         // default style
         styles: {
-            'default': {'color': 'blue', 'weight': 2, 'opacity': 0.8},
+            default: {'color': 'blue', 'weight': 2, 'opacity': 0.8},
             highlight: {'color': 'red', 'weight': 5, 'opacity': 1},
             select: {'color': 'red', 'weight': 7, 'opacity': 1}
         }

@@ -56,12 +56,13 @@ class MaplibreMapListSync {
             setTimeout(() => this._onMapViewChanged(e), 20);
             return;
         }
+        const mapViewChangedStatue = true
 
         // Une fois la carte prête, on met à jour les bornes du formulaire de filtre
         this._formSetBounds();
 
         // Et on recharge la liste d’entités affichées
-        this._reloadList();
+        this._reloadList(mapViewChangedStatue);
     }
 
     _onFormSubmit(e) {
@@ -77,7 +78,7 @@ class MaplibreMapListSync {
         this._formSetBounds(); // Re-fill current bbox
     }
 
-    async _reloadList(refreshLayer) {
+    async _reloadList(mapViewChangedStatue = false) {
         const formData = new FormData(this.options.filter.form);
         let filter = false;
 
@@ -89,13 +90,16 @@ class MaplibreMapListSync {
             }
         }
 
-        if (filter) {
-            this.togglableFiltre.button.classList.remove('btn-info'); // peut être remplacé par toggleable.button.ClassList.remove('btn-info'); idem pour les autres.
-            this.togglableFiltre.button.classList.add('btn-warning');
-        } else {
-            this.togglableFiltre.button.classList.remove('btn-warning');
-            this.togglableFiltre.button.classList.add('btn-info');
+        if(!mapViewChangedStatue) {
+            if (filter) {
+                this.togglableFiltre.button.classList.remove('btn-info'); // peut être remplacé par toggleable.button.ClassList.remove('btn-info'); idem pour les autres.
+                this.togglableFiltre.button.classList.add('btn-warning');
+            } else {
+                this.togglableFiltre.button.classList.remove('btn-warning');
+                this.togglableFiltre.button.classList.add('btn-info');
+            }
         }
+
 
         // Update the datatables URL with the filter parameters
         const url = `${this.options.filter.form.getAttribute('action')}?${new URLSearchParams(formData).toString()}`;
