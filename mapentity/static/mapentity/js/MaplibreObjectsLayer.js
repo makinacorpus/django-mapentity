@@ -96,7 +96,13 @@ class MaplibreObjectsLayer {
 
     addData(geojson) {
         if(geojson.type === 'Feature') {
-            this.addLayer(geojson);
+            this.addLayer(geojson, true);
+            if (geojson) {
+            const bounds = this.calculateBounds(geojson);
+            if (bounds) {
+                this._map.fitBounds(bounds, { maxZoom: 16, padding: 20, duration: 0 });
+            }
+        }
         }else{
             geojson.features.forEach(feature => {
                 this.addLayer(feature);
@@ -131,7 +137,7 @@ class MaplibreObjectsLayer {
         this.highlight(primaryKey, on);
     }
 
-    addLayer(feature, categoryName = null, detailstatue = false) {
+    addLayer(feature, detailStatue = false) {
         const primaryKey = this.getPrimaryKey(feature);
         const layerId = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
@@ -147,7 +153,8 @@ class MaplibreObjectsLayer {
 
         const geometryType = feature.geometry.type;
 
-        const style = detailstatue ? this.options.detailStyle : this.options.style;
+        const style = detailStatue ? this.options.detailStyle : this.options.style;
+        console.log('Style used for layer:', style);
 
         const rgba = parseColor(style.color); // [r, g, b, a]
         const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
@@ -272,7 +279,7 @@ class MaplibreObjectsLayer {
         console.log('Adding layer:', primaryKey, layerId, this._current_objects, layerConfigs);
 
         // Si la couche est déjà présente, on ne l'ajoute pas
-        const category = categoryName || this.options.modelname;
+        const category = this.options.modelname;
         if (!this.layers.overlays[category]) {
             this.layers.overlays[category] = {};
         }
@@ -374,7 +381,7 @@ class MaplibreObjectsLayer {
         if (layer) {
             const bounds = this.calculateBounds(layer);
             if (bounds) {
-                this._map.fitBounds(bounds, { padding: 50 });
+                this._map.fitBounds(bounds, { padding: 20, maxZoom: 16 });
             }
         }
     }

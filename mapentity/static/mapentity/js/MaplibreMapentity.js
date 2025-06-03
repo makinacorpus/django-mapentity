@@ -138,6 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 detailStyle = { ...detailStyle };
             }
 
+            console.log('Style de détail utilisé pour la carte:', detailStyle);
+
             // Créer une instance de MaplibreObjectsLayer
             const objectsLayer = new MaplibreObjectsLayer(null, {
                 objectUrl: getObjectUrl,
@@ -145,6 +147,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 detailStyle: detailStyle,
                 modelname: modelName,
             });
+
+            console.log('objectsLayer créé pour le modèle:', objectsLayer);
 
             // Initialiser la couche d'objets
             objectsLayer.initialize(map.getMap());

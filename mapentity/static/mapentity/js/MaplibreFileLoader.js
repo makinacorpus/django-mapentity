@@ -55,7 +55,7 @@ class MaplibreFileLoader {
 
             const bounds = this.calculateBounds(content);
             if (bounds) {
-                this._map.fitBounds(bounds, { padding: 50 });
+                this._map.fitBounds(bounds, { padding: 20, maxZoom: 15 });
             }
         }
     }
