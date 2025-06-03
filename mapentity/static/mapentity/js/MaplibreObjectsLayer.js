@@ -63,7 +63,9 @@ class MaplibreObjectsLayer {
             this.currentPopup = new maplibregl.Popup({
                 closeButton: false,
                 closeOnClick: false,
-                className: 'custom-popup'
+                className: 'custom-popup',
+                anchor: 'left', // place le popup à droite du point
+                offset: [10, 0], // petit décalage horizonta
             })
                 .setLngLat(coordinates)
                 .setHTML(`<div class="popup-content">${description}</div>`)

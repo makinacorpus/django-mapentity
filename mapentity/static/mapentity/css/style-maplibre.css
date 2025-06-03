@@ -37,16 +37,41 @@
 }
 
 
+/*.custom-popup .maplibregl-popup-content {*/
+/*    background: rgba(0, 0, 0.8, 0.8); !* Semi-transparent black background *!*/
+/*    color: white; !* White text *!*/
+/*    padding: 10px;*/
+/*    border-radius: 5px;*/
+/*}*/
+
+/*.custom-popup .maplibregl-popup-tip {*/
+/*    border-top-color: rgba(0, 0, 0, 0.8); !* Match the popup background *!*/
+/*}*/
+
 .custom-popup .maplibregl-popup-content {
-    background: rgba(0, 0, 0.8, 0.8); /* Semi-transparent black background */
-    color: white; /* White text */
-    padding: 10px;
-    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.9); /* Fond blanc semi-transparent */
+    color: black;                         /* Texte noir */
+    font-weight: bold;                    /* Gras */
+    font-size: 14px;                      /* Taille du texte ajustée */
+    padding: 6px 10px;                    /* Espacement interne */
+    border-radius: 6px;                   /* Coins arrondis */
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.6); /* Légère ombre */
+    text-align: center;                   /* Centrage du texte */
+    white-space: nowrap;                 /* Empêche les retours à la ligne */
+    border: 3px solid rgba(0, 0, 0, 0.3); /* Contour fin */
+    margin-left: 10px; /* Décalage pour éviter le chevauchement */
 }
 
+/* Supprimer le petit triangle du popup */
 .custom-popup .maplibregl-popup-tip {
-    border-top-color: rgba(0, 0, 0, 0.8); /* Match the popup background */
+    display: none !important;
 }
+
+
+.custom-popup .maplibregl-popup-tip {
+    border-top-color: rgba(255, 255, 255, 0.9); /* Pointe assortie au fond */
+}
+
 
 .measure-control-btn-active {
     background-color: #007cbf;
