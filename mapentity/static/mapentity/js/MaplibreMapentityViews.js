@@ -62,12 +62,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const toggleSelectRow = (prevRow, nextRow) => {
                 const animateRow = (row, adding) => {
-                    if (!row) return;
-                    row.style.display = 'none';
-                    setTimeout(() => {
-                        row.style.display = '';
-                        row.classList.toggle('success', adding);
-                    }, 100);
+                    if (!row) {
+                        return;
+                    }
+                    row.classList.toggle('success', adding);
                 };
 
                 animateRow(prevRow, false);
@@ -91,8 +89,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     toggleSelectRow(prev.row, row);
 
-                    if (prev.pk && prev.row) toggleSelectObject(prev.pk, false);
-                    if (row && pk) toggleSelectObject(pk, true);
+                    if (prev.pk && prev.row) {
+                        toggleSelectObject(prev.pk, false);
+                    }
+                    if (row && pk) {
+                        toggleSelectObject(pk, true);
+                    }
                 }
             };
         })();

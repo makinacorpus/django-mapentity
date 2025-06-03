@@ -131,78 +131,145 @@ class MaplibreObjectsLayer {
         this.highlight(primaryKey, on);
     }
 
-    addLayer(feature, categoryName = null) {
+    addLayer(feature, categoryName = null, detailstatue = false) {
         const primaryKey = this.getPrimaryKey(feature);
         const layerId = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
 
-        if(!feature.id){
+        if (!feature.id) {
             feature.id = primaryKey;
         }
+
         this._map.addSource(sourceId, {
             type: 'geojson',
             data: feature
         });
 
         const geometryType = feature.geometry.type;
-        let layerConfig = {};
+
+        const style = detailstatue ? this.options.detailStyle : this.options.style;
+
+        const rgba = parseColor(style.color); // [r, g, b, a]
+        const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
+
+        const fillOpacity = style.fillOpacity ?? 0.7; // default fill opacity
+        const strokeOpacity = style.opacity ?? 1.0; // default opacity
+        const strokeColor = style.color || '#999999'; // default color
+        const strokeWidth = style.weight ?? 5; // default width
+
+        let layerConfigs = [];
 
         if (geometryType === 'Polygon') {
-            layerConfig = {
-                id: layerId,
+            // Fill layer
+            layerConfigs.push({
+                id: `${layerId}-fill`,
                 type: 'fill',
                 source: sourceId,
                 paint: {
-                    'fill-color': this.options.style.color || '#888888',
+                    'fill-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        'transparent',
+                        rgbaStr
+                    ],
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        1,
-                        0.4
+                        0,
+                        fillOpacity
                     ]
                 }
-            };
+            });
+
+            // Border layer
+            layerConfigs.push({
+                id: `${layerId}-stroke`,
+                type: 'line',
+                source: sourceId,
+                paint: {
+                    'line-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        '#FF0000',
+                        strokeColor
+                    ],
+                    'line-width': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        strokeWidth + 3,
+                        strokeWidth
+                    ],
+                    'line-opacity': strokeOpacity
+                }
+            });
+
         } else if (geometryType === 'LineString') {
-            layerConfig = {
+            layerConfigs.push({
                 id: layerId,
                 type: 'line',
                 source: sourceId,
                 paint: {
-                    'line-color': this.options.style.color || '#B42222',
+                    'line-color': strokeColor,
                     'line-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        5,
-                        2
-                    ]
+                        strokeWidth + 2,
+                        strokeWidth
+                    ],
+                    'line-opacity': strokeOpacity
                 }
-            };
+            });
+
         } else if (geometryType === 'Point') {
-            layerConfig = {
+            layerConfigs.push({
                 id: layerId,
                 type: 'circle',
                 source: sourceId,
                 paint: {
-                    'circle-radius': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        9,
-                        6
-                    ],
                     'circle-color': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Red color for hover
-                        this.options.style.color || '#B42222'
+                        '#FF0000', // Couleur rouge pour le survol
+                        rgbaStr // Couleur par défaut
+                    ],
+                    'circle-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        fillOpacity, // Opacité pour le survol
+                        fillOpacity // Opacité par défaut
+                    ],
+                    'circle-stroke-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        '#FF0000', // Couleur rouge pour le survol
+                        strokeColor // Couleur par défaut
+                    ],
+                    'circle-stroke-opacity': strokeOpacity, // Opacité du contour
+                    'circle-stroke-width': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        strokeWidth + 3, // Épaississement du contour au survol
+                        strokeWidth // Largeur du contour par défaut
+                    ],
+                    'circle-radius': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        10, // Rayon plus grand au survol
+                        8 // Rayon par défaut
                     ]
                 }
-            };
+            });
         }
 
-        this._map.addLayer(layerConfig);
+
+        for (const layerConfig of layerConfigs) {
+            this._map.addLayer(layerConfig);
+        }
 
         // dans current_objects on va stocker le layerId
         this._current_objects[primaryKey] = layerId;
+
+        console.log('Adding layer:', primaryKey, layerId, this._current_objects, layerConfigs);
 
         // Si la couche est déjà présente, on ne l'ajoute pas
         const category = categoryName || this.options.modelname;

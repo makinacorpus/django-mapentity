@@ -131,6 +131,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 style = { ...style };  // créer une copie propre
             }
 
+            console.log('Style utilisé pour la carte:', style);
+
             let detailStyle = window.SETTINGS.map.styles.detail;
             if(typeof detailStyle !== "function") {
                 detailStyle = { ...detailStyle };
