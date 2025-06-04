@@ -59,7 +59,7 @@
     text-align: center;                   /* Centrage du texte */
     white-space: nowrap;                 /* Empêche les retours à la ligne */
     border: 3px solid rgba(0, 0, 0, 0.3); /* Contour fin */
-    margin-left: 10px; /* Décalage pour éviter le chevauchement */
+    margin-left: 9px; /* Décalage pour éviter le chevauchement */
 }
 
 /* Supprimer le petit triangle du popup */

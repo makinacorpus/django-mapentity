@@ -176,8 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Créer le contrôle de couches
-            const layerControl = new MaplibreLayerControl(objectsLayer);
-            map.getMap().addControl(layerControl, 'top-right');
+            map.getMap().addControl(new MaplibreLayerControl(objectsLayer), 'top-right');
 
             // metriques de la carte
             const unit = SCALE || 'metric';

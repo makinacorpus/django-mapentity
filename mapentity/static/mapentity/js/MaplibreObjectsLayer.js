@@ -156,14 +156,13 @@ class MaplibreObjectsLayer {
         const geometryType = feature.geometry.type;
 
         const style = detailStatue ? this.options.detailStyle : this.options.style;
-        console.log('Style used for layer:', style);
 
         const rgba = parseColor(style.color); // [r, g, b, a]
         const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
 
         const fillOpacity = style.fillOpacity ?? 0.7; // default fill opacity
         const strokeOpacity = style.opacity ?? 1.0; // default opacity
-        const strokeColor = style.color || '#999999'; // default color
+        const strokeColor = style.color
         const strokeWidth = style.weight ?? 5; // default width
 
         let layerConfigs = [];
@@ -277,8 +276,6 @@ class MaplibreObjectsLayer {
 
         // dans current_objects on va stocker le layerId
         this._current_objects[primaryKey] = layerId;
-
-        console.log('Adding layer:', primaryKey, layerId, this._current_objects, layerConfigs);
 
         // Si la couche est déjà présente, on ne l'ajoute pas
         const category = this.options.modelname;

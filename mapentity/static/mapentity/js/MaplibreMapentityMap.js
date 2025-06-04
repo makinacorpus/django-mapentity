@@ -92,10 +92,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
             // Obtenir le contexte de la carte - A voir encore
-            // mapentityContext.getFullContext(map.getMap(), {
-            //     filter: 'mainfilter',
-            //     datatable: mainDatatable
-            // });
+            // window.addEventListener('load', function (){
+            //     console.log('Chargement du contexte de la carte');
+            //     const contexte = mapentityContext.loadFullContext(map.getMap(), {
+            //         filter: 'mainfilter', // id du formulaire de filtre
+            //         datatable: mainDatatable,
+            //         prefix: 'list',
+            //     });
+            // })
+            console.log('Map entity context on load :', );
+            const fullContext = mapentityContext.getFullContext(map.getMap(), {
+                filter: 'mainfilter',
+                datatable: mainDatatable
+            });
+
+            console.log('Full context without load :', JSON.stringify(fullContext));
 
             if (mapViewContext) {
                 mapentityContext.restoreFullContext(
@@ -103,19 +114,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     mapViewContext, {
                     filter: 'mainfilter', // id du formulaire de filtre
                     datatable: mainDatatable,
-                    // objectsLayer: objectsLayer,
+                    objectsname: modelname,
                     prefix: 'list',
                 });
             }
 
             // Sauvegarde le contexte de la carte lors de la fermeture de la fenêtre
             window.addEventListener('unload', function() {
+                debugger
                 mapentityContext.saveFullContext(map.getMap(), {
                     filter: 'mainfilter', // id du formulaire de filtre
                     datatable: mainDatatable,
                     prefix: 'list',
                 });
             });
+
+            // mapentityContext.saveFullContext(map.getMap(), {
+            //         filter: 'mainfilter', // id du formulaire de filtre
+            //         datatable: mainDatatable,
+            //         prefix: 'list',
+            // });
+            //
+            // console.log('Map context saved on unload:', mapentityContext.loadFullContext({
+            //     prefix: 'list',
+            // }));
 
             // Bouton de capture d'écran pour la carte
             // En course de développement

@@ -4,15 +4,18 @@ class MaplibreMapentityContext {
         this.bounds = bounds;
     }
 
-    /*
+    /**
      * This function `getFullContext` captures the full context of the map and its associated elements.
      * It returns an object containing information about the map view, visible layers, form filters,
      * sorted columns, additional information such as the full URL, and a timestamp.
+     *
+     * @param map - The map object from which to extract the context.
+     * @param kwargs - An optional object containing additional parameters:
      */
     getFullContext(map, kwargs = {}) {
         let context = {};
-        const filter = kwargs.filter; // Optional filter passed in the arguments
-        const datatable = kwargs.datatable; // Optional datatable passed in the arguments
+        const filter = kwargs.filter;
+        const datatable = kwargs.datatable;
 
         // Map view (center and zoom level)
         context['mapview'] = {
@@ -24,7 +27,7 @@ class MaplibreMapentityContext {
         // Visible layers by their name
         const layers = [];
         document.querySelectorAll('div.layer-switcher-menu').forEach(input => {
-            layers.push(input.parentNode.textContent.trim()); // Add the names of checked layers
+            layers.push(input.parentNode.textContent.trim());
         });
 
         const layerList = layers[0].split(" ");
@@ -47,51 +50,63 @@ class MaplibreMapentityContext {
 
         // Sorted columns
         if (datatable) {
-            context['sortcolumns'] = this.last_sort; // Use the last sort configuration
+            context['sortcolumns'] = this.last_sort;
         }
 
         // Additional information useful for screenshots
-        context['fullurl'] = window.location.toString(); // Full URL
-        context['url'] = window.location.pathname.toString(); // URL path
+        context['fullurl'] = window.location.toString();
+        context['url'] = window.location.pathname.toString();
         context['viewport'] = {
             'width': window.innerWidth,
             'height': window.innerHeight
-        }; // Window dimensions
+        };
 
         // Add a timestamp
         context['timestamp'] = new Date().getTime();
 
-        console.log('Full context:', context); // Log the full context for debugging
-        return context; // Return the context object
+        return context;
     }
 
-    // This function `saveFullContext` saves the full context of the map in local storage.
-    // It takes a map (`map`) and additional arguments (`kwargs`) as parameters.
-    // The context is retrieved via the `getFullContext` function, then serialized to JSON.
-    // The context is then stored in localStorage with a prefixed key (if a prefix is provided in `kwargs`).
+    /**
+     * This function `saveFullContext` saves the full context of the map in local storage.
+     * It takes a map (`map`) and additional arguments (`kwargs`) as parameters.
+     * The context is retrieved via the `getFullContext` function, then serialized to JSON.
+     * The context is then stored in localStorage with a prefixed key (if a prefix is provided in `kwargs`).
+     * @param map - The map object from which to extract the context.
+     * @param kwargs - An optional object containing additional parameters, such as a prefix for the storage key.
+     */
     saveFullContext(map, kwargs = {}) {
-        const prefix = kwargs.prefix || ''; // Optional prefix for the storage key
+        const prefix = kwargs.prefix || '';
         const serialized = JSON.stringify(this.getFullContext(map, kwargs)); // Serialize the context
-        localStorage.setItem(prefix + 'map-context', serialized); // Save to localStorage
+        console.log('Saving context in localstorage:', serialized);
+        localStorage.setItem(prefix + 'map-context', serialized);
     }
 
-    // This function `loadFullContext` loads the full context of the map
-    // from local storage (localStorage). It takes an object `kwargs`
-    // containing optional arguments, such as a prefix for the storage key.
-    // If a context is found, it is deserialized from JSON and returned.
-    // Otherwise, the function returns `null`.
+    /**
+     * This function `loadFullContext` loads the full context of the map
+     * from local storage (localStorage). It takes an object `kwargs`
+     * containing optional arguments, such as a prefix for the storage key.
+     * If a context is found, it is deserialized from JSON and returned.
+     * Otherwise, the function returns `null`.
+     * @param kwargs - An optional object containing additional parameters, such as a prefix for the storage key.
+     * @returns {any|null}
+     */
     loadFullContext(kwargs = {}) {
-        const prefix = kwargs.prefix || ''; // Use an empty prefix by default
-        const context = localStorage.getItem(prefix + 'map-context'); // Retrieve the context from localStorage
+        const prefix = kwargs.prefix || '';
+        const context = localStorage.getItem(prefix + 'map-context');
         if (context) {
-            return JSON.parse(context); // Deserialize and return the context
+            return JSON.parse(context);
         }
-        return null; // Return `null` if no context is found
+        return null;
     }
 
-    // This function `restoreLatestMapView` restores the most recent map view
-    // based on saved contexts. It takes a map (`map`), a list
-    // of prefixes (`prefixes`), and additional arguments (`kwargs`).
+    /**
+     * This function `restoreLatestMapView` restores the most recent map view based on saved contexts.
+     * @param map
+     * @param prefixes
+     * @param kwargs
+     * @returns {boolean}
+     */
     restoreLatestMapView(map, prefixes, kwargs = {}) {
         let latest = null; // Variable to store the most recent context
         for (const prefix of prefixes) {
@@ -100,16 +115,20 @@ class MaplibreMapentityContext {
             // Update the most recent context if the current context is more recent
             if (!latest || (context && context.timestamp && context.timestamp > latest.timestamp)) {
                 latest = context;
-                console.debug(JSON.stringify(context)); // Display the context in the console for debugging
             }
         }
         // Restore the map view using the most recent context
         return this.restoreMapView(map, latest, kwargs);
     }
 
-    // This function `restoreMapView` restores the map view
-    // based on a given context. It takes a map (`map`),
-    // a context (`context`), and additional arguments (`kwargs`).
+
+    /**
+     * Restores the map view based on the provided context.
+     * @param map
+     * @param context
+     * @param kwargs
+     * @returns {boolean}
+     */
     restoreMapView(map, context, kwargs = {}) {
         // If no context is provided, load the context from local storage.
         if (!context) {
@@ -133,6 +152,7 @@ class MaplibreMapentityContext {
                     // Pas utile du moment maxZoom n'est pas défini dans les options de la carte
                     // de plus les bounds rend impossible de zoomer au delà de la limite, si la distance définie
                     // par bounds vaut environ 50km, on ne peut pas zoomer au delà de 50km
+
                     // If the reset view control is available.
                     // if (map.getResetViewControl() !== null) {
                     //     // Adjust the map to fit the bounds defined by the control.
@@ -152,11 +172,17 @@ class MaplibreMapentityContext {
         }
     }
 
+    /**
+     * Restores the full context of the map, including filters, sorted columns, and map layers.
+     * @param map
+     * @param context
+     * @param kwargs
+     */
     restoreFullContext(map, context, kwargs = {}) {
         // Check if additional arguments (kwargs) are provided, otherwise initialize to an empty object.
-        const filter = kwargs.filter; // Optional filter.
-        const datatable = kwargs.datatable; // Optional datatable.
-        const objectsname = kwargs.objectsname; // Optional objects name.
+        const filter = kwargs.filter;
+        const datatable = kwargs.datatable;
+        const objectsname = kwargs.objectsname; // The name of the objects layer, used to display the layer in the layer switcher. (modelname)
 
         // If no context is provided or if the context is not an object, try to load it from local storage.
         if (!context || typeof context !== 'object') {
@@ -166,13 +192,13 @@ class MaplibreMapentityContext {
         if (!context) {
             console.warn("No context found.");
             map.fitBounds(map.options.maxBounds);
-            return;  // Stop execution if no context is available.
+            return;
         }
 
         // Restore filters if a filter and filter context are available.
         if (filter && context.filter) {
             const formData = new URLSearchParams(context.filter);
-            formData.forEach((value, key) => {
+            formData.forEach(( key, value) => {
                 const input = filter.querySelector(`[name="${key}"]`);
                 if (input) {
                     if (input.type === 'checkbox' || input.type === 'radio') {
@@ -189,9 +215,7 @@ class MaplibreMapentityContext {
 
         // Restore sorted columns if a datatable and sorted columns are available.
         if (datatable && context.sortcolumns) {
-            if (document.body.getAttribute('data-modelname') in context.sortcolumns) {
-            }
-            this.last_sort = context['sortcolumns']; // Update the last sort configuration.
+            this.last_sort = context['sortcolumns'];
         }
 
         // Restore the map view based on the context.
@@ -200,7 +224,7 @@ class MaplibreMapentityContext {
         // Display the map layers based on their names.
         if (context.maplayers) {
             const layers = context.maplayers;
-            layers.push(objectsname); // Add the objects name to the layers.
+            layers.push(objectsname);
             document.querySelectorAll('div.layer-switcher-menu input[type="checkbox"]').forEach(input => {
                 // Uncheck layers that do not match the object's name.
                 if (input.parentNode.textContent.trim() !== objectsname) {
@@ -212,7 +236,7 @@ class MaplibreMapentityContext {
             for (const layer of layers) {
                 document.querySelectorAll('div.layer-switch-menu input').forEach(input => {
                     if (input.parentNode.textContent.trim() === layer) {
-                        input.setAttribute('checked', 'checked');
+                        input.checked = true;
                     }
                 });
             }
@@ -228,6 +252,7 @@ class MaplibreMapentityContext {
         // if (context.print) {
         //     map.getContainer().classList.remove('leaflet-fade-anim');
         // }
+
         // Trigger a change event on the filter selections.
         filter.querySelectorAll('select').forEach(select => {
             select.dispatchEvent(new Event('change'));
