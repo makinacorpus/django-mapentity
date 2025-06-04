@@ -139,7 +139,7 @@ class DuplicateMixin(object):
 
 class BaseMapEntityMixin(DuplicateMixin, models.Model):
     _entity = None
-    capture_map_image_waitfor = '.leaflet-tile-loaded'
+    capture_map_image_waitfor = '.leaflet-tile-loaded' # faire attention à ceci au moment de mettre en place le control de capture
 
     class Meta:
         abstract = True
@@ -273,6 +273,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def get_delete_url(self):
         return reverse(self._entity.url_name(ENTITY_DELETE), args=[str(self.pk)])
 
+# map image
     def get_map_image_extent(self, srid=API_SRID):
         fieldname = app_settings['GEOM_FIELD_NAME']
         obj = getattr(self, fieldname)

@@ -8,18 +8,7 @@ $(window).on('entity:view:list', function (e, data) {
         'serverSide': true,
         aoColumnDefs: [
             { "bVisible": false, "aTargets": [ 0 ] },  // don't show first column (ID)
-            // {
-            //     "aTargets": [ 1 ],
-            //     "mRender": function ( column_data, type, full ) {  // render second column as detail link
-            //         var value = '';
-            //         if (column_data !== '') {
-            //             value = column_data;
-            //         } else {
-            //             value = full.id.toString();
-            //         }
-            //         return `<a href="/${data.modelname}/${full.id}/">${value}</a>`;
-            //     }
-            // }
+
         ],  // hide id column (consider first)
         "ajax": {
             "url": `/api/${data.modelname}/drf/${data.modelname}s.datatables`
@@ -60,35 +49,6 @@ $(window).on('entity:view:list', function (e, data) {
         MapEntity.mainDatatable.search($(this).val()).draw() ;
     })
 
-    // MapEntity.mainDatatable = JQDataTable.init($('#objects-list'), null /* no load at startup */, {
-    //     // Hide pk column
-    //     aoColumnDefs: [ { "bVisible": false, "aTargets": [ 0 ] } ],
-    //     sDom: "tpf",
-    //     aaData: [],
-    //     iDeferLoading: 0,
-    //     iDisplayLength: 15,
-    //     // Enable cache
-    //     fnServerData: function ( sUrl, aoData, fnCallback, oSettings ) {
-	// 		oSettings.jqXHR = $.ajax( {
-	// 			"url":  sUrl,
-	// 			"data": aoData,
-	// 			"success": function (json) {
-	// 				$(oSettings.oInstance).trigger('xhr', oSettings);
-	// 				fnCallback( json );
-	// 			},
-	// 			"dataType": "json",
-	// 			"cache": true,
-	// 			"type": oSettings.sServerMethod,
-	// 			"error": function (xhr, error, thrown) {
-	// 				if ( error == "parsererror" ) {
-	// 					oSettings.oApi._fnLog( oSettings, 0, "DataTables warning: JSON data from "+
-	// 						"server could not be parsed. This is caused by a JSON formatting error." );
-	// 				}
-	// 			}
-	// 		} );
-	// 	}
-    // });
-
     // Adjust vertically
     expandDatatableHeight();
     $(window).resize(function (e) {
@@ -121,9 +81,6 @@ $(window).on('entity:view:list', function (e, data) {
 
 
 $(window).on('entity:view:detail', function (e, data) {
-    //
-    // Throw event when record is hovered
-    // (used in Leaflet.ObjectLayer and below)
     $('.hoverable').hoverIntent(
         function on() {
             var modelname = $(this).data('modelname');
@@ -137,7 +94,6 @@ $(window).on('entity:view:detail', function (e, data) {
         }
     );
 
-    //
     // Highlight (e.g. table rows) when record is hovered
     $(window).on('entity:mouseover', function (e, data) {
         var modelname = data.modelname;
