@@ -293,7 +293,7 @@ $(window).on('entity:map:list', function (e, data) {
 
     // Ajoute une légende pour le calque des objets
     var nameHTML = '<span style="color: '+ style['color'] + ';">&#x25A3;</span>&nbsp;' + data.objectsname;
-    map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects"));
+    map.layerscontrol.addOverlay(objectsLayer, nameHTML, tr("Objects")); // categorie "Objects" ajoutées manuellement
 
     // Initialise la table de données principale
     var dt = MapEntity.mainDatatable;

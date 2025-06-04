@@ -115,7 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
             scrollY: '100vh',
             scrollCollapse: true,
             lengthChange: false,
+            info: false,
+            sDom: "tpf",
             language: {
+                searchPlaceholder: tr("Search"),  // placeholder in search field
                 paginate: {
                     first: "<<",
                     last: ">>",

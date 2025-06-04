@@ -37,7 +37,6 @@ class MaplibreMapentityTogglableFiltre {
             html: true,
             content: '',
             title: 'useless',
-            // trigger: 'manual'  // Ne pas utiliser 'manual' pour le popover principal
         });
 
         // Initialiser le hover popover
@@ -45,8 +44,7 @@ class MaplibreMapentityTogglableFiltre {
             placement: 'bottom',
             html: true,
             content: () => this.infos(),
-            title: 'Critères actuels',
-            trigger: 'manual'
+            title: tr("Current criteria"),
         });
     }
 
@@ -263,7 +261,7 @@ class MaplibreMapentityTogglableFiltre {
 
     infos() {
         if (Object.keys(this.fields).length === 0) {
-            return '<p>Aucun filtre</p>';
+            return "<p>" + tr("No filter") + "</p>";
         }
 
         return Object.values(this.fields).map(f => {
