@@ -197,7 +197,6 @@ MAPLIBRE_CONFIG_OVERRIDES = {
     'TILES': [
         ('OSM', 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; OpenStreetMap contributors'),
         ('TOPO', 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', '&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.'),
-        ('OSM-France', 'https://tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', '&copy; OpenStreetMap contributors'),
     ]
 }
 

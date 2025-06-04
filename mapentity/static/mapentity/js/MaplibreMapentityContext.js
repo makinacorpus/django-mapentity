@@ -26,13 +26,11 @@ class MaplibreMapentityContext {
 
         // Visible layers by their name
         const layers = [];
-        document.querySelectorAll('div.layer-switcher-menu').forEach(input => {
-            layers.push(input.parentNode.textContent.trim());
+        document.querySelectorAll('div.layer-switcher-menu label').forEach(input => {
+            layers.push(input.textContent.trim());
         });
 
-        const layerList = layers[0].split(" ");
-        context['maplayers'] = layerList; // Store the list of visible layers
-        console.log('Visible layers:', context['maplayers']);
+        context['maplayers'] = layers; // Store the list of visible layers
 
         // Form filters
         if (filter) {
@@ -224,9 +222,10 @@ class MaplibreMapentityContext {
         // Display the map layers based on their names.
         if (context.maplayers) {
             const layers = context.maplayers;
-            layers.push(objectsname);
+            // layers.push(objectsname); comprend pas trop pourquoi on ajoute le nom de l'objet ici, car il est déjà dans la liste des couches peut être que ce sont les objets et pas le nom du modèle, je ne sais pas trop
             document.querySelectorAll('div.layer-switcher-menu input[type="checkbox"]').forEach(input => {
                 // Uncheck layers that do not match the object's name.
+                // peut poser problème à voir au moment de la mise en place de screenshots ('parentNode.textContent' peut ne pas correspondre au nom de la couche)
                 if (input.parentNode.textContent.trim() !== objectsname) {
                     input.checked = false;
                 }
@@ -235,6 +234,7 @@ class MaplibreMapentityContext {
             // Check layers corresponding to the names in the context.
             for (const layer of layers) {
                 document.querySelectorAll('div.layer-switch-menu input').forEach(input => {
+                    // peut poser problème à voir au moment de la mise en place de screenshots ('parentNode.textContent' peut ne pas correspondre au nom de la couche)
                     if (input.parentNode.textContent.trim() === layer) {
                         input.checked = true;
                     }

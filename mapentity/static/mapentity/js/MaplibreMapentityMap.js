@@ -18,9 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
         //     mapViewContext.restoreFullContext(map.getMap(), mapViewContext)
         // }
 
-        // window.addEventListener('unload', function() {
-        //     mapViewContext.saveFullContext(map.getMap(), {prefix: 'detail'});
-        // });
+        window.addEventListener('visibilitychange', function() {
+            mapViewContext.saveFullContext(map.getMap(), {prefix: 'detail'});
+        });
 
         // Affichage de la géométrie de l'objet sur la carte de détail
         const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
@@ -92,22 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const mapViewContext = getURLParameter('context');
             const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
-            // Obtenir le contexte de la carte - A voir encore
-            // window.addEventListener('load', function (){
-            //     console.log('Chargement du contexte de la carte');
-            //     const contexte = mapentityContext.loadFullContext(map.getMap(), {
-            //         filter: 'mainfilter', // id du formulaire de filtre
-            //         datatable: mainDatatable,
-            //         prefix: 'list',
-            //     });
-            // })
-            console.log('Map entity context on load :', );
-            const fullContext = mapentityContext.getFullContext(map.getMap(), {
-                filter: 'mainfilter',
-                datatable: mainDatatable
-            });
-
-            console.log('Full context without load :', JSON.stringify(fullContext));
 
             // if (mapViewContext) {
             //     mapentityContext.restoreFullContext(
@@ -115,35 +99,22 @@ document.addEventListener('DOMContentLoaded', function() {
             //         mapViewContext, {
             //         filter: 'mainfilter', // id du formulaire de filtre
             //         datatable: mainDatatable,
-            //         objectsname: modelname,
+            //         objectsname: modelname,// layers
             //         prefix: 'list',
             //     });
             // }
 
             // Sauvegarde le contexte de la carte lors de la fermeture de la fenêtre
-            // window.addEventListener('unload', function() {
-            //     debugger
-            //     mapentityContext.saveFullContext(map.getMap(), {
-            //         filter: 'mainfilter', // id du formulaire de filtre
-            //         datatable: mainDatatable,
-            //         prefix: 'list',
-            //     });
-            // });
-
-            // mapentityContext.saveFullContext(map.getMap(), {
-            //         filter: 'mainfilter', // id du formulaire de filtre
-            //         datatable: mainDatatable,
-            //         prefix: 'list',
-            // });
-            //
-            // console.log('Map context saved on unload:', mapentityContext.loadFullContext({
-            //     prefix: 'list',
-            // }));
+            window.addEventListener('visibilitychange', function() {
+                mapentityContext.saveFullContext(map.getMap(), {
+                    filter: 'mainfilter', // id du formulaire de filtre
+                    datatable: mainDatatable,
+                    prefix: 'list',
+                });
+            });
 
             // Bouton de capture d'écran pour la carte
             // En course de développement
-
-
 
         });
     });
