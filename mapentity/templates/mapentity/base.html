@@ -130,7 +130,9 @@
         {% for lang in LANGUAGES %}
             {% if lang.0 != 'en' %}
                 <script src="{% get_static_prefix %}mapentity/vendor/bootstrap-datepicker-1.9.0/locales/bootstrap-datepicker.{{ lang.0 }}.min.js"
-                        charset="UTF-8"></script>{% endif %}
+                        charset="UTF-8">
+                </script>
+            {% endif %}
         {% endfor %}
 
         {% leaflet_js plugins="ALL" %}
@@ -154,7 +156,7 @@
 {#            L.Control.FileLayerLoad.LABEL = '<i class="bi bi-folder2-open"></i>';#}
 {#            L.Control.FileLayerLoad.TITLE = "{% trans 'Load local file (GPX, KML, GeoJSON)' %}";#}
 {#            L.GeometryField.unsavedText = "{% trans 'Map geometry is unsaved' %}";#}
-{#          MapEntity.i18n = {#}
+{#            MapEntity.i18n = {#}
 {#                      'Search': "{% trans 'Search' %}",#}
 {#                      'Current criteria': "{% trans 'Current criteria' %}",#}
 {#                     'No filter': "{% trans 'No filter' %}",#}
@@ -203,6 +205,9 @@
         <script src="/static/mapentity/js/MaplibreMapentityViews.js"></script>
         <script src="/static/mapentity/js/MaplibreMapentityMap.js"></script>
         <script src="/static/mapentity/js/MaplibreMapentity.js"></script>
+
+
+        <script src="{% static 'mapentity/RelatedObjectLookups.js' %}"></script>
     {% endcompress %}
 
     {% smart_include "extrabody" %}
