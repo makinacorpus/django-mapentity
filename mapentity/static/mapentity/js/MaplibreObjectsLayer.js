@@ -204,7 +204,7 @@ class MaplibreObjectsLayer {
                     'line-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth + 3,
+                        strokeWidth + 1, // Épaississement du contour au survol
                         strokeWidth
                     ],
                     'line-opacity': strokeOpacity
@@ -221,7 +221,7 @@ class MaplibreObjectsLayer {
                     'line-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth + 2,
+                        strokeWidth + 1,
                         strokeWidth
                     ],
                     'line-opacity': strokeOpacity
@@ -256,7 +256,7 @@ class MaplibreObjectsLayer {
                     'circle-stroke-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth + 3, // Épaississement du contour au survol
+                        strokeWidth + 1, // Épaississement du contour au survol
                         strokeWidth // Largeur du contour par défaut
                     ],
                     'circle-radius': [

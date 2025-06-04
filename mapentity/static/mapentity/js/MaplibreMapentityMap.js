@@ -13,13 +13,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Restauration du contexte de la carte, uniquement pour les captures d'écran
         const mapViewContext = getURLParameter('context');
-        if(mapViewContext && typeof mapViewContext === 'object') {
-            mapViewContext.restoreFullContext(map.getMap(), mapViewContext)
-        }
 
-        window.addEventListener('unload', function() {
-            mapViewContext.restoreFullContext(map.getMap(), {prefix: 'detail'});
-        });
+        // if(mapViewContext && typeof mapViewContext === 'object') {
+        //     mapViewContext.restoreFullContext(map.getMap(), mapViewContext)
+        // }
+
+        // window.addEventListener('unload', function() {
+        //     mapViewContext.saveFullContext(map.getMap(), {prefix: 'detail'});
+        // });
 
         // Affichage de la géométrie de l'objet sur la carte de détail
         const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
@@ -108,26 +109,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
             console.log('Full context without load :', JSON.stringify(fullContext));
 
-            if (mapViewContext) {
-                mapentityContext.restoreFullContext(
-                    map.getMap(),
-                    mapViewContext, {
-                    filter: 'mainfilter', // id du formulaire de filtre
-                    datatable: mainDatatable,
-                    objectsname: modelname,
-                    prefix: 'list',
-                });
-            }
+            // if (mapViewContext) {
+            //     mapentityContext.restoreFullContext(
+            //         map.getMap(),
+            //         mapViewContext, {
+            //         filter: 'mainfilter', // id du formulaire de filtre
+            //         datatable: mainDatatable,
+            //         objectsname: modelname,
+            //         prefix: 'list',
+            //     });
+            // }
 
             // Sauvegarde le contexte de la carte lors de la fermeture de la fenêtre
-            window.addEventListener('unload', function() {
-                debugger
-                mapentityContext.saveFullContext(map.getMap(), {
-                    filter: 'mainfilter', // id du formulaire de filtre
-                    datatable: mainDatatable,
-                    prefix: 'list',
-                });
-            });
+            // window.addEventListener('unload', function() {
+            //     debugger
+            //     mapentityContext.saveFullContext(map.getMap(), {
+            //         filter: 'mainfilter', // id du formulaire de filtre
+            //         datatable: mainDatatable,
+            //         prefix: 'list',
+            //     });
+            // });
 
             // mapentityContext.saveFullContext(map.getMap(), {
             //         filter: 'mainfilter', // id du formulaire de filtre
