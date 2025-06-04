@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const mainDatatable = new DataTable('#objects-list', {
             processing: true,
             serverSide: true,
+            searching: false, // désactive la recherche intégrée de DataTables
             columnDefs: [
                 { visible: false, targets: [0] }
             ],
