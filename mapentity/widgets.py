@@ -1,17 +1,17 @@
 from django.forms import widgets as django_widgets
 from django.template.loader import render_to_string
-from leaflet.forms.widgets import LeafletWidget
-
+# from leaflet.forms.widgets import LeafletWidget
+from .MaplibreMapentityWidgets import MaplibreWidget
 from .helpers import wkt_to_geom
 from .settings import API_SRID
 
 
-class MapWidget(LeafletWidget):
-    geometry_field_class = 'MapEntity.GeometryField'
+class MapWidget(MaplibreWidget):
+    # geometry_field_class = 'MapEntity.GeometryField'
 
     def render(self, name, value, attrs=None, renderer=None):
-        attrs = attrs or {}
-        attrs.update(geometry_field_class=self.geometry_field_class)
+        # attrs = attrs or {}
+        # attrs.update(geometry_field_class=self.geometry_field_class)
         return super().render(name, value, attrs)
 
 
