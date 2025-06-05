@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Rendu des onglets de navigation supérieure
     const history = new MaplibreMapentityHistory();
-    console.log('history: ' , history);
     if (history) {
         window.MapEntity.currentHistory = history;
         history.render();
@@ -89,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    console.debug('View ', context.modelname, context.viewname);
+    // console.debug('View ', context.modelname, context.viewname);
 
     // Initialisation automatique de la carte
     function initializeMap() {
@@ -143,14 +142,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 style = { ...style };  // créer une copie propre
             }
 
-            console.log('Style utilisé pour la carte:', style);
+            // console.log('Style utilisé pour la carte:', style);
 
             let detailStyle = window.SETTINGS.map.styles.detail;
             if(typeof detailStyle !== "function") {
                 detailStyle = { ...detailStyle };
             }
 
-            console.log('Style de détail utilisé pour la carte:', detailStyle);
+            // console.log('Style de détail utilisé pour la carte:', detailStyle);
 
             // Créer une instance de MaplibreObjectsLayer
             const objectsLayer = new MaplibreObjectsLayer(null, {
@@ -161,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 readonly: false,
             });
 
-            console.log('objectsLayer créé pour le modèle:', objectsLayer);
+            // console.log('objectsLayer créé pour le modèle:', objectsLayer);
 
             // Initialiser la couche d'objets
             objectsLayer.initialize(map.getMap());
@@ -197,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 objectsLayer: objectsLayer,
                 mapId: mapId
             });
-            console.log('data après extension', mergedData);
+            // console.log('data après extension', mergedData);
 
             // Déclencher l'événement de vue
             const viewEvent = new CustomEvent('entity:view:' + context.viewname, {
@@ -231,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.jQuery(element).resizable(resizableOptions);
             });
 
-            console.log('Carte initialisée avec succès:', mapId);
+            // console.log('Carte initialisée avec succès:', mapId);
             return { map, objectsLayer, context: mergedData, mapentityContext };
 
         } catch (error) {

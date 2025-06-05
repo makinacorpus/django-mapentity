@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Écouteur d'événement pour la vue détail
     window.addEventListener('entity:map:detail', function(e) {
-        console.log('Map initialized for detail view with data:', e.detail);
+        // console.log('Map initialized for detail view with data:', e.detail);
 
         const { map, objectsLayer, modelname } = e.detail;
 
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Affichage de la géométrie de l'objet sur la carte de détail
         const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
-        console.log('Feature GeoJSON URL:', feature_geojson_url);
+        // console.log('Feature GeoJSON URL:', feature_geojson_url);
 
         const fetchFeatureLayer = async (dataUrl) => {
             const reponse = await fetch(dataUrl);
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const featureData = await reponse.json();
             if (featureData && featureData.type === 'Feature') {
-                console.log('Feature data type retrieved:', featureData.type);
+                // console.log('Feature data type retrieved:', featureData.type);
 
                 if (mapViewContext && mapViewContext.print){
                     const specified = window.SETTINGS.map.styles.print[modelname] ;
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Écouteur d'événement pour la vue liste
     window.addEventListener('entity:map:list', function(e) {
-        console.log('Map initialized for list view with data:', e.detail);
+        // console.log('Map initialized for list view with data:', e.detail);
         const { map, objectsLayer, modelname } = e.detail;
         const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
 
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Charge le formulaire de filtre au premier clic sur le bouton
             togglableFiltre.button.addEventListener('click', function (e) {
-                console.log('Chargement du formulaire de filtre');
+                // console.log('Chargement du formulaire de filtre');
                 togglableFiltre.load_filter_form(mapsync);
             });
 

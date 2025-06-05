@@ -43,7 +43,7 @@ class MaplibreWidget(BaseGeometryWidget):
             id_map_callback=map_id + '_map_callback',
             modifiable=self.modifiable,
             target_map=attrs.get('target_map', getattr(self, 'target_map', None)),
-            geometry_field_class='MaplibreMapentityGeometryField'
+            # geometry_field_class='MaplibreMapentityGeometryField'
         )
         return attrs
 
