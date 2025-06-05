@@ -20,6 +20,11 @@ class MaplibreObjectsLayer {
     }
 
     _onClick(e) {
+        // Skip interactions in readonly mode
+        if (this.options.readonly){
+            return;
+        }
+
         const features = this._map.queryRenderedFeatures(e.point, {
             layers: Object.values(this._current_objects)
         });
@@ -33,6 +38,11 @@ class MaplibreObjectsLayer {
     }
 
     _onMouseMove(e) {
+        // Skip interactions in readonly mode
+         if (this.options.readonly){
+            return;
+        }
+
         const features = this._map.queryRenderedFeatures(e.point, {
             layers: Object.values(this._current_objects)
         });
@@ -98,13 +108,11 @@ class MaplibreObjectsLayer {
 
     addData(geojson) {
         if(geojson.type === 'Feature') {
-            this.addLayer(geojson, true);
-            if (geojson) {
+            this.addLayer(geojson, true, true);
             const bounds = this.calculateBounds(geojson);
             if (bounds) {
                 this._map.fitBounds(bounds, { maxZoom: 16, padding: 20, duration: 0 });
             }
-        }
         }else{
             geojson.features.forEach(feature => {
                 this.addLayer(feature);
@@ -120,6 +128,11 @@ class MaplibreObjectsLayer {
     }
 
     highlight(primaryKey, on = true) {
+        // Skip highlighting in readonly mode
+         if (this.options.readonly){
+            return;
+        }
+
         if (primaryKey && this._current_objects[primaryKey]) {
             const layerId = this._current_objects[primaryKey];
             const sourceId = layerId.replace(/^layer-/, 'source-');
@@ -139,10 +152,14 @@ class MaplibreObjectsLayer {
         this.highlight(primaryKey, on);
     }
 
-    addLayer(feature, detailStatue = false) {
+    addLayer(feature, detailStatue = false, readonly = false) {
         const primaryKey = this.getPrimaryKey(feature);
         const layerId = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
+
+        // Use readonly from parameter or from options
+        const isReadonly = readonly || this.options.readonly;
+        this.options.readonly = isReadonly;
 
         if (!feature.id) {
             feature.id = primaryKey;
@@ -204,7 +221,7 @@ class MaplibreObjectsLayer {
                     'line-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth + 1, // Épaississement du contour au survol
+                        strokeWidth, // Épaississement du contour au survol
                         strokeWidth
                     ],
                     'line-opacity': strokeOpacity
@@ -221,7 +238,7 @@ class MaplibreObjectsLayer {
                     'line-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth + 1,
+                        strokeWidth,
                         strokeWidth
                     ],
                     'line-opacity': strokeOpacity
@@ -256,7 +273,7 @@ class MaplibreObjectsLayer {
                     'circle-stroke-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth + 1, // Épaississement du contour au survol
+                        strokeWidth, // Épaississement du contour au survol
                         strokeWidth // Largeur du contour par défaut
                     ],
                     'circle-radius': [

@@ -158,6 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 style: style,
                 detailStyle: detailStyle,
                 modelname: modelName,
+                readonly: false,
             });
 
             console.log('objectsLayer créé pour le modèle:', objectsLayer);

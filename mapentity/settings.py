@@ -86,7 +86,7 @@ app_settings = dict({
     'TEMP_DIR': getattr(settings, 'TEMP_DIR', '/tmp'),
     'MAP_CAPTURE_SIZE': 800,
     'MAP_CAPTURE_MAX_RATIO': 1.25,
-    'GEOM_FIELD_NAME': 'geom',
+    'GEOM_FIELD_NAME': 'geom', # Nom du champ géométrique - utilisé pour début du nom de l'id de la carte qui vaut "geom-map
     'GPX_FIELD_NAME': 'geom',
     'DATE_UPDATE_FIELD_NAME': 'date_update',
     'MAP_BACKGROUND_FOGGED': False,
