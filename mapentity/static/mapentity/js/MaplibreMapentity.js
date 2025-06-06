@@ -80,6 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
         viewname: bodyElement.dataset.viewname || bodyElement.getAttribute('data-viewname')
     };
 
+    console.log('MapEntity context:', context);
+
     // Récupérer tous les data attributes du body
     Array.from(bodyElement.attributes).forEach(function(attr) {
         if (attr.name.startsWith('data-')) {

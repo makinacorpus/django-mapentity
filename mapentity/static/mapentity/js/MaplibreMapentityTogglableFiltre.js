@@ -1,6 +1,7 @@
 class MaplibreMapentityTogglableFiltre {
     constructor() {
         this.button = document.getElementById('filters-btn');
+        this.button.setAttribute('type', 'button');
         this.fields = {};
         this.visible = false;
         this.loaded_form = false;

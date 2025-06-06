@@ -68,6 +68,7 @@ class MaplibreFileLayerControl {
 
         // Création du bouton pour charger un fichier
         const button = document.createElement('button');
+        button.setAttribute('type', 'button');
         button.className = 'maplibregl-ctrl-icon maplibregl-filelayerload';
         const img = document.createElement('img');
         img.src = '/static/mapentity/images/dossier.png'; // Assurez-vous que le chemin est correct

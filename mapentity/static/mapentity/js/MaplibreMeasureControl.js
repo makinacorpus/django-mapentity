@@ -28,6 +28,7 @@ class MaplibreMeasureControl {
 
         // Création du bouton
         this._button = document.createElement('button');
+        this._button.setAttribute('type', 'button');
         this._button.className = 'measure-control-btn';
 
         const img = document.createElement('img');

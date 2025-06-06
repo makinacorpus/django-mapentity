@@ -296,6 +296,7 @@ class MaplibreObjectsLayer {
 
         // Si la couche est déjà présente, on ne l'ajoute pas
         const category = this.options.modelname;
+        console.log('category', category);
         if (!this.layers.overlays[category]) {
             this.layers.overlays[category] = {};
         }

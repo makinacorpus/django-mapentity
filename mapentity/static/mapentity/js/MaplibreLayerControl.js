@@ -13,6 +13,7 @@ class MaplibreLayerControl {
 
         // Bouton pour ouvrir/fermer le menu
         const button = document.createElement('button');
+        button.setAttribute('type', 'button');
         button.className = 'layer-switcher-btn';
         const img = document.createElement('img');
         img.src = '/static/mapentity/images/layers-2x.png';

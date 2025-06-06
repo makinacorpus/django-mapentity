@@ -1,19 +1,96 @@
 from django.forms import widgets as django_widgets
 from django.template.loader import render_to_string
 # from leaflet.forms.widgets import LeafletWidget
-from .MaplibreMapentityWidgets import MaplibreWidget
+# from .MaplibreMapentityWidgets import MaplibreWidget
 from .helpers import wkt_to_geom
 from .settings import API_SRID
 
 
-class MapWidget(MaplibreWidget):
-    # geometry_field_class = 'MapEntity.GeometryField'
+# from django import forms
+from django.core import validators
+from django.template.defaultfilters import slugify
+# from django.core.exceptions import ImproperlyConfigured
 
-    def render(self, name, value, attrs=None, renderer=None):
-        # attrs = attrs or {}
-        # attrs.update(geometry_field_class=self.geometry_field_class)
-        return super().render(name, value, attrs)
+# from .settings import MAPLIBRE_CONFIG
+from django.contrib.gis.forms.widgets import BaseGeometryWidget
 
+# try:
+#     from django.contrib.gis.forms.widgets import BaseGeometryWidget
+# except (ImportError, ImproperlyConfigured):
+#     from .backport import BaseGeometryWidget
+
+
+
+# class MapWidget(MaplibreWidget):
+#     # geometry_field_class = 'MapEntity.GeometryField'
+#
+#     def render(self, name, value, attrs=None, renderer=None):
+#         # attrs = attrs or {}
+#         # attrs.update(geometry_field_class=self.geometry_field_class)
+#         return super().render(name, value, attrs)
+
+
+class MapWidget(BaseGeometryWidget):
+    """
+    Widget Django pour l'intégration de cartes MapLibre GL JS.
+    """
+    template_name = 'mapentity/widget.html'
+    modifiable = True
+    display_raw = False
+
+    def serialize(self, value):
+        """
+        Sérialise la valeur géométrique en GeoJSON.
+        """
+        return value.geojson if value else ''
+
+    def _get_attrs(self, name, attrs=None):
+        """
+        Prépare les attributs nécessaires pour le rendu du template.
+        """
+
+        # Récupération des paramètres depuis l'initialisation du Field
+        self.geom_type = self.attrs.get('geom_type', getattr(self, 'geom_type', 'GEOMETRY'))
+
+        attrs = attrs or {}
+
+        # Normalisation du type de géométrie
+        if self.geom_type == 'GEOMETRY':
+            attrs['geom_type'] = 'Geometry'
+        else:
+            attrs['geom_type'] = self.geom_type
+
+        # Génération des IDs pour les éléments HTML et JavaScript
+        map_id_css = slugify(attrs.get('id', name))
+        map_id = map_id_css.replace('-', '_')
+
+        attrs.update({
+            'id': map_id,
+            'id_css': map_id_css,
+            'id_map': map_id_css + '_map',
+            # 'id_map_callback': map_id + '_map_callback',
+        })
+
+        return attrs
+
+    def get_context(self, name, value, attrs):
+        """
+        Prépare le contexte pour le rendu du template.
+        """
+        # Gestion des valeurs vides
+        value = None if value in validators.EMPTY_VALUES else value
+
+        # Récupération du contexte parent
+        context = super().get_context(name, value, attrs)
+
+        # Ajout des attributs spécifiques au widget
+        widget_attrs = self._get_attrs(name, attrs)
+        context.update(widget_attrs)
+
+        # Ajout de la valeur sérialisée pour le template
+        context['serialized'] = self.serialize(value)
+
+        return context
 
 class HiddenGeometryWidget(django_widgets.HiddenInput):
 

@@ -2,14 +2,11 @@
 
 <style>
     {% block map_css %}
-        {% if map_width and map_height %}
-            #{{ id_map }} {
-                width: {{ map_width }};
-                height: {{ map_height }};
-            }
-        {% endif %}
+        #{{ id_map }} {
+            width: 100%;
+            height: 100%;
+        }
         {% if not display_raw %}
-            {# id_geom_map #}
             #{{ id }} {
                 display: none;
             }
@@ -17,135 +14,112 @@
     {% endblock map_css %}
 </style>
 
-{#{% if not target_map %}#}
-{#    {% block map %}#}
-{#        <div id="{{ id_map }}" class="maplibre-map"></div>#}
-{#    {% endblock map %}#}
-{#{% endif %}#}
-
- {% block map %}
-        <div id="{{ id_map }}" class="maplibre-map"></div>
- {% endblock map %}
-
+{% block map %}
+    <div id="{{ id_map }}" class="maplibre-map"></div>
+{% endblock map %}
 
 <script type="text/javascript">
-    function {{ id_map_callback }}(map) {
-        // Configuration du champ géométrique
-        const fieldConfig = {
-            fieldid: '{{ id }}',
-            modifiable: {{ modifiable|yesno:"true,false" }},
-            geom_type: '{{ geom_type }}',
-            srid: {{ map_srid }},
-            {#store_class: MaplibreFieldStore#}
-        };
+    {#function {{ id_map_callback }}(map) {#}
+    {#    // Configuration du champ géométrique#}
+    {#    const fieldConfig = {#}
+    {#        fieldid: '{{ id }}',#}
+    {#        modifiable: {{ modifiable|yesno:"true,false" }},#}
+    {#        geom_type: '{{ geom_type }}',#}
+    {#        srid: {{ map_srid }}#}
+    {#    };#}
+    {##}
+    {#    // Initialisation du champ géométrique MapLibre#}
+    {#    (new MaplibreGeometryField(fieldConfig)).addTo(map);#}
+    {# } #}
 
-        // Initialisation du champ géométrique MapLibre
-        {#(new MaplibreGeometryField(fieldConfig)).addTo(map);#}
-        {% block callback %}{% endblock callback %}
-     }
-
-    {% if target_map %}
-        // Réutilisation d'une carte MapLibre existante
-        document.addEventListener('DOMContentLoaded', function() {
-            // Chercher la carte cible par son ID
-            const targetMapElement = document.getElementById('{{ target_map }}-map');
-
-            if (targetMapElement && targetMapElement._maplibreMap) {
-                // Récupérer l'instance MapLibre existante
-                const targetMap = targetMapElement._maplibreMap;
-
-                // Attendre que la carte cible soit prête si nécessaire
-                if (targetMap.loaded()) {
-                    {{ id_map_callback }}(targetMap);
-                } else {
-                    targetMap.on('load', function() {
-                        {{ id_map_callback }}(targetMap);
-                    });
-                }
-            } else {
-                console.error('Carte cible non trouvée pour target_map: {{ target_map }}');
-            }
-        });
-    {% else %}
-        // Initialisation d'une nouvelle carte MapLibre
-        document.addEventListener('DOMContentLoaded', function() {
+    // Initialisation d'une nouvelle carte MapLibre
+    document.addEventListener('DOMContentLoaded', function() {
             const mapId = '{{ id_map }}';
-
             const {BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES} = window.SETTINGS.map.maplibreConfig;
 
             // Initialisation de la carte
             const bounds = [BOUNDS[0], BOUNDS[1]];
             const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds);
 
-            // Stocker l'instance sur l'élément DOM pour réutilisation
-            const mapElement = document.getElementById(mapId);
-            if (mapElement) {
-                mapElement._maplibreMap = map;
-            }
-                let style = window.SETTINGS.map.styles.others;
+            // Configuration des styles
+            let style = window.SETTINGS.map.styles.others;
             if (typeof style !== "function") {
-                    style = { ...style };  // créer une copie propre
+                style = { ...style };
+            }
+
+            let detailStyle = window.SETTINGS.map.styles.detail;
+            if(typeof detailStyle !== "function") {
+                detailStyle = { ...detailStyle };
+            }
+
+              // Gestion des vues
+            const bodyElement = document.body;
+
+            const context = {
+                modelname: bodyElement.dataset.modelname || bodyElement.getAttribute('data-modelname'),
+                viewname: bodyElement.dataset.viewname || bodyElement.getAttribute('data-viewname')
+            };
+
+            console.log('Context:', context);
+            const modelname = context.modelname;
+
+            // Récupérer tous les data attributes du body
+            Array.from(bodyElement.attributes).forEach(function(attr) {
+                if (attr.name.startsWith('data-')) {
+                    const key = attr.name.substring(5); // Enlever 'data-'
+                    context[key] = attr.value;
                 }
+            });
 
-                {#console.log('Style utilisé pour la carte:', style);#}
+            // Créer une instance de MaplibreObjectsLayer
+            const objectsLayer = new MaplibreObjectsLayer(null, {
+                style: style,
+                detailStyle: detailStyle,
+                modelname: modelname
+            });
 
-                let detailStyle = window.SETTINGS.map.styles.detail;
-                if(typeof detailStyle !== "function") {
-                    detailStyle = { ...detailStyle };
+            // Initialiser la couche d'objets
+            objectsLayer.initialize(map.getMap());
+
+            // Ajouter les couches de fond
+            TILES.forEach((tile) => {
+                const [tileName, tileUrl, tileAttribution] = tile;
+                objectsLayer.addBaseLayer(tileName, {
+                    id: tileName + '-base',
+                    tiles: [tileUrl],
+                    attribution: tileAttribution
+                });
+            });
+
+            // Ajouter les contrôles
+            map.getMap().addControl(new MaplibreLayerControl(objectsLayer), 'top-right');
+
+            const unit = SCALE || 'metric';
+            const scale = new maplibregl.ScaleControl({
+                maxWidth: 80,
+                unit: unit
+            });
+            map.getMap().addControl(scale, 'bottom-left');
+
+            // Ajouter le contrôle de reset de vue
+            map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
+
+            // ajout du contrôle de fichiers
+            const fileLayerLoadControl = new MaplibreFileLayerControl({
+                layerOptions: {
+                    style: window.SETTINGS.map.styles.filelayer,
                 }
+            });
 
-                {#console.log('Style de détail utilisé pour la carte:', detailStyle);#}
-
-                // Créer une instance de MaplibreObjectsLayer
-                const objectsLayer = new MaplibreObjectsLayer(null, {
-                    style: style,
-                    detailStyle: detailStyle
-                });
-
-
-
-                // Initialiser la couche d'objets
-                objectsLayer.initialize(map.getMap());
-
-                console.log('widget_mapentity.js: MaplibreObjectsLayer initialisé avec la carte:', map.getMap());
-                {#console.log('objectsLayer créé pour le modèle:', objectsLayer);#}
-
-                // Ajouter une couche de fond OSM
-                TILES.forEach((tile) => {
-                    const [tileName, tileUrl, tileAttribution] = tile;
-                    objectsLayer.addBaseLayer(tileName, {
-                        id: tileName + '-base',
-                        tiles: [tileUrl],
-                        attribution: tileAttribution
-                    });
-                });
-
-                // Créer le contrôle de couches
-                map.getMap().addControl(new MaplibreLayerControl(objectsLayer), 'top-right');
-
-                // metriques de la carte
-                const unit = SCALE || 'metric';
-                const scale = new maplibregl.ScaleControl({
-                    maxWidth: 80,
-                    unit: unit
-                });
-                map.getMap().addControl(scale, 'bottom-left');
-
-
-                // Ajouter un contrôle pour réinitialiser la vue
-                map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
+            map.getMap().addControl(fileLayerLoadControl, 'top-left');
 
             // Attendre que la carte soit chargée avant d'initialiser le callback
             map.getMap().on('load', function() {
-                {{ id_map_callback }}(map);
-                const modelname = 'dummymodel'
+{#                {{ id_map_callback }}(map);#}
                 const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
                 objectsLayer.load(layerUrl);
              });
-        });
-    {% endif %}
-
-
+    });
 </script>
 
 {% if display_raw %}<p>Geometry:</p>{% endif %}
