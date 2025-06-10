@@ -48,7 +48,6 @@ class MapWidget(BaseGeometryWidget):
         """
         Prépare les attributs nécessaires pour le rendu du template.
         """
-
         # Récupération des paramètres depuis l'initialisation du Field
         self.geom_type = self.attrs.get('geom_type', getattr(self, 'geom_type', 'GEOMETRY'))
 
@@ -68,7 +67,8 @@ class MapWidget(BaseGeometryWidget):
             'id': map_id,
             'id_css': map_id_css,
             'id_map': map_id_css + '_map',
-            # 'id_map_callback': map_id + '_map_callback',
+            'id_map_callback': map_id + '_map_callback',
+            # geometry_field_class='MaplibreMapentityGeometryField'
         })
 
         return attrs
