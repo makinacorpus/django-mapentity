@@ -19,18 +19,6 @@
 {% endblock map %}
 
 <script type="text/javascript">
-    {#function {{ id_map_callback }}(map) {#}
-    {#    // Configuration du champ géométrique#}
-    {#    const fieldConfig = {#}
-    {#        fieldid: '{{ id }}',#}
-    {#        modifiable: {{ modifiable|yesno:"true,false" }},#}
-    {#        geom_type: '{{ geom_type }}',#}
-    {#        srid: {{ map_srid }}#}
-    {#    };#}
-    {##}
-    {#    // Initialisation du champ géométrique MapLibre#}
-    {#    (new MaplibreGeometryField(fieldConfig)).addTo(map);#}
-    {# } #}
 
     // Initialisation d'une nouvelle carte MapLibre
     document.addEventListener('DOMContentLoaded', function() {
@@ -115,7 +103,25 @@
 
             // Attendre que la carte soit chargée avant d'initialiser le callback
             map.getMap().on('load', function() {
-{#                {{ id_map_callback }}(map);#}
+                const fieldId = '{{ id }}';
+                const options = {
+                    modifiable: true,
+                    geomType: '{{ geom_type }}',
+                };
+
+                const mapGeometryField = new MaplibreGeometryField(map.getMap(), fieldId, options); // onAdd ne marche que si on utilise addControl.
+
+                {#const lineField = new MaplibreGeometryField(map.getMap(),'line-field', {#}
+                {#    geomType: 'LineString',#}
+                {#    modifiable: true#}
+                {# });#}
+
+                {#// Pour un champ Polygon#}
+                {#const polygonField = new MaplibreGeometryField(map.getMap(),'polygon-field', {#}
+                {#    geomType: 'Polygon',#}
+                {#    modifiable: true#}
+                {# });#}
+
                 const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
                 objectsLayer.load(layerUrl);
              });

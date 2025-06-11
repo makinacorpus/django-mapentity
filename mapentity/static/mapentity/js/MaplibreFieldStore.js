@@ -1,40 +1,46 @@
-// Store pour gérer la sérialisation/désérialisation des données géométriques
+
 class MaplibreFieldStore {
     constructor(fieldId, options = {}) {
         this.formField = document.getElementById(fieldId);
         this.options = { ...options };
     }
 
+    // Sauvegarde les données dans le champ du formulaire
+    save(featureCollection) {
+        if (!this.formField) return;
+
+        const serializedData = this._serialize(featureCollection);
+        this.formField.value = serializedData;
+
+        // Déclencher un événement pour notifier le changement
+        this.formField.dispatchEvent(new Event('change'));
+    }
+
+    // Charge depuis le champ du formulaire
     load() {
-        const value = this.formField.value || '';
-        return this._deserialize(value);
+        if (!this.formField) {
+            return null;
+        }
+
+        const value = this.formField.value;
+        if (!value || /^\s*$/.test(value)) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(value);
+        } catch (error) {
+            console.error('Error parsing GeoJSON from field:', error);
+            return null;
+        }
     }
 
-    save(geojsonData) {
-        this.formField.value = this._serialize(geojsonData);
-    }
-
-    _serialize(geojsonData) {
-        if (!geojsonData || (Array.isArray(geojsonData) && geojsonData.length === 0)) {
+    _serialize(featureCollection) {
+        if (!featureCollection || !featureCollection.features || featureCollection.features.length === 0) {
             return '';
         }
 
-        let features = [];
-
-        // Si on a un tableau de features
-        if (Array.isArray(geojsonData)) {
-            features = geojsonData;
-        } else if (geojsonData.type === 'FeatureCollection') {
-            features = geojsonData.features;
-        } else if (geojsonData.type === 'Feature') {
-            features = [geojsonData];
-        }
-
-        if (features.length === 0) {
-            return '';
-        }
-
-        // Gérer la sérialisation selon le type de géométrie attendu
+        const features = featureCollection.features;
         return this._serializeByGeomType(features);
     }
 
@@ -81,7 +87,7 @@ class MaplibreFieldStore {
                 });
 
             default:
-                // Fallback vers FeatureCollection ou première géométrie
+                // Fallback vers FeatureCollection
                 if (isMulti) {
                     return JSON.stringify({
                         type: 'FeatureCollection',
@@ -91,144 +97,4 @@ class MaplibreFieldStore {
                 return JSON.stringify(features[0].geometry);
         }
     }
-
-    _deserialize(value) {
-        if (/^\s*$/.test(value)) {
-            return null;
-        }
-        try {
-            return this._geoJSONToLayer(JSON.parse(value));
-        } catch (error) {
-            console.error('Error parsing GeoJSON:', error);
-            return null;
-        }
-    }
-
-    _geoJSONToLayer(geojson) {
-        if (!geojson) return null;
-
-        // Si c'est déjà une FeatureCollection
-        if (geojson.type === 'FeatureCollection') {
-            return geojson;
-        }
-
-        // Si c'est une Feature
-        if (geojson.type === 'Feature') {
-            return {
-                type: 'FeatureCollection',
-                features: [geojson]
-            };
-        }
-
-        // Si c'est une géométrie brute, gérer tous les types
-        if (geojson.type && geojson.coordinates) {
-            return this._handleGeometryType(geojson);
-        }
-
-        // GeometryCollection - convertir chaque géométrie
-        if (geojson.type === 'GeometryCollection') {
-            const features = geojson.geometries.map(geometry => ({
-                type: 'Feature',
-                properties: {},
-                geometry: geometry
-            }));
-            return {
-                type: 'FeatureCollection',
-                features: features
-            };
-        }
-
-        return null;
-    }
-
-    _handleGeometryType(geometry) {
-        const feature = {
-            type: 'Feature',
-            properties: {},
-            geometry: geometry
-        };
-
-        // Pour les Multi* geometries, on peut les décomposer si nécessaire
-        switch (geometry.type) {
-            case 'Point':
-            case 'LineString':
-            case 'Polygon':
-                return {
-                    type: 'FeatureCollection',
-                    features: [feature]
-                };
-
-            case 'MultiPoint':
-                // Décomposer en Points individuels si isCollection est false
-                if (!this.options.isCollection) {
-                    const features = geometry.coordinates.map(coord => ({
-                        type: 'Feature',
-                        properties: {},
-                        geometry: {
-                            type: 'Point',
-                            coordinates: coord
-                        }
-                    }));
-                    return {
-                        type: 'FeatureCollection',
-                        features: features
-                    };
-                }
-                return {
-                    type: 'FeatureCollection',
-                    features: [feature]
-                };
-
-            case 'MultiLineString':
-                // Décomposer en LineString individuels si isCollection est false
-                if (!this.options.isCollection) {
-                    const features = geometry.coordinates.map(coords => ({
-                        type: 'Feature',
-                        properties: {},
-                        geometry: {
-                            type: 'LineString',
-                            coordinates: coords
-                        }
-                    }));
-                    return {
-                        type: 'FeatureCollection',
-                        features: features
-                    };
-                }
-                return {
-                    type: 'FeatureCollection',
-                    features: [feature]
-                };
-
-            case 'MultiPolygon':
-                // Décomposer en Polygon individuels si isCollection est false
-                if (!this.options.isCollection) {
-                    const features = geometry.coordinates.map(coords => ({
-                        type: 'Feature',
-                        properties: {},
-                        geometry: {
-                            type: 'Polygon',
-                            coordinates: coords
-                        }
-                    }));
-                    return {
-                        type: 'FeatureCollection',
-                        features: features
-                    };
-                }
-                return {
-                    type: 'FeatureCollection',
-                    features: [feature]
-                };
-
-            default:
-                return {
-                    type: 'FeatureCollection',
-                    features: [feature]
-                };
-        }
-    }
 }
-
-
-

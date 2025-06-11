@@ -27,6 +27,7 @@ MapEntity.GeometryField = L.GeometryField.extend({
         this._resetBounds = null;
     },
 
+    // important pour le style des polylignes - lineString
     _controlDrawOptions: function () {
         // Définit le style des formes dessinées
         var options = L.GeometryField.prototype._controlDrawOptions.call(this);

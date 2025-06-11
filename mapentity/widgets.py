@@ -35,7 +35,6 @@ class MapWidget(BaseGeometryWidget):
     Widget Django pour l'intégration de cartes MapLibre GL JS.
     """
     template_name = 'mapentity/widget.html'
-    modifiable = True
     display_raw = False
 
     def serialize(self, value):
@@ -67,8 +66,7 @@ class MapWidget(BaseGeometryWidget):
             'id': map_id,
             'id_css': map_id_css,
             'id_map': map_id_css + '_map',
-            'id_map_callback': map_id + '_map_callback',
-            # geometry_field_class='MaplibreMapentityGeometryField'
+            # 'id_map_callback': map_id + '_map_callback',
         })
 
         return attrs

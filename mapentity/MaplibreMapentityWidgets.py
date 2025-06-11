@@ -7,12 +7,12 @@ from django.template.defaultfilters import slugify
 from django.core.exceptions import ImproperlyConfigured
 
 # from .settings import MAPLIBRE_CONFIG
-# from django.contrib.gis.forms.widgets import BaseGeometryWidget
+from django.contrib.gis.forms.widgets import BaseGeometryWidget
 
-try:
-    from django.contrib.gis.forms.widgets import BaseGeometryWidget
-except (ImportError, ImproperlyConfigured):
-    from .backport import BaseGeometryWidget
+# try:
+#     from django.contrib.gis.forms.widgets import BaseGeometryWidget
+# except (ImportError, ImproperlyConfigured):
+#     from .backport import BaseGeometryWidget
 
 class MaplibreWidget(BaseGeometryWidget):
     template_name = 'mapentity/widget.html'
