@@ -5,6 +5,7 @@ class MaplibreObjectsLayer {
         this._current_objects = {};
         this.options = { ...options };
         this.currentPopup = null;
+        this.snapper = null,
         this.layers = {
             baseLayers: {},
             overlays: {}
@@ -13,6 +14,7 @@ class MaplibreObjectsLayer {
 
     initialize(map) {
         this._map = map;
+        this.snapper = new MaplibreGeometrySnap(map);
         const onClick = (e) => this._onClick(e);
         const onMouseMove = (e) => this._onMouseMove(e);
         this._map.on('click', onClick);
@@ -169,6 +171,8 @@ class MaplibreObjectsLayer {
             type: 'geojson',
             data: feature
         });
+
+        this.snapper.addGuideSource(sourceId);
 
         const geometryType = feature.geometry.type;
 

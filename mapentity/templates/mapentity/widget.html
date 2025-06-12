@@ -109,12 +109,12 @@
                     geomType: '{{ geom_type }}',
                 };
 
-                const mapGeometryField = new MaplibreGeometryField(map.getMap(), fieldId, options); // onAdd ne marche que si on utilise addControl.
+                {#const mapGeometryField = new MaplibreGeometryField(map.getMap(), fieldId, options); // onAdd ne marche que si on utilise addControl.#}
 
-                {#const lineField = new MaplibreGeometryField(map.getMap(),'id_geom', {#}
-                {#    geomType: 'LineString',#}
-                {#    modifiable: true#}
-                {# });#}
+                const lineField = new MaplibreGeometryField(map.getMap(),'id_geom', {
+                    geomType: 'LineString',
+                    modifiable: true
+                 });
 
                 {#// Pour un champ Polygon#}
                 {#const polygonField = new MaplibreGeometryField(map.getMap(),'id_geom', {#}
