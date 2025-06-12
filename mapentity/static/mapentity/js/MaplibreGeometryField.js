@@ -3,8 +3,11 @@ class MaplibreGeometryField {
 
     constructor(map, fieldId, options = {}) {
         this.fieldId = fieldId;
-        this.snapper = new MaplibreGeometrySnap(map);
-        this.options = { ...options, snapper: this.snapper};
+        // this.snapper = new MaplibreGeometrySnap(map);
+        this.options = {
+            ...options,
+            // snapper: this.snapper
+        };
 
         // Détecter les types de géométrie
         const geomType = (this.options.geomType).toLowerCase();

@@ -62,32 +62,32 @@ class MaplibreDrawControlManager {
             return button;
         };
 
-        if (this.options.snapper && this.options.isLineString) {
-            const snapBtn = createButton(
-                '/static/mapentity/images/itineraire.png',
-                'Toggle Snap',
-                'Activer/Désactiver l\'accrochage',
-                'toggle_snap'
-            );
-            let snappingEnabled = true;
-
-            snapBtn.onclick = () => {
-                snappingEnabled = !snappingEnabled;
-                if (snappingEnabled) {
-                    this.options.snapper._markers.forEach(marker => {
-                        // Re-watch pour activer le snap
-                        this.options.snapper.watchMarker(marker);
-                    });
-                    snapBtn.classList.add('active'); // style CSS optionnel
-                } else {
-                    snapBtn.classList.remove('active');
-                    // Aucun removeListener prévu dans MaplibreGeometrySnap, donc on pourrait vider _markers si besoin
-                }
-                console.log(`Snapping is now ${snappingEnabled ? 'enabled' : 'disabled'}`);
-            };
-
-            this._container.appendChild(snapBtn);
-        }
+        // if (this.options.snapper && this.options.isLineString) {
+        //     const snapBtn = createButton(
+        //         '/static/mapentity/images/itineraire.png',
+        //         'Toggle Snap',
+        //         'Activer/Désactiver l\'accrochage',
+        //         'toggle_snap'
+        //     );
+        //     let snappingEnabled = true;
+        //
+        //     snapBtn.onclick = () => {
+        //         snappingEnabled = !snappingEnabled;
+        //         if (snappingEnabled) {
+        //             this.options.snapper._markers.forEach(marker => {
+        //                 // Re-watch pour activer le snap
+        //                 this.options.snapper.watchMarker(marker);
+        //             });
+        //             snapBtn.classList.add('active'); // style CSS optionnel
+        //         } else {
+        //             snapBtn.classList.remove('active');
+        //             // Aucun removeListener prévu dans MaplibreGeometrySnap, donc on pourrait vider _markers si besoin
+        //         }
+        //         console.log(`Snapping is now ${snappingEnabled ? 'enabled' : 'disabled'}`);
+        //     };
+        //
+        //     this._container.appendChild(snapBtn);
+        // }
 
 
 

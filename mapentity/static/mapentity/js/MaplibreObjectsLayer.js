@@ -5,7 +5,7 @@ class MaplibreObjectsLayer {
         this._current_objects = {};
         this.options = { ...options };
         this.currentPopup = null;
-        this.snapper = null,
+        // this.snapper = null;
         this.layers = {
             baseLayers: {},
             overlays: {}
@@ -14,7 +14,7 @@ class MaplibreObjectsLayer {
 
     initialize(map) {
         this._map = map;
-        this.snapper = new MaplibreGeometrySnap(map);
+        // this.snapper = new MaplibreGeometrySnap(map);
         const onClick = (e) => this._onClick(e);
         const onMouseMove = (e) => this._onMouseMove(e);
         this._map.on('click', onClick);
@@ -154,7 +154,7 @@ class MaplibreObjectsLayer {
         this.highlight(primaryKey, on);
     }
 
-    addLayer(feature, detailStatue = false, readonly = false) {
+    addLayer(feature, detailStatus = false, readonly = false) {
         const primaryKey = this.getPrimaryKey(feature);
         const layerId = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
@@ -172,18 +172,15 @@ class MaplibreObjectsLayer {
             data: feature
         });
 
-        this.snapper.addGuideSource(sourceId);
-
         const geometryType = feature.geometry.type;
-
-        const style = detailStatue ? this.options.detailStyle : this.options.style;
+        const style = detailStatus ? this.options.detailStyle : this.options.style;
 
         const rgba = parseColor(style.color); // [r, g, b, a]
         const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
 
         const fillOpacity = style.fillOpacity ?? 0.7; // default fill opacity
         const strokeOpacity = style.opacity ?? 1.0; // default opacity
-        const strokeColor = style.color
+        const strokeColor = style.color;
         const strokeWidth = style.weight ?? 5; // default width
 
         let layerConfigs = [];
@@ -204,7 +201,7 @@ class MaplibreObjectsLayer {
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0,
+                        fillOpacity, // Increase opacity on hover
                         fillOpacity
                     ]
                 }
@@ -219,13 +216,13 @@ class MaplibreObjectsLayer {
                     'line-color': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000',
+                        '#FF0000', // Change color on hover
                         strokeColor
                     ],
                     'line-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth, // Épaississement du contour au survol
+                        strokeWidth, // Increase width on hover
                         strokeWidth
                     ],
                     'line-opacity': strokeOpacity
@@ -238,11 +235,16 @@ class MaplibreObjectsLayer {
                 type: 'line',
                 source: sourceId,
                 paint: {
-                    'line-color': strokeColor,
+                    'line-color': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        '#FF0000', // Change color on hover
+                        strokeColor
+                    ],
                     'line-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth,
+                        strokeWidth, // Increase width on hover
                         strokeWidth
                     ],
                     'line-opacity': strokeOpacity
@@ -258,54 +260,53 @@ class MaplibreObjectsLayer {
                     'circle-color': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Couleur rouge pour le survol
-                        rgbaStr // Couleur par défaut
+                        '#FF0000', // Change color on hover
+                        rgbaStr
                     ],
                     'circle-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        fillOpacity, // Opacité pour le survol
-                        fillOpacity // Opacité par défaut
+                        fillOpacity, // Increase opacity on hover
+                        fillOpacity
                     ],
                     'circle-stroke-color': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Couleur rouge pour le survol
-                        strokeColor // Couleur par défaut
+                        '#FF0000', // Change color on hover
+                        strokeColor
                     ],
-                    'circle-stroke-opacity': strokeOpacity, // Opacité du contour
+                    'circle-stroke-opacity': strokeOpacity,
                     'circle-stroke-width': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth, // Épaississement du contour au survol
-                        strokeWidth // Largeur du contour par défaut
+                        strokeWidth, // Increase width on hover
+                        strokeWidth
                     ],
                     'circle-radius': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        10, // Rayon plus grand au survol
-                        8 // Rayon par défaut
+                        10, // Increase radius on hover
+                        8
                     ]
                 }
             });
         }
 
-
         for (const layerConfig of layerConfigs) {
             this._map.addLayer(layerConfig);
         }
 
-        // dans current_objects on va stocker le layerId
+        // Store the layerId in current_objects
         this._current_objects[primaryKey] = layerId;
 
-        // Si la couche est déjà présente, on ne l'ajoute pas
+        // If the layer category is not present, add it
         const category = this.options.modelname;
-        console.log('category', category);
         if (!this.layers.overlays[category]) {
             this.layers.overlays[category] = {};
         }
         this.layers.overlays[category][primaryKey] = layerId;
     }
+
 
     addBaseLayer(name, layerConfig) {
         const { id, tiles, tileSize = 256, attribution = '' } = layerConfig;
