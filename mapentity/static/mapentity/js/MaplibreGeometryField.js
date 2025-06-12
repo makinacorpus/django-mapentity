@@ -117,29 +117,32 @@ class MaplibreGeometryField {
             this._stopLiveTracking();
 
             const newFeature = e.features[0];
+            const draw = this.drawManager.getDraw();
 
-            // (Optionnel) Normalisation, sauvegarde, etc.
-            const featureCollection = this.dataManager._normalizeToFeatureCollection(newFeature);
-            this.fieldStore.save(featureCollection);
+            console.log(newFeature.geometry.type);
 
-            // Ne rien faire de plus si ce n'est pas un Point
-            if (newFeature.geometry.type !== 'Point') return;
-
-            // Ton code custom pour les Points
+            // Supprimer les géométries existantes du même type avant d'ajouter la nouvelle
             draw.getAll().features.forEach(f => {
-                if (f.geometry.type === 'Point' && f.id !== newFeature.id) {
+                if (f.geometry.type === newFeature.geometry.type && f.id !== newFeature.id) {
                     draw.delete(f.id);
                 }
             });
 
-            draw.changeMode('simple_select');
+            // Normalisation, sauvegarde
+            const featureCollection = this.dataManager._normalizeToFeatureCollection(newFeature);
+            this.fieldStore.save(featureCollection);
 
-            const coords = newFeature.geometry.coordinates;
-            if (this.currentMarker) this.currentMarker.remove();
+            // Traitement spécifique pour les Points (marker rouge)
+            if (newFeature.geometry.type === 'Point') {
+                draw.changeMode('simple_select');
 
-            this.currentMarker = new maplibregl.Marker({ color: 'red' })
-                .setLngLat(coords)
-                .addTo(this.map);
+                const coords = newFeature.geometry.coordinates;
+                if (this.currentMarker) this.currentMarker.remove();
+
+                this.currentMarker = new maplibregl.Marker({ color: 'red' })
+                    .setLngLat(coords)
+                    .addTo(this.map);
+            }
         });
 
 

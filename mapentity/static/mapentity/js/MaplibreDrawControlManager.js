@@ -45,6 +45,13 @@ class MaplibreDrawControlManager {
 
             button.appendChild(img);
             button.onclick = () => {
+                // Vérifier si on est déjà dans le mode demandé
+                const currentMode = this.draw.getMode();
+                if (currentMode === mode) {
+                    console.log(`Already in ${mode} mode, ignoring click`);
+                    return;
+                }
+
                 this.draw.changeMode(mode);
                 // Notifier le changement de mode
                 if (this.onModeChange) {
