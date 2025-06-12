@@ -1,4 +1,3 @@
-
 class MaplibreGeometryField {
     static unsavedText = 'Map geometry is unsaved';
 
@@ -8,32 +7,97 @@ class MaplibreGeometryField {
 
         // Détecter les types de géométrie
         const geomType = (this.options.geomType).toLowerCase();
-        // this.options.isGeneric = /geometry/.test(geomType);
-        // this.options.isCollection = /(^multi|collection$)/.test(geomType);
         this.options.isLineString = /linestring$/.test(geomType) || this.options.isGeneric;
         this.options.isPolygon = /polygon$/.test(geomType) || this.options.isGeneric;
         this.options.isPoint = /point$/.test(geomType) || this.options.isGeneric;
 
         // Initialiser les composants
-        // this.dataManager = new GeometryDataManager(this.options);
-        // this.fieldStore = new MaplibreFieldStore(this.fieldId, this.options);
+        this.dataManager = new GeometryDataManager(this.options);
+        this.fieldStore = new MaplibreFieldStore(this.fieldId, this.options);
+
+        this.liveDistancePopup = null;
+        this.isDrawingLine = false;
 
         this.map = map;
         this.drawManager = new MaplibreDrawControlManager(map, this.options);
         this.currentMarker = null;
         this._setupDrawEvents();
 
-        // this._setupBeforeUnload();
-        console.log('MaplibreGeometryField initialized for type:', this.options.geomType, this.options);
+        // Configurer le callback pour les changements de mode
+        this.drawManager.setOnModeChange((mode) => {
+            this._handleModeChange(mode);
+        });
     }
 
-    // _setupBeforeUnload() {
-    //     const _beforeunload = window.onbeforeunload;
-    //     window.onbeforeunload = (e) => {
-    //         if (this._unsavedChanges) return MaplibreGeometryField.unsavedText;
-    //         if (typeof _beforeunload === 'function') return _beforeunload(e);
-    //     };
-    // }
+    _handleModeChange(mode) {
+        if (mode === 'draw_line_string') {
+            this.isDrawingLine = true;
+
+            // Créer la popup vide pour la distance
+            this.liveDistancePopup = new maplibregl.Popup({
+                closeButton: false,
+                closeOnClick: false,
+                className: 'custom-popup',
+                offset: 10
+            }).setLngLat([0, 0]) // coordonnée temporaire
+              .setHTML('0.00 km')
+              .addTo(this.map);
+
+            // Commencer le suivi en temps réel dès qu'on entre en mode dessin
+            this._startLiveTracking();
+        } else {
+            this.isDrawingLine = false;
+            if (this.liveDistancePopup) {
+                this.liveDistancePopup.remove();
+                this.liveDistancePopup = null;
+            }
+            this._stopLiveTracking();
+        }
+    }
+
+    _startLiveTracking() {
+        const draw = this.drawManager.getDraw();
+
+        // Suivre le mouvement de la souris pendant le dessin
+        this._mouseMoveHandler = (e) => {
+            if (!this.isDrawingLine || !this.liveDistancePopup) return;
+
+            const drawnFeatures = draw.getAll().features;
+            const currentLine = drawnFeatures.find(f => f.geometry.type === 'LineString');
+
+            if (currentLine && currentLine.geometry.coordinates.length >= 1) {
+                const coords = [...currentLine.geometry.coordinates];
+                // Ajouter la position actuelle de la souris
+                coords.push([e.lngLat.lng, e.lngLat.lat]);
+
+                const tempLine = {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: coords
+                    }
+                };
+
+                const distance = turf.length(tempLine, { units: 'kilometers' });
+                const formattedDistance = `${distance.toFixed(2)} km`;
+
+                // Afficher la popup à la position de la souris
+                this.liveDistancePopup.setLngLat(e.lngLat).setHTML(formattedDistance);
+            } else {
+                // Pas encore de points, afficher 0.00 km
+                this.liveDistancePopup.setLngLat(e.lngLat).setHTML('0.00 km');
+            }
+        };
+
+        this.map.on('mousemove', this._mouseMoveHandler);
+    }
+
+    _stopLiveTracking() {
+        if (this._mouseMoveHandler) {
+            this.map.off('mousemove', this._mouseMoveHandler);
+            this._mouseMoveHandler = null;
+        }
+    }
 
      _setupDrawEvents() {
         // Attendre que draw soit bien disponible
@@ -43,38 +107,54 @@ class MaplibreGeometryField {
             return;
         }
 
-        // draw.create
+        // Suppression finale de la popup à la fin du dessin
         this.map.on('draw.create', (e) => {
-            console.log('draw.create event triggered', e);
+            if (this.liveDistancePopup) {
+                this.liveDistancePopup.remove();
+                this.liveDistancePopup = null;
+            }
+            this.isDrawingLine = false;
+            this._stopLiveTracking();
 
             const newFeature = e.features[0];
 
-            // Si ce n’est pas un Point, ne rien faire de plus → laisser le comportement par défaut
-            if (newFeature.geometry.type !== 'Point') {
-                console.log('draw.create ignoré (géométrie non-Point)');
-                return;
-            }
+            // (Optionnel) Normalisation, sauvegarde, etc.
+            const featureCollection = this.dataManager._normalizeToFeatureCollection(newFeature);
+            this.fieldStore.save(featureCollection);
 
-            //  Comportement personnalisé pour Point uniquement
+            // Ne rien faire de plus si ce n'est pas un Point
+            if (newFeature.geometry.type !== 'Point') return;
 
-            // Supprimer tous les autres points sauf le nouveau
+            // Ton code custom pour les Points
             draw.getAll().features.forEach(f => {
                 if (f.geometry.type === 'Point' && f.id !== newFeature.id) {
                     draw.delete(f.id);
                 }
             });
 
-            // Changer le mode après création - mode suppression
             draw.changeMode('simple_select');
 
-            // Gérer le marker rouge
             const coords = newFeature.geometry.coordinates;
-            if (this.currentMarker) {
-                this.currentMarker.remove();
-            }
+            if (this.currentMarker) this.currentMarker.remove();
+
             this.currentMarker = new maplibregl.Marker({ color: 'red' })
                 .setLngLat(coords)
                 .addTo(this.map);
+        });
+
+
+        this.map.on('draw.update', (e) => {
+            console.log('draw.update event triggered', e);
+
+            const newFeature = e.features[0];
+            console.log('New feature update:', newFeature);
+
+            // normaliser la nouvelle feature en feature collection
+            const featureCollection = this.dataManager._normalizeToFeatureCollection(newFeature);
+            console.log('Normalized feature collection:', featureCollection);
+
+            // Sauvegarder dans le champ du formulaire
+            this.fieldStore.save(featureCollection);
         });
 
         // draw.delete
@@ -87,108 +167,4 @@ class MaplibreGeometryField {
             }
         });
     }
-
-    // // Charge les données (formulaire ou initialise vide)
-    // load() {
-    //     console.log('Loading geometry field data for type:', this.options.geomType);
-    //
-    //     // Essayer de charger depuis le champ du formulaire
-    //     const formData = this.fieldStore.load();
-    //     let geojsonData;
-    //
-    //     if (formData) {
-    //         // Si on a des données dans le formulaire, les utiliser
-    //         geojsonData = this.dataManager.loadFromGeoJSON(formData);
-    //         console.log('Loaded from form field:', geojsonData);
-    //     } else {
-    //         // Sinon, initialiser vide (ready for drawing)
-    //         geojsonData = this.dataManager.initializeEmpty();
-    //         console.log('Initialized empty FeatureCollection for drawing');
-    //     }
-    //
-    //     // Afficher sur la carte
-    //     if (geojsonData && this.drawManager) {
-    //         this.drawManager.set(geojsonData);
-    //         this._setView(geojsonData);
-    //     }
-    //
-    //     return geojsonData;
-    // }
-    //
-    // _setView(geojsonData) {
-    //     if (geojsonData && geojsonData.features && geojsonData.features.length > 0) {
-    //         console.log('Setting view for geojsonData');
-    //         try {
-    //             const bbox = turf.bbox(geojsonData);
-    //             // this.map.fitBounds(bbox, { padding: 20 });
-    //         } catch (e) {
-    //             console.warn('Could not fit bounds:', e);
-    //         }
-    //     }
-    // }
-    //
-    // // Événements de dessin
-    // onCreated(e) {
-    //     console.log('Feature created:', e);
-    //     if (!this.options.isCollection) {
-    //         // Limiter à une seule feature si ce n'est pas une collection
-    //         const allFeatures = this.drawManager.getAll();
-    //         if (allFeatures.features.length > 1) {
-    //             this.drawManager.deleteAll();
-    //             this.drawManager.set({
-    //                 type: 'FeatureCollection',
-    //                 features: e.features
-    //             });
-    //         }
-    //     }
-    //     this._saveCurrentState();
-    // }
-    //
-    // onEdited(e) {
-    //     console.log('Feature edited:', e);
-    //     this._saveCurrentState();
-    // }
-    //
-    // onDeleted(e) {
-    //     console.log('Feature deleted:', e);
-    //     this._saveCurrentState();
-    // }
-    //
-    // _saveCurrentState() {
-    //     console.log('Saving current state...');
-    //     if (this.drawManager) {
-    //         const currentData = this.drawManager.getAll();
-    //
-    //         // DEBUG: Afficher les données capturées
-    //         console.log(' Données dessinées:', currentData);
-    //         console.log(' Coordonnées:', currentData.features.map(f => f.geometry.coordinates));
-    //
-    //         // Mettre à jour le gestionnaire de données
-    //         this.dataManager.updateData(currentData);
-    //
-    //         // Sauvegarder dans le champ du formulaire
-    //         this.fieldStore.save(currentData);
-    //
-    //         // DEBUG: Vérifier la sérialisation
-    //         const serializedValue = this.fieldStore.formField?.value;
-    //         console.log(' Sérialisé dans textarea:', serializedValue);
-    //
-    //         this._unsavedChanges = false;
-    //     }
-    // }
-    //
-    // // API publique
-    // getData() {
-    //     return this.dataManager.getData();
-    // }
-    //
-    // setData(geojsonData) {
-    //     const normalizedData = this.dataManager.loadFromGeoJSON(geojsonData);
-    //     if (this.drawManager) {
-    //         this.drawManager.set(normalizedData);
-    //         this._setView(normalizedData);
-    //     }
-    //     this._saveCurrentState();
-    //     return normalizedData;
-    // }
 }

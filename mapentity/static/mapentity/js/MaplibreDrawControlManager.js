@@ -4,6 +4,7 @@ class MaplibreDrawControlManager {
         this.options = options;
         this.draw = null;
         this._container = null;
+        this.onModeChange = null; // Callback pour notifier le changement de mode
         this._initializeDraw();
         this._addCustomControls();
     }
@@ -45,6 +46,10 @@ class MaplibreDrawControlManager {
             button.appendChild(img);
             button.onclick = () => {
                 this.draw.changeMode(mode);
+                // Notifier le changement de mode
+                if (this.onModeChange) {
+                    this.onModeChange(mode);
+                }
             };
 
             return button;
@@ -94,6 +99,10 @@ class MaplibreDrawControlManager {
                 } else {
                     console.warn('No feature selected for editing');
                 }
+                // Notifier le changement de mode
+                if (this.onModeChange) {
+                    this.onModeChange('direct_select');
+                }
             };
             this._container.appendChild(editBtn);
 
@@ -128,5 +137,10 @@ class MaplibreDrawControlManager {
 
     getDraw() {
         return this.draw;
+    }
+
+    // Méthode pour définir le callback
+    setOnModeChange(callback) {
+        this.onModeChange = callback;
     }
 }
