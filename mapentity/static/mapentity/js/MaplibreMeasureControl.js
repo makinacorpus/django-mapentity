@@ -32,7 +32,7 @@ class MaplibreMeasureControl {
         this._button.className = 'measure-control-btn';
 
         const img = document.createElement('img');
-        img.src = '/static/mapentity/images/measure-control.svg';
+        img.src = '/static/mapentity/images/regle.png';
         img.alt = 'Measure Tool';
         img.style.width = '25px';
         img.style.height = '25px';
