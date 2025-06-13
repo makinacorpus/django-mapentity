@@ -76,7 +76,7 @@ class MaplibreObjectsLayer {
                 closeOnClick: false,
                 className: 'custom-popup',
                 anchor: 'left', // place le popup à droite du point
-                offset: [10, 0], // petit décalage horizonta
+                offset: 10, // petit décalage horizontal
             })
                 .setLngLat(coordinates)
                 .setHTML(`<div class="popup-content">${description}</div>`)
