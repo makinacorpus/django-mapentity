@@ -148,9 +148,9 @@ SRID = 4326
 COMPRESS_ENABLED = False
 TEST = True
 
-MAPENTITY_CONFIG = {
-    'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
-}
+# MAPENTITY_CONFIG = {
+#     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
+# }
 
 PAPERCLIP_FILETYPE_MODEL = 'test_app.FileType'
 PAPERCLIP_LICENSE_MODEL = 'test_app.License'
@@ -180,14 +180,26 @@ LOGGING = {
     },
 }
 
-LEAFLET_CONFIG = {
-    'SRID': 3857,
+# LEAFLET_CONFIG = {
+#     'SRID': 3857,
+#     'TILES': [
+#         ('OSM', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
+#         ('OSM N&B', 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
+#     ],
+#     'SPATIAL_EXTENT': (1.3, 43.7, 1.5, 43.5),
+# }
+
+MAPLIBRE_CONFIG_OVERRIDES = {
+    'DEFAULT_CENTER': [1.3952, 43.5963],  # Toulouse, France
+    'DEFAULT_ZOOM': 5,
+    'SCALE': 'metric',
+    'BOUNDS': [[-3.630430, 40.120372], [3.208008, 45.061882]],
     'TILES': [
-        ('OSM', 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
-        ('OSM N&B', 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png', '(c) OpenStreetMap Contributors'),
-    ],
-    'SPATIAL_EXTENT': (1.3, 43.7, 1.5, 43.5),
+        ('OSM', 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; OpenStreetMap contributors'),
+        ('TOPO', 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', '&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.'),
+    ]
 }
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
