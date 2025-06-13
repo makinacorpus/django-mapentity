@@ -35,11 +35,6 @@
                 style = { ...style };
             }
 
-            let detailStyle = window.SETTINGS.map.styles.detail;
-            if(typeof detailStyle !== "function") {
-                detailStyle = { ...detailStyle };
-            }
-
               // Gestion des vues
             const bodyElement = document.body;
 
@@ -62,7 +57,6 @@
             // Créer une instance de MaplibreObjectsLayer
             const objectsLayer = new MaplibreObjectsLayer(null, {
                 style: style,
-                detailStyle: detailStyle,
                 modelname: modelname
             });
 
@@ -109,18 +103,7 @@
                     geomType: '{{ geom_type }}',
                 };
 
-                {#const mapGeometryField = new MaplibreGeometryField(map.getMap(), fieldId, options); // onAdd ne marche que si on utilise addControl.#}
-
-                const lineField = new MaplibreGeometryField(map.getMap(),'id_geom', {
-                    geomType: 'LineString',
-                    modifiable: true
-                 });
-
-                {#// Pour un champ Polygon#}
-                {#const polygonField = new MaplibreGeometryField(map.getMap(),'id_geom', {#}
-                {#    geomType: 'Polygon',#}
-                {#    modifiable: true#}
-                {# });#}
+                const mapGeometryField = new MaplibreGeometryField(map.getMap(), fieldId, options); // onAdd ne marche que si on utilise addControl.
 
                 const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
                 objectsLayer.load(layerUrl);

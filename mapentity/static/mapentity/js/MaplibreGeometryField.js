@@ -3,12 +3,9 @@ class MaplibreGeometryField {
 
     constructor(map, fieldId, options = {}) {
         this.fieldId = fieldId;
-        // this.snapper = new MaplibreGeometrySnap(map);
         this.options = {
             ...options,
-            // snapper: this.snapper
         };
-
         // Détecter les types de géométrie
         const geomType = (this.options.geomType).toLowerCase();
         this.options.isLineString = /linestring$/.test(geomType) || this.options.isGeneric;
@@ -18,8 +15,6 @@ class MaplibreGeometryField {
         // Initialiser les composants
         this.dataManager = new GeometryDataManager(this.options);
         this.fieldStore = new MaplibreFieldStore(this.fieldId, this.options);
-
-
 
         this.liveDistancePopup = null;
         this.isDrawingLine = false;
