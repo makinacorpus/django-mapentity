@@ -109,21 +109,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const {BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES} = window.SETTINGS.map.maplibreConfig;
             // Initialisation de la carte
             const bounds = [BOUNDS[0],BOUNDS[1]];
-            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds);
+            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
 
             // Initialisation des URLs dynamiques
             const modelName = context.modelname;
             const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelName);
 
             const mapentityContext = new MaplibreMapentityContext(bounds);
-
-            // maxZoom devrait venir des options de la carte de django-leaflet
-            // var maxZoom = document.querySelector('#mainmap').dataset.fitmaxzoom;
-            // console.log('maxZoom:', maxZoom);
-            // if (map.getMap().getZoom() > maxZoom) {
-            //     console.log('Limited zoom to ', maxZoom, '. Was ', map.getMap().getZoom());
-            //     map.getMap().setZoom(maxZoom); // Limite le zoom maximum
-            // }
 
             // Définir une fonction pour générer les URLs de détails d'un objet
             const getObjectUrl = (properties) => {
@@ -144,14 +136,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 style = { ...style };  // créer une copie propre
             }
 
-            // console.log('Style utilisé pour la carte:', style);
-
             let detailStyle = window.SETTINGS.map.styles.detail;
             if(typeof detailStyle !== "function") {
                 detailStyle = { ...detailStyle };
             }
-
-            // console.log('Style de détail utilisé pour la carte:', detailStyle);
 
             // Créer une instance de MaplibreObjectsLayer
             const objectsLayer = new MaplibreObjectsLayer(null, {
@@ -161,8 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 modelname: modelName,
                 readonly: false,
             });
-
-            // console.log('objectsLayer créé pour le modèle:', objectsLayer);
 
             // Initialiser la couche d'objets
             objectsLayer.initialize(map.getMap());
@@ -180,25 +166,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Créer le contrôle de couches
             map.getMap().addControl(new MaplibreLayerControl(objectsLayer), 'top-right');
 
-            // metriques de la carte
-            const unit = SCALE || 'metric';
-            const scale = new maplibregl.ScaleControl({
-                maxWidth: 80,
-                unit: unit
-            });
-            map.getMap().addControl(scale, 'bottom-left');
-
-
-            // Ajouter un contrôle pour réinitialiser la vue
-            map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
-
             // Fusionner les données de contexte avec les données de l'événement
             const mergedData = Object.assign({}, context, {
                 map: map,
                 objectsLayer: objectsLayer,
-                mapId: mapId
+                mapId: mapId,
+                bounds : bounds
             });
-            // console.log('data après extension', mergedData);
+
 
             // Déclencher l'événement de vue
             const viewEvent = new CustomEvent('entity:view:' + context.viewname, {

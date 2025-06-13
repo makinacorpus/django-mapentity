@@ -1,12 +1,12 @@
 class MaplibreMap {
-    constructor(id, mapCenter, mapZoom, mapMaxBounds) {
+    constructor(id, center, zoom, bounds, scale = 'metric') {
         this.id = id;
-        this.mapCenter = mapCenter ;
-        this.mapZoom = mapZoom ;
-        this.mapMaxBounds = mapMaxBounds;
+        this.center = center ;
+        this.zoom = zoom ;
+        this.bounds = bounds;
+        this.scale = scale ;
         this.map = null;
         this.container = null;
-        this.resetViewControl = null; // modifier ceci, mettre en place un objet dans lequel sera stocké tous les controllers ajoutés pour suivre leur trace
         this._init();
     }
 
@@ -20,19 +20,24 @@ class MaplibreMap {
 
         this.map = new maplibregl.Map({
             container: this.id,
-            center: this.mapCenter,
-            zoom: this.mapZoom,
-            maxBounds: this.mapMaxBounds,
+            center: this.center,
+            zoom: this.zoom,
+            maxBounds: this.bounds,
         });
 
         // Ajouter les contrôles standards
         this.map.addControl(new maplibregl.NavigationControl(), 'top-left');
         this.map.addControl(new maplibregl.FullscreenControl(), 'top-left');
-
         // Contrôle de mesure
-        const measureControl = new MaplibreMeasureControl();
-        this.map.addControl(measureControl, 'top-left');
+        this.map.addControl(new MaplibreMeasureControl(), 'top-left');
 
+         const unit = this.scale;
+         const scale = new maplibregl.ScaleControl({
+             maxWidth: 80,
+             unit: unit
+         });
+
+         this.map.addControl(scale, 'bottom-left');
     }
 
     getMap() {
@@ -43,7 +48,4 @@ class MaplibreMap {
         return this.container;
     }
 
-    getResetViewControl() {
-        return this.resetViewControl;
-    }
 }

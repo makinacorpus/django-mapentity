@@ -27,7 +27,7 @@
 
             // Initialisation de la carte
             const bounds = [BOUNDS[0], BOUNDS[1]];
-            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds);
+            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
 
             // Configuration des styles
             let style = window.SETTINGS.map.styles.others;
@@ -35,24 +35,8 @@
                 style = { ...style };
             }
 
-              // Gestion des vues
-            const bodyElement = document.body;
-
-            const context = {
-                modelname: bodyElement.dataset.modelname || bodyElement.getAttribute('data-modelname'),
-                viewname: bodyElement.dataset.viewname || bodyElement.getAttribute('data-viewname')
-            };
-
-            console.log('Context:', context);
-            const modelname = context.modelname;
-
-            // Récupérer tous les data attributes du body
-            Array.from(bodyElement.attributes).forEach(function(attr) {
-                if (attr.name.startsWith('data-')) {
-                    const key = attr.name.substring(5); // Enlever 'data-'
-                    context[key] = attr.value;
-                }
-            });
+            // modelname est récupéré depuis l'élément body
+            const modelname = document.body.getAttribute('data-modelname');
 
             // Créer une instance de MaplibreObjectsLayer
             const objectsLayer = new MaplibreObjectsLayer(null, {
@@ -76,16 +60,6 @@
             // Ajouter les contrôles
             map.getMap().addControl(new MaplibreLayerControl(objectsLayer), 'top-right');
 
-            const unit = SCALE || 'metric';
-            const scale = new maplibregl.ScaleControl({
-                maxWidth: 80,
-                unit: unit
-            });
-            map.getMap().addControl(scale, 'bottom-left');
-
-            // Ajouter le contrôle de reset de vue
-            map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
-
             // ajout du contrôle de fichiers
             const fileLayerLoadControl = new MaplibreFileLayerControl({
                 layerOptions: {
@@ -94,6 +68,9 @@
             });
 
             map.getMap().addControl(fileLayerLoadControl, 'top-left');
+
+            // Ajouter un contrôle pour réinitialiser la vue
+            map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
             // Attendre que la carte soit chargée avant d'initialiser le callback
             map.getMap().on('load', function() {

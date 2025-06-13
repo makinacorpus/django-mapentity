@@ -4,6 +4,7 @@ class MaplibreObjectsLayer {
         this._objects = {};
         this._current_objects = {};
         this.options = { ...options };
+        this.boundsLayer = null;
         this.currentPopup = null;
         this.layers = {
             baseLayers: {},
@@ -109,9 +110,9 @@ class MaplibreObjectsLayer {
     addData(geojson) {
         if(geojson.type === 'Feature') {
             this.addLayer(geojson, true, true);
-            const bounds = this.calculateBounds(geojson);
-            if (bounds) {
-                this._map.fitBounds(bounds, { maxZoom: 16, padding: 20, duration: 0 });
+            this.boundsLayer = this.calculateBounds(geojson);
+            if (this.boundsLayer) {
+                this._map.fitBounds(this.boundsLayer, { maxZoom: 16, padding:0, duration: 0 });
             }
         }else{
             geojson.features.forEach(feature => {
@@ -360,6 +361,10 @@ class MaplibreObjectsLayer {
 
     getCurrentLayers() {
         return this._current_objects;
+    }
+
+    getBoundsLayer() {
+        return this.boundsLayer;
     }
 
     updateFromPks(primaryKeys) {

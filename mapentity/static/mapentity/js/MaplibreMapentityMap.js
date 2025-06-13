@@ -52,12 +52,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         fetchFeatureLayer(feature_geojson_url);
+
+         map.getMap().on('layers:added', () => {
+             // Ajouter un contrôle pour réinitialiser la vuer
+             const boundsLayer = objectsLayer.getBoundsLayer();
+             map.getMap().addControl(new MaplibreResetViewControl(boundsLayer), 'top-left');
+        });
+
     });
 
     // Écouteur d'événement pour la vue liste
     window.addEventListener('entity:map:list', function(e) {
         // console.log('Map initialized for list view with data:', e.detail);
-        const { map, objectsLayer, modelname } = e.detail;
+        const { map, objectsLayer, modelname, bounds } = e.detail;
         const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
 
         map.getMap().on('load', function() {
@@ -72,6 +79,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             map.getMap().addControl(fileLayerLoadControl, 'top-left');
+
+            // Ajouter un contrôle pour réinitialiser la vue
+            map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
             // Gestion de History
             const history = window.MapEntity.currentHistory;
