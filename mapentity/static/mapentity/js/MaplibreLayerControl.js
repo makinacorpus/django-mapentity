@@ -14,6 +14,7 @@ class MaplibreLayerControl {
         // Bouton pour ouvrir/fermer le menu
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
+        button.setAttribute('title', 'contrôleur des couches');
         button.className = 'layer-switcher-btn';
         const img = document.createElement('img');
         img.src = '/static/mapentity/images/layers-2x.png';
@@ -98,7 +99,6 @@ class MaplibreLayerControl {
                     });
                     // Montrer le baseLayer sélectionné
                     this.objectsLayer.toggleLayer(id, true);
-                    console.log(`Base Layer ${id} toggled: ${isChecked}`);
 
                     // S'assurer que mesure est au-dessus de tous les autres
                     if (this._map.getLayer('measure-points')) {
@@ -166,7 +166,6 @@ class MaplibreLayerControl {
 
                 for (const [name, id] of Object.entries(group)) {
                     this.objectsLayer.toggleLayer(id, isChecked);
-                    console.log(`Overlay Layer ${id} toggled: ${isChecked}`);
 
                     if (isChecked) {
                         // Place l'overlay juste avant 'measure-points' pour qu'il soit au-dessus des baseLayers

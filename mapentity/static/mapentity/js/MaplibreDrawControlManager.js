@@ -10,8 +10,6 @@ class MaplibreDrawControlManager {
     }
 
     _initializeDraw() {
-        console.log('MaplibreDrawControlManager initialized with options:', this.options);
-
         const drawOptions = {
             displayControlsDefault: false,
             controls: {

@@ -1,7 +1,4 @@
 class MaplibreFileLayerControl {
-    static TITLE = 'Load local file (GPX, KML, GeoJSON)';
-    static LABEL = '&#8965;';
-
     constructor(options = {}) {
         this.options = {
             position: 'top-left',
@@ -12,7 +9,6 @@ class MaplibreFileLayerControl {
     }
 
     onAdd(map) {
-        console.log('Adding MaplibreFileLayerControl to map:', map);
         this.loader = new MaplibreFileLoader(map, { layerOptions: this.options.layerOptions });
 
         // Initialisation du Drag-and-drop
@@ -69,6 +65,7 @@ class MaplibreFileLayerControl {
         // Création du bouton pour charger un fichier
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
+        button.setAttribute('title', 'charger un fichier local (GPX, KML, GeoJSON)');
         button.className = 'maplibregl-ctrl-icon maplibregl-filelayerload';
         const img = document.createElement('img');
         img.src = '/static/mapentity/images/dossier.png'; // Assurez-vous que le chemin est correct

@@ -8,6 +8,7 @@ class MaplibreGeometryField {
         };
         // Détecter les types de géométrie
         const geomType = (this.options.geomType).toLowerCase();
+        this.options.isGeneric = /geometry/.test(geomType);
         this.options.isLineString = /linestring$/.test(geomType);
         this.options.isPolygon = /polygon$/.test(geomType);
         this.options.isPoint = /point$/.test(geomType);
