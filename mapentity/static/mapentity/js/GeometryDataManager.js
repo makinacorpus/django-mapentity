@@ -1,4 +1,3 @@
-
 class GeometryDataManager {
     constructor() {
     }
@@ -11,8 +10,7 @@ class GeometryDataManager {
         };
     }
 
-    _normalizeToFeatureCollection(geojson) {
-
+    normalizeToFeatureCollection(geojson) {
         // Si c'est déjà une FeatureCollection
         if (geojson.type === 'FeatureCollection') {
             return geojson;
@@ -26,45 +24,25 @@ class GeometryDataManager {
             };
         }
 
-        // Si c'est une géométrie brute
-        if (geojson.type && geojson.coordinates) {
-            return this._handleGeometryType(geojson);
-        }
-
-        // GeometryCollection
-        if (geojson.type === 'GeometryCollection') {
-            const features = geojson.geometries.map(geometry => ({
-                type: 'Feature',
-                properties: {},
-                geometry: geometry
-            }));
-            return {
-                type: 'FeatureCollection',
-                features: features
-            };
-        }
-
         return this.initializeEmpty();
     }
 
-    _handleGeometryType(geometry) {
-        const feature = {
-            type: 'Feature',
-            properties: {},
-            geometry: geometry
+    normalizeToGeometryCollection(geometries) {
+        if (!geometries || geometries.length === 0) {
+            return {
+                type: 'GeometryCollection',
+                geometries: []
+            };
+        }
+
+        const normalizedGeometries = geometries.map(geometry => {
+            return geometry;
+        });
+
+        return {
+            type: 'GeometryCollection',
+            geometries: normalizedGeometries
         };
 
-        // Pour les Multi* geometries, décomposer si nécessaire
-        switch (geometry.type) {
-            case 'Point':
-            case 'LineString':
-            case 'Polygon':
-                return {
-                    type: 'FeatureCollection',
-                    features: [feature]
-                };
-            default:
-                return { type: 'FeatureCollection', features: [feature] };
-        }
     }
 }

@@ -108,17 +108,21 @@ class MaplibreObjectsLayer {
 
 
     addData(geojson) {
+        console.log("Adding data to map:", geojson);
         if(geojson.type === 'Feature') {
             this.addLayer(geojson, true, true);
             this.boundsLayer = this.calculateBounds(geojson);
             if (this.boundsLayer) {
                 this._map.fitBounds(this.boundsLayer, { maxZoom: 16, padding:0, duration: 0 });
             }
-        }else{
+        } else if(geojson.type === 'FeatureCollection') {
             geojson.features.forEach(feature => {
                 this.addLayer(feature);
                 this._mapObjects(feature);
             });
+        } else {
+            console.error("Unsupported GeoJSON type: " + geojson.type);
+            return;
         }
 
     }

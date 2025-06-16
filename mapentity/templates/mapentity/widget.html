@@ -84,6 +84,12 @@
 
                 const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
                 objectsLayer.load(layerUrl);
+
+                // Ajouter le champ de géométrie à la carte
+                {#const LingeringGeometryControl = new MaplibreGeometryField(map.getMap(),fieldId, {#}
+                {#    modifiable: true,#}
+                {#    geomType: 'geometry'#}
+                {# }); #}
              });
     });
 </script>

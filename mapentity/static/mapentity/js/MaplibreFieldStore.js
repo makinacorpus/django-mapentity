@@ -5,10 +5,20 @@ class MaplibreFieldStore {
     }
 
     // Sauvegarde les données dans le champ du formulaire
-    save(featureCollection) {
-        if (!this.formField) return;
+    save(data) {
+        if (!this.formField) {
+            return;
+        }
 
-        const serializedData = this._serialize(featureCollection);
+        let serializedData = '';
+        if(this.options.isGeneric){
+            serializedData = this._serializeGeometryCollection(data);
+            console.log('Saving generic data generic:', serializedData);
+        } else {
+            serializedData = this._serialize(data);
+            console.log('Saving specific data:', serializedData);
+        }
+
         this.formField.value = serializedData;
     }
 
@@ -26,5 +36,11 @@ class MaplibreFieldStore {
             // Géométrie simple
             return JSON.stringify(features[0].geometry);
         }
+    }
+
+    _serializeGeometryCollection(geoemtriesCollection) {
+        // Sérialisation en GeometryCollection
+        console.log('Serializing GeometryCollection:', geoemtriesCollection);
+        return JSON.stringify(geoemtriesCollection);
     }
 }

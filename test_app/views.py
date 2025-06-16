@@ -3,11 +3,11 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
 
-from .filters import DummyModelFilterSet, RoadFilterSet
-from .forms import DummyModelForm, MushroomSpotForm, RoadForm
-from .models import DummyModel, MushroomSpot, Road
+from .filters import DummyModelFilterSet, RoadFilterSet, DummyAptFilterSet
+from .forms import DummyModelForm, MushroomSpotForm, RoadForm, DummyAptModelForm
+from .models import DummyModel, MushroomSpot, Road, DummyAptModel, City
 from .serializers import (DummyGeojsonSerializer, DummySerializer,
-                          RoadSerializer)
+                          RoadSerializer, DummyAptSerializer, DummyAptGeojsonSerializer)
 
 
 class DummyList(mapentity_views.MapEntityList):
@@ -94,3 +94,42 @@ class MushroomSpotCreate(mapentity_views.MapEntityCreate):
 class MushroomSpotUpdate(mapentity_views.MapEntityUpdate):
     model = MushroomSpot
     form_class = MushroomSpotForm
+
+class DummyAptCreate(mapentity_views.MapEntityCreate):
+    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+    form_class = DummyAptModelForm
+
+class DummyAptUpdate(mapentity_views.MapEntityUpdate):
+    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+    form_class = DummyAptModelForm
+
+class DummyAptDelete(mapentity_views.MapEntityDelete):
+    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+
+class DummyAptDuplicate(mapentity_views.MapEntityDuplicate):
+    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+
+class DummyAptList(mapentity_views.MapEntityList):
+    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+    searchable_columns = ['name']
+
+class DummyAptDetail(mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail):
+    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+
+class DummyAptFilter(mapentity_views.MapEntityFilter):
+    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+    filterset_class = DummyAptFilterSet
+
+class DummyAptViewSet(mapentity_views.MapEntityViewSet):
+    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+    serializer_class = DummyAptSerializer
+    geojson_serializer_class = DummyAptGeojsonSerializer
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    filterset_class = DummyAptFilterSet
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        if self.format_kwarg == "geojson":
+            qs = qs.annotate(api_geom=Transform("geom", 4326))
+        return qs
+# Test that we can also override base filter here

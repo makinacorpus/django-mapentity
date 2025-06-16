@@ -60,6 +60,12 @@ class MaplibreDrawControlManager {
             return button;
         };
 
+        if(this.options.isGeneric){
+            this.options.isPoint= true;
+            this.options.isLineString = true;
+            this.options.isPolygon = true;
+        }
+
         if (this.options.isPoint) {
             const pointBtn = createButton(
                 '/static/mapentity/images/draw-point.png',

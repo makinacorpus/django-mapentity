@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from paperclip.models import FileType as BaseFileType, Attachment as BaseAttachment, License as BaseLicense
 
 from mapentity.models import MapEntityMixin
+from django.conf import settings
 
 
 class FileType(BaseFileType):
@@ -87,6 +88,29 @@ class DummyModel(MapEntityMixin, models.Model):
 
     class Meta:
         verbose_name = _("Dummy Model")
+
+
+class DummyAptModel(MapEntityMixin, models.Model):
+    name = models.CharField(blank=True, default='', max_length=128)
+    short_description = models.TextField(blank=True, default='', help_text=_('Short description'))
+    description = models.TextField(blank=True, default='')
+    geom = models.GeometryCollectionField(verbose_name="DummyApt Models", srid=settings.SRID, null=True)
+    date_update = models.DateTimeField(auto_now=True, db_index=True)
+    public = models.BooleanField(default=False)
+    tags = models.ManyToManyField(Tag, blank=True)
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.pk)
+
+    def is_public(self):
+        return self.public
+
+    def name_display(self):
+        return _(f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>')
+
+    class Meta:
+        verbose_name = _("DummyApt Model")
+
 
 
 class DollModel(MapEntityMixin, models.Model):

@@ -8,7 +8,8 @@ class MaplibreGeometryField {
         };
         // Détecter les types de géométrie
         const geomType = (this.options.geomType).toLowerCase();
-        this.options.isGeneric = /geometry/.test(geomType);
+        this.options.isGeneric = /geometrycollection$/.test(geomType);
+        // options.is_collection = /(^multi|collection$)/.test(geom_type);
         this.options.isLineString = /linestring$/.test(geomType);
         this.options.isPolygon = /polygon$/.test(geomType);
         this.options.isPoint = /point$/.test(geomType);
@@ -37,13 +38,16 @@ class MaplibreGeometryField {
             this.isDrawingLine = true;
 
             // Vider le draw des éléments précédents avant de commencer un nouveau dessin
-            const draw = this.drawManager.getDraw();
-            if (draw) {
-                const allFeatures = draw.getAll().features;
-                if (allFeatures.length > 1) {
-                    draw.delete(allFeatures[0].id); // Toujours supprimer le plus ancien
+            if(!this.options.isGeneric) {
+                const draw = this.drawManager.getDraw();
+                if (draw) {
+                    const allFeatures = draw.getAll().features;
+                    if (allFeatures.length > 1) {
+                        draw.delete(allFeatures[0].id); // Toujours supprimer le plus ancien
+                    }
                 }
             }
+
 
             // Créer la popup vide pour la distance
             this.livePopup = new maplibregl.Popup({
@@ -62,14 +66,14 @@ class MaplibreGeometryField {
         if (mode === 'draw_polygon') {
             this.isDrawingPolygon = true;
 
-            // Vider le draw des éléments précédents avant de commencer un nouveau dessin
-            const draw = this.drawManager.getDraw();
-            if (draw) {
-                const allFeatures = draw.getAll().features;
-                console.log('All features before polygon drawing:', allFeatures);
-                console.log('Number of features before polygon drawing:', allFeatures.length);
-                if (allFeatures.length > 1) {
-                    draw.delete(allFeatures[0].id); // Toujours supprimer le plus ancien
+            if(!this.options.isGeneric) {
+                 // Vider le draw des éléments précédents avant de commencer un nouveau dessin
+                const draw = this.drawManager.getDraw();
+                if (draw) {
+                    const allFeatures = draw.getAll().features;
+                    if (allFeatures.length > 1) {
+                        draw.delete(allFeatures[0].id); // Toujours supprimer le plus ancien
+                    }
                 }
             }
 
@@ -228,7 +232,9 @@ class MaplibreGeometryField {
         }
     }
 
-     _setupDrawEvents() {
+     // Extrait de la méthode _setupDrawEvents() mise à jour
+
+    _setupDrawEvents() {
         // Attendre que draw soit bien disponible
         const draw = this.drawManager.getDraw();
         if (!draw) {
@@ -250,22 +256,46 @@ class MaplibreGeometryField {
             this._stopLiveTracking();
 
             // Supprimer les géométries existantes du même type avant d'ajouter la nouvelle
-            draw.getAll().features.forEach(f => {
-                if (f.geometry.type === newFeature.geometry.type && f.id !== newFeature.id) {
-                    draw.delete(f.id);
-                }
-            });
+            if(!this.options.isGeneric) {
+                draw.getAll().features.forEach(f => {
+                    if (f.geometry.type === newFeature.geometry.type && f.id !== newFeature.id) {
+                        draw.delete(f.id);
+                    }
+                });
+            }
 
-            // Normalisation, sauvegarde
-            const featureCollection = this.dataManager._normalizeToFeatureCollection(newFeature);
-            this.fieldStore.save(featureCollection);
+            // Récupérer toutes les features du draw
+            const allFeatures = draw.getAll().features;
+            console.log('All features from draw:', allFeatures);
+
+            // Construire la structure appropriée selon les options
+            let normalizedData;
+
+            if (this.options.isGeneric) {
+                // Mode générique : créer une GeometryCollection avec toutes les géométries
+                normalizedData = this.dataManager.normalizeToGeometryCollection(allFeatures);
+            } else {
+                 if (this.options.isLineString || this.options.isPolygon || this.options.isPoint) {
+                     normalizedData = this.dataManager.normalizeToFeatureCollection(newFeature);
+                 }
+            }
+
+            // Sauvegarder si des données ont été normalisées
+            if (normalizedData) {
+                console.log('Normalized data to save:', normalizedData);
+                this.fieldStore.save(normalizedData);
+            }
 
             // Traitement spécifique pour les Points (marker rouge)
             if (newFeature.geometry.type === 'Point') {
                 draw.changeMode('simple_select');
 
                 const coords = newFeature.geometry.coordinates;
-                if (this.currentMarker) this.currentMarker.remove();
+                if(!this.options.isGeneric) {
+                    if (this.currentMarker) {
+                        this.currentMarker.remove();
+                    }
+                }
 
                 this.currentMarker = new maplibregl.Marker({ color: 'red' })
                     .setLngLat(coords)
@@ -276,15 +306,29 @@ class MaplibreGeometryField {
         this.map.on('draw.update', (e) => {
             console.log('draw.update event triggered', e);
 
-            const newFeature = e.features[0];
-            console.log('New feature update:', newFeature);
+            const draw = this.drawManager.getDraw();
+            const allFeatures = draw.getAll().features;
+            console.log('All features from draw (update):', allFeatures);
 
-            // normaliser la nouvelle feature en feature collection
-            const featureCollection = this.dataManager._normalizeToFeatureCollection(newFeature);
-            console.log('Normalized feature collection:', featureCollection);
+            // Construire la structure appropriée selon les options
+            let normalizedData;
 
-            // Sauvegarder dans le champ du formulaire
-            this.fieldStore.save(featureCollection);
+            if (this.options.isGeneric) {
+                // Mode générique : créer une GeometryCollection avec toutes les géométries
+                normalizedData = this.dataManager.normalizeToGeometryCollection(allFeatures);
+            } else {
+                // Mode spécifique : normaliser la feature mise à jour
+                if( this.options.isLineString || this.options.isPolygon || this.options.isPoint) {
+                    const updatedFeature = e.features[0];
+                    normalizedData = this.dataManager.normalizeToFeatureCollection(updatedFeature);
+                }
+            }
+
+            // Sauvegarder si des données ont été normalisées
+            if (normalizedData) {
+                console.log('Normalized data to save (update):', normalizedData);
+                this.fieldStore.save(normalizedData);
+            }
         });
 
         // draw.delete
