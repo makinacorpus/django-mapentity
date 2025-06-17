@@ -273,7 +273,8 @@ class MaplibreGeometryField {
 
             if (this.options.isGeneric) {
                 // Mode générique : créer une GeometryCollection avec toutes les géométries
-                normalizedData = this.dataManager.normalizeToGeometryCollection(allFeatures);
+                const geometries = allFeatures.map(f => f.geometry);
+                normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
             } else {
                  if (this.options.isLineString || this.options.isPolygon || this.options.isPoint) {
                      normalizedData = this.dataManager.normalizeToFeatureCollection(newFeature);

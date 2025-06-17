@@ -110,16 +110,55 @@ class MaplibreObjectsLayer {
     addData(geojson) {
         console.log("Adding data to map:", geojson);
         if(geojson.type === 'Feature') {
-            this.addLayer(geojson, true, true);
-            this.boundsLayer = this.calculateBounds(geojson);
-            if (this.boundsLayer) {
-                this._map.fitBounds(this.boundsLayer, { maxZoom: 16, padding:0, duration: 0 });
+            if(
+                geojson.geometry &&
+                geojson.geometry.type === "GeometryCollection" &&
+                geojson.geometry.geometries.length > 0
+            ) {
+                geojson.geometry.geometries.forEach(geometry => {
+                    const feature = {
+                        type: 'Feature',
+                        geometry: geometry,
+                        properties: {}
+                    };
+                    this.addLayer(feature, true, true);
+                    this._mapObjects(feature);
+                });
+            } else {
+                this.addLayer(geojson, true, true);
+                this.boundsLayer = this.calculateBounds(geojson);
+                if (this.boundsLayer) {
+                    this._map.fitBounds(this.boundsLayer, { maxZoom: 16, padding:0, duration: 0 });
+                }
             }
+
+
         } else if(geojson.type === 'FeatureCollection') {
-            geojson.features.forEach(feature => {
-                this.addLayer(feature);
-                this._mapObjects(feature);
-            });
+            if (
+                geojson.features.length > 0 &&
+                geojson.features[0].geometry &&
+                geojson.features[0].geometry.type === "GeometryCollection"
+            ) {
+                geojson.features.forEach(feature => {
+                    const geometries = feature.geometry.geometries || [];
+                    console.log(geometries);
+                    geometries.forEach(geometry => {
+                        const singleFeature = {
+                            type: 'Feature',
+                            geometry: geometry,
+                            properties: feature.properties || {}
+                        };
+                        this.addLayer(singleFeature, true, true);
+                        this._mapObjects(singleFeature);
+                    });
+                });
+            } else {
+                geojson.features.forEach(feature => {
+                    this.addLayer(feature);
+                    this._mapObjects(feature);
+                });
+            }
+
         } else {
             console.error("Unsupported GeoJSON type: " + geojson.type);
             return;
@@ -159,8 +198,8 @@ class MaplibreObjectsLayer {
 
     addLayer(feature, detailStatus = false, readonly = false) {
         const primaryKey = this.getPrimaryKey(feature);
-        const layerId = `layer-${primaryKey}`;
-        const sourceId = `source-${primaryKey}`;
+        const layerId = `layer-${this._generateUniqueId()}`;
+        const sourceId = `source-${this._generateUniqueId()}`;
 
         // Use readonly from parameter or from options
         const isReadonly = readonly || this.options.readonly;
