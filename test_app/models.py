@@ -135,6 +135,9 @@ class City(MapEntityMixin, models.Model):
     def __str__(self):
         return self.name
 
+    def name_display(self):
+        return _(f'<a href="{self.get_detail_url()}">{self.name}</a>')
+
 
 class Supermarket(MapEntityMixin, models.Model):
     """ Linestring Mapentity model """

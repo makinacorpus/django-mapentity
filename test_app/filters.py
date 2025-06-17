@@ -1,5 +1,5 @@
 from django_filters.rest_framework import BooleanFilter
-from test_app.models import DummyModel, Road, DummyAptModel
+from test_app.models import DummyModel, Road, DummyAptModel, City
 
 from mapentity.filters import MapEntityFilterSet
 
@@ -23,3 +23,8 @@ class DummyAptFilterSet(MapEntityFilterSet):
     class Meta:
         model = DummyAptModel # Assuming DummyaptModel is similar to DummyModel
         fields = ('public', 'name')
+
+class CityFilterSet(MapEntityFilterSet):
+    class Meta:
+        model = City
+        fields = ('id', 'name')

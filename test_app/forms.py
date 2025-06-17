@@ -1,5 +1,5 @@
 from mapentity.forms import MapEntityForm
-from test_app.models import Road, DummyModel, MushroomSpot, DummyAptModel
+from test_app.models import Road, DummyModel, MushroomSpot, DummyAptModel, City
 
 
 class DummyModelForm(MapEntityForm):
@@ -25,3 +25,8 @@ class DummyAptModelForm(MapEntityForm):
     class Meta:
         model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
         fields = ("name", "short_description", "description", "geom", "public", "tags")
+
+class CityForm(MapEntityForm):
+    class Meta:
+        model = City
+        fields = ("name", "geom")

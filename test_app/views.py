@@ -4,10 +4,10 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from mapentity import views as mapentity_views
 
 from .filters import DummyModelFilterSet, RoadFilterSet, DummyAptFilterSet
-from .forms import DummyModelForm, MushroomSpotForm, RoadForm, DummyAptModelForm
+from .forms import DummyModelForm, MushroomSpotForm, RoadForm, DummyAptModelForm, CityForm
 from .models import DummyModel, MushroomSpot, Road, DummyAptModel, City
 from .serializers import (DummyGeojsonSerializer, DummySerializer,
-                          RoadSerializer, DummyAptSerializer, DummyAptGeojsonSerializer)
+                          RoadSerializer, DummyAptSerializer, DummyAptGeojsonSerializer, CitySerializer)
 
 
 class DummyList(mapentity_views.MapEntityList):
@@ -73,6 +73,12 @@ class RoadCreate(mapentity_views.MapEntityCreate):
     model = Road
     form_class = RoadForm
 
+class RoadUpdate(mapentity_views.MapEntityUpdate):
+    model = Road
+    form_class = RoadForm
+
+class RoadDelete(mapentity_views.MapEntityDelete):
+    model = Road
 
 class RoadViewSet(mapentity_views.MapEntityViewSet):
     model = Road  # Must be defined to be detected by mapentity
@@ -85,11 +91,16 @@ class RoadList(mapentity_views.MapEntityList):
     model = Road  # Must be defined to be detected by mapentity
     filterset_class = RoadFilterSet  # Test that we can also override base filter here
 
+class RoadDetail(mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail):
+    model = Road  # Must be defined to be detected by mapentity
+
+class RoadFilter(mapentity_views.MapEntityFilter):
+    model = Road  # Must be defined to be detected by mapentity
+    filterset_class = RoadFilterSet
 
 class MushroomSpotCreate(mapentity_views.MapEntityCreate):
     model = MushroomSpot
     form_class = MushroomSpotForm
-
 
 class MushroomSpotUpdate(mapentity_views.MapEntityUpdate):
     model = MushroomSpot
@@ -132,4 +143,32 @@ class DummyAptViewSet(mapentity_views.MapEntityViewSet):
         if self.format_kwarg == "geojson":
             qs = qs.annotate(api_geom=Transform("geom", 4326))
         return qs
-# Test that we can also override base filter here
+
+class CityList(mapentity_views.MapEntityList):
+    model = City
+    searchable_columns = ['id', 'name']
+
+class CityDetail(mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail):
+    model = City
+
+class CityCreate(mapentity_views.MapEntityCreate):
+    model = City
+    form_class = CityForm  # Assuming City has similar fields to Road for the form
+
+class CityUpdate(mapentity_views.MapEntityUpdate):
+    model = City
+    form_class = CityForm  # Assuming City has similar fields to Road for the form
+
+class CityDelete(mapentity_views.MapEntityDelete):
+    model = City
+
+class CityViewSet(mapentity_views.MapEntityViewSet):
+    model = City
+    serializer_class = CitySerializer  # Assuming City has similar fields to Road for the serializer
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        if self.format_kwarg == "geojson":
+            qs = qs.annotate(api_geom=Transform("geom", 4326))
+        return qs
