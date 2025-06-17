@@ -130,12 +130,12 @@ document.addEventListener('DOMContentLoaded', function() {
             createdRow: function (row, data, index) {
                 const pk = data.id;
 
-                row.addEventListener('mouseenter', () => {
-                    objectsLayer.highlight(pk);
-                });
-                row.addEventListener('mouseleave', () => {
-                    objectsLayer.highlight(pk, false);
-                });
+                // row.addEventListener('mouseenter', () => {
+                //     objectsLayer.highlight(pk);
+                // });
+                // row.addEventListener('mouseleave', () => {
+                //     objectsLayer.highlight(pk, false);
+                // });
                 row.addEventListener('click', () => {
                     selectorOnce.select(pk, row);
                 });

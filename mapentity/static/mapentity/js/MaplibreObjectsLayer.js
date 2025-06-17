@@ -3,6 +3,7 @@ class MaplibreObjectsLayer {
         this._map = null;
         this._objects = {};
         this._current_objects = {};
+        this._groupedFeatyresObjects = {};
         this.options = { ...options };
         this.boundsLayer = null;
         this.currentPopup = null;
@@ -26,12 +27,14 @@ class MaplibreObjectsLayer {
             return;
         }
 
+        // console.log("current objects:", this._current_objects);
         const features = this._map.queryRenderedFeatures(e.point, {
             layers: Object.values(this._current_objects)
         });
+
         if (features.length > 0) {
             const feature = features[0];
-            const primaryKey = this.getPrimaryKey(feature);
+            // const primaryKey = this.getPrimaryKey(feature);
             if (this.options.objectUrl) {
                 window.location = this.options.objectUrl(feature.properties, feature);
             }
@@ -48,6 +51,13 @@ class MaplibreObjectsLayer {
             layers: Object.values(this._current_objects)
         });
 
+
+         features.forEach(feature => {
+             if(feature.id === undefined || feature.id === null) {
+                 feature.source.slice(0, 7) === 'source-' ? feature.id = feature.source.slice(7) : feature.id = feature.source;
+             }
+         });
+
         // Reset hover state for all features
         Object.keys(this._current_objects).forEach(primaryKey => {
             this.highlight(primaryKey, false);
@@ -56,7 +66,10 @@ class MaplibreObjectsLayer {
         if (features.length > 0) {
             this._map.getCanvas().style.cursor = 'pointer'; // Change cursor to pointer
             const feature = features[0];
+            console.log("Mouse over feature:", feature);
+
             const primaryKey = this.getPrimaryKey(feature);
+            // console.log("Mouse over feature with primary key:", primaryKey);
             this.highlight(primaryKey, true);
 
             // Supprimer le popup précédent s'il existe
@@ -108,10 +121,8 @@ class MaplibreObjectsLayer {
 
 
     addData(geojson) {
-        console.log("Adding data to map:", geojson);
         if(geojson.type === 'Feature') {
-            if(
-                geojson.geometry &&
+            if(geojson.geometry &&
                 geojson.geometry.type === "GeometryCollection" &&
                 geojson.geometry.geometries.length > 0
             ) {
@@ -119,7 +130,9 @@ class MaplibreObjectsLayer {
                     const feature = {
                         type: 'Feature',
                         geometry: geometry,
-                        properties: {}
+                        properties: geojson.properties || {},
+                        id: `${this._generateUniqueId()}` ,// ID unique pour chaque sous-géométrie
+                        // parentType : "GeometryCollection",
                     };
                     this.addLayer(feature, true, true);
                     this._mapObjects(feature);
@@ -132,13 +145,13 @@ class MaplibreObjectsLayer {
                 }
             }
 
-
         } else if(geojson.type === 'FeatureCollection') {
             if (
                 geojson.features.length > 0 &&
                 geojson.features[0].geometry &&
                 geojson.features[0].geometry.type === "GeometryCollection"
             ) {
+                this._groupedFeatyresObjects = geojson.features;
                 geojson.features.forEach(feature => {
                     const geometries = feature.geometry.geometries || [];
                     console.log(geometries);
@@ -146,9 +159,11 @@ class MaplibreObjectsLayer {
                         const singleFeature = {
                             type: 'Feature',
                             geometry: geometry,
-                            properties: feature.properties || {}
+                            properties: feature.properties || {},
+                            id: `${this._generateUniqueId()}`, // ID unique pour chaque sous-géométrie
+                            // parentType : "GeometryCollection",
                         };
-                        this.addLayer(singleFeature, true, true);
+                        this.addLayer(singleFeature, false, false);
                         this._mapObjects(singleFeature);
                     });
                 });
@@ -165,10 +180,27 @@ class MaplibreObjectsLayer {
         }
 
     }
+
      _mapObjects(feature) {
         const pk = this.getPrimaryKey(feature);
         this._objects[pk] = feature;
         feature.properties = feature.properties || {};
+    }
+
+
+    // Nouvelle méthode pour mettre en surbrillance tout un groupe de GeometryCollection
+    highlightGroup(groupId, on = true) {
+        if (this.options.readonly) {
+            return;
+        }
+
+        // Trouver toutes les features du même groupe
+        Object.values(this._objects).forEach(feature => {
+            if (feature.groupId === groupId) {
+                const primaryKey = this.getPrimaryKey(feature);
+                this.highlight(primaryKey, on);
+            }
+        });
     }
 
     highlight(primaryKey, on = true) {
@@ -176,38 +208,72 @@ class MaplibreObjectsLayer {
          if (this.options.readonly){
             return;
         }
+        // console.log('highlight', primaryKey, on);
+        //  console.log("current objects to highlight", JSON.stringify(this._current_objects));
+        //  console.log("current objects:", this._current_objects[primaryKey]);
+
 
         if (primaryKey && this._current_objects[primaryKey]) {
             const layerId = this._current_objects[primaryKey];
+            // console.log('highlighting layer:', layerId, 'on:', on);
             const sourceId = layerId.replace(/^layer-/, 'source-');
+            // console.log('sourceId:', sourceId);
             const source = this._map.getSource(sourceId);
             if (source && source._data) {
+                // console.log("source._data:", source._data);
                 const featureId = this.getPrimaryKey(source._data);
+                // console.log('featureId:', featureId);
+                // console.log("objects:", this._objects[primaryKey]);
                 // Set the hover state for the feature
                 this._map.setFeatureState(
                     { source: sourceId, id: featureId },
-                    { hover: on }
+                    { hover: true }
                 );
             }
         }
     }
 
     select(primaryKey, on = true) {
-        this.highlight(primaryKey, on);
+
+        // console.log(this._objects);
+
+         // Trouver toutes les features du même groupe
+        Object.values(this._objects).forEach(feature => {
+            // console.log('feature', feature);
+            if(feature && feature.properties && feature.properties.id === primaryKey) {
+                // console.log('highlighting feature in GeometryCollection:', feature);
+                const key = this.getPrimaryKey(feature);
+                // console.log(this._current_objects);
+                // console.log("current objects data:", this._current_objects[key]);
+                this.highlight(key, true);
+            }
+            // if (feature.groupId === groupId) {
+            //     const primaryKey = this.getPrimaryKey(feature);
+            //     this.highlight(primaryKey, on);
+            // }
+        });
+
+        this.highlight(primaryKey, true);
     }
 
     addLayer(feature, detailStatus = false, readonly = false) {
+         if (feature.id === undefined || feature.id === null) {
+            feature.id = feature.properties.id;
+         }
+
+         // feature.properties.id = feature.id;
+
+         // console.log('Adding layer for feature:', feature.id, 'with detailStatus:', detailStatus, 'and readonly:', readonly);
         const primaryKey = this.getPrimaryKey(feature);
-        const layerId = `layer-${this._generateUniqueId()}`;
-        const sourceId = `source-${this._generateUniqueId()}`;
+
+
+
+        const layerId = `layer-${primaryKey}`;
+        const sourceId = `source-${primaryKey}`;
 
         // Use readonly from parameter or from options
         const isReadonly = readonly || this.options.readonly;
         this.options.readonly = isReadonly;
-
-        if (!feature.id) {
-            feature.id = primaryKey;
-        }
 
         this._map.addSource(sourceId, {
             type: 'geojson',
@@ -230,14 +296,14 @@ class MaplibreObjectsLayer {
         if (geometryType === 'Polygon') {
             // Fill layer
             layerConfigs.push({
-                id: `${layerId}-fill`,
+                id: layerId,
                 type: 'fill',
                 source: sourceId,
                 paint: {
                     'fill-color': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        'transparent',
+                        '#FF0000', // Change color on hover
                         rgbaStr
                     ],
                     'fill-opacity': [
@@ -246,28 +312,6 @@ class MaplibreObjectsLayer {
                         fillOpacity, // Increase opacity on hover
                         fillOpacity
                     ]
-                }
-            });
-
-            // Border layer
-            layerConfigs.push({
-                id: `${layerId}-stroke`,
-                type: 'line',
-                source: sourceId,
-                paint: {
-                    'line-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Change color on hover
-                        strokeColor
-                    ],
-                    'line-width': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth, // Increase width on hover
-                        strokeWidth
-                    ],
-                    'line-opacity': strokeOpacity
                 }
             });
 
@@ -334,6 +378,8 @@ class MaplibreObjectsLayer {
             });
         }
 
+        // console.log('layerConfigs:', layerConfigs);
+
         for (const layerConfig of layerConfigs) {
             this._map.addLayer(layerConfig);
         }
@@ -347,7 +393,9 @@ class MaplibreObjectsLayer {
             this.layers.overlays[category] = {};
         }
         this.layers.overlays[category][primaryKey] = layerId;
+
     }
+
 
 
     addBaseLayer(name, layerConfig) {
@@ -370,7 +418,7 @@ class MaplibreObjectsLayer {
         this.layers.baseLayers[name] = id;
     }
 
-    removeLayer(layerId) {
+   removeLayer(layerId) {
         if (this._map.getLayer(layerId)) {
             this._map.removeLayer(layerId);
         }
@@ -390,17 +438,29 @@ class MaplibreObjectsLayer {
 
     getLayer(primaryKey) {
         return this._objects[primaryKey];
-        console.log('objects', this._objects);
-        console.log('primaryKey', primaryKey);
     }
 
+      // Méthode getPrimaryKey modifiée pour gérer les GeometryCollection
     getPrimaryKey(feature) {
-        return feature.properties.id || feature.id || this._generateUniqueId(feature);
+        // Si c'est une sous-géométrie d'une GeometryCollection, utiliser feature.id
+        // if (feature.parentType === "GeometryCollection") {
+        //     return feature.id;
+        // }
+        // Sinon, utiliser la méthode classique
+        // return feature.properties?.id ||feature.id || this._generateUniqueId(feature);
+        return feature.id;
     }
 
     _generateUniqueId(feature) {
-        return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        return `${Math.random().toString(36).substring(2, 9)}`;
     }
+
+    _generateGroupId(feature) {
+        const timestamp = Date.now(); // millisecondes actuelles
+        const randomPart = Math.random().toString(36).substring(2, 10); // 8 caractères aléatoires
+        return `group-${timestamp}-${randomPart}`;
+    }
+
 
     getCurrentLayers() {
         return this._current_objects;
@@ -410,12 +470,14 @@ class MaplibreObjectsLayer {
         return this.boundsLayer;
     }
 
+    // mettre update en commentaire pour éviter un refresh de la carte car l'implémentation de reloadList ne correspond pas à l'esprit maplibre
     updateFromPks(primaryKeys) {
         const new_objects = {};
 
         // Construire new_objects avec les layers qui doivent être visibles
         primaryKeys.forEach(primaryKey => {
             const layer = this._objects[primaryKey];
+            console.log('updateFromPks', primaryKey, layer);
             if (layer) {
                 new_objects[primaryKey] = layer;
                 // Si la layer n'existe pas encore dans current_objects, l'ajouter
@@ -424,11 +486,14 @@ class MaplibreObjectsLayer {
                 }
             }
         });
-
+        Object.keys(this._groupedFeatyresObjects).forEach(primaryKey => {
+            console.log('updateFromPks grouped', primaryKey);
+        })
         // Supprimer les layers qui ne sont plus dans primaryKeys
         Object.keys(this._current_objects).forEach(primaryKey => {
-            if (!new_objects[primaryKey]) {
-                this.removeLayer(this._current_objects[primaryKey]);
+            console.log('updateFromPks current', primaryKey);
+            if (!new_objects[primaryKey] ) {
+                this.removeLayer(this._current_objects[primaryKey], primaryKey);
                 // Supprimer la référence de current_objects
                 delete this._current_objects[primaryKey];
 
