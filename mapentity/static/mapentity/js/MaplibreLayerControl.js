@@ -62,6 +62,7 @@ class MaplibreLayerControl {
     }
 
     _populateBaseLayers(container) {
+        console.log('Populating base layers...');
         const layers = this.objectsLayer.getLayers();
         const radioGroupName = 'baseLayer';
 
@@ -134,6 +135,8 @@ class MaplibreLayerControl {
                 layerId: firstLayerId,
                 isDefault: true
             });
+
+            console.log(`Base Layer ${firstLayerId} is set as default and activated.`);
         }
     }
 

@@ -3,7 +3,6 @@ class MaplibreObjectsLayer {
         this._map = null;
         this._objects = {};
         this._current_objects = {};
-        this._groupedFeatyresObjects = {};
         this.options = { ...options };
         this.boundsLayer = null;
         this.currentPopup = null;
@@ -27,14 +26,12 @@ class MaplibreObjectsLayer {
             return;
         }
 
-        // console.log("current objects:", this._current_objects);
         const features = this._map.queryRenderedFeatures(e.point, {
             layers: Object.values(this._current_objects)
         });
 
         if (features.length > 0) {
             const feature = features[0];
-            // const primaryKey = this.getPrimaryKey(feature);
             if (this.options.objectUrl) {
                 window.location = this.options.objectUrl(feature.properties, feature);
             }
@@ -42,68 +39,71 @@ class MaplibreObjectsLayer {
     }
 
     _onMouseMove(e) {
-        // Skip interactions in readonly mode
-         if (this.options.readonly){
-            return;
-        }
+    if (this.options.readonly) return;
 
-        const features = this._map.queryRenderedFeatures(e.point, {
-            layers: Object.values(this._current_objects)
-        });
+    const features = this._map.queryRenderedFeatures(e.point);
+    const hoveredFeature = features[0];
 
+    let hoveredFeatureId = null;
 
-         features.forEach(feature => {
-             if(feature.id === undefined || feature.id === null) {
-                 feature.source.slice(0, 7) === 'source-' ? feature.id = feature.source.slice(7) : feature.id = feature.source;
-             }
-         });
+    if (hoveredFeature) {
+        hoveredFeatureId = hoveredFeature.id || hoveredFeature.properties?.id;
+        this._map.getCanvas().style.cursor = 'pointer';
+    } else {
+        this._map.getCanvas().style.cursor = '';
+    }
 
-        // Reset hover state for all features
-        Object.keys(this._current_objects).forEach(primaryKey => {
-            this.highlight(primaryKey, false);
-        });
+    // RESET hover = false sur tous les features ≠ hoveredFeatureId
+    const layers = Object.values(this._current_objects).flat();
 
-        if (features.length > 0) {
-            this._map.getCanvas().style.cursor = 'pointer'; // Change cursor to pointer
-            const feature = features[0];
-            console.log("Mouse over feature:", feature);
+    for (const layerId of layers) {
+        const layer = this._map.getLayer(layerId);
+        if (!layer) continue;
 
-            const primaryKey = this.getPrimaryKey(feature);
-            // console.log("Mouse over feature with primary key:", primaryKey);
-            this.highlight(primaryKey, true);
+        const sourceId = layer.source;
+        const source = this._map.getSource(sourceId);
+        if (!source || !source._data) continue;
 
-            // Supprimer le popup précédent s'il existe
-            if (this.currentPopup) {
-                this.currentPopup.remove();
-                this.currentPopup = null;
-            }
-
-            const coordinates = feature.geometry.type === 'Point'
-                ? feature.geometry.coordinates
-                : turf.centroid(feature).geometry.coordinates;
-
-            const description = feature.properties.name || 'No data available';
-
-            this.currentPopup = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-                className: 'custom-popup',
-                anchor: 'left', // place le popup à droite du point
-                offset: 10, // petit décalage horizontal
-            })
-                .setLngLat(coordinates)
-                .setHTML(`<div class="popup-content">${description}</div>`)
-                .addTo(this._map);
-
-        } else {
-            // Si aucune feature n'est survolée, supprimer le popup et remettre le curseur par défaut
-            this._map.getCanvas().style.cursor = '';
-            if (this.currentPopup) {
-                this.currentPopup.remove();
-                this.currentPopup = null;
-            }
+        for (const feature of source._data.features) {
+            if (!feature.id) continue;
+            const isHovered = feature.id === hoveredFeatureId;
+            this._map.setFeatureState(
+                { source: sourceId, id: feature.id },
+                { hover: isHovered }
+            );
         }
     }
+
+    // Gérer le popup
+    if (hoveredFeatureId) {
+        if (this.currentPopup) {
+            this.currentPopup.remove();
+            this.currentPopup = null;
+        }
+
+        const coordinates =
+            hoveredFeature.geometry.type === 'Point'
+                ? hoveredFeature.geometry.coordinates
+                : turf.centroid(hoveredFeature).geometry.coordinates;
+
+        const description = hoveredFeature.properties.name || 'No data available';
+
+        this.currentPopup = new maplibregl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            className: 'custom-popup',
+            anchor: 'left',
+            offset: 10,
+        })
+            .setLngLat(coordinates)
+            .setHTML(`<div class="popup-content">${description}</div>`)
+            .addTo(this._map);
+    } else if (this.currentPopup) {
+        this.currentPopup.remove();
+        this.currentPopup = null;
+    }
+}
+
 
 
     async load(url) {
@@ -113,7 +113,7 @@ class MaplibreObjectsLayer {
             const response = await fetch(url);
             const data = await response.json();
             this.addData(data);
-            this._map.fire('layers:added', { layers: this.getLayers() }); // Émettre un événement lorsque de nouvelles couches sont ajoutées
+            this._map.fire('layers:added', { layers: this.getLayers() });
         } catch (error) {
             console.error("Could not load url '" + url + "'", error);
         }
@@ -121,228 +121,111 @@ class MaplibreObjectsLayer {
 
 
     addData(geojson) {
-        if(geojson.type === 'Feature') {
-            if(geojson.geometry &&
-                geojson.geometry.type === "GeometryCollection" &&
-                geojson.geometry.geometries.length > 0
-            ) {
-                geojson.geometry.geometries.forEach(geometry => {
-                    const feature = {
-                        type: 'Feature',
-                        geometry: geometry,
-                        properties: geojson.properties || {},
-                        id: `${this._generateUniqueId()}` ,// ID unique pour chaque sous-géométrie
-                        // parentType : "GeometryCollection",
-                    };
-                    this.addLayer(feature, true, true);
-                    this._mapObjects(feature);
-                });
-            } else {
-                this.addLayer(geojson, true, true);
-                this.boundsLayer = this.calculateBounds(geojson);
-                if (this.boundsLayer) {
-                    this._map.fitBounds(this.boundsLayer, { maxZoom: 16, padding:0, duration: 0 });
-                }
-            }
+        console.log("Adding data to map:", geojson);
 
-        } else if(geojson.type === 'FeatureCollection') {
-            if (
-                geojson.features.length > 0 &&
-                geojson.features[0].geometry &&
-                geojson.features[0].geometry.type === "GeometryCollection"
-            ) {
-                this._groupedFeatyresObjects = geojson.features;
-                geojson.features.forEach(feature => {
-                    const geometries = feature.geometry.geometries || [];
-                    console.log(geometries);
-                    geometries.forEach(geometry => {
-                        const singleFeature = {
-                            type: 'Feature',
-                            geometry: geometry,
-                            properties: feature.properties || {},
-                            id: `${this._generateUniqueId()}`, // ID unique pour chaque sous-géométrie
-                            // parentType : "GeometryCollection",
-                        };
-                        this.addLayer(singleFeature, false, false);
-                        this._mapObjects(singleFeature);
-                    });
-                });
-            } else {
-                geojson.features.forEach(feature => {
-                    this.addLayer(feature);
-                    this._mapObjects(feature);
+        // Generate a unique ID for this GeoJSON data
+        const dataId = this._generateUniqueId();
+
+        // Store the complete GeoJSON object
+        this._objects[dataId] = geojson;
+
+        if(geojson.type === "Feature"){
+
+            // Add as a single layer
+            this.addLayer(geojson,dataId, true, true);
+
+             // Calculate and fit bounds
+            this.boundsLayer = this.calculateBounds(geojson);
+            if (this.boundsLayer) {
+                this._map.fitBounds(this.boundsLayer, {
+                    maxZoom: 16,
+                    padding: 50,
+                    duration: 1000
                 });
             }
-
         } else {
-            console.error("Unsupported GeoJSON type: " + geojson.type);
-            return;
+            // If it's a FeatureCollection, add each feature as a separate layer
+            this.addLayer(geojson, dataId);
         }
 
-    }
-
-     _mapObjects(feature) {
-        const pk = this.getPrimaryKey(feature);
-        this._objects[pk] = feature;
-        feature.properties = feature.properties || {};
-    }
-
-
-    // Nouvelle méthode pour mettre en surbrillance tout un groupe de GeometryCollection
-    highlightGroup(groupId, on = true) {
-        if (this.options.readonly) {
-            return;
-        }
-
-        // Trouver toutes les features du même groupe
-        Object.values(this._objects).forEach(feature => {
-            if (feature.groupId === groupId) {
-                const primaryKey = this.getPrimaryKey(feature);
-                this.highlight(primaryKey, on);
-            }
-        });
     }
 
     highlight(primaryKey, on = true) {
-        // Skip highlighting in readonly mode
-         if (this.options.readonly){
-            return;
-        }
-        // console.log('highlight', primaryKey, on);
-        //  console.log("current objects to highlight", JSON.stringify(this._current_objects));
-        //  console.log("current objects:", this._current_objects[primaryKey]);
+        if (this.options.readonly) return;
 
+        const layersBySource = Object.values(this._current_objects).flat(); // récupère tous les layerIds
 
-        if (primaryKey && this._current_objects[primaryKey]) {
-            const layerId = this._current_objects[primaryKey];
-            // console.log('highlighting layer:', layerId, 'on:', on);
-            const sourceId = layerId.replace(/^layer-/, 'source-');
-            // console.log('sourceId:', sourceId);
+        for (const layerId of layersBySource) {
+            const layer = this._map.getLayer(layerId);
+            if (!layer) continue;
+
+            const sourceId = layer.source;
             const source = this._map.getSource(sourceId);
-            if (source && source._data) {
-                // console.log("source._data:", source._data);
-                const featureId = this.getPrimaryKey(source._data);
-                // console.log('featureId:', featureId);
-                // console.log("objects:", this._objects[primaryKey]);
-                // Set the hover state for the feature
+            if (!source || !source._data) continue;
+
+            for (const feature of source._data.features) {
+                if (!feature.id) continue;
+
+                const isMatch = feature.id === primaryKey;
                 this._map.setFeatureState(
-                    { source: sourceId, id: featureId },
-                    { hover: true }
+                    { source: sourceId, id: feature.id },
+                    { hover: isMatch && on }
                 );
             }
         }
     }
 
+
+
     select(primaryKey, on = true) {
-
-        // console.log(this._objects);
-
-         // Trouver toutes les features du même groupe
-        Object.values(this._objects).forEach(feature => {
-            // console.log('feature', feature);
-            if(feature && feature.properties && feature.properties.id === primaryKey) {
-                // console.log('highlighting feature in GeometryCollection:', feature);
-                const key = this.getPrimaryKey(feature);
-                // console.log(this._current_objects);
-                // console.log("current objects data:", this._current_objects[key]);
-                this.highlight(key, true);
-            }
-            // if (feature.groupId === groupId) {
-            //     const primaryKey = this.getPrimaryKey(feature);
-            //     this.highlight(primaryKey, on);
-            // }
-        });
-
         this.highlight(primaryKey, true);
     }
 
-    addLayer(feature, detailStatus = false, readonly = false) {
-         if (feature.id === undefined || feature.id === null) {
+    addLayer(geojson,pk, detailStatus = false, readonly = false) {
+        const primaryKey = pk;
+
+        geojson.features.forEach(feature => {
+            // Assigner un id unique à chaque feature
             feature.id = feature.properties.id;
-         }
+        })
 
-         // feature.properties.id = feature.id;
+        console.log("geojson features with id:", geojson.features);
 
-         // console.log('Adding layer for feature:', feature.id, 'with detailStatus:', detailStatus, 'and readonly:', readonly);
-        const primaryKey = this.getPrimaryKey(feature);
-
-
-
-        const layerId = `layer-${primaryKey}`;
+        const layerIdBase = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
 
-        // Use readonly from parameter or from options
         const isReadonly = readonly || this.options.readonly;
         this.options.readonly = isReadonly;
 
         this._map.addSource(sourceId, {
             type: 'geojson',
-            data: feature
+            data: geojson,
         });
 
-        const geometryType = feature.geometry.type;
         const style = detailStatus ? this.options.detailStyle : this.options.style;
-
-        const rgba = parseColor(style.color); // [r, g, b, a]
+        const rgba = parseColor(style.color);
         const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
 
-        const fillOpacity = style.fillOpacity ?? 0.7; // default fill opacity
-        const strokeOpacity = style.opacity ?? 1.0; // default opacity
+        const fillOpacity = style.fillOpacity ?? 0.7;
+        const strokeOpacity = style.opacity ?? 1.0;
         const strokeColor = style.color;
-        const strokeWidth = style.weight ?? 5; // default width
+        const strokeWidth = style.weight ?? 2;
 
-        let layerConfigs = [];
+           // Détection des types de géométrie dans le GeoJSON
+        const foundTypes = geojson.features[0].geometry.type;
 
-        if (geometryType === 'Polygon') {
-            // Fill layer
-            layerConfigs.push({
-                id: layerId,
-                type: 'fill',
-                source: sourceId,
-                paint: {
-                    'fill-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Change color on hover
-                        rgbaStr
-                    ],
-                    'fill-opacity': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        fillOpacity, // Increase opacity on hover
-                        fillOpacity
-                    ]
-                }
-            });
+        const layerIds = [];
 
-        } else if (geometryType === 'LineString') {
-            layerConfigs.push({
-                id: layerId,
-                type: 'line',
-                source: sourceId,
-                paint: {
-                    'line-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Change color on hover
-                        strokeColor
-                    ],
-                    'line-width': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth, // Increase width on hover
-                        strokeWidth
-                    ],
-                    'line-opacity': strokeOpacity
-                }
-            });
-
-        } else if (geometryType === 'Point') {
-            layerConfigs.push({
-                id: layerId,
-                type: 'circle',
-                source: sourceId,
-                paint: {
+        // Layer pour les Points
+        this._map.addLayer({
+            id: `${layerIdBase}-points`,
+            type: 'circle',
+            source: sourceId,
+            filter: ['any',
+                ['==', ['geometry-type'], 'Point'],
+                ['==', ['geometry-type'], 'MultiPoint']
+            ],
+             paint: {
                     'circle-color': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
@@ -374,29 +257,85 @@ class MaplibreObjectsLayer {
                         10, // Increase radius on hover
                         8
                     ]
-                }
-            });
+            }
+        });
+        if(foundTypes === "Point" || foundTypes === "MultiPoint") {
+             layerIds.push(`${layerIdBase}-points`);
+        }
+        // Layer pour les Lignes
+        this._map.addLayer({
+            id: `${layerIdBase}-lines`,
+            type: 'line',
+            source: sourceId,
+            filter: ['any',
+                ['==', ['geometry-type'], 'LineString'],
+                ['==', ['geometry-type'], 'MultiLineString']
+            ],
+            paint: {
+                'line-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    '#FF0000', // Change color on hover
+                    strokeColor
+                ],
+                'line-width': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    strokeWidth, // Increase width on hover
+                    strokeWidth
+                ],
+                'line-opacity': strokeOpacity
+            }
+        });
+        if(foundTypes === "LineString" || foundTypes === "MultiLineString") {
+             layerIds.push(`${layerIdBase}-lines`);
         }
 
-        // console.log('layerConfigs:', layerConfigs);
-
-        for (const layerConfig of layerConfigs) {
-            this._map.addLayer(layerConfig);
+        // Layer pour les Polygones
+        this._map.addLayer({
+            id: `${layerIdBase}-polygons`,
+            type: 'fill',
+            source: sourceId,
+            filter: ['any',
+                ['==', ['geometry-type'], 'Polygon'],
+                ['==', ['geometry-type'], 'MultiPolygon']
+            ],
+            paint: {
+                'fill-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    '#FF0000', // Change color on hover
+                    rgbaStr
+                ],
+                'fill-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    fillOpacity, // Increase opacity on hover
+                    fillOpacity
+                ]
+            }
+        });
+        if(foundTypes === "Polygon" || foundTypes === "MultiPolygon") {
+            layerIds.push(`${layerIdBase}-polygons`);
         }
 
-        // Store the layerId in current_objects
-        this._current_objects[primaryKey] = layerId;
+        if(foundTypes === "GeometryCollection") {
+            layerIds.push(`${layerIdBase}-points`);
+            layerIds.push(`${layerIdBase}-lines`);
+            layerIds.push(`${layerIdBase}-polygons`);
+        }
 
-        // If the layer category is not present, add it
+        // Enregistrer les couches dans _objects
+        this._current_objects[primaryKey] = layerIds;
+
         const category = this.options.modelname;
         if (!this.layers.overlays[category]) {
             this.layers.overlays[category] = {};
         }
-        this.layers.overlays[category][primaryKey] = layerId;
+        this.layers.overlays[category][primaryKey] = layerIds;
 
+        console.log('Ajout auto de 1 à 3 couches selon géométrie', layerIds);
     }
-
-
 
     addBaseLayer(name, layerConfig) {
         const { id, tiles, tileSize = 256, attribution = '' } = layerConfig;
@@ -442,13 +381,8 @@ class MaplibreObjectsLayer {
 
       // Méthode getPrimaryKey modifiée pour gérer les GeometryCollection
     getPrimaryKey(feature) {
-        // Si c'est une sous-géométrie d'une GeometryCollection, utiliser feature.id
-        // if (feature.parentType === "GeometryCollection") {
-        //     return feature.id;
-        // }
         // Sinon, utiliser la méthode classique
-        // return feature.properties?.id ||feature.id || this._generateUniqueId(feature);
-        return feature.id;
+        return feature.properties?.id ||feature.id || this._generateUniqueId(feature);
     }
 
     _generateUniqueId(feature) {
@@ -486,8 +420,10 @@ class MaplibreObjectsLayer {
                 }
             }
         });
+
         Object.keys(this._groupedFeatyresObjects).forEach(primaryKey => {
-            console.log('updateFromPks grouped', primaryKey);
+            const key = parseInt(primaryKey);
+            console.log('updateFromPks grouped', (key + 1) );
         })
         // Supprimer les layers qui ne sont plus dans primaryKeys
         Object.keys(this._current_objects).forEach(primaryKey => {
