@@ -139,8 +139,8 @@ class MaplibreObjectsLayer {
             if (this.boundsLayer) {
                 this._map.fitBounds(this.boundsLayer, {
                     maxZoom: 16,
-                    padding: 50,
-                    duration: 1000
+                    padding: 0,
+                    duration: 0
                 });
             }
         } else {
@@ -181,42 +181,62 @@ class MaplibreObjectsLayer {
         this.highlight(primaryKey, true);
     }
 
-    addLayer(geojson,pk, detailStatus = false, readonly = false) {
-        const primaryKey = pk;
+    addLayer(geojson, pk, detailStatus = false, readonly = false) {
+    const primaryKey = pk;
+    const foundTypes = new Set();
 
+    if (geojson.type === "Feature") {
+        if (!geojson.id && geojson.properties?.id) {
+            geojson.id = geojson.properties.id;
+        }
+        const geomType = geojson.geometry?.type;
+        if (geomType === "GeometryCollection" && geojson.geometry.geometries) {
+            geojson.geometry.geometries.forEach(g => {
+                if (g.type) foundTypes.add(g.type);
+            });
+        } else if (geomType) {
+            foundTypes.add(geomType);
+        }
+    } else if (geojson.type === "FeatureCollection") {
         geojson.features.forEach(feature => {
-            // Assigner un id unique à chaque feature
-            feature.id = feature.properties.id;
-        })
-
-        console.log("geojson features with id:", geojson.features);
-
-        const layerIdBase = `layer-${primaryKey}`;
-        const sourceId = `source-${primaryKey}`;
-
-        const isReadonly = readonly || this.options.readonly;
-        this.options.readonly = isReadonly;
-
-        this._map.addSource(sourceId, {
-            type: 'geojson',
-            data: geojson,
+            if (!feature.id && feature.properties?.id) {
+                feature.id = feature.properties.id;
+            }
+            const geomType = feature.geometry?.type;
+            if (geomType === "GeometryCollection" && feature.geometry.geometries) {
+                feature.geometry.geometries.forEach(g => {
+                    if (g.type) foundTypes.add(g.type);
+                });
+            } else if (geomType) {
+                foundTypes.add(geomType);
+            }
         });
+    }
 
-        const style = detailStatus ? this.options.detailStyle : this.options.style;
-        const rgba = parseColor(style.color);
-        const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
+    console.log("geojson features with id:", geojson.features ?? geojson);
 
-        const fillOpacity = style.fillOpacity ?? 0.7;
-        const strokeOpacity = style.opacity ?? 1.0;
-        const strokeColor = style.color;
-        const strokeWidth = style.weight ?? 2;
+    const layerIdBase = `layer-${primaryKey}`;
+    const sourceId = `source-${primaryKey}`;
 
-           // Détection des types de géométrie dans le GeoJSON
-        const foundTypes = geojson.features[0].geometry.type;
+    const isReadonly = readonly || this.options.readonly;
+    this.options.readonly = isReadonly;
 
-        const layerIds = [];
+    this._map.addSource(sourceId, {
+        type: 'geojson',
+        data: geojson,
+    });
 
-        // Layer pour les Points
+    const style = detailStatus ? this.options.detailStyle : this.options.style;
+    const rgba = parseColor(style.color); // [r, g, b, a]
+    const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
+    const fillOpacity = style.fillOpacity ?? 0.7; // default fill opacity
+    const strokeOpacity = style.opacity ?? 1.0; // default opacity
+    const strokeColor = style.color;
+    const strokeWidth = style.weight ?? 5; // default width
+
+    const layerIds = [];
+
+    if (foundTypes.has("Point") || foundTypes.has("MultiPoint")) {
         this._map.addLayer({
             id: `${layerIdBase}-points`,
             type: 'circle',
@@ -225,44 +245,44 @@ class MaplibreObjectsLayer {
                 ['==', ['geometry-type'], 'Point'],
                 ['==', ['geometry-type'], 'MultiPoint']
             ],
-             paint: {
-                    'circle-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Change color on hover
-                        rgbaStr
-                    ],
-                    'circle-opacity': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        fillOpacity, // Increase opacity on hover
-                        fillOpacity
-                    ],
-                    'circle-stroke-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Change color on hover
-                        strokeColor
-                    ],
-                    'circle-stroke-opacity': strokeOpacity,
-                    'circle-stroke-width': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth, // Increase width on hover
-                        strokeWidth
-                    ],
-                    'circle-radius': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        10, // Increase radius on hover
-                        8
-                    ]
+            paint: {
+                'circle-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    '#FF0000', // Change color on hover
+                    rgbaStr
+                ],
+                'circle-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    fillOpacity, // Increase opacity on hover
+                    fillOpacity
+                ],
+                'circle-stroke-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    '#FF0000', // Change color on hover
+                    strokeColor
+                ],
+                'circle-stroke-opacity': strokeOpacity,
+                'circle-stroke-width': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    strokeWidth, // Increase width on hover
+                    strokeWidth
+                ],
+                'circle-radius': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    10, // Increase radius on hover
+                    8
+                ]
             }
         });
-        if(foundTypes === "Point" || foundTypes === "MultiPoint") {
-             layerIds.push(`${layerIdBase}-points`);
-        }
-        // Layer pour les Lignes
+        layerIds.push(`${layerIdBase}-points`);
+    }
+
+    if (foundTypes.has("LineString") || foundTypes.has("MultiLineString")) {
         this._map.addLayer({
             id: `${layerIdBase}-lines`,
             type: 'line',
@@ -275,23 +295,17 @@ class MaplibreObjectsLayer {
                 'line-color': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
-                    '#FF0000', // Change color on hover
+                    '#FF0000',
                     strokeColor
                 ],
-                'line-width': [
-                    'case',
-                    ['boolean', ['feature-state', 'hover'], false],
-                    strokeWidth, // Increase width on hover
-                    strokeWidth
-                ],
+                'line-width': strokeWidth,
                 'line-opacity': strokeOpacity
             }
         });
-        if(foundTypes === "LineString" || foundTypes === "MultiLineString") {
-             layerIds.push(`${layerIdBase}-lines`);
-        }
+        layerIds.push(`${layerIdBase}-lines`);
+    }
 
-        // Layer pour les Polygones
+    if (foundTypes.has("Polygon") || foundTypes.has("MultiPolygon")) {
         this._map.addLayer({
             id: `${layerIdBase}-polygons`,
             type: 'fill',
@@ -304,38 +318,26 @@ class MaplibreObjectsLayer {
                 'fill-color': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
-                    '#FF0000', // Change color on hover
+                    '#FF0000',
                     rgbaStr
                 ],
-                'fill-opacity': [
-                    'case',
-                    ['boolean', ['feature-state', 'hover'], false],
-                    fillOpacity, // Increase opacity on hover
-                    fillOpacity
-                ]
+                'fill-opacity': fillOpacity
             }
         });
-        if(foundTypes === "Polygon" || foundTypes === "MultiPolygon") {
-            layerIds.push(`${layerIdBase}-polygons`);
-        }
-
-        if(foundTypes === "GeometryCollection") {
-            layerIds.push(`${layerIdBase}-points`);
-            layerIds.push(`${layerIdBase}-lines`);
-            layerIds.push(`${layerIdBase}-polygons`);
-        }
-
-        // Enregistrer les couches dans _objects
-        this._current_objects[primaryKey] = layerIds;
-
-        const category = this.options.modelname;
-        if (!this.layers.overlays[category]) {
-            this.layers.overlays[category] = {};
-        }
-        this.layers.overlays[category][primaryKey] = layerIds;
-
-        console.log('Ajout auto de 1 à 3 couches selon géométrie', layerIds);
+        layerIds.push(`${layerIdBase}-polygons`);
     }
+
+    this._current_objects[primaryKey] = layerIds;
+
+    const category = this.options.modelname;
+    if (!this.layers.overlays[category]) {
+        this.layers.overlays[category] = {};
+    }
+    this.layers.overlays[category][primaryKey] = layerIds;
+
+    console.log('Ajout auto de 1 à 3 couches selon géométrie', layerIds);
+}
+
 
     addBaseLayer(name, layerConfig) {
         const { id, tiles, tileSize = 256, attribution = '' } = layerConfig;
