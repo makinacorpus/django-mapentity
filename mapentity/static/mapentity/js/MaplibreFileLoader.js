@@ -55,7 +55,7 @@ class MaplibreFileLoader {
 
             const bounds = this.calculateBounds(content);
             if (bounds) {
-                this._map.fitBounds(bounds, { padding: 20, maxZoom: 15 });
+                this._map.fitBounds(bounds, { padding: 50, maxZoom: 15 });
             }
         }
     }
@@ -108,41 +108,61 @@ class MaplibreFileLoader {
     }
 
     calculateBounds(geojson) {
-        if (!geojson || !geojson.features) return null;
+        if (!geojson) {
+            return null;
+        }
 
         const bounds = new maplibregl.LngLatBounds();
 
-        geojson.features.forEach(feature => {
-            const coords = feature.geometry?.coordinates;
-            const type = feature.geometry?.type;
-            if (!coords || !type) return;
-
+        // Fonction utilitaire pour extraire et aplatir les coordonnées
+        const flattenCoords = (geometry) => {
+            const { type, coordinates, geometries } = geometry;
             let flattened = [];
 
             switch (type) {
                 case 'Point':
-                    flattened = [coords];
+                    flattened = [coordinates];
                     break;
                 case 'MultiPoint':
                 case 'LineString':
-                    flattened = coords;
+                    flattened = coordinates;
                     break;
                 case 'Polygon':
                 case 'MultiLineString':
-                    flattened = coords.flat();
+                    flattened = coordinates.flat();
                     break;
                 case 'MultiPolygon':
-                    flattened = coords.flat(2);
+                    flattened = coordinates.flat(2);
                     break;
-                default:
-                    return;
+                case 'GeometryCollection':
+                    geometries?.forEach(geom => {
+                        flattened.push(...flattenCoords(geom));
+                    });
+                    break;
             }
 
-            flattened.forEach(coord => bounds.extend(coord));
-        });
+            return flattened;
+        };
+
+        // Cas d'un seul Feature
+        if (geojson.geometry) {
+            const coords = flattenCoords(geojson.geometry);
+            coords.forEach(coord => bounds.extend(coord));
+        }
+
+        // Cas d'une FeatureCollection
+        else if (geojson.features) {
+            geojson.features.forEach(feature => {
+                const geometry = feature.geometry;
+                if (!geometry) return;
+                const coords = flattenCoords(geometry);
+                coords.forEach(coord => bounds.extend(coord));
+            });
+        }
 
         return bounds.isEmpty() ? null : bounds;
     }
+
 
     _convertToGeoJSON(content, format) {
         if (typeof content === 'string') {
