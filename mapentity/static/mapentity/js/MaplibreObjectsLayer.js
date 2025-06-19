@@ -401,8 +401,21 @@ class MaplibreObjectsLayer {
    //      }
    //  }
 
-    toggleLayer(layerId, visible = true) {
-        this._map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+    toggleLayer(layerIds, visible = true) {
+        // Force en tableau si ce n'est pas déjà un tableau
+        const ids = Array.isArray(layerIds)
+            ? layerIds
+            : typeof layerIds === 'string'
+                ? layerIds.split(',').map(id => id.trim())
+                : [];
+
+        for (const id of ids) {
+            if (this._map.getLayer(id)) {
+                this._map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+            } else {
+                console.warn(`Layer "${id}" not found.`);
+            }
+        }
     }
 
     getLayers() {
@@ -414,10 +427,10 @@ class MaplibreObjectsLayer {
     }
 
       // Méthode getPrimaryKey modifiée pour gérer les GeometryCollection
-    getPrimaryKey(feature) {
-        // Sinon, utiliser la méthode classique
-        return feature.properties?.id ||feature.id || this._generateUniqueId(feature);
-    }
+    // getPrimaryKey(feature) {
+    //     // Sinon, utiliser la méthode classique
+    //     return feature.properties?.id ||feature.id || this._generateUniqueId(feature);
+    // }
 
     _generateUniqueId(feature) {
         return `${Math.random().toString(36).substring(2, 9)}`;
@@ -442,7 +455,7 @@ class MaplibreObjectsLayer {
         const layersBySource = Object.values(this._current_objects).flat();
 
         if (layersBySource.length === 0) {
-            console.error("PROBLÈME: Aucun layer trouvé dans _current_objects");
+            console.error("Aucun layer trouvé dans _current_objects");
             return;
         }
 
@@ -452,7 +465,7 @@ class MaplibreObjectsLayer {
             const layer = this._map.getLayer(layerId);
 
             if (!layer) {
-                console.log("Layer not found, continuing...");
+                console.log("Aucun layer trouvé, continuer...");
                 continue;
             }
 
@@ -497,18 +510,7 @@ class MaplibreObjectsLayer {
             features: featuresToShow
         });
 
-        // Nettoyer les overlays
-        const category = this.options.modelname;
-        if (!this.layers.overlays[category]) this.layers.overlays[category] = {};
-
-        Object.keys(this.layers.overlays[category]).forEach(id => {
-            if (!primaryKeys.includes(id)) {
-                delete this.layers.overlays[category][id];
-            }
-        });
     }
-
-
 
     // Fit the map to the bounds of the layer we clicked on
     jumpTo(pk) {

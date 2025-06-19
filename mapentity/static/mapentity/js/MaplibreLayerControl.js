@@ -142,6 +142,8 @@ class MaplibreLayerControl {
 
     _populateOverlays(container) {
         const layers = this.objectsLayer.getLayers();
+        console.log('Populating overlays...');
+        console.log("Available overlays:", layers.overlays);
 
         const hr = document.createElement('hr');
         hr.style.margin = 0;
@@ -165,9 +167,13 @@ class MaplibreLayerControl {
             container.appendChild(document.createElement('br'));
 
             input.addEventListener('change', (e) => {
+                console.log('overlay ', layers.overlays);
                 const isChecked = e.target.checked;
+                console.log(`Toggling overlays for category ${category} to ${isChecked}`);
+                console.log(`Group:`, group);
 
                 for (const [name, id] of Object.entries(group)) {
+                    console.log(`Toggling overlay ${name} (${id}) to ${isChecked}`);
                     this.objectsLayer.toggleLayer(id, isChecked);
 
                     if (isChecked) {
