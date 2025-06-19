@@ -80,6 +80,25 @@ document.addEventListener('DOMContentLoaded', function() {
             // Charger dynamiquement les objets depuis le backend en utilisant la méthode load
             objectsLayer.load(layerUrl);
 
+            const mapViewContext = getURLParameter('context');
+            const mapentityContext = window.MapEntity.currentMap.mapentityContext;
+
+            // Bouton de capture d'écran pour la carte
+            // En course de développement
+
+            const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
+                () => {
+                context = mapentityContext.getFullContext(map.getMap(), {
+                    filter: 'mainfilter', // id du formulaire de filtre
+                    datatable: mainDatatable,
+                    objectsname: modelname, // layers
+                    prefix: 'list',
+                });
+                context['selector'] = '#mainmap';
+                return JSON.stringify(context);
+            });
+            map.getMap().addControl(screenshotControl, 'top-left');
+
             // ajout du contrôle de fichiers
             const fileLayerLoadControl = new MaplibreFileLayerControl({
                 layerOptions: {
@@ -107,26 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 // console.log('Chargement du formulaire de filtre');
                 togglableFiltre.load_filter_form(mapsync);
             });
-
-            const mapViewContext = getURLParameter('context');
-            const mapentityContext = window.MapEntity.currentMap.mapentityContext;
-
-                     // Bouton de capture d'écran pour la carte
-            // En course de développement
-
-            const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
-                () => {
-                context = mapentityContext.getFullContext(map.getMap(), {
-                    filter: 'mainfilter', // id du formulaire de filtre
-                    datatable: mainDatatable,
-                    objectsname: modelname, // layers
-                    prefix: 'list',
-                });
-                context['selector'] = '#mainmap';
-                return JSON.stringify(context);
-            });
-            map.getMap().addControl(screenshotControl, 'top-left');
-
 
             // if (mapViewContext) {
             //     mapentityContext.restoreFullContext(
