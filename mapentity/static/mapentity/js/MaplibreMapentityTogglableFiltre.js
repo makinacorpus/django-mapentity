@@ -57,7 +57,6 @@ class MaplibreMapentityTogglableFiltre {
         // Event pour le toggle principal
         this.button.addEventListener('click', (e) => {
             e.stopPropagation();
-            console.log("Toggle filters button clicked");
             this.toggle();
         });
 
@@ -82,9 +81,7 @@ class MaplibreMapentityTogglableFiltre {
         try {
             if (this.popover && this.popover.length > 0) {
                 const popoverData = this.popover.data('bs.popover');
-                console.log('Popover data:', popoverData);
                 if (popoverData && popoverData.tip) {
-                    console.log('Popover tip found:', popoverData.tip);
                     return $(popoverData.tip);
                 }
             }

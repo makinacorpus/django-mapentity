@@ -151,17 +151,23 @@ class MaplibreObjectsLayer {
     }
 
     highlight(primaryKey, on = true) {
-        if (this.options.readonly) return;
+        if (this.options.readonly) {
+            return;
+        }
 
         const layersBySource = Object.values(this._current_objects).flat(); // récupère tous les layerIds
 
         for (const layerId of layersBySource) {
             const layer = this._map.getLayer(layerId);
-            if (!layer) continue;
+            if (!layer) {
+                continue;
+            }
 
             const sourceId = layer.source;
             const source = this._map.getSource(sourceId);
-            if (!source || !source._data) continue;
+            if (!source || !source._data) {
+                continue;
+            }
 
             for (const feature of source._data.features) {
                 if (!feature.id) continue;
@@ -385,15 +391,15 @@ class MaplibreObjectsLayer {
         this.layers.baseLayers[name] = id;
     }
 
-   removeLayer(layerId) {
-        if (this._map.getLayer(layerId)) {
-            this._map.removeLayer(layerId);
-        }
-        const sourceId = layerId.replace(/^layer-/, 'source-');
-        if (this._map.getSource(sourceId)) {
-            this._map.removeSource(sourceId);
-        }
-    }
+   // removeLayer(layerId) {
+   //      if (this._map.getLayer(layerId)) {
+   //          this._map.removeLayer(layerId);
+   //      }
+   //      const sourceId = layerId.replace(/^layer-/, 'source-');
+   //      if (this._map.getSource(sourceId)) {
+   //          this._map.removeSource(sourceId);
+   //      }
+   //  }
 
     toggleLayer(layerId, visible = true) {
         this._map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
@@ -425,40 +431,84 @@ class MaplibreObjectsLayer {
         return this.boundsLayer;
     }
 
-    // mettre update en commentaire pour éviter un refresh de la carte car l'implémentation de reloadList ne correspond pas à l'esprit maplibre
     updateFromPks(primaryKeys) {
-        const new_objects = {};
+        if (!this._track_objects) {
+            this._track_objects = {};
+        }
 
-        // Construire new_objects avec les layers qui doivent être visibles
+        let sourceId = null;
+        let fullFeatureCollection = null;
+
+        const layersBySource = Object.values(this._current_objects).flat();
+
+        if (layersBySource.length === 0) {
+            console.error("PROBLÈME: Aucun layer trouvé dans _current_objects");
+            return;
+        }
+
+        // Trouver le sourceId via les layerIds dans _current_objects
+        for (let i = 0; i < layersBySource.length; i++) {
+            const layerId = layersBySource[i];
+            const layer = this._map.getLayer(layerId);
+
+            if (!layer) {
+                console.log("Layer not found, continuing...");
+                continue;
+            }
+
+            const currentSourceId = layer.source;
+            const source = this._map.getSource(currentSourceId);
+
+            if (source && source._data && source._data.features) {
+                sourceId = currentSourceId;
+                fullFeatureCollection = source._data;
+                break;
+            }
+        }
+
+        if (!sourceId || !fullFeatureCollection) {
+            console.warn('Aucune source valide trouvée');
+            return;
+        }
+
+        const source = this._map.getSource(sourceId);
+
+        // Sauvegarder les features actuelles si non encore tracées
+        fullFeatureCollection.features.forEach(feature => {
+            const featureId = feature.properties?.id;
+            if (featureId && !this._track_objects[featureId]) {
+                this._track_objects[featureId] = { ...feature };
+            }
+        });
+
+        // Reconstituer les features à afficher à partir de primaryKeys
+        const featuresToShow = [];
+
         primaryKeys.forEach(primaryKey => {
-            const layer = this._objects[primaryKey];
-            console.log('updateFromPks', primaryKey, layer);
-            if (layer) {
-                new_objects[primaryKey] = layer;
-                // Si la layer n'existe pas encore dans current_objects, l'ajouter
-                if (!this._current_objects[primaryKey]) {
-                    this.addLayer(layer);
-                }
+            const feature = this._track_objects[primaryKey];
+            if (feature) {
+                featuresToShow.push(feature);
             }
         });
 
-        // Supprimer les layers qui ne sont plus dans primaryKeys
-        Object.keys(this._current_objects).forEach(primaryKey => {
-            console.log('updateFromPks current', primaryKey);
-            if (!new_objects[primaryKey] ) {
-                this.removeLayer(this._current_objects[primaryKey], primaryKey);
-                // Supprimer la référence de current_objects
-                delete this._current_objects[primaryKey];
-
-                // Supprimer aussi des overlays
-                const category = this.options.modelname;
-                if (this.layers.overlays[category] && this.layers.overlays[category][primaryKey]) {
-                    delete this.layers.overlays[category][primaryKey];
-                }
-            }
+        // Mettre à jour la source avec les nouvelles features visibles
+        source.setData({
+            type: 'FeatureCollection',
+            features: featuresToShow
         });
 
+        // Nettoyer les overlays
+        const category = this.options.modelname;
+        if (!this.layers.overlays[category]) this.layers.overlays[category] = {};
+
+        Object.keys(this.layers.overlays[category]).forEach(id => {
+            if (!primaryKeys.includes(id)) {
+                delete this.layers.overlays[category][id];
+            }
+        });
     }
+
+
 
     // Fit the map to the bounds of the layer we clicked on
     jumpTo(pk) {

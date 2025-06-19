@@ -21,7 +21,7 @@ class MaplibreMapListSync {
 
      initialize() {
 
-        // this.map.on('moveend', (e) => this._onMapViewChanged(e));
+        this.map.on('moveend', (e) => this._onMapViewChanged(e));
 
         if (this.options.filter) {
             this.options.filter.submitbutton.addEventListener('click', (e) => this._onFormSubmit(e));
@@ -122,9 +122,9 @@ class MaplibreMapListSync {
             // Update the text of the number of results with the returned value
             document.getElementById('nbresults').textContent = data.count;
 
-            console.log('Number of results:', data.pk);
+            console.log('Number of results:', data.count);
             // Update the map layers with the returned primary keys
-            // this.layer.updateFromPks(data.pk_list);
+            this.layer.updateFromPks(data.pk_list);
 
         } catch (error) {
             console.error('Error:', error);
