@@ -512,13 +512,39 @@ class MaplibreObjectsLayer {
 
     // Fit the map to the bounds of the layer we clicked on
     jumpTo(pk) {
-        const layer = this.getLayer(pk);
-        console.log('jumpTo', layer);
-        if (layer) {
-            const bounds = this.calculateBounds(layer);
-            if (bounds) {
-                this._map.fitBounds(bounds, { padding: 20, maxZoom: 16 });
+        let feature = null;
+        const layersBySource = Object.values(this._current_objects).flat();
+
+        if (layersBySource.length === 0) {
+            console.warn("Aucun layer trouvé dans _current_objects");
+            return;
+        }
+
+        // Chercher la feature dans les sources actives
+        for (const layerId of layersBySource) {
+            const layer = this._map.getLayer(layerId);
+            if (!layer) continue;
+
+            const source = this._map.getSource(layer.source);
+            if (source && source._data && source._data.features) {
+                const foundFeature = source._data.features.find(f => f.properties?.id === pk);
+                if (foundFeature) {
+                    feature = foundFeature;
+                    break;
+                }
             }
+        }
+
+        if (!feature) {
+            console.warn(`Feature avec l'id ${pk} non trouvée`);
+            return;
+        }
+
+        const bounds = this.calculateBounds(feature);
+        if (bounds) {
+            this._map.fitBounds(bounds, { padding: 20, maxZoom: 16 });
+        } else {
+            console.warn(`Impossible de calculer les bounds pour la feature ${pk}`);
         }
     }
 
