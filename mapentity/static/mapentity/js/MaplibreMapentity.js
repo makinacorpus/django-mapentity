@@ -171,7 +171,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 map: map,
                 objectsLayer: objectsLayer,
                 mapId: mapId,
-                bounds : bounds
+                bounds : bounds,
+                mapentityContext: mapentityContext
             });
 
 

@@ -61,6 +61,7 @@ class MaplibreMapentityContext {
 
         // Add a timestamp
         context['timestamp'] = new Date().getTime();
+        map.getContainer().classList.add('leaflet-tile-loaded');
 
         return context;
     }

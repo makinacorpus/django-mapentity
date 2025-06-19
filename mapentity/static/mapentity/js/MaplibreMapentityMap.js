@@ -7,9 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const { map, objectsLayer, modelname } = e.detail;
 
-        // Bouton de capture d'écran pour la carte
-        // En course de développement
-
 
         // Restauration du contexte de la carte, uniquement pour les captures d'écran
         const mapViewContext = getURLParameter('context');
@@ -57,6 +54,18 @@ document.addEventListener('DOMContentLoaded', function() {
              // Ajouter un contrôle pour réinitialiser la vuer
              const boundsLayer = objectsLayer.getBoundsLayer();
              map.getMap().addControl(new MaplibreResetViewControl(boundsLayer), 'top-left');
+
+             // Bouton de capture d'écran pour la carte
+            // En course de développement
+            const mapentityContext = window.MapEntity.currentMap.mapentityContext;
+
+            const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
+                () => {
+                    context = mapentityContext.getFullContext(map.getMap());
+                    context['selector'] = '#detailmap';
+                    return JSON.stringify(context);
+            });
+            map.getMap().addControl(screenshotControl, 'top-left');
         });
 
     });
@@ -102,6 +111,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const mapViewContext = getURLParameter('context');
             const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
+                     // Bouton de capture d'écran pour la carte
+            // En course de développement
+
+            const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
+                () => {
+                context = mapentityContext.getFullContext(map.getMap(), {
+                    filter: 'mainfilter', // id du formulaire de filtre
+                    datatable: mainDatatable,
+                    objectsname: modelname, // layers
+                    prefix: 'list',
+                });
+                context['selector'] = '#mainmap';
+                return JSON.stringify(context);
+            });
+            map.getMap().addControl(screenshotControl, 'top-left');
+
 
             // if (mapViewContext) {
             //     mapentityContext.restoreFullContext(
@@ -122,9 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     prefix: 'list',
                 });
             });
-
-            // Bouton de capture d'écran pour la carte
-            // En course de développement
 
         });
     });
