@@ -51,10 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchFeatureLayer(feature_geojson_url);
 
          map.getMap().on('layers:added', () => {
-             // Ajouter un contrôle pour réinitialiser la vuer
-             const boundsLayer = objectsLayer.getBoundsLayer();
-             map.getMap().addControl(new MaplibreResetViewControl(boundsLayer), 'top-left');
-
              // Bouton de capture d'écran pour la carte
             // En course de développement
             const mapentityContext = window.MapEntity.currentMap.mapentityContext;
@@ -66,6 +62,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     return JSON.stringify(context);
             });
             map.getMap().addControl(screenshotControl, 'top-left');
+
+            // Ajouter un contrôle pour réinitialiser la vuer
+             const boundsLayer = objectsLayer.getBoundsLayer();
+             map.getMap().addControl(new MaplibreResetViewControl(boundsLayer), 'top-left');
         });
 
     });

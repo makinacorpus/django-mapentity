@@ -26,9 +26,7 @@ class MaplibreObjectsLayer {
             return;
         }
 
-        const features = this._map.queryRenderedFeatures(e.point, {
-            layers: Object.values(this._current_objects)
-        });
+        const features = this._map.queryRenderedFeatures(e.point);
 
         if (features.length > 0) {
             const feature = features[0];
