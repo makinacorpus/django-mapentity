@@ -38,8 +38,6 @@ class MaplibreScreenshotController {
         document.body.appendChild(form);
         form.submit();
         form.remove();
-
-        // this.fire('triggered');
     }
 
     onAdd(map) {
@@ -69,23 +67,4 @@ class MaplibreScreenshotController {
 
         return this.container;
     }
-
-    // fire(eventName) {
-    //     // Simulation simple du système d'événements Leaflet
-    //     if (this._events && this._events[eventName]) {
-    //         this._events[eventName].forEach(callback => callback());
-    //     }
-    // }
-    //
-    // on(eventName, callback) {
-    //     if (!this._events) this._events = {};
-    //     if (!this._events[eventName]) this._events[eventName] = [];
-    //     this._events[eventName].push(callback);
-    // }
-    //
-    // off(eventName, callback) {
-    //     if (this._events && this._events[eventName]) {
-    //         this._events[eventName] = this._events[eventName].filter(cb => cb !== callback);
-    //     }
-    // }
 }
