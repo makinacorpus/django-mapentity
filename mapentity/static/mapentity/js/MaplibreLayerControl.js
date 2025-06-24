@@ -122,7 +122,6 @@ class MaplibreLayerControl {
 
             // Activer la première couche
             this.objectsLayer.toggleLayer(firstLayerId, true);
-            console.log(`Default Base Layer ${firstLayerId} activated`);
 
             // S'assurer que mesure est au-dessus
             if (this._map.getLayer('measure-points')) {
@@ -135,19 +134,28 @@ class MaplibreLayerControl {
                 layerId: firstLayerId,
                 isDefault: true
             });
-
-            console.log(`Base Layer ${firstLayerId} is set as default and activated.`);
         }
     }
 
     _populateOverlays(container) {
         const layers = this.objectsLayer.getLayers();
-        console.log('Populating overlays...');
-        console.log("Available overlays:", layers.overlays);
 
-        const hr = document.createElement('hr');
-        hr.style.margin = 0;
-        container.appendChild(hr);
+        // Nettoyer les overlays existants (garder seulement les base layers + hr)
+        const existingHr = container.querySelector('hr');
+        if (existingHr) {
+            // Supprimer tout ce qui suit le hr
+            let nextElement = existingHr.nextElementSibling;
+            while (nextElement) {
+                const toRemove = nextElement;
+                nextElement = nextElement.nextElementSibling;
+                toRemove.remove();
+            }
+        } else {
+            // Ajouter le hr s'il n'existe pas
+            const hr = document.createElement('hr');
+            hr.style.margin = '0';
+            container.appendChild(hr);
+        }
 
         for (const [category, group] of Object.entries(layers.overlays)) {
             const categoryTitle = document.createElement('div');
@@ -160,20 +168,17 @@ class MaplibreLayerControl {
             const input = document.createElement('input');
             input.type = 'checkbox';
             input.checked = true;
-            input.dataset.category = category;
+            input.name = "overlaysLayer";
+            input.dataset.layerId = category;
             label.appendChild(input);
             label.append(` ${category}`);
             container.appendChild(label);
             container.appendChild(document.createElement('br'));
 
             input.addEventListener('change', (e) => {
-                console.log('overlay ', layers.overlays);
                 const isChecked = e.target.checked;
-                console.log(`Toggling overlays for category ${category} to ${isChecked}`);
-                console.log(`Group:`, group);
 
                 for (const [name, id] of Object.entries(group)) {
-                    console.log(`Toggling overlay ${name} (${id}) to ${isChecked}`);
                     this.objectsLayer.toggleLayer(id, isChecked);
 
                     if (isChecked) {

@@ -3,21 +3,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Écouteur d'événement pour la vue détail
     window.addEventListener('entity:map:detail', function(e) {
-        // console.log('Map initialized for detail view with data:', e.detail);
-
         const { map, objectsLayer, modelname } = e.detail;
-
 
         // Restauration du contexte de la carte, uniquement pour les captures d'écran
         const mapViewContext = getURLParameter('context');
-
-        // if(mapViewContext && typeof mapViewContext === 'object') {
-        //     mapViewContext.restoreFullContext(map.getMap(), mapViewContext)
-        // }
-
-        window.addEventListener('visibilitychange', function() {
-            mapViewContext.saveFullContext(map.getMap(), {prefix: 'detail'});
-        });
 
         // Affichage de la géométrie de l'objet sur la carte de détail
         const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
@@ -63,16 +52,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             map.getMap().addControl(screenshotControl, 'top-left');
 
+            // if(mapViewContext) {
+            //     mapViewContext.restoreFullContext(map.getMap(), mapViewContext)
+            // }
+
             // Ajouter un contrôle pour réinitialiser la vuer
              const boundsLayer = objectsLayer.getBoundsLayer();
              map.getMap().addControl(new MaplibreResetViewControl(boundsLayer), 'top-left');
+
+             // Sauvegarde le contexte de la carte lors de la fermeture de la fenêtre
+             window.addEventListener('visibilitychange', function() {
+                mapentityContext.saveFullContext(map.getMap(), {prefix: 'detail'});
+             });
         });
 
     });
 
     // Écouteur d'événement pour la vue liste
     window.addEventListener('entity:map:list', function(e) {
-        // console.log('Map initialized for list view with data:', e.detail);
         const { map, objectsLayer, modelname, bounds } = e.detail;
         const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
 
@@ -84,8 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
             // Bouton de capture d'écran pour la carte
-            // En course de développement
-
             const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
                 () => {
                 context = mapentityContext.getFullContext(map.getMap(), {
@@ -131,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             //     mapentityContext.restoreFullContext(
             //         map.getMap(),
             //         mapViewContext, {
-            //         filter: 'mainfilter', // id du formulaire de filtre
+            //         filter: 'mainfilter',
             //         datatable: mainDatatable,
             //         objectsname: modelname,// layers
             //         prefix: 'list',

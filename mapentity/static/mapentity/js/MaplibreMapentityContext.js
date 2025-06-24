@@ -26,11 +26,17 @@ class MaplibreMapentityContext {
 
         // Visible layers by their name
         const layers = [];
-        document.querySelectorAll('div.layer-switcher-menu label').forEach(input => {
-            layers.push(input.textContent.trim());
+
+        document.querySelectorAll('.layer-switcher-menu label').forEach(label => {
+            const inputElement = label.querySelector('input');
+            if(inputElement && inputElement.checked) {
+                // console.log(`${inputElement.type} layer is visible:`, label.textContent.trim());
+                layers.push(label.textContent.trim());
+            }
         });
 
         context['maplayers'] = layers; // Store the list of visible layers
+        console.log('Visible layers:', context['maplayers']);
 
         // Form filters
         if (filter) {
@@ -61,7 +67,8 @@ class MaplibreMapentityContext {
 
         // Add a timestamp
         context['timestamp'] = new Date().getTime();
-        map.getContainer().classList.add('leaflet-tile-loaded');
+        // ajout de la classe pour les tiles chargées permettant par la suite à screamshotter de réaliser une capture d'écran
+        map.getContainer().classList.add('maplibre-tile-loaded');
 
         return context;
     }
@@ -77,7 +84,7 @@ class MaplibreMapentityContext {
     saveFullContext(map, kwargs = {}) {
         const prefix = kwargs.prefix || '';
         const serialized = JSON.stringify(this.getFullContext(map, kwargs)); // Serialize the context
-        console.log('Saving context in localstorage:', serialized);
+        // console.log('Saving context in localstorage:', serialized);
         localStorage.setItem(prefix + 'map-context', serialized);
     }
 
@@ -145,26 +152,7 @@ class MaplibreMapentityContext {
             } else {
                 // If the map is defined.
                 if (map !== null) {
-
-                    map.fitBounds(this.bounds, {padding : 0}); // Adjust the map to fit the predefined bounds.
-
-                    // Pas utile du moment maxZoom n'est pas défini dans les options de la carte
-                    // de plus les bounds rend impossible de zoomer au delà de la limite, si la distance définie
-                    // par bounds vaut environ 50km, on ne peut pas zoomer au delà de 50km
-
-                    // If the reset view control is available.
-                    // if (map.getResetViewControl() !== null) {
-                    //     // Adjust the map to fit the bounds defined by the control.
-                    //     map.fitBounds(map.getResetViewControl().getBounds());
-                    //     // Get the maximum allowed zoom level.
-                    //     const maxZoom = map.getContainer().getAttribute('data-fitmaxzoom');
-                    //     // If the current zoom level exceeds the maximum allowed.
-                    //     if (map.getZoom() > maxZoom) {
-                    //         // Display a message in the console and adjust the zoom level.
-                    //         console.log('Limited zoom to ', maxZoom, '. Was ', map.getZoom());
-                    //         map.setZoom(maxZoom);
-                    //     }
-                    // }
+                    map.fitBounds(this.bounds, {padding : 0, maxZoom : 16}); // Adjust the map to fit the predefined bounds.
                 }
             }
             return false; // Indicate that the restoration failed.
@@ -242,17 +230,7 @@ class MaplibreMapentityContext {
                 });
             }
 
-            // Update layer controls if available.
-            // if ((map.layerscontrol !== undefined) && !!map.layerscontrol._map) {
-            //     map.layerscontrol._onInputClick();
-            // }
-
         }
-
-        // Disable tile animations if the context is in print mode.
-        // if (context.print) {
-        //     map.getContainer().classList.remove('leaflet-fade-anim');
-        // }
 
         // Trigger a change event on the filter selections.
         filter.querySelectorAll('select').forEach(select => {
