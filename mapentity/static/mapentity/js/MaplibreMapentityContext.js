@@ -232,7 +232,9 @@ class MaplibreMapentityContext {
             // Traitement des cases à cocher (checkbox)
             layerLabels.forEach(label => {
                 const input = label.querySelector('input');
-                if (!input || input.type !== 'checkbox') return;
+                if (!input || input.type !== 'checkbox') {
+                    return;
+                }
 
                 const labelText = label.textContent.trim();
                 input.checked = layers.includes(labelText);
@@ -241,7 +243,9 @@ class MaplibreMapentityContext {
             // Traitement des boutons radio
             layerLabels.forEach(label => {
                 const input = label.querySelector('input');
-                if (!input || input.type !== 'radio') return;
+                if (!input || input.type !== 'radio') {
+                    return;
+                }
 
                 const layerId = input.dataset.layerId;
                 if (layers.includes(layerId?.replace('-base', ''))) {

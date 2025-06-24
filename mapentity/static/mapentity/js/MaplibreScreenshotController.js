@@ -8,20 +8,10 @@ class MaplibreScreenshotController {
     }
 
     screenshot() {
-        // Effet visuel de capture d'écran (même logique que l'original)
-        const overlay = document.createElement('div');
-        overlay.id = 'overlay';
-        overlay.style.cssText = 'z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;';
-        document.body.appendChild(overlay);
-
-        // Simulation du fadeOut jQuery
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s';
-        setTimeout(() => {
-            if (overlay.parentNode) {
-                overlay.parentNode.removeChild(overlay);
-            }
-        }, 300);
+        // Effet visuel de capture d'écran avec jQuery (comme l'original)
+        $('<div id="overlay" style="z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;"> </div>')
+            .appendTo(document.body) // Ajoute un overlay blanc au document
+            .fadeOut(); // Fait disparaître l'overlay
 
         const fullContext = this.getcontext();
 
