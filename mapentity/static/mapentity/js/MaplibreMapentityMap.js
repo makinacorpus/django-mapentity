@@ -5,48 +5,53 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('entity:map:detail', function(e) {
         const { map, objectsLayer, modelname } = e.detail;
 
-        // Restauration du contexte de la carte, uniquement pour les captures d'écran
-        const mapViewContext = getURLParameter('context');
+         map.getMap().on('load', () => {
+             const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
-        if(mapViewContext) {
-            mapViewContext.restoreFullContext(map.getMap(), mapViewContext)
-        }
+            // Restauration du contexte de la carte, uniquement pour les captures d'écran
+            const mapViewContext = mapentityContext.loadFullContext({prefix: 'detail'});
 
-        // Affichage de la géométrie de l'objet sur la carte de détail
-        const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
-        // console.log('Feature GeoJSON URL:', feature_geojson_url);
-
-        const fetchFeatureLayer = async (dataUrl) => {
-            const reponse = await fetch(dataUrl);
-            if (!reponse.ok) {
-                console.error('Erreur lors de la récupération des données GeoJSON:', reponse.statusText);
-                return;
+            if(mapViewContext) {
+                mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
+                    prefix: 'detail',
+                    objectsname: modelname, // layers
+                    objectsLayer: objectsLayer,
+                })
             }
-            const featureData = await reponse.json();
-            if (featureData && featureData.type === 'Feature') {
-                // console.log('Feature data type retrieved:', featureData.type);
 
-                if (mapViewContext && mapViewContext.print){
-                    const specified = window.SETTINGS.map.styles.print[modelname] ;
-                    if (specified) {
-                        objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
-                    }
+            // Affichage de la géométrie de l'objet sur la carte de détail
+            const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
+            // console.log('Feature GeoJSON URL:', feature_geojson_url);
+
+            const fetchFeatureLayer = async (dataUrl) => {
+                const reponse = await fetch(dataUrl);
+                if (!reponse.ok) {
+                    console.error('Erreur lors de la récupération des données GeoJSON:', reponse.statusText);
+                    return;
                 }
+                const featureData = await reponse.json();
+                if (featureData && featureData.type === 'Feature') {
+                    // console.log('Feature data type retrieved:', featureData.type);
 
-                // Charger la géométrie de l'objet sur la carte
-                objectsLayer.load(feature_geojson_url);
+                    if (mapViewContext && mapViewContext.print){
+                        const specified = window.SETTINGS.map.styles.print[modelname] ;
+                        if (specified) {
+                            objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
+                        }
+                    }
 
-            } else {
-                console.warn('No features found in the GeoJSON data.');
+                    // Charger la géométrie de l'objet sur la carte
+                    objectsLayer.load(feature_geojson_url);
+
+                } else {
+                    console.warn('No features found in the GeoJSON data.');
+                }
             }
-        }
 
-        fetchFeatureLayer(feature_geojson_url);
+            fetchFeatureLayer(feature_geojson_url);
 
-         map.getMap().on('layers:added', () => {
              // Bouton de capture d'écran pour la carte
             // En course de développement
-            const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
             const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
                 () => {
@@ -122,7 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Restoration du contexte de la carte
-            const mapViewContext = getURLParameter('context');
+            const mapViewContext = mapentityContext.loadFullContext({prefix: 'list'});
+            // console.log('Map View Context:', mapViewContext);
 
             if (mapViewContext) {
                 mapentityContext.restoreFullContext(
@@ -132,6 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     datatable: mainDatatable,
                     objectsname: modelname,// layers
                     prefix: 'list',
+                    objectsLayer : objectsLayer,
                 });
             }
 

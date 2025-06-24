@@ -400,6 +400,7 @@ class MaplibreObjectsLayer {
    //  }
 
     toggleLayer(layerIds, visible = true) {
+        // console.log(`Toggling layer(s): ${layerIds} to ${visible ? 'visible' : 'hidden'}`);
         // Force en tableau si ce n'est pas déjà un tableau
         const ids = Array.isArray(layerIds)
             ? layerIds

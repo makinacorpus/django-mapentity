@@ -170,6 +170,7 @@ class MaplibreMapentityContext {
         const filter = kwargs.filter;
         const datatable = kwargs.datatable;
         const objectsname = kwargs.objectsname; // The name of the objects layer, used to display the layer in the layer switcher. (modelname)
+        const objectsLayer = kwargs.objectsLayer; // The objects layer, used to display the layer in the layer switcher.
 
         // If no context is provided or if the context is not an object, try to load it from local storage.
         if (!context || typeof context !== 'object') {
@@ -183,19 +184,34 @@ class MaplibreMapentityContext {
         }
 
         // Restore filters if a filter and filter context are available.
+        console.log('Restoring filters:', filter, context.filter);
         if (filter && context.filter) {
             const formData = new URLSearchParams(context.filter);
-            formData.forEach(( key, value) => {
-                const input = filter.querySelector(`[name="${key}"]`);
+            const params = {};
+
+            // S'assurer que 'filter' est un élément DOM
+            const filterElement = typeof filter === 'string' ? document.getElementById(filter) : filter;
+            if (!filterElement) return;
+
+            // Convertir les données en objet clé/valeur
+            for (const [key, value] of formData.entries()) {
+                params[key] = value;
+            }
+
+            // Appliquer les valeurs aux champs du formulaire
+            for (const [key, value] of Object.entries(params)) {
+                const input = filterElement.querySelector(`[name="${key}"]`);
                 if (input) {
                     if (input.type === 'checkbox' || input.type === 'radio') {
-                        input.checked = true;
+                        input.checked = value === 'true' || value === 'on';
                     } else {
                         input.value = value;
                     }
                 }
-            });
-            filter.querySelectorAll('select').forEach(select => {
+            }
+
+            // Déclencher les événements 'change' pour les <select>
+            filterElement.querySelectorAll('select').forEach(select => {
                 select.dispatchEvent(new Event('change'));
             });
         }
@@ -211,30 +227,31 @@ class MaplibreMapentityContext {
         // Display the map layers based on their names.
         if (context.maplayers) {
             const layers = context.maplayers;
-            // layers.push(objectsname); comprend pas trop pourquoi on ajoute le nom de l'objet ici, car il est déjà dans la liste des couches peut être que ce sont les objets et pas le nom du modèle, je ne sais pas trop
-            document.querySelectorAll('div.layer-switcher-menu input[type="checkbox"]').forEach(input => {
-                // Uncheck layers that do not match the object's name.
-                // peut poser problème à voir au moment de la mise en place de screenshots ('parentNode.textContent' peut ne pas correspondre au nom de la couche)
-                if (input.parentNode.textContent.trim() !== objectsname) {
+            const layerLabels = document.querySelectorAll('.layer-switcher-menu label');
+
+            // Traitement des cases à cocher (checkbox)
+            layerLabels.forEach(label => {
+                const input = label.querySelector('input');
+                if (!input || input.type !== 'checkbox') return;
+
+                const labelText = label.textContent.trim();
+                input.checked = layers.includes(labelText);
+            });
+
+            // Traitement des boutons radio
+            layerLabels.forEach(label => {
+                const input = label.querySelector('input');
+                if (!input || input.type !== 'radio') return;
+
+                const layerId = input.dataset.layerId;
+                if (layers.includes(layerId?.replace('-base', ''))) {
+                    input.checked = true;
+                    objectsLayer.toggleLayer(layerId);
+                } else {
                     input.checked = false;
                 }
             });
-
-            // Check layers corresponding to the names in the context.
-            for (const layer of layers) {
-                document.querySelectorAll('div.layer-switch-menu input').forEach(input => {
-                    // peut poser problème à voir au moment de la mise en place de screenshots ('parentNode.textContent' peut ne pas correspondre au nom de la couche)
-                    if (input.parentNode.textContent.trim() === layer) {
-                        input.checked = true;
-                    }
-                });
-            }
-
         }
 
-        // Trigger a change event on the filter selections.
-        filter.querySelectorAll('select').forEach(select => {
-            select.dispatchEvent(new Event('change'));
-        });
     }
 }
