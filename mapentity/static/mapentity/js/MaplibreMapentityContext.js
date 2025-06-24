@@ -184,37 +184,37 @@ class MaplibreMapentityContext {
         }
 
         // Restore filters if a filter and filter context are available.
-        console.log('Restoring filters:', filter, context.filter);
-        if (filter && context.filter) {
-            const formData = new URLSearchParams(context.filter);
-            const params = {};
-
-            // S'assurer que 'filter' est un élément DOM
-            const filterElement = typeof filter === 'string' ? document.getElementById(filter) : filter;
-            if (!filterElement) return;
-
-            // Convertir les données en objet clé/valeur
-            for (const [key, value] of formData.entries()) {
-                params[key] = value;
-            }
-
-            // Appliquer les valeurs aux champs du formulaire
-            for (const [key, value] of Object.entries(params)) {
-                const input = filterElement.querySelector(`[name="${key}"]`);
-                if (input) {
-                    if (input.type === 'checkbox' || input.type === 'radio') {
-                        input.checked = value === 'true' || value === 'on';
-                    } else {
-                        input.value = value;
-                    }
-                }
-            }
-
-            // Déclencher les événements 'change' pour les <select>
-            filterElement.querySelectorAll('select').forEach(select => {
-                select.dispatchEvent(new Event('change'));
-            });
-        }
+        // console.log('Restoring filters:', filter, context.filter);
+        // if (filter && context.filter) {
+        //     const formData = new URLSearchParams(context.filter);
+        //     const params = {};
+        //
+        //     // S'assurer que 'filter' est un élément DOM
+        //     const filterElement = typeof filter === 'string' ? document.getElementById(filter) : filter;
+        //     if (!filterElement) return;
+        //
+        //     // Convertir les données en objet clé/valeur
+        //     for (const [key, value] of formData.entries()) {
+        //         params[key] = value;
+        //     }
+        //
+        //     // Appliquer les valeurs aux champs du formulaire
+        //     for (const [key, value] of Object.entries(params)) {
+        //         const input = filterElement.querySelector(`[name="${key}"]`);
+        //         if (input) {
+        //             if (input.type === 'checkbox' || input.type === 'radio') {
+        //                 input.checked = value === 'true' || value === 'on';
+        //             } else {
+        //                 input.value = value;
+        //             }
+        //         }
+        //     }
+        //
+        //     // Déclencher les événements 'change' pour les <select>
+        //     filterElement.querySelectorAll('select').forEach(select => {
+        //         select.dispatchEvent(new Event('change'));
+        //     });
+        // }
 
         // Restore sorted columns if a datatable and sorted columns are available.
         if (datatable && context.sortcolumns) {
