@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Restauration du contexte de la carte, uniquement pour les captures d'écran
         const mapViewContext = getURLParameter('context');
 
+        if(mapViewContext) {
+            mapViewContext.restoreFullContext(map.getMap(), mapViewContext)
+        }
+
         // Affichage de la géométrie de l'objet sur la carte de détail
         const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
         // console.log('Feature GeoJSON URL:', feature_geojson_url);
@@ -52,10 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             map.getMap().addControl(screenshotControl, 'top-left');
 
-            // if(mapViewContext) {
-            //     mapViewContext.restoreFullContext(map.getMap(), mapViewContext)
-            // }
-
             // Ajouter un contrôle pour réinitialiser la vuer
              const boundsLayer = objectsLayer.getBoundsLayer();
              map.getMap().addControl(new MaplibreResetViewControl(boundsLayer), 'top-left');
@@ -77,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Charger dynamiquement les objets depuis le backend en utilisant la méthode load
             objectsLayer.load(layerUrl);
 
-            const mapViewContext = getURLParameter('context');
             const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
             // Bouton de capture d'écran pour la carte
@@ -122,16 +121,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 togglableFiltre.load_filter_form(mapsync);
             });
 
-            // if (mapViewContext) {
-            //     mapentityContext.restoreFullContext(
-            //         map.getMap(),
-            //         mapViewContext, {
-            //         filter: 'mainfilter',
-            //         datatable: mainDatatable,
-            //         objectsname: modelname,// layers
-            //         prefix: 'list',
-            //     });
-            // }
+            // Restoration du contexte de la carte
+            const mapViewContext = getURLParameter('context');
+
+            if (mapViewContext) {
+                mapentityContext.restoreFullContext(
+                    map.getMap(),
+                    mapViewContext, {
+                    filter: 'mainfilter',
+                    datatable: mainDatatable,
+                    objectsname: modelname,// layers
+                    prefix: 'list',
+                });
+            }
 
             // Sauvegarde le contexte de la carte lors de la fermeture de la fenêtre
             window.addEventListener('visibilitychange', function() {
