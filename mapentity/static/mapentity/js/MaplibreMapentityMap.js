@@ -9,19 +9,15 @@ document.addEventListener('DOMContentLoaded', function() {
              const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
             // Restauration du contexte de la carte, uniquement pour les captures d'écran
-            const mapViewContext = mapentityContext.loadFullContext({prefix: 'detail'});
-
-            if(mapViewContext) {
-                mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
+             const mapViewContext = getURLParameter("context");
+             mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
                     prefix: 'detail',
                     objectsname: modelname, // layers
                     objectsLayer: objectsLayer,
-                })
-            }
+             });
 
             // Affichage de la géométrie de l'objet sur la carte de détail
             const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
-            // console.log('Feature GeoJSON URL:', feature_geojson_url);
 
             const fetchFeatureLayer = async (dataUrl) => {
                 const reponse = await fetch(dataUrl);
@@ -51,8 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchFeatureLayer(feature_geojson_url);
 
              // Bouton de capture d'écran pour la carte
-            // En course de développement
-
             const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
                 () => {
                     context = mapentityContext.getFullContext(map.getMap());
@@ -127,20 +121,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Restoration du contexte de la carte
-            const mapViewContext = mapentityContext.loadFullContext({prefix: 'list'});
-            // console.log('Map View Context:', mapViewContext);
+            const mapViewContext = getURLParameter("context");
 
-            if (mapViewContext) {
-                mapentityContext.restoreFullContext(
-                    map.getMap(),
-                    mapViewContext, {
+            mapentityContext.restoreFullContext(
+                map.getMap(),
+                mapViewContext, {
                     filter: 'mainfilter',
                     datatable: mainDatatable,
-                    objectsname: modelname,// layers
+                    objectsname: modelname,
                     prefix: 'list',
                     objectsLayer : objectsLayer,
                 });
-            }
 
             // Sauvegarde le contexte de la carte lors de la fermeture de la fenêtre
             window.addEventListener('visibilitychange', function() {

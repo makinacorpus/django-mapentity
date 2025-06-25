@@ -13,8 +13,17 @@
      * @param name {string} - The name of the parameter to retrieve from the URL
      * @returns {string} - The value of the parameter, or null if not found
      */
+
     function getURLParameter(name) {
-        return new URLSearchParams(window.location.search).get(name);
+        var paramEncoded = (RegExp('[?|&]' + name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1],
+            paramDecoded = decodeURIComponent(paramEncoded);
+        if (typeof paramDecoded == 'string') {
+            try {
+                return JSON.parse(paramDecoded);
+            }
+            catch (e) {}
+        }
+        return paramDecoded;
     }
 
     function expandDatatableHeight() {
