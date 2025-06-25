@@ -167,9 +167,9 @@ class MaplibreMapentityContext {
      */
     restoreFullContext(map, context, kwargs = {}) {
         // Check if additional arguments (kwargs) are provided, otherwise initialize to an empty object.
-        const filter = kwargs.filter;
+        // const filter = kwargs.filter;
+        // const objectsname = kwargs.objectsname; // The name of the objects layer, used to display the layer in the layer switcher. (modelname)
         const datatable = kwargs.datatable;
-        const objectsname = kwargs.objectsname; // The name of the objects layer, used to display the layer in the layer switcher. (modelname)
         const objectsLayer = kwargs.objectsLayer; // The objects layer, used to display the layer in the layer switcher.
 
         // If no context is provided or if the context is not an object, try to load it from local storage.
