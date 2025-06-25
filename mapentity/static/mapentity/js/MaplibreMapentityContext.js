@@ -179,7 +179,7 @@ class MaplibreMapentityContext {
         // If no context is found, display a warning and adjust the map to the maximum bounds.
         if (!context) {
             console.warn("No context found.");
-            map.fitBounds(map.options.maxBounds);
+            map.fitBounds(this.bounds);
             return;
         }
 
