@@ -1,9 +1,6 @@
 class MaplibreFileLayerControl {
     constructor(options = {}) {
-        this.options = {
-            position: 'top-left',
-            ...options
-        };
+        this.options = {...options};
         this.loader = null;
         this._container = null;
     }
@@ -18,6 +15,7 @@ class MaplibreFileLayerControl {
         return this.initContainer(map);
     }
 
+    // peut être penser à enlever le drag and drop car ne fonctionne pas aussi bien que si l'on charge le fichier via le bouton
     // Initialisation du drag and drop
     _initDragAndDrop(map) {
         const fileLoader = this.loader;

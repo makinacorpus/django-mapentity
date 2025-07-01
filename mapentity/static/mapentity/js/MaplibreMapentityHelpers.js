@@ -13,7 +13,6 @@
      * @param name {string} - The name of the parameter to retrieve from the URL
      * @returns {string} - The value of the parameter, or null if not found
      */
-
     function getURLParameter(name) {
         var paramEncoded = (RegExp('[?|&]' + name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1],
             paramDecoded = decodeURIComponent(paramEncoded);

@@ -1,9 +1,7 @@
 class MaplibreFileLoader {
     constructor(map, options = {}) {
         this._map = map;
-        this.options = {
-            ...options
-        };
+        this.options = { ...options };
 
         this._popup = new maplibregl.Popup({
             closeButton: false,
@@ -18,20 +16,19 @@ class MaplibreFileLoader {
     }
 
     load(file) {
-        console.log('Loading file:', file.name);
         const ext = file.name.split('.').pop();
-        console.log('File extension:', ext);
         const parser = this._parsers[ext];
         if (!parser) {
-            window.alert("Unsupported file type " + file.type + '(' + ext + ')');
+            window.alert("Unsupported file type " + file.type + ' (' + ext + ')');
             return;
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
-            this._map.fire('data:loading', { filename: file.name, format: ext });
-            const layer = parser(e.target.result, ext);
-            this._map.fire('data:loaded', { layer: layer, filename: file.name, format: ext });
+         reader.onload = (e) => {
+            // this._map.fire('data:loading', { filename: file.name, format: ext });
+            // const layer = parser(e.target.result, ext);
+            // this._map.fire('data:loaded', { layer: layer, filename: file.name, format: ext });
+            parser(e.target.result, ext);
         };
         reader.readAsText(file);
     }
@@ -49,9 +46,30 @@ class MaplibreFileLoader {
         });
 
         if (content.features) {
-            this._addLayerWithPopup('polygon', 'fill', sourceId, '#888888', 0.4, ['==', '$type', 'Polygon']);
-            this._addLayerWithPopup('point', 'circle', sourceId, '#B42222', 6, ['==', '$type', 'Point']);
-            this._addLayerWithPopup('line', 'line', sourceId, '#B42222', 2, ['==', '$type', 'LineString']);
+            // Utiliser les options définies ou valeurs par défaut
+            const style = this.options.style || {};
+            const color = style.color || '#B42222';
+            const fillOpacity = style.fillOpacity ?? 0.7;
+            const strokeOpacity = style.opacity ?? 1.0;
+            const strokeWidth = style.weight ?? 2;
+            const circleRadius = style.radius ?? 6;
+
+            // On envoie un objet `style` complet
+            this._addLayerWithPopup('polygon', 'fill', sourceId, {
+                color,
+                opacity: fillOpacity
+            }, ['==', '$type', 'Polygon']);
+
+            this._addLayerWithPopup('point', 'circle', sourceId, {
+                color,
+                radius: circleRadius
+            }, ['==', '$type', 'Point']);
+
+            this._addLayerWithPopup('line', 'line', sourceId, {
+                color,
+                opacity: strokeOpacity,
+                width: strokeWidth
+            }, ['==', '$type', 'LineString']);
 
             const bounds = this.calculateBounds(content);
             if (bounds) {
@@ -60,33 +78,38 @@ class MaplibreFileLoader {
         }
     }
 
-    _addLayerWithPopup(type, layerType, sourceId, color, sizeOrOpacity, filter) {
+    _addLayerWithPopup(type, layerType, sourceId, style, filter) {
         const layerId = `${type}-layer-${sourceId}`;
 
-        const paint = {
-            'fill': {
-                'fill-color': color,
-                'fill-opacity': sizeOrOpacity
-            },
-            'circle': {
-                'circle-radius': sizeOrOpacity,
-                'circle-color': color
-            },
-            'line': {
-                'line-color': color,
-                'line-width': sizeOrOpacity
-            }
-        };
+        // Créer dynamiquement l'objet paint selon le type de layer
+        let paint;
+        if (layerType === 'fill') {
+            paint = {
+                'fill-color': style.color,
+                'fill-opacity': style.opacity
+            };
+        } else if (layerType === 'circle') {
+            paint = {
+                'circle-radius': style.radius,
+                'circle-color': style.color
+            };
+        } else if (layerType === 'line') {
+            paint = {
+                'line-color': style.color,
+                'line-opacity': style.opacity,
+                'line-width': style.width
+            };
+        }
 
         this._map.addLayer({
             id: layerId,
             type: layerType,
             source: sourceId,
-            paint: paint[layerType],
+            paint: paint,
             filter: filter
         });
 
-        // Add popup events
+        // Ajouter popup
         this._map.on('mouseenter', layerId, (e) => {
             this._map.getCanvas().style.cursor = 'pointer';
             const coordinates = e.lngLat;
@@ -108,17 +131,13 @@ class MaplibreFileLoader {
     }
 
     calculateBounds(geojson) {
-        if (!geojson) {
-            return null;
-        }
+        if (!geojson) return null;
 
         const bounds = new maplibregl.LngLatBounds();
 
-        // Fonction utilitaire pour extraire et aplatir les coordonnées
         const flattenCoords = (geometry) => {
             const { type, coordinates, geometries } = geometry;
             let flattened = [];
-
             switch (type) {
                 case 'Point':
                     flattened = [coordinates];
@@ -140,29 +159,21 @@ class MaplibreFileLoader {
                     });
                     break;
             }
-
             return flattened;
         };
 
-        // Cas d'un seul Feature
         if (geojson.geometry) {
-            const coords = flattenCoords(geojson.geometry);
-            coords.forEach(coord => bounds.extend(coord));
-        }
-
-        // Cas d'une FeatureCollection
-        else if (geojson.features) {
+            flattenCoords(geojson.geometry).forEach(coord => bounds.extend(coord));
+        } else if (geojson.features) {
             geojson.features.forEach(feature => {
-                const geometry = feature.geometry;
-                if (!geometry) return;
-                const coords = flattenCoords(geometry);
-                coords.forEach(coord => bounds.extend(coord));
+                if (feature.geometry) {
+                    flattenCoords(feature.geometry).forEach(coord => bounds.extend(coord));
+                }
             });
         }
 
         return bounds.isEmpty() ? null : bounds;
     }
-
 
     _convertToGeoJSON(content, format) {
         if (typeof content === 'string') {

@@ -37,9 +37,9 @@ class MaplibreMapListSync {
         // Get the data from the first column of the table
         const results = this.dt.column(0).data().toArray();
 
-        console.log('results _onListFilter : ', results);
         // Update the map layer objects with the retrieved primary keys
         this.layer.updateFromPks(results);
+
         // Call a method to handle the reloaded logic
         this._handleReloaded(results.length);
     }
