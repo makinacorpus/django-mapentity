@@ -20,6 +20,12 @@ class MaplibreMap {
 
         this.map = new maplibregl.Map({
             container: this.id,
+            style: {
+                version: 8,
+                glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+                sources: {},
+                layers: [],
+            },
             center: this.center,
             zoom: this.zoom,
             maxBounds: this.bounds,

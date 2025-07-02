@@ -1,148 +1,177 @@
-// Écouteurs d'événements pour les cartes
+// Solution 1: Déclencher les événements spécifiques APRÈS l'initialisation complète
 document.addEventListener('DOMContentLoaded', function() {
 
-    // Écouteur d'événement pour la vue détail
+    window.addEventListener('entity:map:ready', function(e) {
+        const { map, objectsLayer, context, TILES, bounds, mapentityContext } = e.detail;
+
+        map.getMap().on('load', function() {
+            objectsLayer.initialize(map.getMap());
+
+            TILES.forEach(([name, url, attribution]) => {
+                objectsLayer.addBaseLayer(name, {
+                    id: name + '-base',
+                    tiles: [url],
+                    attribution
+                });
+            });
+
+            map.getMap().addControl(new MaplibreLayerControl(objectsLayer), 'top-right');
+
+            const mergedData = Object.assign({}, context, {
+                map,
+                objectsLayer,
+                bounds
+            });
+
+            // Exposer l'instance
+            window.MapEntity.currentMap = { map, objectsLayer, context: mergedData, mapentityContext };
+
+            // Gestion des panneaux redimensionnables
+            const resizableElements = document.querySelectorAll("#panelleft, .details-panel");
+            resizableElements.forEach(function(element) {
+                const resizableOptions = {
+                    handleSelector: ".splitter",
+                    resizeHeight: false,
+                    onDragEnd: function(e, el, opt) {
+                        if (map && map.getMap()) {
+                            map.getMap().resize();
+                        }
+                    }
+                };
+                window.jQuery(element).resizable(resizableOptions);
+            });
+
+            // MAINTENANT déclencher les événements spécifiques après l'initialisation complète
+            window.dispatchEvent(new CustomEvent('entity:view:' + context.viewname, { detail: mergedData }));
+            window.dispatchEvent(new CustomEvent('entity:map:' + context.viewname, { detail: mergedData }));
+        });
+    });
+
+    // Écouteur pour la vue détail - SANS map.on('load') car déjà chargée
     window.addEventListener('entity:map:detail', function(e) {
         const { map, objectsLayer, modelname } = e.detail;
+        const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
-         map.getMap().on('load', () => {
-             const mapentityContext = window.MapEntity.currentMap.mapentityContext;
+        // Restauration du contexte de la carte
+        const mapViewContext = getURLParameter("context");
+        mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
+            prefix: 'detail',
+            objectsname: modelname,
+            objectsLayer: objectsLayer,
+        });
 
-            // Restauration du contexte de la carte, uniquement pour les captures d'écran
-             const mapViewContext = getURLParameter("context");
-             mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
-                    prefix: 'detail',
-                    objectsname: modelname, // layers
-                    objectsLayer: objectsLayer,
-             });
+        // Affichage de la géométrie de l'objet
+        const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
 
-            // Affichage de la géométrie de l'objet sur la carte de détail
-            const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
-
-            const fetchFeatureLayer = async (dataUrl) => {
-                const reponse = await fetch(dataUrl);
-                if (!reponse.ok) {
-                    console.error('Erreur lors de la récupération des données GeoJSON:', reponse.statusText);
+        const fetchFeatureLayer = async (dataUrl) => {
+            try {
+                const response = await fetch(dataUrl);
+                if (!response.ok) {
+                    console.error('Erreur lors de la récupération des données GeoJSON:', response.statusText);
                     return;
                 }
-                const featureData = await reponse.json();
+                const featureData = await response.json();
                 if (featureData && featureData.type === 'Feature') {
-                    // console.log('Feature data type retrieved:', featureData.type);
-
-                    if (mapViewContext && mapViewContext.print){
-                        const specified = window.SETTINGS.map.styles.print[modelname] ;
+                    if (mapViewContext && mapViewContext.print) {
+                        const specified = window.SETTINGS.map.styles.print[modelname];
                         if (specified) {
                             objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
                         }
                     }
-
-                    // Charger la géométrie de l'objet sur la carte
                     objectsLayer.load(feature_geojson_url);
-
                 } else {
                     console.warn('No features found in the GeoJSON data.');
                 }
+            } catch (error) {
+                console.error('Erreur lors du chargement de la feature:', error);
             }
+        };
 
+        if (feature_geojson_url) {
             fetchFeatureLayer(feature_geojson_url);
+        }
 
-             // Bouton de capture d'écran pour la carte
-            const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
-                () => {
-                    context = mapentityContext.getFullContext(map.getMap());
-                    context['selector'] = '#detailmap';
-                    return JSON.stringify(context);
+        // Contrôles
+        const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
+            () => {
+                const context = mapentityContext.getFullContext(map.getMap());
+                context['selector'] = '#detailmap';
+                return JSON.stringify(context);
             });
-            map.getMap().addControl(screenshotControl, 'top-left');
+        map.getMap().addControl(screenshotControl, 'top-left');
 
-            // Ajouter un contrôle pour réinitialiser la vuer
-             const boundsLayer = objectsLayer.getBoundsLayer();
-             map.getMap().addControl(new MaplibreResetViewControl(boundsLayer), 'top-left');
+        const boundsLayer = objectsLayer.getBoundsLayer();
+        map.getMap().addControl(new MaplibreResetViewControl(boundsLayer), 'top-left');
 
-             // Sauvegarde le contexte de la carte lors de la fermeture de la fenêtre
-             window.addEventListener('visibilitychange', function() {
-                mapentityContext.saveFullContext(map.getMap(), {prefix: 'detail'});
-             });
+        // Sauvegarde du contexte
+        window.addEventListener('visibilitychange', function() {
+            mapentityContext.saveFullContext(map.getMap(), {prefix: 'detail'});
         });
-
     });
 
-    // Écouteur d'événement pour la vue liste
+    // Écouteur pour la vue liste - SANS map.on('load') car déjà chargée
     window.addEventListener('entity:map:list', function(e) {
         const { map, objectsLayer, modelname, bounds } = e.detail;
         const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
+        const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
-        map.getMap().on('load', function() {
-            // Charger dynamiquement les objets depuis le backend en utilisant la méthode load
-            objectsLayer.load(layerUrl);
+        // Charger les objets depuis le backend
+        objectsLayer.load(layerUrl);
 
-            const mapentityContext = window.MapEntity.currentMap.mapentityContext;
-
-            // Bouton de capture d'écran pour la carte
-            const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
-                () => {
-                context = mapentityContext.getFullContext(map.getMap(), {
-                    filter: 'mainfilter', // id du formulaire de filtre
-                    datatable: mainDatatable,
-                    objectsname: modelname, // layers
+        // Contrôles
+        const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
+            () => {
+                const context = mapentityContext.getFullContext(map.getMap(), {
+                    filter: 'mainfilter',
+                    datatable: window.MapEntity.dt,
+                    objectsname: modelname,
                     prefix: 'list',
                 });
                 context['selector'] = '#mainmap';
                 return JSON.stringify(context);
             });
-            map.getMap().addControl(screenshotControl, 'top-left');
+        map.getMap().addControl(screenshotControl, 'top-left');
 
-            // ajout du contrôle de fichiers
-            const fileLayerLoadControl = new MaplibreFileLayerControl({
-                layerOptions: {
-                    style: window.SETTINGS.map.styles.filelayer,
-                }
+        const fileLayerLoadControl = new MaplibreFileLayerControl({
+            layerOptions: {
+                style: window.SETTINGS.map.styles.filelayer,
+            }
+        });
+        map.getMap().addControl(fileLayerLoadControl, 'top-left');
+
+        map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
+
+        // Gestion de l'historique et des filtres
+        const history = window.MapEntity.currentHistory;
+
+        const togglableFiltre = new MaplibreMapentityTogglableFiltre();
+
+        const mainDatatable = window.MapEntity.dt;
+
+        const mapsync = new MaplibreMapListSync(mainDatatable, map.getMap(),
+            objectsLayer, togglableFiltre, history);
+
+        togglableFiltre.button.addEventListener('click', function (e) {
+            togglableFiltre.load_filter_form(mapsync);
+        });
+
+        // Restauration du contexte
+        const mapViewContext = getURLParameter("context");
+        mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
+            filter: 'mainfilter',
+            datatable: mainDatatable,
+            objectsname: modelname,
+            prefix: 'list',
+            objectsLayer: objectsLayer,
+        });
+
+        // Sauvegarde du contexte
+        window.addEventListener('visibilitychange', function() {
+            mapentityContext.saveFullContext(map.getMap(), {
+                filter: 'mainfilter',
+                datatable: mainDatatable,
+                prefix: 'list',
             });
-
-            map.getMap().addControl(fileLayerLoadControl, 'top-left');
-
-            // Ajouter un contrôle pour réinitialiser la vue
-            map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
-
-            // Gestion de History
-            const history = window.MapEntity.currentHistory;
-
-            // Gestion des Filtres
-             const togglableFiltre = new MaplibreMapentityTogglableFiltre();
-            // Initialisation de la synchronisation de la carte avec la table
-            const mainDatatable = window.MapEntity.dt;
-            const mapsync = new MaplibreMapListSync(mainDatatable, map.getMap(),
-                objectsLayer, togglableFiltre, history);
-
-            // Charge le formulaire de filtre au premier clic sur le bouton
-            togglableFiltre.button.addEventListener('click', function (e) {
-                // console.log('Chargement du formulaire de filtre');
-                togglableFiltre.load_filter_form(mapsync);
-            });
-
-            // Restoration du contexte de la carte
-            const mapViewContext = getURLParameter("context");
-
-            mapentityContext.restoreFullContext(
-                map.getMap(),
-                mapViewContext, {
-                    filter: 'mainfilter',
-                    datatable: mainDatatable,
-                    objectsname: modelname,
-                    prefix: 'list',
-                    objectsLayer : objectsLayer,
-                });
-
-            // Sauvegarde le contexte de la carte lors de la fermeture de la fenêtre
-            window.addEventListener('visibilitychange', function() {
-                mapentityContext.saveFullContext(map.getMap(), {
-                    filter: 'mainfilter', // id du formulaire de filtre
-                    datatable: mainDatatable,
-                    prefix: 'list',
-                });
-            });
-
         });
     });
-
 });
