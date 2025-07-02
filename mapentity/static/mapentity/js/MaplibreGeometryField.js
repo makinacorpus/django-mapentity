@@ -1,15 +1,11 @@
 class MaplibreGeometryField {
-    static unsavedText = 'Map geometry is unsaved';
-
     constructor(map, fieldId, options = {}) {
         this.fieldId = fieldId;
-        this.options = {
-            ...options,
-        };
+        this.options = {...options};
+
         // Détecter les types de géométrie
         const geomType = (this.options.geomType).toLowerCase();
         this.options.isGeneric = /geometrycollection$/.test(geomType);
-        // options.is_collection = /(^multi|collection$)/.test(geom_type);
         this.options.isLineString = /linestring$/.test(geomType);
         this.options.isPolygon = /polygon$/.test(geomType);
         this.options.isPoint = /point$/.test(geomType);
@@ -24,322 +20,215 @@ class MaplibreGeometryField {
 
         this.map = map;
         this.drawManager = new MaplibreDrawControlManager(map, this.options);
-        this.currentMarker = null;
-        this._setupDrawEvents();
 
-        // Configurer le callback pour les changements de mode
-        this.drawManager.setOnModeChange((mode) => {
-            this._handleModeChange(mode);
-        });
+        // Store unique events history (always up to date)
+        this.gmEvents = [];
+
+        this._setupGeomanEvents();
     }
 
-    _handleModeChange(mode) {
-        if (mode === 'draw_line_string') {
-            this.isDrawingLine = true;
-
-            // Vider le draw des éléments précédents avant de commencer un nouveau dessin
-            if(!this.options.isGeneric) {
-                const draw = this.drawManager.getDraw();
-                if (draw) {
-                    const allFeatures = draw.getAll().features;
-                    if (allFeatures.length > 1) {
-                        draw.delete(allFeatures[0].id); // Toujours supprimer le plus ancien
-                    }
-                }
-            }
-
-
-            // Créer la popup vide pour la distance
-            this.livePopup = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-                className: 'custom-popup',
-                anchor: 'left',
-                offset: 10
-            })
-              .addTo(this.map);
-
-            // Commencer le suivi en temps réel dès qu'on entre en mode dessin
-            this._startLiveLineTracking();
-        }
-
-        if (mode === 'draw_polygon') {
-            this.isDrawingPolygon = true;
-
-            if(!this.options.isGeneric) {
-                 // Vider le draw des éléments précédents avant de commencer un nouveau dessin
-                const draw = this.drawManager.getDraw();
-                if (draw) {
-                    const allFeatures = draw.getAll().features;
-                    if (allFeatures.length > 1) {
-                        draw.delete(allFeatures[0].id); // Toujours supprimer le plus ancien
-                    }
-                }
-            }
-
-            // Créer la popup vide pour la distance
-            this.livePopup = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-                className: 'custom-popup',
-                anchor: 'left',
-                offset: 10
-            })
-              .addTo(this.map);
-
-            // Commencer le suivi en temps réel dès qu'on entre en mode dessin
-            this._startLivePolygonTracking();
+    /**
+     * Helper function to safely extract GeoJSON from feature
+     */
+    _getGeoJson(featureData) {
+        try {
+            return featureData.getGeoJson();
+        } catch (e) {
+            console.warn('Cannot retrieve GeoJSON:', e);
+            return null;
         }
     }
 
-    _startLiveLineTracking() {
-        const draw = this.drawManager.getDraw();
-
-        // Suivre le mouvement de la souris pendant le dessin
-        this._mouseMoveHandler = (e) => {
-            if (!this.isDrawingLine || !this.livePopup) {
-                return;
-            }
-
-            const drawnFeatures = draw.getAll().features;
-
-            const currentLine = drawnFeatures.find(f => f.geometry.type === 'LineString');
-            if(!currentLine){
-                // Remettre en mode dessin de polygone
-                draw.changeMode('draw_line_string');
-                return; // Empêcher la suite du traitement
-            }
-
-            if (currentLine && currentLine.geometry.coordinates.length >= 1) {
-                const coords = [...currentLine.geometry.coordinates];
-                // Ajouter la position actuelle de la souris
-                coords.push([e.lngLat.lng, e.lngLat.lat]);
-
-                const tempLine = {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'LineString',
-                        coordinates: coords
-                    }
-                };
-
-                const distance = turf.length(tempLine, { units: 'kilometers' });
-                const formattedDistance = `${distance.toFixed(2)} km`;
-                let formattedMessage = '';
-                // Déterminer le message en fonction du nombre de points déjà placés
-                let message;
-
-                if(currentLine.geometry.coordinates.length === 1) {
-                    // Aucun point encore placé, message initial
-                    message = 'Cliquer pour commencer le dessin de la ligne';
-                    formattedMessage = message;
-                } else if (currentLine.geometry.coordinates.length === 2) {
-                    // Premier point placé, on peut continuer
-                    message = '<br>Cliquer pour continuer le dessin de la ligne';
-                    formattedMessage = formattedDistance + message;
-                } else {
-                    // Plusieurs points déjà placés
-                    message = '<br>Cliquer sur le dernier point pour terminer la ligne';
-                    formattedMessage = formattedDistance + message;
-                }
-
-                // Afficher la popup à la position de la souris
-                this.livePopup.setLngLat(e.lngLat).setHTML(formattedMessage);
-            }
+    /**
+     * Get current FeatureCollection from stored events
+     */
+    _getFeatureCollection() {
+        return {
+            type: 'FeatureCollection',
+            features: this.gmEvents
+                .map(e => e.geojson)
+                .filter(f => !!f)
         };
-
-        this.map.on('mousemove', this._mouseMoveHandler);
     }
 
-    _startLivePolygonTracking() {
-        const draw = this.drawManager.getDraw();
+    /**
+     * Update gmEvents array with new event data
+     */
+    _updateEventsHistory(event) {
+        console.log('Processing event:', event);
 
-        // Suivre le mouvement de la souris pendant le dessin
-        this._mouseMoveHandler = (e) => {
-            if (!this.isDrawingPolygon || !this.livePopup) {
-                return;
-            }
-
-            const drawnFeatures = draw.getAll().features;
-
-            const currentPolygon = drawnFeatures.find(f => f.geometry.type === 'Polygon');
-            if(!currentPolygon){
-                // Remettre en mode dessin de polygone
-                draw.changeMode('draw_polygon');
-                return; // Empêcher la suite du traitement
-            }
-
-            console.log('currentPolygon', currentPolygon);
-            console.log('currentPolygon coordinates length', currentPolygon?.geometry.coordinates[0].length);
-            if (currentPolygon && currentPolygon.geometry.coordinates[0].length >= 2) {
-
-                const coords = [...currentPolygon.geometry.coordinates[0]];
-                // Ajouter la position actuelle de la souris
-                coords.push([e.lngLat.lng, e.lngLat.lat]);
-                // Fermer le polygone en ajoutant le premier point à la fin
-                coords.push(coords[0]);
-
-                const tempPolygon = {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'Polygon',
-                        coordinates: [coords]
-                    }
-                };
-
-
-                let formattedArea;
-                let formattedMessage = '';
-
-                const area = turf.area(tempPolygon); // Aire en mètres carrés
-                // Formatage de l'aire selon la taille
-                if (area < 10000) { // moins de 1 hectare
-                    formattedArea = `${area.toFixed(0)} m²`;
-                } else if (area < 1000000) { // moins de 1 km²
-                    formattedArea = `${(area / 10000).toFixed(2)} ha`;
-                } else {
-                    formattedArea = `${(area / 1000000).toFixed(2)} km²`;
-                }
-
-                let message;
-
-                if(currentPolygon.geometry.coordinates[0].length === 2) {
-                    // Aucun point encore placé, message initial
-                    message = 'Cliquer pour commencer le dessin de la forme';
-                    formattedMessage = message;
-                } else if (currentPolygon.geometry.coordinates[0].length === 3 || currentPolygon.geometry.coordinates[0].length === 4) {
-                    // Premier point placé, on peut continuer
-                    message = '<br>Cliquer pour continuer le dessin de la forme';
-                    formattedMessage =formattedArea + message;
-                } else {
-                    // Plusieurs points déjà placés
-                    message = '<br>Cliquer sur le dernier point pour terminer la forme';
-                    formattedMessage =formattedArea + message;
-                }
-
-                // Afficher la popup à la position de la souris
-                this.livePopup.setLngLat(e.lngLat).setHTML(formattedMessage);
-            }
-        };
-
-        this.map.on('mousemove', this._mouseMoveHandler);
-    }
-
-    _stopLiveTracking() {
-        if (this._mouseMoveHandler) {
-            this.map.off('mousemove', this._mouseMoveHandler);
-            this._mouseMoveHandler = null;
+        const eventId = event?.feature?.id;
+        if (!eventId) {
+            console.warn('Event without feature ID, skipping');
+            return false;
         }
+
+        if (event.type === 'gm:remove') {
+            // Supprimer la feature du tableau
+            const index = this.gmEvents.findIndex(e => e.id === eventId);
+            if (index !== -1) {
+                this.gmEvents.splice(index, 1);
+                console.log(`Feature with ID ${eventId} deleted from gmEvents`);
+            }
+        } else {
+            // Pour create, editend, dragend etc.
+            const geoJson = event?.feature ? this._getGeoJson(event.feature) : null;
+            if (!geoJson) {
+                console.warn('Could not extract GeoJSON from feature');
+                return false;
+            }
+
+            const eventData = {
+                id: eventId,
+                type: event?.type,
+                shape: event?.shape ?? undefined,
+                geojson: geoJson,
+            };
+
+            const index = this.gmEvents.findIndex(e => e.id === eventId);
+            if (index !== -1) {
+                // Remplacer la donnée existante
+                this.gmEvents[index] = eventData;
+            } else {
+                // Ajouter nouvelle entrée
+                this.gmEvents.push(eventData);
+            }
+        }
+
+        console.log('Events history updated:', this.gmEvents);
+        return true;
     }
 
-     // Extrait de la méthode _setupDrawEvents() mise à jour
-
-    _setupDrawEvents() {
-        // Attendre que draw soit bien disponible
-        const draw = this.drawManager.getDraw();
-        if (!draw) {
-            console.error('Draw instance is not available');
+    /**
+     * Process and save geometry data after an event
+     */
+    _processAndSaveGeometry(event) {
+        // Mettre à jour l'historique des événements
+        if (!this._updateEventsHistory(event)) {
             return;
         }
 
-        // Suppression finale de la popup à la fin du dessin
-        this.map.on('draw.create', (e) => {
-            const newFeature = e.features[0];
-            const draw = this.drawManager.getDraw();
+        const allFeatures = this._getFeatureCollection();
+        console.log('Current features:', allFeatures);
 
-            if (this.livePopup) {
-                this.livePopup.remove();
-                this.livePopup = null;
-            }
-            this.isDrawingLine = false;
-            this.isDrawingPolygon = false;
-            this._stopLiveTracking();
+        // Construire la structure appropriée selon les options
+        let normalizedData;
 
-            // Supprimer les géométries existantes du même type avant d'ajouter la nouvelle
-            if(!this.options.isGeneric) {
-                draw.getAll().features.forEach(f => {
-                    if (f.geometry.type === newFeature.geometry.type && f.id !== newFeature.id) {
-                        draw.delete(f.id);
-                    }
-                });
-            }
+        if (this.options.isGeneric) {
+            // Mode générique : créer une GeometryCollection avec toutes les géométries
+            const geometries = allFeatures.features.map(feature => feature.geometry);
+            console.log('Geometries to normalize:', geometries);
+            normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
+        } else {
+            // Mode spécifique : normaliser selon le type
+            if (this.options.isLineString || this.options.isPolygon || this.options.isPoint) {
+                // Pour les événements de suppression, on prend toutes les features restantes
+                // Pour les autres événements, on prend la dernière feature modifiée
+                const targetFeature = event.type === 'gm:remove'
+                    ? allFeatures.features[0] // première feature restante, ou undefined si vide
+                    : allFeatures.features.at(-1); // dernière feature modifiée
 
-            // Récupérer toutes les features du draw
-            const allFeatures = draw.getAll().features;
-            console.log('All features from draw:', allFeatures);
-
-            // Construire la structure appropriée selon les options
-            let normalizedData;
-
-            if (this.options.isGeneric) {
-                // Mode générique : créer une GeometryCollection avec toutes les géométries
-                const geometries = allFeatures.map(f => f.geometry);
-                normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
-            } else {
-                 if (this.options.isLineString || this.options.isPolygon || this.options.isPoint) {
-                     normalizedData = this.dataManager.normalizeToFeatureCollection(newFeature);
-                 }
-            }
-
-            // Sauvegarder si des données ont été normalisées
-            if (normalizedData) {
-                console.log('Normalized data to save:', normalizedData);
-                this.fieldStore.save(normalizedData);
-            }
-
-            // Traitement spécifique pour les Points (marker rouge)
-            if (newFeature.geometry.type === 'Point') {
-                draw.changeMode('simple_select');
-
-                const coords = newFeature.geometry.coordinates;
-                if(!this.options.isGeneric) {
-                    if (this.currentMarker) {
-                        this.currentMarker.remove();
-                    }
-                }
-
-                this.currentMarker = new maplibregl.Marker({ color: 'red' })
-                    .setLngLat(coords)
-                    .addTo(this.map);
-            }
-        });
-
-        this.map.on('draw.update', (e) => {
-            console.log('draw.update event triggered', e);
-
-            const draw = this.drawManager.getDraw();
-            const allFeatures = draw.getAll().features;
-            console.log('All features from draw (update):', allFeatures);
-
-            // Construire la structure appropriée selon les options
-            let normalizedData;
-
-            if (this.options.isGeneric) {
-                // Mode générique : créer une GeometryCollection avec toutes les géométries
-                normalizedData = this.dataManager.normalizeToGeometryCollection(allFeatures);
-            } else {
-                // Mode spécifique : normaliser la feature mise à jour
-                if( this.options.isLineString || this.options.isPolygon || this.options.isPoint) {
-                    const updatedFeature = e.features[0];
-                    normalizedData = this.dataManager.normalizeToFeatureCollection(updatedFeature);
+                if (targetFeature) {
+                    normalizedData = this.dataManager.normalizeToFeatureCollection(targetFeature);
+                } else {
+                    // Si aucune feature n'est disponible (toutes supprimées), normaliser avec null
+                    normalizedData = this.dataManager.normalizeToFeatureCollection(null);
                 }
             }
+        }
 
-            // Sauvegarder si des données ont été normalisées
-            if (normalizedData) {
-                console.log('Normalized data to save (update):', normalizedData);
-                this.fieldStore.save(normalizedData);
+        // Sauvegarder si des données ont été normalisées
+        if (normalizedData !== undefined) {
+            console.log('Normalized data to save:', normalizedData);
+            this.fieldStore.save(normalizedData);
+        }
+    }
+
+    /**
+     * Setup conditional controls based on feature type during drag/edit operations
+     */
+    _setupConditionalControls() {
+        if (!this.options.isGeneric) {
+            return; // Pas besoin de logique conditionnelle pour les modes spécifiques
+        }
+
+        // Intercepter les événements de début de drag
+        this.map.on('gm:dragstart', (event) => {
+            console.log('Drag start event:', event);
+
+            const geoJson = event?.feature ? this._getGeoJson(event.feature) : null;
+            if (!geoJson) {
+                console.warn('Could not extract GeoJSON from dragged feature');
+                return;
             }
+
+            const geometryType = geoJson.geometry?.type;
+            if (geometryType !== 'Point') {
+                // Empêcher le drag pour les non-points en mode générique
+                console.log('Blocking drag for non-point geometry:', geometryType);
+                 // Utiliser la nouvelle méthode du DrawControlManager
+                this.drawManager.applyConditionalControls(geometryType);
+            }
+
+            console.log('Allowing drag for Point geometry');
         });
 
-        // draw.delete
-        this.map.on('custom.draw.delete', (e) => {
-            console.log('draw.delete event triggered', e);
-            // Supprimer marker si un point a été supprimé
-            if (this.currentMarker) {
-                    this.currentMarker.remove();
-                    this.currentMarker = null;
+        // Intercepter les événements de début d'édition
+        this.map.on('gm:editstart', (event) => {
+            console.log('Edit start event:', event);
+
+            const geoJson = event?.feature ? this._getGeoJson(event.feature) : null;
+            if (!geoJson) {
+                console.warn('Could not extract GeoJSON from edited feature');
+                return;
             }
+
+            const geometryType = geoJson.geometry?.type;
+            if (geometryType === 'Point') {
+                // Empêcher l'édition pour les points en mode générique
+                console.log('Blocking edit for Point geometry');
+                // Utiliser la nouvelle méthode du DrawControlManager
+                this.drawManager.applyConditionalControls(geometryType);
+            }
+
+            console.log('Allowing edit for non-point geometry:', geometryType);
+        });
+    }
+
+    _setupGeomanEvents() {
+        // Attendre que Geoman soit complètement chargé
+        this.map.on("gm:loaded", () => {
+            const geoman = this.drawManager.getGeoman();
+            if (!geoman) {
+                console.error('Geoman instance is not available');
+                return;
+            }
+
+            console.log('Geoman loaded, setting up events and conditional controls');
+
+            // Setup conditional controls for generic mode
+            this._setupConditionalControls();
+
+            // Unified event handlers using the refactored method
+            this.map.on('gm:create', (event) => {
+                console.log('Feature created');
+                this._processAndSaveGeometry(event);
+            });
+
+            this.map.on('gm:editend', (event) => {
+                console.log('Feature edited');
+                this._processAndSaveGeometry(event);
+            });
+
+            this.map.on('gm:dragend', (event) => {
+                console.log('Feature dragged');
+                this._processAndSaveGeometry(event);
+            });
+
+            this.map.on('gm:remove', (event) => {
+                console.log('Feature removed');
+                this._processAndSaveGeometry(event);
+            });
         });
     }
 }
