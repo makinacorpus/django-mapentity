@@ -124,15 +124,6 @@ class MaplibreDrawControlManager {
         // Attendre que Geoman soit complètement chargé
         this.map.on("gm:loaded", () => {
             console.log("Geoman fully loaded");
-            console.log("Controls configuration:", {
-                dragEnabled,
-                editEnabled,
-                deleteEnabled: this.options.modifiable,
-                isGeneric: this.options.isGeneric,
-                isPoint: this.options.isPoint,
-                isLineString: this.options.isLineString,
-                isPolygon: this.options.isPolygon
-            });
         });
     }
 
@@ -141,53 +132,4 @@ class MaplibreDrawControlManager {
         return this.geoman;
     }
 
-    /**
-     * Méthodes pour contrôler dynamiquement les contrôles (utilisées par MaplibreGeometryField)
-     */
-    enableDrag() {
-        if (this.geoman?.controls?.edit?.drag) {
-            this.geoman.controls.edit.drag.enable();
-        }
-    }
-
-    disableDrag() {
-        if (this.geoman?.controls?.edit?.drag) {
-            this.geoman.controls.edit.drag.disable();
-        }
-    }
-
-    enableEdit() {
-        if (this.geoman?.controls?.edit?.change) {
-            this.geoman.controls.edit.change.enable();
-        }
-    }
-
-    disableEdit() {
-        if (this.geoman?.controls?.edit?.change) {
-            this.geoman.controls.edit.change.disable();
-        }
-    }
-
-    /**
-     * Méthode pour appliquer la logique conditionnelle selon le type de géométrie
-     */
-    applyConditionalControls(geometryType) {
-        if (!this.options.isGeneric) { // peut être pas
-            return; // Pas de logique conditionnelle pour les modes spécifiques
-        }
-
-        console.log('Applying conditional controls for geometry type:', geometryType);
-
-        if (geometryType === 'Point') {
-            // Pour les points : activer drag, désactiver edit
-            this.disableEdit();
-            this.enableDrag();
-            console.log('Point geometry: drag enabled, edit disabled');
-        } else {
-            // Pour les autres géométries : activer edit, désactiver drag
-            this.disableDrag();
-            this.enableEdit();
-            console.log('Non-point geometry: edit enabled, drag disabled');
-        }
-    }
 }

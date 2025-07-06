@@ -17,6 +17,9 @@ class MaplibreGeometryField {
         this.livePopup = null;
         this.isDrawingLine = false;
         this.isDrawingPolygon = false;
+        this.isDrawingRectangle = false;
+        this.currentDrawingCoords = [];
+        this.rectangleStartCoord = null;
 
         this.map = map;
         this.drawManager = new MaplibreDrawControlManager(map, this.options);
@@ -145,54 +148,186 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Setup conditional controls based on feature type during drag/edit operations
+     * Handle click events during line drawing
      */
-    _setupConditionalControls() {
-        if (!this.options.isGeneric) {
-            return; // Pas besoin de logique conditionnelle pour les modes spécifiques
+    _handleDrawingClick(event) {
+        if (!this.isDrawingLine && !this.isDrawingPolygon && !this.isDrawingRectangle) {
+            return;
         }
 
-        // Intercepter les événements de début de drag
-        this.map.on('gm:dragstart', (event) => {
-            console.log('Drag start event:', event);
+        console.log('Drawing click at:', event.lngLat);
 
-            const geoJson = event?.feature ? this._getGeoJson(event.feature) : null;
-            if (!geoJson) {
-                console.warn('Could not extract GeoJSON from dragged feature');
-                return;
+        const coords = [event.lngLat.lng, event.lngLat.lat];
+
+        if (this.isDrawingLine) {
+            // Ajouter le point cliqué aux coordonnées de dessin
+            this.currentDrawingCoords.push(coords);
+            console.log('Updated line drawing coordinates:', this.currentDrawingCoords);
+            this._updateDrawingPopup(coords, false);
+        } else if (this.isDrawingRectangle) {
+            // Pour le rectangle, on ne stocke que le premier point
+            if (this.currentDrawingCoords.length === 0) {
+                this.rectangleStartCoord = coords;
+                this.currentDrawingCoords.push(coords);
+                console.log('Rectangle start point:', coords);
+                this._updateDrawingPopup(coords, false);
+            }
+        } else if (this.isDrawingPolygon) {
+            // Ajouter le point cliqué aux coordonnées de dessin du polygone
+            this.currentDrawingCoords.push(coords);
+            console.log('Updated polygon drawing coordinates:', this.currentDrawingCoords);
+            this._updateDrawingPopup(coords, false);
+        }
+    }
+
+    /**
+     * Handle live mouse movement during drawing
+     */
+    _handleLiveDrawing(event) {
+        if ((!this.isDrawingLine && !this.isDrawingPolygon && !this.isDrawingRectangle) ||
+            !event.markerData?.position?.coordinate) {
+            return;
+        }
+
+        const mouseCoords = event.markerData.position.coordinate;
+        console.log('Live drawing at:', mouseCoords);
+
+        // Mettre à jour la popup avec la position de la souris
+        this._updateDrawingPopup(mouseCoords, true);
+    }
+
+    /**
+     * Update the popup with distance/area information based on drawing mode
+     */
+    _updateDrawingPopup(currentCoords, isLive = false) {
+        if (!this.livePopup) {
+            return;
+        }
+
+        let formattedMessage = '';
+
+        if (this.isDrawingLine) {
+            formattedMessage = this._getLineDrawingMessage(currentCoords, isLive);
+        } else if (this.isDrawingRectangle) {
+            formattedMessage = this._getRectangleDrawingMessage(currentCoords, isLive);
+        } else if (this.isDrawingPolygon) {
+            formattedMessage = this._getPolygonDrawingMessage(currentCoords, isLive);
+        }
+
+        // Afficher la popup à la position actuelle
+        this.livePopup.setLngLat(currentCoords).setHTML(formattedMessage);
+    }
+
+    /**
+     * Get message for line drawing
+     */
+    _getLineDrawingMessage(currentCoords, isLive) {
+        if (this.currentDrawingCoords.length === 0) {
+            return 'Cliquer pour commencer le dessin de la ligne';
+        } else if (this.currentDrawingCoords.length >= 1) {
+            const tempCoords = [...this.currentDrawingCoords];
+
+            if (isLive) {
+                tempCoords.push(currentCoords);
             }
 
-            const geometryType = geoJson.geometry?.type;
-            if (geometryType !== 'Point') {
-                // Empêcher le drag pour les non-points en mode générique
-                console.log('Blocking drag for non-point geometry:', geometryType);
-                 // Utiliser la nouvelle méthode du DrawControlManager
-                this.drawManager.applyConditionalControls(geometryType);
+            if (tempCoords.length >= 2) {
+                const tempLine = {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: tempCoords
+                    }
+                };
+
+                const distance = turf.length(tempLine, { units: 'kilometers' });
+                const formattedDistance = `${distance.toFixed(2)} km`;
+
+                if (this.currentDrawingCoords.length === 1) {
+                    return formattedDistance + '<br>Cliquer pour continuer le dessin de la ligne';
+                } else {
+                    return formattedDistance + '<br>Cliquer sur le dernier point pour terminer la ligne';
+                }
+            } else {
+                return 'Cliquer pour continuer le dessin de la ligne';
             }
+        }
+        return '';
+    }
 
-            console.log('Allowing drag for Point geometry');
-        });
+    /**
+     * Get message for rectangle drawing
+     */
+    _getRectangleDrawingMessage(currentCoords, isLive) {
+        if (this.currentDrawingCoords.length === 0) {
+            return 'Cliquer et glisser pour dessiner le rectangle';
+        } else if (this.currentDrawingCoords.length === 1) {
+            if (isLive && this.rectangleStartCoord) {
+                // Créer un rectangle temporaire avec les coordonnées de début et la position actuelle
+                const tempRectangle = {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: [[
+                            this.rectangleStartCoord,
+                            [currentCoords[0], this.rectangleStartCoord[1]],
+                            currentCoords,
+                            [this.rectangleStartCoord[0], currentCoords[1]],
+                            this.rectangleStartCoord
+                        ]]
+                    }
+                };
 
-        // Intercepter les événements de début d'édition
-        this.map.on('gm:editstart', (event) => {
-            console.log('Edit start event:', event);
-
-            const geoJson = event?.feature ? this._getGeoJson(event.feature) : null;
-            if (!geoJson) {
-                console.warn('Could not extract GeoJSON from edited feature');
-                return;
+                const area = turf.area(tempRectangle) / 1000000; // Convertir en km²
+                const formattedArea = `${area.toFixed(2)} km²`;
+                return formattedArea + '<br>Cliquer pour terminer le rectangle';
+            } else {
+                return 'Cliquer pour terminer le rectangle';
             }
+        }
+        return '';
+    }
 
-            const geometryType = geoJson.geometry?.type;
-            if (geometryType === 'Point') {
-                // Empêcher l'édition pour les points en mode générique
-                console.log('Blocking edit for Point geometry');
-                // Utiliser la nouvelle méthode du DrawControlManager
-                this.drawManager.applyConditionalControls(geometryType);
-            }
+    /**
+     * Get message for polygon drawing
+     */
+    _getPolygonDrawingMessage(currentCoords, isLive) {
+        if (this.currentDrawingCoords.length === 0) {
+            return 'Cliquer pour commencer le dessin de la forme';
+        } else if (this.currentDrawingCoords.length === 1 || this.currentDrawingCoords.length === 2) {
+            return 'Cliquer pour continuer le dessin de la forme';
+        }else if (this.currentDrawingCoords.length >= 3) {
+            return 'Cliquer sur le premier point pour fermer la forme';
+        }
+        return '';
+    }
 
-            console.log('Allowing edit for non-point geometry:', geometryType);
-        });
+    /**
+     * Reset drawing coordinates for next shape while keeping drawing mode active
+     */
+    _resetDrawingCoords() {
+        // Réinitialiser les coordonnées pour recommencer une nouvelle forme
+        this.currentDrawingCoords = [];
+        this.rectangleStartCoord = null;
+        console.log('Drawing coordinates reset for next shape');
+    }
+
+    /**
+     * Stop drawing tracking and cleanup completely
+     */
+    _stopLiveDrawingTracking() {
+        if (this.livePopup) {
+            this.livePopup.remove();
+            this.livePopup = null;
+        }
+
+        // Réinitialiser toutes les variables de dessin
+        this.currentDrawingCoords = [];
+        this.rectangleStartCoord = null;
+        this.isDrawingLine = false;
+        this.isDrawingPolygon = false;
+        this.isDrawingRectangle = false;
+        console.log('Drawing tracking completely stopped');
     }
 
     _setupGeomanEvents() {
@@ -204,30 +339,106 @@ class MaplibreGeometryField {
                 return;
             }
 
-            console.log('Geoman loaded, setting up events and conditional controls');
+            // Événement de début de dessin
+            this.map.on('gm:globaldrawmodetoggled', (event) => {
+                console.log('Drawing mode toggled:', event);
 
-            // Setup conditional controls for generic mode
-            this._setupConditionalControls();
+                if (event.enabled) {
+                    // Activer le mode de dessin approprié
+                    if (event.shape === 'line') {
+                        console.log('Starting line drawing');
+                        this.isDrawingLine = true;
+                        this.isDrawingPolygon = false;
+                        this.isDrawingRectangle = false;
+                    } else if (event.shape === 'polygon') {
+                        console.log('Starting polygon drawing');
+                        this.isDrawingLine = false;
+                        this.isDrawingPolygon = true;
+                        this.isDrawingRectangle = false;
+                    } else if (event.shape === 'rectangle') {
+                        console.log('Starting rectangle drawing');
+                        this.isDrawingLine = false;
+                        this.isDrawingPolygon = false;
+                        this.isDrawingRectangle = true;
+                    }
+
+                    // Réinitialiser les coordonnées et créer la popup
+                    this.currentDrawingCoords = [];
+                    this.rectangleStartCoord = null;
+
+                    // Créer la popup pour les mesures
+                    if (!this.livePopup) {
+                        this.livePopup = new maplibregl.Popup({
+                            closeButton: false,
+                            closeOnClick: false,
+                            className: 'custom-popup',
+                            anchor: 'left',
+                            offset: 10
+                        }).addTo(this.map);
+                    }
+                } else {
+                    // Arrêter le tracking quand le mode dessin est désactivé
+                    if (event.shape === 'line' || event.shape === 'polygon' || event.shape === 'rectangle') {
+                        this._stopLiveDrawingTracking();
+                    }
+                }
+            });
+
+            // Événement pour le suivi en temps réel pendant le dessin
+            this.map.on('_gm:draw', (event) => {
+                console.log('Live draw event received:', event);
+                if (event.mode === 'line' || event.mode === 'polygon' || event.mode === 'rectangle') {
+                    this._handleLiveDrawing(event);
+                }
+            });
 
             // Unified event handlers using the refactored method
             this.map.on('gm:create', (event) => {
-                console.log('Feature created');
-                this._processAndSaveGeometry(event);
+                try {
+                    console.log('Feature created');
+                    this._processAndSaveGeometry(event);
+
+                    // Réinitialiser les coordonnées pour la prochaine forme si on est toujours en mode dessin
+                    if ((event.shape === 'line' && this.isDrawingLine) ||
+                        (event.shape === 'polygon' && this.isDrawingPolygon) ||
+                        (event.shape === 'rectangle' && this.isDrawingRectangle)) {
+                        this._resetDrawingCoords();
+                    }
+                } catch (error) {
+                    console.error('Error during feature creation:', error);
+                }
             });
 
             this.map.on('gm:editend', (event) => {
-                console.log('Feature edited');
-                this._processAndSaveGeometry(event);
+                try {
+                    console.log('Feature edited');
+                    this._processAndSaveGeometry(event);
+                } catch (error) {
+                    console.error('Error during feature edit:', error);
+                }
             });
 
             this.map.on('gm:dragend', (event) => {
-                console.log('Feature dragged');
-                this._processAndSaveGeometry(event);
+                try {
+                    console.log('Feature dragged');
+                    this._processAndSaveGeometry(event);
+                } catch (error) {
+                    console.error('Error during feature drag:', error);
+                }
             });
 
             this.map.on('gm:remove', (event) => {
-                console.log('Feature removed');
-                this._processAndSaveGeometry(event);
+                try {
+                    console.log('Feature removed');
+                    this._processAndSaveGeometry(event);
+                } catch (error) {
+                    console.error('Error during feature removal:', error);
+                }
+            });
+
+            // Gérer les clics uniquement pendant le dessin
+            this.map.on('click', (event) => {
+                this._handleDrawingClick(event);
             });
         });
     }

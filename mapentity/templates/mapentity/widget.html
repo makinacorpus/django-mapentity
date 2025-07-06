@@ -82,8 +82,8 @@
 
                 const mapGeometryField = new MaplibreGeometryField(map.getMap(), fieldId, options); // onAdd ne marche que si on utilise addControl.
 
-                const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
-                objectsLayer.load(layerUrl);
+                {#const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);#}
+                {#objectsLayer.load(layerUrl);#}
 
                 // Ajouter le champ de géométrie à la carte
                 {#const LingeringGeometryControl = new MaplibreGeometryField(map.getMap(),fieldId, {#}

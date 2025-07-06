@@ -72,6 +72,8 @@ class MaplibreObjectsLayer {
             }
         }
 
+        // Gérer le survol des features, bien que les geometries ne soient pas encore crées effectivement
+        // il y apparait un effet hover et les popus apparaissent
         // Gérer le popup
         if (hoveredFeatureId) {
             if (this.currentPopup) {
@@ -101,8 +103,6 @@ class MaplibreObjectsLayer {
             this.currentPopup = null;
         }
     }
-
-
 
     async load(url) {
         console.log("Loading data from URL: " + url);
@@ -178,8 +178,6 @@ class MaplibreObjectsLayer {
             }
         }
     }
-
-
 
     select(primaryKey, on = true) {
         this.highlight(primaryKey, true);
