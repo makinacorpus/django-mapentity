@@ -11,6 +11,10 @@ class GeometryDataManager {
     }
 
     normalizeToFeatureCollection(geojson) {
+        if (!geojson) {
+            return this.initializeEmpty();
+        }
+
         // Si c'est déjà une FeatureCollection
         if (geojson.type === 'FeatureCollection') {
             return geojson;

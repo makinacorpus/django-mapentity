@@ -112,7 +112,6 @@ class MaplibreGeometryField {
         }
 
         const allFeatures = this._getFeatureCollection();
-        console.log('Current features:', allFeatures);
 
         // Construire la structure appropriée selon les options
         let normalizedData;
@@ -120,7 +119,6 @@ class MaplibreGeometryField {
         if (this.options.isGeneric) {
             // Mode générique : créer une GeometryCollection avec toutes les géométries
             const geometries = allFeatures.features.map(feature => feature.geometry);
-            console.log('Geometries to normalize:', geometries);
             normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
         } else {
             // Mode spécifique : normaliser selon le type
@@ -142,7 +140,6 @@ class MaplibreGeometryField {
 
         // Sauvegarder si des données ont été normalisées
         if (normalizedData !== undefined) {
-            console.log('Normalized data to save:', normalizedData);
             this.fieldStore.save(normalizedData);
         }
     }
@@ -155,27 +152,22 @@ class MaplibreGeometryField {
             return;
         }
 
-        console.log('Drawing click at:', event.lngLat);
-
         const coords = [event.lngLat.lng, event.lngLat.lat];
 
         if (this.isDrawingLine) {
             // Ajouter le point cliqué aux coordonnées de dessin
             this.currentDrawingCoords.push(coords);
-            console.log('Updated line drawing coordinates:', this.currentDrawingCoords);
             this._updateDrawingPopup(coords, false);
         } else if (this.isDrawingRectangle) {
             // Pour le rectangle, on ne stocke que le premier point
             if (this.currentDrawingCoords.length === 0) {
                 this.rectangleStartCoord = coords;
                 this.currentDrawingCoords.push(coords);
-                console.log('Rectangle start point:', coords);
                 this._updateDrawingPopup(coords, false);
             }
         } else if (this.isDrawingPolygon) {
             // Ajouter le point cliqué aux coordonnées de dessin du polygone
             this.currentDrawingCoords.push(coords);
-            console.log('Updated polygon drawing coordinates:', this.currentDrawingCoords);
             this._updateDrawingPopup(coords, false);
         }
     }
@@ -190,7 +182,6 @@ class MaplibreGeometryField {
         }
 
         const mouseCoords = event.markerData.position.coordinate;
-        // console.log('Live drawing at:', mouseCoords);
 
         // Mettre à jour la popup avec la position de la souris
         this._updateDrawingPopup(mouseCoords, true);
@@ -309,7 +300,6 @@ class MaplibreGeometryField {
         // Réinitialiser les coordonnées pour recommencer une nouvelle forme
         this.currentDrawingCoords = [];
         this.rectangleStartCoord = null;
-        console.log('Drawing coordinates reset for next shape');
     }
 
     /**
@@ -327,8 +317,6 @@ class MaplibreGeometryField {
         this.isDrawingLine = false;
         this.isDrawingPolygon = false;
         this.isDrawingRectangle = false;
-        console.log('Drawing tracking completely stopped');
-
     }
 
     _setupGeomanEvents() {
@@ -339,8 +327,6 @@ class MaplibreGeometryField {
                 console.error('Geoman instance is not available');
                 return;
             }
-            // check mode state
-            // this.map.gm.options.isModeEnabled('edit', 'drag');
 
             // Événement de début de dessin
             this.map.on('gm:globaldrawmodetoggled', (event) => {
@@ -349,17 +335,14 @@ class MaplibreGeometryField {
                 if (event.enabled) {
                     // Activer le mode de dessin approprié
                     if (event.shape === 'line') {
-                        console.log('Starting line drawing');
                         this.isDrawingLine = true;
                         this.isDrawingPolygon = false;
                         this.isDrawingRectangle = false;
                     } else if (event.shape === 'polygon') {
-                        console.log('Starting polygon drawing');
                         this.isDrawingLine = false;
                         this.isDrawingPolygon = true;
                         this.isDrawingRectangle = false;
                     } else if (event.shape === 'rectangle') {
-                        console.log('Starting rectangle drawing');
                         this.isDrawingLine = false;
                         this.isDrawingPolygon = false;
                         this.isDrawingRectangle = true;
@@ -389,7 +372,6 @@ class MaplibreGeometryField {
 
             // Événement pour le suivi en temps réel pendant le dessin
             this.map.on('_gm:draw', (event) => {
-                // console.log('Live draw event received:', event);
                 if (event.mode === 'line' || event.mode === 'polygon' || event.mode === 'rectangle') {
                     this._handleLiveDrawing(event);
                 }
@@ -407,6 +389,29 @@ class MaplibreGeometryField {
                         (event.shape === 'rectangle' && this.isDrawingRectangle)) {
                         this._resetDrawingCoords();
                     }
+
+                    // Désactiver le mode de dessin après la création
+                    if(this.options.isPoint || this.options.isPolygon || this.options.isLineString) {
+                        // this.map.gm.disableDraw();
+                        // this._stopLiveDrawingTracking();
+                        const source = this.map.getSource('gm_main');
+                        if (source) {
+                          const data = source._data;
+
+                          // Si on a déjà une feature existante, on la retire
+                          if (this.gmEvents.length > 1) {
+                            const featureIdToDelete = this.gmEvents[0].id;
+                            data.features = data.features.filter(f => f.id !== featureIdToDelete);
+
+                            // Mettre à jour la liste locale : on retire l'ancien élément
+                            this.gmEvents.shift();
+                          }
+
+                          // Puis remettre à jour la source
+                          source.setData(data);
+                        }
+                    }
+
                 } catch (error) {
                     console.error('Error during feature creation:', error);
                 }
@@ -432,7 +437,7 @@ class MaplibreGeometryField {
 
             this.map.on('gm:remove', (event) => {
                 try {
-                    console.log('Feature removed');
+                    console.log('Feature removed', event);
                     this._processAndSaveGeometry(event);
                 } catch (error) {
                     console.error('Error during feature removal:', error);
