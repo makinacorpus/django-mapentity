@@ -43,7 +43,8 @@
                 // Créer une instance de MaplibreObjectsLayer
                 const objectsLayer = new MaplibreObjectsLayer(null, {
                     style: style,
-                    modelname: modelname
+                    modelname: modelname,
+                    readonly : true // empêche la surbrillance des objets
                 });
 
                 // Initialiser la couche d'objets

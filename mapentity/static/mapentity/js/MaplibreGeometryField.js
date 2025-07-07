@@ -190,7 +190,7 @@ class MaplibreGeometryField {
         }
 
         const mouseCoords = event.markerData.position.coordinate;
-        console.log('Live drawing at:', mouseCoords);
+        // console.log('Live drawing at:', mouseCoords);
 
         // Mettre à jour la popup avec la position de la souris
         this._updateDrawingPopup(mouseCoords, true);
@@ -328,6 +328,7 @@ class MaplibreGeometryField {
         this.isDrawingPolygon = false;
         this.isDrawingRectangle = false;
         console.log('Drawing tracking completely stopped');
+
     }
 
     _setupGeomanEvents() {
@@ -338,6 +339,8 @@ class MaplibreGeometryField {
                 console.error('Geoman instance is not available');
                 return;
             }
+            // check mode state
+            // this.map.gm.options.isModeEnabled('edit', 'drag');
 
             // Événement de début de dessin
             this.map.on('gm:globaldrawmodetoggled', (event) => {
@@ -386,7 +389,7 @@ class MaplibreGeometryField {
 
             // Événement pour le suivi en temps réel pendant le dessin
             this.map.on('_gm:draw', (event) => {
-                console.log('Live draw event received:', event);
+                // console.log('Live draw event received:', event);
                 if (event.mode === 'line' || event.mode === 'polygon' || event.mode === 'rectangle') {
                     this._handleLiveDrawing(event);
                 }
