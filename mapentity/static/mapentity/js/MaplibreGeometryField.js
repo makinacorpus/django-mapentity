@@ -24,7 +24,7 @@ class MaplibreGeometryField {
         this.map = map;
         this.drawManager = new MaplibreDrawControlManager(map, this.options);
 
-        // Store unique events history (always up to date)
+        // stock les Features Geoman
         this.gmEvents = [];
 
         this._setupGeomanEvents();
