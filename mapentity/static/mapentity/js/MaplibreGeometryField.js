@@ -31,7 +31,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Helper function to safely extract GeoJSON from feature
+     * Fonction utilitaire pour obtenir le GeoJSON d'une feature
      */
     _getGeoJson(featureData) {
         try {
@@ -43,7 +43,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Get current FeatureCollection from stored events
+     * Obtenir la collection de features
      */
     _getFeatureCollection() {
         return {
@@ -55,7 +55,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Update gmEvents array with new event data
+     * Mis à jour de gmEvents avec de nouvelles données ou suppression
      */
     _updateEventsHistory(event) {
         console.log('Processing event:', event);
@@ -103,7 +103,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Process and save geometry data after an event
+     * Traiter et sauvegarder la géométrie après un événement create, editend, dragend ou remove
      */
     _processAndSaveGeometry(event) {
         // Mettre à jour l'historique des événements
@@ -145,7 +145,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Handle click events during line drawing
+     * Gestion des événements de clic pendant le dessin
      */
     _handleDrawingClick(event) {
         if (!this.isDrawingLine && !this.isDrawingPolygon && !this.isDrawingRectangle) {
@@ -173,7 +173,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Handle live mouse movement during drawing
+     * Gestion des mouvements de la souris pendant le dessin en direct
      */
     _handleLiveDrawing(event) {
         if ((!this.isDrawingLine && !this.isDrawingPolygon && !this.isDrawingRectangle) ||
@@ -188,7 +188,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Update the popup with distance/area information based on drawing mode
+     * Met à jour la popup de dessin en direct avec les distances ou surfaces
      */
     _updateDrawingPopup(currentCoords, isLive = false) {
         if (!this.livePopup) {
@@ -210,7 +210,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Get message for line drawing
+     * Obtient le message de dessin pour la ligne
      */
     _getLineDrawingMessage(currentCoords, isLive) {
         if (this.currentDrawingCoords.length === 0) {
@@ -247,7 +247,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Get message for rectangle drawing
+     * Obtient le message de dessin pour le rectangle
      */
     _getRectangleDrawingMessage(currentCoords, isLive) {
         if (this.currentDrawingCoords.length === 0) {
@@ -280,7 +280,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Get message for polygon drawing
+     * Obtient le message de dessin pour le polygone
      */
     _getPolygonDrawingMessage(currentCoords, isLive) {
         if (this.currentDrawingCoords.length === 0) {
@@ -294,7 +294,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Reset drawing coordinates for next shape while keeping drawing mode active
+     * Rénitialiser les coordonnées de dessin
      */
     _resetDrawingCoords() {
         // Réinitialiser les coordonnées pour recommencer une nouvelle forme
@@ -303,7 +303,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Stop drawing tracking and cleanup completely
+     * Arrêter le suivi du dessin en direct
      */
     _stopLiveDrawingTracking() {
         if (this.livePopup) {
@@ -323,6 +323,7 @@ class MaplibreGeometryField {
         // Attendre que Geoman soit complètement chargé
         this.map.on("gm:loaded", () => {
             const geoman = this.drawManager.getGeoman();
+            // Vérifier si Geoman est disponible
             if (!geoman) {
                 console.error('Geoman instance is not available');
                 return;
@@ -330,57 +331,83 @@ class MaplibreGeometryField {
 
             // Événement de début de dessin
             this.map.on('gm:globaldrawmodetoggled', (event) => {
-                console.log('Drawing mode toggled:', event);
+                try {
+                    if (event.enabled) {
+                        // Activer le mode de dessin approprié
+                        if (event.shape === 'line') {
+                            this.isDrawingLine = true;
+                            this.isDrawingPolygon = false;
+                            this.isDrawingRectangle = false;
+                        } else if (event.shape === 'polygon') {
+                            this.isDrawingLine = false;
+                            this.isDrawingPolygon = true;
+                            this.isDrawingRectangle = false;
+                        } else if (event.shape === 'rectangle') {
+                            this.isDrawingLine = false;
+                            this.isDrawingPolygon = false;
+                            this.isDrawingRectangle = true;
+                        }
 
-                if (event.enabled) {
-                    // Activer le mode de dessin approprié
-                    if (event.shape === 'line') {
-                        this.isDrawingLine = true;
-                        this.isDrawingPolygon = false;
-                        this.isDrawingRectangle = false;
-                    } else if (event.shape === 'polygon') {
-                        this.isDrawingLine = false;
-                        this.isDrawingPolygon = true;
-                        this.isDrawingRectangle = false;
-                    } else if (event.shape === 'rectangle') {
-                        this.isDrawingLine = false;
-                        this.isDrawingPolygon = false;
-                        this.isDrawingRectangle = true;
+                        // Réinitialiser les coordonnées et créer la popup
+                        this.currentDrawingCoords = [];
+                        this.rectangleStartCoord = null;
+
+                        // Créer la popup pour les mesures
+                        if (!this.livePopup) {
+                            this.livePopup = new maplibregl.Popup({
+                                closeButton: false,
+                                closeOnClick: false,
+                                className: 'custom-popup',
+                                anchor: 'left',
+                                offset: 10
+                            }).addTo(this.map);
+                        }
+
+                        // Désactiver le mode de dessin après la création
+                        if(this.options.isPoint || this.options.isPolygon || this.options.isLineString) {
+                            const source = this.map.getSource('gm_main');
+                            if (source) {
+                              const data = source._data;
+
+                              // Si on a déjà une feature existante, on la retire
+                              if (this.gmEvents.length >= 1) {
+                                const featureIdToDelete = this.gmEvents[0].id;
+                                data.features = data.features.filter(f => f.id !== featureIdToDelete);
+
+                                // Mettre à jour la liste locale : on retire l'ancien élément
+                                this.gmEvents.shift();
+                              }
+
+                              // Puis remettre à jour la source
+                              source.setData(data);
+                            }
+                        }
+                    } else {
+                        // Arrêter le tracking quand le mode dessin est désactivé
+                        if (event.shape === 'line' || event.shape === 'polygon' || event.shape === 'rectangle') {
+                            this._stopLiveDrawingTracking();
+                        }
                     }
 
-                    // Réinitialiser les coordonnées et créer la popup
-                    this.currentDrawingCoords = [];
-                    this.rectangleStartCoord = null;
-
-                    // Créer la popup pour les mesures
-                    if (!this.livePopup) {
-                        this.livePopup = new maplibregl.Popup({
-                            closeButton: false,
-                            closeOnClick: false,
-                            className: 'custom-popup',
-                            anchor: 'left',
-                            offset: 10
-                        }).addTo(this.map);
-                    }
-                } else {
-                    // Arrêter le tracking quand le mode dessin est désactivé
-                    if (event.shape === 'line' || event.shape === 'polygon' || event.shape === 'rectangle') {
-                        this._stopLiveDrawingTracking();
-                    }
+                } catch(error) {
+                    console.error('Error during global draw mode toggle:', error);
                 }
             });
 
             // Événement pour le suivi en temps réel pendant le dessin
             this.map.on('_gm:draw', (event) => {
-                if (event.mode === 'line' || event.mode === 'polygon' || event.mode === 'rectangle') {
-                    this._handleLiveDrawing(event);
+                try {
+                    if (event.mode === 'line' || event.mode === 'polygon' || event.mode === 'rectangle') {
+                        this._handleLiveDrawing(event);
+                    }
+                } catch (error) {
+                    console.error('Error during live drawing event:', error);
                 }
             });
 
-            // Unified event handlers using the refactored method
+            // Événement pour la création de la géométrie
             this.map.on('gm:create', (event) => {
                 try {
-                    console.log('Feature created');
                     this._processAndSaveGeometry(event);
 
                     // Réinitialiser les coordonnées pour la prochaine forme si on est toujours en mode dessin
@@ -392,24 +419,8 @@ class MaplibreGeometryField {
 
                     // Désactiver le mode de dessin après la création
                     if(this.options.isPoint || this.options.isPolygon || this.options.isLineString) {
-                        // this.map.gm.disableDraw();
-                        // this._stopLiveDrawingTracking();
-                        const source = this.map.getSource('gm_main');
-                        if (source) {
-                          const data = source._data;
-
-                          // Si on a déjà une feature existante, on la retire
-                          if (this.gmEvents.length > 1) {
-                            const featureIdToDelete = this.gmEvents[0].id;
-                            data.features = data.features.filter(f => f.id !== featureIdToDelete);
-
-                            // Mettre à jour la liste locale : on retire l'ancien élément
-                            this.gmEvents.shift();
-                          }
-
-                          // Puis remettre à jour la source
-                          source.setData(data);
-                        }
+                        this.map.gm.disableDraw();
+                        this._stopLiveDrawingTracking();
                     }
 
                 } catch (error) {
@@ -417,27 +428,27 @@ class MaplibreGeometryField {
                 }
             });
 
+            // Événement pour la fin de l'édition
             this.map.on('gm:editend', (event) => {
                 try {
-                    console.log('Feature edited');
                     this._processAndSaveGeometry(event);
                 } catch (error) {
                     console.error('Error during feature edit:', error);
                 }
             });
 
+            // Événement de fin de déplacement
             this.map.on('gm:dragend', (event) => {
                 try {
-                    console.log('Feature dragged');
                     this._processAndSaveGeometry(event);
                 } catch (error) {
                     console.error('Error during feature drag:', error);
                 }
             });
 
+            // Événement de suppression de la géométrie
             this.map.on('gm:remove', (event) => {
                 try {
-                    console.log('Feature removed', event);
                     this._processAndSaveGeometry(event);
                 } catch (error) {
                     console.error('Error during feature removal:', error);
@@ -446,7 +457,11 @@ class MaplibreGeometryField {
 
             // Gérer les clics uniquement pendant le dessin
             this.map.on('click', (event) => {
-                this._handleDrawingClick(event);
+                try {
+                    this._handleDrawingClick(event);
+                } catch(error) {
+                    console.error('Error during click event:', error);
+                }
             });
         });
     }

@@ -2,7 +2,10 @@ class GeometryDataManager {
     constructor() {
     }
 
-    // Initialise avec une FeatureCollection vide
+    /**
+     * Initialise un objet GeoJSON vide de type FeatureCollection.
+     * @returns {{type: string, features: *[]}} - Un objet GeoJSON vide de type FeatureCollection
+     */
     initializeEmpty() {
         return {
             type: 'FeatureCollection',
@@ -10,6 +13,11 @@ class GeometryDataManager {
         };
     }
 
+    /**
+     * Normalise un objet GeoJSON en FeatureCollection.
+     * @param geojson {Object} - L'objet GeoJSON à normaliser.
+     * @returns {*|{type: string, features: *[]}} - Retourne un objet GeoJSON de type FeatureCollection
+     */
     normalizeToFeatureCollection(geojson) {
         if (!geojson) {
             return this.initializeEmpty();
@@ -31,6 +39,11 @@ class GeometryDataManager {
         return this.initializeEmpty();
     }
 
+    /**
+     * Normalise un tableau de géométries en GeometryCollection.
+     * @param geometries {Array} - Un tableau de géométries à normaliser.
+     * @returns {{type: string, geometries: *}|{type: string, geometries: *[]}} - Retourne un objet GeoJSON de type GeometryCollection
+     */
     normalizeToGeometryCollection(geometries) {
         if (!geometries || geometries.length === 0) {
             return {
