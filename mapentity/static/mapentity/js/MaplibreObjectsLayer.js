@@ -152,7 +152,7 @@ class MaplibreObjectsLayer {
 
             this.addLayer(geojson,dataId, true, true);
 
-            this.boundsLayer = this._calculateBounds(geojson);
+            this.boundsLayer = calculateBounds(geojson);
             if (this.boundsLayer) {
                 this._map.fitBounds(this.boundsLayer, {
                     maxZoom: 16,
@@ -422,16 +422,6 @@ class MaplibreObjectsLayer {
         this.layers.baseLayers[name] = id;
     }
 
-   // removeLayer(layerId) {
-   //      if (this._map.getLayer(layerId)) {
-   //          this._map.removeLayer(layerId);
-   //      }
-   //      const sourceId = layerId.replace(/^layer-/, 'source-');
-   //      if (this._map.getSource(sourceId)) {
-   //          this._map.removeSource(sourceId);
-   //      }
-   //  }
-
     /**
      * Bascule la visibilité d'une ou plusieurs couches.
      * @param layerIds {string|Array<string>} - L'ID ou les IDs des couches à basculer. Peut être une chaîne de caractères ou un tableau de chaînes.
@@ -471,12 +461,6 @@ class MaplibreObjectsLayer {
     getLayer(primaryKey) {
         return this._objects[primaryKey];
     }
-
-      // Méthode getPrimaryKey modifiée pour gérer les GeometryCollection
-    // getPrimaryKey(feature) {
-    //     // Sinon, utiliser la méthode classique
-    //     return feature.properties?.id ||feature.id || this._generateUniqueId(feature);
-    // }
 
     /**
      * Génère un identifiant unique pour une feature.
@@ -609,74 +593,12 @@ class MaplibreObjectsLayer {
             return;
         }
 
-        const bounds = this.calculateBounds(feature);
+        const bounds = calculateBounds(feature);
         if (bounds) {
             this._map.fitBounds(bounds, { padding: 20, maxZoom: 16 });
         } else {
             console.warn(`Impossible de calculer les bounds pour la feature ${pk}`);
         }
-    }
-
-    /**
-     * Calcule les limites (bounds) d'un objet GeoJSON ou d'une collection de géométries.
-     * @param geojson {Object} - Un objet GeoJSON ou une collection de géométries à partir duquel calculer les limites.
-     * @returns {null|maplibregl.LngLatBounds} - Retourne les limites calculées ou `null` si l'objet est vide.
-     * @private
-     */
-    _calculateBounds(geojson) {
-        if (!geojson) {
-            return null;
-        }
-
-        const bounds = new maplibregl.LngLatBounds();
-
-        // Fonction utilitaire pour extraire et aplatir les coordonnées
-        const flattenCoords = (geometry) => {
-            const { type, coordinates, geometries } = geometry;
-            let flattened = [];
-
-            switch (type) {
-                case 'Point':
-                    flattened = [coordinates];
-                    break;
-                case 'MultiPoint':
-                case 'LineString':
-                    flattened = coordinates;
-                    break;
-                case 'Polygon':
-                case 'MultiLineString':
-                    flattened = coordinates.flat();
-                    break;
-                case 'MultiPolygon':
-                    flattened = coordinates.flat(2);
-                    break;
-                case 'GeometryCollection':
-                    geometries?.forEach(geom => {
-                        flattened.push(...flattenCoords(geom));
-                    });
-                    break;
-            }
-
-            return flattened;
-        };
-
-        // Cas d'un seul Feature
-        if (geojson.geometry) {
-            const coords = flattenCoords(geojson.geometry);
-            coords.forEach(coord => bounds.extend(coord));
-        }
-
-        // Cas d'une FeatureCollection
-        else if (geojson.features) {
-            geojson.features.forEach(feature => {
-                const geometry = feature.geometry;
-                if (!geometry) return;
-                const coords = flattenCoords(geometry);
-                coords.forEach(coord => bounds.extend(coord));
-            });
-        }
-
-        return bounds.isEmpty() ? null : bounds;
     }
 
 }

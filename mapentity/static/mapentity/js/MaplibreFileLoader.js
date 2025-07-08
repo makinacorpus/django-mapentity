@@ -34,9 +34,6 @@ class MaplibreFileLoader {
 
         const reader = new FileReader();
          reader.onload = (e) => {
-            // this._map.fire('data:loading', { filename: file.name, format: ext });
-            // const layer = parser(e.target.result, ext);
-            // this._map.fire('data:loaded', { layer: layer, filename: file.name, format: ext });
             parser(e.target.result, ext);
         };
         reader.readAsText(file);
@@ -68,7 +65,6 @@ class MaplibreFileLoader {
             const strokeWidth = style.weight ?? 2;
             const circleRadius = style.radius ?? 6;
 
-            // On envoie un objet `style` complet
             this._addLayerWithPopup('polygon', 'fill', sourceId, {
                 color,
                 opacity: fillOpacity
@@ -85,7 +81,7 @@ class MaplibreFileLoader {
                 width: strokeWidth
             }, ['==', '$type', 'LineString']);
 
-            const bounds = this._calculateBounds(content);
+            const bounds = calculateBounds(content);
             if (bounds) {
                 this._map.fitBounds(bounds, { padding: 50, maxZoom: 16 });
             }
@@ -149,57 +145,6 @@ class MaplibreFileLoader {
             this._map.getCanvas().style.cursor = '';
             this._popup.remove();
         });
-    }
-
-    /**
-     * Calcule les limites d'un objet GeoJSON.
-     * @param geojson {Object} - L'objet GeoJSON à partir duquel les limites seront calculées.
-     * @returns {null|maplibregl.LngLatBounds} - Retourne les limites calculées ou null si l'objet est vide.
-     * @private
-     */
-    _calculateBounds(geojson) {
-        if (!geojson) return null;
-
-        const bounds = new maplibregl.LngLatBounds();
-
-        const flattenCoords = (geometry) => {
-            const { type, coordinates, geometries } = geometry;
-            let flattened = [];
-            switch (type) {
-                case 'Point':
-                    flattened = [coordinates];
-                    break;
-                case 'MultiPoint':
-                case 'LineString':
-                    flattened = coordinates;
-                    break;
-                case 'Polygon':
-                case 'MultiLineString':
-                    flattened = coordinates.flat();
-                    break;
-                case 'MultiPolygon':
-                    flattened = coordinates.flat(2);
-                    break;
-                case 'GeometryCollection':
-                    geometries?.forEach(geom => {
-                        flattened.push(...flattenCoords(geom));
-                    });
-                    break;
-            }
-            return flattened;
-        };
-
-        if (geojson.geometry) {
-            flattenCoords(geojson.geometry).forEach(coord => bounds.extend(coord));
-        } else if (geojson.features) {
-            geojson.features.forEach(feature => {
-                if (feature.geometry) {
-                    flattenCoords(feature.geometry).forEach(coord => bounds.extend(coord));
-                }
-            });
-        }
-
-        return bounds.isEmpty() ? null : bounds;
     }
 
     /**

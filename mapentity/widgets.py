@@ -1,25 +1,11 @@
 from django.forms import widgets as django_widgets
 from django.template.loader import render_to_string
-# from leaflet.forms.widgets import LeafletWidget
-# from .MaplibreMapentityWidgets import MaplibreWidget
 from .helpers import wkt_to_geom
 from .settings import API_SRID
 
-
-# from django import forms
 from django.core import validators
 from django.template.defaultfilters import slugify
-# from django.core.exceptions import ImproperlyConfigured
-
-# from .settings import MAPLIBRE_CONFIG
 from django.contrib.gis.forms.widgets import BaseGeometryWidget
-
-# try:
-#     from django.contrib.gis.forms.widgets import BaseGeometryWidget
-# except (ImportError, ImproperlyConfigured):
-#     from .backport import BaseGeometryWidget
-
-
 
 # class MapWidget(MaplibreWidget):
 #     # geometry_field_class = 'MapEntity.GeometryField'
@@ -66,7 +52,6 @@ class MapWidget(BaseGeometryWidget):
             'id': map_id,
             'id_css': map_id_css,
             'id_map': map_id_css + '_map',
-            # 'id_map_callback': map_id + '_map_callback',
         })
 
         return attrs

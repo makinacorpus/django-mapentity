@@ -45,6 +45,68 @@
     }
 
     /**
+     * Calcule les limites (bounds) d'un objet GeoJSON ou d'une collection de géométries.
+     * @param geojson {Object} - Un objet GeoJSON ou une collection de géométries à partir duquel calculer les limites.
+     * @returns {null|maplibregl.LngLatBounds} - Retourne les limites calculées ou `null` si l'objet est vide.
+     * @private
+     */
+    function calculateBounds(geojson) {
+        if (!geojson) {
+            return null;
+        }
+
+        const bounds = new maplibregl.LngLatBounds();
+
+        // Fonction utilitaire pour extraire et aplatir les coordonnées
+        const flattenCoords = (geometry) => {
+            const { type, coordinates, geometries } = geometry;
+            let flattened = [];
+
+            switch (type) {
+                case 'Point':
+                    flattened = [coordinates];
+                    break;
+                case 'MultiPoint':
+                case 'LineString':
+                    flattened = coordinates;
+                    break;
+                case 'Polygon':
+                case 'MultiLineString':
+                    flattened = coordinates.flat();
+                    break;
+                case 'MultiPolygon':
+                    flattened = coordinates.flat(2);
+                    break;
+                case 'GeometryCollection':
+                    geometries?.forEach(geom => {
+                        flattened.push(...flattenCoords(geom));
+                    });
+                    break;
+            }
+
+            return flattened;
+        };
+
+        // Cas d'un seul Feature
+        if (geojson.geometry) {
+            const coords = flattenCoords(geojson.geometry);
+            coords.forEach(coord => bounds.extend(coord));
+        }
+
+        // Cas d'une FeatureCollection
+        else if (geojson.features) {
+            geojson.features.forEach(feature => {
+                const geometry = feature.geometry;
+                if (!geometry) return;
+                const coords = flattenCoords(geometry);
+                coords.forEach(coord => bounds.extend(coord));
+            });
+        }
+
+        return bounds.isEmpty() ? null : bounds;
+    }
+
+    /**
      * Initialise TinyMCE avec la gestion du comptage de mots et des caractères.
      * @param editor {Object} - L'éditeur TinyMCE à initialiser.
      */
