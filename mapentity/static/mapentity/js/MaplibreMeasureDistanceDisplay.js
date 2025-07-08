@@ -1,9 +1,16 @@
 class MaplibreMeasureDistanceDisplay {
+    /**
+     * Classe pour afficher la distance totale mesurée sur une carte MapLibre.
+     */
     constructor() {
         this._container = null;
     }
 
-        createContainer() {
+    /**
+     * Crée le conteneur pour afficher la distance mesurée.
+     * @returns {null} - Retourne le conteneur créé.
+     */
+    createContainer() {
         this._container = document.createElement('div');
         this._container.style.position = 'absolute';
         this._container.style.top = '10px';
@@ -15,6 +22,10 @@ class MaplibreMeasureDistanceDisplay {
         return this._container;
     }
 
+    /**
+     * Met à jour l'affichage de la distance totale mesurée.
+     * @param distance {number} - La distance totale mesurée en kilomètres.
+     */
     updateDistance(distance) {
         if (this._container) {
             this._container.innerHTML = '';

@@ -1,9 +1,17 @@
 class MaplibreMapListSync {
+    /**
+     * Constructor for MaplibreMapListSync
+     * @param datatable {DataTable} - L'instance de DataTable à synchroniser avec la carte MapLibre
+     * @param map {maplibregl.Map} - L'instance de la carte MapLibre à synchroniser avec la liste
+     * @param objectsLayer {MaplibreObjectsLayer} - L'instance de MaplibreObjectsLayer pour gérer les objets de la carte
+     * @param togglableFiltre {MaplibreMapentityTogglableFiltre} - L'instance de MaplibreMapentityTogglableFiltre pour gérer les filtres
+     * @param history {MaplibreMapentityHistory} - L'instance de MaplibreMapentityHistory pour gérer l'historique des actions
+     */
     constructor(datatable, map, objectsLayer, togglableFiltre, history) {
         this.dt = datatable;
         this.map = map;
         this.layer = objectsLayer;
-        this.togglableFiltre = togglableFiltre; // Initialize the filter
+        this.togglableFiltre = togglableFiltre;
         this.history = history;
         this.options = {
             filter: {
@@ -13,12 +21,15 @@ class MaplibreMapListSync {
                 bboxfield: document.getElementById('id_bbox'),
             }
         };
-        this._loading = false; // loading state
-        // this.spinner = new CustomSpinner(document.body); // Initialize the custom spinner
+
+        this._loading = false;
 
         this.initialize();
     }
 
+    /**
+     * Initialisation de MaplibreMapListSync
+     */
      initialize() {
 
         this.map.on('moveend', (e) => this._onMapViewChanged(e));
@@ -31,26 +42,31 @@ class MaplibreMapListSync {
         this.dt.onFilter = () => this._onListFilter();
     }
 
+    /**
+     * Callback pour le filtrage de la liste
+     * @private
+     */
     _onListFilter() {
-        // Retrieve the value of the filter text input in DataTables
-        // const filterTxt = document.querySelector(".dataTables_filter input[type='text']").value;
-        // Get the data from the first column of the table
         const results = this.dt.column(0).data().toArray();
-
-        // Update the map layer objects with the retrieved primary keys
         this.layer.updateFromPks(results);
-
-        // Call a method to handle the reloaded logic
         this._handleReloaded(results.length);
     }
 
+    /**
+     * Assure que l'historique est mis à jour avec le nombre d'enregistrements rechargés
+     * @param nbrecords {number} - Le nombre d'enregistrements rechargés
+     * @private
+     */
     _handleReloaded(nbrecords) {
-            // Affiche et sauvegarde le nombre de résultats
             this.history.saveListInfo({ model: this.options.modelname, nb: nbrecords });
-            // Call the setsubmit method of the togglableFiltre object
             this.togglableFiltre.setsubmit();
     }
 
+    /**
+     * Callback pour les changements de vue de la carte
+     * @param e {Object} - L'événement de changement de vue de la carte
+     * @private
+     */
     _onMapViewChanged(e) {
         if (!this.map || !this.map.loaded()) {
             setTimeout(() => this._onMapViewChanged(e), 20);
@@ -65,19 +81,33 @@ class MaplibreMapListSync {
         this._reloadList(mapViewChangedStatue);
     }
 
+    /**
+     * Callback pour la soumission du formulaire de filtre
+     * @param e {Event} - L'événement de soumission du formulaire
+     * @private
+     */
     _onFormSubmit(e) {
-        // Set bounds of the filter form
         this._formSetBounds();
-        // Refresh the map
         this._reloadList(true);
     }
 
+    /**
+     * Callback pour la réinitialisation du formulaire de filtre
+     * @param e {Event} - L'événement de réinitialisation du formulaire
+     * @private
+     */
     _onFormReset(e) {
-        this._formClear(this.options.filter.form); // Clear all fields
+        this._formClear(this.options.filter.form);
         this._reloadList();
-        this._formSetBounds(); // Re-fill current bbox
+        this._formSetBounds();
     }
 
+    /**
+     * Recharge la liste d'entités affichées sur la carte
+     * @param mapViewChangedStatue {boolean} - Indique si la vue de la carte a été modifiée
+     * @returns {Promise<boolean>} - Retourne une promesse qui se résout en false si le chargement est terminé
+     * @private
+     */
     async _reloadList(mapViewChangedStatue = false) {
         const formData = new FormData(this.options.filter.form);
         let filter = false;
@@ -101,51 +131,49 @@ class MaplibreMapListSync {
         }
 
 
-        // Update the datatables URL with the filter parameters
+        // Mettre à jour l'URL de la DataTable avec les paramètres du formulaire
         const url = `${this.options.filter.form.getAttribute('action')}?${new URLSearchParams(formData).toString()}`;
         this.dt.ajax.url(url).load();
 
-        if (this._loading) return;
+        if (this._loading) {
+            return;
+        }
         this._loading = true;
 
-        // this.spinner.show(); // Show the spinner
-
         try {
-            // Get filtered primary keys (PKs)
             const response = await fetch(`${this.options.filter.form.getAttribute('action').replace('.datatables', '/filter_infos.json')}?${new URLSearchParams(formData)}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            console.log('filter_infos', data);
 
-            // Update the text of the number of results with the returned value
             document.getElementById('nbresults').textContent = data.count;
 
-            console.log('Number of results:', data.count);
-            // Update the map layers with the returned primary keys
             this.layer.updateFromPks(data.pk_list);
 
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            // this.spinner.hide(); // Hide the spinner
             this._loading = false; // Indicate that loading is done
         }
 
         return false;
     }
 
+    /**
+     * Met à jour les bornes du formulaire de filtre en fonction de la vue actuelle de la carte
+     * @private
+     */
     _formSetBounds() {
-        // Check if the filter option is defined
-        if (!this.options.filter) return;
+        if (!this.options.filter) {
+            return;
+        }
 
-        // Ensure the map is loaded before proceeding
         if (!this.map.loaded()) {
             console.warn("Map view not set, cannot get bounds.");
             return;
         }
-        // Récupérer les limites géographiques actuelles de la carte
+
         const bounds = this.map.getBounds(); // Le bounds utilisé doit être celle étudiée à la carte car elle est dynamique.
 
         // Extraire les coordonnées et les borner aux valeurs valides
@@ -164,22 +192,26 @@ class MaplibreMapListSync {
         }
     }
 
+    /**
+     * Efface les champs du formulaire de filtre
+     * @param form {HTMLFormElement} - Le formulaire à effacer
+     * @private
+     */
     _formClear(form) {
-        // Select all input elements of type text, password, file, number, and all select and textarea elements
+        // selection des champs de saisie texte, mot de passe, fichier, nombre, sélecteurs et zones de texte
         const elements = form.querySelectorAll('input[type="text"], input[type="password"], input[type="file"], input[type="number"], select, textarea');
         elements.forEach(el => {
             el.value = '';
-            el.dispatchEvent(new Event('change')); // je ne sais pas si c'est custom ou pas mais j'ai l'impression que c'est custom
+            el.dispatchEvent(new Event('change'));
         });
 
-        // Select all input elements of type radio and checkbox, and all select options
+        // Selection des inputs de type radio, checkbox et options de select
         const radioCheckboxElements = form.querySelectorAll('input[type="radio"], input[type="checkbox"], select option');
         radioCheckboxElements.forEach(el => {
             el.removeAttribute('checked');
             el.removeAttribute('selected');
         });
 
-        // Update chosen selects
         const selectElements = form.querySelectorAll('select');
         selectElements.forEach(select => {
             select.value = '';

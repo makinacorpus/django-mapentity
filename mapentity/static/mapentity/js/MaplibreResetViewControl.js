@@ -1,10 +1,19 @@
 class MaplibreResetViewControl {
+    /**
+     * Contrôle pour réinitialiser la vue de la carte à ses limites initiales.
+     * @param {Object} bounds - Les limites de la carte sous forme de [SW, NE] (sud-ouest, nord-est).
+     */
     constructor(bounds) {
         this.bounds = bounds; // Les limites de la carte
         this.map = null;
         this.container = null;
     }
 
+    /**
+     * Ajoute le contrôle à la carte.
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre à laquelle ajouter le contrôle.
+     * @returns {null} - Retourne le conteneur principal du contrôle.
+     */
     onAdd(map) {
         this.map = map; // faire attention : référence à la carte et pas instance de MaplibreMap qui lui possède une référence à la carte
         // Créer le conteneur principal
@@ -31,6 +40,9 @@ class MaplibreResetViewControl {
         return this.container;
     }
 
+    /**
+     * Réinitialise la vue de la carte aux limites initiales.
+     */
     reset() {
         if (!this.bounds) {
             console.warn('No bounds set for reset view control.');
@@ -46,6 +58,10 @@ class MaplibreResetViewControl {
 
     }
 
+    /**
+     * Récupère les limites de la carte.
+     * @returns {Object} - Les limites de la carte sous forme de [SW, NE] (sud-ouest, nord-est).
+     */
     getBounds() {
         return this.bounds;
     }

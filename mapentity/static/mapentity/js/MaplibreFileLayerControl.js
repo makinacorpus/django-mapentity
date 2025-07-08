@@ -7,16 +7,15 @@ class MaplibreFileLayerControl {
 
     onAdd(map) {
         this.loader = new MaplibreFileLoader(map, { layerOptions: this.options.layerOptions });
-
-        // Initialisation du Drag-and-drop
         this._initDragAndDrop(map);
-
-        // Initialisation du conteneur
         return this.initContainer(map);
     }
 
-    // peut être penser à enlever le drag and drop car ne fonctionne pas aussi bien que si l'on charge le fichier via le bouton
-    // Initialisation du drag and drop
+    /**
+     * Initialise le drag and drop pour charger des fichiers dans la carte.
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre.
+     * @private
+     */
     _initDragAndDrop(map) {
         const fileLoader = this.loader;
         const dropbox = map.getContainer();
@@ -54,7 +53,11 @@ class MaplibreFileLayerControl {
         }
     }
 
-
+    /**
+     * Initialise le conteneur principal du contrôle de chargement de fichier.
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre.
+     * @returns {null} - Retourne le conteneur principal du contrôle.
+     */
     initContainer(map) {
         // Creation du conteneur principal
         this._container = document.createElement('div');

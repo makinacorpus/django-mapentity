@@ -1,4 +1,8 @@
-// Fonction utilitaire pour convertir les géométries en WKT
+/**
+ * Convertit un objet de géométrie en sa représentation WKT (Well-Known Text).
+ * @param geometry {Object} - L'objet de géométrie à convertir, qui doit contenir un type et des coordonnées.
+ * @returns {string} - La chaîne WKT représentant la géométrie, ou 'GEOMETRY()' si le type n'est pas reconnu.
+ */
 function getWKT(geometry){
     if(geometry.type === 'Point'){
         return `POINT(${geometry.cordinates.join(' ')})`;

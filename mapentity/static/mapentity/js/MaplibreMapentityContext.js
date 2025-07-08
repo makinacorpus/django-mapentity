@@ -1,36 +1,34 @@
 class MaplibreMapentityContext {
+    /**
+     * Conctructeur de la classe MaplibreMapentityContext.
+     * @param bounds {Array} - Un tableau contenant les coordonnées des limites de la carte, sous la forme [[swLng, swLat], [neLng, neLat]].
+     */
     constructor(bounds) {
         this.last_sort = {};
         this.bounds = bounds;
     }
 
     /**
-     * This function `getFullContext` captures the full context of the map and its associated elements.
-     * It returns an object containing information about the map view, visible layers, form filters,
-     * sorted columns, additional information such as the full URL, and a timestamp.
-     *
-     * @param map - The map object from which to extract the context.
-     * @param kwargs - An optional object containing additional parameters:
+     * Récupère le contexte complet de la carte, y compris la vue actuelle, les couches visibles, les filtres et les colonnes triées.
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
+     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'filter' pour les filtres de formulaire et 'datatable' pour les colonnes triées.
      */
     getFullContext(map, kwargs = {}) {
         let context = {};
         const filter = kwargs.filter;
         const datatable = kwargs.datatable;
 
-        // Map view (center and zoom level)
         context['mapview'] = {
             'lat': map.getCenter().lat,
             'lng': map.getCenter().lng,
             'zoom': map.getZoom()
         };
 
-        // Visible layers by their name
         const layers = [];
 
         document.querySelectorAll('.layer-switcher-menu label').forEach(label => {
             const inputElement = label.querySelector('input');
             if(inputElement && inputElement.checked) {
-                // console.log(`${inputElement.type} layer is visible:`, label.textContent.trim());
                 layers.push(label.textContent.trim());
             }
         });
@@ -47,17 +45,14 @@ class MaplibreMapentityContext {
             const formData = new FormData(form);
             // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox'
             const fields = Array.from(formData).filter(([name, _]) => name !== 'bbox');
-            // Convertir les champs filtrés en URLSearchParams
             context['filter'] = new URLSearchParams(fields).toString();
 
         }
 
-        // Sorted columns
         if (datatable) {
             context['sortcolumns'] = this.last_sort;
         }
 
-        // Additional information useful for screenshots
         context['fullurl'] = window.location.toString();
         context['url'] = window.location.pathname.toString();
         context['viewport'] = {
@@ -65,7 +60,6 @@ class MaplibreMapentityContext {
             'height': window.innerHeight
         };
 
-        // Add a timestamp
         context['timestamp'] = new Date().getTime();
         // ajout de la classe pour les tiles chargées permettant par la suite à screamshotter de réaliser une capture d'écran
         map.getContainer().classList.add('maplibre-tile-loaded');
@@ -74,28 +68,20 @@ class MaplibreMapentityContext {
     }
 
     /**
-     * This function `saveFullContext` saves the full context of the map in local storage.
-     * It takes a map (`map`) and additional arguments (`kwargs`) as parameters.
-     * The context is retrieved via the `getFullContext` function, then serialized to JSON.
-     * The context is then stored in localStorage with a prefixed key (if a prefix is provided in `kwargs`).
-     * @param map - The map object from which to extract the context.
-     * @param kwargs - An optional object containing additional parameters, such as a prefix for the storage key.
+     * Sauvegarde le contexte complet de la carte dans le stockage local (localStorage).
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
+     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
      */
     saveFullContext(map, kwargs = {}) {
         const prefix = kwargs.prefix || '';
-        const serialized = JSON.stringify(this.getFullContext(map, kwargs)); // Serialize the context
-        // console.log('Saving context in localstorage:', serialized);
+        const serialized = JSON.stringify(this.getFullContext(map, kwargs));
         localStorage.setItem(prefix + 'map-context', serialized);
     }
 
     /**
-     * This function `loadFullContext` loads the full context of the map
-     * from local storage (localStorage). It takes an object `kwargs`
-     * containing optional arguments, such as a prefix for the storage key.
-     * If a context is found, it is deserialized from JSON and returned.
-     * Otherwise, the function returns `null`.
-     * @param kwargs - An optional object containing additional parameters, such as a prefix for the storage key.
-     * @returns {any|null}
+     * Charge le contexte complet de la carte depuis le stockage local (localStorage).
+     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
+     * @returns {any|null} - Retourne le contexte chargé depuis le stockage local, ou null si aucun contexte n'est trouvé.
      */
     loadFullContext(kwargs = {}) {
         const prefix = kwargs.prefix || '';
@@ -107,76 +93,67 @@ class MaplibreMapentityContext {
     }
 
     /**
-     * This function `restoreLatestMapView` restores the most recent map view based on saved contexts.
-     * @param map
-     * @param prefixes
-     * @param kwargs
-     * @returns {boolean}
+     * Restores le dernier contexte de la carte.
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
+     * @param prefixes {Array} - Un tableau de préfixes pour rechercher le contexte dans le stockage local.
+     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
+     * @returns {boolean} - Retourne true si la restauration a réussi, sinon false.
      */
     restoreLatestMapView(map, prefixes, kwargs = {}) {
-        let latest = null; // Variable to store the most recent context
+        let latest = null;
         for (const prefix of prefixes) {
-            // Load the context corresponding to the current prefix
             const context = this.loadFullContext({ ...kwargs, prefix });
-            // Update the most recent context if the current context is more recent
             if (!latest || (context && context.timestamp && context.timestamp > latest.timestamp)) {
                 latest = context;
             }
         }
-        // Restore the map view using the most recent context
         return this.restoreMapView(map, latest, kwargs);
     }
 
 
     /**
-     * Restores the map view based on the provided context.
-     * @param map
-     * @param context
-     * @param kwargs
-     * @returns {boolean}
+     * Restores la vue de la carte à partir du contexte fourni ou du contexte chargé depuis le stockage local.
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
+     * @param context {Object|null} - Le contexte de la carte à restaurer. Si null, le contexte sera chargé depuis le stockage local.
+     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
+     * @returns {boolean} - Retourne true si la restauration de la vue de la carte a réussi, sinon false.
      */
     restoreMapView(map, context, kwargs = {}) {
-        // If no context is provided, load the context from local storage.
         if (!context) {
             context = this.loadFullContext(kwargs);
         }
 
-        // Check if a valid context is available.
         if (context !== null) {
-            // If the context contains map view information.
             if (context && context.mapview) {
-                // Set the map view with the coordinates and zoom level from the context.
                 map.setCenter([context.mapview.lng, context.mapview.lat]);
                 map.setZoom(context.mapview.zoom);
-                return true; // Indicate that the restoration was successful.
+                return true;
             } else {
-                // If the map is defined.
                 if (map !== null) {
                     map.fitBounds(this.bounds, {padding : 0, maxZoom : 16}); // Adjust the map to fit the predefined bounds.
                 }
             }
-            return false; // Indicate that the restoration failed.
+            return false;
         }
     }
 
     /**
-     * Restores the full context of the map, including filters, sorted columns, and map layers.
-     * @param map
-     * @param context
-     * @param kwargs
+     * Restores le contexte complet de la carte, y compris les filtres, les colonnes triées et les couches visibles.
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
+     * @param context {Object|null} - Le contexte de la carte à restaurer. Si null, le contexte sera chargé depuis le stockage local.
+     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'filter' pour les filtres de formulaire, 'datatable' pour les colonnes triées et 'objectsLayer' pour la couche d'objets.
      */
     restoreFullContext(map, context, kwargs = {}) {
-        // Check if additional arguments (kwargs) are provided, otherwise initialize to an empty object.
         // const filter = kwargs.filter;
         // const objectsname = kwargs.objectsname; // The name of the objects layer, used to display the layer in the layer switcher. (modelname)
         const datatable = kwargs.datatable;
-        const objectsLayer = kwargs.objectsLayer; // The objects layer, used to display the layer in the layer switcher.
+        const objectsLayer = kwargs.objectsLayer;
 
-        // If no context is provided or if the context is not an object, try to load it from local storage.
+
         if (!context || typeof context !== 'object') {
             context = this.loadFullContext(kwargs);
         }
-        // If no context is found, display a warning and adjust the map to the maximum bounds.
+
         if (!context) {
             console.warn("No context found.");
             map.fitBounds(this.bounds);
@@ -216,15 +193,15 @@ class MaplibreMapentityContext {
         //     });
         // }
 
-        // Restore sorted columns if a datatable and sorted columns are available.
+        // Restore le dernier tri des colonnes si un datatable est fourni et que des colonnes de tri sont spécifiées dans le contexte.
         if (datatable && context.sortcolumns) {
             this.last_sort = context['sortcolumns'];
         }
 
-        // Restore the map view based on the context.
+        // restore la vue de la carte à partir du contexte.
         this.restoreMapView(map, context, kwargs);
 
-        // Display the map layers based on their names.
+        // Affichage des couches visibles dans le sélecteur de couches.
         if (context.maplayers) {
             const layers = context.maplayers;
             const layerLabels = document.querySelectorAll('.layer-switcher-menu label');

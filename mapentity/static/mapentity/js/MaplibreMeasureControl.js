@@ -1,4 +1,7 @@
 class MaplibreMeasureControl {
+    /**
+     * Contrôle de mesure pour MapLibre GL JS.
+     */
     constructor() {
         this._map = null;
         this._container = null;
@@ -19,6 +22,11 @@ class MaplibreMeasureControl {
         this._button = null;
     }
 
+    /**
+     * Ajoute le contrôle de mesure à la carte MapLibre.
+     * @param map {maplibregl.Map} - L'instance de la carte MapLibre à laquelle ajouter le contrôle.
+     * @returns {null} - Retourne le conteneur du contrôle de mesure.
+     */
     onAdd(map) {
         this._map = map;
 
@@ -111,6 +119,9 @@ class MaplibreMeasureControl {
         return this._container;
     }
 
+    /**
+     * Supprime le contrôle de mesure de la carte MapLibre.
+     */
     onRemove() {
         if (this._container?.parentNode) {
             this._container.parentNode.removeChild(this._container);
@@ -118,6 +129,11 @@ class MaplibreMeasureControl {
         this._map = undefined;
     }
 
+    /**
+     * Gère le clic sur la carte pour ajouter ou supprimer des points de mesure.
+     * @param e {Object} - L'événement de clic contenant les coordonnées du point cliqué.
+     * @private
+     */
     _onClick(e) {
         const features = this._map.queryRenderedFeatures(e.point, {
             layers: ['measure-points']
@@ -159,12 +175,21 @@ class MaplibreMeasureControl {
         this._map.getSource('geojson').setData(this._geojson);
     }
 
+    /**
+     * Gère le mouvement de la souris sur la carte pendant le dessin.
+     * @param e {Object} - L'événement de mouvement de la souris contenant les coordonnées.
+     * @private
+     */
     _onMouseMove(e) {
         if (this._drawing) {
             this._map.getCanvas().style.cursor = 'crosshair';
         }
     }
 
+    /**
+     * Termine la mesure en réinitialisant les données et en mettant à jour l'affichage de la distance.
+     * @private
+     */
     _finishMeasure() {
         this._geojson.features = [];
         this._linestring.geometry.coordinates = [];

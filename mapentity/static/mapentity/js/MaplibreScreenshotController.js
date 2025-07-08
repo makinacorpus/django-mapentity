@@ -1,5 +1,9 @@
 class MaplibreScreenshotController {
-
+    /**
+     * Contrôle pour prendre une capture d'écran de la carte MapLibre.
+     * @param url {string} - L'URL du serveur pour envoyer la capture d'écran.
+     * @param getcontext {function} - Fonction pour obtenir le contexte complet de la carte à capturer.
+     */
     constructor(url, getcontext) {
         this.url = url;
         this.getcontext = getcontext;
@@ -7,6 +11,9 @@ class MaplibreScreenshotController {
         this.container = null;
     }
 
+    /**
+     * Prend une capture d'écran de la carte et envoie le contexte au serveur.
+     */
     screenshot() {
         // Effet visuel de capture d'écran avec jQuery
         $('<div id="overlay" style="z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;"> </div>')
@@ -21,6 +28,11 @@ class MaplibreScreenshotController {
         '</form>').appendTo('body').submit().remove(); // Soumet et supprime le formulaire
     }
 
+    /**
+     * Ajoute le contrôle de capture d'écran à la carte MapLibre.
+     * @param map {maplibregl.Map} - L'instance de la carte MapLibre à laquelle ajouter le contrôle.
+     * @returns {null} - Retourne le conteneur principal du contrôle de capture d'écran.
+     */
     onAdd(map) {
         this.map = map; // faire attention : référence à la carte et pas instance de MaplibreMap qui lui possède une référence à la carte
 

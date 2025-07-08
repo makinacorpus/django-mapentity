@@ -1,13 +1,21 @@
 class MaplibreLayerControl {
+    /**
+     * Contrôle personnalisé pour Maplibre GL JS permettant de gérer les couches de la carte.
+     * @param objectsLayer {MaplibreObjectsLayer} - Instance de MaplibreObjectsLayer pour gérer les couches.
+     */
     constructor(objectsLayer) {
         this.objectsLayer = objectsLayer;
         this._container = null;
     }
 
+    /**
+     * Ajoute le contrôle à la carte Maplibre.
+     * @param map {maplibregl.Map} - Instance de la carte Maplibre à laquelle ajouter le contrôle.
+     * @returns {null}
+     */
     onAdd(map) {
         this._map = map;
 
-        // Créer le conteneur principal
         this._container = document.createElement('div');
         this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
 
@@ -56,11 +64,20 @@ class MaplibreLayerControl {
         return this._container;
     }
 
+    /**
+     * Supprime le contrôle de la carte Maplibre.
+     * @returns {void}
+     */
     onRemove() {
         this._container.parentNode.removeChild(this._container);
         this._map = undefined;
     }
 
+    /**
+     * Remplit le conteneur avec les couches de base disponibles.
+     * @param container {HTMLElement} - Le conteneur dans lequel ajouter les couches de base.
+     * @private
+     */
     _populateBaseLayers(container) {
         console.log('Populating base layers...');
         const layers = this.objectsLayer.getLayers();
@@ -137,6 +154,11 @@ class MaplibreLayerControl {
         }
     }
 
+    /**
+     * Remplit le conteneur avec les overlays disponibles.
+     * @param container {HTMLElement} - Le conteneur dans lequel ajouter les overlays.
+     * @private
+     */
     _populateOverlays(container) {
         const layers = this.objectsLayer.getLayers();
 

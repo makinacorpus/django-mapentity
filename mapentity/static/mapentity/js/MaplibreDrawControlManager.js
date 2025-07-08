@@ -7,6 +7,10 @@ class MaplibreDrawControlManager {
         this._initializeGeoman();
     }
 
+    /**
+     * Initialise Geoman avec les options appropriées en fonction des types de géométries.
+     * Cette méthode configure les contrôles d'édition et de dessin en fonction des options fournies.
+     */
     _initializeGeoman() {
         // Logique conditionnelle pour les contrôles d'édition
         const shouldShowDragForPoint = this.options.isPoint || this.options.isGeneric;
@@ -16,7 +20,6 @@ class MaplibreDrawControlManager {
         const dragEnabled = shouldShowDragForPoint && this.options.modifiable;
 
         // Pour l'edit (change) : visible pour tout sauf les points seuls
-        // Si isGeneric est true, on l'active mais la logique métier gérera la restriction sur les points
         const editEnabled = shouldShowEditForOthers;
 
         // Configuration des options Geoman
@@ -120,14 +123,12 @@ class MaplibreDrawControlManager {
 
         // Initialiser Geoman
         this.geoman = new Geoman.Geoman(this.map, geomanOptions);
-
-        // Attendre que Geoman soit complètement chargé
-        this.map.on("gm:loaded", () => {
-            console.log("Geoman fully loaded");
-        });
     }
 
-    // Méthodes pour la compatibilité avec l'ancienne API
+    /**
+     * Retourne l'instance Geoman associée à ce gestionnaire.
+     * @returns {Geoman.Geoman} L'instance de Geoman
+     * */
     getGeoman() {
         return this.geoman;
     }

@@ -1,4 +1,4 @@
-    // Toggable console.debug() function
+
     console.debug = function () {
         if (window.SETTINGS && window.SETTINGS.debug) {
             if (arguments.length > 1)
@@ -9,9 +9,9 @@
     };
 
     /**
-     * Get URL parameter in Javascript
-     * @param name {string} - The name of the parameter to retrieve from the URL
-     * @returns {string} - The value of the parameter, or null if not found
+     * Obtennir les paramètres de l'URL.
+     * @param name {string} - Le nom du paramètre à récupérer
+     * @returns {string} - La valeur du paramètre décodée ou null si le paramètre n'existe pas
      */
     function getURLParameter(name) {
         var paramEncoded = (RegExp('[?|&]' + name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1],
@@ -25,25 +25,29 @@
         return paramDecoded;
     }
 
+    /**
+     * Ajuste la hauteur du tableau DataTable pour remplir l'espace disponible.
+     */
     function expandDatatableHeight() {
-        // Calculate the available height for the table by subtracting 75 from the container height
         var fill_height = $('#objects-list_wrapper').height() - 75;
-        // Define the height of a single table row
         var row_height = 36;
-        // Calculate the number of rows that can fit in the available space
         var number_of_rows = Math.floor(fill_height / row_height);
-        // Update the number of rows displayed in the table and redraw
         $('#objects-list').DataTable().page.len(parseInt(number_of_rows.toString())).draw();
     }
 
-    // translation langue
+    /**
+     * Traduit un texte en utilisant le dictionnaire de traduction de MapEntity.
+     * @param s
+     * @returns {*}
+     */
     function tr(s) {
         return MapEntity.i18n[s] || s;
     }
 
-    //cette fonction personnalise TinyMCE pour gérer les limites de caractères et améliorer
-    // l'expérience utilisateur avec des validations visuelles.
-    // ceci pourrait être réécrit en js ou gardé tel quel pour garantir la compatibilité
+    /**
+     * Initialise TinyMCE avec la gestion du comptage de mots et des caractères.
+     * @param editor {Object} - L'éditeur TinyMCE à initialiser.
+     */
     function tinyMceInit(editor) {
         var context = $('body').data();
         editor.on('WordCountUpdate', function(event) {

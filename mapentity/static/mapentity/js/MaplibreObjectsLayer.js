@@ -1,4 +1,9 @@
 class MaplibreObjectsLayer {
+    /**
+     * Classe MaplibreObjectsLayer pour gérer les couches d'objets sur une carte Maplibre.
+     * @param geojson {Object} - Un objet GeoJSON ou un tableau de géométries à ajouter à la carte.
+     * @param options {Object} - Un objet d'options pour configurer la couche, par exemple pour définir des styles ou des propriétés supplémentaires.
+     */
     constructor(geojson, options) {
         this._map = null;
         this._objects = {};
@@ -12,6 +17,10 @@ class MaplibreObjectsLayer {
         };
     }
 
+    /**
+     * Initialise la couche d'objets sur la carte Maplibre.
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre sur laquelle ajouter la couche.
+     */
     initialize(map) {
         this._map = map;
         const onClick = (e) => this._onClick(e);
@@ -20,6 +29,11 @@ class MaplibreObjectsLayer {
         this._map.on('mousemove', onMouseMove);
     }
 
+    /**
+     * Gère l'événement de clic sur la carte.
+     * @param e {Object} - L'événement de clic contenant les coordonnées du point cliqué.
+     * @private
+     */
     _onClick(e) {
         // Skip interactions in readonly mode
         if (this.options.readonly){
@@ -36,6 +50,11 @@ class MaplibreObjectsLayer {
         }
     }
 
+    /**
+     * Gère le mouvement de la souris sur la carte pour afficher des informations contextuelles.
+     * @param e {Object} - L'événement de mouvement de la souris contenant les coordonnées.
+     * @private
+     */
     _onMouseMove(e) {
         if (this.options.readonly) return;
 
@@ -72,9 +91,6 @@ class MaplibreObjectsLayer {
             }
         }
 
-        // Gérer le survol des features, bien que les geometries ne soient pas encore crées effectivement
-        // il y apparait un effet hover et les popus apparaissent
-        // Gérer le popup
         if (hoveredFeatureId) {
             if (this.currentPopup) {
                 this.currentPopup.remove();
@@ -104,6 +120,11 @@ class MaplibreObjectsLayer {
         }
     }
 
+    /**
+     * Charge des données GeoJSON à partir d'une URL.
+     * @param url {string} - L'URL à partir de laquelle charger les données GeoJSON.
+     * @returns {Promise<void>} - Une promesse qui se résout lorsque les données sont chargées et ajoutées à la carte.
+     */
     async load(url) {
         console.log("Loading data from URL: " + url);
         this.loading = true;
@@ -117,23 +138,21 @@ class MaplibreObjectsLayer {
         }
     }
 
-
+    /**
+     * Ajoute des données GeoJSON à la carte.
+     * @param geojson {Object} - Un objet GeoJSON ou un tableau de géométries à ajouter à la carte.
+     */
     addData(geojson) {
-        console.log("Adding data to map:", geojson);
 
-        // Generate a unique ID for this GeoJSON data
         const dataId = this._generateUniqueId();
 
-        // Store the complete GeoJSON object
         this._objects[dataId] = geojson;
 
         if(geojson.type === "Feature"){
 
-            // Add as a single layer
             this.addLayer(geojson,dataId, true, true);
 
-             // Calculate and fit bounds
-            this.boundsLayer = this.calculateBounds(geojson);
+            this.boundsLayer = this._calculateBounds(geojson);
             if (this.boundsLayer) {
                 this._map.fitBounds(this.boundsLayer, {
                     maxZoom: 16,
@@ -142,12 +161,16 @@ class MaplibreObjectsLayer {
                 });
             }
         } else {
-            // If it's a FeatureCollection, add each feature as a separate layer
             this.addLayer(geojson, dataId);
         }
 
     }
 
+    /**
+     * Met en surbrillance un objet sur la carte en fonction de sa clé primaire.
+     * @param primaryKey {string|number} - La clé primaire de l'objet à mettre en surbrillance.
+     * @param on {boolean} - Indique si la surbrillance doit être activée ou désactivée.
+     */
     highlight(primaryKey, on = true) {
         if (this.options.readonly) {
             return;
@@ -179,10 +202,22 @@ class MaplibreObjectsLayer {
         }
     }
 
+    /**
+     * Sélectionne un objet sur la carte en fonction de sa clé primaire.
+     * @param primaryKey {string|number} - La clé primaire de l'objet à sélectionner.
+     * @param on {boolean} - Indique si la sélection doit être activée ou désactivée.
+     */
     select(primaryKey, on = true) {
         this.highlight(primaryKey, true);
     }
 
+    /**
+     * Ajoute une couche à la carte en fonction des données GeoJSON fournies.
+     * @param geojson {Object} - Un objet GeoJSON ou un tableau de géométries à ajouter à la carte.
+     * @param pk {string|number} - La clé primaire de l'objet à ajouter, utilisée pour identifier la couche.
+     * @param detailStatus {boolean} - Indique si le style détaillé doit être appliqué (par défaut: false).
+     * @param readonly {boolean} - Indique si la couche doit être en mode lecture seule (par défaut: false).
+     */
     addLayer(geojson, pk, detailStatus = false, readonly = false) {
         const primaryKey = pk;
         const foundTypes = new Set();
@@ -218,8 +253,6 @@ class MaplibreObjectsLayer {
                 }
             });
         }
-
-        console.log("geojson features with id:", geojson.features ?? geojson);
 
         const layerIdBase = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
@@ -362,11 +395,13 @@ class MaplibreObjectsLayer {
             this.layers.overlays[category] = {};
         }
         this.layers.overlays[category][primaryKey] = layerIds;
-
-        console.log('Ajout auto de 1 à 3 couches selon géométrie', layerIds);
     }
 
-
+    /**
+     * Ajoute une couche de base à la carte.
+     * @param name {string} - Le nom de la couche de base.
+     * @param layerConfig {Object} - La configuration de la couche de base, contenant les propriétés suivantes :
+     */
     addBaseLayer(name, layerConfig) {
         const { id, tiles, tileSize = 256, attribution = '' } = layerConfig;
 
@@ -397,6 +432,11 @@ class MaplibreObjectsLayer {
    //      }
    //  }
 
+    /**
+     * Bascule la visibilité d'une ou plusieurs couches.
+     * @param layerIds {string|Array<string>} - L'ID ou les IDs des couches à basculer. Peut être une chaîne de caractères ou un tableau de chaînes.
+     * @param visible {boolean} - Indique si les couches doivent être visibles ou non. Par défaut, c'est `true`.
+     */
     toggleLayer(layerIds, visible = true) {
         // console.log(`Toggling layer(s): ${layerIds} to ${visible ? 'visible' : 'hidden'}`);
         // Force en tableau si ce n'est pas déjà un tableau
@@ -415,10 +455,19 @@ class MaplibreObjectsLayer {
         }
     }
 
+    /**
+     * Récupère les couches actuellement gérées par cette instance.
+     * @returns {*|{baseLayers: {}, overlays: {}}}
+     */
     getLayers() {
         return this.layers;
     }
 
+    /**
+     * Récupère un objet de couche en fonction de sa clé primaire.
+     * @param primaryKey {string|number} - La clé primaire de l'objet de couche à récupérer.
+     * @returns {*} - L'objet de couche correspondant à la clé primaire, ou `undefined` si non trouvé.
+     */
     getLayer(primaryKey) {
         return this._objects[primaryKey];
     }
@@ -429,18 +478,36 @@ class MaplibreObjectsLayer {
     //     return feature.properties?.id ||feature.id || this._generateUniqueId(feature);
     // }
 
+    /**
+     * Génère un identifiant unique pour une feature.
+     * @param feature {Object} - La feature pour laquelle générer un identifiant.
+     * @returns {string} - Un identifiant unique sous forme de chaîne de caractères.
+     * @private
+     */
     _generateUniqueId(feature) {
         return `${Math.random().toString(36).substring(2, 9)}`;
     }
 
+    /**
+     * Récupère les objets actuellement gérés par cette instance.
+     * @returns {*|{}} - Un objet contenant les objets actuellement gérés, organisés par clé primaire.
+     */
     getCurrentLayers() {
         return this._current_objects;
     }
 
+    /**
+     * Récupère la couche de limites (bounds) actuellement utilisée.
+     * @returns {null} - La couche de limites, ou `null` si aucune couche de limites n'est définie.
+     */
     getBoundsLayer() {
         return this.boundsLayer;
     }
 
+    /**
+     * Met à jour la couche d'objets en fonction des clés primaires fournies.
+     * @param primaryKeys {Array<string|number>} - Un tableau de clés primaires pour lesquelles mettre à jour les objets.
+     */
     updateFromPks(primaryKeys) {
         if (!this._track_objects) {
             this._track_objects = {};
@@ -509,7 +576,10 @@ class MaplibreObjectsLayer {
 
     }
 
-    // Fit the map to the bounds of the layer we clicked on
+    /**
+     * Déplace la carte pour centrer sur une feature spécifique en fonction de sa clé primaire.
+     * @param pk {string|number} - La clé primaire de la feature à centrer.
+     */
     jumpTo(pk) {
         let feature = null;
         const layersBySource = Object.values(this._current_objects).flat();
@@ -547,7 +617,13 @@ class MaplibreObjectsLayer {
         }
     }
 
-    calculateBounds(geojson) {
+    /**
+     * Calcule les limites (bounds) d'un objet GeoJSON ou d'une collection de géométries.
+     * @param geojson {Object} - Un objet GeoJSON ou une collection de géométries à partir duquel calculer les limites.
+     * @returns {null|maplibregl.LngLatBounds} - Retourne les limites calculées ou `null` si l'objet est vide.
+     * @private
+     */
+    _calculateBounds(geojson) {
         if (!geojson) {
             return null;
         }

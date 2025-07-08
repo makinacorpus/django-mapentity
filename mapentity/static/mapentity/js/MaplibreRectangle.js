@@ -1,15 +1,21 @@
 class MaplibreRectangle {
+    /**
+     * Classe représentant un rectangle sur une carte Maplibre.
+     * @param bounds {Array} - Un tableau contenant les coordonnées des coins du rectangle, sous la forme [[swLng, swLat], [neLng, neLat]].
+     * @param options {Object} - Un objet d'options pour configurer le rectangle, par exemple pour définir des styles ou des propriétés supplémentaires.
+     */
     constructor(bounds, options= {}) {
         this.bounds = bounds;
         this.options = options;
         this.coordinates = this._boundsToCoordinates(bounds);
     }
 
-    setBounds(bounds) {
-        this.bounds = bounds;
-        this.coordinates = this._boundsToCoordinates(bounds);
-    }
-
+    /**
+     * Définit les limites du rectangle.
+     * @param bounds {Array} - Un tableau contenant les coordonnées des coins du rectangle, sous la forme [[swLng, swLat], [neLng, neLat]].
+     * @returns {*[][]} - Un tableau contenant les coordonnées des coins du rectangle sous la forme [[swLng, swLat], [neLng, neLat]].
+     * @private
+     */
     _boundsToCoordinates(bounds) {
 
         const sw = bounds[0]; // Southwest corner
@@ -24,6 +30,10 @@ class MaplibreRectangle {
         ];
     }
 
+    /**
+     * Récupère les coordonnées du rectangle sous forme de GeoJSON.
+     * @returns {string} - Les coordonnées du rectangle sous forme WKT (Well-Known Text).
+     */
     getWKT() {
         // Utilisation de la fonction getWKT pour récupérer les coordonnées sous format WKT
         return getWKT({

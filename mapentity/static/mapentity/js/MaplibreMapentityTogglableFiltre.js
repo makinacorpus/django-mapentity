@@ -1,4 +1,7 @@
 class MaplibreMapentityTogglableFiltre {
+    /**
+     * Constructeur de la classe MaplibreMapentityTogglableFiltre
+     */
     constructor() {
         this.button = document.getElementById('filters-btn');
         this.button.setAttribute('type', 'button');
@@ -16,6 +19,9 @@ class MaplibreMapentityTogglableFiltre {
         this.initEventListeners();
     }
 
+    /**
+     * Initialise le popover pour les filtres
+     */
     initPopover() {
         // Vérifier que jQuery et Bootstrap sont disponibles
         if (typeof $ === 'undefined') {
@@ -49,6 +55,9 @@ class MaplibreMapentityTogglableFiltre {
         });
     }
 
+    /**
+     * Initialise les écouteurs d'événements pour les boutons et champs
+     */
     initEventListeners() {
         // Events pour le hover info
         this.button.addEventListener('mouseenter', () => this.showinfo());
@@ -70,12 +79,19 @@ class MaplibreMapentityTogglableFiltre {
         this.attachFieldEvents();
     }
 
+    /**
+     * Attache les événements aux champs du formulaire de filtre
+     */
     attachFieldEvents() {
         document.querySelectorAll('#mainfilter select, #mainfilter input').forEach(element => {
             element.addEventListener('change', () => this.setfield(element));
         });
     }
 
+    /**
+     *  Accessor pour obtenir l'élément tip du popover
+     * @returns {jQuery|HTMLElement|*|null}
+     */
     tip() {
         // Retourner l'élément tip du popover Bootstrap
         try {
@@ -91,6 +107,11 @@ class MaplibreMapentityTogglableFiltre {
         return null;
     }
 
+    /**
+     * Charge le formulaire de filtre depuis l'URL spécifiée dans l'attribut filter-url
+     * @param mapsync {MaplibreMapListSync} - Instance de MaplibreMapListSync pour la synchronisation des filtres
+     * @returns {Promise<void>} - Retourne une promesse qui se résout lorsque le formulaire est chargé
+     */
     async load_filter_form(mapsync) {
         const mainfilter = document.getElementById('mainfilter');
         if (!mainfilter || this.loaded_form) {
@@ -103,7 +124,6 @@ class MaplibreMapentityTogglableFiltre {
             return;
         }
 
-        console.log('Loading filter form from:', filterUrl);
         try {
             const response = await fetch(filterUrl);
             if (!response.ok) {
@@ -132,16 +152,16 @@ class MaplibreMapentityTogglableFiltre {
             }
 
             // Attacher les événements aux boutons
-            this.attachFormEvents(mapsync, newMainFilter);
+            this._attachFormEvents(mapsync, newMainFilter);
 
             // Gestion des select multiples avec Chosen
-            this.setupChosenSelects(newMainFilter);
+            this._setupChosenSelects(newMainFilter);
 
             // Réorganiser les filtres right
-            this.reorganizeRightFilters(newMainFilter);
+            this._reorganizeRightFilters(newMainFilter);
 
             // Dispatch custom event
-            this.dispatchFilterEvent();
+            this._dispatchFilterEvent();
 
             this.loaded_form = true;
 
@@ -151,8 +171,13 @@ class MaplibreMapentityTogglableFiltre {
         }
     }
 
-    attachFormEvents(mapsync, newMainFilter) {
-        // Events pour submit et reset
+    /**
+     * Attache les événements aux boutons de filtre et aux champs du formulaire
+     * @param mapsync {MaplibreMapListSync} - Instance de MaplibreMapListSync pour la synchronisation des filtres
+     * @param newMainFilter {HTMLElement} - Le nouvel élément de filtre principal
+     * @private
+     */
+    _attachFormEvents(mapsync, newMainFilter) {
         const filterBtn = document.getElementById('filter');
         const resetBtn = document.getElementById('reset');
 
@@ -164,7 +189,6 @@ class MaplibreMapentityTogglableFiltre {
             resetBtn.addEventListener('click', (e) => mapsync._onFormReset(e));
         }
 
-        // Events pour les champs
         newMainFilter.querySelectorAll('select, input').forEach(element => {
             element.addEventListener('change', () => this.setfield(element));
         });
@@ -180,12 +204,17 @@ class MaplibreMapentityTogglableFiltre {
         });
     }
 
-    setupChosenSelects(newMainFilter) {
-        // Gestion des select multiples avec Chosen (si disponible)
+    /**
+     * Configure les sélecteurs multiples avec Chosen
+     * @param newMainFilter {HTMLElement} - Le nouvel élément de filtre principal
+     * @private
+     */
+    _setupChosenSelects(newMainFilter) {
+
         const multipleSelects = newMainFilter.querySelectorAll('select[multiple]');
 
         multipleSelects.forEach(select => {
-            // Si Chosen est disponible
+
             if (typeof $.fn.chosen === 'function') {
                 $(select).chosen();
             }
@@ -203,7 +232,12 @@ class MaplibreMapentityTogglableFiltre {
         });
     }
 
-    reorganizeRightFilters(newMainFilter) {
+    /**
+     * Réorganise les filtres de droite dans le conteneur principal
+     * @param newMainFilter {HTMLElement} - Le nouvel élément de filtre principal
+     * @private
+     */
+    _reorganizeRightFilters(newMainFilter) {
         const rightContainer = document.querySelector('#mainfilter > .right');
         if (!rightContainer) return;
 
@@ -215,8 +249,11 @@ class MaplibreMapentityTogglableFiltre {
         });
     }
 
-    // Méthode pour dispatcher un événement de filtre, y jeter un oeil une fois que tout sera en place
-    dispatchFilterEvent() {
+    /**
+     * Déclenche un événement personnalisé pour les filtres
+     * @private
+     */
+    _dispatchFilterEvent() {
         const context = document.body.dataset;
         if (context?.modelname) {
             window.dispatchEvent(new CustomEvent('entity:view:filter', {
@@ -225,12 +262,19 @@ class MaplibreMapentityTogglableFiltre {
         }
     }
 
+    /**
+     * Affiche un message d'erreur dans la console
+     * @param message
+     */
     showError(message) {
         console.error(message);
     }
 
+    /**
+     * Affiche le popover d'information (hover) si le popover principal n'est pas visible
+     */
     showinfo() {
-        // Si le popover principal est visible, ne pas montrer le hover
+
         if (this.visible) {
             return;
         }
@@ -247,6 +291,9 @@ class MaplibreMapentityTogglableFiltre {
         }
     }
 
+    /**
+     * Cache le popover d'information (hover) si il est visible
+     */
     hideinfo() {
         if (this.hover) {
             try {
@@ -257,19 +304,29 @@ class MaplibreMapentityTogglableFiltre {
         }
     }
 
+    /**
+     * Affiche les informations des filtres actifs
+     * @returns {string}
+     */
     infos() {
         if (Object.keys(this.fields).length === 0) {
             return "<p>" + tr("No filter") + "</p>";
         }
 
         return Object.values(this.fields).map(f => {
-            const safeValue = this.escapeHtml(f.value);
-            const safeLabel = this.escapeHtml(f.label);
+            const safeValue = this._escapeHtml(f.value);
+            const safeLabel = this._escapeHtml(f.label);
             return `<p><span class="filter-info">${safeLabel}</span>: ${safeValue}</p>`;
         }).join('');
     }
 
-    escapeHtml(str) {
+    /**
+     * Échappe les caractères spéciaux HTML dans une chaîne
+     * @param str {string|null|undefined} - La chaîne à échapper
+     * @returns {string} - La chaîne échappée
+     * @private
+     */
+    _escapeHtml(str) {
         if (str === null || str === undefined) return '';
 
         return String(str).replace(/[&<>"']/g, (char) => ({
@@ -281,6 +338,9 @@ class MaplibreMapentityTogglableFiltre {
         }[char]));
     }
 
+    /**
+     * Bascule l'affichage du popover de filtres
+     */
     toggle() {
         if (!this.popover) {
             console.warn('Popover not initialized');
@@ -288,17 +348,21 @@ class MaplibreMapentityTogglableFiltre {
         }
 
         if (this.visible) {
-            this.hidePopover();
+            this._hidePopover();
         } else {
             console.log("Showing filters popover");
-            this.showPopover();
+            this._showPopover();
         }
 
         this.visible = !this.visible;
     }
 
-    showPopover() {
-        // Cacher le hover info d'abord
+    /**
+     * Affiche le popover de filtres
+     * @private
+     */
+    _showPopover() {
+
         this.hideinfo();
 
         if (!this.popover) {
@@ -319,14 +383,18 @@ class MaplibreMapentityTogglableFiltre {
                 } else {
                     console.error('Popover tip still not found after show');
                 }
-            }, 100); // Augmenter le délai
+            }, 1000);
 
         } catch (error) {
             console.error('Error showing popover:', error);
         }
     }
 
-    hidePopover() {
+    /**
+     * Cache le popover de filtres
+     * @private
+     */
+    _hidePopover() {
         const tip = this.tip();
 
         // Remettre le panel dans le wrapper avant de fermer
@@ -338,14 +406,12 @@ class MaplibreMapentityTogglableFiltre {
             }
         }
 
-        // Cacher le popover
         try {
             this.popover.popover('hide');
         } catch (error) {
             console.error('Error hiding popover:', error);
         }
 
-        // Retirer l'event listener
         this.removeOutsideClickListener();
     }
 
@@ -379,15 +445,17 @@ class MaplibreMapentityTogglableFiltre {
         }
     }
 
+    /**
+     * Attache un écouteur d'événements pour les clics à l'extérieur du popover
+     */
     attachOutsideClickListener() {
-        // Utiliser la méthode jQuery pour les événements avec namespace
+
         $(document).on('click.filtersOutside', (e) => {
             const tip = this.tip();
             const target = e.target;
 
             if (!tip || tip.length === 0) return;
 
-            // Vérifier si le clic est à l'extérieur
             const isOutsideTip = tip.has(target).length === 0;
             const isOutsideButton = !this.button.contains(target);
 
@@ -397,10 +465,18 @@ class MaplibreMapentityTogglableFiltre {
         });
     }
 
+    /**
+     * Supprime l'écouteur d'événements pour les clics à l'extérieur du popover
+     */
     removeOutsideClickListener() {
         $(document).off('click.filtersOutside');
     }
 
+    /**
+     * Met à jour l'état d'un champ de filtre
+     * @param field {HTMLElement} - L'élément de champ à mettre à jour
+     * @returns {boolean} - Retourne true si le champ est défini, false sinon
+     */
     setfield(field) {
         if (!field || !field.name) return false;
 
@@ -410,7 +486,7 @@ class MaplibreMapentityTogglableFiltre {
         let val = $field.val();
         let set = val !== '' && val !== null && !Array.isArray(val) || (Array.isArray(val) && val.length > 0 && val[0] !== '');
 
-        // Logique pour différents types de champs (comme dans l'original)
+        // Logique pour différents types de champs
         if ($field.is('input[type=hidden]')) {
             set = false;
         } else if ($field.is('select[multiple]')) {
@@ -441,6 +517,9 @@ class MaplibreMapentityTogglableFiltre {
         return set;
     }
 
+    /**
+     * Met à jour l'état du bouton de soumission en fonction des filtres actifs
+     */
     setsubmit() {
         const btn = document.getElementById('filters-btn');
         if (!btn) return;

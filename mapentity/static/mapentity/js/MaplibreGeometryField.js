@@ -32,6 +32,9 @@ class MaplibreGeometryField {
 
     /**
      * Fonction utilitaire pour obtenir le GeoJSON d'une feature
+     * @param featureData {Object} - La feature Geoman contenant les données de la géométrie
+     * @return {Object|null} - Retourne l'objet GeoJSON ou null en cas d'erreur
+     * @private
      */
     _getGeoJson(featureData) {
         try {
@@ -44,6 +47,8 @@ class MaplibreGeometryField {
 
     /**
      * Obtenir la collection de features
+     * @return {Object} - Un objet GeoJSON de type FeatureCollection contenant toutes les features
+     * @private
      */
     _getFeatureCollection() {
         return {
@@ -56,9 +61,11 @@ class MaplibreGeometryField {
 
     /**
      * Mis à jour de gmEvents avec de nouvelles données ou suppression
+     * @param event {Object} - L'événement Geoman contenant les données de la feature
+     * @return {boolean} - Retourne true si l'événement a été traité avec succès, false sinon
+     * @private
      */
     _updateEventsHistory(event) {
-        console.log('Processing event:', event);
 
         const eventId = event?.feature?.id;
         if (!eventId) {
@@ -71,7 +78,6 @@ class MaplibreGeometryField {
             const index = this.gmEvents.findIndex(e => e.id === eventId);
             if (index !== -1) {
                 this.gmEvents.splice(index, 1);
-                console.log(`Feature with ID ${eventId} deleted from gmEvents`);
             }
         } else {
             // Pour create, editend, dragend etc.
@@ -98,12 +104,14 @@ class MaplibreGeometryField {
             }
         }
 
-        console.log('Events history updated:', this.gmEvents);
         return true;
     }
 
     /**
      * Traiter et sauvegarder la géométrie après un événement create, editend, dragend ou remove
+     * @param event {Object} - L'événement Geoman contenant les données de la feature
+     * @return {void}
+     * @private
      */
     _processAndSaveGeometry(event) {
         // Mettre à jour l'historique des événements
@@ -113,7 +121,6 @@ class MaplibreGeometryField {
 
         const allFeatures = this._getFeatureCollection();
 
-        // Construire la structure appropriée selon les options
         let normalizedData;
 
         if (this.options.isGeneric) {
@@ -125,9 +132,7 @@ class MaplibreGeometryField {
             if (this.options.isLineString || this.options.isPolygon || this.options.isPoint) {
                 // Pour les événements de suppression, on prend toutes les features restantes
                 // Pour les autres événements, on prend la dernière feature modifiée
-                const targetFeature = event.type === 'gm:remove'
-                    ? allFeatures.features[0] // première feature restante, ou undefined si vide
-                    : allFeatures.features.at(-1); // dernière feature modifiée
+                const targetFeature = event.type === 'gm:remove' ? allFeatures.features[0] : allFeatures.features.at(-1);
 
                 if (targetFeature) {
                     normalizedData = this.dataManager.normalizeToFeatureCollection(targetFeature);
@@ -146,6 +151,9 @@ class MaplibreGeometryField {
 
     /**
      * Gestion des événements de clic pendant le dessin
+     * @param event {Object} - L'événement de clic contenant les coordonnées du clic
+     * @return {void}
+     * @private
      */
     _handleDrawingClick(event) {
         if (!this.isDrawingLine && !this.isDrawingPolygon && !this.isDrawingRectangle) {
@@ -174,6 +182,9 @@ class MaplibreGeometryField {
 
     /**
      * Gestion des mouvements de la souris pendant le dessin en direct
+     * @param event {Object} - L'événement de mouvement de la souris contenant les données du marqueur
+     * @return {void}
+     * @private
      */
     _handleLiveDrawing(event) {
         if ((!this.isDrawingLine && !this.isDrawingPolygon && !this.isDrawingRectangle) ||
@@ -189,6 +200,10 @@ class MaplibreGeometryField {
 
     /**
      * Met à jour la popup de dessin en direct avec les distances ou surfaces
+     * @param currentCoords {Array} - Les coordonnées actuelles du marqueur
+     * @param isLive {boolean} - Indique si c'est un suivi en direct ou non
+     * @return {void}
+     * @private
      */
     _updateDrawingPopup(currentCoords, isLive = false) {
         if (!this.livePopup) {
@@ -211,6 +226,10 @@ class MaplibreGeometryField {
 
     /**
      * Obtient le message de dessin pour la ligne
+     * @param currentCoords {Array} - Les coordonnées actuelles du marqueur
+     * @param isLive {boolean} - Indique si c'est un suivi en direct ou non
+     * @return {string} - Le message de dessin formaté
+     * @private
      */
     _getLineDrawingMessage(currentCoords, isLive) {
         if (this.currentDrawingCoords.length === 0) {
@@ -248,6 +267,10 @@ class MaplibreGeometryField {
 
     /**
      * Obtient le message de dessin pour le rectangle
+     * @param currentCoords {Array} - Les coordonnées actuelles du marqueur
+     * @param isLive {boolean} - Indique si c'est un suivi en direct ou non
+     * @return {string} - Le message de dessin formaté
+     * @private
      */
     _getRectangleDrawingMessage(currentCoords, isLive) {
         if (this.currentDrawingCoords.length === 0) {
@@ -281,6 +304,10 @@ class MaplibreGeometryField {
 
     /**
      * Obtient le message de dessin pour le polygone
+     * @param currentCoords {Array} - Les coordonnées actuelles du marqueur
+     * @param isLive {boolean} - Indique si c'est un suivi en direct ou non
+     * @return {string} - Le message de dessin formaté
+     * @private
      */
     _getPolygonDrawingMessage(currentCoords, isLive) {
         if (this.currentDrawingCoords.length === 0) {
@@ -295,6 +322,8 @@ class MaplibreGeometryField {
 
     /**
      * Rénitialiser les coordonnées de dessin
+     * @return {void}
+     * @private
      */
     _resetDrawingCoords() {
         // Réinitialiser les coordonnées pour recommencer une nouvelle forme
@@ -304,6 +333,8 @@ class MaplibreGeometryField {
 
     /**
      * Arrêter le suivi du dessin en direct
+     * @return {void}
+     * @private
      */
     _stopLiveDrawingTracking() {
         if (this.livePopup) {
@@ -319,6 +350,10 @@ class MaplibreGeometryField {
         this.isDrawingRectangle = false;
     }
 
+    /**
+     * Configurer les événements Geoman pour la création, l'édition et le suivi en direct des géométries
+     * @private
+     */
     _setupGeomanEvents() {
         // Attendre que Geoman soit complètement chargé
         this.map.on("gm:loaded", () => {

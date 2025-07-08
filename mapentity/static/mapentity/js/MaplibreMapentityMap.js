@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Écouteur pour la vue détail - SANS map.on('load') car déjà chargée
+    // Écouteur pour la vue détail
     window.addEventListener('entity:map:detail', function(e) {
         const { map, objectsLayer, modelname } = e.detail;
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Écouteur pour la vue liste - SANS map.on('load') car déjà chargée
+    // Écouteur pour la vue liste
     window.addEventListener('entity:map:list', function(e) {
         const { map, objectsLayer, modelname, bounds } = e.detail;
         const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);

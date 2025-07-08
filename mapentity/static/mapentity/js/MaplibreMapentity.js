@@ -2,7 +2,9 @@ if (!window.MapEntity) window.MapEntity = {};
 
 document.addEventListener('DOMContentLoaded', function() {
 
-// Fonction pour ajuster la hauteur maximale des panneaux défilants
+    /**
+     * Remplit la hauteur maximale des éléments avec la classe .scrollable
+     */
     function fillmax() {
         document.querySelectorAll('.scrollable').forEach(function(element) {
             if (window.innerWidth >= 992) {

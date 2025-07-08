@@ -1,4 +1,9 @@
 class MaplibreFileLoader {
+    /**
+     * Constructeur de la classe MaplibreFileLoader.
+     * @param map {maplibregl.Map} - L'instance de la carte Maplibre où les données seront chargées.
+     * @param options {Object} - Options de configuration pour le chargeur de fichiers.
+     */
     constructor(map, options = {}) {
         this._map = map;
         this.options = { ...options };
@@ -15,6 +20,10 @@ class MaplibreFileLoader {
         };
     }
 
+    /**
+     * Charge un fichier dans la carte Maplibre.
+     * @param file {File} - Le fichier à charger, qui doit être un objet File valide.
+     */
     load(file) {
         const ext = file.name.split('.').pop();
         const parser = this._parsers[ext];
@@ -33,6 +42,11 @@ class MaplibreFileLoader {
         reader.readAsText(file);
     }
 
+    /**
+     * Charge un contenu GeoJSON dans la carte Maplibre.
+     * @param content {Object|string} - Le contenu GeoJSON à charger, qui peut être une chaîne JSON ou un objet.
+     * @private
+     */
     _loadGeoJSON(content) {
         if (typeof content === 'string') {
             content = JSON.parse(content);
@@ -71,17 +85,25 @@ class MaplibreFileLoader {
                 width: strokeWidth
             }, ['==', '$type', 'LineString']);
 
-            const bounds = this.calculateBounds(content);
+            const bounds = this._calculateBounds(content);
             if (bounds) {
                 this._map.fitBounds(bounds, { padding: 50, maxZoom: 15 });
             }
         }
     }
 
+    /**
+     * Ajoute une couche avec un popup à la carte Maplibre.
+     * @param type {string} - Le type de la couche (par exemple, 'polygon', 'point', 'line').
+     * @param layerType {string} - Le type de la couche Maplibre (par exemple, 'fill', 'circle', 'line').
+     * @param sourceId {string} - L'ID de la source GeoJSON à utiliser pour la couche.
+     * @param style {Object} - Un objet contenant les styles pour la couche, comme 'color', 'opacity', 'radius', etc.
+     * @param filter {Array} - Un tableau de filtres pour la couche, par exemple ['==', '$type', 'Polygon'].
+     * @private
+     */
     _addLayerWithPopup(type, layerType, sourceId, style, filter) {
         const layerId = `${type}-layer-${sourceId}`;
 
-        // Créer dynamiquement l'objet paint selon le type de layer
         let paint;
         if (layerType === 'fill') {
             paint = {
@@ -114,7 +136,6 @@ class MaplibreFileLoader {
             this._map.getCanvas().style.cursor = 'pointer';
             const coordinates = e.lngLat;
             const properties = e.features[0].properties;
-            console.log(properties);
             const content = Object.entries(properties)
                 .map(([key, value]) => `<strong>${key}</strong>: ${value}`)
                 .join('<br>');
@@ -130,7 +151,13 @@ class MaplibreFileLoader {
         });
     }
 
-    calculateBounds(geojson) {
+    /**
+     * Calcule les limites d'un objet GeoJSON.
+     * @param geojson {Object} - L'objet GeoJSON à partir duquel les limites seront calculées.
+     * @returns {null|maplibregl.LngLatBounds} - Retourne les limites calculées ou null si l'objet est vide.
+     * @private
+     */
+    _calculateBounds(geojson) {
         if (!geojson) return null;
 
         const bounds = new maplibregl.LngLatBounds();
@@ -175,6 +202,12 @@ class MaplibreFileLoader {
         return bounds.isEmpty() ? null : bounds;
     }
 
+    /**
+     * Convertit le contenu d'un fichier en GeoJSON.
+     * @param content {string|Document} - Le contenu du fichier, qui peut être une chaîne XML ou un document XML.
+     * @param format {string} - Le format du fichier (par exemple, 'gpx', 'kml').
+     * @private
+     */
     _convertToGeoJSON(content, format) {
         if (typeof content === 'string') {
             content = (new window.DOMParser()).parseFromString(content, "text/xml");

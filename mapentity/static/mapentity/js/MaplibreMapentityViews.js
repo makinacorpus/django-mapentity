@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
     //     });
     // });
 
-    // Certainement faire ceci dans MaplibreMapentity.js puisque entity:view:detail est déjà géré dans MaplibreMapentityMap.js
     // Écouteur d'événement pour la vue liste
     window.addEventListener('entity:view:list', function(e) {
         console.log('Map initialized for list view with data:', e.detail);
