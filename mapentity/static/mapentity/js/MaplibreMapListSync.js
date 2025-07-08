@@ -1,6 +1,6 @@
 class MaplibreMapListSync {
     /**
-     * Constructor for MaplibreMapListSync
+     * Constructeur de MaplibreMapListSync
      * @param datatable {DataTable} - L'instance de DataTable à synchroniser avec la carte MapLibre
      * @param map {maplibregl.Map} - L'instance de la carte MapLibre à synchroniser avec la liste
      * @param objectsLayer {MaplibreObjectsLayer} - L'instance de MaplibreObjectsLayer pour gérer les objets de la carte
@@ -73,11 +73,7 @@ class MaplibreMapListSync {
             return;
         }
         const mapViewChangedStatue = true
-
-        // Une fois la carte prête, on met à jour les bornes du formulaire de filtre
         this._formSetBounds();
-
-        // Et on recharge la liste d’entités affichées
         this._reloadList(mapViewChangedStatue);
     }
 
@@ -122,7 +118,7 @@ class MaplibreMapListSync {
 
         if(!mapViewChangedStatue) {
             if (filter) {
-                this.togglableFiltre.button.classList.remove('btn-info'); // peut être remplacé par toggleable.button.ClassList.remove('btn-info'); idem pour les autres.
+                this.togglableFiltre.button.classList.remove('btn-info');
                 this.togglableFiltre.button.classList.add('btn-warning');
             } else {
                 this.togglableFiltre.button.classList.remove('btn-warning');
@@ -154,7 +150,7 @@ class MaplibreMapListSync {
         } catch (error) {
             console.error('Error:', error);
         } finally {
-            this._loading = false; // Indicate that loading is done
+            this._loading = false;
         }
 
         return false;

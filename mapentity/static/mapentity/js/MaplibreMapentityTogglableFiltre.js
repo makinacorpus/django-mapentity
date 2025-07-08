@@ -9,7 +9,6 @@ class MaplibreMapentityTogglableFiltre {
         this.visible = false;
         this.loaded_form = false;
 
-        // Vérification que les éléments existent
         if (!this.button) {
             console.error('Required button element not found');
             return;
@@ -23,13 +22,11 @@ class MaplibreMapentityTogglableFiltre {
      * Initialise le popover pour les filtres
      */
     initPopover() {
-        // Vérifier que jQuery et Bootstrap sont disponibles
         if (typeof $ === 'undefined') {
             console.error('jQuery not available for popover');
             return;
         }
 
-        // Vérifier que les éléments existent
         const popoverEl = document.getElementById('filters-popover');
         const hoverEl = document.getElementById('filters-hover');
 
@@ -38,7 +35,6 @@ class MaplibreMapentityTogglableFiltre {
             return;
         }
 
-        // Initialiser le popover principal
         this.popover = $('#filters-popover').popover({
             placement: 'bottom',
             html: true,
@@ -46,7 +42,6 @@ class MaplibreMapentityTogglableFiltre {
             title: 'useless',
         });
 
-        // Initialiser le hover popover
         this.hover = $('#filters-hover').popover({
             placement: 'bottom',
             html: true,
@@ -59,23 +54,19 @@ class MaplibreMapentityTogglableFiltre {
      * Initialise les écouteurs d'événements pour les boutons et champs
      */
     initEventListeners() {
-        // Events pour le hover info
         this.button.addEventListener('mouseenter', () => this.showinfo());
         this.button.addEventListener('mouseleave', () => this.hideinfo());
 
-        // Event pour le toggle principal
         this.button.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggle();
         });
 
-        // Event pour fermer
         const closeBtn = document.getElementById('filters-close');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => this.toggle());
         }
 
-        // Events pour les champs existants
         this.attachFieldEvents();
     }
 
@@ -93,7 +84,6 @@ class MaplibreMapentityTogglableFiltre {
      * @returns {jQuery|HTMLElement|*|null}
      */
     tip() {
-        // Retourner l'élément tip du popover Bootstrap
         try {
             if (this.popover && this.popover.length > 0) {
                 const popoverData = this.popover.data('bs.popover');
@@ -132,13 +122,11 @@ class MaplibreMapentityTogglableFiltre {
 
             const responseText = await response.text();
 
-            // Cacher le spinner
             const spinner = document.querySelector('#filters-panel .filter-spinner-container');
             if (spinner) {
                 spinner.style.display = 'none';
             }
 
-            // Remplacer le contenu
             mainfilter.outerHTML = responseText;
             const newMainFilter = document.getElementById('mainfilter');
 
@@ -146,7 +134,6 @@ class MaplibreMapentityTogglableFiltre {
                 throw new Error('New main filter not found after replacement');
             }
 
-            // Configuration mapsync
             if (mapsync?.options?.filter) {
                 mapsync.options.filter.form = newMainFilter;
             }
@@ -239,7 +226,9 @@ class MaplibreMapentityTogglableFiltre {
      */
     _reorganizeRightFilters(newMainFilter) {
         const rightContainer = document.querySelector('#mainfilter > .right');
-        if (!rightContainer) return;
+        if (!rightContainer) {
+            return;
+        }
 
         newMainFilter.querySelectorAll('.right-filter').forEach(filter => {
             const p = filter.closest('p');
@@ -371,10 +360,8 @@ class MaplibreMapentityTogglableFiltre {
         }
 
         try {
-            // Afficher le popover
             this.popover.popover('show');
 
-            // Attendre que le popover soit créé dans le DOM
             setTimeout(() => {
                 const tip = this.tip();
                 if (tip && tip.length > 0) {
@@ -383,7 +370,7 @@ class MaplibreMapentityTogglableFiltre {
                 } else {
                     console.error('Popover tip still not found after show');
                 }
-            }, 1000);
+            }, 100);
 
         } catch (error) {
             console.error('Error showing popover:', error);
@@ -397,7 +384,6 @@ class MaplibreMapentityTogglableFiltre {
     _hidePopover() {
         const tip = this.tip();
 
-        // Remettre le panel dans le wrapper avant de fermer
         if (tip && tip.length > 0) {
             const panel = tip.find('#filters-panel');
             const wrapper = document.getElementById('filters-wrapper');
@@ -423,7 +409,6 @@ class MaplibreMapentityTogglableFiltre {
         }
 
         try {
-            // Vider le contenu et ajouter la flèche
             tip.empty().append('<div class="arrow"/>');
 
             // Déplacer le panel du wrapper vers le tip
