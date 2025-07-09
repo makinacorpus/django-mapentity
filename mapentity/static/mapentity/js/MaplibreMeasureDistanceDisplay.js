@@ -15,10 +15,10 @@ class MaplibreMeasureDistanceDisplay {
         this._container.style.position = 'absolute';
         this._container.style.top = '10px';
         this._container.style.left = '60px';
-        this._container.style.background = 'rgba(0, 0, 0, 0.7)'; // Fond noir transparent
+        this._container.style.background = 'rgba(0, 0, 0, 0.7)';
         this._container.style.padding = '10px';
         this._container.style.zIndex = 1000;
-        this._container.style.borderRadius = '5px'; // Coins arrondis
+        this._container.style.borderRadius = '5px';
         return this._container;
     }
 

@@ -18,19 +18,5 @@ function getWKT(geometry){
         return `LINESTRING(${coordinates})`;
     }
 
-    if(geometry.type === 'MultiPolygon'){
-        const coordinates = geometry.coordinates.map(polygon => {
-            return `(${polygon[0].map(coord => coord.join(' ')).join(', ')})`;
-        }).join(', ');
-        return `MULTIPOLYGON(${coordinates})`;
-    }
-
-    if(geometry.type === 'MultiLineString'){
-        const coordinates = geometry.coordinates.map(line => {
-            return `(${line.map(coord => coord.join(' ')).join(', ')})`;
-        }).join(', ');
-        return `MULTILINESTRING(${coordinates})`;
-    }
-
     return 'GEOMETRY()';
 }

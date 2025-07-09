@@ -17,15 +17,15 @@ class MaplibreScreenshotController {
     screenshot() {
         // Effet visuel de capture d'écran avec jQuery
         $('<div id="overlay" style="z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;"> </div>')
-            .appendTo(document.body) // Ajoute un overlay blanc au document
-            .fadeOut(); // Fait disparaître l'overlay
+            .appendTo(document.body)
+            .fadeOut();
 
         const fullContext = this.getcontext();
 
         // Hack pour télécharger une réponse en pièce jointe via Ajax avec jQuery
         $('<form action="' + this.url + '" method="post">' +
         '<textarea name="printcontext">' + fullContext + '</textarea>' +
-        '</form>').appendTo('body').submit().remove(); // Soumet et supprime le formulaire
+        '</form>').appendTo('body').submit().remove();
     }
 
     /**
@@ -47,7 +47,7 @@ class MaplibreScreenshotController {
         button.className = 'maplibregl-ctrl-icon maplibregl-screenshot';
 
         const img = document.createElement('img');
-        img.src = '/static/mapentity/images/screenshot.png'; // Adapter le chemin selon vos besoins
+        img.src = '/static/mapentity/images/screenshot.png';
         img.alt = 'Screenshot';
         img.style.width = '25px';
         img.style.height = '25px';

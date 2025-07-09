@@ -86,7 +86,6 @@ class MaplibreLayerControl {
         // Obtenir les entrées des baseLayers
         const baseLayerEntries = Object.entries(layers.baseLayers);
 
-        // Variable pour stocker la première couche
         let firstLayerId = null;
         let firstInput = null;
 
@@ -111,11 +110,11 @@ class MaplibreLayerControl {
             input.addEventListener('change', (e) => {
                 const isChecked = e.target.checked;
                 if (isChecked) {
-                    // Cacher tous les autres baseLayers
+
                     Object.values(layers.baseLayers).forEach(layerId => {
                         this.objectsLayer.toggleLayer(layerId, false);
                     });
-                    // Montrer le baseLayer sélectionné
+
                     this.objectsLayer.toggleLayer(id, true);
 
                     // S'assurer que mesure est au-dessus de tous les autres
@@ -129,15 +128,13 @@ class MaplibreLayerControl {
 
         // Sélectionner automatiquement la première couche de base
         if (firstLayerId && firstInput) {
-            // Marquer le premier radio button comme sélectionné
+
             firstInput.checked = true;
 
-            // Cacher toutes les couches de base d'abord
             Object.values(layers.baseLayers).forEach(layerId => {
                 this.objectsLayer.toggleLayer(layerId, false);
             });
 
-            // Activer la première couche
             this.objectsLayer.toggleLayer(firstLayerId, true);
 
             // S'assurer que mesure est au-dessus

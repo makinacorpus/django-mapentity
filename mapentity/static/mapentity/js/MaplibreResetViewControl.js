@@ -4,7 +4,7 @@ class MaplibreResetViewControl {
      * @param {Object} bounds - Les limites de la carte sous forme de [SW, NE] (sud-ouest, nord-est).
      */
     constructor(bounds) {
-        this.bounds = bounds; // Les limites de la carte
+        this.bounds = bounds;
         this.map = null;
         this.container = null;
     }
@@ -15,7 +15,7 @@ class MaplibreResetViewControl {
      * @returns {null} - Retourne le conteneur principal du contrôle.
      */
     onAdd(map) {
-        this.map = map; // faire attention : référence à la carte et pas instance de MaplibreMap qui lui possède une référence à la carte
+        this.map = map;
         // Créer le conteneur principal
         this.container = document.createElement('div');
         this.container.className = 'maplibregl-ctrl maplibregl-ctrl-group maplibregl-resetview';
@@ -34,7 +34,6 @@ class MaplibreResetViewControl {
         button.appendChild(img);
         this.container.appendChild(button);
 
-        // Ajouter l'événement de clic pour réinitialiser la carte
         button.onclick = () => this.reset()
 
         return this.container;

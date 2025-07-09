@@ -35,7 +35,6 @@ class MaplibreObjectsLayer {
      * @private
      */
     _onClick(e) {
-        // Skip interactions in readonly mode
         if (this.options.readonly){
             return;
         }
@@ -428,8 +427,6 @@ class MaplibreObjectsLayer {
      * @param visible {boolean} - Indique si les couches doivent être visibles ou non. Par défaut, c'est `true`.
      */
     toggleLayer(layerIds, visible = true) {
-        // console.log(`Toggling layer(s): ${layerIds} to ${visible ? 'visible' : 'hidden'}`);
-        // Force en tableau si ce n'est pas déjà un tableau
         const ids = Array.isArray(layerIds)
             ? layerIds
             : typeof layerIds === 'string'
@@ -542,7 +539,6 @@ class MaplibreObjectsLayer {
             }
         });
 
-        // Reconstituer les features à afficher à partir de primaryKeys
         const featuresToShow = [];
 
         primaryKeys.forEach(primaryKey => {

@@ -48,7 +48,6 @@ class MaplibreFieldStore {
      */
     _serializeByGeomType(features) {
         if (features.length === 1 && features[0].geometry) {
-            // Géométrie simple
             return JSON.stringify(features[0].geometry);
         }
     }
@@ -60,8 +59,6 @@ class MaplibreFieldStore {
      * @private
      */
     _serializeGeometryCollection(geoemtriesCollection) {
-        // Sérialisation en GeometryCollection
-        console.log('Serializing GeometryCollection:', geoemtriesCollection);
         return JSON.stringify(geoemtriesCollection);
     }
 }

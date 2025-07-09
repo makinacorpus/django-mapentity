@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
             info: false,
             sDom: "tpf",
             language: {
-                searchPlaceholder: tr("Search"),  // placeholder in search field
+                searchPlaceholder: tr("Search"),
                 paginate: {
                     first: "<<",
                     last: ">>",
