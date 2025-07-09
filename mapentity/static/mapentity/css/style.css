@@ -193,7 +193,7 @@ select[multiple] {
         flex: 0 0 auto;
         width: 18px;
         background-color: #DDD;
-        background-image: url(images/drag-horizontal.png);
+        background-image: url(../images/drag-horizontal.png);
         background-position: center center;
         background-repeat: no-repeat;
         min-height: 200px;
@@ -234,7 +234,7 @@ form.mapentity-form > div.container-fluid {
 }
 
 .screenshot-control {
-    background-image: url(images/screenshot-control.png);
+    background-image: url(../images/screenshot-control.png);
 }
 
 .leaflet-draw.leaflet-control {
@@ -699,7 +699,7 @@ body.screamshot .leaflet-control-attribution {
 }
 
 body.screamshot .leaflet-top.leaflet-left {
-    background-image: url(images/compass.svg);
+    background-image: url(../images/compass.svg);
     display: block;
     min-height: 60px;
     min-width: 60px;
