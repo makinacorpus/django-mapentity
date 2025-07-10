@@ -40,8 +40,9 @@ class MaplibreObjectsLayer {
         }
 
         const features = this._map.queryRenderedFeatures(e.point);
+        console.log("Features found on click:", features);
 
-        if (features.length > 0) {
+        if (features.length > 0 && features[0].source !== 'geojson') {
             const feature = features[0];
             if (this.options.objectUrl) {
                 window.location = this.options.objectUrl(feature.properties, feature);
