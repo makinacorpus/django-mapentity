@@ -1,4 +1,4 @@
-{% load static i18n leaflet_tags compress mapentity_tags %}
+{% load static i18n compress mapentity_tags %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -36,7 +36,6 @@
                 <link rel="stylesheet" href="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.css' %}"/>
                 <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-icons-1.2.2/font/bootstrap-icons.css' %}">
                 <link rel="stylesheet" href="{% static 'mapentity/vendor/chosen-1.8.7/chosen.css' %}">
-                {% leaflet_css plugins="ALL" %}
 
                 <style>
                     {% for entity in allowed_entities %}
@@ -144,44 +143,10 @@
                     {% endif %}
                 {% endfor %}
 
-                {% leaflet_js plugins="ALL" %}
-
 
                 <script  src="{% static 'mapentity/vendor/jquery-resizable.min.js' %}"></script>
                 <script  src="{% static 'mapentity/vendor/chosen-1.8.7/chosen.jquery.min.js' %}"></script>
                 <script  src="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.js' %}"></script>
-
-                {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.helpers.js' %}"></script>#}
-        {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.views.js' %}"></script>#}
-        {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.history.js' %}"></script>#}
-        {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.map.js' %}"></script>#}
-        {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.context.js' %}"></script>#}
-        {#        <script type="text/javascript" src="{% static 'mapentity/mapentity.filter.js' %}"></script>#}
-
-        {#        <script>#}
-        {#            L.Icon.Default.imagePath = "{% static 'leaflet/images/' %}";#}
-        {#            L.Control.MeasureControl.TITLE = "{% trans 'Measure distances' %}";#}
-        {#            L.Control.Screenshot.TITLE = "{% trans 'Save map as image' %}";#}
-        {#            L.Control.FileLayerLoad.LABEL = '<i class="bi bi-folder2-open"></i>';#}
-        {#            L.Control.FileLayerLoad.TITLE = "{% trans 'Load local file (GPX, KML, GeoJSON)' %}";#}
-        {#            L.GeometryField.unsavedText = "{% trans 'Map geometry is unsaved' %}";#}
-        {#            MapEntity.i18n = {#}
-        {#                      'Search': "{% trans 'Search' %}",#}
-        {#                      'Current criteria': "{% trans 'Current criteria' %}",#}
-        {#                     'No filter': "{% trans 'No filter' %}",#}
-        {#                };#}
-
-        {#        </script>#}
-        {#         <script src="{% static 'mapentity/jquery.hoverIntent.js' %}"></script>#}
-                {#        <script  src="{% static 'mapentity/jquery.deserialize.js' %}"></script>#}
-        {#        <script  src="{% static 'mapentity/leaflet-objectslayer.js' %}"></script>#}
-        {#        <script  src="{% static 'mapentity/leaflet-serializers.js' %}"></script>#}
-        {#        <script  src="{% static 'mapentity/leaflet-datatables.js' %}"></script>#}
-        {#        <script  src="{% static 'mapentity/leaflet.enumeration.js' %}"></script>#}
-
-                <!-- Forms -->
-        {#        <script src="{% static 'mapentity/RelatedObjectLookups.js' %}"></script>#}
-        {#        <script src="{% static 'mapentity/jquery.formset-patched.js' %}"></script>#}
 
                 {% smart_include "extrajs" %}
                 <script>

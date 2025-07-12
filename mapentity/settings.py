@@ -146,57 +146,6 @@ TINYMCE_DEFAULT_CONFIG = {
 TINYMCE_DEFAULT_CONFIG.update(getattr(settings, 'TINYMCE_DEFAULT_CONFIG', {}))
 setattr(settings, 'TINYMCE_DEFAULT_CONFIG', TINYMCE_DEFAULT_CONFIG)
 
-# leaflet plugins integration
-# _LEAFLET_PLUGINS = OrderedDict([
-#     ('leaflet.overintent', {
-#         'js': 'mapentity/Leaflet.OverIntent/leaflet.overintent.js',
-#     }),
-#     ('leaflet.label', {
-#         'css': 'mapentity/Leaflet.label/dist/leaflet.label.css',
-#         'js': 'mapentity/Leaflet.label/dist/leaflet.label.js'
-#     }),
-#     ('leaflet.spin', {
-#         'js': ['paperclip/spin.min.js',
-#                'mapentity/Leaflet.Spin/leaflet.spin.js']
-#     }),
-#     ('leaflet.layerindex', {
-#         'js': ['mapentity/RTree/src/rtree.js',
-#                'mapentity/Leaflet.LayerIndex/leaflet.layerindex.js']
-#     }),
-#     ('leaflet.filelayer', {
-#         'js': ['mapentity/togeojson/togeojson.js',
-#                'mapentity/Leaflet.FileLayer/leaflet.filelayer.js']
-#     }),
-#     ('leaflet.geometryutil', {
-#         'js': 'mapentity/Leaflet.GeometryUtil/dist/leaflet.geometryutil.js'
-#     }),
-#     ('forms', {}),
-#     ('leaflet.snap', {
-#         'js': 'mapentity/Leaflet.Snap/leaflet.snap.js'
-#     }),
-#     ('leaflet.measurecontrol', {
-#         'css': 'mapentity/Leaflet.MeasureControl/leaflet.measurecontrol.css',
-#         'js': 'mapentity/Leaflet.MeasureControl/leaflet.measurecontrol.js'
-#     }),
-#     ('leaflet.fullscreen', {
-#         'css': 'mapentity/leaflet.fullscreen/Control.FullScreen.css',
-#         'js': 'mapentity/leaflet.fullscreen/Control.FullScreen.js'
-#     }),
-#     ('leaflet.groupedlayercontrol', {
-#         'css': 'mapentity/Leaflet.groupedlayercontrol/src/leaflet.groupedlayercontrol.css',
-#         'js': 'mapentity/Leaflet.groupedlayercontrol/src/leaflet.groupedlayercontrol.js'
-#     }),
-#     ('mapentity', {
-#         'js': ['mapentity/mapentity.js',
-#                'mapentity/mapentity.forms.js'],
-#     })
-# ])
-#
-# _LEAFLET_CONFIG = getattr(settings, 'LEAFLET_CONFIG', {})
-# _LEAFLET_PLUGINS.update(_LEAFLET_CONFIG.get('PLUGINS', {}))  # mapentity plugins first
-# _LEAFLET_CONFIG['PLUGINS'] = _LEAFLET_PLUGINS
-# setattr(settings, 'LEAFLET_CONFIG', _LEAFLET_CONFIG)
-
 # config Rest_Framework
 REST_FRAMEWORK_DEFAULT_CONFIG = {
     # Use Django's standard `django.contrib.auth` permissions,
