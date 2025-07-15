@@ -7,12 +7,18 @@ document.addEventListener('DOMContentLoaded', function() {
         map.getMap().on('load', function() {
             objectsLayer.initialize(map.getMap());
 
-            TILES.forEach(([name, url, attribution]) => {
-                objectsLayer.addBaseLayer(name, {
-                    id: name + '-base',
-                    tiles: [url],
-                    attribution
-                });
+            let tilesArray = Array.isArray(TILES) ? TILES : [TILES];
+            tilesArray.forEach(item => {
+                if (Array.isArray(item) && item.length >= 2) {
+                    const [name, url, attribution] = item;
+                    objectsLayer.addBaseLayer(name, {
+                        id: name + '-base',
+                        tiles: [url],
+                        attribution
+                    });
+                } else {
+                    console.warn('Item is not a valid tile definition:', item);
+                }
             });
 
             map.getMap().addControl(new MaplibreLayerControl(objectsLayer), 'top-right');

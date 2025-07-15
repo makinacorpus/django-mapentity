@@ -17,13 +17,9 @@ _DEFAULT_MAP_STYLES = {
 }
 
 # Tuiles par défaut
-_DEFAULT_TILES = {
-    'OSM': {
-        'name': 'OSM',
-        'url': '//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        'attribution': '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    },
-}
+_DEFAULT_TILES = [
+    ('OSM', 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; OpenStreetMap contributors'),
+]
 
 # Config MapLibre par défaut
 _DEFAULT_MAPLIBRE_CONFIG = {
