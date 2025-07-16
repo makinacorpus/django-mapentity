@@ -9,10 +9,10 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import translation
-from test_app.models import MushroomSpot, Supermarket, Tag
 
 from mapentity.registry import app_settings
 from mapentity.serializers import CSVSerializer, ZipShapeSerializer
+from test_project.test_app.models import MushroomSpot, Supermarket, Tag
 
 
 class CommonShapefileSerializerMixin:

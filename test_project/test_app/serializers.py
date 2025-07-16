@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from test_app.models import DummyModel, Road
 
 from mapentity.serializers import MapentityGeojsonModelSerializer
+from test_project.test_app.models import DummyModel, Road
 
 
 class DummySerializer(serializers.ModelSerializer):

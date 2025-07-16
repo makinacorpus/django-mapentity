@@ -1,7 +1,7 @@
 from django_filters.rest_framework import BooleanFilter
-from test_app.models import DummyModel, Road
 
 from mapentity.filters import MapEntityFilterSet
+from test_project.test_app.models import DummyModel, Road
 
 
 class DummyModelFilterSet(MapEntityFilterSet):

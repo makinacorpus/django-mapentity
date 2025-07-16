@@ -1,6 +1,5 @@
-from test_app.models import DummyModel, MushroomSpot, Road
-
 from mapentity.forms import MapEntityForm
+from test_project.test_app.models import DummyModel, MushroomSpot, Road
 
 
 class DummyModelForm(MapEntityForm):
