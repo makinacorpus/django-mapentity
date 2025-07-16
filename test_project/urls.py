@@ -20,7 +20,7 @@ urlpatterns = [
         ),
         name="home",
     ),
-    path("", include("test_app.urls")),
+    path("", include("test_project.test_app.urls")),
     path("", include("mapentity.urls")),
     path("tinymce/", include("tinymce.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
