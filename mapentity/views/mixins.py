@@ -134,11 +134,13 @@ class FilterListMixin:
                         for field in _model._meta.get_fields()
                         if not isinstance(
                             field,
-                            GeometryField
-                            | GenericRelation
-                            | GenericRel
-                            | GenericForeignKey
-                            | FileField,
+                            (
+                                GeometryField,
+                                GenericRelation,
+                                GenericRel,
+                                GenericForeignKey,
+                                FileField,
+                            ),
                         )
                     ]
 
