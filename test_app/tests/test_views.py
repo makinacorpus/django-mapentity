@@ -330,6 +330,7 @@ class ListViewTest(BaseTest):
         self.assertContains(response, '<input type="text" name="name"')
         self.assertContains(response, '<input type="hidden" name="bbox"')
 
+
 class MapEntityLayerViewTest(BaseTest):
     def setUp(self):
         DummyModelFactory.create_batch(30)
@@ -511,21 +512,21 @@ class LogViewTest(BaseTest):
 
 
 class LogoutViewTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_superuser(self.__class__.__name__ + 'User',
-                                            'email@corp.com', 'booh')
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = SuperUserFactory()
+
     def test_logout_post(self):
         self.client.force_login(user=self.user)
+
         response = self.client.get('/dummymodel/list/')
         parsed = BeautifulSoup(response.content)
-        logout_tag = parsed.find("form", {"action":"/logout/", "method": "post" })
+        logout_tag = parsed.find("form", {"action": "/logout/", "method": "post"})
+
         self.assertTrue(logout_tag)
-
-        self.assertTrue(logout_tag.find("input", {"name": "csrfmiddlewaretoken" }))
-
+        self.assertTrue(logout_tag.find("input", {"name": "csrfmiddlewaretoken"}))
         self.assertTrue(logout_tag.find("button", {"type": "submit"}))
 
-        
 
 class LogViewMapentityTest(MapEntityTest):
     userfactory = SuperUserFactory
