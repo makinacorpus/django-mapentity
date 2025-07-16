@@ -47,7 +47,7 @@ setup(
     extras_require={
         'dev': [
             'django-debug-toolbar',
-            'flake8',
+            'ruff',
             'freezegun',
             'factory_boy',
             'coverage',

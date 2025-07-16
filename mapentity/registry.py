@@ -17,22 +17,22 @@ from rest_framework import routers as rest_routers
 from rest_framework.serializers import ModelSerializer
 
 from mapentity import models as mapentity_models
-from mapentity.utils import get_internal_user
 from mapentity.serializers import MapentityGeojsonModelSerializer
 from mapentity.settings import app_settings
+from mapentity.utils import get_internal_user
 
 logger = logging.getLogger(__name__)
 
 
 class MapEntityOptions:
     menu = True
-    label = ''
-    modelname = ''
-    url_list = ''
-    url_add = ''
-    icon = ''
-    icon_small = ''
-    icon_big = ''
+    label = ""
+    modelname = ""
+    url_list = ""
+    url_add = ""
+    icon = ""
+    icon_small = ""
+    icon_big = ""
     dynamic_views = None
 
     def __init__(self, model):
@@ -40,15 +40,15 @@ class MapEntityOptions:
         self.label = model._meta.verbose_name_plural
         self.app_label = model._meta.app_label
         self.modelname = model._meta.model_name
-        self.icon = 'images/%s.png' % self.modelname
-        self.icon_small = 'images/%s-16.png' % self.modelname
-        self.icon_big = 'images/%s-96.png' % self.modelname
+        self.icon = f"images/{self.modelname}.png"
+        self.icon_small = f"images/{self.modelname}-16.png"
+        self.icon_big = f"images/{self.modelname}-96.png"
 
         self.rest_router = rest_routers.DefaultRouter(trailing_slash=False)
 
         # Can't do reverse right now, URL not setup yet
-        self.url_list = '%s:%s_%s' % (self.app_label, self.modelname, 'list')
-        self.url_add = '%s:%s_%s' % (self.app_label, self.modelname, 'add')
+        self.url_list = "{}:{}_{}".format(self.app_label, self.modelname, "list")
+        self.url_add = "{}:{}_{}".format(self.app_label, self.modelname, "add")
 
     def scan_views(self):
         """
@@ -57,7 +57,7 @@ class MapEntityOptions:
         from . import views as mapentity_views
 
         # Obtain app's views module from Model
-        views_module_name = re.sub('models.*', 'views', self.model.__module__)
+        views_module_name = re.sub("models.*", "views", self.model.__module__)
         views_module = import_module(views_module_name)
         # Filter to views inherited from MapEntity base views
         picked = []
@@ -67,7 +67,9 @@ class MapEntityOptions:
         for name, view in inspect.getmembers(views_module):
             if inspect.isclass(view) and issubclass(view, View):
                 # Pick-up views
-                if hasattr(view, 'get_entity_kind') or issubclass(view, mapentity_views.MapEntityViewSet):
+                if hasattr(view, "get_entity_kind") or issubclass(
+                    view, mapentity_views.MapEntityViewSet
+                ):
                     try:
                         view_model = view.model or view.queryset.model
                     except AttributeError:
@@ -87,14 +89,16 @@ class MapEntityOptions:
         if self.dynamic_views is None:
             generic_views = mapentity_views.MAPENTITY_GENERIC_VIEWS
         else:
-            generic_views = [getattr(mapentity_views, 'MapEntity%s' % name)
-                             for name in self.dynamic_views]
+            generic_views = [
+                getattr(mapentity_views, f"MapEntity{name}")
+                for name in self.dynamic_views
+            ]
 
         # Dynamically define missing views
         for generic_view in generic_views:
             already_defined = any([issubclass(view, generic_view) for view in picked])
             if not already_defined:
-                list_dependencies = (mapentity_views.MapEntityFormat, )
+                list_dependencies = (mapentity_views.MapEntityFormat,)
                 if list_view and generic_view in list_dependencies:
                     # List view depends on JsonList and Format view
                     class dynamic_view(generic_view, list_view):
@@ -103,6 +107,7 @@ class MapEntityOptions:
                     # General case
                     class dynamic_view(generic_view):
                         model = _model
+
                 picked.append(dynamic_view)
 
         # Dynamically define REST missing viewset
@@ -115,9 +120,13 @@ class MapEntityOptions:
                 queryset = _queryset
                 serializer_class = _serializer
                 geojson_serializer_class = _geojson_serializer
+
             rest_viewset = dynamic_viewset
-        self.rest_router.register(r'api/' + self.modelname + '/drf/' + self.modelname + 's',
-                                  rest_viewset, basename=f"{self.modelname}-drf")
+        self.rest_router.register(
+            r"api/" + self.modelname + "/drf/" + self.modelname + "s",
+            rest_viewset,
+            basename=f"{self.modelname}-drf",
+        )
 
         # Returns Django URL patterns
         return self.__view_classes_to_url(*picked)
@@ -128,8 +137,9 @@ class MapEntityOptions:
         class Serializer(ModelSerializer):
             class Meta:
                 model = _model
-                id_field = 'id'
+                id_field = "id"
                 exclude = []
+
         return Serializer
 
     def get_geojson_serializer(self):
@@ -138,6 +148,7 @@ class MapEntityOptions:
         class Serializer(MapentityGeojsonModelSerializer):
             class Meta(MapentityGeojsonModelSerializer):
                 model = _model
+
         return Serializer
 
     def get_queryset(self):
@@ -145,22 +156,28 @@ class MapEntityOptions:
 
     def _url_path(self, view_kind):
         kind_to_urlpath = {
-            mapentity_models.ENTITY_LIST: r'^{modelname}/list/$',
-            mapentity_models.ENTITY_FILTER: r'^{modelname}/filter/$',
-            mapentity_models.ENTITY_VIEWSET: r'^api/{modelname}/drf/{modelname}$',
-            mapentity_models.ENTITY_FORMAT_LIST: r'^{modelname}/list/export/$',
-            mapentity_models.ENTITY_DETAIL: r'^{modelname}/(?P<pk>\d+)/$',
-            mapentity_models.ENTITY_MAPIMAGE: r'^image/{modelname}-(?P<pk>\d+).png$',
-            mapentity_models.ENTITY_CREATE: r'^{modelname}/add/$',
-            mapentity_models.ENTITY_UPDATE: r'^{modelname}/edit/(?P<pk>\d+)/$',
-            mapentity_models.ENTITY_DELETE: r'^{modelname}/delete/(?P<pk>\d+)/$',
-            mapentity_models.ENTITY_MARKUP: r'^{modelname}/markup/(?P<pk>\d+)/$',
+            mapentity_models.ENTITY_LIST: r"^{modelname}/list/$",
+            mapentity_models.ENTITY_FILTER: r"^{modelname}/filter/$",
+            mapentity_models.ENTITY_VIEWSET: r"^api/{modelname}/drf/{modelname}$",
+            mapentity_models.ENTITY_FORMAT_LIST: r"^{modelname}/list/export/$",
+            mapentity_models.ENTITY_DETAIL: r"^{modelname}/(?P<pk>\d+)/$",
+            mapentity_models.ENTITY_MAPIMAGE: r"^image/{modelname}-(?P<pk>\d+).png$",
+            mapentity_models.ENTITY_CREATE: r"^{modelname}/add/$",
+            mapentity_models.ENTITY_UPDATE: r"^{modelname}/edit/(?P<pk>\d+)/$",
+            mapentity_models.ENTITY_DELETE: r"^{modelname}/delete/(?P<pk>\d+)/$",
+            mapentity_models.ENTITY_MARKUP: r"^{modelname}/markup/(?P<pk>\d+)/$",
         }
-        if app_settings['MAPENTITY_WEASYPRINT']:
-            kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = r'^document/{modelname}-(?P<pk>\d+).pdf$'
+        if app_settings["MAPENTITY_WEASYPRINT"]:
+            kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = (
+                r"^document/{modelname}-(?P<pk>\d+).pdf$"
+            )
         else:
-            kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = r'^document/{modelname}-(?P<pk>\d+).odt$'
-        kind_to_urlpath[mapentity_models.ENTITY_DUPLICATE] = r'^{modelname}/duplicate/(?P<pk>\d+)/$'
+            kind_to_urlpath[mapentity_models.ENTITY_DOCUMENT] = (
+                r"^document/{modelname}-(?P<pk>\d+).odt$"
+            )
+        kind_to_urlpath[mapentity_models.ENTITY_DUPLICATE] = (
+            r"^{modelname}/duplicate/(?P<pk>\d+)/$"
+        )
         url_path = kind_to_urlpath[view_kind]
         url_path = url_path.format(modelname=self.modelname)
         return url_path
@@ -172,15 +189,17 @@ class MapEntityOptions:
         return re_path(url_path, view_class.as_view(), name=url_name)
 
     def __view_classes_to_url(self, *view_classes):
-        return [self.url_for(view_class) for view_class in view_classes] + self.rest_router.urls
+        return [
+            self.url_for(view_class) for view_class in view_classes
+        ] + self.rest_router.urls
 
     def url_shortname(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS
-        return '%s_%s' % (self.modelname, kind)
+        return f"{self.modelname}_{kind}"
 
     def url_name(self, kind):
         assert kind in mapentity_models.ENTITY_KINDS
-        return '%s:%s' % (self.app_label, self.url_shortname(kind))
+        return f"{self.app_label}:{self.url_shortname(kind)}"
 
 
 class Registry:
@@ -190,8 +209,7 @@ class Registry:
         self.content_type_ids = []
 
     def register(self, model, options=None, menu=None):
-        """ Register model and returns URL patterns
-        """
+        """Register model and returns URL patterns"""
         # Ignore models from not installed apps
         if model._meta.app_config is None:
             return []
@@ -204,7 +222,7 @@ class Registry:
         else:
             options = options(model)
 
-        setattr(model, '_entity', options)
+        setattr(model, "_entity", options)
 
         # Smoother upgrade for Geotrek
         if menu is not None:
@@ -256,43 +274,45 @@ def create_mapentity_model_permissions(model):
     for view_kind in mapentity_models.ENTITY_KINDS:
         perm = model.get_entity_kind_permission(view_kind)
         codename = auth.get_permission_codename(perm, model._meta)
-        name = "Can %s %s" % (perm, model._meta.verbose_name_raw)
+        name = f"Can {perm} {model._meta.verbose_name_raw}"
         permissions.add((codename, _(name)))
 
     ctype = ContentType.objects.db_manager(db).get_for_model(model)
-    for (codename, name) in permissions:
-        p, created = perms_manager.get_or_create(codename=codename,
-                                                 content_type=ctype)
+    for codename, name in permissions:
+        p, created = perms_manager.get_or_create(codename=codename, content_type=ctype)
         if created:
             p.name = name[:50]
             p.save()
-            logger.info("Permission '%s' created." % codename)
+            msg = f"Permission '{codename}' created."
+            logger.info(msg)
 
-    for view_kind in (mapentity_models.ENTITY_LIST,
-                      mapentity_models.ENTITY_DOCUMENT):
+    for view_kind in (mapentity_models.ENTITY_LIST, mapentity_models.ENTITY_DOCUMENT):
         perm = model.get_entity_kind_permission(view_kind)
         codename = auth.get_permission_codename(perm, model._meta)
 
-        internal_user_permission = internal_user.user_permissions.filter(codename=codename,
-                                                                         content_type=ctype)
+        internal_user_permission = internal_user.user_permissions.filter(
+            codename=codename, content_type=ctype
+        )
 
         if not internal_user_permission.exists():
             try:
                 permission = perms_manager.get(codename=codename, content_type=ctype)
                 internal_user.user_permissions.add(permission)
-                logger.info("Added permission %s to internal user %s" % (codename,
-                                                                         internal_user))
+                msg = f"Added permission {codename} to internal user {internal_user}"
+                logger.info(msg)
             except Exception:
                 pass
 
-    attachmenttype = ContentType.objects.db_manager(db).get_for_model(get_attachment_model())
-    read_perm = dict(codename='read_attachment', content_type=attachmenttype)
+    attachmenttype = ContentType.objects.db_manager(db).get_for_model(
+        get_attachment_model()
+    )
+    read_perm = dict(codename="read_attachment", content_type=attachmenttype)
     if not internal_user.user_permissions.filter(**read_perm).exists():
         permission = perms_manager.get(**read_perm)
         try:
             internal_user.user_permissions.add(permission)
-            logger.info("Added permission %s to internal user %s" % (permission.codename,
-                                                                     internal_user))
+            msg = f"Added permission {permission.codename} to internal user {internal_user}"
+            logger.info(msg)
 
         except Exception:
             pass
