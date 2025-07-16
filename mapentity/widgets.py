@@ -7,7 +7,7 @@ from .settings import API_SRID
 
 
 class MapWidget(LeafletWidget):
-    geometry_field_class = 'MapEntity.GeometryField'
+    geometry_field_class = "MapEntity.GeometryField"
 
     def render(self, name, value, attrs=None, renderer=None):
         attrs = attrs or {}
@@ -16,7 +16,6 @@ class MapWidget(LeafletWidget):
 
 
 class HiddenGeometryWidget(django_widgets.HiddenInput):
-
     def value_from_datadict(self, data, files, name):
         """
         From WKT to Geometry (TODO: should be done in Field clean())
@@ -35,11 +34,11 @@ class HiddenGeometryWidget(django_widgets.HiddenInput):
 
 class SelectMultipleWithPop(django_widgets.SelectMultiple):
     def __init__(self, *args, **kwargs):
-        self.add_url = kwargs.pop('add_url')
+        self.add_url = kwargs.pop("add_url")
         super().__init__(*args, **kwargs)
 
     def render(self, name, *args, **kwargs):
         html = super().render(name, *args, **kwargs)
-        context = {'field': name, 'add_url': self.add_url}
+        context = {"field": name, "add_url": self.add_url}
         popupplus = render_to_string("mapentity/popupplus.html", context)
         return html + popupplus

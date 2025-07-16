@@ -18,9 +18,8 @@ from .settings import app_settings
 
 
 def view_permission_required(login_url=None, raise_exception=None):
-
     if raise_exception is None:
-        raise_exception = (login_url is None)
+        raise_exception = login_url is None
 
     def check_perms(request, user, perm):
         # Check both authenticated and anonymous
@@ -31,7 +30,9 @@ def view_permission_required(login_url=None, raise_exception=None):
             raise PermissionDenied
 
         # As the last resort, redirects
-        msg = _('Access to the requested resource is restricted. You have been redirected.')
+        msg = _(
+            "Access to the requested resource is restricted. You have been redirected."
+        )
         messages.warning(request, msg)
         return False
 
@@ -41,17 +42,21 @@ def view_permission_required(login_url=None, raise_exception=None):
 
             redirect_url = login_url
             if login_url in mapentity_models.ENTITY_KINDS:
-                is_handle_object = issubclass(self.__class__, (BaseDetailView, BaseUpdateView))
+                is_handle_object = issubclass(
+                    self.__class__, BaseDetailView | BaseUpdateView
+                )
                 if is_handle_object:
                     view_subject = self.get_object()
                 else:
                     view_subject = self.model
-                get_url_method = getattr(view_subject, 'get_{0}_url'.format(login_url))
+                get_url_method = getattr(view_subject, f"get_{login_url}_url")
                 redirect_url = get_url_method()
 
-            has_perm_decorator = user_passes_test(lambda u: check_perms(request, u, perm),
-                                                  login_url=redirect_url,
-                                                  redirect_field_name=None)
+            has_perm_decorator = user_passes_test(
+                lambda u: check_perms(request, u, perm),
+                login_url=redirect_url,
+                redirect_field_name=None,
+            )
             cbv_user_has_perm = method_decorator(has_perm_decorator)
 
             @cbv_user_has_perm
@@ -61,16 +66,17 @@ def view_permission_required(login_url=None, raise_exception=None):
             return decorated(self, request, *args, **kwargs)
 
         return _wrapped_view
+
     return decorator
 
 
 def view_cache_latest():
     def decorator(view_func):
         def _wrapped_view(self, request, *args, **kwargs):
-            if not kwargs.get('format', None):
-                kwargs['format'] = 'datatables'
+            if not kwargs.get("format", None):
+                kwargs["format"] = "datatables"
                 return view_func(self, request, *args, **kwargs)
-            if kwargs.get('format') == "datatables":
+            if kwargs.get("format") == "datatables":
                 # don't cache dataTables
                 return view_func(self, request, *args, **kwargs)
             view_model = self.model
@@ -82,10 +88,12 @@ def view_cache_latest():
             @cbv_cache_latest
             def decorated(self, request, *args, **kwargs):
                 return view_func(self, request, *args, **kwargs)
-            kwargs.pop('format')
+
+            kwargs.pop("format")
             return decorated(self, request, *args, **kwargs)
 
         return _wrapped_view
+
     return decorator
 
 
@@ -94,27 +102,30 @@ def view_cache_response_content():
         def _wrapped_method(self, *args, **kwargs):
             # Do not cache if filters presents of datatables format
             params = self.request.GET.keys()
-            with_filters = all([not p.startswith('_') for p in params])
-            if ((len(params) > 0 and with_filters) or kwargs.get("format") == "datatables" or
-                    "datatables" in self.request.build_absolute_uri()):
+            with_filters = all([not p.startswith("_") for p in params])
+            if (
+                (len(params) > 0 and with_filters)
+                or kwargs.get("format") == "datatables"
+                or "datatables" in self.request.build_absolute_uri()
+            ):
                 return view_func(self, *args, **kwargs)
 
             # Restore from cache or store view result
             geojson_lookup = None
-            if hasattr(self, 'view_cache_key'):
+            if hasattr(self, "view_cache_key"):
                 geojson_lookup = self.view_cache_key()
             elif not self.request.GET:  # Do not cache filtered responses
                 view_model = self.model
                 language = self.request.LANGUAGE_CODE
                 latest_saved = view_model.latest_updated()
                 if latest_saved:
-                    geojson_lookup = '%s_%s_%s_json_layer' % (
+                    geojson_lookup = "{}_{}_{}_json_layer".format(
                         language,
                         view_model._meta.model_name,
-                        latest_saved.strftime('%y%m%d%H%M%S%f')
+                        latest_saved.strftime("%y%m%d%H%M%S%f"),
                     )
 
-            geojson_cache = caches[app_settings['GEOJSON_LAYERS_CACHE_BACKEND']]
+            geojson_cache = caches[app_settings["GEOJSON_LAYERS_CACHE_BACKEND"]]
 
             if geojson_lookup:
                 content = geojson_cache.get(geojson_lookup)
@@ -131,6 +142,7 @@ def view_cache_response_content():
             return response
 
         return _wrapped_method
+
     return decorator
 
 
@@ -139,24 +151,32 @@ def save_history():
     A decorator for class-based views, which save navigation history in
     session.
     """
+
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(self, request, *args, **kwargs):
             result = view_func(self, request, *args, **kwargs)
 
             # Stack list of request paths
-            history = request.session.get('history', [])
+            history = request.session.get("history", [])
             # Remove previous visits of this page
-            history = [h for h in history if h['path'] != request.path]
+            history = [h for h in history if h["path"] != request.path]
             # Add this one and remove extras
             model = self.model or self.queryset.model
-            history.insert(0, dict(title=self.get_title(),
-                                   path=request.path,
-                                   modelname=model._meta.object_name.lower()))
-            if len(history) > app_settings['HISTORY_ITEMS_MAX']:
+            history.insert(
+                0,
+                dict(
+                    title=self.get_title(),
+                    path=request.path,
+                    modelname=model._meta.object_name.lower(),
+                ),
+            )
+            if len(history) > app_settings["HISTORY_ITEMS_MAX"]:
                 history.pop()
-            request.session['history'] = history
+            request.session["history"] = history
 
             return result
+
         return _wrapped_view
+
     return decorator

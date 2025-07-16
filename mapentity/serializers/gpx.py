@@ -1,6 +1,6 @@
 import gpxpy.gpx
 from django.conf import settings
-from django.contrib.gis.geos import Point, LineString, Polygon
+from django.contrib.gis.geos import LineString, Point, Polygon
 from django.contrib.gis.geos.collections import GeometryCollection
 from django.core.serializers.base import Serializer
 from django.utils.translation import gettext_lazy as _
@@ -20,6 +20,7 @@ class GPXSerializer(Serializer):
         Collection -> One route/waypoint per item
 
     """
+
     def __init__(self, *args, **kwargs):
         self.gpx = None
 
@@ -30,28 +31,27 @@ class GPXSerializer(Serializer):
         for obj in queryset:
             self.end_object(obj)
 
-        stream = options.pop('stream')
+        stream = options.pop("stream")
         stream.write(self.gpx.to_xml())
 
     def end_object(self, obj):
-        """ Single object serialization.
-        """
+        """Single object serialization."""
         objtype = obj.__class__._meta.verbose_name
-        name = '[%s] %s' % (objtype, (obj))
-        description = getattr(obj, 'description', '')
+        name = f"[{objtype}] {obj}"
+        description = getattr(obj, "description", "")
         objupdate = obj.get_date_update()
         if objupdate:
-            description += _('Modified') + ': ' + humanize_timesince(objupdate)
-        geom_field = self.options.pop('gpx_field', app_settings['GPX_FIELD_NAME'])
+            description += _("Modified") + ": " + humanize_timesince(objupdate)
+        geom_field = self.options.pop("gpx_field", app_settings["GPX_FIELD_NAME"])
         geom = getattr(obj, geom_field, None)
         if not geom:
-            geom = getattr(obj, app_settings['GEOM_FIELD_NAME'], None)
+            geom = getattr(obj, app_settings["GEOM_FIELD_NAME"], None)
         if geom:
             # assert geom.srid == settings.SRID, f"Invalid SRID ({geom.srid}!= {settings.SRID})"
             self.geomToGPX(geom, name, description)
 
     def _point_to_GPX(self, point, klass=gpxpy.gpx.GPXWaypoint):
-        if isinstance(point, (tuple, list)):
+        if isinstance(point, tuple | list):
             point = Point(*point, srid=settings.SRID)
         newpoint = point.transform(4326, clone=True)  # transformation: gps uses 4326
         # transform looses the Z parameter
@@ -68,7 +68,7 @@ class GPXSerializer(Serializer):
         """
         if isinstance(geom, GeometryCollection):
             for i, g in enumerate(geom):
-                self.geomToGPX(g, "%s (%s)" % (name, i), description)
+                self.geomToGPX(g, f"{name} ({i})", description)
         elif isinstance(geom, Point):
             wp = self._point_to_GPX(geom)
             wp.name = name
@@ -77,10 +77,14 @@ class GPXSerializer(Serializer):
         elif isinstance(geom, LineString):
             gpx_track = gpxpy.gpx.GPXTrack(name=name, description=description)
             gpx_segment = gpxpy.gpx.GPXTrackSegment()
-            gpx_segment.points = [self._point_to_GPX(point, klass=gpxpy.gpx.GPXTrackPoint) for point in geom]
+            gpx_segment.points = [
+                self._point_to_GPX(point, klass=gpxpy.gpx.GPXTrackPoint)
+                for point in geom
+            ]
             gpx_track.segments.append(gpx_segment)
             self.gpx.tracks.append(gpx_track)
         elif isinstance(geom, Polygon):
             self.geomToGPX(geom[0], name, description)
         else:
-            raise ValueError("Unsupported geometry %s" % geom)
+            msg = f"Unsupported geometry {geom}"
+            raise ValueError(msg)
