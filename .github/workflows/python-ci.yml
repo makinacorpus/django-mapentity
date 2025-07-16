@@ -93,7 +93,7 @@ jobs:
         fail_ci_if_error: true # optional (default = false)
 
   publish:
-    needs: [lint, test]
+    needs: [quality, test]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
