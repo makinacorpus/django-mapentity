@@ -1,12 +1,12 @@
 from django.conf import settings
 from django.contrib.gis import forms
 from django.contrib.gis.geos import Polygon
-from django.db.models.fields.related import ManyToOneRel, ForeignKey
-from django_filters import ModelMultipleChoiceFilter, Filter
+from django.db.models.fields.related import ForeignKey, ManyToOneRel
+from django_filters import Filter, ModelMultipleChoiceFilter
 from django_filters.filterset import get_model_field, remote_queryset
 from django_filters.rest_framework import FilterSet
 
-from mapentity.settings import app_settings, API_SRID
+from mapentity.settings import API_SRID, app_settings
 from mapentity.widgets import HiddenGeometryWidget
 
 
@@ -14,9 +14,9 @@ class PolygonFilter(Filter):
     field_class = forms.PolygonField
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('field_name', app_settings['GEOM_FIELD_NAME'])
-        kwargs.setdefault('widget', HiddenGeometryWidget)
-        kwargs.setdefault('lookup_expr', 'intersects')
+        kwargs.setdefault("field_name", app_settings["GEOM_FIELD_NAME"])
+        kwargs.setdefault("widget", HiddenGeometryWidget)
+        kwargs.setdefault("lookup_expr", "intersects")
         super().__init__(*args, **kwargs)
 
     def get_value_with_bounds_fixed(self, value):
@@ -83,11 +83,11 @@ class BaseMapEntityFilterSet(FilterSet):
                 self.__set_placeholder(field, field.widget)
 
     def __set_placeholder(self, field, widget):
-        field.help_text = ''  # Hide help text
-        widget.attrs['placeholder'] = field.label
-        widget.attrs['data-placeholder'] = field.label
-        widget.attrs['title'] = field.label
-        widget.attrs['data-label'] = field.label
+        field.help_text = ""  # Hide help text
+        widget.attrs["placeholder"] = field.label
+        widget.attrs["data-placeholder"] = field.label
+        widget.attrs["title"] = field.label
+        widget.attrs["data-label"] = field.label
 
     @classmethod
     def add_filter(cls, name, filter_=None):
@@ -110,12 +110,12 @@ class MapEntityFilterSet(BaseMapEntityFilterSet):
     bbox = PolygonFilter()
 
     class Meta:
-        fields = ['bbox']
+        fields = ["bbox"]
         filter_overrides = {
             ForeignKey: {
-                'filter_class': ModelMultipleChoiceFilter,
-                'extra': lambda f: {
-                    'queryset': remote_queryset(f),
-                }
+                "filter_class": ModelMultipleChoiceFilter,
+                "extra": lambda f: {
+                    "queryset": remote_queryset(f),
+                },
             },
         }
