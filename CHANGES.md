@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-8.13.0+dev (XXXX-XX-XX)
+8.13.1     (2025-07-16)
 -----------------------
 
 - Use logout view in POST (https://code.djangoproject.com/ticket/15619)
