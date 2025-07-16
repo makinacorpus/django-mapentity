@@ -109,7 +109,12 @@
           {% endfor %}
 
           <li class="dropdown-divider"></li>
-          <li class="dropdown-item"><a href="{% url 'logout' %}"><i class="bi bi-power"></i> {% trans "Logout" %}</a></li>
+          <li>
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="dropdown-item"><i class="bi bi-power"></i> {% trans "Logout" %}</button>
+            </form>
+          </li>
         </ul>
       </li>
       {% endif %}

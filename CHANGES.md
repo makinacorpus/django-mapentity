@@ -4,6 +4,8 @@ CHANGELOG
 8.13.0+dev (XXXX-XX-XX)
 -----------------------
 
+- Use logout view in POST (https://code.djangoproject.com/ticket/15619)
+
 
 8.13.0     (2025-04-29)
 -----------------------
