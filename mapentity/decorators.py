@@ -43,7 +43,7 @@ def view_permission_required(login_url=None, raise_exception=None):
             redirect_url = login_url
             if login_url in mapentity_models.ENTITY_KINDS:
                 is_handle_object = issubclass(
-                    self.__class__, BaseDetailView | BaseUpdateView
+                    self.__class__, (BaseDetailView, BaseUpdateView)
                 )
                 if is_handle_object:
                     view_subject = self.get_object()
