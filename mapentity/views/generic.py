@@ -473,7 +473,7 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         context['template_attributes'] = self.template_attributes
         context['mapentity_weasyprint'] = app_settings['MAPENTITY_WEASYPRINT']
         if 'context' in self.request.GET:
-            mapcontext = json.loads(self.request.GET['context'])
+            mapcontext = json.loads(self.request.GET['context'])  # se souvenir de ceci , cela pourrait bien posé problème car ces derniers n'existerait sürement plus à l'heure actuelle
             if 'mapsize' in mapcontext:
                 context['mapwidth'] = int(mapcontext['mapsize']['width'])
                 context['mapheight'] = int(mapcontext['mapsize']['height'])

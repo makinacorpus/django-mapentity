@@ -138,7 +138,7 @@ class MapEntityForm(TranslatedModelForm):
                     formmodel = self._meta.model
                     modelfield = formmodel._meta.get_field(fieldname)
                     needs_replace_widget = (isinstance(modelfield, GeometryField)
-                                            and not isinstance(formfield.widget, MapWidget))
+                                            and not isinstance(formfield.widget, MapWidget)) # faire gaffe à la refactorisation, garder le nom MapWidget
                     if needs_replace_widget:
                         formfield.widget = MapWidget()
                         if self.instance.pk and self.user:

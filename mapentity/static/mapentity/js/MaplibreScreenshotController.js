@@ -1,0 +1,63 @@
+class MaplibreScreenshotController {
+    /**
+     * Contrôle pour prendre une capture d'écran de la carte MapLibre.
+     * @param url {string} - L'URL du serveur pour envoyer la capture d'écran.
+     * @param getcontext {function} - Fonction pour obtenir le contexte complet de la carte à capturer.
+     */
+    constructor(url, getcontext) {
+        this.url = url;
+        this.getcontext = getcontext;
+        this.map = null;
+        this.container = null;
+    }
+
+    /**
+     * Prend une capture d'écran de la carte et envoie le contexte au serveur.
+     */
+    screenshot() {
+        // Effet visuel de capture d'écran avec jQuery
+        $('<div id="overlay" style="z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;"> </div>')
+            .appendTo(document.body)
+            .fadeOut();
+
+        const fullContext = this.getcontext();
+
+        // Hack pour télécharger une réponse en pièce jointe via Ajax avec jQuery
+        $('<form action="' + this.url + '" method="post">' +
+        '<textarea name="printcontext">' + fullContext + '</textarea>' +
+        '</form>').appendTo('body').submit().remove();
+    }
+
+    /**
+     * Ajoute le contrôle de capture d'écran à la carte MapLibre.
+     * @param map {maplibregl.Map} - L'instance de la carte MapLibre à laquelle ajouter le contrôle.
+     * @returns {null} - Retourne le conteneur principal du contrôle de capture d'écran.
+     */
+    onAdd(map) {
+        this.map = map; // faire attention : référence à la carte et pas instance de MaplibreMap qui lui possède une référence à la carte
+
+        // Créer le conteneur principal
+        this.container = document.createElement('div');
+        this.container.className = 'maplibregl-ctrl maplibregl-ctrl-group maplibregl-screenshot';
+
+        // Bouton pour prendre une capture d'écran
+        const button = document.createElement('button');
+        button.setAttribute('type', 'button');
+        button.setAttribute('title', 'Capture d\'écran');
+        button.className = 'maplibregl-ctrl-icon maplibregl-screenshot';
+
+        const img = document.createElement('img');
+        img.src = '/static/mapentity/images/screenshot.png';
+        img.alt = 'Screenshot';
+        img.style.width = '25px';
+        img.style.height = '25px';
+        img.style.padding = '2px';
+        button.appendChild(img);
+        this.container.appendChild(button);
+
+        // Ajouter l'événement de clic pour prendre la capture d'écran
+        button.onclick = () => this.screenshot();
+
+        return this.container;
+    }
+}
