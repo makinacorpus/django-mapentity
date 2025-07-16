@@ -51,7 +51,7 @@ class GPXSerializer(Serializer):
             self.geomToGPX(geom, name, description)
 
     def _point_to_GPX(self, point, klass=gpxpy.gpx.GPXWaypoint):
-        if isinstance(point, tuple | list):
+        if isinstance(point, (tuple, list)):
             point = Point(*point, srid=settings.SRID)
         newpoint = point.transform(4326, clone=True)  # transformation: gps uses 4326
         # transform looses the Z parameter
