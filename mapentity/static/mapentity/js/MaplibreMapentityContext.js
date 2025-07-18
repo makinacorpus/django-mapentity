@@ -3,9 +3,10 @@ class MaplibreMapentityContext {
      * Conctructeur de la classe MaplibreMapentityContext.
      * @param bounds {Array} - Un tableau contenant les coordonnées des limites de la carte, sous la forme [[swLng, swLat], [neLng, neLat]].
      */
-    constructor(bounds) {
+    constructor(bounds, layerManager) {
         this.last_sort = {};
         this.bounds = bounds;
+        this.layerManager = layerManager;
     }
 
     /**
@@ -227,7 +228,8 @@ class MaplibreMapentityContext {
                 const layerId = input.dataset.layerId;
                 if (layers.includes(layerId?.replace('-base', ''))) {
                     input.checked = true;
-                    objectsLayer.toggleLayer(layerId);
+                    this.layerManager.toggleLayer(layerId);
+                    // objectsLayer.toggleLayer(layerId);
                 } else {
                     input.checked = false;
                 }

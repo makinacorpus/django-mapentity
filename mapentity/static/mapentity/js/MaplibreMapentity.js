@@ -107,7 +107,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
         const modelName = context.modelname;
         const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelName);
-        const mapentityContext = new MaplibreMapentityContext(bounds);
+        const layerManager = new MaplibreLayerManager();
+        const mapentityContext = new MaplibreMapentityContext(bounds, layerManager);
 
         let style = window.SETTINGS.map.styles[modelName] || window.SETTINGS.map.styles.others;
         if (typeof style !== 'function') style = { ...style };
@@ -130,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 mapentityContext: mapentityContext,
                 TILES : TILES,
                 bounds : bounds,
+                layerManager: layerManager,
             }
         });
         window.dispatchEvent(mapReadyEvent);

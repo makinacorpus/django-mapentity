@@ -2,16 +2,17 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('entity:map:ready', function(e) {
-        const { map, objectsLayer, context, TILES, bounds, mapentityContext } = e.detail;
+        const { map, objectsLayer, context, TILES, bounds, mapentityContext, layerManager } = e.detail;
 
         map.getMap().on('load', function() {
+
             objectsLayer.initialize(map.getMap());
 
             let tilesArray = Array.isArray(TILES) ? TILES : [TILES];
             tilesArray.forEach(item => {
-                if (Array.isArray(item) && item.length >= 2) {
+                if (Array.isArray(item)) {
                     const [name, url, attribution] = item;
-                    objectsLayer.addBaseLayer(name, {
+                    layerManager.addBaseLayer(name, {
                         id: name + '-base',
                         tiles: [url],
                         attribution
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            map.getMap().addControl(new MaplibreLayerControl(objectsLayer), 'top-right');
+            map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
 
             const mergedData = Object.assign({}, context, {
                 map,

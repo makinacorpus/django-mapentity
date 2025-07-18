@@ -1,28 +1,33 @@
 class MaplibreObjectsLayer {
     /**
-     * Classe MaplibreObjectsLayer pour gérer les couches d'objets sur une carte Maplibre.
-     * @param geojson {Object} - Un objet GeoJSON ou un tableau de géométries à ajouter à la carte.
-     * @param options {Object} - Un objet d'options pour configurer la couche, par exemple pour définir des styles ou des propriétés supplémentaires.
+     * @param geojson {Object} - Objet GeoJSON
+     * @param options {Object} - Options de configuration
      */
-    constructor(geojson, options) {
+    constructor(geojson, options = {}) {
         this._map = null;
         this._objects = {};
         this._current_objects = {};
         this.options = { ...options };
         this.boundsLayer = null;
         this.currentPopup = null;
-        this.layers = {
-            baseLayers: {},
-            overlays: {}
-        };
+        this._track_objects = {};
+
+        // Récupérer le gestionnaire de couches
+        this.layerManager = MaplibreLayerManager.getInstance();
     }
 
     /**
-     * Initialise la couche d'objets sur la carte Maplibre.
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre sur laquelle ajouter la couche.
+     * Initialise la couche d'objets sur la carte
+     * @param map {maplibregl.Map} - Instance de la carte Maplibre
      */
     initialize(map) {
         this._map = map;
+
+        // Initialiser le gestionnaire de couches s'il ne l'est pas déjà
+        if (!this.layerManager._map) {
+            this.layerManager.initialize(map);
+        }
+
         const onClick = (e) => this._onClick(e);
         const onMouseMove = (e) => this._onMouseMove(e);
         this._map.on('click', onClick);
@@ -30,12 +35,12 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Gère l'événement de clic sur la carte.
-     * @param e {Object} - L'événement de clic contenant les coordonnées du point cliqué.
+     * Gère l'événement de clic sur la carte
+     * @param e {Object} - Événement de clic
      * @private
      */
     _onClick(e) {
-        if (this.options.readonly){
+        if (this.options.readonly) {
             return;
         }
 
@@ -51,8 +56,8 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Gère le mouvement de la souris sur la carte pour afficher des informations contextuelles.
-     * @param e {Object} - L'événement de mouvement de la souris contenant les coordonnées.
+     * Gère le mouvement de la souris sur la carte
+     * @param e {Object} - Événement de mouvement
      * @private
      */
     _onMouseMove(e) {
@@ -60,7 +65,6 @@ class MaplibreObjectsLayer {
 
         const features = this._map.queryRenderedFeatures(e.point);
         const hoveredFeature = features[0];
-
         let hoveredFeatureId = null;
 
         if (hoveredFeature) {
@@ -70,9 +74,8 @@ class MaplibreObjectsLayer {
             this._map.getCanvas().style.cursor = '';
         }
 
-        // RESET hover = false sur tous les features ≠ hoveredFeatureId
+        // Reset hover state
         const layers = Object.values(this._current_objects).flat();
-
         for (const layerId of layers) {
             const layer = this._map.getLayer(layerId);
             if (!layer) continue;
@@ -91,16 +94,16 @@ class MaplibreObjectsLayer {
             }
         }
 
+        // Gestion du popup
         if (hoveredFeatureId) {
             if (this.currentPopup) {
                 this.currentPopup.remove();
                 this.currentPopup = null;
             }
 
-            const coordinates =
-                hoveredFeature.geometry.type === 'Point'
-                    ? hoveredFeature.geometry.coordinates
-                    : turf.centroid(hoveredFeature).geometry.coordinates;
+            const coordinates = hoveredFeature.geometry.type === 'Point'
+                ? hoveredFeature.geometry.coordinates
+                : turf.centroid(hoveredFeature).geometry.coordinates;
 
             const description = hoveredFeature.properties.name || 'No data available';
 
@@ -121,9 +124,9 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Charge des données GeoJSON à partir d'une URL.
-     * @param url {string} - L'URL à partir de laquelle charger les données GeoJSON.
-     * @returns {Promise<void>} - Une promesse qui se résout lorsque les données sont chargées et ajoutées à la carte.
+     * Charge des données depuis une URL
+     * @param url {string} - URL des données GeoJSON
+     * @returns {Promise<void>}
      */
     async load(url) {
         console.log("Loading data from URL: " + url);
@@ -132,26 +135,21 @@ class MaplibreObjectsLayer {
             const response = await fetch(url);
             const data = await response.json();
             this.addData(data);
-            this._map.fire('layers:added', { layers: this.getLayers() });
         } catch (error) {
             console.error("Could not load url '" + url + "'", error);
         }
     }
 
     /**
-     * Ajoute des données GeoJSON à la carte.
-     * @param geojson {Object} - Un objet GeoJSON ou un tableau de géométries à ajouter à la carte.
+     * Ajoute des données GeoJSON
+     * @param geojson {Object} - Données GeoJSON
      */
     addData(geojson) {
-
         const dataId = this._generateUniqueId();
-
         this._objects[dataId] = geojson;
 
-        if(geojson.type === "Feature"){
-
-            this.addLayer(geojson,dataId, true, true);
-
+        if (geojson.type === "Feature") {
+            this.addLayer(geojson, dataId, true, true);
             this.boundsLayer = calculateBounds(geojson);
             if (this.boundsLayer) {
                 this._map.fitBounds(this.boundsLayer, {
@@ -163,36 +161,256 @@ class MaplibreObjectsLayer {
         } else {
             this.addLayer(geojson, dataId);
         }
-
     }
 
     /**
-     * Met en surbrillance un objet sur la carte en fonction de sa clé primaire.
-     * @param primaryKey {string|number} - La clé primaire de l'objet à mettre en surbrillance.
-     * @param on {boolean} - Indique si la surbrillance doit être activée ou désactivée.
+     * Ajoute une couche à la carte
+     * @param geojson {Object} - Données GeoJSON
+     * @param pk {string} - Clé primaire
+     * @param detailStatus {boolean} - Mode détaillé
+     * @param readonly {boolean} - Mode lecture seule
      */
-    highlight(primaryKey, on = true) {
-        if (this.options.readonly) {
-            return;
+    addLayer(geojson, pk, detailStatus = false, readonly = false) {
+        const primaryKey = pk;
+        const foundTypes = new Set();
+
+        // Analyse des types de géométrie
+        if (geojson.type === "Feature") {
+            if (!geojson.id && geojson.properties?.id) {
+                geojson.id = geojson.properties.id;
+            }
+            this._analyzeGeometryTypes(geojson.geometry, foundTypes);
+        } else if (geojson.type === "FeatureCollection") {
+            geojson.features.forEach(feature => {
+                if (!feature.id && feature.properties?.id) {
+                    feature.id = feature.properties.id;
+                }
+                this._analyzeGeometryTypes(feature.geometry, foundTypes);
+            });
         }
 
-        const layersBySource = Object.values(this._current_objects).flat(); // récupère tous les layerIds
+        const layerIdBase = `layer-${primaryKey}`;
+        const sourceId = `source-${primaryKey}`;
+        const isReadonly = readonly || this.options.readonly;
 
+        // Ajouter la source
+        this._map.addSource(sourceId, {
+            type: 'geojson',
+            data: geojson,
+        });
+
+        // Styles
+        const style = detailStatus ? this.options.detailStyle : this.options.style;
+        const rgba = parseColor(style.color);
+        const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
+        const fillOpacity = style.fillOpacity ?? 0.7;
+        const strokeOpacity = style.opacity ?? 1.0;
+        const strokeColor = style.color;
+        const strokeWidth = style.weight ?? 5;
+
+        const layerIds = [];
+
+        // Ajouter les couches selon les types de géométrie
+        if (foundTypes.has("Point") || foundTypes.has("MultiPoint")) {
+            layerIds.push(this._addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth));
+        }
+
+        if (foundTypes.has("LineString") || foundTypes.has("MultiLineString")) {
+            layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity));
+        }
+
+        if (foundTypes.has("Polygon") || foundTypes.has("MultiPolygon")) {
+            layerIds.push(...this._addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity));
+        }
+
+        // Enregistrer les couches
+        this._current_objects[primaryKey] = layerIds;
+
+        // Enregistrer auprès du gestionnaire de couches
+        const category = this.options.modelname || 'default';
+        this.layerManager.registerOverlay(category, primaryKey, layerIds);
+    }
+
+    /**
+     * Analyse les types de géométrie
+     * @param geometry {Object} - Géométrie GeoJSON
+     * @param foundTypes {Set} - Set des types trouvés
+     * @private
+     */
+    _analyzeGeometryTypes(geometry, foundTypes) {
+        if (!geometry) return;
+
+        if (geometry.type === "GeometryCollection" && geometry.geometries) {
+            geometry.geometries.forEach(g => {
+                if (g.type) foundTypes.add(g.type);
+            });
+        } else if (geometry.type) {
+            foundTypes.add(geometry.type);
+        }
+    }
+
+    /**
+     * Ajoute une couche de points
+     * @param layerIdBase {string} - Base de l'ID de couche
+     * @param sourceId {string} - ID de la source
+     * @param rgbaStr {string} - Couleur RGBA
+     * @param strokeColor {string} - Couleur de contour
+     * @param fillOpacity {number} - Opacité de remplissage
+     * @param strokeOpacity {number} - Opacité de contour
+     * @param strokeWidth {number} - Largeur de contour
+     * @returns {string} - ID de la couche créée
+     * @private
+     */
+    _addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth) {
+        const layerId = `${layerIdBase}-points`;
+        this._map.addLayer({
+            id: layerId,
+            type: 'circle',
+            source: sourceId,
+            filter: ['any',
+                ['==', ['geometry-type'], 'Point'],
+                ['==', ['geometry-type'], 'MultiPoint']
+            ],
+            paint: {
+                'circle-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    '#FF0000',
+                    rgbaStr
+                ],
+                'circle-opacity': fillOpacity,
+                'circle-stroke-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    '#FF0000',
+                    strokeColor
+                ],
+                'circle-stroke-opacity': strokeOpacity,
+                'circle-stroke-width': strokeWidth,
+                'circle-radius': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    10,
+                    8
+                ]
+            }
+        });
+        return layerId;
+    }
+
+    /**
+     * Ajoute une couche de lignes
+     * @param layerIdBase {string} - Base de l'ID de couche
+     * @param sourceId {string} - ID de la source
+     * @param strokeColor {string} - Couleur de ligne
+     * @param strokeWidth {number} - Largeur de ligne
+     * @param strokeOpacity {number} - Opacité de ligne
+     * @returns {string} - ID de la couche créée
+     * @private
+     */
+    _addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity) {
+        const layerId = `${layerIdBase}-lines`;
+        this._map.addLayer({
+            id: layerId,
+            type: 'line',
+            source: sourceId,
+            filter: ['any',
+                ['==', ['geometry-type'], 'LineString'],
+                ['==', ['geometry-type'], 'MultiLineString']
+            ],
+            paint: {
+                'line-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    '#FF0000',
+                    strokeColor
+                ],
+                'line-width': strokeWidth,
+                'line-opacity': strokeOpacity
+            }
+        });
+        return layerId;
+    }
+
+    /**
+     * Ajoute les couches de polygones (remplissage + contour)
+     * @param layerIdBase {string} - Base de l'ID de couche
+     * @param sourceId {string} - ID de la source
+     * @param rgbaStr {string} - Couleur RGBA
+     * @param strokeColor {string} - Couleur de contour
+     * @param fillOpacity {number} - Opacité de remplissage
+     * @param strokeWidth {number} - Largeur de contour
+     * @param strokeOpacity {number} - Opacité de contour
+     * @returns {Array<string>} - IDs des couches créées
+     * @private
+     */
+    _addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity) {
+        const fillLayerId = `${layerIdBase}-polygon-fill`;
+        const strokeLayerId = `${layerIdBase}-polygon-stroke`;
+
+        // Couche de remplissage
+        this._map.addLayer({
+            id: fillLayerId,
+            type: 'fill',
+            source: sourceId,
+            filter: ['any',
+                ['==', ['geometry-type'], 'Polygon'],
+                ['==', ['geometry-type'], 'MultiPolygon']
+            ],
+            paint: {
+                'fill-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    '#FF0000',
+                    rgbaStr
+                ],
+                'fill-opacity': fillOpacity
+            }
+        });
+
+        // Couche de contour
+        this._map.addLayer({
+            id: strokeLayerId,
+            type: 'line',
+            source: sourceId,
+            filter: ['any',
+                ['==', ['geometry-type'], 'Polygon'],
+                ['==', ['geometry-type'], 'MultiPolygon']
+            ],
+            paint: {
+                'line-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    '#FF0000',
+                    strokeColor
+                ],
+                'line-width': strokeWidth,
+                'line-opacity': strokeOpacity
+            }
+        });
+
+        return [fillLayerId, strokeLayerId];
+    }
+
+    /**
+     * Met en surbrillance un objet
+     * @param primaryKey {string|number} - Clé primaire
+     * @param on {boolean} - Activer/désactiver
+     */
+    highlight(primaryKey, on = true) {
+        if (this.options.readonly) return;
+
+        const layersBySource = Object.values(this._current_objects).flat();
         for (const layerId of layersBySource) {
             const layer = this._map.getLayer(layerId);
-            if (!layer) {
-                continue;
-            }
+            if (!layer) continue;
 
             const sourceId = layer.source;
             const source = this._map.getSource(sourceId);
-            if (!source || !source._data) {
-                continue;
-            }
+            if (!source || !source._data) continue;
 
             for (const feature of source._data.features) {
                 if (!feature.id) continue;
-
                 const isMatch = feature.id === primaryKey;
                 this._map.setFeatureState(
                     { source: sourceId, id: feature.id },
@@ -203,292 +421,17 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Sélectionne un objet sur la carte en fonction de sa clé primaire.
-     * @param primaryKey {string|number} - La clé primaire de l'objet à sélectionner.
-     * @param on {boolean} - Indique si la sélection doit être activée ou désactivée.
+     * Sélectionne un objet
+     * @param primaryKey {string|number} - Clé primaire
+     * @param on {boolean} - Activer/désactiver
      */
     select(primaryKey, on = true) {
         this.highlight(primaryKey, true);
     }
 
     /**
-     * Ajoute une couche à la carte en fonction des données GeoJSON fournies.
-     * @param geojson {Object} - Un objet GeoJSON ou un tableau de géométries à ajouter à la carte.
-     * @param pk {string|number} - La clé primaire de l'objet à ajouter, utilisée pour identifier la couche.
-     * @param detailStatus {boolean} - Indique si le style détaillé doit être appliqué (par défaut: false).
-     * @param readonly {boolean} - Indique si la couche doit être en mode lecture seule (par défaut: false).
-     */
-    addLayer(geojson, pk, detailStatus = false, readonly = false) {
-        const primaryKey = pk;
-        const foundTypes = new Set();
-
-        if (geojson.type === "Feature") {
-            if (!geojson.id && geojson.properties?.id) {
-                geojson.id = geojson.properties.id;
-            }
-            const geomType = geojson.geometry?.type;
-            if (geomType === "GeometryCollection" && geojson.geometry.geometries) {
-                geojson.geometry.geometries.forEach(g => {
-                    if (g.type) {
-                        foundTypes.add(g.type);
-                    }
-                });
-            } else if (geomType) {
-                foundTypes.add(geomType);
-            }
-        } else if (geojson.type === "FeatureCollection") {
-            geojson.features.forEach(feature => {
-                if (!feature.id && feature.properties?.id) {
-                    feature.id = feature.properties.id;
-                }
-                const geomType = feature.geometry?.type;
-                if (geomType === "GeometryCollection" && feature.geometry.geometries) {
-                    feature.geometry.geometries.forEach(g => {
-                        if (g.type) {
-                            foundTypes.add(g.type);
-                        }
-                    });
-                } else if (geomType) {
-                    foundTypes.add(geomType);
-                }
-            });
-        }
-
-        const layerIdBase = `layer-${primaryKey}`;
-        const sourceId = `source-${primaryKey}`;
-
-        const isReadonly = readonly || this.options.readonly;
-        this.options.readonly = isReadonly;
-
-        this._map.addSource(sourceId, {
-            type: 'geojson',
-            data: geojson,
-        });
-
-        const style = detailStatus ? this.options.detailStyle : this.options.style;
-        const rgba = parseColor(style.color); // [r, g, b, a]
-        const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
-        const fillOpacity = style.fillOpacity ?? 0.7; // default fill opacity
-        const strokeOpacity = style.opacity ?? 1.0; // default opacity
-        const strokeColor = style.color;
-        const strokeWidth = style.weight ?? 5; // default width
-
-        const layerIds = [];
-
-        if (foundTypes.has("Point") || foundTypes.has("MultiPoint")) {
-            this._map.addLayer({
-                id: `${layerIdBase}-points`,
-                type: 'circle',
-                source: sourceId,
-                filter: ['any',
-                    ['==', ['geometry-type'], 'Point'],
-                    ['==', ['geometry-type'], 'MultiPoint']
-                ],
-                paint: {
-                    'circle-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Change color on hover
-                        rgbaStr
-                    ],
-                    'circle-opacity': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        fillOpacity, // Increase opacity on hover
-                        fillOpacity
-                    ],
-                    'circle-stroke-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000', // Change color on hover
-                        strokeColor
-                    ],
-                    'circle-stroke-opacity': strokeOpacity,
-                    'circle-stroke-width': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        strokeWidth, // Increase width on hover
-                        strokeWidth
-                    ],
-                    'circle-radius': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        10, // Increase radius on hover
-                        8
-                    ]
-                }
-            });
-            layerIds.push(`${layerIdBase}-points`);
-        }
-
-        if (foundTypes.has("LineString") || foundTypes.has("MultiLineString")) {
-            this._map.addLayer({
-                id: `${layerIdBase}-lines`,
-                type: 'line',
-                source: sourceId,
-                filter: ['any',
-                    ['==', ['geometry-type'], 'LineString'],
-                    ['==', ['geometry-type'], 'MultiLineString']
-                ],
-                paint: {
-                    'line-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000',
-                        strokeColor
-                    ],
-                    'line-width': strokeWidth,
-                    'line-opacity': strokeOpacity
-                }
-            });
-            layerIds.push(`${layerIdBase}-lines`);
-        }
-
-        if (foundTypes.has("Polygon") || foundTypes.has("MultiPolygon")) {
-            // Add a fill layer for polygons
-            this._map.addLayer({
-                id: `${layerIdBase}-polygon-fill`,
-                type: 'fill',
-                source: sourceId,
-                filter: ['any',
-                    ['==', ['geometry-type'], 'Polygon'],
-                    ['==', ['geometry-type'], 'MultiPolygon']
-                ],
-                paint: {
-                    'fill-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000',
-                        rgbaStr
-                    ],
-                    'fill-opacity': fillOpacity
-                }
-            });
-
-            // Add a stroke layer for polygons
-            this._map.addLayer({
-                id: `${layerIdBase}-polygon-stroke`,
-                type: 'line',
-                source: sourceId,
-                filter: ['any',
-                    ['==', ['geometry-type'], 'Polygon'],
-                    ['==', ['geometry-type'], 'MultiPolygon']
-                ],
-                paint: {
-                    'line-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'hover'], false],
-                        '#FF0000',
-                        strokeColor
-                    ],
-                    'line-width': strokeWidth,
-                    'line-opacity': strokeOpacity
-                }
-            });
-            layerIds.push(`${layerIdBase}-polygon-fill`, `${layerIdBase}-polygon-stroke`);
-        }
-
-        this._current_objects[primaryKey] = layerIds;
-
-        const category = this.options.modelname;
-        if (!this.layers.overlays[category]) {
-            this.layers.overlays[category] = {};
-        }
-        this.layers.overlays[category][primaryKey] = layerIds;
-    }
-
-    /**
-     * Ajoute une couche de base à la carte.
-     * @param name {string} - Le nom de la couche de base.
-     * @param layerConfig {Object} - La configuration de la couche de base, contenant les propriétés suivantes :
-     */
-    addBaseLayer(name, layerConfig) {
-        const { id, tiles, tileSize = 256, attribution = '' } = layerConfig;
-
-        this._map.addSource(id, {
-            type: 'raster',
-            tiles: tiles,
-            tileSize,
-            attribution
-        });
-
-        this._map.addLayer({
-            id,
-            type: 'raster',
-            source: id,
-            layout: { visibility: 'none' }
-        });
-
-        this.layers.baseLayers[name] = id;
-    }
-
-    /**
-     * Bascule la visibilité d'une ou plusieurs couches.
-     * @param layerIds {string|Array<string>} - L'ID ou les IDs des couches à basculer. Peut être une chaîne de caractères ou un tableau de chaînes.
-     * @param visible {boolean} - Indique si les couches doivent être visibles ou non. Par défaut, c'est `true`.
-     */
-    toggleLayer(layerIds, visible = true) {
-        const ids = Array.isArray(layerIds)
-            ? layerIds
-            : typeof layerIds === 'string'
-                ? layerIds.split(',').map(id => id.trim())
-                : [];
-
-        for (const id of ids) {
-            if (this._map.getLayer(id)) {
-                this._map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
-            } else {
-                console.warn(`Layer "${id}" not found.`);
-            }
-        }
-    }
-
-    /**
-     * Récupère les couches actuellement gérées par cette instance.
-     * @returns {*|{baseLayers: {}, overlays: {}}}
-     */
-    getLayers() {
-        return this.layers;
-    }
-
-    /**
-     * Récupère un objet de couche en fonction de sa clé primaire.
-     * @param primaryKey {string|number} - La clé primaire de l'objet de couche à récupérer.
-     * @returns {*} - L'objet de couche correspondant à la clé primaire, ou `undefined` si non trouvé.
-     */
-    getLayer(primaryKey) {
-        return this._objects[primaryKey];
-    }
-
-    /**
-     * Génère un identifiant unique pour une feature.
-     * @param feature {Object} - La feature pour laquelle générer un identifiant.
-     * @returns {string} - Un identifiant unique sous forme de chaîne de caractères.
-     * @private
-     */
-    _generateUniqueId(feature) {
-        return `${Math.random().toString(36).substring(2, 9)}`;
-    }
-
-    /**
-     * Récupère les objets actuellement gérés par cette instance.
-     * @returns {*|{}} - Un objet contenant les objets actuellement gérés, organisés par clé primaire.
-     */
-    getCurrentLayers() {
-        return this._current_objects;
-    }
-
-    /**
-     * Récupère la couche de limites (bounds) actuellement utilisée.
-     * @returns {null} - La couche de limites, ou `null` si aucune couche de limites n'est définie.
-     */
-    getBoundsLayer() {
-        return this.boundsLayer;
-    }
-
-    /**
-     * Met à jour la couche d'objets en fonction des clés primaires fournies.
-     * @param primaryKeys {Array<string|number>} - Un tableau de clés primaires pour lesquelles mettre à jour les objets.
+     * Met à jour les objets affichés
+     * @param primaryKeys {Array<string|number>} - Clés primaires à afficher
      */
     updateFromPks(primaryKeys) {
         if (!this._track_objects) {
@@ -497,7 +440,6 @@ class MaplibreObjectsLayer {
 
         let sourceId = null;
         let fullFeatureCollection = null;
-
         const layersBySource = Object.values(this._current_objects).flat();
 
         if (layersBySource.length === 0) {
@@ -505,19 +447,13 @@ class MaplibreObjectsLayer {
             return;
         }
 
-        // Trouver le sourceId via les layerIds dans _current_objects
-        for (let i = 0; i < layersBySource.length; i++) {
-            const layerId = layersBySource[i];
+        // Trouver la source
+        for (const layerId of layersBySource) {
             const layer = this._map.getLayer(layerId);
-
-            if (!layer) {
-                console.log("Aucun layer trouvé, continuer...");
-                continue;
-            }
+            if (!layer) continue;
 
             const currentSourceId = layer.source;
             const source = this._map.getSource(currentSourceId);
-
             if (source && source._data && source._data.features) {
                 sourceId = currentSourceId;
                 fullFeatureCollection = source._data;
@@ -532,7 +468,7 @@ class MaplibreObjectsLayer {
 
         const source = this._map.getSource(sourceId);
 
-        // Sauvegarder les features actuelles si non encore tracées
+        // Sauvegarder les features
         fullFeatureCollection.features.forEach(feature => {
             const featureId = feature.properties?.id;
             if (featureId && !this._track_objects[featureId]) {
@@ -540,37 +476,26 @@ class MaplibreObjectsLayer {
             }
         });
 
-        const featuresToShow = [];
+        // Filtrer les features à afficher
+        const featuresToShow = primaryKeys
+            .map(pk => this._track_objects[pk])
+            .filter(feature => feature);
 
-        primaryKeys.forEach(primaryKey => {
-            const feature = this._track_objects[primaryKey];
-            if (feature) {
-                featuresToShow.push(feature);
-            }
-        });
-
-        // Mettre à jour la source avec les nouvelles features visibles
+        // Mettre à jour la source
         source.setData({
             type: 'FeatureCollection',
             features: featuresToShow
         });
-
     }
 
     /**
-     * Déplace la carte pour centrer sur une feature spécifique en fonction de sa clé primaire.
-     * @param pk {string|number} - La clé primaire de la feature à centrer.
+     * Déplace la vue vers un objet
+     * @param pk {string|number} - Clé primaire
      */
     jumpTo(pk) {
         let feature = null;
         const layersBySource = Object.values(this._current_objects).flat();
 
-        if (layersBySource.length === 0) {
-            console.warn("Aucun layer trouvé dans _current_objects");
-            return;
-        }
-
-        // Chercher la feature dans les sources actives
         for (const layerId of layersBySource) {
             const layer = this._map.getLayer(layerId);
             if (!layer) continue;
@@ -593,9 +518,63 @@ class MaplibreObjectsLayer {
         const bounds = calculateBounds(feature);
         if (bounds) {
             this._map.fitBounds(bounds, { padding: 20, maxZoom: 16 });
-        } else {
-            console.warn(`Impossible de calculer les bounds pour la feature ${pk}`);
         }
     }
 
+    /**
+     * Récupère un objet par sa clé
+     * @param primaryKey {string|number} - Clé primaire
+     * @returns {Object}
+     */
+    getLayer(primaryKey) {
+        return this._objects[primaryKey];
+    }
+
+    /**
+     * Récupère la couche des limites
+     * @returns {*}
+     */
+    getBoundsLayer() {
+        return this.boundsLayer;
+    }
+
+    /**
+     * Génère un ID unique
+     * @returns {string}
+     * @private
+     */
+    _generateUniqueId() {
+        return `${Math.random().toString(36).substring(2, 9)}`;
+    }
+    //
+    // /**
+    //  * Nettoie les ressources
+    //  */
+    // destroy() {
+    //     // Supprimer les couches du gestionnaire
+    //     const category = this.options.modelname || 'default';
+    //     Object.keys(this._current_objects).forEach(pk => {
+    //         this.layerManager.unregisterOverlay(category, pk);
+    //     });
+    //
+    //     // Supprimer les sources et couches de la carte
+    //     Object.values(this._current_objects).flat().forEach(layerId => {
+    //         if (this._map.getLayer(layerId)) {
+    //             this._map.removeLayer(layerId);
+    //         }
+    //     });
+    //
+    //     Object.keys(this._objects).forEach(pk => {
+    //         const sourceId = `source-${pk}`;
+    //         if (this._map.getSource(sourceId)) {
+    //             this._map.removeSource(sourceId);
+    //         }
+    //     });
+    //
+    //     // Supprimer le popup
+    //     if (this.currentPopup) {
+    //         this.currentPopup.remove();
+    //         this.currentPopup = null;
+    //     }
+    // }
 }
