@@ -112,7 +112,7 @@
           <li>
             <form method="post" action="{% url 'logout' %}">
               {% csrf_token %}
-              <button type="submit" class="dropdown-item"><i class="bi bi-power"></i> {% trans "Logout" %}</button>
+              <button id="btn-logout" type="submit" class="dropdown-item"><i class="bi bi-power"></i> {% trans "Logout" %}</button>
             </form>
           </li>
         </ul>

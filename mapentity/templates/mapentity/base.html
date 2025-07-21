@@ -1,6 +1,7 @@
 {% load static i18n leaflet_tags compress mapentity_tags %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <!-- version {{ VERSION }} -->
     {% block head %}
