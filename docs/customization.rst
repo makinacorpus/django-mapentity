@@ -2,6 +2,29 @@ Customization
 =============
 
 
+Models
+------
+
+If you want to add some custom fields in the list view, you must customize your model
+
+    from django.utils.functional import classproperty
+
+    class Museum(MapEntityMixin, models.Model):
+        geom = models.PointField()
+        name = models.CharField(max_length=80)
+
+        # create a property for you custom column
+        @property
+        def my_custom_col(self):
+            <my custim logic>
+
+        # Map entity need a verbose name to display the custom column in the table
+        @classproperty
+        def my_custom_col_verbose_name(cls):
+            return "My custom label"
+
+
+
 Views
 -----
 
@@ -26,7 +49,7 @@ can override CBV methods as usual::
 
     class MuseumList(MapEntityList):
         model = Museum
-        columns = ['id', 'name']
+        columns = ['id', 'name', 'my_custom_col']
 
 
     class MuseumDetail(MapEntityDetail):
@@ -61,6 +84,7 @@ can override CBV methods as usual::
         queryset = Museum.objects.all()
 
 
+
 Serializers
 ------------
 
@@ -80,7 +104,10 @@ You must define a least a regular and a geosjon serializer::
 
     class MuseumGeojsonSerializer(MapentityGeojsonModelSerializer):
         class Meta(MapentityGeojsonModelSerializer.Meta):
-            fields = ["id", "name"]
+            # the custom field must be added to the serializer 
+            my_custom_field = serializers.CharField()
+
+            fields = ["id", "name", "my_custom_field"]
             model = Museum
 
 Filters
