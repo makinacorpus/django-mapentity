@@ -114,13 +114,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof style !== 'function') style = { ...style };
         let detailStyle = window.SETTINGS.map.styles.detail;
         if (typeof detailStyle !== 'function') detailStyle = { ...detailStyle };
+        const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelName;
+        const category = tr("Objects");
 
         const objectsLayer = new MaplibreObjectsLayer(null, {
             objectUrl: props => objectUrlTemplate.replace('0', props.id),
             style,
             detailStyle,
             modelname: modelName,
-            readonly: false
+            readonly: false,
+            nameHTML : nameHTML,
+            category: category,
         });
 
         const mapReadyEvent = new CustomEvent('entity:map:ready', {

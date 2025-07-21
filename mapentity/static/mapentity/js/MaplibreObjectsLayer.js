@@ -227,8 +227,8 @@ class MaplibreObjectsLayer {
         this._current_objects[primaryKey] = layerIds;
 
         // Enregistrer auprès du gestionnaire de couches
-        const category = this.options.modelname || 'default';
-        this.layerManager.registerOverlay(category, primaryKey, layerIds);
+        // const category = this.options.modelname || 'default';
+        this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
     }
 
     /**

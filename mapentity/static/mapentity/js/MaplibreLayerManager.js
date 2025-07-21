@@ -57,18 +57,24 @@ class MaplibreLayerManager {
 
     /**
      * Enregistre une couche overlay
-     * @param category {string} - Catégorie de la couche (modelname)
+     * @param category {string} - Catégorie de la couche (ex : tr("Objects"))
      * @param primaryKey {string} - Clé primaire de l'objet
      * @param layerIds {Array} - IDs des couches MapLibre
+     * @param labelHTML {string} - Label HTML personnalisé à afficher (ex : avec couleur ou icône)
      */
-    registerOverlay(category, primaryKey, layerIds) {
+    registerOverlay(category, primaryKey, layerIds, labelHTML) {
         if (!this.layers.overlays[category]) {
             this.layers.overlays[category] = {};
         }
 
-        this.layers.overlays[category][primaryKey] = layerIds;
+        this.layers.overlays[category][primaryKey] = {
+            layerIds,
+            labelHTML
+        };
+
         this._fireEvent('overlayAdded', { category, primaryKey, layerIds });
     }
+
 
     /**
      * Bascule la visibilité d'une ou plusieurs couches

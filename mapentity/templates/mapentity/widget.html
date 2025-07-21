@@ -29,6 +29,8 @@
             const bounds = [BOUNDS[0], BOUNDS[1]];
             const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
 
+            const layerManager = new MaplibreLayerManager();
+
             // Attendre que la carte soit chargée avant d'initialiser le callback
             map.getMap().on('load', function() {
                  // Configuration des styles
@@ -39,21 +41,26 @@
 
                 // modelname est récupéré depuis l'élément body
                 const modelname = document.body.getAttribute('data-modelname');
+                const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelname;
+                const category = tr("Objects");
 
                 // Créer une instance de MaplibreObjectsLayer
                 const objectsLayer = new MaplibreObjectsLayer(null, {
                     style: style,
                     modelname: modelname,
-                    readonly : true // empêche la surbrillance des objets
+                    readonly : true, // empêche la surbrillance des objets
+                    nameHTML: nameHTML,
+                    category: category,
                 });
 
                 // Initialiser la couche d'objets
+
                 objectsLayer.initialize(map.getMap());
 
                 // Ajouter les couches de fond
                 TILES.forEach((tile) => {
                     const [tileName, tileUrl, tileAttribution] = tile;
-                    objectsLayer.addBaseLayer(tileName, {
+                    layerManager.addBaseLayer(tileName, {
                         id: tileName + '-base',
                         tiles: [tileUrl],
                         attribution: tileAttribution
@@ -61,7 +68,7 @@
                 });
 
                 // Ajouter les contrôles
-                map.getMap().addControl(new MaplibreLayerControl(objectsLayer), 'top-right');
+                map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
 
                 // ajout du contrôle de fichiers
                 const fileLayerLoadControl = new MaplibreFileLayerControl({

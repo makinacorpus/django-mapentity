@@ -126,7 +126,7 @@ class MaplibreLayerControl {
         const layers = this.layerManager.getLayers();
         const overlays = layers.overlays;
 
-        // Nettoyer tous les éléments après le <hr> (s'il existe)
+        // Nettoyer les anciens overlays après le <hr>
         const existingHr = menu.querySelector('hr');
         if (existingHr) {
             let next = existingHr.nextElementSibling;
@@ -143,7 +143,7 @@ class MaplibreLayerControl {
 
         // Injecter les overlays groupés par catégorie
         for (const [category, group] of Object.entries(overlays)) {
-            // Titre de catégorie
+            // Titre de la catégorie
             const categoryTitle = document.createElement('div');
             categoryTitle.textContent = category;
             categoryTitle.style.fontWeight = 'bold';
@@ -151,8 +151,9 @@ class MaplibreLayerControl {
             categoryTitle.dataset.category = category;
             menu.appendChild(categoryTitle);
 
-            // Parcourir les overlays
-            for (const [primaryKey, layerIds] of Object.entries(group)) {
+            for (const [primaryKey, info] of Object.entries(group)) {
+                const { layerIds, labelHTML } = info;
+
                 const label = document.createElement('label');
                 const input = document.createElement('input');
                 input.type = 'checkbox';
@@ -160,10 +161,16 @@ class MaplibreLayerControl {
                 input.dataset.layerId = primaryKey;
 
                 label.appendChild(input);
-                label.append(` ${category}`);
+
+                // Injecter du HTML (nom coloré, etc.)
+                const span = document.createElement('span');
+                span.innerHTML = ` ${labelHTML}`;
+                label.appendChild(span);
+
                 menu.appendChild(label);
                 menu.appendChild(document.createElement('br'));
 
+                // Événement checkbox
                 input.addEventListener('change', (e) => {
                     const isChecked = e.target.checked;
                     this.layerManager.toggleLayer(layerIds, isChecked);
@@ -178,5 +185,6 @@ class MaplibreLayerControl {
             }
         }
     }
+
 
 }
