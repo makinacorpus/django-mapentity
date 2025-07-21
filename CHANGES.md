@@ -1,8 +1,19 @@
 CHANGELOG
 =========
 
+8.13.1+dev (XXXX-XX-XX)
+-----------------------
+
+**Improvements**
+
+- lang detection in html tag
+- id attribute on logout button
+
+
 8.13.1     (2025-07-16)
 -----------------------
+
+**Bug fixes**
 
 - Use logout view in POST (https://code.djangoproject.com/ticket/15619)
 
