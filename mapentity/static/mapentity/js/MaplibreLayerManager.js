@@ -76,7 +76,9 @@ class MaplibreLayerManager {
      * @param visible {boolean} - Visibilité souhaitée
      */
     toggleLayer(layerIds, visible = true) {
-        if (!this._map) return;
+        if (!this._map) {
+            return;
+        }
 
         const ids = Array.isArray(layerIds)
             ? layerIds
@@ -102,27 +104,35 @@ class MaplibreLayerManager {
     }
 
     /**
-     * Ajoute un écouteur d'événement
-     * @param event {string} - Nom de l'événement
-     * @param callback {Function} - Fonction de rappel
+     * Recupère la map
+     * @returns {Object} - Objet contenant la carte
      */
-    on(event, callback) {
-        if (!this._eventListeners[event]) {
-            this._eventListeners[event] = [];
-        }
-        this._eventListeners[event].push(callback);
+    getMap() {
+        return this._map;
     }
 
-    /**
-     * Supprime un écouteur d'événement
-     * @param event {string} - Nom de l'événement
-     * @param callback {Function} - Fonction de rappel
-     */
-    off(event, callback) {
-        if (this._eventListeners[event]) {
-            this._eventListeners[event] = this._eventListeners[event].filter(cb => cb !== callback);
-        }
-    }
+    // /**
+    //  * Ajoute un écouteur d'événement
+    //  * @param event {string} - Nom de l'événement
+    //  * @param callback {Function} - Fonction de rappel
+    //  */
+    // on(event, callback) {
+    //     if (!this._eventListeners[event]) {
+    //         this._eventListeners[event] = [];
+    //     }
+    //     this._eventListeners[event].push(callback);
+    // }
+    //
+    // /**
+    //  * Supprime un écouteur d'événement
+    //  * @param event {string} - Nom de l'événement
+    //  * @param callback {Function} - Fonction de rappel
+    //  */
+    // off(event, callback) {
+    //     if (this._eventListeners[event]) {
+    //         this._eventListeners[event] = this._eventListeners[event].filter(cb => cb !== callback);
+    //     }
+    // }
 
     /**
      * Déclenche un événement

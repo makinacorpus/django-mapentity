@@ -49,9 +49,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // MAINTENANT déclencher les événements spécifiques après l'initialisation complète
-            window.dispatchEvent(new CustomEvent('entity:map', {detail : mergedData}));
             window.dispatchEvent(new CustomEvent('entity:view:' + context.viewname, { detail: mergedData }));
             window.dispatchEvent(new CustomEvent('entity:map:' + context.viewname, { detail: mergedData }));
+            window.dispatchEvent(new CustomEvent('entity:map', {detail : mergedData}));
         });
     });
 
@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
         mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
             prefix: 'detail',
             objectsname: modelname,
-            objectsLayer: objectsLayer,
         });
 
         // Affichage de la géométrie de l'objet
@@ -170,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
             datatable: mainDatatable,
             objectsname: modelname,
             prefix: 'list',
-            objectsLayer: objectsLayer,
         });
 
         // Sauvegarde du contexte

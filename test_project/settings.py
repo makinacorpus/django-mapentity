@@ -185,10 +185,10 @@ MAPLIBRE_CONFIG_OVERRIDES = {
     'DEFAULT_ZOOM': 5,
     'SCALE': 'metric',
     'BOUNDS': [[-3.630430, 40.120372], [3.208008, 45.061882]],
-#     'TILES': [
-#         ('OSM', 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; OpenStreetMap contributors'),
-#         ('TOPO', 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', '&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.'),
-#     ]
+    'TILES': [
+        ('OSM', 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', '&copy; OpenStreetMap contributors'),
+        ('TOPO', 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', '&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.'),
+    ]
 }
 
 

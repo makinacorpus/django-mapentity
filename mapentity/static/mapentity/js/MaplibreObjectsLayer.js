@@ -24,7 +24,7 @@ class MaplibreObjectsLayer {
         this._map = map;
 
         // Initialiser le gestionnaire de couches s'il ne l'est pas déjà
-        if (!this.layerManager._map) {
+        if (!this.layerManager.getMap()) {
             this.layerManager.initialize(map);
         }
 

@@ -2,6 +2,7 @@ class MaplibreMapentityContext {
     /**
      * Conctructeur de la classe MaplibreMapentityContext.
      * @param bounds {Array} - Un tableau contenant les coordonnées des limites de la carte, sous la forme [[swLng, swLat], [neLng, neLat]].
+     * @param layerManager {MaplibreLayerManager}
      */
     constructor(bounds, layerManager) {
         this.last_sort = {};
@@ -35,7 +36,6 @@ class MaplibreMapentityContext {
         });
 
         context['maplayers'] = layers; // Store the list of visible layers
-        console.log('Visible layers:', context['maplayers']);
 
         // Form filters
         if (filter) {
@@ -47,7 +47,6 @@ class MaplibreMapentityContext {
             // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox'
             const fields = Array.from(formData).filter(([name, _]) => name !== 'bbox');
             context['filter'] = new URLSearchParams(fields).toString();
-
         }
 
         if (datatable) {
@@ -93,23 +92,23 @@ class MaplibreMapentityContext {
         return null;
     }
 
-    /**
-     * Restores le dernier contexte de la carte.
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
-     * @param prefixes {Array} - Un tableau de préfixes pour rechercher le contexte dans le stockage local.
-     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
-     * @returns {boolean} - Retourne true si la restauration a réussi, sinon false.
-     */
-    restoreLatestMapView(map, prefixes, kwargs = {}) {
-        let latest = null;
-        for (const prefix of prefixes) {
-            const context = this.loadFullContext({ ...kwargs, prefix });
-            if (!latest || (context && context.timestamp && context.timestamp > latest.timestamp)) {
-                latest = context;
-            }
-        }
-        return this.restoreMapView(map, latest, kwargs);
-    }
+    // /**
+    //  * Restores le dernier contexte de la carte.
+    //  * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
+    //  * @param prefixes {Array} - Un tableau de préfixes pour rechercher le contexte dans le stockage local.
+    //  * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
+    //  * @returns {boolean} - Retourne true si la restauration a réussi, sinon false.
+    //  */
+    // restoreLatestMapView(map, prefixes, kwargs = {}) {
+    //     let latest = null;
+    //     for (const prefix of prefixes) {
+    //         const context = this.loadFullContext({ ...kwargs, prefix });
+    //         if (!latest || (context && context.timestamp && context.timestamp > latest.timestamp)) {
+    //             latest = context;
+    //         }
+    //     }
+    //     return this.restoreMapView(map, latest, kwargs);
+    // }
 
 
     /**
@@ -120,10 +119,6 @@ class MaplibreMapentityContext {
      * @returns {boolean} - Retourne true si la restauration de la vue de la carte a réussi, sinon false.
      */
     restoreMapView(map, context, kwargs = {}) {
-        if (!context) {
-            context = this.loadFullContext(kwargs);
-        }
-
         if (context !== null) {
             if (context && context.mapview) {
                 map.setCenter([context.mapview.lng, context.mapview.lat]);
@@ -148,8 +143,7 @@ class MaplibreMapentityContext {
         // const filter = kwargs.filter;
         // const objectsname = kwargs.objectsname; // The name of the objects layer, used to display the layer in the layer switcher. (modelname)
         const datatable = kwargs.datatable;
-        const objectsLayer = kwargs.objectsLayer;
-
+        // const objectsLayer = kwargs.objectsLayer;
 
         if (!context || typeof context !== 'object') {
             context = this.loadFullContext(kwargs);
@@ -193,11 +187,10 @@ class MaplibreMapentityContext {
         //         select.dispatchEvent(new Event('change'));
         //     });
         // }
-
-        // Restore le dernier tri des colonnes si un datatable est fourni et que des colonnes de tri sont spécifiées dans le contexte.
-        if (datatable && context.sortcolumns) {
-            this.last_sort = context['sortcolumns'];
-        }
+        // // Restore le dernier tri des colonnes si un datatable est fourni et que des colonnes de tri sont spécifiées dans le contexte.
+        // if (datatable && context.sortcolumns) {
+        //     this.last_sort = context['sortcolumns'];
+        // }
 
         // restore la vue de la carte à partir du contexte.
         this.restoreMapView(map, context, kwargs);
@@ -229,7 +222,6 @@ class MaplibreMapentityContext {
                 if (layers.includes(layerId?.replace('-base', ''))) {
                     input.checked = true;
                     this.layerManager.toggleLayer(layerId);
-                    // objectsLayer.toggleLayer(layerId);
                 } else {
                     input.checked = false;
                 }
