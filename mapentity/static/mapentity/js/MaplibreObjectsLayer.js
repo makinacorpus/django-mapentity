@@ -229,7 +229,6 @@ class MaplibreObjectsLayer {
         this._current_objects[primaryKey] = layerIds;
 
         // Enregistrer auprès du gestionnaire de couches
-        // const category = this.options.modelname || 'default';
         this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
     }
 
@@ -400,7 +399,9 @@ class MaplibreObjectsLayer {
      * @param on {boolean} - Activer/désactiver
      */
     highlight(primaryKey, on = true) {
-        if (this.options.readonly) return;
+        if (this.options.readonly) {
+            return;
+        }
 
         const layersBySource = Object.values(this._current_objects).flat();
         for (const layerId of layersBySource) {
