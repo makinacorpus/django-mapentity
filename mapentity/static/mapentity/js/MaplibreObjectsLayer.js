@@ -194,6 +194,7 @@ class MaplibreObjectsLayer {
         const layerIdBase = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
         const isReadonly = readonly || this.options.readonly;
+        this.options.readonly = isReadonly;
 
         // Ajouter la source
         this._map.addSource(sourceId, {
@@ -549,35 +550,4 @@ class MaplibreObjectsLayer {
     _generateUniqueId() {
         return `${Math.random().toString(36).substring(2, 9)}`;
     }
-    //
-    // /**
-    //  * Nettoie les ressources
-    //  */
-    // destroy() {
-    //     // Supprimer les couches du gestionnaire
-    //     const category = this.options.modelname || 'default';
-    //     Object.keys(this._current_objects).forEach(pk => {
-    //         this.layerManager.unregisterOverlay(category, pk);
-    //     });
-    //
-    //     // Supprimer les sources et couches de la carte
-    //     Object.values(this._current_objects).flat().forEach(layerId => {
-    //         if (this._map.getLayer(layerId)) {
-    //             this._map.removeLayer(layerId);
-    //         }
-    //     });
-    //
-    //     Object.keys(this._objects).forEach(pk => {
-    //         const sourceId = `source-${pk}`;
-    //         if (this._map.getSource(sourceId)) {
-    //             this._map.removeSource(sourceId);
-    //         }
-    //     });
-    //
-    //     // Supprimer le popup
-    //     if (this.currentPopup) {
-    //         this.currentPopup.remove();
-    //         this.currentPopup = null;
-    //     }
-    // }
 }

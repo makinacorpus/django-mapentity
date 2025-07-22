@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Écouteur pour la vue détail
     window.addEventListener('entity:map:detail', function(e) {
-        const { map, objectsLayer, modelname } = e.detail;
+        const { map, objectsLayer, modelname, bounds } = e.detail;
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
         // Restauration du contexte de la carte
@@ -107,8 +107,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         map.getMap().addControl(screenshotControl, 'top-left');
 
-        const boundsLayer = objectsLayer.getBoundsLayer();
-        map.getMap().addControl(new MaplibreResetViewControl(boundsLayer), 'top-left');
+        // const boundsLayer = objectsLayer.getBoundsLayer();
+        map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
         // Sauvegarde du contexte
         window.addEventListener('visibilitychange', function() {
