@@ -29,6 +29,14 @@ class MaplibreLayerControl {
         menu.style.display = 'none';
         menu.style.width = '200px';
         menu.style.padding = '5px';
+        //  Scroll settings
+        menu.style.maxHeight = '800px'; // Ajuste la hauteur selon tes besoins
+        menu.style.overflowY = 'auto';
+        menu.style.background = 'white';
+        menu.style.border = '1px solid #ccc';
+        menu.style.boxShadow = '0px 2px 6px rgba(0,0,0,0.2)';
+        menu.style.zIndex = '1000';
+
         this._container.appendChild(menu);
 
         button.addEventListener('click', () => {

@@ -61,7 +61,9 @@ class MaplibreObjectsLayer {
      * @private
      */
     _onMouseMove(e) {
-        if (this.options.readonly) return;
+        if (this.options.readonly) {
+            return;
+        }
 
         const features = this._map.queryRenderedFeatures(e.point);
         const hoveredFeature = features[0];
