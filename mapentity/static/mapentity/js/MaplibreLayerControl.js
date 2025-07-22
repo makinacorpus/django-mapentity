@@ -30,7 +30,7 @@ class MaplibreLayerControl {
         menu.style.width = '200px';
         menu.style.padding = '5px';
         //  Scroll settings
-        menu.style.maxHeight = '800px'; // Ajuste la hauteur selon tes besoins
+        menu.style.maxHeight = '800px';
         menu.style.overflowY = 'auto';
         menu.style.background = 'white';
         menu.style.border = '1px solid #ccc';
