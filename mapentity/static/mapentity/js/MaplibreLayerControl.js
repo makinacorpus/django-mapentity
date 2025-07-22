@@ -61,9 +61,9 @@ class MaplibreLayerControl {
             this._firstBaseLayerInput.checked = true;
 
             // Déclencher l'événement change immédiatement
-            // const changeEvent = new Event('change', { bubbles: true });
-            // this._firstBaseLayerInput.dispatchEvent(changeEvent);
-            this._firstBaseLayerInput.click();
+            const changeEvent = new Event('change', { bubbles: true });
+            this._firstBaseLayerInput.dispatchEvent(changeEvent);
+            // this._firstBaseLayerInput.click();
         }
     }
 
