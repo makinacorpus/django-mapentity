@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // MAINTENANT déclencher les événements spécifiques après l'initialisation complète
             window.dispatchEvent(new CustomEvent('entity:view:' + context.viewname, { detail: mergedData }));
             window.dispatchEvent(new CustomEvent('entity:map:' + context.viewname, { detail: mergedData }));
-            window.dispatchEvent(new CustomEvent('entity:map', {detail : mergedData}));
+
         });
     });
 
@@ -119,11 +119,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Écouteur pour la vue liste
     window.addEventListener('entity:map:list', function(e) {
         const { map, objectsLayer, modelname, bounds } = e.detail;
-        const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
+
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
         // Charger les objets depuis le backend
-        objectsLayer.load(layerUrl);
+        objectsLayer.load();
 
         // Contrôles
         const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,

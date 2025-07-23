@@ -11,6 +11,11 @@ class MaplibreObjectsLayer {
         this.boundsLayer = null;
         this.currentPopup = null;
         this._track_objects = {};
+        this.isLoaded = false; // Nouvel état pour le lazy loading
+        this.dataUrl = options.dataUrl; // URL pour le lazy loading
+        this.isLazy = options.isLazy;
+        this.loading = false; // État de chargement
+        this.primaryKey = this.options.primaryKey;
 
         // Récupérer le gestionnaire de couches
         this.layerManager = MaplibreLayerManager.getInstance();
@@ -126,19 +131,97 @@ class MaplibreObjectsLayer {
     }
 
     /**
+     * Enregistre une couche lazy (sans données) dans le gestionnaire
+     * @param name {string} - Nom de la couche
+     * @param category {string} - Catégorie de la couche
+     * @param labelHTML {string} - Label HTML pour l'affichage
+     */
+    registerLazyLayer(name, category, labelHTML, primaryKey, dataUrl) {
+        // Enregistrer dans le gestionnaire avec un statut lazy
+        console.log('dataUrl', this.dataUrl);
+        this.layerManager.registerLazyOverlay(
+            category,
+            primaryKey,
+            name,
+            this.dataUrl,
+            labelHTML,
+            () => this.toggleLazyLayer(primaryKey) // Callback pour le chargement
+        );
+    }
+
+    /**
+     * Gère le toggle d'une couche lazy (chargement + affichage/masquage)
+     * @param primaryKey {string} - Clé primaire de la couche
+     * @param visible {boolean} - Visibilité souhaitée
+     * @returns {Promise<boolean>} - Succès du chargement/toggle
+     */
+    async toggleLazyLayer(primaryKey, visible = true) {
+
+        this._map.on('layerManager:lazyLayerVisibilityChanged', (event) => {
+            visible = event.visible;
+            if (!visible && this.isLoaded) {
+                const layerIds = this._current_objects[primaryKey];
+                if (layerIds) {
+                    this.layerManager.toggleLayer(layerIds, false);
+                }
+                return true;
+            }
+        })
+
+        // Si on veut afficher mais pas encore chargé, charger d'abord
+        if (visible && !this.isLoaded && this.dataUrl) {
+            try {
+                await this.load(this.dataUrl);
+                // Après chargement réussi, afficher la couche
+                const layerIds = this._current_objects[primaryKey];
+                if (layerIds) {
+                    this.layerManager.toggleLayer(layerIds, true);
+                }
+                return true;
+            } catch (error) {
+                console.error(`Impossible de charger les données pour ${this.options.name}:`, error);
+                // Notifier l'échec au gestionnaire de couches pour décocher la case
+                this.layerManager.notifyLoadingError(primaryKey);
+                return false;
+            }
+        }
+
+        // Si déjà chargé, juste faire le toggle normal
+        if (this.isLoaded) {
+            const layerIds = this._current_objects[primaryKey];
+            if (layerIds) {
+                this.layerManager.toggleLayer(layerIds, visible);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Charge des données depuis une URL
      * @param url {string} - URL des données GeoJSON
      * @returns {Promise<void>}
      */
-    async load(url) {
-        console.log("Loading data from URL: " + url);
+    async load() {
+        if (this.loading) {
+            console.warn("Chargement déjà en cours...");
+            return;
+        }
+        console.log("Loading data from URL: " + this.dataUrl);
         this.loading = true;
+
         try {
-            const response = await fetch(url);
+            const response = await fetch(this.dataUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             const data = await response.json();
+            this.isLoaded = true;
             this.addData(data);
         } catch (error) {
             console.error("Could not load url '" + url + "'", error);
+            throw error; // Re-lancer pour que toggleLazyLayer puisse gérer l'erreur
         }
     }
 
@@ -147,7 +230,7 @@ class MaplibreObjectsLayer {
      * @param geojson {Object} - Données GeoJSON
      */
     addData(geojson) {
-        const dataId = this._generateUniqueId();
+        const dataId = this.primaryKey;
         this._objects[dataId] = geojson;
 
         if (geojson.type === "Feature") {
@@ -193,7 +276,7 @@ class MaplibreObjectsLayer {
 
         const layerIdBase = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
-        const isReadonly = readonly || this.options.readonly;
+        const isReadonly = readonly || this.options.readonly; // peut être idéal pour la suite
         this.options.readonly = isReadonly;
 
         // Ajouter la source
@@ -229,8 +312,11 @@ class MaplibreObjectsLayer {
         // Enregistrer les couches
         this._current_objects[primaryKey] = layerIds;
 
-        // Enregistrer auprès du gestionnaire de couches
-        this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
+        // Enregistrer auprès du gestionnaire de couches (seulement si pas déjà lazy)
+        if(this.isLoaded && !this.isLazy) {
+            this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
+            window.dispatchEvent(new CustomEvent('entity:map'));
+        }
     }
 
     /**
@@ -540,14 +626,5 @@ class MaplibreObjectsLayer {
      */
     getBoundsLayer() {
         return this.boundsLayer;
-    }
-
-    /**
-     * Génère un ID unique
-     * @returns {string}
-     * @private
-     */
-    _generateUniqueId() {
-        return `${Math.random().toString(36).substring(2, 9)}`;
     }
 }

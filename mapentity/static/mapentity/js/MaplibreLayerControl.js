@@ -1,19 +1,36 @@
 class MaplibreLayerControl {
     constructor(layerManager) {
         this.layerManager = layerManager;
-        this._container = null;
         this._map = null;
-        this._firstBaseLayerInput = null; // Stocker la référence
+        this._container = null;
+        this._menu = null;
+        this._firstBaseLayerInput = null;
+        this._lazyInputs = new Map(); // Clé = primaryKey
     }
 
     onAdd(map) {
         this._map = map;
-        this._container = document.createElement('div');
-        this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+        this._container = this._createContainer();
+        this._menu = this._createMenu();
+        this._container.appendChild(this._menu);
+
+        this._populateBaseLayers(this._menu);
+        this._activateFirstBaseLayer();
+
+        this._map.on('layerManager:overlayAdded', () => this._populateOverlaysLayers());
+        this._map.on('layerManager:lazyOverlayAdded', () => this._populateLazyOverlaysLayers());
+        // this._map.on('layerManager:loadingError', (e) => this._handleLoadingError(e.primaryKey));
+
+        return this._container;
+    }
+
+    _createContainer() {
+        const container = document.createElement('div');
+        container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
 
         const button = document.createElement('button');
-        button.setAttribute('type', 'button');
-        button.setAttribute('title', 'Layer Controller');
+        button.type = 'button';
+        button.title = 'Layer Controller';
         button.className = 'layer-switcher-btn';
 
         const img = document.createElement('img');
@@ -21,42 +38,38 @@ class MaplibreLayerControl {
         img.alt = 'Layers';
         img.style.width = '25px';
         img.style.height = '25px';
+
         button.appendChild(img);
-        this._container.appendChild(button);
-
-        const menu = document.createElement('div');
-        menu.className = 'layer-switcher-menu';
-        menu.style.display = 'none';
-        menu.style.width = '200px';
-        menu.style.padding = '5px';
-        //  Scroll settings
-        menu.style.maxHeight = '800px';
-        menu.style.overflowY = 'auto';
-        menu.style.background = 'white';
-        menu.style.border = '1px solid #ccc';
-        menu.style.boxShadow = '0px 2px 6px rgba(0,0,0,0.2)';
-        menu.style.zIndex = '1000';
-
-        this._container.appendChild(menu);
+        container.appendChild(button);
 
         button.addEventListener('click', () => {
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            this._menu.style.display = this._menu.style.display === 'none' ? 'block' : 'none';
         });
 
         document.addEventListener('click', (e) => {
-            if (!this._container.contains(e.target)) {
-                menu.style.display = 'none';
+            if (!container.contains(e.target)) {
+                this._menu.style.display = 'none';
             }
         });
 
-        this._populateBaseLayers(menu);
+        return container;
+    }
 
-        // Activer automatiquement la première couche APRÈS population
-        this._activateFirstBaseLayer();
-
-        this._map.on('layerManager:overlayAdded', () => this._populateOverlaysLayers(menu));
-
-        return this._container;
+    _createMenu() {
+        const menu = document.createElement('div');
+        Object.assign(menu.style, {
+            display: 'none',
+            width: '200px',
+            padding: '5px',
+            maxHeight: '800px',
+            overflowY: 'auto',
+            background: 'white',
+            border: '1px solid #ccc',
+            boxShadow: '0px 2px 6px rgba(0,0,0,0.2)',
+            zIndex: '1000'
+        });
+        menu.className = 'layer-switcher-menu';
+        return menu;
     }
 
     /**
@@ -65,13 +78,24 @@ class MaplibreLayerControl {
      */
     _activateFirstBaseLayer() {
         if (this._firstBaseLayerInput) {
-            console.log('Activating first base layer immediately');
             this._firstBaseLayerInput.checked = true;
-
             // Déclencher l'événement change immédiatement
             const changeEvent = new Event('change', { bubbles: true });
             this._firstBaseLayerInput.dispatchEvent(changeEvent);
-            // this._firstBaseLayerInput.click();
+        }
+    }
+
+    _handleLoadingError(primaryKey) {
+        const input = this._lazyInputs.get(primaryKey);
+        if (input) {
+            input.checked = false;
+            input.disabled = false;
+
+            const label = input.parentElement;
+            if (label) {
+                label.style.color = 'red';
+                setTimeout(() => (label.style.color = ''), 3000);
+            }
         }
     }
 
@@ -81,118 +105,132 @@ class MaplibreLayerControl {
      * @private
      */
     _populateBaseLayers(container) {
-        console.log('populate base layer');
-        const layers = this.layerManager.getLayers();
-        const radioGroupName = 'baseLayer';
+        const baseLayers = this.layerManager.getLayers().baseLayers;
 
-        const baseLayerEntries = Object.entries(layers.baseLayers);
-
-        for (const [index, [name, id]] of baseLayerEntries.entries()) {
+        Object.entries(baseLayers).forEach(([name, id], index) => {
             const label = document.createElement('label');
             const input = document.createElement('input');
+
             input.type = 'radio';
-            input.name = radioGroupName;
-            input.checked = false;
+            input.name = 'baseLayer';
             input.dataset.layerId = id;
+
+            if (index === 0) this._firstBaseLayerInput = input;
 
             label.appendChild(input);
             label.append(` ${name}`);
             container.appendChild(label);
             container.appendChild(document.createElement('br'));
 
-            // Stocker la référence du premier input
-            if (index === 0) {
-                this._firstBaseLayerInput = input;
-            }
-
             input.addEventListener('change', (e) => {
                 if (e.target.checked) {
-                    console.log('Layer change triggered for:', id);
-                    Object.values(layers.baseLayers).forEach(layerId => {
+                    Object.values(baseLayers).forEach(layerId => {
                         this.layerManager.toggleLayer(layerId, false);
                     });
-
                     this.layerManager.toggleLayer(id, true);
 
-                    if (this._map.getLayer('measure-points')) {
-                        this._map.moveLayer('measure-points');
-                    }
-                    if (this._map.getLayer('measure-lines')) {
-                        this._map.moveLayer('measure-lines');
-                    }
+                    // Remet les couches de mesure au-dessus
+                    ['measure-points', 'measure-lines'].forEach(layer => {
+                        if (this._map.getLayer(layer)) {
+                            this._map.moveLayer(layer);
+                        }
+                    });
                 }
             });
-        }
+        });
     }
 
-    /**
-     * Ajoute dynamiquement les overlays au menu à partir du layerManager.
-     * @param {HTMLElement} menu - Le conteneur DOM dans lequel injecter les overlays.
-     * @private
-     */
-    _populateOverlaysLayers(menu) {
-        const layers = this.layerManager.getLayers();
-        const overlays = layers.overlays;
 
-        // Nettoyer les anciens overlays après le <hr>
-        const existingHr = menu.querySelector('hr');
-        if (existingHr) {
-            let next = existingHr.nextElementSibling;
-            while (next) {
-                const toRemove = next;
-                next = next.nextElementSibling;
-                toRemove.remove();
-            }
-        } else {
-            const hr = document.createElement('hr');
-            hr.style.margin = '0';
-            menu.appendChild(hr);
-        }
+    _populateOverlaysLayers() {
+        const overlays = this.layerManager.getLayers().overlays;
+        this._cleanupOverlaySection('loaded');
+        this._ensureSeparator();
 
-        // Injecter les overlays groupés par catégorie
         for (const [category, group] of Object.entries(overlays)) {
-            // Titre de la catégorie
-            const categoryTitle = document.createElement('div');
-            categoryTitle.textContent = category;
-            categoryTitle.style.fontWeight = 'bold';
-            categoryTitle.style.marginBottom = '5px';
-            categoryTitle.dataset.category = category;
-            menu.appendChild(categoryTitle);
+            const title = document.createElement('div');
+            title.textContent = category;
+            title.style.fontWeight = 'bold';
+            title.style.marginTop = '10px';
+            title.dataset.overlayType = 'loaded';
+            this._menu.appendChild(title);
 
-            for (const [primaryKey, info] of Object.entries(group)) {
-                const { layerIds, labelHTML } = info;
+            for (const [primaryKey, overlay] of Object.entries(group)) {
+                const { labelHTML, layerIds } = overlay;
 
                 const label = document.createElement('label');
+                label.dataset.overlayType = 'loaded';
+
                 const input = document.createElement('input');
                 input.type = 'checkbox';
                 input.checked = true;
-                input.dataset.layerId = primaryKey;
 
                 label.appendChild(input);
+                label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
+                this._menu.appendChild(label);
+                this._menu.appendChild(document.createElement('br'));
 
-                // Injecter du HTML (nom coloré, etc.)
-                const span = document.createElement('span');
-                span.innerHTML = ` ${labelHTML}`;
-                label.appendChild(span);
+                input.addEventListener('change', () => {
+                    this.layerManager.toggleLayer(layerIds, input.checked);
+                });
+            }
+        }
+    }
 
-                menu.appendChild(label);
-                menu.appendChild(document.createElement('br'));
+    _populateLazyOverlaysLayers() {
+        const lazyOverlays = this.layerManager.getLayers().lazyOverlays;
+        this._cleanupOverlaySection('lazy');
+        this._ensureSeparator();
 
-                // Événement checkbox
-                input.addEventListener('change', (e) => {
-                    const isChecked = e.target.checked;
-                    this.layerManager.toggleLayer(layerIds, isChecked);
+        for (const [category, group] of Object.entries(lazyOverlays)) {
+            const title = document.createElement('div');
+            title.textContent = category;
+            title.style.fontWeight = 'bold';
+            title.style.marginTop = '10px';
+            title.dataset.overlayType = 'lazy';
+            this._menu.appendChild(title);
 
-                    if (this._map.getLayer('measure-points')) {
-                        this._map.moveLayer('measure-points');
-                    }
-                    if (this._map.getLayer('measure-lines')) {
-                        this._map.moveLayer('measure-lines');
+            for (const [primaryKey, lazyLayer] of Object.entries(group)) {
+                const { labelHTML, isVisible } = lazyLayer;
+
+                const label = document.createElement('label');
+                label.dataset.overlayType = 'lazy';
+
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.checked = isVisible;
+                this._lazyInputs.set(primaryKey, input);
+
+                label.appendChild(input);
+                label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
+                this._menu.appendChild(label);
+                this._menu.appendChild(document.createElement('br'));
+
+                input.addEventListener('change', async () => {
+                    input.disabled = true;
+                    const success = await this.layerManager.toggleLazyOverlay(category, primaryKey, input.checked);
+                    console.log('success maplibre layer controller', success);
+                    if (!success) {
+                        this._handleLoadingError(primaryKey);
+                    } else {
+                        input.disabled = false;
                     }
                 });
             }
         }
     }
 
+    _ensureSeparator() {
+        if (!this._menu.querySelector('hr')) {
+            const hr = document.createElement('hr');
+            hr.style.margin = '0';
+            hr.dataset.type = 'separator';
+            this._menu.appendChild(hr);
+        }
+    }
 
+    _cleanupOverlaySection(type) {
+        const elementsToRemove = Array.from(this._menu.children)
+            .filter(el => el.dataset.overlayType === type);
+        elementsToRemove.forEach(el => el.remove());
+    }
 }

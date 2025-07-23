@@ -8,7 +8,8 @@ class MaplibreLayerManager {
 
         this.layers = {
             baseLayers: {},
-            overlays: {}
+            overlays: {},
+            lazyOverlays: {} // Nouvelles couches lazy
         };
         this._map = null;
         this._eventListeners = [];
@@ -56,11 +57,11 @@ class MaplibreLayerManager {
     }
 
     /**
-     * Enregistre une couche overlay
-     * @param category {string} - Catégorie de la couche (ex : tr("Objects"))
+     * Enregistre une couche overlay classique
+     * @param category {string} - Catégorie de la couche
      * @param primaryKey {string} - Clé primaire de l'objet
      * @param layerIds {Array} - IDs des couches MapLibre
-     * @param labelHTML {string} - Label HTML personnalisé à afficher (ex : avec couleur ou icône)
+     * @param labelHTML {string} - Label HTML personnalisé à afficher
      */
     registerOverlay(category, primaryKey, layerIds, labelHTML) {
         if (!this.layers.overlays[category]) {
@@ -69,12 +70,86 @@ class MaplibreLayerManager {
 
         this.layers.overlays[category][primaryKey] = {
             layerIds,
-            labelHTML
+            labelHTML,
+            type: 'loaded' // Couche déjà chargée
         };
 
-        this._fireEvent('overlayAdded', { category, primaryKey, layerIds });
+        this._fireEvent('overlayAdded', { category, primaryKey, layerIds, labelHTML, type: 'loaded' });
     }
 
+    /**
+     * Enregistre une couche overlay lazy (non chargée)
+     * @param category {string} - Catégorie de la couche
+     * @param primaryKey {string} - Clé primaire de l'objet
+     * @param name {string} - Nom de la couche
+     * @param dataUrl {string} - URL des données
+     * @param labelHTML {string} - Label HTML personnalisé à afficher
+     * @param loadCallback {Function} - Callback pour charger la couche
+     */
+    registerLazyOverlay(category, primaryKey, name, dataUrl, labelHTML, loadCallback) {
+        if (!this.layers.lazyOverlays[category]) {
+            this.layers.lazyOverlays[category] = {};
+        }
+
+        this.layers.lazyOverlays[category][primaryKey] = {
+            name,
+            dataUrl,
+            labelHTML,
+            loadCallback,
+            isLoaded: false,
+            isVisible: false,
+            type: 'lazy'
+        };
+
+        this._fireEvent('lazyOverlayAdded', {
+            category,
+            primaryKey,
+            name,
+            dataUrl,
+            labelHTML,
+            type: 'lazy'
+        });
+    }
+
+    /**
+     * Gère le toggle d'une couche lazy
+     * @param category {string} - Catégorie
+     * @param primaryKey {string} - Clé primaire
+     * @param visible {boolean} - Visibilité souhaitée
+     * @returns {Promise<boolean>} - Succès de l'opération
+     */
+    async toggleLazyOverlay(category, primaryKey, visible) {
+        const lazyLayer = this.layers.lazyOverlays[category]?.[primaryKey];
+
+        if (!lazyLayer) {
+            console.warn(`Couche lazy introuvable: ${category}/${primaryKey}`);
+            return false;
+        }
+
+        try {
+            // Appeler le callback de chargement de la couche
+            const success = await lazyLayer.loadCallback(primaryKey, visible);
+            if (success) {
+                lazyLayer.isVisible = visible;
+                if (visible) {
+                    lazyLayer.isLoaded = true;
+                }
+            }
+            this._fireEvent('lazyLayerVisibilityChanged', { primaryKey, visible });
+            return success;
+        } catch (error) {
+            console.error(`Erreur lors du toggle de la couche lazy ${primaryKey}:`, error);
+            return false;
+        }
+    }
+
+    /**
+     * Notifie une erreur de chargement pour décocher la case
+     * @param primaryKey {string} - Clé primaire de la couche qui a échoué
+     */
+    notifyLoadingError(primaryKey) {
+        this._fireEvent('loadingError', { primaryKey });
+    }
 
     /**
      * Bascule la visibilité d'une ou plusieurs couches
@@ -103,42 +178,19 @@ class MaplibreLayerManager {
 
     /**
      * Récupère toutes les couches
-     * @returns {Object} - Objet contenant baseLayers et overlays
+     * @returns {Object} - Objet contenant baseLayers, overlays et lazyOverlays
      */
     getLayers() {
         return this.layers;
     }
 
     /**
-     * Recupère la map
+     * Récupère la map
      * @returns {Object} - Objet contenant la carte
      */
     getMap() {
         return this._map;
     }
-
-    // /**
-    //  * Ajoute un écouteur d'événement
-    //  * @param event {string} - Nom de l'événement
-    //  * @param callback {Function} - Fonction de rappel
-    //  */
-    // on(event, callback) {
-    //     if (!this._eventListeners[event]) {
-    //         this._eventListeners[event] = [];
-    //     }
-    //     this._eventListeners[event].push(callback);
-    // }
-    //
-    // /**
-    //  * Supprime un écouteur d'événement
-    //  * @param event {string} - Nom de l'événement
-    //  * @param callback {Function} - Fonction de rappel
-    //  */
-    // off(event, callback) {
-    //     if (this._eventListeners[event]) {
-    //         this._eventListeners[event] = this._eventListeners[event].filter(cb => cb !== callback);
-    //     }
-    // }
 
     /**
      * Déclenche un événement

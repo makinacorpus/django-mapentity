@@ -45,6 +45,15 @@
     }
 
     /**
+     * Génère un ID unique
+     * @returns {string}
+     * @private
+     */
+    function generateUniqueId() {
+        return `${Math.random().toString(36).substring(2, 9)}`;
+    }
+
+    /**
      * Calcule les limites (bounds) d'un objet GeoJSON ou d'une collection de géométries.
      * @param geojson {Object} - Un objet GeoJSON ou une collection de géométries à partir duquel calculer les limites.
      * @returns {null|maplibregl.LngLatBounds} - Retourne les limites calculées ou `null` si l'objet est vide.

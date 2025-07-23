@@ -100,47 +100,51 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    try {
-        const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES } = window.SETTINGS.map.maplibreConfig;
-        const bounds = [BOUNDS[0], BOUNDS[1]];
+    // initialisation de la carte
 
-        const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
-        const modelName = context.modelname;
-        const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelName);
-        const layerManager = new MaplibreLayerManager();
-        const mapentityContext = new MaplibreMapentityContext(bounds, layerManager);
+    const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES } = window.SETTINGS.map.maplibreConfig;
+    const bounds = [BOUNDS[0], BOUNDS[1]];
 
-        let style = window.SETTINGS.map.styles[modelName] || window.SETTINGS.map.styles.others;
-        if (typeof style !== 'function') style = { ...style };
-        let detailStyle = window.SETTINGS.map.styles.detail;
-        if (typeof detailStyle !== 'function') detailStyle = { ...detailStyle };
-        const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelName;
-        const category = tr("Objects");
+    const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
+    const modelName = context.modelname;
+    const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelName);
+    const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelName);
+    const layerManager = new MaplibreLayerManager();
+    const mapentityContext = new MaplibreMapentityContext(bounds, layerManager);
 
-        const objectsLayer = new MaplibreObjectsLayer(null, {
-            objectUrl: props => objectUrlTemplate.replace('0', props.id),
-            style,
-            detailStyle,
-            modelname: modelName,
-            readonly: false,
-            nameHTML : nameHTML,
-            category: category,
-        });
+    let style = window.SETTINGS.map.styles[modelName] || window.SETTINGS.map.styles.others;
+    if (typeof style !== 'function') style = { ...style };
+    let detailStyle = window.SETTINGS.map.styles.detail;
+    if (typeof detailStyle !== 'function') detailStyle = { ...detailStyle };
+    const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelName;
+    const category = tr("Objects");
+    const primaryKey = generateUniqueId();
+    console.log("primaryKey", primaryKey);
 
-        const mapReadyEvent = new CustomEvent('entity:map:ready', {
-            detail: {
-                map: map,
-                objectsLayer: objectsLayer,
-                context: context,
-                mapentityContext: mapentityContext,
-                TILES : TILES,
-                bounds : bounds,
-                layerManager: layerManager,
-            }
-        });
-        window.dispatchEvent(mapReadyEvent);
+    const objectsLayer = new MaplibreObjectsLayer(null, {
+        objectUrl: props => objectUrlTemplate.replace('0', props.id),
+        style,
+        detailStyle,
+        modelname: modelName,
+        readonly: false,
+        nameHTML : nameHTML,
+        category: category,
+        dataUrl: layerUrl,
+        primaryKey: primaryKey,
+        isLazy: false,
+    });
 
-    } catch (error) {
-        console.error('Erreur lors de l\'initialisation de la carte:', error);
-    }
+    const mapReadyEvent = new CustomEvent('entity:map:ready', {
+        detail: {
+            map: map,
+            objectsLayer: objectsLayer,
+            context: context,
+            mapentityContext: mapentityContext,
+            TILES : TILES,
+            bounds : bounds,
+            layerManager: layerManager,
+        }
+    });
+    window.dispatchEvent(mapReadyEvent);
+
 });
