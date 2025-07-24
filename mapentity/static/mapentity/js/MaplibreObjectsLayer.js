@@ -136,14 +136,13 @@ class MaplibreObjectsLayer {
      * @param category {string} - Catégorie de la couche
      * @param labelHTML {string} - Label HTML pour l'affichage
      */
-    registerLazyLayer(name, category, labelHTML, primaryKey, dataUrl) {
+    registerLazyLayer(modelname, category, labelHTML, primaryKey, dataUrl) {
         // Enregistrer dans le gestionnaire avec un statut lazy
-        console.log('dataUrl', this.dataUrl);
         this.layerManager.registerLazyOverlay(
             category,
             primaryKey,
-            name,
-            this.dataUrl,
+            modelname,
+            dataUrl,
             labelHTML,
             () => this.toggleLazyLayer(primaryKey) // Callback pour le chargement
         );

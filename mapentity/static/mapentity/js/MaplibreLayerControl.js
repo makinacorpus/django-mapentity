@@ -208,7 +208,6 @@ class MaplibreLayerControl {
                 input.addEventListener('change', async () => {
                     input.disabled = true;
                     const success = await this.layerManager.toggleLazyOverlay(category, primaryKey, input.checked);
-                    console.log('success maplibre layer controller', success);
                     if (!success) {
                         this._handleLoadingError(primaryKey);
                     } else {

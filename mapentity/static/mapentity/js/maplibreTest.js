@@ -1,31 +1,31 @@
-// window.addEventListener("entity:map", () => {
-//     const map = window.MapEntity.currentMap.map;
-//     const modelname = 'road';
-//     const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
-//
-//     const nameHTML = tr('Trails');
-//     const category = tr('Trail');
-//     const primaryKey = generateUniqueId();
-//
-//     const style = {
-//         color: 'blue',
-//         weight: 2,
-//         opacity: 0.5,
-//         fillColor: '#FF0000',
-//         fillOpacity: 0.1
-//     };
-//
-//     const objectsLayer = new MaplibreObjectsLayer(null, {
-//         style,
-//         modelname: modelname,
-//         readonly: false,
-//         nameHTML: nameHTML,
-//         category: category,
-//         primaryKey: primaryKey,
-//         dataUrl: layerUrl,
-//         isLazy: true
-//     });
-//
-//     objectsLayer.initialize(map.getMap());
-//     objectsLayer.registerLazyLayer(name,category,nameHTML, primaryKey, layerUrl);
-// });
+window.addEventListener("entity:map", () => {
+    const map = window.MapEntity.currentMap.map;
+    const modelname = 'road';
+    const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
+
+    const nameHTML = tr('Trails');
+    const category = tr('Trail');
+    const primaryKey = generateUniqueId();
+
+    const style = {
+        color: 'blue',
+        weight: 2,
+        opacity: 0.5,
+        fillColor: '#FF0000',
+        fillOpacity: 0.1
+    };
+
+    const objectsLayer = new MaplibreObjectsLayer(null, {
+        style,
+        modelname: modelname,
+        readonly: true,
+        nameHTML: nameHTML,
+        category: category,
+        primaryKey: primaryKey,
+        dataUrl: layerUrl,
+        isLazy: true
+    });
+
+    objectsLayer.initialize(map.getMap());
+    objectsLayer.registerLazyLayer(modelname,category,nameHTML, primaryKey, layerUrl);
+});

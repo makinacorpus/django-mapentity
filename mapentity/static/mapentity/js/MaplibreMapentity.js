@@ -106,26 +106,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const bounds = [BOUNDS[0], BOUNDS[1]];
 
     const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
-    const modelName = context.modelname;
-    const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelName);
-    const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelName);
+    const modelname = context.modelname;
+    const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelname);
+    const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
     const layerManager = new MaplibreLayerManager();
     const mapentityContext = new MaplibreMapentityContext(bounds, layerManager);
 
-    let style = window.SETTINGS.map.styles[modelName] || window.SETTINGS.map.styles.others;
+    let style = window.SETTINGS.map.styles[modelname] || window.SETTINGS.map.styles.others;
     if (typeof style !== 'function') style = { ...style };
     let detailStyle = window.SETTINGS.map.styles.detail;
     if (typeof detailStyle !== 'function') detailStyle = { ...detailStyle };
-    const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelName;
+    const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelname;
     const category = tr("Objects");
     const primaryKey = generateUniqueId();
-    console.log("primaryKey", primaryKey);
 
     const objectsLayer = new MaplibreObjectsLayer(null, {
         objectUrl: props => objectUrlTemplate.replace('0', props.id),
         style,
         detailStyle,
-        modelname: modelName,
+        modelname: modelname,
         readonly: false,
         nameHTML : nameHTML,
         category: category,

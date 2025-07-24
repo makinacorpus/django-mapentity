@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // MAINTENANT déclencher les événements spécifiques après l'initialisation complète
             window.dispatchEvent(new CustomEvent('entity:view:' + context.viewname, { detail: mergedData }));
             window.dispatchEvent(new CustomEvent('entity:map:' + context.viewname, { detail: mergedData }));
-
         });
     });
 

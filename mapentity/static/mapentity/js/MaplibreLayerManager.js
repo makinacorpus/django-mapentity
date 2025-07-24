@@ -138,7 +138,7 @@ class MaplibreLayerManager {
             this._fireEvent('lazyLayerVisibilityChanged', { primaryKey, visible });
             return success;
         } catch (error) {
-            console.error(`Erreur lors du toggle de la couche lazy ${primaryKey}:`, error);
+            console.error(`Erreur lors du toggle de la couche lazy ${category}:`, error);
             return false;
         }
     }
