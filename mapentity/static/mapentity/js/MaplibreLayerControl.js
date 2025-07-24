@@ -57,17 +57,6 @@ class MaplibreLayerControl {
 
     _createMenu() {
         const menu = document.createElement('div');
-        Object.assign(menu.style, {
-            display: 'none',
-            width: '200px',
-            padding: '5px',
-            maxHeight: '800px',
-            overflowY: 'auto',
-            background: 'white',
-            border: '1px solid #ccc',
-            boxShadow: '0px 2px 6px rgba(0,0,0,0.2)',
-            zIndex: '1000'
-        });
         menu.className = 'layer-switcher-menu';
         return menu;
     }

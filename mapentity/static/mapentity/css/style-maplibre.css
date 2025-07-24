@@ -1,19 +1,24 @@
 /* Layer Switcher Styles */
 .layer-switcher-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: white;
+    display: none;
+    width: 255px;
+    padding: 10px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background-color: #fff;
     border: 1px solid #ccc;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    font-size: 13px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    border-radius: 4px;
 }
 
-.layer-switcher-menu h4 {
-    margin: 6px 0 4px;
-    font-size: 14px;
-    font-weight: bold;
+/* Style pour les labels */
+.layer-switcher-menu label {
+    display: block;
+    margin: 5px 0;
+    cursor: pointer;
 }
 
 .layer-switcher-btn {
@@ -21,6 +26,20 @@
     border: none;
     cursor: pointer;
     padding: 4px;
+}
+
+.layer-entry {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Responsive: petits écrans */
+@media screen and (max-width: 768px) {
+    .layer-switcher-menu {
+        max-height: 70vh;
+        font-size: 16px;
+        padding: 12px;
+    }
 }
 
 /* Mesure controller */
@@ -35,18 +54,6 @@
 .measure-control-btn img {
     vertical-align: middle;
 }
-
-
-/*.custom-popup .maplibregl-popup-content {*/
-/*    background: rgba(0, 0, 0.8, 0.8); !* Semi-transparent black background *!*/
-/*    color: white; !* White text *!*/
-/*    padding: 10px;*/
-/*    border-radius: 5px;*/
-/*}*/
-
-/*.custom-popup .maplibregl-popup-tip {*/
-/*    border-top-color: rgba(0, 0, 0, 0.8); !* Match the popup background *!*/
-/*}*/
 
 .custom-popup .maplibregl-popup-content {
     background: rgba(255, 255, 255, 0.9); /* Fond blanc semi-transparent */
@@ -90,9 +97,4 @@
     z-index: 9999;
     white-space: nowrap;
     pointer-events: none;
-}
-
-.layer-entry {
-    display: block;
-    margin-bottom: 5px;
 }
