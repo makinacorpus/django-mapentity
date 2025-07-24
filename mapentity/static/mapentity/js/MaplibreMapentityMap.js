@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('entity:map:ready', function(e) {
-        const { map, objectsLayer, context, TILES, bounds, mapentityContext, layerManager } = e.detail;
+        const { map, objectsLayer, context, TILES, bounds, mapentityContext, layerManager, layerUrl } = e.detail;
 
         map.getMap().on('load', function() {
 
@@ -27,7 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const mergedData = Object.assign({}, context, {
                 map,
                 objectsLayer,
-                bounds
+                bounds,
+                layerUrl,
             });
 
             // Exposer l'instance
@@ -48,7 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.jQuery(element).resizable(resizableOptions);
             });
 
-            // MAINTENANT déclencher les événements spécifiques après l'initialisation complète
             window.dispatchEvent(new CustomEvent('entity:view:' + context.viewname, { detail: mergedData }));
             window.dispatchEvent(new CustomEvent('entity:map:' + context.viewname, { detail: mergedData }));
             window.dispatchEvent(new CustomEvent('entity:map'));
@@ -118,12 +118,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Écouteur pour la vue liste
     window.addEventListener('entity:map:list', function(e) {
-        const { map, objectsLayer, modelname, bounds } = e.detail;
+        const { map, objectsLayer, modelname, bounds, layerUrl } = e.detail;
 
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
         // Charger les objets depuis le backend
-        objectsLayer.load();
+        objectsLayer.load(layerUrl);
 
         // Contrôles
         const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,

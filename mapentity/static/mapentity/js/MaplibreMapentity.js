@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
             TILES : TILES,
             bounds : bounds,
             layerManager: layerManager,
+            layerUrl : layerUrl,
         }
     });
     window.dispatchEvent(mapReadyEvent);

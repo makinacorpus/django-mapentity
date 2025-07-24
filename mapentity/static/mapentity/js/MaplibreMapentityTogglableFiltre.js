@@ -339,7 +339,6 @@ class MaplibreMapentityTogglableFiltre {
         if (this.visible) {
             this._hidePopover();
         } else {
-            console.log("Showing filters popover");
             this._showPopover();
         }
 

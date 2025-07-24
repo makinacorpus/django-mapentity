@@ -202,16 +202,16 @@ class MaplibreObjectsLayer {
      * @param url {string} - URL des données GeoJSON
      * @returns {Promise<void>}
      */
-    async load() {
+    async load(url) {
         if (this.loading) {
             console.warn("Chargement déjà en cours...");
             return;
         }
-        console.log("Loading data from URL: " + this.dataUrl);
+        console.log("Loading data from URL: " + url);
         this.loading = true;
 
         try {
-            const response = await fetch(this.dataUrl);
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }

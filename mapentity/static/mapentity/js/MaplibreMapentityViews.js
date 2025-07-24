@@ -1,61 +1,9 @@
 // Écouteurs d'événements pour les vues
 document.addEventListener('DOMContentLoaded', function() {
-
-    // // Écouteur d'événement pour la vue détail
-    // window.addEventListener('entity:view:detail', function(e) {
-    //     console.log('Map initialized for detail view with data:', e.detail);
-    //
-    //     const { objectsLayer, modelname, pk } = e.detail;
-    //
-    //     // Attacher les listeners de survol sur les éléments hoverable
-    //     document.querySelectorAll('.hoverable').forEach(el => {
-    //         el.addEventListener('mouseenter', () => {
-    //             const mouseOverEvent = new CustomEvent('entity:mouseover', {
-    //                 detail: { pk: pk, modelname: modelname }
-    //             });
-    //             window.dispatchEvent(mouseOverEvent);
-    //         });
-    //
-    //         el.addEventListener('mouseleave', () => {
-    //             const mouseOutEvent = new CustomEvent('entity:mouseout', {
-    //                 detail: { pk: pk, modelname: modelname  }
-    //             });
-    //             window.dispatchEvent(mouseOutEvent);
-    //         });
-    //     });
-    //
-    //     // Réaction au survol pour mettre en évidence sur la carte
-    //     window.addEventListener('entity:mouseover', function (event) {
-    //         const { pk, modelname } = event.detail;
-    //         // if (modelname && pk) {
-    //         //     objectsLayer.highlight(pk);
-    //         // }
-    //
-    //         // Highlight visuel sur la page
-    //         document.querySelectorAll(`[data-modelname="${modelname}"][data-pk="${pk}"]`)
-    //             .forEach(item => item.classList.add('hover'));
-    //     });
-    //
-    //     // Réaction à la sortie de survol
-    //     window.addEventListener('entity:mouseout', function (event) {
-    //         const { pk, modelname } = event.detail;
-    //         // if (modelname && pk) {
-    //         //     objectsLayer.highlight(pk, false);
-    //         // }
-    //
-    //         // Retirer le highlight visuel
-    //         document.querySelectorAll(`[data-modelname="${modelname}"][data-pk="${pk}"]`)
-    //             .forEach(item => item.classList.remove('hover'));
-    //     });
-    // });
-
     // Écouteur d'événement pour la vue liste
     window.addEventListener('entity:view:list', function(e) {
-        console.log('Map initialized for list view with data:', e.detail);
-
         const { objectsLayer, modelname } = e.detail;
-
-            // Sélectionneur unique défini globalement
+        // Sélectionneur unique défini globalement
         const selectorOnce = (() => {
             let current = { 'pk': null, 'row': null };
 
@@ -72,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             const toggleSelectObject = (pk, on = true) => {
-                console.log('toggleSelectObject', pk);
                 objectsLayer.select(pk, on);
             };
 
