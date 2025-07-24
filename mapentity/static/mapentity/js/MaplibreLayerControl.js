@@ -19,7 +19,7 @@ class MaplibreLayerControl {
 
         this._map.on('layerManager:overlayAdded', () => this._populateOverlaysLayers());
         this._map.on('layerManager:lazyOverlayAdded', () => this._populateLazyOverlaysLayers());
-        // this._map.on('layerManager:loadingError', (e) => this._handleLoadingError(e.primaryKey));
+        this._map.on('layerManager:loadingError', (e) => this._handleLoadingError(e.primaryKey));
 
         return this._container;
     }
@@ -119,8 +119,9 @@ class MaplibreLayerControl {
 
             label.appendChild(input);
             label.append(` ${name}`);
+            label.classList.add('layer-entry');
             container.appendChild(label);
-            container.appendChild(document.createElement('br'));
+            // container.appendChild(document.createElement('br'));
 
             input.addEventListener('change', (e) => {
                 if (e.target.checked) {
@@ -166,8 +167,9 @@ class MaplibreLayerControl {
 
                 label.appendChild(input);
                 label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
+                label.classList.add('layer-entry');
                 this._menu.appendChild(label);
-                this._menu.appendChild(document.createElement('br'));
+                // this._menu.appendChild(document.createElement('br'));
 
                 input.addEventListener('change', () => {
                     this.layerManager.toggleLayer(layerIds, input.checked);
@@ -202,8 +204,9 @@ class MaplibreLayerControl {
 
                 label.appendChild(input);
                 label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
+                label.classList.add('layer-entry');
                 this._menu.appendChild(label);
-                this._menu.appendChild(document.createElement('br'));
+                // this._menu.appendChild(document.createElement('br'));
 
                 input.addEventListener('change', async () => {
                     input.disabled = true;
