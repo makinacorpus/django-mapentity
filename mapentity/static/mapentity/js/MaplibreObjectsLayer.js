@@ -314,7 +314,6 @@ class MaplibreObjectsLayer {
         // Enregistrer auprès du gestionnaire de couches (seulement si pas déjà lazy)
         if(this.isLoaded && !this.isLazy) {
             this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
-            window.dispatchEvent(new CustomEvent('entity:map'));
         }
     }
 
