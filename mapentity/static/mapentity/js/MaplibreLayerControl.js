@@ -5,7 +5,7 @@ class MaplibreLayerControl {
         this._container = null;
         this._menu = null;
         this._firstBaseLayerInput = null;
-        this._lazyInputs = new Map(); // Clé = primaryKey
+        this._lazyInputs = new Map();
     }
 
     onAdd(map) {
@@ -110,7 +110,6 @@ class MaplibreLayerControl {
             label.append(` ${name}`);
             label.classList.add('layer-entry');
             container.appendChild(label);
-            // container.appendChild(document.createElement('br'));
 
             input.addEventListener('change', (e) => {
                 if (e.target.checked) {
@@ -158,7 +157,6 @@ class MaplibreLayerControl {
                 label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
                 label.classList.add('layer-entry');
                 this._menu.appendChild(label);
-                // this._menu.appendChild(document.createElement('br'));
 
                 input.addEventListener('change', () => {
                     this.layerManager.toggleLayer(layerIds, input.checked);
@@ -195,7 +193,6 @@ class MaplibreLayerControl {
                 label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
                 label.classList.add('layer-entry');
                 this._menu.appendChild(label);
-                // this._menu.appendChild(document.createElement('br'));
 
                 input.addEventListener('change', async () => {
                     input.disabled = true;
