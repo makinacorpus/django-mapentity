@@ -43,6 +43,8 @@
                 const modelname = document.body.getAttribute('data-modelname');
                 const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelname;
                 const category = tr("Objects");
+                const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
+                const primaryKey = generateUniqueId();
 
                 // Créer une instance de MaplibreObjectsLayer
                 const objectsLayer = new MaplibreObjectsLayer(null, {
@@ -51,6 +53,9 @@
                     readonly : true, // empêche la surbrillance des objets
                     nameHTML: nameHTML,
                     category: category,
+                    dataUrl : layerUrl,
+                    primaryKey: primaryKey,
+                    isLazy: false,
                 });
 
                 // Initialiser la couche d'objets
@@ -90,7 +95,6 @@
 
                 const mapGeometryField = new MaplibreGeometryField(map.getMap(), fieldId, options); // onAdd ne marche que si on utilise addControl.
 
-                const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
                 objectsLayer.load(layerUrl);
 
              });
