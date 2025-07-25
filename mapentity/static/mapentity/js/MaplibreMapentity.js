@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const layerManager = new MaplibreLayerManager();
     const mapentityContext = new MaplibreMapentityContext(bounds, layerManager);
 
-    let style = window.SETTINGS.map.styles[modelname] || window.SETTINGS.map.styles.others;
+    let style = window.SETTINGS.map.styles[modelname] || window.SETTINGS.map.styles['others'];
     if (typeof style !== 'function') style = { ...style };
     let detailStyle = window.SETTINGS.map.styles.detail;
     if (typeof detailStyle !== 'function') detailStyle = { ...detailStyle };
