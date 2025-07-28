@@ -92,6 +92,7 @@
                     modifiable: true,
                     geomType: '{{ geom_type }}',
                 };
+                console.log("geomType : ", options.geomType);
 
                 const mapGeometryField = new MaplibreGeometryField(map.getMap(), fieldId, options); // onAdd ne marche que si on utilise addControl.
 

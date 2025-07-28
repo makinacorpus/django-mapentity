@@ -3,8 +3,8 @@ window.addEventListener("entity:map", () => {
     const modelname = 'road';
     const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
 
-    const nameHTML = tr('Trails');
-    const category = tr('Trail');
+    const nameHTML = tr('Roads');
+    const category = tr('Road');
     const primaryKey = generateUniqueId();
 
     const style = {
