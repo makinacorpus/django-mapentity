@@ -13,8 +13,8 @@ class MaplibreDrawControlManager {
      */
     _initializeGeoman() {
         // Logique conditionnelle pour les contrôles d'édition
-        const shouldShowDragForPoint = this.options.isPoint || this.options.isGeneric;
-        const shouldShowEditForOthers = (this.options.isLineString || this.options.isPolygon || this.options.isGeneric) && this.options.modifiable;
+        const shouldShowDragForPoint = this.options.isPoint || this.options.isGeneric || this.options.isCollection;
+        const shouldShowEditForOthers = (this.options.isLineString || this.options.isPolygon || this.options.isGeneric || this.options.isCollection) && this.options.modifiable;
 
         // Pour le drag : visible seulement pour les points (et en mode générique)
         const dragEnabled = shouldShowDragForPoint && this.options.modifiable;
@@ -28,25 +28,25 @@ class MaplibreDrawControlManager {
                 draw: {
                     polygon: {
                         title: 'Draw Polygon',
-                        uiEnabled: this.options.isPolygon || this.options.isGeneric,
+                        uiEnabled: this.options.isPolygon || this.options.isGeneric || this.options.isCollection,
                         active: false,
                     },
 
                     line: {
                         title: 'Draw Line',
-                        uiEnabled: this.options.isLineString || this.options.isGeneric,
+                        uiEnabled: this.options.isLineString || this.options.isGeneric || this.options.isCollection,
                         active: false,
                     },
 
                     marker: {
                         title: 'Draw Point',
-                        uiEnabled: this.options.isPoint || this.options.isGeneric,
+                        uiEnabled: this.options.isPoint || this.options.isGeneric || this.options.isCollection,
                         active: false,
                     },
 
                     rectangle: {
                         title: 'Draw Rectangle',
-                        uiEnabled: this.options.isGeneric,
+                        uiEnabled: this.options.isGeneric || this.options.isCollection,
                         active: false,
                     },
 

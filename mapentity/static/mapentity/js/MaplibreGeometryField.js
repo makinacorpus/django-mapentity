@@ -5,7 +5,8 @@ class MaplibreGeometryField {
 
         // Détecter les types de géométrie
         const geomType = (this.options.geomType).toLowerCase();
-        this.options.isGeneric = /geometrycollection$/.test(geomType);
+        this.options.isGeneric = /geometry/.test(geomType);
+        this.options.isCollection = /(^multi|collection$)/.test(geomType);
         this.options.isLineString = /linestring$/.test(geomType);
         this.options.isPolygon = /polygon$/.test(geomType);
         this.options.isPoint = /point$/.test(geomType);
@@ -123,13 +124,13 @@ class MaplibreGeometryField {
 
         let normalizedData;
 
-        if (this.options.isGeneric) {
+        if (this.options.isCollection) {
             // Mode générique : créer une GeometryCollection avec toutes les géométries
             const geometries = allFeatures.features.map(feature => feature.geometry);
             normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
         } else {
             // Mode spécifique : normaliser selon le type
-            if (this.options.isLineString || this.options.isPolygon || this.options.isPoint) {
+            if (this.options.isLineString || this.options.isPolygon || this.options.isPoint || this.options.isGeneric) {
                 // Pour les événements de suppression, on prend toutes les features restantes
                 // Pour les autres événements, on prend la dernière feature modifiée
                 const targetFeature = event.type === 'gm:remove' ? allFeatures.features[0] : allFeatures.features.at(-1);
