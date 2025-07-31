@@ -16,10 +16,8 @@ class MaplibreFieldStore {
         let serializedData = '';
         if(this.options.isGeneric){
             serializedData = this._serializeGeometryCollection(data);
-            console.log('Saving generic data generic:', serializedData);
         } else {
             serializedData = this._serialize(data);
-            console.log('Saving specific data:', serializedData);
         }
 
         this.formField.value = serializedData;

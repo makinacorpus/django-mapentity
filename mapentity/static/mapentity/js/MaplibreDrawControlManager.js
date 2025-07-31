@@ -3,7 +3,6 @@ class MaplibreDrawControlManager {
         this.map = map;
         this.options = {...options};
         this.geoman = null;
-        this._container = null;
         this._initializeGeoman();
     }
 

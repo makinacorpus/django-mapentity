@@ -45,20 +45,9 @@ class GeometryDataManager {
      * @returns {{type: string, geometries: *}|{type: string, geometries: *[]}} - Retourne un objet GeoJSON de type GeometryCollection
      */
     normalizeToGeometryCollection(geometries) {
-        if (!geometries || geometries.length === 0) {
-            return {
-                type: 'GeometryCollection',
-                geometries: []
-            };
-        }
-
-        const normalizedGeometries = geometries.map(geometry => {
-            return geometry;
-        });
-
         return {
             type: 'GeometryCollection',
-            geometries: normalizedGeometries
+            geometries: geometries || []
         };
 
     }

@@ -119,19 +119,31 @@ class MaplibreMapentityContext {
      * @returns {boolean} - Retourne true si la restauration de la vue de la carte a réussi, sinon false.
      */
     restoreMapView(map, context, kwargs = {}) {
-        if (context !== null) {
-            if (context && context.mapview) {
-                map.setCenter([context.mapview.lng, context.mapview.lat]);
-                map.setZoom(context.mapview.zoom);
-                return true;
-            } else {
-                if (map !== null) {
-                    map.fitBounds(this.bounds, {padding : 0, maxZoom : 16}); // Adjust the map to fit the predefined bounds.
-                }
-            }
+        if (context === null || map === null) {
             return false;
         }
+
+        const lng = context?.mapview?.lng;
+        const lat = context?.mapview?.lat;
+        const zoom = context?.mapview?.zoom;
+
+        if (Number.isFinite(lng) && Number.isFinite(lat)) {
+            map.setCenter([lng, lat]);
+        } else {
+            console.warn("Longitude ou latitude manquante ou invalide — setCenter ignoré.");
+        }
+
+        if (Number.isFinite(zoom)) {
+            map.setZoom(zoom);
+        } else {
+            console.warn("Niveau de zoom manquant ou invalide — setZoom ignoré.");
+        }
+
+        map.fitBounds(this.bounds, { maxZoom: 16 });
+        return true;
     }
+
+
 
     /**
      * Restores le contexte complet de la carte, y compris les filtres, les colonnes triées et les couches visibles.
