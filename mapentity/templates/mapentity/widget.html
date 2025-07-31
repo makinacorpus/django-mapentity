@@ -52,6 +52,7 @@
             map.getMap().on('load', function () {
                 // Ajout de la couche d’objets contextuels
                 const modelname = document.body.getAttribute('data-modelname');
+                console.log('modelname : ', modelname);
                 const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
                 const style = window.SETTINGS.map.styles.others;
                 const objectsLayer = new MaplibreObjectsLayer(null, {
