@@ -2,103 +2,103 @@
 
 <style>
     {% block map_css %}
-        #{{ id_map }} {
-            width: 100%;
-            height: 100%;
-        }
-        {% if not display_raw %}
-            #{{ id }} {
-                display: none;
-            }
-        {% endif %}
+    #{{ id_map }} {
+        width: 100%;
+        height: 100%;
+    }
+    {% if not display_raw %}
+    #{{ id }} {
+        display: none;
+    }
+    {% endif %}
     {% endblock map_css %}
 </style>
 
 {% block map %}
-    <div id="{{ id_map }}" class="maplibre-map"></div>
+{% if not target_map %}
+<div id="{{ id_map }}" class="maplibre-map"></div>
+{% endif %}
 {% endblock map %}
 
 <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const fieldId = '{{ id }}';
+        const options = {
+            modifiable: '{{ modifiable|yesno:"true,false" }}',
+            geomType: '{{ geom_type }}',
+        };
 
-    // Initialisation d'une nouvelle carte MapLibre
-    document.addEventListener('DOMContentLoaded', function() {
+        console.log('fieldId', fieldId);
+        console.log('options', options);
+        const targetMapId = '{{ target_map|default:"" }}';
+        console.log('targetMapId', targetMapId);
+        if (targetMapId) {
+            // Se branche sur une carte existante définie par target_map
+            window.addEventListener('map:init', function (e) {
+                if (e.detail.fieldId === 'id_' + targetMapId) {
+                    const sharedMap = e.detail.map;
+                    new MaplibreGeometryField(sharedMap, fieldId, options);
+                }
+            });
+        } else {
+            // Ce champ est responsable de créer la carte
             const mapId = '{{ id_map }}';
-            const {BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES} = window.SETTINGS.map.maplibreConfig;
-
-            // Initialisation de la carte
+            const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES } = window.SETTINGS.map.maplibreConfig;
             const bounds = [BOUNDS[0], BOUNDS[1]];
-            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
 
+            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
             const layerManager = new MaplibreLayerManager();
 
-            // Attendre que la carte soit chargée avant d'initialiser le callback
-            map.getMap().on('load', function() {
-                 // Configuration des styles
-                let style = window.SETTINGS.map.styles.others;
-                if (typeof style !== "function") {
-                    style = { ...style };
-                }
-
-                // modelname est récupéré depuis l'élément body
+            map.getMap().on('load', function () {
+                // Ajout de la couche d’objets contextuels
                 const modelname = document.body.getAttribute('data-modelname');
-                const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelname;
-                const category = tr("Objects");
                 const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
-                const primaryKey = generateUniqueId();
-
-                // Créer une instance de MaplibreObjectsLayer
+                const style = window.SETTINGS.map.styles.others;
                 const objectsLayer = new MaplibreObjectsLayer(null, {
-                    style: style,
+                    style: typeof style === "function" ? {} : style,
                     modelname: modelname,
-                    readonly : true, // empêche la surbrillance des objets
-                    nameHTML: nameHTML,
-                    category: category,
-                    dataUrl : layerUrl,
-                    primaryKey: primaryKey,
+                    readonly: true,
+                    nameHTML: '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelname,
+                    category: tr("Objects"),
+                    dataUrl: layerUrl,
+                    primaryKey: generateUniqueId(),
                     isLazy: false,
                 });
-
-                // Initialiser la couche d'objets
-
                 objectsLayer.initialize(map.getMap());
 
-                // Ajouter les couches de fond
-                TILES.forEach((tile) => {
-                    const [tileName, tileUrl, tileAttribution] = tile;
+                // Base layers
+                TILES.forEach(([tileName, tileUrl, tileAttribution]) => {
                     layerManager.addBaseLayer(tileName, {
                         id: tileName + '-base',
                         tiles: [tileUrl],
-                        attribution: tileAttribution
+                        attribution: tileAttribution,
                     });
                 });
 
-                // Ajouter les contrôles
                 map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
-
-                // ajout du contrôle de fichiers
-                const fileLayerLoadControl = new MaplibreFileLayerControl({
+                map.getMap().addControl(new MaplibreFileLayerControl({
                     layerOptions: {
                         style: window.SETTINGS.map.styles.filelayer,
                     }
-                });
-
-                map.getMap().addControl(fileLayerLoadControl, 'top-left');
-
-                // Ajouter un contrôle pour réinitialiser la vue
+                }), 'top-left');
                 map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
-                const fieldId = '{{ id }}';
-                const options = {
-                    modifiable: true,
-                    geomType: '{{ geom_type }}',
-                };
-                console.log("geomType : ", options.geomType);
+                // Initialisation du champ de géométrie principal
+                new MaplibreGeometryField(map.getMap(), fieldId, options);
 
-                const mapGeometryField = new MaplibreGeometryField(map.getMap(), fieldId, options); // onAdd ne marche que si on utilise addControl.
+                // Notifier les autres champs géométriques de cette carte
+                window.dispatchEvent(new CustomEvent('map:init', {
+                    detail: {
+                        map: map.getMap(),
+                        fieldId: fieldId,
+                        options: options,
+                    }
+                }));
 
+                // chargement des couches
                 objectsLayer.load(layerUrl);
-
-             });
+            });
+        }
     });
 </script>
 
