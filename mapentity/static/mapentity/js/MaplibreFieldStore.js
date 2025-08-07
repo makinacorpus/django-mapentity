@@ -13,12 +13,9 @@ class MaplibreFieldStore {
             return;
         }
 
-        let serializedData = '';
-        if(this.options.isGeneric){
-            serializedData = this._serializeGeometryCollection(data);
-        } else {
-            serializedData = this._serialize(data);
-        }
+        const serializedData = this.options.isGeneric
+            ? this._serializeGeometryCollection(data)
+            : this._serialize(data)
 
         this.formField.value = serializedData;
     }

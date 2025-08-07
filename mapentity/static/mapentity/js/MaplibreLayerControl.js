@@ -166,7 +166,7 @@ class MaplibreLayerControl {
     }
 
     _populateLazyOverlaysLayers() {
-        const lazyOverlays = this.layerManager.getLayers().lazyOverlays;
+        const { lazyOverlays } = this.layerManager.getLayers();
         this._cleanupOverlaySection('lazy');
         this._ensureSeparator();
 

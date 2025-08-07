@@ -1,6 +1,6 @@
-class MaplibreMapentityTogglableFiltre {
+class MaplibreMapentityTogglableFilter {
     /**
-     * Constructeur de la classe MaplibreMapentityTogglableFiltre
+     * Constructeur de la classe MaplibreMapentityTogglableFilter
      */
     constructor() {
         this.button = document.getElementById('filters-btn');

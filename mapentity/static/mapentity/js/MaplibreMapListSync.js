@@ -4,14 +4,14 @@ class MaplibreMapListSync {
      * @param datatable {DataTable} - L'instance de DataTable à synchroniser avec la carte MapLibre
      * @param map {maplibregl.Map} - L'instance de la carte MapLibre à synchroniser avec la liste
      * @param objectsLayer {MaplibreObjectsLayer} - L'instance de MaplibreObjectsLayer pour gérer les objets de la carte
-     * @param togglableFiltre {MaplibreMapentityTogglableFiltre} - L'instance de MaplibreMapentityTogglableFiltre pour gérer les filtres
+     * @param togglableFilter {MaplibreMapentityTogglableFilter} - L'instance de MaplibreMapentityTogglableFilter pour gérer les filtres
      * @param history {MaplibreMapentityHistory} - L'instance de MaplibreMapentityHistory pour gérer l'historique des actions
      */
-    constructor(datatable, map, objectsLayer, togglableFiltre, history) {
+    constructor(datatable, map, objectsLayer, togglableFilter, history) {
         this.dt = datatable;
         this.map = map;
         this.layer = objectsLayer;
-        this.togglableFiltre = togglableFiltre;
+        this.togglableFilter = togglableFilter;
         this.history = history;
         this.options = {
             filter: {
@@ -59,7 +59,7 @@ class MaplibreMapListSync {
      */
     _handleReloaded(nbrecords) {
             this.history.saveListInfo({ model: this.options.modelname, nb: nbrecords });
-            this.togglableFiltre.setsubmit();
+            this.togglableFilter.setsubmit();
     }
 
     /**
@@ -109,21 +109,14 @@ class MaplibreMapListSync {
         let filter = false;
 
         for (const value of formData.values()) {
-            if (value.name !== 'bbox') {
-                if (value.value !== '') {
-                    filter = true;
-                }
+            if (value.name !== 'bbox' && value.value !== '') {
+                filter = true;
             }
         }
 
         if(!mapViewChangedStatue) {
-            if (filter) {
-                this.togglableFiltre.button.classList.remove('btn-info');
-                this.togglableFiltre.button.classList.add('btn-warning');
-            } else {
-                this.togglableFiltre.button.classList.remove('btn-warning');
-                this.togglableFiltre.button.classList.add('btn-info');
-            }
+            this.togglableFilter.button.classList.toggle('btn-info', !filter);
+            this.togglableFilter.button.classList.toggle('btn-warning', filter);
         }
 
 
@@ -152,8 +145,6 @@ class MaplibreMapListSync {
         } finally {
             this._loading = false;
         }
-
-        return false;
     }
 
     /**

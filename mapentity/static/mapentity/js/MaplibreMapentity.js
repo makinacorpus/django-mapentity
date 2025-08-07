@@ -77,19 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Récupération du contexte
     const bodyElement = document.body;
-
-    const context = {
-        modelname: bodyElement.dataset.modelname || bodyElement.getAttribute('data-modelname'),
-        viewname: bodyElement.dataset.viewname || bodyElement.getAttribute('data-viewname')
-    };
-
-    // Récupérer tous les data attributes du body
-    Array.from(bodyElement.attributes).forEach(function(attr) {
-        if (attr.name.startsWith('data-')) {
-            const key = attr.name.substring(5); // Enlever 'data-'
-            context[key] = attr.value;
-        }
-    });
+    const context = Object.assign({}, bodyElement.dataset);
 
     // Initialisation directe de la carte
     const mapId = context.viewname === 'detail' ? 'detailmap' : 'mainmap';

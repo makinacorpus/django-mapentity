@@ -151,15 +151,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Gestion de l'historique et des filtres
         const history = window.MapEntity.currentHistory;
 
-        const togglableFiltre = new MaplibreMapentityTogglableFiltre();
+        const togglableFilter = new MaplibreMapentityTogglableFilter();
 
         const mainDatatable = window.MapEntity.dt;
 
         const mapsync = new MaplibreMapListSync(mainDatatable, map.getMap(),
-            objectsLayer, togglableFiltre, history);
+            objectsLayer, togglableFilter, history);
 
-        togglableFiltre.button.addEventListener('click', function (e) {
-            togglableFiltre.load_filter_form(mapsync);
+        togglableFilter.button.addEventListener('click', function (e) {
+            togglableFilter.load_filter_form(mapsync);
         });
 
         // Restauration du contexte
