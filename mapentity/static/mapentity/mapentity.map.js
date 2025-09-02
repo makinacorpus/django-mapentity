@@ -136,6 +136,13 @@ $(window).on('entity:map', function (e, data) {
 
     map.addControl(new L.Control.FullScreen());
     map.addControl(new L.Control.MeasureControl());
+    map.addControl(new L.Control.Locate({icon: "bi bi-geo-fill",
+                              iconLoading: "bi bi-arrow-repeat",
+                              position: 'topright',
+                              strings: {
+                                title: "Show me where I am, yo!"
+                              }}
+    ));
 
     map.on("moveend", function () {
         var bounds = map.getBounds();
