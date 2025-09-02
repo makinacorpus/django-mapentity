@@ -559,7 +559,7 @@ class LogoutViewTest(TestCase):
         self.client.force_login(user=self.user)
 
         response = self.client.get("/dummymodel/list/")
-        parsed = BeautifulSoup(response.content)
+        parsed = BeautifulSoup(response.content, features="html.parser")
         logout_tag = parsed.find("form", {"action": "/logout/", "method": "post"})
 
         self.assertTrue(logout_tag)

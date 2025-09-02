@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.urls import include, path, re_path
+from django.views.i18n import JavaScriptCatalog
 
 from .registry import registry
 from .settings import app_settings
@@ -18,6 +19,7 @@ if _MEDIA_URL.endswith("/"):
 
 app_name = "mapentity"
 urlpatterns = [
+    path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
     path("map_screenshot/", map_screenshot, name="map_screenshot"),
     path("convert/", Convert.as_view(), name="convert"),
     path("history/delete/", history_delete, name="history_delete"),
