@@ -14,7 +14,7 @@
             {% if request.user.is_authenticated %}
                 <li class="nav-item {% if viewname == 'list' %}{{ modelname }} active{% endif %}">
                     <button class="btn-list btn btn-light dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                        {% trans "List" %} <span id="nbresults" class="badge badge-secondary"></span>
+                      <span onclick="javascript:location='/';"> {% trans "List" %}</span> <span id="nbresults" class="badge badge-secondary"></span>
                     </button>
                     <div class="dropdown-menu">
                         {% for entity in allowed_entities %}
