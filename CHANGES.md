@@ -4,6 +4,10 @@ CHANGELOG
 8.14.0+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Improve responsive menu, sidebar, list and detail views
+
 
 8.14.0     (2025-09-04)
 -----------------------
