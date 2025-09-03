@@ -80,31 +80,28 @@
                         {% endif %}
 
                         <div class="dropdown-divider"></div>
-                        <h6 class="dropdown-header">Dropdown header</h6>
+                        <h6 class="dropdown-header">
+                            {% trans "Languages" %}
+                        </h6>
                         {% get_current_language as LANGUAGE_CODE %}
                         {% get_available_languages as LANGUAGES %}
                         {% get_language_info_list for LANGUAGES as languages %}
-                        {% for language in languages %}
-                            <div class="dropdown-item">
-                                <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
-                                    <input name="next" type="hidden" value="{{ redirect_to }}">
-                                    <button type="submit" name="language" value="{{ language.code }}"
-                                            class="btn language-menu-item {% if language.code == LANGUAGE_CODE %}active{% endif %}">
-                                        {{ language.name_local|title }} ({{ language.code }})
-                                    </button>
-                                </form>
-                            </div>
-                        {% endfor %}
-
+                        <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                            <input name="next" type="hidden" value="{{ redirect_to }}">
+                            {% for language in languages %}
+                            <button class="dropdown-item" type="submit" name="language" value="{{ language.code }}"
+                                    class="btn btn-light m-0 language-menu-item {% if language.code == LANGUAGE_CODE %}active{% endif %}">
+                                {{ language.name_local|title }} ({{ language.code }})
+                            </button>
+                            {% endfor %}
+                        </form>
                         <div class="dropdown-divider"></div>
-                        <div class="dropdown-item">
                             <form method="post" action="{% url 'logout' %}">
                                 {% csrf_token %}
-                                <button class="btn btn-outline-danger" id="btn-logout" type="submit">
-                                    <i class="bi bi-power"></i> {% trans "Logout" %}
+                                <button class="btn dropdown-item" id="btn-logout" type="submit">
+                                    <i class="bi bi-power text-danger"></i> {% trans "Logout" %}
                                 </button>
                             </form>
-                        </div>
                     </div>
                 </li>
             {% endif %}
