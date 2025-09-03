@@ -201,14 +201,6 @@ select[multiple] {
     }
 }
 
-/* Navbar fixed */
-
-#container {
-    padding-top: 60px;
-}
-
-
-
 /**** Maps ****/
 
 .map-fogged .leaflet-container {
