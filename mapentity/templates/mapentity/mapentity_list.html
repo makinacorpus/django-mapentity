@@ -43,6 +43,8 @@
             <span class="btn disabled" href="#">
               <i class="bi bi-plus"></i> <span class="d-none d-sm-inline">{{ create_label }}</span></span>
             {% endif %}
+            {% block extra_actions %}
+            {% endblock %}
           </div>
           {% endblock mainactions %}
 

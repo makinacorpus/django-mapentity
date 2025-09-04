@@ -559,7 +559,7 @@ class LogoutViewTest(TestCase):
         self.client.force_login(user=self.user)
 
         response = self.client.get("/dummymodel/list/")
-        parsed = BeautifulSoup(response.content)
+        parsed = BeautifulSoup(response.content, features="html.parser")
         logout_tag = parsed.find("form", {"action": "/logout/", "method": "post"})
 
         self.assertTrue(logout_tag)
@@ -578,7 +578,7 @@ class LogViewMapentityTest(MapEntityTest):
             "action_flag": "Addition",
             "action_time": "10/06/2022 12:40:10",
             "change_message": "",
-            "content_type": 12,
+            "content_type": 13,
             "id": 1,
             "object": '<a data-pk="1" href="/dummymodel/1/" >Test_App | Dummy '
             "Model <class 'object'></a>",

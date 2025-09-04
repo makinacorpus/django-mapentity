@@ -25,7 +25,7 @@
             <link rel="stylesheet" type="text/css"
                   href="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.css' %}"/>
             <link rel="stylesheet" type="text/css"
-                  href="{% static 'mapentity/vendor/bootstrap-icons-1.2.2/font/bootstrap-icons.css' %}">
+                  href="{% static 'mapentity/vendor/bootstrap-icons-1.13.1/bootstrap-icons.min.css' %}">
             <link rel="stylesheet" type="text/css" href="{% static 'mapentity/vendor/chosen-1.8.7/chosen.css' %}">
             {% leaflet_css plugins="ALL" %}
 
@@ -104,6 +104,7 @@
 
 
 {% block extrabody %}
+    <script src="{% url 'mapentity:javascript-catalog' %}"></script>
     {{ block.super }}
 
     {# Global Javascript settings #}

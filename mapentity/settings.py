@@ -183,6 +183,13 @@ _LEAFLET_PLUGINS = OrderedDict(
             },
         ),
         (
+            "leaflet.localte-control",
+            {
+                "css": "mapentity/vendor/Leaflet.locate-control/L.Control.Locate.css",
+                "js": "mapentity/vendor/Leaflet.locate-control/L.Control.Locate.min.js",
+            },
+        ),
+        (
             "mapentity",
             {
                 "js": ["mapentity/mapentity.js", "mapentity/mapentity.forms.js"],

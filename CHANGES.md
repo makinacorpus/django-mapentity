@@ -1,6 +1,18 @@
 CHANGELOG
 =========
 
+8.13.2+dev (XXXX-XX-XX)
+-----------------------
+
+**New features**
+
+- Add locate button on maps to center on user's position
+
+**Improvements**
+
+- New template block on list views to add extra action buttons
+- Update bootstrap icons to 1.13.1
+
 8.13.2     (2025-07-21)
 -----------------------
 
