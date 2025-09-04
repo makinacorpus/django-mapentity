@@ -4,31 +4,40 @@
     <a class="navbar-brand" href="#">
         <img src="{% static 'images/logo-login.png' %}" width="30" height="30" alt="">
     </a>
+
+    {% if request.user.is_authenticated %}
+    <ul class="navbar-nav mr-auto">
+        <li class="nav-item {% if viewname == 'list' %}{{ modelname }} active{% endif %}">
+            <button class="btn-list btn btn-light dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+              <span onclick="javascript:location='/';"> {% trans "List" %}</span> <span id="nbresults" class="badge badge-secondary"></span>
+            </button>
+            <div class="dropdown-menu">
+                <ul class="list-group">
+                {% for entity in allowed_entities %}
+                    {% if entity.menu %}
+                        <li class="dropdown-item d-flex">
+                            <a href="{% url entity.url_list %}">
+                                <img src="{% static entity.icon_small %}" /> {{ entity.label }}</a>
+                            &nbsp;&nbsp;
+                            <a title="{% trans 'Add' %}" href="{% url entity.url_add %}" class="btn btn-success btn-sm ml-auto">
+                                <i class="bi bi-plus"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                    </ul>
+            </div>
+        </li>
+    </ul>
+    {% endif %}
+
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            {% if request.user.is_authenticated %}
-                <li class="nav-item {% if viewname == 'list' %}{{ modelname }} active{% endif %}">
-                    <button class="btn-list btn btn-light dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                      <span onclick="javascript:location='/';"> {% trans "List" %}</span> <span id="nbresults" class="badge badge-secondary"></span>
-                    </button>
-                    <div class="dropdown-menu">
-                        {% for entity in allowed_entities %}
-                            {% if entity.menu %}
-                                <a class="dropdown-item" href="{% url entity.url_list %}">
-                                    <img src="{% static entity.icon_small %}"/> {{ entity.label }}
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-
-                </li>
-            {% endif %}
-            <ul id="historylist" class="navbar-nav {% if request.session.history %} nav-tabs{% endif %}">
+        <ul id="historylist" class="mr-auto navbar-nav {% if request.session.history %} nav-tabs{% endif %}">
                 {% block toolbar %}
                     {% for item in request.session.history %}
                         {% if forloop.first and viewname != "list" %}
@@ -54,7 +63,6 @@
                 {% endblock toolbar %}
             </ul>
 
-        </ul>
         <ul class="navbar-nav ml-auto">
             {% if request.user.is_authenticated %}
                 <li class="nav-item dropdown">
