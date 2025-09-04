@@ -11,7 +11,7 @@ CHANGELOG
 **Improvements**
 
 - New template block on list views to add extra action buttons
-
+- Update bootstrap icons to 1.13.1
 
 8.13.2     (2025-07-21)
 -----------------------
