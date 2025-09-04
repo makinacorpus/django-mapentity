@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-16 12:08+0000\n"
+"POT-Creation-Date: 2025-09-04 08:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,16 +81,13 @@ msgstr ""
 msgid "List"
 msgstr ""
 
-msgid "Quick access"
-msgstr ""
-
-msgid "Add"
-msgstr ""
-
 msgid "Admin"
 msgstr ""
 
 msgid "Logbook"
+msgstr ""
+
+msgid "Languages"
 msgstr ""
 
 msgid "Logout"
@@ -142,15 +139,6 @@ msgstr ""
 msgid "No, back to edit view"
 msgstr ""
 
-msgid "PDF"
-msgstr ""
-
-msgid "ODT"
-msgstr ""
-
-msgid "DOC"
-msgstr ""
-
 msgid "Properties"
 msgstr ""
 
@@ -163,10 +151,28 @@ msgstr ""
 msgid "History"
 msgstr ""
 
+msgid "PDF"
+msgstr ""
+
+msgid "ODT"
+msgstr ""
+
+msgid "DOC"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "You have not permission to edit this object."
+msgstr ""
+
 msgid "Duplicate"
 msgstr ""
 
-msgid "Update"
+msgid "You have not permission to duplicate this object."
 msgstr ""
 
 msgid "Date"
