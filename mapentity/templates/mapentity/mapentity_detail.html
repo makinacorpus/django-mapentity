@@ -127,8 +127,7 @@
             {% endblock %}
             <div id="attachments" class="tab-pane">
                 {% block attachmentspanel %}
-                {% include 'paperclip/attachment_list.html' with
-                attachment_form_next=object.get_detail_url|add:'?tab=attachments' %}
+                {% include 'paperclip/attachment_list.html' with attachment_form_next=object.get_detail_url|add:'?tab=attachments' %}
                 {% endblock attachmentspanel %}
             </div>
             {% block after_attachments_extra_tab_content %}
