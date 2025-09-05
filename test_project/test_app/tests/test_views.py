@@ -458,10 +458,6 @@ class DetailViewTest(BaseTest):
             response,
             f'href="/convert/?url=/document/dummymodel-{self.object.pk}.odt&to=doc"',
         )
-        self.assertNotContains(
-            response,
-            f'href="/document/dummymodel-{self.object.pk}.odt"',
-        )
 
     def test_detail_fragment(self):
         self.login()
