@@ -421,23 +421,17 @@ class DetailViewTest(BaseTest):
 
         self.assertContains(
             response,
-            '<a class="btn btn-light btn-sm" rel="noopener noreferrer"'
-            f' target="_blank" href="/document/dummymodel-{self.object.pk}.odt">'
-            '<img src="/static/paperclip/fileicons/odt.png"/> ODT</a>',
+            f'href="/document/dummymodel-{self.object.pk}.odt"',
         )
         self.assertContains(
             response,
-            '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
-            f' href="/convert/?url=/document/dummymodel-{self.object.pk}.odt'
-            '&from=application/vnd.oasis.opendocument.text&to=doc">'
-            '<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>',
+            f'href="/convert/?url=/document/dummymodel-{self.object.pk}.odt'
+            '&from=application/vnd.oasis.opendocument.text&to=doc"',
         )
         self.assertContains(
             response,
-            '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
-            f' href="/convert/?url=/document/dummymodel-{self.object.pk}.odt'
-            '&from=application/vnd.oasis.opendocument.text">'
-            '<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>',
+            f'href="/convert/?url=/document/dummymodel-{self.object.pk}.odt'
+            '&from=application/vnd.oasis.opendocument.text"',
         )
 
     def test_export_buttons_weasyprint(self):
@@ -453,28 +447,16 @@ class DetailViewTest(BaseTest):
         if app_settings["MAPENTITY_WEASYPRINT"]:
             self.assertContains(
                 response,
-                '<a class="btn btn-light btn-sm" target="_blank"'
-                f' href="/document/dummymodel-{self.object.pk}.pdf">'
-                '<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>',
+                f'href="/document/dummymodel-{self.object.pk}.pdf"',
             )
         else:
             self.assertContains(
                 response,
-                '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
-                f' href="/document/dummymodel-{self.object.pk}.odt">'
-                '<img src="/static/paperclip/fileicons/pdf.png"/> PDF</a>',
+                f'href="/document/dummymodel-{self.object.pk}.odt"',
             )
         self.assertNotContains(
             response,
-            '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
-            f' href="/convert/?url=/document/dummymodel-{self.object.pk}.odt&to=doc">'
-            '<img src="/static/paperclip/fileicons/doc.png"/> DOC</a>',
-        )
-        self.assertNotContains(
-            response,
-            '<a class="btn btn-light btn-sm" rel="noopener noreferrer" target="_blank"'
-            f' href="/document/dummymodel-{self.object.pk}.odt">'
-            '<img src="/static/paperclip/fileicons/odt.png"/> ODT</a>',
+            f'href="/convert/?url=/document/dummymodel-{self.object.pk}.odt&to=doc"',
         )
 
     def test_detail_fragment(self):

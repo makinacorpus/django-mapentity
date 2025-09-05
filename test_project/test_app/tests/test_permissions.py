@@ -53,11 +53,11 @@ class NavBarPermissionsTest(TestCase):
         call_command("update_permissions_mapentity")
 
     def test_navbar_permissions(self):
-        user = UserFactory.create(password="booh")
+        user = UserFactory()
         user.user_permissions.add(Permission.objects.get(codename="read_dummymodel"))
-        self.client.login(username=user.username, password="booh")
+        self.client.force_login(user)
         response = self.client.get("/dummymodel/list/")
-        self.assertContains(response, 'href="/dummymodel/add/">+</a>')
-        self.assertContains(response, '<a href="/dummymodel/list/"')
-        self.assertNotContains(response, 'href="/mushroomspot/add/">+</a>')
-        self.assertNotContains(response, '<a href="/mushroomspot/list/"')
+        self.assertContains(response, 'href="/dummymodel/add/"')
+        self.assertContains(response, 'href="/dummymodel/list/"')
+        self.assertNotContains(response, 'href="/mushroomspot/add/"')
+        self.assertNotContains(response, 'href="/mushroomspot/list/"')

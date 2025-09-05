@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-16 12:08+0000\n"
+"POT-Creation-Date: 2025-09-04 08:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,17 +80,14 @@ msgstr "Erreur interne"
 msgid "List"
 msgstr "Liste"
 
-msgid "Quick access"
-msgstr "Accès rapide"
-
-msgid "Add"
-msgstr "Ajouter"
-
 msgid "Admin"
 msgstr "Admin"
 
 msgid "Logbook"
 msgstr "Journal"
+
+msgid "Languages"
+msgstr "Langues"
 
 msgid "Logout"
 msgstr "Déconnexion"
@@ -139,16 +136,7 @@ msgid "Yes, delete"
 msgstr "Oui, supprimer"
 
 msgid "No, back to edit view"
-msgstr "Non, retour à la vue d'édition"
-
-msgid "PDF"
-msgstr "PDF"
-
-msgid "ODT"
-msgstr "ODT"
-
-msgid "DOC"
-msgstr "DOC"
+msgstr "Non, retour à la vue de modification"
 
 msgid "Properties"
 msgstr "Propriétés"
@@ -162,11 +150,29 @@ msgstr "Fichiers liés"
 msgid "History"
 msgstr "Historique"
 
+msgid "PDF"
+msgstr "PDF"
+
+msgid "ODT"
+msgstr "ODT"
+
+msgid "DOC"
+msgstr "DOC"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "You have not permission to edit this object."
+msgstr "Vous n'avez pas la permission de modifier cet objet."
+
 msgid "Duplicate"
 msgstr "Dupliquer"
 
-msgid "Update"
-msgstr "Modifier"
+msgid "You have not permission to duplicate this object."
+msgstr "Vous n'avez pas la permission de dupliquer cet objet."
 
 msgid "Date"
 msgstr "Date"
@@ -260,7 +266,7 @@ msgstr "Pas de carte disponible pour cet objet."
 
 #, python-format
 msgid "Edit %s"
-msgstr "Éditer %s"
+msgstr "Modifier %s"
 
 msgid "Saved"
 msgstr "Sauvegardé"
