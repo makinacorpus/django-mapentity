@@ -17,12 +17,14 @@
   "css": "mapentity/static/mapentity/dist/style.css",
   "targets": {
     "js": {
-      "source": "mapentity/main.js",
+      "source": "mapentity/src/main.js",
       "context": "browser",
       "outputFormat": "global"
     },
     "css": {
-      "source": "mapentity/style.scss"
+      "source": "mapentity/src/style.scss",
+      "context": "browser",
+      "outputFormat": "global"
     }
   },
   "browserslist": "> 0.25%",

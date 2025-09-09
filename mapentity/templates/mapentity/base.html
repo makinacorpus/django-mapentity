@@ -10,6 +10,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta charset="UTF-8">
         <link rel="icon" type="image/png" href="{% media_static_fallback 'upload/favicon.png' 'images/favicon.png' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'mapentity/dist/main.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'mapentity/dist/style.css' %}">
 
         {% compress css %}
@@ -39,7 +40,6 @@
                     }
                 {% endif %}
             </style>
-            <link rel="stylesheet" href="{% static 'mapentity/style.css' %}"/>
 
             {% smart_include "extracss" %}
         {% endcompress %}
