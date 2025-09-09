@@ -8,7 +8,7 @@
 ![Django Version](https://img.shields.io/badge/django-%3E%3D%204.2-green.svg)
 
 
-Mapentity is a CRUD framework for geospatial entities built with Django. It provide interface to manager geographic object over leaflet maps.
+Mapentity is a CRUD framework for geospatial entities built with Django. It provides interface to manage geographic entities over leaflet maps.
 It uses Bootstrap and leaflet.
 
 
