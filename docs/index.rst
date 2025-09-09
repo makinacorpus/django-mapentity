@@ -6,6 +6,11 @@
 Welcome to MapEntity's documentation!
 =====================================
 
+.. image:: assets/images/logo-header.png
+   :alt: MapEntity logo
+   :width: 120
+   :height: 120
+
 MapEntity is a CRUD interface for geospatial entities built with Django.
 
 .. toctree::

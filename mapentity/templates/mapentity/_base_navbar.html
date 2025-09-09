@@ -1,8 +1,8 @@
 {% load static i18n mapentity_tags %}
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">
-        <img src="{% static 'images/logo-login.png' %}" width="30" height="30" alt="">
+    <a class="navbar-brand mr-0" href="#">
+        {% block logo_header %}<img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;" alt="logo">{% endblock %} <span class="d-none d-sm-inline">{% block title_header %}Mapentity{% endblock %}</span>
     </a>
 
     {% if request.user.is_authenticated %}
