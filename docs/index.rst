@@ -6,7 +6,7 @@
 Welcome to MapEntity's documentation!
 =====================================
 
-.. image:: mapentity/static/images/logo-header.png
+.. image:: assets/images/logo-header.png
    :alt: MapEntity logo
    :width: 120
    :height: 120
