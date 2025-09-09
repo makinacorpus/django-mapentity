@@ -1,5 +1,4 @@
-![logo-header.png](mapentity/static/images/logo-header.png)
-# MapEntity
+<img alt="Mapentity" src="mapentity/static/images/logo-login.png" width="120" height="120"/>
 
 ![PyPI](https://img.shields.io/pypi/v/mapentity.svg)
 [![CI](https://github.com/makinacorpus/django-mapentity/actions/workflows/python-ci.yml/badge.svg)](https://github.com/makinacorpus/django-mapentity/actions/workflows/python-ci.yml)
