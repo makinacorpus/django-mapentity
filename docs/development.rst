@@ -4,11 +4,16 @@ Development
 Quickstart to run MapEntity in development :
 
 ::
-    docker-compose build
+    make serve
+
+Then run initial commands i another terminal :
+
+::
     docker-compose run --rm web ./manage.py migrate
     docker-compose run --rm web ./manage.py createsuperuser
     docker-compose run --rm web ./manage.py update_permissions_mapentity
-    docker-compose up
+    make watch
+
 
 Get Screamshotter and convertit working:
 

@@ -117,6 +117,21 @@ jobs:
           sudo apt-get -y install gettext
           django-admin compilemessages
 
+      - name: Setup node for front
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '24'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install front dependencies
+        run: |
+          npm ci --no-audit
+
+      - name: Build front
+        run: |
+          npm run build
+
       - name: Build package
         run: |
           python setup.py sdist

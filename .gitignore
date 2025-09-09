@@ -14,3 +14,7 @@ __pycache__
 /.coverage
 *.mo
 coverage.xml
+.parcel-cache
+node_modules
+/mapentity/static/mapentity/dist/
+!/mapentity/static/mapentity/dist/.empty

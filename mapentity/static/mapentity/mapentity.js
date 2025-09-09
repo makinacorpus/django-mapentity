@@ -21,7 +21,7 @@ $(document).ready(function (e) {
     $(window).resize(fillmax);
 
     // Chosen-ify elements
-    $(".chzn-select").chosen();
+    $(".chzn-select").select2();
 
     // Top-navigation tabs
     MapEntity.history.render();
