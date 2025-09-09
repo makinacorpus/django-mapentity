@@ -4,6 +4,22 @@ CHANGELOG
 8.14.1+dev (XXXX-XX-XX)
 -----------------------
 
+**Warning**
+
+- Default brand logo and title added. You can override them in templates.
+
+**Improvements**
+
+- Add a default logo
+
+
+8.14.1     (2025-09-05)
+-----------------------
+
+**Warning**
+
+- Some component has been changed. User menu items, actions buttons in list, actions and download buttons in details views. Please test and update your templates before upgrading.
+
 **Improvements**
 
 - Improve responsive menu, sidebar, list and detail views
