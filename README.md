@@ -15,10 +15,11 @@ It uses Bootstrap and leaflet.
 **Some projects built with mapentity:**
 
 
-| Project        | Logo                                                                                                           |
-  |----------------|----------------------------------------------------------------------------------------------------------------|
-  | Geotrek-admin  | <a href="https://github.com/Georiviere/Georiviere-admin"><img src="https://geotrek.fr/assets/img/logo.svg" alt="Geotrek" width="80" height="80"/></a> |
-  | Georiviere     | <a href="https://github.com/Georiviere/Georiviere-admin"><img src="https://github.com/Georiviere.png" alt="Georiviere" width="80" height="80"/></a>   |
+  | Project         | Lien                                                                                                                                                  |
+  |-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | Geotrek-admin   | <a href="https://github.com/Georiviere/Georiviere-admin"><img src="https://geotrek.fr/assets/img/logo.svg" alt="Geotrek" width="80" height="80"/></a> |
+  | Georiviere      | <a href="https://github.com/Georiviere/Georiviere-admin"><img src="https://github.com/Georiviere.png" alt="Georiviere" width="80" height="80"/></a>   |
+  | Patrimoine bâti | https://github.com/PnEcrins/Patrimoine-bati                                                                                                           |
 
 [See documentation](http://django-mapentity.readthedocs.org/)
 
