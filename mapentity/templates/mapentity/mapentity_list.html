@@ -3,10 +3,11 @@
 
 {% block title %}{{ objectsname }} | {{ block.super }}{% endblock title %}
 
+{% block extra_class_container %}
+    list-container
+{% endblock %}
 
 {% block container %}
-<div id="container" class="container-fluid list-container">
-
     <div id="mainpanel" class="row">
         <!-- List Panel -->
         <div id="panelleft" class="col-12 col-md-6 d-flex">
@@ -21,7 +22,7 @@
                             <a class="nav-link {% if entity.modelname == modelname %}active{% endif %}"
                                href="{% url entity.url_list %}" title="{{ entity.label }}">
                                 <span class="sr-only">{{ entity.label }}</span>
-                                <img src="{% static entity.icon %}" alt="{{ entity.modelname|truncatechars:3|title }}"/>
+                                <img src="{% static entity.icon %}" alt="{{ entity.modelname.1|title }}"/>
                             </a>
                         </li>
                         {% endif %}
@@ -112,7 +113,6 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock container %}
 
 

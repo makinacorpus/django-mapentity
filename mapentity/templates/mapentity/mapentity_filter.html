@@ -1,14 +1,19 @@
 {% load i18n static %}
+{% load crispy_forms_tags %}
 
 {% block mainfilter %}
 <form id="mainfilter" action="{{ model.get_datatablelist_url }}" filter-url="{{ model.get_filter_url }}">
-    <div class="left form-group">
-        {{ filter.form.as_p }}
+    <div class="left">
+        {% crispy filter.form %}
     </div>
-    <div class="right form-group"></div>
+    <div class="right"></div>
     <div class="actions">
-        <input id="reset" type="reset" class="btn btn-light"/>
-        <a id="filter" class="btn btn-primary"><i class="bi bi-search"></i> {% trans "Filter" %}</a>
+        <div class="btn-group" role="group">
+            <input id="reset" type="reset" class="btn btn-outline-secondary btn-sm"/>
+            <button type="button" id="filter" class="btn btn-primary btn-sm">
+                <i class="bi bi-search"></i> {% trans "Filter" %}
+            </button>
+        </div>
     </div>
 </form>
 {% endblock mainfilter %}

@@ -1,7 +1,27 @@
 /***** Bootstrap customizations ******/
+#mainfilter div.form-group {
+  margin-bottom: 0.1rem;
+}
+
+#mainfilter input.form-control-sm, select.form-control-sm {
+  height: 21px;
+}
+
+#mainfilter select.custom-select {
+  height: 21px;
+  line-height: 21px;
+  color: #495057;
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
 .dropdown-menu {
     z-index: 9999;
+}
+
+.select2-dropdown {
+  left: 0;
+  z-index: 9999;
 }
 
 .btn-group.disabled .btn img {

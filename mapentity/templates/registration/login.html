@@ -48,41 +48,33 @@
 
 {% block body_classes %}bg-light{% endblock %}
 
-{% block content %}
-    <div class="container-fluid">
-        <br>
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            {% endfor %}
-        {% endif %}
-        <div class="row">
-            <div class="col-12 col-md-6 offset-md-3">
-                <div class="card">
-                    <img class="img-rounded p-2"
-                         src="{% media_static_fallback 'upload/logo-login.png' 'images/logo-login.png' %}" alt="logo"/>
-                    <div class="card-body">
-                        <form action="" method="post" class="form-horizontal">
-                            {% csrf_token %}
-                            {{ form|crispy }}
-                            <div class="text-right">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-box-arrow-in-right"></i> {% trans "Login" %}</button>
-                            </div>
-                        </form>
-                        <p class="card-text">
-                            <span class="font-weight-bold">{{ TITLE }}</span> <span class="font-italic">{{ VERSION }}</span>
-                        </p>
+{% block navbar %}{% endblock %}
+
+{% block extra_class_container %}mt-5{% endblock %}
+
+{% block container %}
+    <div class="row">
+    <div class="col-12 col-md-6 offset-md-3">
+        <div class="card">
+            <img class="img-rounded p-2"
+                 src="{% media_static_fallback 'upload/logo-login.png' 'images/logo-login.png' %}" alt="logo"/>
+            <div class="card-body">
+                <form action="" method="post" class="form-horizontal">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-box-arrow-in-right"></i> {% trans "Login" %}
+                        </button>
                     </div>
-                </div>
+                </form>
+                <p class="card-text">
+                    <span class="font-weight-bold">{{ TITLE }}</span> <span class="font-italic">{{ VERSION }}</span>
+                </p>
             </div>
         </div>
     </div>
-{% endblock content %}
+</div>
+{% endblock %}
 
-{% block extrabody %}
-{% endblock extrabody %}
+{% block extrabody %}{% endblock extrabody %}

@@ -6,6 +6,8 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'popper.js';
 
 require('select2')(window, jQuery);
+import 'select2/dist/js/select2.full';
+import '@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.css';
 import 'bootstrap-datepicker';
 import 'bootstrap-datepicker/dist/locales/bootstrap-datepicker.fr.min.js';
 import 'bootstrap-datepicker/dist/locales/bootstrap-datepicker.es.min.js';

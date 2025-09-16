@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@swc/helpers": "^0.5.17",
+    "@ttskch/select2-bootstrap4-theme": "^1.5.2",
     "bootstrap": "^4.6.0",
     "bootstrap-datepicker": "^1.9.0",
     "bootstrap-icons": "^1.13.1",
