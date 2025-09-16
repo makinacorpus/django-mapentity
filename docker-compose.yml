@@ -29,6 +29,10 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - web
+    ports:
+      - "1234:1234"
+    volumes:
+      - ./:/code/src
     command: npm run watch
 
 volumes:
