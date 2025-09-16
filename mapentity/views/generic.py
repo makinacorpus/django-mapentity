@@ -53,7 +53,8 @@ def log_action(request, object, action_flag):
         return
     if not request.user.is_authenticated:
         return
-    LogEntry.objects.log_action(
+
+    LogEntry.objects.log_action_new(
         user_id=request.user.pk,
         content_type_id=object.get_content_type_id(),
         object_id=object.pk,
@@ -431,7 +432,8 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _("Created"))
+        messages.success(self.request,
+                         _('%(object)s instance created.' % {'object': self.get_model()._meta.verbose_name}))
         log_action(self.request, self.object, ADDITION)
         return response
 
