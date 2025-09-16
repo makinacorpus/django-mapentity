@@ -4,7 +4,9 @@ RUN apt-get update -qq && apt-get install -y -qq \
     binutils libproj-dev gdal-bin libsqlite3-mod-spatialite \
     libjpeg62 zlib1g-dev libcairo2 libpango-1.0-0 \
     libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info \
-    libldap2-dev libsasl2-dev gettext && \
+    libldap2-dev libsasl2-dev libatk1.0-0t64 libcups2t64 \
+    libatk-bridge2.0-0t64 libatspi2.0-0t64 libxdamage1 libxkbcommon0 libasound2t64\
+    gettext npm && \
     apt-get clean all && rm -rf /var/apt/lists/* && rm -rf /var/cache/apt/*
 
 RUN mkdir -p /code
@@ -21,6 +23,7 @@ WORKDIR /code/src
 RUN  /code/venv/bin/pip install --no-cache-dir pip setuptools wheel -U
 # Install dev requirements
 RUN /code/venv/bin/pip3 install --no-cache-dir -e .[dev] -U
+RUN /code/venv/bin/playwright install
 
 # Activate venv through entrypoint
 COPY --chown=django:django docker/entrypoint.sh /usr/local/bin/entrypoint.sh

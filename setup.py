@@ -51,7 +51,8 @@ setup(
             'freezegun',
             'factory_boy',
             'coverage',
-            'tblib'
+            'tblib',
+            'playwright'
         ]
     },
     packages=find_packages(),
