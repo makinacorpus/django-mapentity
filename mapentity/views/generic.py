@@ -432,8 +432,11 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request,
-                         _('%(object)s instance created.' % {'object': self.get_model()._meta.verbose_name}))
+        messages.success(
+            self.request,
+            _("%(object)s instance created.")
+            % {"object": self.get_model()._meta.verbose_name},
+        )
         log_action(self.request, self.object, ADDITION)
         return response
 
