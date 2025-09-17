@@ -57,7 +57,7 @@ class NavBarPermissionsTest(TestCase):
         user.user_permissions.add(Permission.objects.get(codename="read_dummymodel"))
         self.client.force_login(user)
         response = self.client.get("/dummymodel/list/")
-        self.assertContains(response, 'href="/dummymodel/add/"')
+        self.assertNotContains(response, 'href="/dummymodel/add/"')
         self.assertContains(response, 'href="/dummymodel/list/"')
         self.assertNotContains(response, 'href="/mushroomspot/add/"')
         self.assertNotContains(response, 'href="/mushroomspot/list/"')
