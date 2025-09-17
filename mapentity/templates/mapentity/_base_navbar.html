@@ -97,9 +97,9 @@
                             <input name="next" type="hidden" value="{{ redirect_to }}">
                             {% for language in LANGUAGES %}
                                 {% get_language_info for language.0 as LANGUAGE %}
-                            <button class="dropdown-item" type="submit" name="language" value="{{ language.code }}"
-                                    class="btn btn-light m-0 language-menu-item {% if language.code == LANGUAGE_CODE %}active{% endif %}">
-                                {{ LANGUAGE.name_local|title }} ({{ language.code }})
+                            <button class="dropdown-item" type="submit" name="language" value="{{ language.0 }}"
+                                    class="btn btn-light m-0 language-menu-item {% if language.0 == LANGUAGE_CODE %}active{% endif %}">
+                                {{ language.1|title }} ({{ language.0 }})
                             </button>
                             {% endfor %}
                         </form>
