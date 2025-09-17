@@ -92,7 +92,9 @@ _tinymce_default_config = {
 }
 _tinymce_project_config = getattr(settings, "TINYMCE_DEFAULT_CONFIG", {})
 
-TINYMCE_DEFAULT_CONFIG = always_merger.merge(_tinymce_default_config, _tinymce_project_config)
+TINYMCE_DEFAULT_CONFIG = always_merger.merge(
+    _tinymce_default_config, _tinymce_project_config
+)
 setattr(settings, "TINYMCE_DEFAULT_CONFIG", TINYMCE_DEFAULT_CONFIG)
 
 
@@ -107,7 +109,8 @@ _rest_framework_default_config = {
 }
 _rest_framework_project_config = getattr(settings, "REST_FRAMEWORK", {})
 REST_FRAMEWORK = always_merger.merge(
-    _rest_framework_default_config, _rest_framework_project_config)
+    _rest_framework_default_config, _rest_framework_project_config
+)
 setattr(settings, "REST_FRAMEWORK", REST_FRAMEWORK)
 
 _LEAFLET_PLUGINS = OrderedDict(

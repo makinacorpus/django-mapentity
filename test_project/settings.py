@@ -15,6 +15,8 @@ import os
 import sys
 from tempfile import TemporaryDirectory
 
+from django.utils.translation import gettext_lazy as _
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -112,8 +114,8 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGES = (
-    ("en", "English"),
-    ("fr", "French"),
+    ("en", f"🇬🇧 {_('English')}"),
+    ("fr", f"🇫🇷 {_('French')}"),
 )
 
 LANGUAGE_CODE = "en-us"
@@ -198,7 +200,7 @@ MAPENTITY_CONFIG = {
     "CONVERSION_SERVER": "http://convertit:6543",
     "CAPTURE_SERVER": "http://screamshotter:8000",
     "SENDFILE_HTTP_HEADER": "X-Accel-Redirect",
-    "MAP_STYLES": {"toto": "yes"}
+    "MAP_STYLES": {"toto": "yes"},
 }
 LOCALE_PATHS = (os.path.join(BASE_DIR, "test_project", "locale"),)
 LOGIN_REDIRECT_URL = "/"
