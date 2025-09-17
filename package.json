@@ -1,0 +1,64 @@
+{
+  "name": "django-mapentity",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/makinacorpus/django-mapentity#readme",
+  "bugs": {
+    "url": "https://github.com/makinacorpus/django-mapentity/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/makinacorpus/django-mapentity.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "js": "mapentity/static/mapentity/dist/main.js",
+  "css": "mapentity/static/mapentity/dist/style.css",
+  "targets": {
+    "js": {
+      "source": "mapentity/src/main.js",
+      "context": "browser",
+      "outputFormat": "global"
+    },
+    "css": {
+      "source": "mapentity/src/style.scss",
+      "context": "browser",
+      "outputFormat": "global"
+    }
+  },
+  "browserslist": "> 0.25%",
+  "alias": {
+    "jquery": {
+      "global": "$"
+    }
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "parcel build",
+    "watch": "parcel watch"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.15.4",
+    "parcel": "^2.15.4"
+  },
+  "dependencies": {
+    "@swc/helpers": "^0.5.17",
+    "@ttskch/select2-bootstrap4-theme": "^1.5.2",
+    "bootstrap": "^4.6.0",
+    "bootstrap-datepicker": "^1.9.0",
+    "bootstrap-icons": "^1.13.1",
+    "chosen-js": "^1.8.7",
+    "datatables.net": "^1.11.5",
+    "datatables.net-bs4": "^1.11.5",
+    "jquery": "^1.9.1",
+    "jquery-hoverintent": "^1.10.2",
+    "popper.js": "^1.16.1",
+    "select2": "^4.1.0-rc.0"
+  },
+  "@parcel/resolver-default": {
+    "packageExports": true
+  }
+}

@@ -2,33 +2,44 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand mr-0" href="#" title="{{ TITLE }} {{ VERSION }}">
-        {% block logo_header %}<img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;" alt="logo">{% endblock %} <span class="d-none d-sm-inline">{% block title_header %}{{ TITLE }}{% endblock %}</span>
+        {% block logo_header %}
+            <img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;"
+                 alt="logo">{% endblock %} <span class="d-none d-sm-inline">{% block title_header %}
+        {{ TITLE }}{% endblock %}</span>
     </a>
 
     {% if request.user.is_authenticated %}
-    <ul class="navbar-nav mr-auto">
-        <li class="nav-item {% if viewname == 'list' %}{{ modelname }} active{% endif %}">
-            <button class="btn-list btn btn-light dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-              <span onclick="javascript:location='/';"> {% trans "List" %}</span> <span id="nbresults" class="badge badge-secondary"></span>
-            </button>
-            <div class="dropdown-menu">
-                <ul class="list-group">
-                {% for entity in allowed_entities %}
-                    {% if entity.menu %}
-                        <li class="dropdown-item d-flex">
-                            <a href="{% url entity.url_list %}">
-                                <img src="{% static entity.icon_small %}" /> {{ entity.label }}</a>
-                            &nbsp;&nbsp;
-                            <a title="{% trans 'Add' %}" href="{% url entity.url_add %}" class="btn btn-success btn-sm ml-auto">
-                                <i class="bi bi-plus"></i>
-                            </a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item {% if viewname == 'list' %}{{ modelname }} active{% endif %}">
+                <button class="btn-list btn btn-light dropdown-toggle" type="button" data-toggle="dropdown"
+                        aria-expanded="false">
+                    <span onclick="javascript:location='/';"> {% trans "List" %}</span> <span id="nbresults"
+                                                                                              class="badge badge-secondary"></span>
+                </button>
+                <div class="dropdown-menu">
+                    <ul class="list-group">
+                        {% for entity in allowed_entities %}
+                            {% if entity.menu %}
+                                <li class="dropdown-item d-flex">
+                                    <a class="dropdown-item" href="{% url entity.url_list %}">
+                                    <object data="{% static entity.icon_small %}">
+                                    </object>
+                                         {{ entity.label }}
+                                    </a>
+
+                                    {% if can_add %}
+                                        <a title="{% trans 'Add' %}" href="{% url entity.url_add %}"
+                                           class="btn btn-success btn-sm ml-auto">
+                                            <i class="bi bi-plus"></i>
+                                        </a>
+                                    {% endif %}
+                                </li>
+                            {% endif %}
+                        {% endfor %}
                     </ul>
-            </div>
-        </li>
-    </ul>
+                </div>
+            </li>
+        </ul>
     {% endif %}
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -38,35 +49,35 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul id="historylist" class="mr-auto navbar-nav {% if request.session.history %} nav-tabs{% endif %}">
-                {% block toolbar %}
-                    {% for item in request.session.history %}
-                        {% if forloop.first and viewname != "list" %}
-                            <li class="{{ modelname }} nav-item history first mr-1">
-                                <a class="nav-link active" href="{{ item.path }}">
+            {% block toolbar %}
+                {% for item in request.session.history %}
+                    {% if forloop.first and viewname != "list" %}
+                        <li class="{{ modelname }} nav-item history first mr-1">
+                            <a class="nav-link active" href="{{ item.path }}">
                                     <span class="content">{% if title|lower %}{{ title }}{% else %}
                                         {{ item.title }}{% endif %}</span>
-                                    {% if viewname == "detail" %}
-                                        <button class="close hidden">&times;</button>
-                                    {% endif %}
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="
-                                    {% if forloop.first %}{% block nav-detail %}{% endblock nav-detail %}{% endif %} {{ item.modelname }} nav-item history mr-1">
-                                <a class="nav-link bg-light" href="{{ item.path }}" title="{{ item.title }}">
-                                    <span class="content">{{ item.title|truncatechars:12 }}</span>
-                                    <button class="close d-none">&times;</button>
-                                </a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                {% endblock toolbar %}
-            </ul>
+                                {% if viewname == "detail" %}
+                                    <button class="close hidden">&times;</button>
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="{% if forloop.first %}{% block nav-detail %}{% endblock nav-detail %}{% endif %} {{ item.modelname }} nav-item history mr-1">
+                            <a class="nav-link bg-light" href="{{ item.path }}" title="{{ item.title }}">
+                                <span class="content">{{ item.title|truncatechars:12 }}</span>
+                                <button class="close d-none">&times;</button>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            {% endblock toolbar %}
+        </ul>
 
         <ul class="navbar-nav ml-auto">
             {% if request.user.is_authenticated %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle bg-light" href="#" id="navbarDropdownUsermenuLink" role="button" data-toggle="dropdown"
+                    <a class="nav-link dropdown-toggle bg-light" href="#" id="navbarDropdownUsermenuLink" role="button"
+                       data-toggle="dropdown"
                        aria-haspopup="true" aria-expanded="false">
                         <i class="bi bi-person-fill"></i>
                         {{ request.user }}
@@ -82,8 +93,8 @@
 
                         {% if ACTION_HISTORY_ENABLED and 'mapentity.read_logentry' in perms %}
                             <a class="dropdown-item{% block nav-logbook %}{% endblock nav-logbook %}"
-                                   href="{% url 'mapentity:logentry_list' %}">
-                                   <i class="bi bi-book"></i> {% trans "Logbook" %}
+                               href="{% url 'mapentity:logentry_list' %}">
+                                <i class="bi bi-book"></i> {% trans "Logbook" %}
                             </a>
                         {% endif %}
 
@@ -97,19 +108,19 @@
                         <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
                             <input name="next" type="hidden" value="{{ redirect_to }}">
                             {% for language in languages %}
-                            <button class="dropdown-item" type="submit" name="language" value="{{ language.code }}"
-                                    class="btn btn-light m-0 language-menu-item {% if language.code == LANGUAGE_CODE %}active{% endif %}">
-                                {{ language.name_local|title }} ({{ language.code }})
-                            </button>
+                                <button class="dropdown-item" type="submit" name="language" value="{{ language.code }}"
+                                        class="btn btn-light m-0 language-menu-item {% if language.code == LANGUAGE_CODE %}active{% endif %}">
+                                    {{ language.name_local|title }} ({{ language.code }})
+                                </button>
                             {% endfor %}
                         </form>
                         <div class="dropdown-divider"></div>
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button class="btn dropdown-item" id="btn-logout" type="submit">
-                                    <i class="bi bi-power text-danger"></i> {% trans "Logout" %}
-                                </button>
-                            </form>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button class="btn dropdown-item" id="btn-logout" type="submit">
+                                <i class="bi bi-power text-danger"></i> {% trans "Logout" %}
+                            </button>
+                        </form>
                     </div>
                 </li>
             {% endif %}

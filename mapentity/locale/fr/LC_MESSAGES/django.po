@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-04 08:53+0000\n"
+"POT-Creation-Date: 2025-09-17 07:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,6 +79,9 @@ msgstr "Erreur interne"
 
 msgid "List"
 msgstr "Liste"
+
+msgid "Add"
+msgstr "Ajouter"
 
 msgid "Admin"
 msgstr "Admin"
@@ -246,8 +249,9 @@ msgstr "quelques secondes"
 msgid "Invalid geometry value."
 msgstr "Géométrie invalide"
 
-msgid "Created"
-msgstr "Créé"
+#, python-format
+msgid "%(object)s instance created."
+msgstr "Objet de type '%(object)s' a été créé."
 
 msgid "Your form contains errors"
 msgstr "Le formulaire contient des erreurs"
@@ -269,4 +273,4 @@ msgid "Edit %s"
 msgstr "Modifier %s"
 
 msgid "Saved"
-msgstr "Sauvegardé"
+msgstr "Enregistré"

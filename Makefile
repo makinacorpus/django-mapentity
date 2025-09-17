@@ -19,6 +19,16 @@ serve:
 	@$(PRINT_COLOR) "$(COLOR_SUCCESS) \n### Start server ###\n $(COLOR_RESET)\n"
 	$(docker_compose) up
 
+.PHONY: watch
+watch:
+	@$(PRINT_COLOR) "$(COLOR_SUCCESS) \n### Watch JS / CSS ###\n $(COLOR_RESET)\n"
+	$(docker_compose) run --remove-orphans --no-deps --rm web npm run watch
+
+.PHONY: build_assets
+build_assets:
+	@$(PRINT_COLOR) "$(COLOR_SUCCESS) \n### Build assets JS / CSS ###\n $(COLOR_RESET)\n"
+	$(docker_compose) run --remove-orphans --no-deps --rm web npm run build
+
 ###########################
 #          Lint           #
 ###########################

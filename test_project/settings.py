@@ -208,6 +208,15 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"
 
 MODELTRANSLATION_LANGUAGES = ("en", "fr", "zh-hant")
-
+CRISPY_CLASS_CONVERTERS = {
+    "textinput": "form-control form-control-sm input-group input-group-sm",
+    "numberinput": "form-control form-control-sm",
+    "emailinput": "form-control form-control-sm",
+    "urlinput": "form-control form-control-sm",
+    "passwordinput": "form-control form-control-sm",
+    "textarea": "form-control form-control-sm",
+    "dateinput": "form-control form-control-sm",
+    "select": "form-control form-control-sm",
+}
 if "test" in sys.argv:
     MEDIA_ROOT = TemporaryDirectory().name

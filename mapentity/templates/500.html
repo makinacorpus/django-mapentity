@@ -2,13 +2,11 @@
 {% load i18n %}
 
 {% block container %}
-    <div id="container" class="container-fluid">
         <div class="page-header">
             <h1>{% trans "Internal error" %} <small>(500)</small></h1>
         </div>
-    </div>
 {% endblock container %}
 
-{% block js_setings_view %}
+{% block js_settings_view %}
     {# disable js settings view to avoid exception in exception #}
 {% endblock %}

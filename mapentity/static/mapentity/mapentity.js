@@ -20,8 +20,8 @@ $(document).ready(function (e) {
     setTimeout(fillmax, 0);
     $(window).resize(fillmax);
 
-    // Chosen-ify elements
-    $(".chzn-select").chosen();
+    // style select elements
+    $('select').select2({theme: "bootstrap4"});
 
     // Top-navigation tabs
     MapEntity.history.render();

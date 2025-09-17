@@ -101,9 +101,11 @@ MapEntity.TogglableFilter = L.Class.extend({
                             $mainfilter.find('select[multiple]').trigger('chosen:updated');
                         }, 1);
                     });
+                    // style select elements
+                    $('select[multiple]').select2();
 
                     // Make sure filter-set class is added if a choice is selected.
-                    $mainfilter.find('select[multiple]').chosen().on('change', function (e) {
+                    $mainfilter.find('select[multiple]').select2({theme: "bootstrap4"}).on('change', function (e) {
                         var $target = $(e.target),
                             name = $target.attr('name'),
                             $container = $('div#id_' + name + '_chzn > ul');

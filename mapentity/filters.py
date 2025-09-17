@@ -1,3 +1,4 @@
+from crispy_forms.layout import Layout
 from django.conf import settings
 from django.contrib.gis import forms
 from django.contrib.gis.geos import Polygon
@@ -119,3 +120,11 @@ class MapEntityFilterSet(BaseMapEntityFilterSet):
                 },
             },
         }
+
+    @property
+    def form(self):
+        form = super().form
+        layout_components = list(form.fields.keys())
+        form.helper.form_tag = False
+        form.helper.layout = Layout(*layout_components)
+        return form
