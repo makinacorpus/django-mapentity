@@ -147,10 +147,6 @@ SRID = 4326
 COMPRESS_ENABLED = False
 TEST = True
 
-MAPENTITY_CONFIG = {
-    "SENDFILE_HTTP_HEADER": "X-Accel-Redirect",
-}
-
 PAPERCLIP_FILETYPE_MODEL = "test_app.FileType"
 PAPERCLIP_LICENSE_MODEL = "test_app.License"
 PAPERCLIP_ATTACHMENT_MODEL = "test_app.Attachment"
@@ -202,6 +198,7 @@ MAPENTITY_CONFIG = {
     "CONVERSION_SERVER": "http://convertit:6543",
     "CAPTURE_SERVER": "http://screamshotter:8000",
     "SENDFILE_HTTP_HEADER": "X-Accel-Redirect",
+    "MAP_STYLES": {"toto": "yes"}
 }
 LOCALE_PATHS = (os.path.join(BASE_DIR, "test_project", "locale"),)
 LOGIN_REDIRECT_URL = "/"
