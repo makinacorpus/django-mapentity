@@ -93,13 +93,13 @@
                         </h6>
                         {% get_current_language as LANGUAGE_CODE %}
                         {% get_available_languages as LANGUAGES %}
-                        {% get_language_info_list for LANGUAGES as languages %}
                         <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
                             <input name="next" type="hidden" value="{{ redirect_to }}">
-                            {% for language in languages %}
+                            {% for language in LANGUAGES %}
+                                {% get_language_info for language as LANGUAGE %}
                             <button class="dropdown-item" type="submit" name="language" value="{{ language.code }}"
                                     class="btn btn-light m-0 language-menu-item {% if language.code == LANGUAGE_CODE %}active{% endif %}">
-                                {{ language.name_local|title }} ({{ language.code }})
+                                {{ LANGUAGE.name_local|title }} ({{ language.code }})
                             </button>
                             {% endfor %}
                         </form>
