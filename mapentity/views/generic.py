@@ -54,7 +54,7 @@ def log_action(request, object, action_flag):
     if not request.user.is_authenticated:
         return
 
-    LogEntry.objects.log_action_new(
+    LogEntry.objects.log_action(
         user_id=request.user.pk,
         content_type_id=object.get_content_type_id(),
         object_id=object.pk,
