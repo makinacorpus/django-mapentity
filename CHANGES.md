@@ -4,6 +4,14 @@ CHANGELOG
 8.14.2+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Better language and translation management even if language is valid but not supported by django
+
+**Bug fixes**
+
+- In some cases default settings values can't be overridden.
+
 
 8.14.2     (2025-09-09)
 -----------------------
