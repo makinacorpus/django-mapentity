@@ -200,7 +200,6 @@ MAPENTITY_CONFIG = {
     "CONVERSION_SERVER": "http://convertit:6543",
     "CAPTURE_SERVER": "http://screamshotter:8000",
     "SENDFILE_HTTP_HEADER": "X-Accel-Redirect",
-    "MAP_STYLES": {"toto": "yes"},
 }
 LOCALE_PATHS = (os.path.join(BASE_DIR, "test_project", "locale"),)
 LOGIN_REDIRECT_URL = "/"
