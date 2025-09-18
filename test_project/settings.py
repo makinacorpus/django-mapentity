@@ -15,9 +15,11 @@ import os
 import sys
 from tempfile import TemporaryDirectory
 
-from django.utils.translation import gettext_lazy as _
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _(s):
+    return s
 
 
 # Quick-start development settings - unsuitable for production

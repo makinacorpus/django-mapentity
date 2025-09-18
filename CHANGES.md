@@ -30,7 +30,7 @@ CHANGELOG
 
 **Warning**
 
-- Some component has been changed. User menu items, actions buttons in list, actions and download buttons in details views. Please test and update your templates before upgrading.
+- Some components have been changed. User menu items, actions buttons in list, actions and download buttons in details views. Please test and update your templates before upgrading.
 
 **Improvements**
 
