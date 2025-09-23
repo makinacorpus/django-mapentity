@@ -86,7 +86,6 @@ class MapEntityList(BaseListView, ListView):
         context["columns"] = self.get_columns()  # From BaseListView
         context["unorderable_columns"] = self.unorderable_columns  # From BaseListView
         context["searchable_columns"] = self.searchable_columns  # From BaseListView
-        context["create_label"] = self.get_model().get_create_label()
 
         model = self.get_model()
         perm_create = model.get_permission_codename(mapentity_models.ENTITY_CREATE)
