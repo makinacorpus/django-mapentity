@@ -2,7 +2,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand mr-0" href="#" title="{{ TITLE }} {{ VERSION }}">
-        {% block logo_header %}<img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;" alt="logo">{% endblock %} <span class="d-none d-sm-inline">{% block title_header %}{{ TITLE }}{% endblock %}</span>
+        {% block logo_header %}<img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;" alt="logo">{% endblock %} <span class="d-none d-sm-inline"></span>
     </a>
 
     {% if request.user.is_authenticated %}
@@ -62,7 +62,9 @@
                     {% endfor %}
                 {% endblock toolbar %}
             </ul>
-
+        <span class="nav-brand">
+            {% block title_header %}{{ TITLE }}{% endblock %}
+        </span>
         <ul class="navbar-nav ml-auto">
             {% if request.user.is_authenticated %}
                 <li class="nav-item dropdown">
@@ -115,4 +117,5 @@
             {% endif %}
         </ul>
     </div>
+
 </nav>

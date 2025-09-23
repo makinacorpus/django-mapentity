@@ -350,7 +350,8 @@ tr.selected-row td {
     font-size: 1.25rem;
     display: inline;
     margin: 0;
-    padding: 0.375rem 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.25rem;
 }
 
 #list-panel .table th,

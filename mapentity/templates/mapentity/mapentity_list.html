@@ -33,7 +33,7 @@
             <div id="list-panel">
 
                 <div class="btn-toolbar">
-                    <h1 class="list-title">{{ objectsname }}</h1>
+                    {% block list_title %}<h3 class="list-title">{{ objectsname }}</h3>{% endblock %}
                     {% smart_include "preactions" %}
 
                     {% block mainactions %}
