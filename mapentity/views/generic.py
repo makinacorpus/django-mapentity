@@ -417,7 +417,7 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
 
     @classmethod
     def get_title(cls):
-        return cls.model.get_create_label()
+        return f'{_("Add")} {cls.model._meta.verbose_name}'
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
     def dispatch(self, *args, **kwargs):
