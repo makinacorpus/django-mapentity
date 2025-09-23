@@ -34,13 +34,8 @@
 
                 <div class="btn-toolbar">
                     {% block list_title %}<h3 class="list-title">{{ objectsname }}</h3>{% endblock %}
-
-                    {% smart_include "preactions" %}
-
                     <div class="btn-group mr-2">
-                        {% block pre_actions %}
-                        {% endblock %}
-
+                        {% smart_include "preactions" %}
                         {% block mainactions %}
                         {% if can_add %}
                         <a class="btn btn-success" href="{{ model.get_add_url }}">
@@ -48,12 +43,8 @@
                         </a>
                         {% endif %}
                         {% endblock mainactions %}
-
-                        {% block extra_actions %}
-                        {% endblock %}
+                        {% smart_include "listactions" %}
                     </div>
-
-                    {% smart_include "listactions" %}
                     {% include "mapentity/_mapentity_list_filter.html" %}
                 </div>
 
