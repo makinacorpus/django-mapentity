@@ -33,24 +33,18 @@
             <div id="list-panel">
 
                 <div class="btn-toolbar">
-                    <h1 class="list-title">{{ objectsname }}</h1>
-                    {% smart_include "preactions" %}
-
-                    {% block mainactions %}
+                    {% block list_title %}<h3 class="list-title">{{ objectsname }}</h3>{% endblock %}
                     <div class="btn-group mr-2">
+                        {% smart_include "preactions" %}
+                        {% block mainactions %}
                         {% if can_add %}
                         <a class="btn btn-success" href="{{ model.get_add_url }}">
-                            <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{{ create_label }}</span></a>
-                        {% else %}
-                        <span class="btn disabled" href="#">
-              <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{{ create_label }}</span></span>
+                            <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{% trans "Add" %}</span>
+                        </a>
                         {% endif %}
-                        {% block extra_actions %}
-                        {% endblock %}
+                        {% endblock mainactions %}
+                        {% smart_include "listactions" %}
                     </div>
-                    {% endblock mainactions %}
-
-                    {% smart_include "listactions" %}
                     {% include "mapentity/_mapentity_list_filter.html" %}
                 </div>
 

@@ -4,6 +4,10 @@ CHANGELOG
 8.14.2+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Improve list button, blocks and title
+
 
 8.14.2     (2025-09-09)
 -----------------------
