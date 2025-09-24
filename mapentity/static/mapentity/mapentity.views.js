@@ -97,6 +97,7 @@ $(window).on('entity:view:list', function (e, data) {
 
     // Adjust vertically
     expandDatatableHeight();
+
     $(window).resize(function (e) {
         expandDatatableHeight();
     });
@@ -122,7 +123,8 @@ $(window).on('entity:view:list', function (e, data) {
 
     // Hardcore Datatables customizations
     $('#objects-list_filter label').contents().filter(function() {return this.nodeType === 3;/*Node.TEXT_NODE*/}).remove();
-
+// Adjust vertically
+    expandDatatableHeight();
 });
 
 

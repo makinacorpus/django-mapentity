@@ -94,9 +94,12 @@ parseColor = function(color) {
 
 
 function expandDatatableHeight() {
-    var fill_height = $('#objects-list_wrapper').height() - 75;
+    console.log("expand");
+    var fill_height = $('#list-panel').height() - 160;
+    console.log(fill_height);
     var row_height = 36;
     var number_of_rows = Math.floor(fill_height / row_height);
+    console.log(number_of_rows);
     $('#objects-list').DataTable().page.len(parseInt(number_of_rows.toString())).draw();
 }
 

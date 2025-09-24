@@ -36,7 +36,7 @@
                         {% smart_include "preactions" %}
                         {% block mainactions %}
                         {% if can_add %}
-                        <a class="btn btn-success" href="{{ model.get_add_url }}">
+                        <a class="btn btn-success btn-sm" href="{{ model.get_add_url }}">
                             <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{% trans "Add" %}</span>
                         </a>
                         {% endif %}
@@ -47,7 +47,7 @@
                 </div>
 
                 {% block mainlist %}
-                <table id="objects-list" class="table table-striped table-bordered">
+                <table id="objects-list" class="table table-striped table-bordered mt-2">
                     <thead>
                     <tr>
                         {% block list-fields %}
