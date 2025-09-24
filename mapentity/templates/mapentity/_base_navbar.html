@@ -39,7 +39,7 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul id="historylist" class="mr-auto navbar-nav {% if request.session.history %} nav-tabs{% endif %}">
+        <ul id="historylist" class="ml-5 nav {% if request.session.history %} nav-tabs{% endif %}">
                 {% block toolbar %}
                     {% for item in request.session.history %}
                         {% if forloop.first and viewname != "list" %}
