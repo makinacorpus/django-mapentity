@@ -28,9 +28,10 @@ $(window).on('entity:view:list', function (e, data) {
         pageLength: 7, // page size is computed from the window size - expandDatatableHeight()
         scrollY: '100vh',
         scrollCollapse: true,
+        info: false, // hide "showing 1 to n of m entries"
         "lengthChange": false, // disable page length selection
-        "info": false, // hide infos "showinf xxx of xxx elements"
-        sDom: "tpf", // move search field at bottom left
+        "dom": 'T<"clear">rtp',
+
         "language": {
             "searchPlaceholder": tr("Search"),  // placeholder in search field
             "paginate": {
@@ -39,6 +40,9 @@ $(window).on('entity:view:list', function (e, data) {
                 "next":       ">",
                 "previous":   "<"
             },
+        },
+    layout: {
+            bottomEnd: 'inputPaging'
         },
         createdRow: function ( row, data, index ) {
             // highlight feature on map on row hover
@@ -53,8 +57,10 @@ $(window).on('entity:view:list', function (e, data) {
             );
         }
     });
-    $("#objects-list_filter").addClass("d-none"); // hide search field
+    var paging = document.getElementsByClassName('dt-paging')[0];
+    paging.classList.add('d-flex', 'flex-row-reverse');
 
+    //$(".paging").addClass("d-none"); // hide search field
     // champs de recherche custom
     $('#object-list-search').keyup(function(){
         MapEntity.mainDatatable.search($(this).val()).draw() ;

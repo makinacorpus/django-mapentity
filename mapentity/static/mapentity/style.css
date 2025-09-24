@@ -165,6 +165,7 @@ select[multiple] {
     }
 }
 
+
 #panelleft {
     padding-left: 0;
     flex: 0 0 auto;
@@ -337,6 +338,7 @@ tr.selected-row td {
     display: flex;
     flex-direction: column;
     width: 100%;
+    padding-right: 0px;
 }
 
 @media (min-width: 768px) {
@@ -346,6 +348,11 @@ tr.selected-row td {
     }
 }
 
+@media (min-width: 500px) {
+    #list-panel {
+        padding-right: 50px;
+    }
+}
 #list-panel .list-title {
     font-size: 1.25rem;
     display: inline;

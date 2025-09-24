@@ -6,12 +6,10 @@
 
 {% block container %}
 <div id="container" class="container-fluid list-container">
-
     <div id="mainpanel" class="row">
         <!-- List Panel -->
-        <div id="panelleft" class="col-12 col-md-6 d-flex">
+        <div id="panelleft" class="col-12 col-md-6 d-flex p-0">
             <!-- Modules Panel -->
-
             <nav id="entitylist" class="d-md-block bg-light sidebar collapse">
                 <div class="sidebar-sticky pt-3">
                     <ul class="nav flex-column">
@@ -95,7 +93,7 @@
         <div class="splitter"></div>
 
         <!-- Map Panel -->
-        <div class="col-12 col-md-6" id="panelright">
+        <div class="col-12 col-md-6 p-0" id="panelright">
             <div class="map-panel">
                 {% block mainmap %}
                 <div id="maphead">
