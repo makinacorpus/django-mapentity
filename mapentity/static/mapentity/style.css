@@ -347,7 +347,14 @@ tr.selected-row td {
         height: calc(100vh - 65px);
     }
 }
-
+#objects-list_wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+#list-download-toolbar{
+    height: 38px;
+}
 @media (min-width: 500px) {
     #list-panel {
         padding-right: 50px;

@@ -95,7 +95,7 @@ parseColor = function(color) {
 
 function expandDatatableHeight() {
     console.log("expand");
-    var fill_height = $('#list-panel').height() - 160;
+    var fill_height = $('#objects-list_wrapper').height() - 50;
     console.log(fill_height);
     var row_height = 36;
     var number_of_rows = Math.floor(fill_height / row_height);

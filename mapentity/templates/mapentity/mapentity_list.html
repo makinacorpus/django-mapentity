@@ -65,7 +65,7 @@
                     </tbody>
                 </table>
 
-                <div id="list-download-toolbar" class="btn-toolbar" role="toolbar" aria-label="">
+                <div id="list-download-toolbar" class="d-flex justify-content-between align-text-bottom" role="toolbar" aria-label="">
                     <div class="btn-group {% if not can_export %}disabled{% endif %}">
                         <button class="btn btn-light btn-sm" name="csv" title="{% trans 'CSV' %}">
                             <img src="{% static 'paperclip/fileicons/csv.png' %}" alt="">
