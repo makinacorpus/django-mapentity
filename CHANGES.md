@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+8.14.3+dev (XXXX-XX-XX)
+-----------------------
+
+**Improvements**
+
+- Upgrade Datatables to 2.3.4
+
+
 8.14.3     (2025-09-23)
 -----------------------
 
