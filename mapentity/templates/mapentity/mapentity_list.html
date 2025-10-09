@@ -6,12 +6,10 @@
 
 {% block container %}
 <div id="container" class="container-fluid list-container">
-
     <div id="mainpanel" class="row">
         <!-- List Panel -->
-        <div id="panelleft" class="col-12 col-md-6 d-flex">
+        <div id="panelleft" class="col-12 col-md-6 d-flex p-0">
             <!-- Modules Panel -->
-
             <nav id="entitylist" class="d-md-block bg-light sidebar collapse">
                 <div class="sidebar-sticky pt-3">
                     <ul class="nav flex-column">
@@ -33,29 +31,23 @@
             <div id="list-panel">
 
                 <div class="btn-toolbar">
-                    <h1 class="list-title">{{ objectsname }}</h1>
-                    {% smart_include "preactions" %}
-
-                    {% block mainactions %}
+                    {% block list_title %}<h3 class="list-title">{{ objectsname }}</h3>{% endblock %}
                     <div class="btn-group mr-2">
+                        {% smart_include "preactions" %}
+                        {% block mainactions %}
                         {% if can_add %}
-                        <a class="btn btn-success" href="{{ model.get_add_url }}">
-                            <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{{ create_label }}</span></a>
-                        {% else %}
-                        <span class="btn disabled" href="#">
-              <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{{ create_label }}</span></span>
+                        <a class="btn btn-success btn-sm" href="{{ model.get_add_url }}">
+                            <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{% trans "Add" %}</span>
+                        </a>
                         {% endif %}
-                        {% block extra_actions %}
-                        {% endblock %}
+                        {% endblock mainactions %}
+                        {% smart_include "listactions" %}
                     </div>
-                    {% endblock mainactions %}
-
-                    {% smart_include "listactions" %}
                     {% include "mapentity/_mapentity_list_filter.html" %}
                 </div>
 
                 {% block mainlist %}
-                <table id="objects-list" class="table table-striped table-bordered">
+                <table id="objects-list" class="table table-striped table-bordered mt-2">
                     <thead>
                     <tr>
                         {% block list-fields %}
@@ -73,7 +65,7 @@
                     </tbody>
                 </table>
 
-                <div id="list-download-toolbar" class="btn-toolbar" role="toolbar" aria-label="">
+                <div id="list-download-toolbar" class="d-flex justify-content-between align-text-bottom" role="toolbar" aria-label="">
                     <div class="btn-group {% if not can_export %}disabled{% endif %}">
                         <button class="btn btn-light btn-sm" name="csv" title="{% trans 'CSV' %}">
                             <img src="{% static 'paperclip/fileicons/csv.png' %}" alt="">
@@ -84,8 +76,6 @@
                         <button class="btn btn-light btn-sm" name="gpx" title="{% trans 'GPX' %}">
                             <img src="{% static 'paperclip/fileicons/gpx.png' %}" alt="">
                         </button>
-                    </div>
-                    <div class="input-group" name="search-group">
                         <div class="input-group-prepend">
                             <div class="input-group-text" id="btnGroupAddon">
                                 <i class="bi bi-search"></i>
@@ -101,7 +91,7 @@
         <div class="splitter"></div>
 
         <!-- Map Panel -->
-        <div class="col-12 col-md-6" id="panelright">
+        <div class="col-12 col-md-6 p-0" id="panelright">
             <div class="map-panel">
                 {% block mainmap %}
                 <div id="maphead">

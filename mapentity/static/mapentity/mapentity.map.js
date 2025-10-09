@@ -143,7 +143,7 @@ $(window).on('entity:map', function (e, data) {
                                 title: gettext("Locate me")
                               }}
     ));
-
+    window.map = map;
     map.on("moveend", function () {
         var bounds = map.getBounds();
         //$('#id_bbox').val(`${bounds.getSouthWest().lng},${bounds.getSouthWest().lat},${bounds.getNorthEast().lng},${bounds.getNorthEast().lat}`);

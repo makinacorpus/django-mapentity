@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-8.14.2+dev (XXXX-XX-XX)
+8.14.4+dev (XXXX-XX-XX)
 -----------------------
 
 **Improvements**
@@ -11,6 +11,22 @@ CHANGELOG
 **Bug fixes**
 
 - In some cases default settings values can't be overridden.
+
+
+8.14.4     (2025-09-25)
+-----------------------
+
+**Improvements**
+
+- Upgrade Datatables to 2.3.4
+
+
+8.14.3     (2025-09-23)
+-----------------------
+
+**Improvements**
+
+- Improve list button, blocks and title
 
 
 8.14.2     (2025-09-09)

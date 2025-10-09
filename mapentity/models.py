@@ -169,14 +169,6 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         return self.get_detail_url()
 
     @classmethod
-    def get_create_label(cls):
-        name = cls._meta.verbose_name
-        if hasattr(name, "_proxy____args"):
-            name = name._proxy____args[0]  # untranslated
-        # Whole "add" phrase translatable, but not catched  by makemessages
-        return _("Add a new %(name)s") % {"name": name.lower()}
-
-    @classmethod
     def get_entity_kind_permission(cls, entity_kind):
         operations = {
             ENTITY_CREATE: ENTITY_PERMISSION_CREATE,

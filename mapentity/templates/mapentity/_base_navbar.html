@@ -2,7 +2,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand mr-0" href="#" title="{{ TITLE }} {{ VERSION }}">
-        {% block logo_header %}<img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;" alt="logo">{% endblock %} <span class="d-none d-sm-inline">{% block title_header %}{{ TITLE }}{% endblock %}</span>
+        {% block logo_header %}<img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;" alt="logo">{% endblock %} <span class="d-none d-sm-inline"></span>
     </a>
 
     {% if request.user.is_authenticated %}
@@ -31,13 +31,15 @@
     </ul>
     {% endif %}
 
+ <span class="navbar-text mr-auto">{% block title_header %}{{ TITLE }}{% endblock %}</span>
+
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul id="historylist" class="mr-auto navbar-nav {% if request.session.history %} nav-tabs{% endif %}">
+        <ul id="historylist" class="ml-5 nav {% if request.session.history %} nav-tabs{% endif %}">
                 {% block toolbar %}
                     {% for item in request.session.history %}
                         {% if forloop.first and viewname != "list" %}
@@ -62,7 +64,6 @@
                     {% endfor %}
                 {% endblock toolbar %}
             </ul>
-
         <ul class="navbar-nav ml-auto">
             {% if request.user.is_authenticated %}
                 <li class="nav-item dropdown">
@@ -114,4 +115,5 @@
             {% endif %}
         </ul>
     </div>
+
 </nav>
