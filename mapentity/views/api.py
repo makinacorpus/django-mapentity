@@ -1,6 +1,10 @@
 import logging
+import re
 
+from django.conf import settings
 from django.contrib.gis.db.models.functions import Transform
+from django.core.exceptions import FieldDoesNotExist
+from django.db import models
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import renderers, viewsets
 from rest_framework.decorators import action
@@ -90,6 +94,45 @@ class MapEntityViewSet(viewsets.ModelViewSet):
                 "pk_list": qs.values_list("pk", flat=True),
                 "count": self.get_filter_count_infos(qs),
             }
+        )
+
+    @action(detail=True, methods=["get"])
+    def popup_content(self, request, *args, **kwargs):
+        obj = self.get_object()
+        response = {}
+        model_name = self.model.__name__.lower()
+
+        label_config = getattr(settings, "LABEL_PER_MODEL", {})
+        fields = label_config.get(model_name, [])
+
+        if fields:
+            for field_name in fields:
+                try:
+                    field = obj._meta.get_field(field_name)
+                except FieldDoesNotExist:
+                    continue
+
+                value = None
+
+                if isinstance(field, (models.ForeignKey, models.ManyToManyField)):
+                    display_func = getattr(obj, f"{field_name}_display", None)
+                    if callable(display_func):
+                        value = display_func()
+                else:
+                    value = getattr(obj, field_name, None)
+
+                if value is not None:
+                    # remove paragraph, image and link tags
+                    value = re.sub(re.compile('<.*?>') , '', value)
+                    # truncate long text (around 2 rows)
+                    if (len(value) > 100):
+                        value = value[:100]+"..."
+                    response[field_name] = value
+        else:
+            response["name"] = getattr(obj, "name", None)
+
+        return Response(
+            response
         )
 
     @view_cache_latest()
