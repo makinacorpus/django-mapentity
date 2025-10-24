@@ -10,7 +10,7 @@ from paperclip.settings import (
     get_license_model,
 )
 
-fake = Faker("fr_FR")
+fake = Faker("en_US")
 fake.add_provider(geo)
 
 
@@ -18,10 +18,10 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = get_user_model()
 
-    username = factory.Sequence("mary_poppins{0}".format)
-    first_name = factory.Sequence("Mary {0}".format)
-    last_name = factory.Sequence("Poppins {0}".format)
-    email = factory.LazyAttribute(lambda a: f"{a.username}@example.com")
+    username = factory.Faker('user_name')
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    email = factory.Faker('email')
 
     is_staff = False
     is_active = True
