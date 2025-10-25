@@ -1,32 +1,12 @@
 from collections import OrderedDict
-from copy import deepcopy
 
+from deepmerge import always_merger
 from django.conf import settings
 from django.contrib.messages import constants as messages
 
 API_SRID = 4326
 
-_DEFAULT_MAP_STYLES = {
-    "detail": {
-        "weight": 5,
-        "opacity": 1,
-        "color": "yellow",
-        "arrowColor": "#FF5E00",
-        "arrowSize": 8,
-    },
-    "others": {"opacity": 0.9, "fillOpacity": 0.7, "color": "yellow"},
-    "filelayer": {
-        "color": "red",
-        "opacity": 1.0,
-        "fillOpacity": 0.9,
-        "weight": 2,
-        "radius": 5,
-    },
-    "draw": {"color": "#35FF00", "opacity": 0.8, "weight": 3},
-    "print": {},
-}
-
-app_settings = dict(
+_default_app_settings = dict(
     {
         "TITLE": "Mapentity",
         "HISTORY_ITEMS_MAX": 5,
@@ -55,22 +35,36 @@ app_settings = dict(
         "SENDFILE_HTTP_HEADER": None,
         "DRF_API_URL_PREFIX": r"^api/",
         "MAPENTITY_WEASYPRINT": False,
-        "MAP_STYLES": _DEFAULT_MAP_STYLES,
+        "MAP_STYLES": {
+            "detail": {
+                "weight": 5,
+                "opacity": 1,
+                "color": "yellow",
+                "arrowColor": "#FF5E00",
+                "arrowSize": 8,
+            },
+            "others": {"opacity": 0.9, "fillOpacity": 0.7, "color": "yellow"},
+            "filelayer": {
+                "color": "red",
+                "opacity": 1.0,
+                "fillOpacity": 0.9,
+                "weight": 2,
+                "radius": 5,
+            },
+            "draw": {"color": "#35FF00", "opacity": 0.8, "weight": 3},
+            "print": {},
+        },
         "REGEX_PATH_ATTACHMENTS": r"\.\d+x\d+_q\d+(_crop)?\.(jpg|png|jpeg|bmp|webp)$",
         "MAX_CHARACTERS": None,
         "MAX_CHARACTERS_BY_FIELD": {},
-    },
-    **getattr(settings, "MAPENTITY_CONFIG", {}),
+    }
 )
+_project_settings = getattr(settings, "MAPENTITY_CONFIG", {})
 
-# default MAP_STYLES should not be replaced but updated by MAPENTITY_CONFIG
-_MAP_STYLES = deepcopy(_DEFAULT_MAP_STYLES)
-_MAP_STYLES.update(app_settings["MAP_STYLES"])
-app_settings["MAP_STYLES"] = _MAP_STYLES
+app_settings = always_merger.merge(_default_app_settings, _project_settings)
 
-CRISPY_TEMPLATE_PACK = "bootstrap4"
 
-TINYMCE_DEFAULT_CONFIG = {
+_tinymce_default_config = {
     "theme": "silver",
     "height": 500,
     "menubar": False,
@@ -96,11 +90,15 @@ TINYMCE_DEFAULT_CONFIG = {
     ),
     "setup": "tinyMceInit",
 }
-TINYMCE_DEFAULT_CONFIG.update(getattr(settings, "TINYMCE_DEFAULT_CONFIG", {}))
+_tinymce_project_config = getattr(settings, "TINYMCE_DEFAULT_CONFIG", {})
+
+TINYMCE_DEFAULT_CONFIG = always_merger.merge(
+    _tinymce_default_config, _tinymce_project_config
+)
 setattr(settings, "TINYMCE_DEFAULT_CONFIG", TINYMCE_DEFAULT_CONFIG)
 
 
-REST_FRAMEWORK_DEFAULT_CONFIG = {
+_rest_framework_default_config = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": ["mapentity.models.MapEntityRestPermissions"],
@@ -109,14 +107,11 @@ REST_FRAMEWORK_DEFAULT_CONFIG = {
         "mapentity.renderers.GeoJSONRenderer",
     ],
 }
-REST_FRAMEWORK_DEFAULT_CONFIG.update(getattr(settings, "REST_FRAMEWORK", {}))
-setattr(settings, "REST_FRAMEWORK", REST_FRAMEWORK_DEFAULT_CONFIG)
-
-for name, override in getattr(settings, "MAP_STYLES", {}).items():
-    # fallback old settings MAP_STYLES
-    merged = app_settings["MAP_STYLES"].get(name, {})
-    merged.update(override)
-    app_settings["MAP_STYLES"][name] = merged
+_rest_framework_project_config = getattr(settings, "REST_FRAMEWORK", {})
+REST_FRAMEWORK = always_merger.merge(
+    _rest_framework_default_config, _rest_framework_project_config
+)
+setattr(settings, "REST_FRAMEWORK", REST_FRAMEWORK)
 
 _LEAFLET_PLUGINS = OrderedDict(
     [
@@ -207,10 +202,11 @@ setattr(settings, "LEAFLET_CONFIG", _LEAFLET_CONFIG)
 _MODELTRANSLATION_LANGUAGES = getattr(
     settings, "MODELTRANSLATION_LANGUAGES", tuple(x[0] for x in settings.LANGUAGES)
 )
+setattr(settings, "MODELTRANSLATION_LANGUAGES", _MODELTRANSLATION_LANGUAGES)
+
 _MODELTRANSLATION_DEFAULT_LANGUAGE = getattr(
     settings, "MODELTRANSLATION_DEFAULT_LANGUAGE", _MODELTRANSLATION_LANGUAGES[0]
 )
-setattr(settings, "MODELTRANSLATION_LANGUAGES", _MODELTRANSLATION_LANGUAGES)
 setattr(
     settings, "MODELTRANSLATION_DEFAULT_LANGUAGE", _MODELTRANSLATION_DEFAULT_LANGUAGE
 )
@@ -229,6 +225,8 @@ _MESSAGE_TAGS = getattr(
 )
 
 setattr(settings, "MESSAGE_TAGS", _MESSAGE_TAGS)
+
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 # crispy form default config with bootstrap4
 _CRISPY_ALLOWED_TEMPLATE_PACKS = getattr(
