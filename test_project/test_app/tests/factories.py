@@ -23,6 +23,7 @@ class SectorFactory(factory.django.DjangoModelFactory):
 
 class DummyModelFactory(factory.django.DjangoModelFactory):
     name = "a dummy model"
+    short_description = "a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object to make tests"
 
     @factory.lazy_attribute
     def geom(self):

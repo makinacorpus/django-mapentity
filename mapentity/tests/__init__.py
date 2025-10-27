@@ -57,6 +57,9 @@ class MapEntityTest(TestCase):
     def get_expected_datatables_attrs(self):
         return {}
 
+    def get_expected_popup_content(self):
+        return ""
+
     def setUp(self):
         if self.user:
             self.client.force_login(user=self.user)
@@ -442,6 +445,28 @@ class MapEntityTest(TestCase):
                     }
                 ],
             },
+        )
+
+    @freeze_time("2020-03-17")
+    def test_api_popup_content(self):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        self.obj = self.modelfactory.create()
+        popup_url = (
+            f"/api/{self.model._meta.model_name}/drf/{self.model._meta.model_name}s/{self.obj.pk}/popup_content"
+        )
+        response = self.client.get(popup_url)
+        self.assertEqual(response.status_code, 200, f"{popup_url} not found")
+        content_json = response.json()
+        self.assertEqual(
+            content_json,
+            {
+                "data": self.get_expected_popup_content(),
+                "draw": 1,
+                "recordsFiltered": 1,
+                "recordsTotal": 1,
+            }
         )
 
 
