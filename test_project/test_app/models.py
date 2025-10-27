@@ -92,6 +92,9 @@ class DummyModel(MapEntityMixin, models.Model):
     def name_display(self):
         return f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>'
 
+    def tags_display(self):
+        return ', '.join(t.label for t in self.tags.all())
+
     class Meta:
         verbose_name = _("Dummy Model")
 

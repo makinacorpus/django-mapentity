@@ -62,9 +62,21 @@ class DummyModelFunctionalTest(MapEntityTest):
             "name_fr": "",
             "name_zh_hant": "",
             "public": '<i class="bi bi-x-circle text-danger"></i>',
-            "short_description": "",
+            "short_description": "a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object to make tests",
             "tags": [self.obj.tags.first().pk],
         }
+
+    def get_expected_popup_content(self):
+        return (
+            f'<div class="d-flex flex-column justify-content-center">\n'
+            f'    <p class="text-center mb-0"><strong>a dummy model</strong></p>\n'
+            f'    <p>\n'
+            f'        a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object ...<br>{self.obj.tags.first().label}<br>\n'
+            f'    </p>\n'
+            f'    <button id="detail-btn" class="btn btn-sm btn-info" onclick="window.location.href=\'/dummymodel/{self.model.objects.first().pk}/\'">Detail sheet</button>\n'
+            f'</div>'
+        )
+
 
     def get_good_data(self):
         return {"geom": '{"type": "Point", "coordinates":[0, 0]}'}
@@ -289,6 +301,7 @@ class SettingsViewTest(BaseTest):
                 "layer": "/api/modelname/drf/modelnames.geojson",
                 "screenshot": "/map_screenshot/",
                 "detail": "/modelname/0/",
+                "popup": "/api/modelname/drf/modelnames/0/popup_content",
                 "format_list": "/modelname/list/export/",
                 "static": "/static/",
                 "root": "/",
@@ -608,6 +621,19 @@ class LogViewMapentityTest(MapEntityTest):
         )
         super().test_api_no_format_list_for_model()
 
+    @freeze_time("2022-06-10 12:40:10")
+    def test_api_popup_content(self):
+        obj = self.modelfactory()
+
+        LogEntry.objects.log_action(
+            user_id=self.user.pk,
+            content_type_id=obj.get_content_type_id(),
+            object_id=obj.pk,
+            object_repr=force_str(object),
+            action_flag=1,
+        )
+        super().test_api_popup_content()
+
     def test_crud_status(self):
         instance = self.modelfactory()
 
@@ -632,6 +658,9 @@ class LogViewMapentityTest(MapEntityTest):
         pass
 
     def test_no_html_in_csv(self):
+        pass
+
+    def test_api_popup_content(self):
         pass
 
 
