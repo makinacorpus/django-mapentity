@@ -70,7 +70,12 @@ L.ObjectsLayer = L.GeoJSON.extend({
         }, this));
 
         this.on('click', async function (e) {
-            var popup_content =  await this.getPopupContent(e.layer);
+            var popup_content;
+            try{
+                popup_content =  await this.getPopupContent(e.layer);
+            } catch (error) {
+                popup_content = gettext('Data unavailable');
+            }
             if (e.target._popup){
                 // update popup content if it has been already bind
                 var popup = e.target._popup;
@@ -229,62 +234,22 @@ L.ObjectsLayer = L.GeoJSON.extend({
     },
 
     getPopupContent: async function (layer){
-        const popup_div = document.createElement('div');
-        popup_div.classList.add('d-flex', 'flex-column', 'justify-content-center');
-        const popup_paragraph = document.createElement('p');
         const popup_url = window.SETTINGS.urls.popup.replace(new RegExp('modelname', 'g'), this.options.modelname)
                                           .replace('0', layer.properties.id);
 
         // fetch data
-        try{
-            var response = await window.fetch(popup_url);
-            if (!response.ok){
-                console.log(`HTTP error! Status: ${response.status}`);
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            } else {
-                // parse data
-                try {
-                    var json = await response.json();
-                    
-                    var title = Object.keys(json.data)[0];
-                    console.log(title);
-                    var popup_title = document.createElement('p');
-                    popup_title.appendChild(document.createTextNode(`${json.data[title]}`));
-                    popup_title.classList.add('text-center', 'mb-0');
-                    popup_div.appendChild(popup_title);
-
-                    for (var field_name in json.data) {
-                        if (field_name !== title) {
-                            popup_paragraph.appendChild(document.createTextNode(`${json.data[field_name]}`));
-                            popup_paragraph.appendChild(document.createElement('br'));
-                        }
-                }
-                } catch (error) {
-                    console.log('Cannot parse data');
-                    throw new Error('Cannot parse data');
-                }
+        var response = await window.fetch(popup_url);
+        if (!response.ok){
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        } else {
+            // parse data
+            try {
+                var json = await response.json();
+                return json.data;
+            } catch (error) {
+                throw new Error('Cannot parse data');
             }
-        } catch (error) {
-            popup_paragraph.appendChild(document.createTextNode('data unavailable'));
         }
-
-        popup_div.appendChild(popup_paragraph);
-
-        // create button to detail view
-        if (this.options.objectUrl){
-            const btn = document.createElement('button');
-            btn.appendChild(document.createTextNode('Fiche détail'));
-            btn.classList.add('btn', 'btn-sm', 'btn-info');
-
-            // redirect to detail view on click
-            btn.addEventListener('click', (e) => {
-                window.location = this.options.objectUrl(layer.properties, layer);
-            }, this);
-
-            popup_div.appendChild(btn);
-        }
-
-        return popup_div;
     }
 
 });

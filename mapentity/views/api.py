@@ -5,6 +5,8 @@ from django.conf import settings
 from django.contrib.gis.db.models.functions import Transform
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
+from django.template import loader
+from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import renderers, viewsets
 from rest_framework.decorators import action
@@ -93,47 +95,66 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             {
                 "pk_list": qs.values_list("pk", flat=True),
                 "count": self.get_filter_count_infos(qs),
+                "attributes": [],
             }
         )
 
     @action(detail=True, methods=["get"])
     def popup_content(self, request, *args, **kwargs):
         obj = self.get_object()
-        response = {}
         model_name = self.model.__name__.lower()
-
         label_config = getattr(settings, "LABEL_PER_MODEL", {})
-        fields = label_config.get(model_name, [])
+        fields = label_config.get(model_name, []).copy()
 
-        if fields:
-            for field_name in fields:
-                try:
-                    field = obj._meta.get_field(field_name)
-                except FieldDoesNotExist:
-                    continue
-
-                value = None
-
-                if isinstance(field, (models.ForeignKey, models.ManyToManyField)):
-                    display_func = getattr(obj, f"{field_name}_display", None)
-                    if callable(display_func):
-                        value = display_func()
-                else:
-                    value = getattr(obj, field_name, None)
-
-                if value is not None:
-                    # remove paragraph, image and link tags
-                    value = re.sub(re.compile('<.*?>') , '', value)
-                    # truncate long text (around 2 rows)
-                    if (len(value) > 100):
-                        value = value[:100]+"..."
-                    response[field_name] = value
-        else:
-            response["name"] = getattr(obj, "name", None)
-
-        return Response(
-            response
+        NEED_DISPLAY_FUNCTION = (
+            models.BooleanField,
+            models.ForeignKey,
+            models.ManyToManyField,
+            models.OneToOneField,
         )
+
+        def get_field_value(obj, field_name, field):
+            if isinstance(field, NEED_DISPLAY_FUNCTION):
+                display_func = getattr(obj, f"{field_name}_display", None)
+                if callable(display_func):
+                    return display_func()
+            return getattr(obj, field_name, None)
+
+        def clean_value(value):
+            if isinstance(value, str):
+                # Remove simple HTML tags
+                value = re.sub(r"<.*?>", "", value)
+                # truncate long text (around 2 rows)
+                if len(value) > 100:
+                    value = value[:100] + "..."
+            return value
+
+        context = {
+            "button_label": _("Detail sheet"),
+            "detail_url": obj.get_detail_url(),
+            "attributes": [],
+        }
+
+        title_field = "name" if hasattr(fields, "name") else (fields[0] if fields else None)
+        if title_field:
+            context["title"] = getattr(obj, title_field, None)
+            if title_field in fields:
+                fields.remove(title_field)
+        else:
+            context["title"] = getattr(obj, "name", None)
+
+        for field_name in fields:
+            try:
+                field = obj._meta.get_field(field_name)
+            except FieldDoesNotExist:
+                continue
+
+            value = get_field_value(obj, field_name, field)
+            if value:
+                context["attributes"].append(clean_value(value))
+
+        template = loader.get_template("mapentity/mapentity_popup_content.html")
+        return Response(template.render(context))
 
     @view_cache_latest()
     @view_cache_response_content()
