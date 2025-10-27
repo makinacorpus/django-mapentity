@@ -135,7 +135,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             "attributes": [],
         }
 
-        title_field = "name" if hasattr(fields, "name") else (fields[0] if fields else None)
+        title_field = fields[0] if fields else None
         if title_field:
             context["title"] = getattr(obj, title_field, None)
             if title_field in fields:
