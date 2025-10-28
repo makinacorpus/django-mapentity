@@ -70,13 +70,12 @@ class DummyModelFunctionalTest(MapEntityTest):
         return (
             f'<div class="d-flex flex-column justify-content-center">\n'
             f'    <p class="text-center mb-0"><strong>a dummy model</strong></p>\n'
-            f'    <p>\n'
-            f'        a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object ...<br>{self.obj.tags.first().label}<br>\n'
-            f'    </p>\n'
+            f"    <p>\n"
+            f"        a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object ...<br>{self.obj.tags.first().label}<br>\n"
+            f"    </p>\n"
             f'    <button id="detail-btn" class="btn btn-sm btn-info" onclick="window.location.href=\'/dummymodel/{self.model.objects.first().pk}/\'">Detail sheet</button>\n'
-            f'</div>'
+            f"</div>"
         )
-
 
     def get_good_data(self):
         return {"geom": '{"type": "Point", "coordinates":[0, 0]}'}
@@ -620,19 +619,6 @@ class LogViewMapentityTest(MapEntityTest):
             action_flag=1,
         )
         super().test_api_no_format_list_for_model()
-
-    @freeze_time("2022-06-10 12:40:10")
-    def test_api_popup_content(self):
-        obj = self.modelfactory()
-
-        LogEntry.objects.log_action(
-            user_id=self.user.pk,
-            content_type_id=obj.get_content_type_id(),
-            object_id=obj.pk,
-            object_repr=force_str(object),
-            action_flag=1,
-        )
-        super().test_api_popup_content()
 
     def test_crud_status(self):
         instance = self.modelfactory()
