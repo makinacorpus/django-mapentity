@@ -25,7 +25,7 @@ from ..models import City, DummyModel, FileType
 from ..views import DummyDetail, DummyList, DummyModelFilter, RoadList
 from .factories import DummyModelFactory
 
-fake = Faker("fr_FR")
+fake = Faker("en_US")
 fake.add_provider(geo)
 
 User = get_user_model()
