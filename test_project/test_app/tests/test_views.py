@@ -69,7 +69,7 @@ class DummyModelFunctionalTest(MapEntityTest):
     def get_expected_popup_content(self):
         return (
             f'<div class="d-flex flex-column justify-content-center">\n'
-            f'    <p class="text-center mb-0"><strong>a dummy model</strong></p>\n'
+            f'    <p class="text-center mb-0"><strong>a dummy model (1)</strong></p>\n'
             f"    <p>\n"
             f"        a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object ...<br>{self.obj.tags.first().label}<br>\n"
             f"    </p>\n"

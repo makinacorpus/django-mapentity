@@ -133,15 +133,8 @@ class MapEntityViewSet(viewsets.ModelViewSet):
             "button_label": _("Detail sheet"),
             "detail_url": obj.get_detail_url(),
             "attributes": [],
+            "title": str(obj),
         }
-
-        title_field = fields[0] if fields else None
-        if title_field:
-            context["title"] = getattr(obj, title_field, None)
-            if title_field in fields:
-                fields.remove(title_field)
-        else:
-            context["title"] = getattr(obj, "name", None)
 
         for field_name in fields:
             try:
