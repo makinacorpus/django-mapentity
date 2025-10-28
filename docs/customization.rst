@@ -212,7 +212,7 @@ Configure popup fields for each model using the ``LABEL_PER_MODEL`` setting:
     }
 
 The key is the model name in lowercase (e.g., ``"museum"``), and the value is a list of field names to display.
-The first field in the list is used as the popup title, while other fields are displayed below.
+The popup title shows the object's string representation (using `__str__()`), with the configured fields displayed below.
 
 Most fields display their raw values automatically.
 However, ``BooleanField``, ``ForeignKey``, ``ManyToManyField``, and ``OneToOneField`` require a display function in your model:

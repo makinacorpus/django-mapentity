@@ -213,6 +213,6 @@ if "test" in sys.argv:
     MEDIA_ROOT = TemporaryDirectory().name
 
 LABEL_PER_MODEL = {
-    "dummymodel": ["name", "short_description", "public", "tags", "test"],
+    "dummymodel": ["short_description", "public", "tags", "test"],
     "logentry": [],
 }
