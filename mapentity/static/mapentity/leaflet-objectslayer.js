@@ -74,7 +74,7 @@ L.ObjectsLayer = L.GeoJSON.extend({
             try{
                 popup_content =  await this.getPopupContent(e.layer);
             } catch (error) {
-                popup_content = gettext('Data unavailable');
+                popup_content = gettext('Data unreachable');
             }
             if (e.target._popup){
                 // update popup content if it has been already bind
