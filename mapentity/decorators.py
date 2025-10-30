@@ -89,9 +89,7 @@ def view_cache_latest():
             def decorated(self, request, *args, **kwargs):
                 return view_func(self, request, *args, **kwargs)
 
-            kwargs.pop("format")
-            raise Exception(kwargs)
-            return decorated(self, request, *args, **kwargs)
+            return decorated(self, request, *args, {})
 
         return _wrapped_view
 
