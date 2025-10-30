@@ -4,6 +4,10 @@ CHANGELOG
 8.14.4+dev (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Cache decorators can now be used with views with extra kwargs parameters
+
 
 8.14.4     (2025-09-25)
 -----------------------
