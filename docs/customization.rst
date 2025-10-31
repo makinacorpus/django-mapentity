@@ -214,17 +214,19 @@ Configure popup fields for each model using the ``LABEL_PER_MODEL`` setting:
 The key is the model name in lowercase (e.g., ``"museum"``), and the value is a list of field names to display.
 The popup title shows the object's string representation (using `__str__()`), with the configured fields displayed below.
 
-Most fields display their raw values automatically.
-However, ``BooleanField``, ``ForeignKey``, ``ManyToManyField``, and ``OneToOneField`` require a display function in your model:
+If there is a display function for a field in the model then it will be used in priority.
 
 .. code-block:: python
 
+    @property
     def public_display(self):
         return "Public" if self.public else "Not public"
 
-The following field types are not supported and will be ignored: ``BinaryField``, ``FileField``, ``FilePathField``, ``ImageField``, and ``GeometryField``.
+If no display function exists, the field’s string representation is used by default.
 
-If a model isn't configured in ``LABEL_PER_MODEL``, the object's name is used as the title if it has a "name" field.
+Non-existent fields can be used if a display function exist.
+
+If a model isn't configured in ``LABEL_PER_MODEL``, the object's string representation is used as the title.
 If a specified field doesn't exist on the model, it won't be displayed. The detail page button is always shown.
 
 Settings
