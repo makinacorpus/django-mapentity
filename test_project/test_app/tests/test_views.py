@@ -62,9 +62,20 @@ class DummyModelFunctionalTest(MapEntityTest):
             "name_fr": "",
             "name_zh_hant": "",
             "public": '<i class="bi bi-x-circle text-danger"></i>',
-            "short_description": "",
+            "short_description": "a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object to make tests",
             "tags": [self.obj.tags.first().pk],
         }
+
+    def get_expected_popup_content(self):
+        return (
+            f'<div class="d-flex flex-column justify-content-center">\n'
+            f'    <p class="text-center mb-0"><strong>a dummy model (1)</strong></p>\n'
+            f"    <p>\n"
+            f"        a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object ...<br>public: no<br>{self.obj.tags.first().label}<br>a dummy model<br>\n"
+            f"    </p>\n"
+            f'    <button id="detail-btn" class="btn btn-sm btn-info" onclick="window.location.href=\'/dummymodel/{self.model.objects.first().pk}/\'">Detail sheet</button>\n'
+            f"</div>"
+        )
 
     def get_good_data(self):
         return {"geom": '{"type": "Point", "coordinates":[0, 0]}'}
@@ -289,6 +300,7 @@ class SettingsViewTest(BaseTest):
                 "layer": "/api/modelname/drf/modelnames.geojson",
                 "screenshot": "/map_screenshot/",
                 "detail": "/modelname/0/",
+                "popup": "/api/modelname/drf/modelnames/0/popup_content",
                 "format_list": "/modelname/list/export/",
                 "static": "/static/",
                 "root": "/",
@@ -560,7 +572,7 @@ class LogViewMapentityTest(MapEntityTest):
             "action_flag": "Addition",
             "action_time": "10/06/2022 12:40:10",
             "change_message": "",
-            "content_type": 13,
+            "content_type": 12,
             "id": 1,
             "object": '<a data-pk="1" href="/dummymodel/1/" >Test_App | Dummy '
             "Model <class 'object'></a>",
@@ -632,6 +644,9 @@ class LogViewMapentityTest(MapEntityTest):
         pass
 
     def test_no_html_in_csv(self):
+        pass
+
+    def test_api_popup_content(self):
         pass
 
 

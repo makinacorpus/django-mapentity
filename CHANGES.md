@@ -4,6 +4,10 @@ CHANGELOG
 8.14.5+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Add popup on marker with configurable information
+
 
 8.14.5     (2025-10-30)
 -----------------------

@@ -211,3 +211,7 @@ MODELTRANSLATION_LANGUAGES = ("en", "fr", "zh-hant")
 
 if "test" in sys.argv:
     MEDIA_ROOT = TemporaryDirectory().name
+
+LABEL_PER_MODEL = {
+    "dummymodel": ["short_description", "public", "tags", "name", "test"],
+}

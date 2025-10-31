@@ -69,13 +69,24 @@ L.ObjectsLayer = L.GeoJSON.extend({
             }
         }, this));
 
+        this.on('click', async function (e) {
+            var popup_content;
+            try{
+                popup_content =  await this.getPopupContent(e.layer);
+            } catch (error) {
+                popup_content = gettext('Data unreachable');
+            }
+            if (e.target._popup){
+                // update popup content if it has been already bind
+                var popup = e.target._popup;
+                popup.setContent(popup_content);
+                popup.update();
+            } else {
+                // bind a new popup
+                this.bindPopup(popup_content).openPopup(e.latlng);
+            }
+        }, this);
 
-        // Optionnaly make them clickable
-        if (this.options.objectUrl) {
-            this.on('click', function(e) {
-                window.location = this.options.objectUrl(e.layer.properties, e.layer);
-            }, this);
-        }
 
         var dataurl = null;
         if (typeof(geojson) == 'string') {
@@ -220,8 +231,27 @@ L.ObjectsLayer = L.GeoJSON.extend({
             layer._defaultStyle = this.options.styles['default'];
             layer.setStyle(layer._defaultStyle);
         }
-    }
-});
+    },
 
+    getPopupContent: async function (layer){
+        const popup_url = window.SETTINGS.urls.popup.replace(new RegExp('modelname', 'g'), this.options.modelname)
+                                          .replace('0', layer.properties.id);
+
+        // fetch data
+        var response = await window.fetch(popup_url);
+        if (!response.ok){
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        } else {
+            // parse data
+            try {
+                var json = await response.json();
+                return json.data;
+            } catch (error) {
+                throw new Error('Cannot parse data');
+            }
+        }
+    }
+
+});
 
 L.ObjectsLayer.include(L.LayerIndexMixin);
