@@ -1,5 +1,4 @@
 import logging
-import re
 
 from django.conf import settings
 from django.contrib.gis.db.models.functions import Transform
@@ -106,24 +105,26 @@ class MapEntityViewSet(viewsets.ModelViewSet):
         label_config = getattr(settings, "LABEL_PER_MODEL", {})
         fields = label_config.get(model_name, []).copy()
 
-        NEED_DISPLAY_FUNCTION = (
-            models.BooleanField,
-            models.ForeignKey,
-            models.ManyToManyField,
-            models.OneToOneField,
-        )
+        def get_field_value(obj, field):
+            try:
+                modelfield = self.model._meta.get_field(field)
+            except FieldDoesNotExist:
+                modelfield = None
 
-        def get_field_value(obj, field_name, field):
-            if isinstance(field, NEED_DISPLAY_FUNCTION):
-                display_func = getattr(obj, f"{field_name}_display", None)
-                if callable(display_func):
-                    return display_func()
-            return getattr(obj, field_name, None)
+            value = getattr(obj, field + "_display", getattr(obj, field, None))
+            if isinstance(value, bool):
+                field_name = obj._meta.get_field(field).verbose_name
+                value = f"{field_name}: " + (_("no"), _("yes"))[value]
+
+            if isinstance(modelfield, models.ManyToManyField) and not isinstance(
+                value, str
+            ):
+                value = ", ".join([str(val) for val in value.all()])
+
+            return mapentity_serializers.smart_plain_text(value, ascii)
 
         def clean_value(value):
             if isinstance(value, str):
-                # Remove simple HTML tags
-                value = re.sub(r"<.*?>", "", value)
                 # truncate long text (around 2 rows)
                 if len(value) > 100:
                     value = value[:100] + "..."
@@ -137,12 +138,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
         }
 
         for field_name in fields:
-            try:
-                field = obj._meta.get_field(field_name)
-            except FieldDoesNotExist:
-                continue
-
-            value = get_field_value(obj, field_name, field)
+            value = get_field_value(obj, field_name)
             if value:
                 context["attributes"].append(clean_value(value))
 
