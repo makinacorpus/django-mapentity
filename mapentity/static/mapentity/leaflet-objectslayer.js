@@ -3,6 +3,7 @@ L.ObjectsLayer = L.GeoJSON.extend({
         indexing: true,
         highlight: true,
         objectUrl: null,
+        displayPopup: true,
         styles: {
             'default': {'color': 'blue', 'weight': 2, 'opacity': 0.8},
             highlight: {'color': 'red', 'weight': 5, 'opacity': 1},
@@ -70,23 +71,24 @@ L.ObjectsLayer = L.GeoJSON.extend({
         }, this));
 
         this.on('click', async function (e) {
-            var popup_content;
-            try{
-                popup_content =  await this.getPopupContent(e.layer);
-            } catch (error) {
-                popup_content = gettext('Data unreachable');
-            }
-            if (e.target._popup){
-                // update popup content if it has been already bind
-                var popup = e.target._popup;
-                popup.setContent(popup_content);
-                popup.update();
-            } else {
-                // bind a new popup
-                this.bindPopup(popup_content).openPopup(e.latlng);
+            if(this.options.displayPopup){
+                var popup_content;
+                try{
+                    popup_content =  await this.getPopupContent(e.layer);
+                } catch (error) {
+                    popup_content = gettext('Data unreachable');
+                }
+                if (e.target._popup){
+                    // update popup content if it has been already bind
+                    var popup = e.target._popup;
+                    popup.setContent(popup_content);
+                    popup.update();
+                } else {
+                    // bind a new popup
+                    this.bindPopup(popup_content).openPopup(e.latlng);
+                }
             }
         }, this);
-
 
         var dataurl = null;
         if (typeof(geojson) == 'string') {
@@ -250,7 +252,7 @@ L.ObjectsLayer = L.GeoJSON.extend({
                 throw new Error('Cannot parse data');
             }
         }
-    }
+    },
 
 });
 

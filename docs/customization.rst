@@ -228,6 +228,7 @@ Non-existent fields can be used if a display function exist.
 
 If a model isn't configured in ``LABEL_PER_MODEL``, the object's string representation is used as the title.
 If a specified field doesn't exist on the model, it won't be displayed. The detail page button is always shown.
+If the option ``displayPopup`` is setup to false, then the popup will not appear when clicking on the feature.
 
 Settings
 -----------
