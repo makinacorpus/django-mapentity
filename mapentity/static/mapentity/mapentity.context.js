@@ -135,7 +135,7 @@ MapEntity.Context = new function() {
                 var layer = layers[i];
                 $('form.leaflet-control-layers-list input').each(function () {
                     if ($.trim($(this).parent().text()) == layer) {
-                        $(this).attr('checked', 'checked');
+                        $(this).prop('checked', 'checked');
                     }
                 });
             }
