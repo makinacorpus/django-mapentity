@@ -1,7 +1,8 @@
+from dal import autocomplete
 from django.conf import settings
 from django.contrib.gis import forms
 from django.contrib.gis.geos import Polygon
-from django.db.models.fields.related import ForeignKey, ManyToOneRel
+from django.db.models.fields.related import ForeignKey, ManyToManyField, ManyToOneRel
 from django_filters import Filter, ModelMultipleChoiceFilter
 from django_filters.filterset import get_model_field, remote_queryset
 from django_filters.rest_framework import FilterSet
@@ -116,6 +117,14 @@ class MapEntityFilterSet(BaseMapEntityFilterSet):
                 "filter_class": ModelMultipleChoiceFilter,
                 "extra": lambda f: {
                     "queryset": remote_queryset(f),
+                    "widget": autocomplete.Select2Multiple,
+                },
+            },
+            ManyToManyField: {
+                "filter_class": ModelMultipleChoiceFilter,
+                "extra": lambda f: {
+                    "queryset": remote_queryset(f),
+                    "widget": autocomplete.Select2Multiple,
                 },
             },
         }
