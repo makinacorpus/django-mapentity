@@ -19,7 +19,9 @@ MapEntity.Context = new function() {
         // Form filters
         if (filter) {
             // exclude bbox field, since it comes from the map view.
-            var fields = $($(filter).serializeArray()).filter(function (){ return this.name != 'bbox';});
+            var fields = $($(filter).serializeArray()).filter(function (){
+                return this.name != 'bbox' && this.value !== '';
+            });
             context['filter'] = $.param(fields);
         }
 
@@ -94,6 +96,7 @@ MapEntity.Context = new function() {
     self.restoreFullContext = function(map, context, kwargs) {
         if (!kwargs) kwargs = {};
         var filter = kwargs.filter,
+            loadFilter = kwargs.loadFilter,
             datatable = kwargs.datatable,
             objectsname = kwargs.objectsname;
 
@@ -107,41 +110,54 @@ MapEntity.Context = new function() {
             return;  // No context, no restore.
         }
 
+        // Wait for 'filter:loaded' before applying filters
+        // and restoring the map view, since filter loading is async.
+        $(window).on('filter:loaded', function () {
+            // This map view change will refresh the list
+            self.restoreMapView(map, context, kwargs);
+
+            // Show layers by their name
+            if (context.maplayers) {
+                var layers = context.maplayers;
+                layers.push(objectsname);
+                $('form.leaflet-control-layers-list input:checkbox').each(function () {
+                    if ($.trim($(this).parent().text()) != objectsname) {
+                        $(this).removeAttr('checked');
+                    }
+                });
+                for (var i = 0; i < layers.length; i++) {
+                    var layer = layers[i];
+                    $('form.leaflet-control-layers-list input').each(function () {
+                        if ($.trim($(this).parent().text()) == layer) {
+                            $(this).attr('checked', 'checked');
+                        }
+                    });
+                }
+                if ((map.layerscontrol !== undefined) && !!map.layerscontrol._map) {
+                    map.layerscontrol._onInputClick();
+                }
+            }
+        });
+
         if (filter && context.filter) {
-            $(filter).deserialize(context.filter);
-            $(filter).find('select').trigger("chosen:updated");
+            $(window).one('entity:view:filter', function () {
+                $(filter).deserialize(context.filter);
+                $(filter).find('select').trigger("chosen:updated");
+                // trigger mapview restoration
+                $(window).trigger("filter:loaded");
+            });
+            loadFilter();
+        } else {
+            // trigger mapview restoration
+            $(window).trigger("filter:loaded");
         }
+
 
         if (datatable && context.sortcolumns) {
             if ($('body').attr('data-modelname') in context.sortcolumns) {
                 //datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
             }
             last_sort = context['sortcolumns'];
-        }
-
-        // This map view change will refresh the list
-        self.restoreMapView(map, context, kwargs);
-
-        // Show layers by their name
-        if (context.maplayers) {
-            var layers = context.maplayers;
-            layers.push(objectsname);
-            $('form.leaflet-control-layers-list input:checkbox').each(function () {
-                if ($.trim($(this).parent().text()) != objectsname) {
-                    $(this).removeAttr('checked');
-                }
-            });
-            for(var i=0; i<layers.length; i++) {
-                var layer = layers[i];
-                $('form.leaflet-control-layers-list input').each(function () {
-                    if ($.trim($(this).parent().text()) == layer) {
-                        $(this).attr('checked', 'checked');
-                    }
-                });
-            }
-            if ((map.layerscontrol !== undefined)  && !!map.layerscontrol._map) {
-                map.layerscontrol._onInputClick();
-            }
         }
 
         if (context.print) {

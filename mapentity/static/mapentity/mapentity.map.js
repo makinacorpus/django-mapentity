@@ -351,6 +351,7 @@ $(window).on('entity:map:list', function (e, data) {
         // Parameters
         {
             filter: '#mainfilter',
+            loadFilter: t.load_filter_form.bind(t, mapsync),
             datatable: dt,
             objectsname: layerLabel,
             // We can have several contexts in the application (mainly 'detail' and 'list')
