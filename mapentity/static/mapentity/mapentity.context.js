@@ -93,6 +93,40 @@ MapEntity.Context = new function() {
 
     };
 
+    self.restoreFilters = function (context, filter) {
+        var $filter = $(filter);
+        $filter.deserialize(context.filter);
+        $filter.find('select').trigger("chosen:updated");
+        $filter.find('select').trigger("change");
+    };
+
+    self.restoreMapContext = function (context, objectsname, kwargs){
+        // This map view change will refresh the list
+        self.restoreMapView(map, context, kwargs);
+
+        // Show layers by their name
+        if (context.maplayers) {
+            var layers = context.maplayers;
+            layers.push(objectsname);
+            $('form.leaflet-control-layers-list input:checkbox').each(function () {
+                if ($.trim($(this).parent().text()) != objectsname) {
+                    $(this).removeAttr('checked');
+                }
+            });
+            for (var i = 0; i < layers.length; i++) {
+                var layer = layers[i];
+                $('form.leaflet-control-layers-list input').each(function () {
+                    if ($.trim($(this).parent().text()) == layer) {
+                        $(this).prop('checked', 'checked');
+                    }
+                });
+            }
+            if ((map.layerscontrol !== undefined) && !!map.layerscontrol._map) {
+                map.layerscontrol._onInputClick();
+            }
+        }
+    };
+
     self.restoreFullContext = function(map, context, kwargs) {
         if (!kwargs) kwargs = {};
         var filter = kwargs.filter,
@@ -110,48 +144,14 @@ MapEntity.Context = new function() {
             return;  // No context, no restore.
         }
 
-        // Wait for 'filter:loaded' before applying filters
-        // and restoring the map view, since filter loading is async.
-        $(window).on('filter:loaded', function () {
-            // This map view change will refresh the list
-            self.restoreMapView(map, context, kwargs);
-
-            // Show layers by their name
-            if (context.maplayers) {
-                var layers = context.maplayers;
-                layers.push(objectsname);
-                $('form.leaflet-control-layers-list input:checkbox').each(function () {
-                    if ($.trim($(this).parent().text()) != objectsname) {
-                        $(this).removeAttr('checked');
-                    }
-                });
-                for (var i = 0; i < layers.length; i++) {
-                    var layer = layers[i];
-                    $('form.leaflet-control-layers-list input').each(function () {
-                        if ($.trim($(this).parent().text()) == layer) {
-                            $(this).attr('checked', 'checked');
-                        }
-                    });
-                }
-                if ((map.layerscontrol !== undefined) && !!map.layerscontrol._map) {
-                    map.layerscontrol._onInputClick();
-                }
-            }
-        });
-
         if (filter && context.filter) {
-            $(window).one('entity:view:filter', function () {
-                $(filter).deserialize(context.filter);
-                $(filter).find('select').trigger("chosen:updated");
-                // trigger mapview restoration
-                $(window).trigger("filter:loaded");
+            loadFilter(() => {
+                self.restoreFilters(context, filter);
+                self.restoreMapContext(context, objectsname, kwargs);
             });
-            loadFilter();
         } else {
-            // trigger mapview restoration
-            $(window).trigger("filter:loaded");
+            self.restoreMapContext(context, objectsname, kwargs);
         }
-
 
         if (datatable && context.sortcolumns) {
             if ($('body').attr('data-modelname') in context.sortcolumns) {
@@ -164,6 +164,6 @@ MapEntity.Context = new function() {
             // Disable tiles animations when screenshoting
             $(map._container).removeClass('leaflet-fade-anim');
         }
-        $(filter).find('select').trigger("change");
+
     };
 };

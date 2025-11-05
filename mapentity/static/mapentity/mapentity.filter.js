@@ -68,7 +68,7 @@ MapEntity.TogglableFilter = L.Class.extend({
         return $(this.popover.data('bs.popover').tip);
     },
 
-    load_filter_form: function (mapsync) {
+    load_filter_form: function (mapsync, callback) {
         var self = this;
         // On first click on Filter button, load HTML content for form
         var $mainfilter = $('#mainfilter');
@@ -115,6 +115,9 @@ MapEntity.TogglableFilter = L.Class.extend({
                     // Trigger event allowing to launch further processing
                     var context = $('body').data();
                     $(window).trigger('entity:view:filter', {modelname: context.modelname});
+                    if(callback){
+                        callback.apply();
+                    }
                 })
                 .fail(xhr => console.error('Error:', xhr.status));
         }
