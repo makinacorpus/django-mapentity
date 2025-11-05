@@ -4,9 +4,6 @@ CHANGELOG
 8.14.5+dev (XXXX-XX-XX)
 -----------------------
 
-**Bug fixes**
-
-- Fix the test issue in get_expected_datatables_attrs
 
 8.14.5     (2025-10-30)
 -----------------------
