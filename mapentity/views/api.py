@@ -102,7 +102,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
     def popup_content(self, request, *args, **kwargs):
         obj = self.get_object()
         model_name = self.model.__name__.lower()
-        label_config = getattr(settings, "LABEL_PER_MODEL", {})
+        label_config = getattr(settings, "POPUP_CONTENT", {})
         fields = label_config.get(model_name, []).copy()
 
         def get_field_value(obj, field):

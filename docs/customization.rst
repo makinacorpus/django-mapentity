@@ -203,11 +203,11 @@ Popups
 MapEntity displays a popup when clicking on a map object.
 By default, it shows the object's name and a button linking to its detail page.
 
-Configure popup fields for each model using the ``LABEL_PER_MODEL`` setting:
+Configure popup fields for each model using the ``POPUP_CONTENT`` setting:
 
 .. code-block:: python
 
-    LABEL_PER_MODEL = {
+    POPUP_CONTENT = {
         "museum": ["name", "city", "public"],
     }
 
@@ -226,7 +226,7 @@ If no display function exists, the field’s string representation is used by de
 
 Non-existent fields can be used if a display function exist.
 
-If a model isn't configured in ``LABEL_PER_MODEL``, the object's string representation is used as the title.
+If a model isn't configured in ``POPUP_CONTENT``, the object's string representation is used as the title.
 If a specified field doesn't exist on the model, it won't be displayed. The detail page button is always shown.
 If the option ``displayPopup`` is setup to false, then the popup will not appear when clicking on the feature.
 
