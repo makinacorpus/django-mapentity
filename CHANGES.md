@@ -6,7 +6,6 @@ CHANGELOG
 
 **Bug fixes**
 
-- Fix the test issue in get_expected_datatables_attrs
 - Fix filter context restoration
 
 8.14.5     (2025-10-30)
