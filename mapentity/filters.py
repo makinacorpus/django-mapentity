@@ -151,6 +151,14 @@ class MapEntityFilterSet(BaseMapEntityFilterSet):
                     ),
                 },
             },
+            models.TextField: {
+                "filter_class": CharFilter,
+                "extra": lambda f: {
+                    "widget": widgets.TextInput(
+                        attrs={"class": "form-control form-control-sm"}
+                    ),
+                },
+            },
             models.IntegerField: {
                 "filter_class": NumberFilter,
                 "extra": lambda f: {
