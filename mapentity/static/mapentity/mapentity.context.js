@@ -107,15 +107,9 @@ MapEntity.Context = new function() {
         var layers = context.maplayers;
         if (layers) {
             layers.push(objectsname);
-            $('form.leaflet-control-layers-list input:checkbox').each(function () {
-                if ($.trim($(this).parent().text()) != objectsname) {
-                    $(this).removeAttr('checked');
-                }
-            });
             $('form.leaflet-control-layers-list input').each(function () {
-                if (layers.includes($.trim($(this).parent().text()))) {
-                    $(this).prop('checked', 'checked');
-                }
+                var shouldBeChecked = layers.includes($.trim($(this).parent().text()));
+                $(this).prop('checked', shouldBeChecked);
             });
             if (map.layerscontrol !== undefined && !!map.layerscontrol._map) {
                 map.layerscontrol._onInputClick();
@@ -151,7 +145,7 @@ MapEntity.Context = new function() {
 
         if (datatable && context.sortcolumns) {
             if ($('body').attr('data-modelname') in context.sortcolumns) {
-                //datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
+                datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
             }
             last_sort = context['sortcolumns'];
         }
