@@ -2,8 +2,16 @@ from dal import autocomplete
 from django.conf import settings
 from django.contrib.gis import forms
 from django.contrib.gis.geos import Polygon
-from django.db.models.fields.related import ForeignKey, ManyToManyField, ManyToOneRel
-from django_filters import Filter, ModelMultipleChoiceFilter
+from django.db import models
+from django.db.models.fields.related import ManyToOneRel
+from django.forms import widgets
+from django_filters import (
+    BooleanFilter,
+    CharFilter,
+    Filter,
+    ModelMultipleChoiceFilter,
+    NumberFilter,
+)
 from django_filters.filterset import get_model_field, remote_queryset
 from django_filters.rest_framework import FilterSet
 
@@ -113,18 +121,58 @@ class MapEntityFilterSet(BaseMapEntityFilterSet):
     class Meta:
         fields = ["bbox"]
         filter_overrides = {
-            ForeignKey: {
+            models.ForeignKey: {
                 "filter_class": ModelMultipleChoiceFilter,
                 "extra": lambda f: {
                     "queryset": remote_queryset(f),
                     "widget": autocomplete.Select2Multiple,
                 },
             },
-            ManyToManyField: {
+            models.ManyToManyField: {
                 "filter_class": ModelMultipleChoiceFilter,
                 "extra": lambda f: {
                     "queryset": remote_queryset(f),
                     "widget": autocomplete.Select2Multiple,
+                },
+            },
+            models.BooleanField: {
+                "filter_class": BooleanFilter,
+                "extra": lambda f: {
+                    "widget": widgets.NullBooleanSelect(
+                        attrs={"class": "form-control form-control-sm"}
+                    ),
+                },
+            },
+            models.CharField: {
+                "filter_class": CharFilter,
+                "extra": lambda f: {
+                    "widget": widgets.TextInput(
+                        attrs={"class": "form-control form-control-sm"}
+                    ),
+                },
+            },
+            models.IntegerField: {
+                "filter_class": NumberFilter,
+                "extra": lambda f: {
+                    "widget": widgets.NumberInput(
+                        attrs={"class": "form-control form-control-sm"}
+                    ),
+                },
+            },
+            models.AutoField: {
+                "filter_class": NumberFilter,
+                "extra": lambda f: {
+                    "widget": widgets.NumberInput(
+                        attrs={"class": "form-control form-control-sm"}
+                    ),
+                },
+            },
+            models.FloatField: {
+                "filter_class": NumberFilter,
+                "extra": lambda f: {
+                    "widget": widgets.NumberInput(
+                        attrs={"class": "form-control form-control-sm"}
+                    ),
                 },
             },
         }
