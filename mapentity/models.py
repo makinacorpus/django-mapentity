@@ -283,8 +283,8 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         return reverse(self._entity.url_name(ENTITY_DETAIL), args=[str(self.pk)])
 
     def get_popup_url(self):
-        modelname = cls._meta.model_name.lower()
-        return (f"/api/{modelname}/drf/{modelname}s/{self.pk}/popup_content")
+        modelname = self._meta.model_name.lower()
+        return f"/api/{modelname}/drf/{modelname}s/{self.pk}/popup_content"
 
     @property
     def map_image_url(self):
