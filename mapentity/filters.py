@@ -159,6 +159,22 @@ class MapEntityFilterSet(BaseMapEntityFilterSet):
                     ),
                 },
             },
+            models.EmailField: {
+                "filter_class": CharFilter,
+                "extra": lambda f: {
+                    "widget": widgets.TextInput(
+                        attrs={"class": "form-control form-control-sm"}
+                    ),
+                },
+            },
+            models.URLField: {
+                "filter_class": CharFilter,
+                "extra": lambda f: {
+                    "widget": widgets.TextInput(
+                        attrs={"class": "form-control form-control-sm"}
+                    ),
+                },
+            },
             models.IntegerField: {
                 "filter_class": NumberFilter,
                 "extra": lambda f: {
