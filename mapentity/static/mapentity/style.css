@@ -13,54 +13,11 @@ select[multiple] {
     min-height: 180px;
 }
 
-/***** Chosen override ******/
-
-.chosen-container-active .chosen-choices {
-    border: 1px solid #AAA;
-}
-
-.chosen-container .chosen-results .highlighted {
-    background-color: #919191;
-    background-image: linear-gradient(#919191 20%, #747474 90%);
-    color: #fff;
-}
-
-.chosen-container .chosen-choices {
-    border-radius: 4px;
-}
-
 .controls .text-muted{
     display: block;
 }
 
 /* Bootstrap style */
-
-.chosen-container .chosen-single {
-    background-image: none;
-    box-shadow: none;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    background-color: #ffffff;
-    border: 1px solid #cccccc;
-    font-size: 14px;
-    font-weight: normal;
-    color: #555555;
-    height: 28px;
-    line-height: 28px;
-    text-align: left;
-    vertical-align: middle;
-    padding-left: 10px;
-    border-radius: 4px;
-}
-
-.chosen-container-single .chosen-single div b {
-    background-position-y: 5px;
-}
-
-/* Fix a Chosen bug, which sets width to 0px when initialized while hidden */
-#mainfilter .chosen-container-multi,
-#mainform .chosen-container-multi {
-    width: 220px !important;
-}
 
 .table th, .table td {
     padding: 4px;
@@ -325,11 +282,6 @@ tr.selected-row td {
     width: 100%;
 }
 
-#maphead .chosen-container {
-    max-width: 180px;
-    text-align: left;
-}
-
 /***** Entity List ******/
 
 #list-panel {
@@ -476,10 +428,6 @@ div.dataTables_wrapper div.dataTables_filter input {
     padding: .5rem;
     max-height: calc(100vh - 25px);
     overflow-y: scroll;
-}
-
-#mainfilter .form-group > p:last-child:has(.chosen-container-multi) {
-    padding-bottom: 12rem;
 }
 
 #mainfilter label {
