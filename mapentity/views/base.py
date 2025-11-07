@@ -190,9 +190,7 @@ def map_screenshot(request):
         context["print"] = True
         printcontext = json.dumps(context)
         contextencoded = quote(printcontext)
-        map_url += (
-            f"?lang={get_language()}&auth_token={TokenManager.generate_token()}&context={contextencoded}"
-        )
+        map_url += f"?lang={get_language()}&auth_token={TokenManager.generate_token()}&context={contextencoded}"
 
         msg = f"Capture {map_url}"
         logger.debug(msg)
