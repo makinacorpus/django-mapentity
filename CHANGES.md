@@ -6,7 +6,6 @@ CHANGELOG
 
 **Bug fixes**
 
-- Fix restoration of layers context
 - Fix filter context restoration
 - Fix layer restoration in screenshot
 

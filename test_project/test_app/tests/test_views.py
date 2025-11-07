@@ -1,3 +1,4 @@
+import json
 import os
 from unittest import mock
 
@@ -11,7 +12,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils.encoding import force_str
+from django.utils.translation import get_language
 from faker import Faker
 from faker.providers import geo
 from freezegun import freeze_time
@@ -666,3 +669,65 @@ class FilterViewTest(BaseTest):
         response = self.client.get(City.get_filter_url())
         self.assertContains(response, '<input type="text" name="name"')
         self.assertContains(response, '<input type="hidden" name="bbox"')
+
+
+class MapScreenshotTest(BaseTest):
+    context = {
+        "mapview": {"lat": 42.771211138625894, "lng": 1.336212158203125, "zoom": 9},
+        "maplayers": ["OSM", "Cadastre", "Signalétiques", "POI", "▣ Tronçons"],
+        "filter": "",
+        "sortcolumns": {},
+        "fullurl": "https://demo-admin.geotrek.fr/path/list/",
+        "url": "/path/list/",
+        "selector": "#map",
+        "viewport": {"width": 1854, "height": 481},
+        "timestamp": 1762525783907,
+    }
+
+    @mock.patch("mapentity.views.base.capture_image")
+    @mock.patch(
+        "mapentity.tokens.TokenManager.generate_token", return_value="test-token"
+    )
+    def test_map_screenshot_success(self, mock_token, mock_capture):
+        self.login()
+
+        mock_capture.return_value = b"fake_png_data"
+
+        data = {"printcontext": json.dumps(self.context)}
+
+        response = self.client.post(reverse("mapentity:map_screenshot"), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "image/png")
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertEqual(response.content, b"fake_png_data")
+
+        args, kwargs = mock_capture.call_args
+        called_url = args[0]
+        width = kwargs.get("width")
+        height = kwargs.get("height")
+        selector = kwargs.get("selector")
+
+        self.assertTrue(called_url.startswith("http"))
+        self.assertIn(f"lang={get_language()}", called_url)
+        self.assertIn("auth_token=test-token", called_url)
+        self.assertIn("context=", called_url)
+        self.assertEqual(width, 1854)
+        self.assertEqual(height, 481)
+        self.assertEqual(selector, "#map")
+
+    def test_map_screenshot_invalid_json_context(self):
+        self.login()
+
+        data = {"printcontext": "json_error"}
+
+        response = self.client.post(reverse("mapentity:map_screenshot"), data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_map_screenshot_invalid_length_context(self):
+        self.login()
+
+        data = {"printcontext": "{" + "test" * 1000 + "}"}
+
+        response = self.client.post(reverse("mapentity:map_screenshot"), data)
+        self.assertEqual(response.status_code, 400)
