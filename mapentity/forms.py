@@ -4,6 +4,7 @@ from warnings import warn
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Button, Div, Layout, Submit
+from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib.gis.db.models.fields import GeometryField
@@ -100,6 +101,11 @@ class MapEntityForm(TranslatedModelForm):
     leftpanel_scrollable = True
     hidden_fields = []
 
+    default_widgets = {
+        forms.ModelChoiceField: autocomplete.Select2(),
+        forms.ModelMultipleChoiceField: autocomplete.Select2Multiple(),
+    }
+
     def __init__(self, *args, **kwargs):
         if self.geomfields is None:
             self.geomfields = ["geom"]
@@ -170,6 +176,13 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.help_text += f", {textfield_help_text}"
                     else:
                         formfield.help_text = textfield_help_text
+                # force FK and m2m to use select2
+
+                for field_type, widget_factory in self.default_widgets.items():
+                    if formfield.__class__ == field_type:
+                        formfield.widget = widget_factory
+                        formfield.queryset = formfield.queryset.all()
+                        break
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(

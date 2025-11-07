@@ -966,3 +966,7 @@ TODO: please help;
 .select2-container--open {
     z-index: 9999 !important;
 }
+
+#modelfields .custom-select {
+  padding: 0 !important;
+}
