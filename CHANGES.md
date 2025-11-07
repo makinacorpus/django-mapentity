@@ -8,7 +8,7 @@ CHANGELOG
 
 - Fix restoration of layers context
 - Fix filter context restoration
-- fix layer context restoration
+- Fix layer restoration in screenshot
 
 
 
