@@ -677,7 +677,7 @@ class MapScreenshotTest(BaseTest):
         "maplayers": ["OSM", "Cadastre", "Signalétiques", "POI", "▣ Tronçons"],
         "filter": "",
         "sortcolumns": {},
-        "fullurl": "https://demo-admin.geotrek.fr/path/list/",
+        "fullurl": "https://test.fr/path/list/",
         "url": "/path/list/",
         "selector": "#map",
         "viewport": {"width": 1854, "height": 481},
