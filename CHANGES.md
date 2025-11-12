@@ -4,6 +4,9 @@ CHANGELOG
 8.14.5+dev (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Fix filter context restoration
 
 8.14.5     (2025-10-30)
 -----------------------
