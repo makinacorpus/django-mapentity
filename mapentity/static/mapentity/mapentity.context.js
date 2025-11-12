@@ -19,7 +19,9 @@ MapEntity.Context = new function() {
         // Form filters
         if (filter) {
             // exclude bbox field, since it comes from the map view.
-            var fields = $($(filter).serializeArray()).filter(function (){ return this.name != 'bbox';});
+            var fields = $($(filter).serializeArray()).filter(function (){
+                return this.name != 'bbox' && this.value !== '';
+            });
             context['filter'] = $.param(fields);
         }
 
@@ -91,9 +93,34 @@ MapEntity.Context = new function() {
 
     };
 
+    self.restoreFilters = function (context, filter) {
+        var $filter = $(filter);
+        $filter.deserialize(context.filter);
+        $filter.find('select').trigger("chosen:updated").trigger("change");
+    };
+
+    self.restoreMapContext = function (context, objectsname, kwargs){
+        // This map view change will refresh the list
+        self.restoreMapView(map, context, kwargs);
+
+        // Show layers by their name
+        var layers = context.maplayers;
+        if (layers) {
+            layers.push(objectsname);
+            $('form.leaflet-control-layers-list input').each(function () {
+                var shouldBeChecked = layers.includes($.trim($(this).parent().text()));
+                $(this).prop('checked', shouldBeChecked);
+            });
+            if (map.layerscontrol !== undefined && !!map.layerscontrol._map) {
+                map.layerscontrol._onInputClick();
+            }
+        }
+    };
+
     self.restoreFullContext = function(map, context, kwargs) {
         if (!kwargs) kwargs = {};
         var filter = kwargs.filter,
+            loadFilter = kwargs.loadFilter,
             datatable = kwargs.datatable,
             objectsname = kwargs.objectsname;
 
@@ -108,46 +135,25 @@ MapEntity.Context = new function() {
         }
 
         if (filter && context.filter) {
-            $(filter).deserialize(context.filter);
-            $(filter).find('select').trigger("chosen:updated");
+            loadFilter(() => {
+                self.restoreFilters(context, filter);
+                self.restoreMapContext(context, objectsname, kwargs);
+            });
+        } else {
+            self.restoreMapContext(context, objectsname, kwargs);
         }
 
         if (datatable && context.sortcolumns) {
             if ($('body').attr('data-modelname') in context.sortcolumns) {
-                //datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
+                datatable.fnSort(context.sortcolumns[$('body').attr('data-modelname')]);
             }
             last_sort = context['sortcolumns'];
-        }
-
-        // This map view change will refresh the list
-        self.restoreMapView(map, context, kwargs);
-
-        // Show layers by their name
-        if (context.maplayers) {
-            var layers = context.maplayers;
-            layers.push(objectsname);
-            $('form.leaflet-control-layers-list input:checkbox').each(function () {
-                if ($.trim($(this).parent().text()) != objectsname) {
-                    $(this).removeAttr('checked');
-                }
-            });
-            for(var i=0; i<layers.length; i++) {
-                var layer = layers[i];
-                $('form.leaflet-control-layers-list input').each(function () {
-                    if ($.trim($(this).parent().text()) == layer) {
-                        $(this).attr('checked', 'checked');
-                    }
-                });
-            }
-            if ((map.layerscontrol !== undefined)  && !!map.layerscontrol._map) {
-                map.layerscontrol._onInputClick();
-            }
         }
 
         if (context.print) {
             // Disable tiles animations when screenshoting
             $(map._container).removeClass('leaflet-fade-anim');
         }
-        $(filter).find('select').trigger("change");
+
     };
 };
