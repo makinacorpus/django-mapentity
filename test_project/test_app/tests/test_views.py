@@ -684,14 +684,12 @@ class MapScreenshotTest(BaseTest):
         "timestamp": 1762525783907,
     }
 
-    @mock.patch("mapentity.views.base.capture_image")
-    @mock.patch(
-        "mapentity.tokens.TokenManager.generate_token", return_value="test-token"
-    )
-    def test_map_screenshot_success(self, mock_token, mock_capture):
+    @mock.patch("mapentity.helpers.requests.get")
+    def test_map_screenshot_success(self, mock_capture):
         self.login()
 
-        mock_capture.return_value = b"fake_png_data"
+        mock_capture.return_value.content = b"fake_png_data"
+        mock_capture.return_value.status_code = 200
 
         data = {"printcontext": json.dumps(self.context)}
 
@@ -704,30 +702,34 @@ class MapScreenshotTest(BaseTest):
 
         args, kwargs = mock_capture.call_args
         called_url = args[0]
-        width = kwargs.get("width")
-        height = kwargs.get("height")
-        selector = kwargs.get("selector")
 
+        # check mapentity url
         self.assertTrue(called_url.startswith("http"))
-        self.assertIn(f"lang={get_language()}", called_url)
-        self.assertIn("auth_token=test-token", called_url)
-        self.assertIn("context=", called_url)
-        self.assertEqual(width, 1854)
-        self.assertEqual(height, 481)
-        self.assertEqual(selector, "#map")
+        self.assertIn(f"lang%3D{get_language()}", called_url)
+        self.assertIn("auth_token", called_url)
+        self.assertIn("context", called_url)
+
+        # check screamshotter url
+        self.assertIn("width=1854", called_url)
+        self.assertIn("height=481", called_url)
+        self.assertIn("selector=%23map", called_url)
 
     def test_map_screenshot_invalid_json_context(self):
         self.login()
 
         data = {"printcontext": "json_error"}
 
-        response = self.client.post(reverse("mapentity:map_screenshot"), data)
+        with self.assertLogs(level='INFO') as cm:
+            response = self.client.post(reverse("mapentity:map_screenshot"), data)
         self.assertEqual(response.status_code, 400)
+        self.assertIn("ERROR:mapentity.views.base:Expecting value: line 1 column 1 (char 0)", cm.output[0])
 
     def test_map_screenshot_invalid_length_context(self):
         self.login()
 
         data = {"printcontext": "{" + "test" * 1000 + "}"}
 
-        response = self.client.post(reverse("mapentity:map_screenshot"), data)
+        with self.assertLogs(level='INFO') as cm:
+            response = self.client.post(reverse("mapentity:map_screenshot"), data)
         self.assertEqual(response.status_code, 400)
+        self.assertIn("ERROR:mapentity.views.base:Print context is way too big", cm.output[0])
