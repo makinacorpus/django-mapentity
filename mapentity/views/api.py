@@ -124,7 +124,7 @@ class MapEntityViewSet(viewsets.ModelViewSet):
 
             # add field name for boolean field for readability
             if value in [_("yes"), _("no")]:
-                value = f"{field_name}: {value}"
+                value = f"{obj._meta.get_field(field_name).verbose_name}: {value}"
 
             if value:
                 context["attributes"].append(value)
