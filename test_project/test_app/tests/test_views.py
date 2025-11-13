@@ -719,17 +719,22 @@ class MapScreenshotTest(BaseTest):
 
         data = {"printcontext": "json_error"}
 
-        with self.assertLogs(level='INFO') as cm:
+        with self.assertLogs(level="INFO") as cm:
             response = self.client.post(reverse("mapentity:map_screenshot"), data)
         self.assertEqual(response.status_code, 400)
-        self.assertIn("ERROR:mapentity.views.base:Expecting value: line 1 column 1 (char 0)", cm.output[0])
+        self.assertIn(
+            "ERROR:mapentity.views.base:Expecting value: line 1 column 1 (char 0)",
+            cm.output[0],
+        )
 
     def test_map_screenshot_invalid_length_context(self):
         self.login()
 
         data = {"printcontext": "{" + "test" * 1000 + "}"}
 
-        with self.assertLogs(level='INFO') as cm:
+        with self.assertLogs(level="INFO") as cm:
             response = self.client.post(reverse("mapentity:map_screenshot"), data)
         self.assertEqual(response.status_code, 400)
-        self.assertIn("ERROR:mapentity.views.base:Print context is way too big", cm.output[0])
+        self.assertIn(
+            "ERROR:mapentity.views.base:Print context is way too big", cm.output[0]
+        )
