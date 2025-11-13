@@ -27,6 +27,9 @@ def field_as_string(obj, field, ascii=False):
             or isinstance(value, Decimal)
         ):
             value = number_format(value)
+        if hasattr(value, "all"):
+            # convert ManyRelatedManager to QuerySet
+            value = value.all()
         if isinstance(value, list) or isinstance(value, QuerySet):
             value = ", ".join([str(val) for val in value])
     return smart_plain_text(value, ascii)

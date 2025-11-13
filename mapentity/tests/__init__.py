@@ -452,19 +452,11 @@ class MapEntityTest(TestCase):
             return  # Abstract test should not run
 
         self.obj = self.modelfactory.create()
-        popup_url = f"/api/{self.model._meta.model_name}/drf/{self.model._meta.model_name}s/{self.obj.pk}/popup_content"
+        popup_url = self.obj.get_popup_url()
         response = self.client.get(popup_url)
         self.assertEqual(response.status_code, 200, f"{popup_url} not found")
         content_json = response.json()
-        self.assertEqual(
-            content_json,
-            {
-                "data": self.get_expected_popup_content(),
-                "draw": 1,
-                "recordsFiltered": 1,
-                "recordsTotal": 1,
-            },
-        )
+        self.assertEqual(content_json, self.get_expected_popup_content())
 
 
 class MapEntityLiveTest(LiveServerTestCase):

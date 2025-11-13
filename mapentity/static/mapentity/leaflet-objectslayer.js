@@ -246,8 +246,7 @@ L.ObjectsLayer = L.GeoJSON.extend({
         } else {
             // parse data
             try {
-                var json = await response.json();
-                return json.data;
+                return response.json();
             } catch (error) {
                 throw new Error('Cannot parse data');
             }
