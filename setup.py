@@ -43,6 +43,7 @@ setup(
         'paperclip',
         'requests',
         'weasyprint',
+        'deepmerge',
     ],
     extras_require={
         'dev': [

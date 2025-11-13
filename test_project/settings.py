@@ -18,6 +18,10 @@ from tempfile import TemporaryDirectory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def _(s):
+    return s
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
@@ -112,8 +116,8 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGES = (
-    ("en", "English"),
-    ("fr", "French"),
+    ("en", f"🇬🇧 {_('English')}"),
+    ("fr", f"🇫🇷 {_('French')}"),
 )
 
 LANGUAGE_CODE = "en-us"
@@ -146,10 +150,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 SRID = 4326
 COMPRESS_ENABLED = False
 TEST = True
-
-MAPENTITY_CONFIG = {
-    "SENDFILE_HTTP_HEADER": "X-Accel-Redirect",
-}
 
 PAPERCLIP_FILETYPE_MODEL = "test_app.FileType"
 PAPERCLIP_LICENSE_MODEL = "test_app.License"

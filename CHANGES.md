@@ -4,6 +4,14 @@ CHANGELOG
 8.15.0+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Better language and translation management even if language is valid but not supported by django
+
+**Bug fixes**
+
+- In some cases default settings values can't be overridden.
+
 
 8.15.0     (2025-11-13)
 -----------------------
@@ -60,7 +68,7 @@ CHANGELOG
 
 **Warning**
 
-- Some component has been changed. User menu items, actions buttons in list, actions and download buttons in details views. Please test and update your templates before upgrading.
+- Some components have been changed. User menu items, actions buttons in list, actions and download buttons in details views. Please test and update your templates before upgrading.
 
 **Improvements**
 
