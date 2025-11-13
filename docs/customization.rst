@@ -197,6 +197,38 @@ The second way overrides these templates for all your models.
     you need to create a sub-directory named ``mapentity`` in ``main/templates``.
     Then you can create a file named ``override_detail_pdf.html``(or ``.css``) and it will be used for all your models if a specific template is not provided.
 
+Popups
+------
+
+MapEntity displays a popup when clicking on a map object.
+By default, it shows the object's name and a button linking to its detail page.
+
+Configure popup fields for each model using the ``POPUP_CONTENT`` setting:
+
+.. code-block:: python
+
+    POPUP_CONTENT = {
+        "museum": ["name", "city", "public"],
+    }
+
+The key is the model name in lowercase (e.g., ``"museum"``), and the value is a list of field names to display.
+The popup title shows the object's string representation (using `__str__()`), with the configured fields displayed below.
+
+If there is a display function for a field in the model then it will be used in priority.
+
+.. code-block:: python
+
+    @property
+    def public_display(self):
+        return "Public" if self.public else "Not public"
+
+If no display function exists, the field’s string representation is used by default.
+
+Non-existent fields can be used if a display function exist.
+
+If a model isn't configured in ``POPUP_CONTENT``, the object's string representation is used as the title.
+If a specified field doesn't exist on the model, it won't be displayed. The detail page button is always shown.
+If the option ``displayPopup`` is setup to false, then the popup will not appear when clicking on the feature.
 
 Settings
 -----------

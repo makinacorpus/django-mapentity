@@ -114,6 +114,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
         dictsettings["urls"]["static"] = settings.STATIC_URL
         dictsettings["urls"]["layer"] = options.model.get_layer_url()
         dictsettings["urls"]["detail"] = f"{root_url}modelname/0/"
+        dictsettings["urls"]["popup"] = "/api/modelname/drf/modelnames/0/popup-content"
         dictsettings["urls"]["format_list"] = (
             f"{root_url}{options._url_path(mapentity_models.ENTITY_FORMAT_LIST)[1:-1]}"
         )

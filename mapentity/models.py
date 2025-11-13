@@ -282,6 +282,12 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def get_detail_url(self):
         return reverse(self._entity.url_name(ENTITY_DETAIL), args=[str(self.pk)])
 
+    def get_popup_url(self):
+        return reverse(
+            f"{self._meta.app_label.lower()}:{self._meta.model_name.lower()}-drf-popup-content",
+            kwargs={"pk": self.pk},
+        )
+
     @property
     def map_image_url(self):
         return self.get_map_image_url()
