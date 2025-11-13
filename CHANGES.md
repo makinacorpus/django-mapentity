@@ -7,6 +7,8 @@ CHANGELOG
 **Bug fixes**
 
 - Fix filter context restoration
+- Fix layer restoration in screenshot
+
 
 8.14.5     (2025-10-30)
 -----------------------
