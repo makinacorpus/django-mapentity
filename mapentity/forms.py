@@ -179,7 +179,6 @@ class MapEntityForm(TranslatedModelForm):
                 # force FK and m2m to use select2
                 if formfield.__class__ == forms.ModelChoiceField:
                     formfield.widget = autocomplete.ModelSelect2()
-                    raise Exception(formfield.queryset)
                 if formfield.__class__ == forms.ModelMultipleChoiceField:
                     formfield.widget = autocomplete.ModelSelect2Multiple()
 
