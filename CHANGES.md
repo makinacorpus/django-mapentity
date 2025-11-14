@@ -4,6 +4,10 @@ CHANGELOG
 8.15.0+dev (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Fix missing translation for popups
+
 
 8.15.0     (2025-11-13)
 -----------------------
