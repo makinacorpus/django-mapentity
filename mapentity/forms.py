@@ -9,7 +9,9 @@ from django import forms
 from django.conf import settings
 from django.contrib.gis.db.models.fields import GeometryField
 from django.core.exceptions import FieldDoesNotExist
+from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django_filters.filterset import remote_queryset
 from modeltranslation.utils import build_localized_fieldname
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 from tinymce.widgets import TinyMCE
@@ -100,9 +102,9 @@ class MapEntityForm(TranslatedModelForm):
     leftpanel_scrollable = True
     hidden_fields = []
 
-    default_widgets = {
-        forms.ModelChoiceField: autocomplete.ModelSelect2(),
-        forms.ModelMultipleChoiceField: autocomplete.ModelSelect2Multiple(),
+    RELATED_WIDGET_MAP = {
+        models.ForeignKey: autocomplete.ListSelect2,
+        models.ManyToManyField: autocomplete.Select2Multiple,
     }
 
     def __init__(self, *args, **kwargs):
@@ -175,11 +177,28 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.help_text += f", {textfield_help_text}"
                     else:
                         formfield.help_text = textfield_help_text
-                # force FK and m2m to use select2
-                if formfield.__class__ == forms.ModelChoiceField:
-                    formfield.widget = autocomplete.ModelSelect2()
-                if formfield.__class__ == forms.ModelMultipleChoiceField:
-                    formfield.widget = autocomplete.ModelSelect2Multiple()
+        model = getattr(self._meta, "model", None)
+        if not model:
+            return
+
+        for name, form_field in list(self.fields.items()):
+            try:
+                model_field = model._meta.get_field(name)
+            except Exception:
+                model_field = None
+
+            if model_field is None:
+                continue
+
+            # mapping champs relationnels (FK, M2M)
+            for mtype, widget_cls in self.RELATED_WIDGET_MAP.items():
+                if isinstance(model_field, mtype):
+                    # garde les attrs existants
+                    attrs = getattr(form_field.widget, "attrs", {}).copy()
+                    attrs.setdefault("class", "form-control")
+                    form_field.widget = widget_cls(attrs=attrs)
+                    form_field.queryset = remote_queryset(model_field)
+                    break
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(
