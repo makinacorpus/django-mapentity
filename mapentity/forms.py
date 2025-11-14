@@ -103,7 +103,7 @@ class MapEntityForm(TranslatedModelForm):
     hidden_fields = []
 
     default_widgets = {
-        models.ForeignKey: autocomplete.ListSelect2,
+        models.ForeignKey: autocomplete.Select2,
         models.ManyToManyField: autocomplete.Select2Multiple,
     }
 
@@ -177,6 +177,7 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.help_text += f", {textfield_help_text}"
                     else:
                         formfield.help_text = textfield_help_text
+
         model = getattr(self._meta, "model", None)
         if not model:
             return
