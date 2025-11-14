@@ -102,8 +102,8 @@ class MapEntityForm(TranslatedModelForm):
     hidden_fields = []
 
     default_widgets = {
-        forms.ModelChoiceField: autocomplete.ListSelect2(),
-        forms.ModelMultipleChoiceField: autocomplete.Select2Multiple(),
+        forms.ModelChoiceField: autocomplete.ModelSelect2(),
+        forms.ModelMultipleChoiceField: autocomplete.ModelSelect2Multiple(),
     }
 
     def __init__(self, *args, **kwargs):
@@ -178,12 +178,12 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.help_text = textfield_help_text
                 # force FK and m2m to use select2
 
-                for field_type, widget_factory in self.default_widgets.items():
-                    if formfield.__class__ == field_type:
-                        # raise Exception(widget_factory)
-                        formfield.widget = widget_factory
+                widget_factory = self.default_widgets.get(formfield.__class__, None)
+                if widget_factory:
+                    formfield.widget = widget_factory
+                    if hasattr(formfield, "queryset"):
                         formfield.queryset = formfield.queryset.all()
-                        break
+
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(
