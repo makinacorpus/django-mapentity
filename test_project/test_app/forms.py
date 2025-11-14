@@ -11,7 +11,7 @@ class DummyModelForm(MapEntityForm):
 class RoadForm(MapEntityForm):
     class Meta:
         model = Road
-        fields = ("name", "geom")
+        fields = ("name", "tag", "geom")
 
 
 class MushroomSpotForm(MapEntityForm):

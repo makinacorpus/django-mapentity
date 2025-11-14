@@ -102,7 +102,7 @@ class MapEntityForm(TranslatedModelForm):
     hidden_fields = []
 
     default_widgets = {
-        forms.ModelChoiceField: autocomplete.Select2(),
+        forms.ModelChoiceField: autocomplete.ListSelect2(),
         forms.ModelMultipleChoiceField: autocomplete.Select2Multiple(),
     }
 
@@ -180,6 +180,7 @@ class MapEntityForm(TranslatedModelForm):
 
                 for field_type, widget_factory in self.default_widgets.items():
                     if formfield.__class__ == field_type:
+                        # raise Exception(widget_factory)
                         formfield.widget = widget_factory
                         formfield.queryset = formfield.queryset.all()
                         break
