@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-23 09:53+0000\n"
+"POT-Creation-Date: 2025-11-14 15:16+0000\n"
 "PO-Revision-Date: 2025-10-24 15:28+0000\n"
 "Last-Translator: J-E Castagnede <jean-etienne.castagnede@makina-corpus.com>\n"
 "Language-Team: French <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/fr/>\n"
@@ -18,8 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Generator: Weblate 5.13.3\n"
 
-msgid ""
-"Access to the requested resource is restricted. You have been redirected."
+msgid "Access to the requested resource is restricted. You have been redirected."
 msgstr "L'accès à la ressource demandée est restreint. Vous avez été redirigé."
 
 #, python-format
@@ -245,6 +244,9 @@ msgstr "quelques secondes"
 
 msgid "Invalid geometry value."
 msgstr "Géométrie invalide."
+
+msgid "Detail sheet"
+msgstr "Fiche détail"
 
 msgid "Created"
 msgstr "Créé"
