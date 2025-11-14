@@ -87,7 +87,7 @@ function dismissAddRelatedObjectPopup(win, newId, newRepr) {
             }
         }
         // Trigger a change event to update related links if required.
-        $(elem).trigger("chosen:updated");
+        $(elem).trigger("change");
     } else {
         var toId = name + "_to";
         o = new Option(newRepr, newId);
