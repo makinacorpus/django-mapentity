@@ -103,7 +103,7 @@ class MapEntityForm(TranslatedModelForm):
     hidden_fields = []
 
     default_widgets = {
-        models.ForeignKey: autocomplete.Select2,
+        models.ForeignKey: autocomplete.ListSelect2,
         models.ManyToManyField: autocomplete.Select2Multiple,
     }
 
