@@ -178,11 +178,11 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.help_text = textfield_help_text
                 # force FK and m2m to use select2
 
-                widget_factory = self.default_widgets.get(formfield.__class__, None)
-                if widget_factory:
-                    formfield.widget = widget_factory
-                    if hasattr(formfield, "queryset"):
-                        formfield.queryset = formfield.queryset.all()
+            widget_factory = self.default_widgets.get(formfield.__class__, None)
+            if widget_factory:
+                formfield.widget = widget_factory
+                if hasattr(formfield, "queryset"):
+                    formfield.queryset = formfield.queryset.all()
 
 
         if self.instance.pk and self.user:
