@@ -114,6 +114,9 @@ DATABASES = {
 LANGUAGES = (
     ("en", "English"),
     ("fr", "French"),
+    ("de", "Deutsch"),
+    ("nl", "Netherlands"),
+    ("es", "Spanish"),
 )
 
 LANGUAGE_CODE = "en-us"

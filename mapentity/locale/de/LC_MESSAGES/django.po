@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-23 09:53+0000\n"
+"POT-Creation-Date: 2025-11-14 15:45+0000\n"
 "PO-Revision-Date: 2025-10-24 15:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: German <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/de/>\n"
@@ -18,8 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.13.3\n"
 
-msgid ""
-"Access to the requested resource is restricted. You have been redirected."
+msgid "Access to the requested resource is restricted. You have been redirected."
 msgstr ""
 
 #, python-format
@@ -244,6 +243,9 @@ msgid "just a few seconds ago"
 msgstr ""
 
 msgid "Invalid geometry value."
+msgstr ""
+
+msgid "Detail sheet"
 msgstr ""
 
 msgid "Created"
