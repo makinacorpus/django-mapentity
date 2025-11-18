@@ -111,6 +111,10 @@ MapEntity.TogglableFilter = L.Class.extend({
                     if(callback){
                         callback.apply();
                     }
+                    // Force Select2 initialization on autocomplete fields
+                    $('select').each(function() {
+                        $(this).select2();
+                    });
                 })
                 .fail(xhr => console.error('Error:', xhr.status));
         }

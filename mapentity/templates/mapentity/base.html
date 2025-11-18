@@ -11,11 +11,7 @@
         <meta charset="UTF-8">
         <link rel="icon" type="image/png" href="{% media_static_fallback 'upload/favicon.png' 'images/favicon.png' %}"/>
 
-
-
-        {% compress css %}<link href="/static/admin/css/vendor/select2/select2.css" media="screen" rel="stylesheet">
-        <link href="/static/admin/css/autocomplete.css" media="screen" rel="stylesheet">
-        <link href="/static/autocomplete_light/select2.css" media="screen" rel="stylesheet">
+        {% compress css %}
             {% if DEBUG %}
                 <link rel="stylesheet" type="text/css"
                       href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.css' %}"/>
@@ -67,7 +63,6 @@
             <script type="text/javascript" src="{% static 'mapentity/vendor/jquery/jquery-1.9.1.min.js' %}"></script>
         {% endif %}
     {% endblock head %}
-
     {% block extrahead %}
     {% endblock extrahead %}
 </head>
@@ -181,10 +176,7 @@
     {% endcompress %}
 
     {% smart_include "extrabody" %}
-       <script src="/static/admin/js/vendor/select2/select2.full.js"></script>
-        <script src="/static/autocomplete_light/autocomplete_light.js"></script>
-        <script src="/static/autocomplete_light/select2.js"></script>
-        <script src="/static/autocomplete_light/i18n/fr.js"></script>
+
 {% endblock extrabody %}
 </body>
 </html>
