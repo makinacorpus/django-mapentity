@@ -108,10 +108,10 @@ MapEntity.TogglableFilter = L.Class.extend({
                     // Trigger event allowing to launch further processing
                     var context = $('body').data();
                     $(window).trigger('entity:view:filter', {modelname: context.modelname});
+                    // Force Select2 initialization on autocomplete fields
                     if(callback){
                         callback.apply();
                     }
-                    // Force Select2 initialization on autocomplete fields
                     $('select').each(function() {
                         $(this).select2();
                     });

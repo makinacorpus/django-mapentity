@@ -96,7 +96,6 @@ MapEntity.Context = new function() {
     self.restoreFilters = function (context, filter) {
         var $filter = $(filter);
         $filter.deserialize(context.filter);
-        $filter.find('select').trigger("change");
     };
 
     self.restoreMapContext = function (context, objectsname, kwargs){
