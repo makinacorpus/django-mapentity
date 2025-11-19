@@ -51,10 +51,11 @@
                     <thead>
                     <tr>
                         {% block list-fields %}
+                        <th></th>
                         {% for field in columns %}
                         <th data-data="{{ field }}" {% if field in unorderable_columns %} data-orderable="false"
                             data-searchable="false" {% elif field not in searchable_columns %}
-                            data-searchable="false" {% endif %}>
+                            data-searchable="true" {% endif %}>
                             {{ model|verbose:field }}
                         </th>
                         {% endfor %}

@@ -7,7 +7,8 @@ $(window).on('entity:view:list', function (e, data) {
         'processing': true,
         'serverSide': true,
         aoColumnDefs: [
-            { "bVisible": false, "aTargets": [ 0 ] },  // don't show first column (ID)
+            { "render": DataTable.render.select(), "orderable": false, "searchable": false, "targets": [0]},
+            { "bVisible": false, "aTargets": [ 1 ] },  // don't show first column (ID)
             // {
             //     "aTargets": [ 1 ],
             //     "mRender": function ( column_data, type, full ) {  // render second column as detail link
@@ -55,7 +56,13 @@ $(window).on('entity:view:list', function (e, data) {
                     window.objectsLayer.highlight(pk, false);
                 }
             );
-        }
+        },
+    select: {
+            style: 'multi',
+            selector: 'td:first-child',
+
+        },
+    order: [[1, 'asc']]
     });
     var paging = document.getElementsByClassName('dt-paging')[0];
     paging.classList.add('d-flex', 'flex-row-reverse');
