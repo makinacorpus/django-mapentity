@@ -91,6 +91,13 @@ class MapEntityList(BaseListView, ListView):
         perm_create = model.get_permission_codename(mapentity_models.ENTITY_CREATE)
         can_add = user_has_perm(self.request.user, perm_create)
         context["can_add"] = can_add
+        perm_update = model.get_permission_codename(mapentity_models.ENTITY_UPDATE)
+        can_edit = user_has_perm(self.request.user, perm_update)
+        context["can_edit"] = can_edit
+        perm_delete = model.get_permission_codename(mapentity_models.ENTITY_DELETE)
+        can_delete = user_has_perm(self.request.user, perm_delete)
+        context["can_delete"] = can_delete
+        context["can_delete"] = can_delete
         perm_export = model.get_permission_codename(mapentity_models.ENTITY_FORMAT_LIST)
         can_export = user_has_perm(self.request.user, perm_export)
         context["can_export"] = can_export
