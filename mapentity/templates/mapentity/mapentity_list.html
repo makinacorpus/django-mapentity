@@ -40,7 +40,14 @@
                             <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{% trans "Add" %}</span>
                         </a>
                         {% endif %}
-                        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false" {% if not can_edit and not can_delete %}disabled{% endif %}>
+                        <button class="btn btn-sm btn-primary dropdown-toggle"
+                                type="button"
+                                data-toggle="dropdown"
+                                aria-expanded="false"
+                                {% if not can_edit and not can_delete %}
+                                    title="{% trans "Access to the requested resource is restricted" %}"
+                                    disabled
+                                {% endif %}>
                             <i class="bi bi-gear-fill"></i> <span class="d-none d-sm-inline">{% trans "Actions" %}</span>
                         </button>
                         <div class="dropdown-menu">
