@@ -100,6 +100,21 @@ $(window).on('entity:view:list', function (e, data) {
 
   // Adjust vertically
     expandDatatableHeight();
+
+    // batch editing
+    var selected_pks = [];
+    $("#btn-batch-editing").on("click", async () => {
+        if ($('.dt-scroll-headInner .dt-select-checkbox').is(":checked")) {
+            const url = $('#mainfilter').attr('action').replace('.datatables', '/filter_infos.json');
+            const params = $('#mainfilter').serialize();
+
+            const data = await $.get(url, params);
+            selected_pks = data.pk_list;
+        } else {
+            selected_pks = MapEntity.mainDatatable.rows( { selected: true } ).data().pluck('id').toArray();
+        }
+    });
+
 });
 
 
