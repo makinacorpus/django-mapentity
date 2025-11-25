@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-14 15:16+0000\n"
+"POT-Creation-Date: 2025-11-25 08:36+0000\n"
 "PO-Revision-Date: 2025-10-24 15:28+0000\n"
 "Last-Translator: J-E Castagnede <jean-etienne.castagnede@makina-corpus.com>\n"
 "Language-Team: French <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/fr/>\n"
@@ -188,6 +188,9 @@ msgstr "Historique complet"
 msgid "Map"
 msgstr "Carte"
 
+msgid "Access to the requested resource is restricted"
+msgstr "L'accès à la ressource demandée est restreint."
+
 msgid "CSV"
 msgstr "CSV"
 
@@ -196,6 +199,12 @@ msgstr "Fichier shape"
 
 msgid "GPX"
 msgstr "GPX"
+
+msgid "Do you really wish to delete the following objects ?"
+msgstr "Voulez-vous vraiment supprimer les objets suivants ?"
+
+msgid "No, back to list view"
+msgstr "Non, retour à la vue liste"
 
 msgid "Last author"
 msgstr "Dernier auteur"
@@ -247,6 +256,10 @@ msgstr "Géométrie invalide."
 
 msgid "Detail sheet"
 msgstr "Fiche détail"
+
+#, python-format
+msgid "Delete selected %s"
+msgstr "Supprimer %s sélectionnés"
 
 msgid "Created"
 msgstr "Créé"

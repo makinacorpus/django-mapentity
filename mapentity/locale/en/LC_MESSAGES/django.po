@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-14 15:16+0000\n"
+"POT-Creation-Date: 2025-11-25 08:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -188,6 +188,9 @@ msgstr ""
 msgid "Map"
 msgstr ""
 
+msgid "Access to the requested resource is restricted"
+msgstr ""
+
 msgid "CSV"
 msgstr ""
 
@@ -195,6 +198,12 @@ msgid "Shapefile"
 msgstr ""
 
 msgid "GPX"
+msgstr ""
+
+msgid "Do you really wish to delete the following objects ?"
+msgstr ""
+
+msgid "No, back to list view"
 msgstr ""
 
 msgid "Last author"
@@ -246,6 +255,10 @@ msgid "Invalid geometry value."
 msgstr ""
 
 msgid "Detail sheet"
+msgstr ""
+
+#, python-format
+msgid "Delete selected %s"
 msgstr ""
 
 msgid "Created"
