@@ -5,6 +5,7 @@
 
 
 {% block container %}
+{{ block.super }}
 <div id="container" class="container-fluid list-container">
     <div id="mainpanel" class="row">
         <!-- List Panel -->
@@ -58,7 +59,7 @@
                                 </a>
                             {%  endif %}
                             {% if can_delete %}
-                                <a class="dropdown-item text-danger" href="#" id="btn-delete" role="button">
+                                <a class="dropdown-item text-danger" href="{{ model.get_multi_delete_url }}" id="btn-delete" role="button">
                                         <i class="bi bi-trash"></i> {% trans "Delete" %}
                                 </a>
                             {% endif %}

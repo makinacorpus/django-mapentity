@@ -102,19 +102,27 @@ $(window).on('entity:view:list', function (e, data) {
     expandDatatableHeight();
 
     // batch editing
-    var selected_pks = [];
     $("#btn-batch-editing").on("click", async () => {
+        var pks_list = [];
         if ($('.dt-scroll-headInner .dt-select-checkbox').is(":checked")) {
             const url = $('#mainfilter').attr('action').replace('.datatables', '/filter_infos.json');
             const params = $('#mainfilter').serialize();
 
             const data = await $.get(url, params);
-            selected_pks = data.pk_list;
+            pks_list = data.pk_list;
         } else {
-            selected_pks = MapEntity.mainDatatable.rows( { selected: true } ).data().pluck('id').toArray();
+            pks_list = MapEntity.mainDatatable.rows( { selected: true } ).data().pluck('id').toArray();
         }
-    });
 
+        var selected_pks = pks_list.join(",");
+
+        // replace href of delete button
+        var deleteBtn = $("#btn-delete")[0];
+        var url = new URL(deleteBtn.getAttribute("href"), window.location.origin);
+        url.searchParams.set("pks", selected_pks);
+
+        deleteBtn.setAttribute("href", url.toString());
+    });
 });
 
 

@@ -1,0 +1,31 @@
+{% extends "mapentity/base_site.html" %}
+{% load i18n mapentity_tags %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        .div-center { margin: 0 auto; width: 400px; }
+    </style>
+{% endblock extrahead %}
+
+{% block mainpanel %}
+{{ block.super }}
+
+<div class="div-center">
+    <div class="alert alert-block">
+        <h4 class="alert-heading">Warning!</h4>
+        {% blocktrans %}Do you really wish to delete the following objects ?{% endblocktrans %}
+        <ul>
+        {% for object in object_list %}
+            <li>{{ object }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-danger" value="{% trans "Yes, delete" %}"></input>
+        <a class="btn btn-inverse" href="{{ model.get_list_url }}">{% trans "No, back to list view" %}</a>
+    </form>
+</div>
+
+{% endblock mainpanel %}
