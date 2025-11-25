@@ -407,6 +407,32 @@ class DocumentConvert(Convert, DetailView):
         return self.get_object().get_document_url()
 
 
+class MapEntityMultiDelete(ModelViewMixin, ListView):
+    def get_queryset(self):
+        pks = self.request.GET["pks"].split(",")
+        queryset = self.model.objects.filter(pk__in=pks)
+
+        return queryset
+
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_MULTI_DELETE
+
+    def get_template_names(self):
+        return ["mapentity/mapentity_multi_delete_confirmation.html"]
+
+    def get_title(self):
+        return _("Delete selected %s") % self.model._meta.model_name
+
+    def get_success_url(self):
+        return self.get_model().get_list_url()
+
+    def post(self, request, *args, **kwargs):
+        self.get_queryset().delete()
+        messages.success(self.request, _("Deleted"))
+        return HttpResponseRedirect(self.get_success_url())
+
+
 """
 
     CRUD

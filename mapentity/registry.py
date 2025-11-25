@@ -165,6 +165,7 @@ class MapEntityOptions:
             mapentity_models.ENTITY_CREATE: r"^{modelname}/add/$",
             mapentity_models.ENTITY_UPDATE: r"^{modelname}/edit/(?P<pk>\d+)/$",
             mapentity_models.ENTITY_DELETE: r"^{modelname}/delete/(?P<pk>\d+)/$",
+            mapentity_models.ENTITY_MULTI_DELETE: r"^{modelname}/multi_delete/$",
             mapentity_models.ENTITY_MARKUP: r"^{modelname}/markup/(?P<pk>\d+)/$",
         }
         if app_settings["MAPENTITY_WEASYPRINT"]:

@@ -41,6 +41,7 @@ ENTITY_MARKUP = "markup"
 ENTITY_DUPLICATE = "duplicate"
 ENTITY_CREATE = "add"
 ENTITY_UPDATE = "update"
+ENTITY_MULTI_DELETE = "multi_delete"
 ENTITY_DELETE = "delete"
 ENTITY_UPDATE_GEOM = "update_geom"
 
@@ -56,6 +57,7 @@ ENTITY_KINDS = (
     ENTITY_CREATE,
     ENTITY_DUPLICATE,
     ENTITY_UPDATE,
+    ENTITY_MULTI_DELETE,
     ENTITY_DELETE,
     ENTITY_UPDATE_GEOM,
 )
@@ -176,6 +178,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
             ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
             ENTITY_UPDATE_GEOM: ENTITY_PERMISSION_UPDATE_GEOM,
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
+            ENTITY_MULTI_DELETE: ENTITY_PERMISSION_DELETE,
             ENTITY_DETAIL: ENTITY_PERMISSION_READ,
             ENTITY_LIST: ENTITY_PERMISSION_READ,
             ENTITY_FILTER: ENTITY_PERMISSION_READ,
@@ -303,6 +306,10 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
 
     def get_delete_url(self):
         return reverse(self._entity.url_name(ENTITY_DELETE), args=[str(self.pk)])
+
+    @classmethod
+    def get_multi_delete_url(self):
+        return reverse(self._entity.url_name(ENTITY_MULTI_DELETE))
 
     def get_map_image_extent(self, srid=API_SRID):
         fieldname = app_settings["GEOM_FIELD_NAME"]
