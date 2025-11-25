@@ -4,6 +4,10 @@ CHANGELOG
 8.15.1+dev (XXXX-XX-XX)
 -----------------------
 
+**Maintenance**
+
+- Change chosen to select2 library. Use dango-autocomplete-light to let users to customize static select or multiselect to API dynamic if required. (perfs issues)
+
 
 8.15.1 (2025-11-14)
 -----------------------
