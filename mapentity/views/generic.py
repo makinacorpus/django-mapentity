@@ -4,12 +4,15 @@ import os
 from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
+import django_filters
+from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
+from django.db import models
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
@@ -27,6 +30,7 @@ from django_weasyprint import WeasyTemplateResponseMixin
 from djappypod.response import OdtTemplateResponse
 
 from mapentity.tokens import TokenManager
+from test_project.test_app.models import DummyModel
 
 from .. import models as mapentity_models
 from .. import serializers as mapentity_serializers
@@ -431,6 +435,74 @@ class MapEntityMultiDelete(ModelViewMixin, ListView):
         self.get_queryset().delete()
         messages.success(self.request, _("Deleted"))
         return HttpResponseRedirect(self.get_success_url())
+
+
+class MapEntityMultiUpdate(ModelViewMixin, ListView):
+    class DynamicFilter(django_filters.FilterSet):
+        class Meta:
+            model = DummyModel
+            fields = [
+                f.name
+                for f in model._meta.get_fields()
+                if isinstance(f, (models.BooleanField, models.ForeignKey))
+            ]
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+            for fieldname in self.base_filters.keys():
+                field = self.form.fields[fieldname]
+                if isinstance(field, forms.NullBooleanField):
+                    field.widget.choices = [
+                        ("unknown", _("Do nothing"))
+                    ] + field.widget.choices[1:]
+
+    def update_queryset(self):
+        queryset = self.get_queryset()
+        data = {}
+        for field, value in self.request.POST.items():
+            if field == "csrfmiddlewaretoken":
+                continue
+
+            if value != "unknown":
+                if value in ("true", "false"):
+                    data[field] = True if value == "true" else False
+                else:
+                    data[field] = value
+
+        return queryset.update(**data)
+
+    def get_queryset(self):
+        self.pks = self.request.GET["pks"].split(",")
+        queryset = self.model.objects.filter(pk__in=self.pks)
+
+        return queryset
+
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_MULTI_UPDATE
+
+    def get_template_names(self):
+        return ["mapentity/mapentity_multi_update_form.html"]
+
+    def get_title(self):
+        return _("Update selected %s") % self.model._meta.model_name
+
+    def get_success_url(self):
+        return self.get_model().get_list_url()
+
+    def post(self, request, *args, **kwargs):
+        modified_rows = self.update_queryset()
+        messages.success(self.request, _("%s items updated") % modified_rows)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        filter = self.DynamicFilter()
+        context["form"] = filter.form
+
+        return context
 
 
 """

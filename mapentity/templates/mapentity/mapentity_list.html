@@ -54,7 +54,7 @@
                         </button>
                         <div class="dropdown-menu">
                             {% if can_edit %}
-                                <a class="dropdown-item" href="#" id="btn-edit" role="button" data-toggle="modal">
+                                <a class="dropdown-item" href="{{ model.get_multi_update_url }}" id="btn-edit" role="button">
                                     <i class="bi bi-pencil-square"></i> {% trans "Edit" %}
                                 </a>
                             {%  endif %}
