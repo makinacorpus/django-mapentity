@@ -30,7 +30,6 @@ from django_weasyprint import WeasyTemplateResponseMixin
 from djappypod.response import OdtTemplateResponse
 
 from mapentity.tokens import TokenManager
-from test_project.test_app.models import DummyModel
 
 from .. import models as mapentity_models
 from .. import serializers as mapentity_serializers
@@ -440,22 +439,32 @@ class MapEntityMultiDelete(ModelViewMixin, ListView):
 class MapEntityMultiUpdate(ModelViewMixin, ListView):
     class DynamicFilter(django_filters.FilterSet):
         class Meta:
-            model = DummyModel
-            fields = [
-                f.name
-                for f in model._meta.get_fields()
-                if isinstance(f, (models.BooleanField, models.ForeignKey))
-            ]
+            model = None
+            fields = "__all__"
 
+        # add comments
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
+            model = self._meta.model
 
-            for fieldname in self.base_filters.keys():
-                field = self.form.fields[fieldname]
+            for name in self.base_filters.keys():
+                field = self.form.fields[name]
+
                 if isinstance(field, forms.NullBooleanField):
-                    field.widget.choices = [
-                        ("unknown", _("Do nothing"))
-                    ] + field.widget.choices[1:]
+                    # use empty label
+                    field.widget.choices = [("unknown", _("Do nothing"))] + field.widget.choices[1:]
+                elif isinstance(field, forms.ChoiceField):
+                    is_nullable = model._meta.get_field(name).null
+                    null_label = _("Null")
+                    field.empty_label = null_label
+
+                    choices = list(field.widget.choices)
+                    if not is_nullable:
+                        choices.remove(('', null_label))
+                    choices.insert(0, ('unknown', _('Do nothing')))
+                    field.widget.choices = choices
+                    field.initial = choices[0][0]
+
 
     def update_queryset(self):
         queryset = self.get_queryset()
@@ -498,11 +507,28 @@ class MapEntityMultiUpdate(ModelViewMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        filter = self.DynamicFilter()
-        context["form"] = filter.form
+        context["form"] = self.generate_filterset().form
 
         return context
+
+    def generate_filterset(self):
+        fields = [
+            f.name
+            for f in self.model._meta.get_fields()
+            if isinstance(f, (models.BooleanField, models.ForeignKey))
+        ]
+
+        meta = type(
+            "Meta",
+            (),
+            {
+                "model": self.model,
+                "fields": fields,
+            },
+        )
+        FilterType = type(f"{self.model._meta.model_name}_Multi_Update_Form", (self.DynamicFilter,), {"Meta": meta})
+
+        return FilterType()
 
 
 """
