@@ -1,0 +1,22 @@
+{% extends "mapentity/base_site.html" %}
+{% load i18n mapentity_tags crispy_forms_tags %}
+
+{% block mainpanel %}
+{{ block.super }}
+
+<div class="m-5">
+    <h4>{% trans "Modify selected items" %}</h4>
+    <form method="POST" id="update-form">
+        {% csrf_token %}
+        {{ form }}
+        <div>
+            <input type="submit" value="{% trans "Save" %}">
+        </div>
+    </form>
+</div>
+{% endblock mainpanel %}
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("form").action = {{ model.get_multi_update_url }} + params.toString();
+</script>

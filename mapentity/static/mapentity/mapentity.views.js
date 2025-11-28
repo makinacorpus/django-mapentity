@@ -116,12 +116,19 @@ $(window).on('entity:view:list', function (e, data) {
 
         var selected_pks = pks_list.join(",");
 
-        // replace href of delete button
+        // replace href on delete button
         var deleteBtn = $("#btn-delete")[0];
-        var url = new URL(deleteBtn.getAttribute("href"), window.location.origin);
-        url.searchParams.set("pks", selected_pks);
+        var urlDelete = new URL(deleteBtn.getAttribute("href"), window.location.origin);
+        urlDelete.searchParams.set("pks", selected_pks);
 
-        deleteBtn.setAttribute("href", url.toString());
+        deleteBtn.setAttribute("href", urlDelete.toString());
+
+        // replace href on edit button
+        var editBtn = $("#btn-edit")[0];
+        var urlEdit = new URL(editBtn.getAttribute("href"), window.location.origin);
+        urlEdit.searchParams.set("pks", selected_pks);
+
+        editBtn.setAttribute("href", urlEdit.toString());
     });
 });
 

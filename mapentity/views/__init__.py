@@ -22,6 +22,7 @@ from .generic import (
     MapEntityMapImage,
     MapEntityMarkupWeasyprint,
     MapEntityMultiDelete,
+    MapEntityMultiUpdate,
     MapEntityUpdate,
 )
 from .logentry import LogEntryList, LogEntryViewSet
@@ -45,6 +46,7 @@ MAPENTITY_GENERIC_VIEWS = [
     MapEntityUpdate,
     MapEntityDelete,
     MapEntityMultiDelete,
+    MapEntityMultiUpdate,
 ]
 
 __all__ = [
@@ -66,6 +68,7 @@ __all__ = [
     "MapEntityDelete",
     "MapEntityViewSet",
     "MapEntityMultiDelete",
+    "MapEntityMultiUpdate",
     "HttpJSONResponse",
     "JSONResponseMixin",
     "LastModifiedMixin",
