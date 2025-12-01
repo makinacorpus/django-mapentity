@@ -4,19 +4,81 @@
 {% block mainpanel %}
 {{ block.super }}
 
-<div class="m-5">
-    <h4>{% trans "Modify selected items" %}</h4>
-    <form method="POST" id="update-form">
-        {% csrf_token %}
-        {{ form }}
-        <div>
-            <input type="submit" value="{% trans "Save" %}">
-        </div>
-    </form>
+<div class="row justify-content-center w-100 m-5">
+    <div class="col-4 card card-body">
+        <h4>{% trans "Modify selected items" %}</h4>
+        {% crispy form form.helper %}
+    </div>
 </div>
-{% endblock mainpanel %}
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{% trans "Confirme modification" %}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <p>{% blocktrans %}Do you want to apply the following modifications on the <strong>{{ nb_objects }} selected objects</strong> ?{% endblocktrans %}</p>
+          <ul>
+          {% for field in form.fields %}
+              <li id="{{ field }}_li"><strong>{{ field }}</strong>: <span id="{{ field }}_value"></span></li>
+          {% endfor %}
+          </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-submit">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 
 <script>
+    const form = document.getElementById("multi-update-form");
+
+    // duplicate pks params  (GET) on action url
+    const url = new URL("{{ model.get_multi_update_url }}", window.location.origin);
     const params = new URLSearchParams(window.location.search);
-    document.getElementById("form").action = {{ model.get_multi_update_url }} + params.toString();
+
+    url.search = params.toString();
+    form.action = url.toString();
+
+    // intercept submit event to ask confirmation to the user before modifying multiple elements
+    form.addEventListener("submit", function(event) {
+        // stop propagation to avoid submitting the form
+        event.preventDefault();
+
+        document.getElementById("confirm-submit").onclick = () => {
+            form.submit();
+        };
+
+        $(".modal-body span").each(function(index, span) {
+            const fieldName = span.id.replace("_value", "");
+            const selectElement = document.getElementById("id_" + fieldName);
+            const selectedOptions = Array.from(selectElement.selectedOptions);
+
+            const listElement = document.getElementById(fieldName + "_li");
+            let values = [];
+
+            selectedOptions.forEach(option => {
+                if (option.value === "unknown") {
+                    listElement.hidden = true;
+                } else {
+                    listElement.hidden = false;
+                    values.push(option.textContent.trim());
+                }
+            });
+            span.textContent = values.join(", ");
+        });
+    });
+
+
 </script>
+{% endblock mainpanel %}

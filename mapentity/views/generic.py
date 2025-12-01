@@ -4,8 +4,6 @@ import os
 from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-import django_filters
-from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -34,7 +32,11 @@ from mapentity.tokens import TokenManager
 from .. import models as mapentity_models
 from .. import serializers as mapentity_serializers
 from ..decorators import save_history, view_permission_required
-from ..forms import AttachmentForm
+from ..forms import (
+    AttachmentForm,
+    BaseMultiUpdateForm,
+    MultiUpdateFilter,
+)
 from ..helpers import (
     convertit_url,
     download_content,
@@ -413,9 +415,9 @@ class DocumentConvert(Convert, DetailView):
 class MapEntityMultiDelete(ModelViewMixin, ListView):
     def get_queryset(self):
         pks = self.request.GET["pks"].split(",")
-        queryset = self.model.objects.filter(pk__in=pks)
+        self.queryset = self.model.objects.filter(pk__in=pks)
 
-        return queryset
+        return self.queryset
 
     @classmethod
     def get_entity_kind(cls):
@@ -437,55 +439,26 @@ class MapEntityMultiDelete(ModelViewMixin, ListView):
 
 
 class MapEntityMultiUpdate(ModelViewMixin, ListView):
-    class DynamicFilter(django_filters.FilterSet):
-        class Meta:
-            model = None
-            fields = "__all__"
-
-        # add comments
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            model = self._meta.model
-
-            for name in self.base_filters.keys():
-                field = self.form.fields[name]
-
-                if isinstance(field, forms.NullBooleanField):
-                    # use empty label
-                    field.widget.choices = [("unknown", _("Do nothing"))] + field.widget.choices[1:]
-                elif isinstance(field, forms.ChoiceField):
-                    is_nullable = model._meta.get_field(name).null
-                    null_label = _("Null")
-                    field.empty_label = null_label
-
-                    choices = list(field.widget.choices)
-                    if not is_nullable:
-                        choices.remove(('', null_label))
-                    choices.insert(0, ('unknown', _('Do nothing')))
-                    field.widget.choices = choices
-                    field.initial = choices[0][0]
-
-
     def update_queryset(self):
         queryset = self.get_queryset()
         data = {}
+        model_fields = [f.name for f in self.model._meta.get_fields()]
         for field, value in self.request.POST.items():
-            if field == "csrfmiddlewaretoken":
+            if value == "unknown" or field not in model_fields:
                 continue
 
-            if value != "unknown":
-                if value in ("true", "false"):
-                    data[field] = True if value == "true" else False
-                else:
-                    data[field] = value
+            if value in ("true", "false"):
+                data[field] = value == "true"
+            else:
+                data[field] = value
 
         return queryset.update(**data)
 
     def get_queryset(self):
         self.pks = self.request.GET["pks"].split(",")
-        queryset = self.model.objects.filter(pk__in=self.pks)
+        self.queryset = self.model.objects.filter(pk__in=self.pks)
 
-        return queryset
+        return self.queryset
 
     @classmethod
     def get_entity_kind(cls):
@@ -508,27 +481,24 @@ class MapEntityMultiUpdate(ModelViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["form"] = self.generate_filterset().form
+        context["nb_objects"] = self.queryset.count()
 
         return context
 
     def generate_filterset(self):
-        fields = [
-            f.name
-            for f in self.model._meta.get_fields()
-            if isinstance(f, (models.BooleanField, models.ForeignKey))
-        ]
+        _model = self.model
 
-        meta = type(
-            "Meta",
-            (),
-            {
-                "model": self.model,
-                "fields": fields,
-            },
-        )
-        FilterType = type(f"{self.model._meta.model_name}_Multi_Update_Form", (self.DynamicFilter,), {"Meta": meta})
+        class MultiUpdateForm(MultiUpdateFilter):
+            class Meta:
+                model = _model
+                fields = [
+                    f.name
+                    for f in self.model._meta.get_fields()
+                    if isinstance(f, (models.BooleanField, models.ForeignKey))
+                ]
+                form = BaseMultiUpdateForm
 
-        return FilterType()
+        return MultiUpdateForm()
 
 
 """
