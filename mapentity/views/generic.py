@@ -504,17 +504,26 @@ class MapEntityMultiUpdate(ModelViewMixin, ListView):
 
         return context
 
+    def get_editable_fields(self):
+        ENABLE_FIELDS_TYPES = (
+            models.BooleanField, models.ForeignKey
+        )
+        editable_fields = [
+            field.name
+            for field in self.model._meta.get_fields()
+            if isinstance(field, ENABLE_FIELDS_TYPES)
+            and field.editable
+            and not field.unique
+        ]
+        return editable_fields
+
     def generate_filterset(self):
         _model = self.model
 
         class MultiUpdateForm(MultiUpdateFilter):
             class Meta:
                 model = _model
-                fields = [
-                    f.name
-                    for f in self.model._meta.get_fields()
-                    if isinstance(f, (models.BooleanField, models.ForeignKey)) and f.editable
-                ]
+                fields = self.get_editable_fields()
                 form = BaseMultiUpdateForm
 
         return MultiUpdateForm()
