@@ -513,7 +513,7 @@ class MapEntityMultiUpdate(ModelViewMixin, ListView):
                 fields = [
                     f.name
                     for f in self.model._meta.get_fields()
-                    if isinstance(f, (models.BooleanField, models.ForeignKey))
+                    if isinstance(f, (models.BooleanField, models.ForeignKey)) and f.editable
                 ]
                 form = BaseMultiUpdateForm
 
