@@ -101,7 +101,7 @@ $(window).on('entity:view:list', function (e, data) {
   // Adjust vertically
     expandDatatableHeight();
 
-    // batch editing
+    // batch edition
     $("#btn-batch-editing").on("click", async () => {
         var pks_list = [];
         if ($('.dt-scroll-headInner .dt-select-checkbox').is(":checked")) {
