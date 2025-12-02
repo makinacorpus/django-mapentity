@@ -433,11 +433,11 @@ class MapEntityMultiDelete(ModelViewMixin, ListView):
         return self.get_model().get_list_url()
 
     def get(self, request, *args, **kwargs):
-        if not self.queryset:
+        if not request.GET.get("pks"):
             messages.error(self.request, _("At least one object must be selected"))
             return HttpResponseRedirect(self.get_success_url())
 
-        super().get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.get_queryset().delete()
@@ -486,11 +486,11 @@ class MapEntityMultiUpdate(ModelViewMixin, ListView):
         return self.get_model().get_list_url()
 
     def get(self, request, *args, **kwargs):
-        if not self.queryset:
+        if not request.GET.get("pks"):
             messages.error(self.request, _("At least one object must be selected"))
             return HttpResponseRedirect(self.get_success_url())
 
-        super().get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         modified_rows = self.update_queryset()
