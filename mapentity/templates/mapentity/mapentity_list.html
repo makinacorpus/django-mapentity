@@ -33,6 +33,8 @@
 
                 <div class="btn-toolbar">
                     {% block list_title %}<h3 class="list-title">{{ objectsname }}</h3>{% endblock %}
+                    <div class="btn-group mr-2">
+                        {% smart_include "preactions" %}
                         {% block mainactions %}
                         {% if can_add %}
                         <a class="btn btn-success btn-sm" href="{{ model.get_add_url }}">
