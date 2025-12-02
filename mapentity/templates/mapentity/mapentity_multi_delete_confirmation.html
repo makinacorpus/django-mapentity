@@ -14,16 +14,11 @@
 <div class="div-center">
     <div class="alert alert-block">
         <h4 class="alert-heading">Warning!</h4>
-        {% blocktrans %}Do you really wish to delete the following objects ?{% endblocktrans %}
-        <ul>
-        {% for object in object_list %}
-            <li>{{ object }}</li>
-        {% endfor %}
-        </ul>
+        {% blocktrans %}Do you really wish to delete <strong>{{ nb_objects }} objects</strong> ?{% endblocktrans %}
     </div>
     <form method="POST">
         {% csrf_token %}
-        <input type="submit" class="btn btn-danger" value="{% trans "Yes, delete" %}"></input>
+        <input type="submit" class="btn btn-danger" value="{% trans "Yes, delete" %}">
         <a class="btn btn-inverse" href="{{ model.get_list_url }}">{% trans "No, back to list view" %}</a>
     </form>
 </div>

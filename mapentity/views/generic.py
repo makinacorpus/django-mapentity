@@ -437,6 +437,11 @@ class MapEntityMultiDelete(ModelViewMixin, ListView):
         messages.success(self.request, _("Deleted"))
         return HttpResponseRedirect(self.get_success_url())
 
+    def get_context_data(self):
+        context = super().get_context_data()
+        context["nb_objects"] = self.queryset.count()
+        return context
+
 
 class MapEntityMultiUpdate(ModelViewMixin, ListView):
     def update_queryset(self):
