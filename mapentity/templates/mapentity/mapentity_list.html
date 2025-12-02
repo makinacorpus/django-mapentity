@@ -33,36 +33,36 @@
 
                 <div class="btn-toolbar">
                     {% block list_title %}<h3 class="list-title">{{ objectsname }}</h3>{% endblock %}
-                    <div class="btn-group mr-2">
-                        {% smart_include "preactions" %}
                         {% block mainactions %}
                         {% if can_add %}
                         <a class="btn btn-success btn-sm" href="{{ model.get_add_url }}">
                             <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{% trans "Add" %}</span>
                         </a>
                         {% endif %}
-                        <button id="btn-batch-editing"
-                                class="btn btn-sm btn-primary dropdown-toggle"
-                                type="button"
-                                data-toggle="dropdown"
-                                aria-expanded="false"
-                                {% if not can_edit and not can_delete %}
-                                    title="{% trans "Access to the requested resource is restricted" %}"
-                                    disabled
-                                {% endif %}>
-                            <i class="bi bi-gear-fill"></i> <span class="d-none d-sm-inline">{% trans "Actions" %}</span>
-                        </button>
-                        <div class="dropdown-menu">
-                            {% if can_edit %}
-                                <a class="dropdown-item" href="{{ model.get_multi_update_url }}" id="btn-edit" role="button">
-                                    <i class="bi bi-pencil-square"></i> {% trans "Edit" %}
-                                </a>
-                            {%  endif %}
-                            {% if can_delete %}
-                                <a class="dropdown-item text-danger" href="{{ model.get_multi_delete_url }}" id="btn-delete" role="button">
-                                        <i class="bi bi-trash"></i> {% trans "Delete" %}
-                                </a>
-                            {% endif %}
+                        <div class="btn-group" role="group">
+                            <button id="btn-batch-editing"
+                                    class="btn btn-sm btn-primary dropdown-toggle"
+                                    type="button"
+                                    data-toggle="dropdown"
+                                    aria-expanded="false"
+                                    {% if not can_edit and not can_delete %}
+                                        title="{% trans "Access to the requested resource is restricted" %}"
+                                        disabled
+                                    {% endif %}>
+                                <i class="bi bi-gear-fill"></i> <span class="d-none d-sm-inline">{% trans "Actions" %}</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                {% if can_edit %}
+                                    <a class="dropdown-item" href="{{ model.get_multi_update_url }}" id="btn-edit" role="button">
+                                        <i class="bi bi-pencil-square"></i> {% trans "Edit" %}
+                                    </a>
+                                {%  endif %}
+                                {% if can_delete %}
+                                    <a class="dropdown-item text-danger" href="{{ model.get_multi_delete_url }}" id="btn-delete" role="button">
+                                            <i class="bi bi-trash"></i> {% trans "Delete" %}
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
                         {% endblock mainactions %}
                         {% smart_include "listactions" %}
