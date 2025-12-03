@@ -48,7 +48,12 @@ from ..helpers import (
 from ..models import ADDITION, CHANGE, DELETION, LogEntry
 from ..settings import app_settings
 from .base import BaseListView, history_delete
-from .mixins import FilterListMixin, FormViewMixin, ModelViewMixin
+from .mixins import (
+    FilterListMixin,
+    FormViewMixin,
+    ModelViewMixin,
+    MultiObjectActionMixin
+)
 
 logger = logging.getLogger(__name__)
 
@@ -412,7 +417,7 @@ class DocumentConvert(Convert, DetailView):
         return self.get_object().get_document_url()
 
 
-class MapEntityMultiDelete(ModelViewMixin, ListView):
+class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_queryset(self):
         pks = self.request.GET["pks"].split(",")
         self.queryset = self.model.objects.filter(pk__in=pks)
@@ -450,7 +455,7 @@ class MapEntityMultiDelete(ModelViewMixin, ListView):
         return context
 
 
-class MapEntityMultiUpdate(ModelViewMixin, ListView):
+class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
     def update_queryset(self):
         queryset = self.get_queryset()
         data = {}
@@ -484,13 +489,6 @@ class MapEntityMultiUpdate(ModelViewMixin, ListView):
 
     def get_success_url(self):
         return self.get_model().get_list_url()
-
-    def get(self, request, *args, **kwargs):
-        if not request.GET.get("pks"):
-            messages.error(self.request, _("At least one object must be selected"))
-            return HttpResponseRedirect(self.get_success_url())
-
-        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         modified_rows = self.update_queryset()
