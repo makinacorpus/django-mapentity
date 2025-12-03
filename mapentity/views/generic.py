@@ -11,6 +11,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
@@ -503,16 +504,19 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
         return context
 
     def get_editable_fields(self):
-        ENABLE_FIELDS_TYPES = (
+        ALLOWED_FIELD_TYPES = (
             models.BooleanField, models.ForeignKey
         )
-        editable_fields = [
-            field.name
-            for field in self.model._meta.get_fields()
-            if isinstance(field, ENABLE_FIELDS_TYPES)
-            and field.editable
-            and not field.unique
-        ]
+
+        editable_fields = []
+        for field in self.model._meta.fields:
+            is_valid_type = isinstance(field, ALLOWED_FIELD_TYPES)
+            is_editable = getattr(field, "editable", False)
+            is_not_unique = not getattr(field, "unique", False) # do not add one to one relation fields
+            is_not_content_type = getattr(field, "related_model", None) != ContentType  # do not add genericforeignkey
+
+            if is_valid_type and is_editable and is_not_unique and is_not_content_type:
+                editable_fields.append(field.name)
         return editable_fields
 
     def generate_filterset(self):
