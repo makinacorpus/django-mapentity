@@ -1,12 +1,12 @@
 import logging
 
 from crispy_forms.helper import FormHelper
+from django.contrib import messages
 from django.contrib.contenttypes.fields import (
     GenericForeignKey,
     GenericRel,
     GenericRelation,
 )
-from django.contrib import messages
 from django.contrib.gis.db.models import GeometryField
 from django.db.models.fields.files import FileField
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
@@ -185,10 +185,10 @@ class MultiObjectActionMixin:
     """
     Perform data validation before performing an action on multiple items
     """
+
     def get(self, request, *args, **kwargs):
-        print("multi object action mixin")
         if not request.GET.get("pks"):
-            messages.error(self.request, _("At least one object must be selected"))
+            messages.warning(self.request, _("At least one object must be selected"))
             return HttpResponseRedirect(self.get_success_url())
 
         return super().get(request, *args, **kwargs)

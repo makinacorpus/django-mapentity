@@ -7,11 +7,11 @@ from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
@@ -53,7 +53,7 @@ from .mixins import (
     FilterListMixin,
     FormViewMixin,
     ModelViewMixin,
-    MultiObjectActionMixin
+    MultiObjectActionMixin,
 )
 
 logger = logging.getLogger(__name__)
@@ -435,20 +435,13 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_title(self):
         return _("Delete selected %s") % self.model._meta.model_name
 
-    def get_success_url(self):
+    def get_redirect_url(self):
         return self.get_model().get_list_url()
-
-    def get(self, request, *args, **kwargs):
-        if not request.GET.get("pks"):
-            messages.error(self.request, _("At least one object must be selected"))
-            return HttpResponseRedirect(self.get_success_url())
-
-        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.get_queryset().delete()
         messages.success(self.request, _("Deleted"))
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(self.get_redirect_url())
 
     def get_context_data(self):
         context = super().get_context_data()
@@ -488,13 +481,13 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_title(self):
         return _("Update selected %s") % self.model._meta.model_name
 
-    def get_success_url(self):
+    def get_redirect_url(self):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
         modified_rows = self.update_queryset()
         messages.success(self.request, _("%s items updated") % modified_rows)
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(self.get_redirect_url())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -504,16 +497,18 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
         return context
 
     def get_editable_fields(self):
-        ALLOWED_FIELD_TYPES = (
-            models.BooleanField, models.ForeignKey
-        )
+        ALLOWED_FIELD_TYPES = (models.BooleanField, models.ForeignKey)
 
         editable_fields = []
         for field in self.model._meta.fields:
             is_valid_type = isinstance(field, ALLOWED_FIELD_TYPES)
             is_editable = getattr(field, "editable", False)
-            is_not_unique = not getattr(field, "unique", False) # do not add one to one relation fields
-            is_not_content_type = getattr(field, "related_model", None) != ContentType  # do not add genericforeignkey
+            is_not_unique = not getattr(
+                field, "unique", False
+            )  # do not add one to one relation fields
+            is_not_content_type = (
+                getattr(field, "related_model", None) != ContentType
+            )  # do not add genericforeignkey
 
             if is_valid_type and is_editable and is_not_unique and is_not_content_type:
                 editable_fields.append(field.name)
