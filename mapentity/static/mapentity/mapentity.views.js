@@ -116,20 +116,18 @@ $(window).on('entity:view:list', function (e, data) {
 
         var selected_pks = pks_list.join(",");
 
-        // replace href on delete button
-        var deleteBtn = $("#btn-delete")[0];
-        var urlDelete = new URL(deleteBtn.getAttribute("href"), window.location.origin);
-        urlDelete.searchParams.set("pks", selected_pks);
-
-        deleteBtn.setAttribute("href", urlDelete.toString());
-
-        // replace href on edit button
-        var editBtn = $("#btn-edit")[0];
-        var urlEdit = new URL(editBtn.getAttribute("href"), window.location.origin);
-        urlEdit.searchParams.set("pks", selected_pks);
-
-        editBtn.setAttribute("href", urlEdit.toString());
+        updateButtonHref("#btn-delete", "pks", selected_pks);
+        updateButtonHref("#btn-edit", "pks", selected_pks);
     });
+
+    function updateButtonHref(selector, paramName, paramValue) {
+        var btn = $(selector);
+        if (btn.length !== 0) {
+            var url = new URL(btn[0].getAttribute("href"), window.location.origin);
+            url.searchParams.set(paramName, paramValue);
+            btn[0].setAttribute("href", url.toString());
+        }
+    }
 });
 
 
