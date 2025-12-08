@@ -24,8 +24,8 @@
       <div class="modal-body">
           <p>{% blocktrans %}Do you want to apply the following modifications on the <strong>{{ nb_objects }} selected objects</strong> ?{% endblocktrans %}</p>
           <ul>
-          {% for field in form.fields %}
-              <li id="{{ field }}_li"><strong>{{ field }}</strong>: <span id="{{ field }}_value"></span></li>
+          {% for field_name, field in form.fields.items %}
+              <li id="{{ field_name }}_li"><strong>{{ field.label }}</strong>: <span id="{{ field_name }}_value"></span></li>
           {% endfor %}
           </ul>
       </div>

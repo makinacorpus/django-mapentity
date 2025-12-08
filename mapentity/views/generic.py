@@ -512,6 +512,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
 
             if is_valid_type and is_editable and is_not_unique and is_not_content_type:
                 editable_fields.append(field.name)
+
         return editable_fields
 
     def generate_filterset(self):
