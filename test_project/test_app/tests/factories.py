@@ -3,7 +3,7 @@ import random
 import factory
 from django.contrib.gis.geos import Point
 
-from test_project.test_app.models import DummyModel, ManikinModel, Sector, Tag
+from test_project.test_app.models import DummyModel, ManikinModel, Sector, Tag, GeoPoint, WeatherStation, City
 
 
 class TagFactory(factory.django.DjangoModelFactory):
@@ -11,6 +11,30 @@ class TagFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Tag
+
+
+class CityFactory(factory.django.DjangoModelFactory):
+    name = factory.Sequence(lambda n: f"City {n}")
+
+    @factory.lazy_attribute
+    def geom(self):
+        x = random.randint(-18000, 18000)
+        y = random.randint(-8000, 8000)
+        return Point(x / 100, y / 100, srid=4326)
+
+    class Meta:
+        model = City
+
+
+class WeatherStationFactory(factory.django.DjangoModelFactory):
+    @factory.lazy_attribute
+    def geom(self):
+        x = random.randint(-18000, 18000)
+        y = random.randint(-8000, 8000)
+        return Point(x / 100, y / 100, srid=4326)
+
+    class Meta:
+        model = WeatherStation
 
 
 class SectorFactory(factory.django.DjangoModelFactory):
@@ -51,3 +75,34 @@ class DummyModelFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = DummyModel
+
+
+class GeoPointFactory(factory.django.DjangoModelFactory):
+    name = "geo point"
+    internal_reference = "QF536-321"
+
+    @factory.lazy_attribute
+    def geom(self):
+        x = random.randint(-18000, 18000)
+        y = random.randint(-8000, 8000)
+        return Point(x / 100, y / 100, srid=4326)
+
+    @factory.post_generation
+    def tags(obj, create, extracted=None, **kwargs):
+        if create:
+            if extracted:
+                for tag in extracted:
+                    obj.tags.add(tag)
+            else:
+                obj.tags.add(TagFactory.create())
+
+    @factory.lazy_attribute
+    def sector(self):
+        return SectorFactory.create()
+
+    @factory.lazy_attribute
+    def weather_station(self):
+        return WeatherStationFactory.create()
+
+    class Meta:
+        model = GeoPoint

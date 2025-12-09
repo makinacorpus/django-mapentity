@@ -439,13 +439,13 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
-        self.get_queryset().delete()
-        messages.success(self.request, _("Deleted"))
+        deleted_items = self.get_queryset().delete()
+        messages.success(self.request, _("%s items deleted") % deleted_items[0])
         return HttpResponseRedirect(self.get_redirect_url())
 
     def get_context_data(self):
         context = super().get_context_data()
-        context["nb_objects"] = self.queryset.count()
+        context["nb_objects"] = self.get_queryset().count()
         return context
 
 
@@ -492,7 +492,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["form"] = self.generate_filterset().form
-        context["nb_objects"] = self.queryset.count()
+        context["nb_objects"] = self.get_queryset().count()
 
         return context
 
