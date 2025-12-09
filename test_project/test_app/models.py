@@ -1,7 +1,7 @@
-from django.contrib.gis.db import models
-from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.db import models
+from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import gettext_lazy as _
 from paperclip.models import Attachment as BaseAttachment
 from paperclip.models import FileType as BaseFileType
@@ -148,11 +148,13 @@ class Sector(MapEntityMixin, models.Model):
 class GeoPoint(MapEntityMixin, models.Model):
     public = models.BooleanField(default=False)
     geom = models.PointField(null=True, default=None)
-    located_in = models.ForeignKey(City, on_delete=models.SET_NULL, null=True, blank=True)
-    sector = models.ForeignKey(Sector,on_delete=models.CASCADE)
+    located_in = models.ForeignKey(
+        City, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    sector = models.ForeignKey(Sector, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    weather_station = models.OneToOneField(WeatherStation,on_delete=models.CASCADE)
-    internal_reference = models.CharField(max_length=20,editable=False)
+    weather_station = models.OneToOneField(WeatherStation, on_delete=models.CASCADE)
+    internal_reference = models.CharField(max_length=20, editable=False)
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.SET_NULL)
     object_id = models.PositiveIntegerField(blank=True, null=True)
     related_object = GenericForeignKey("content_type", "object_id")

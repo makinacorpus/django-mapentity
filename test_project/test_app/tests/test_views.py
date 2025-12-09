@@ -26,7 +26,14 @@ from mapentity.tests.factories import AttachmentFactory, SuperUserFactory
 from mapentity.views import Convert, JSSettings, ServeAttachment
 
 from ..models import City, DummyModel, FileType, GeoPoint
-from ..views import DummyDetail, DummyList, DummyModelFilter, RoadList, GeoPointMultiDelete, GeoPointMultiUpdate
+from ..views import (
+    DummyDetail,
+    DummyList,
+    DummyModelFilter,
+    GeoPointMultiDelete,
+    GeoPointMultiUpdate,
+    RoadList,
+)
 from .factories import DummyModelFactory, GeoPointFactory
 
 fake = Faker("en_US")
@@ -516,15 +523,14 @@ class MultiDeleteViewTest(BaseTest):
         multideleteview = GeoPointMultiDelete()
         multideleteview.object_list = GeoPoint.objects.none()
         self.assertEqual(
-            multideleteview.get_template_names()[-1], "mapentity/mapentity_multi_delete_confirmation.html"
+            multideleteview.get_template_names()[-1],
+            "mapentity/mapentity_multi_delete_confirmation.html",
         )
 
     def test_mapentity_title(self):
         multideleteview = GeoPointMultiDelete()
         multideleteview.object_list = GeoPoint.objects.none()
-        self.assertEqual(
-            multideleteview.get_title(), "Delete selected geopoint"
-        )
+        self.assertEqual(multideleteview.get_title(), "Delete selected geopoint")
 
     def test_multi_delete_should_have_number_of_selected_objects_in_context(self):
         view = GeoPointMultiDelete()
@@ -576,7 +582,6 @@ class MultiUpdateiewTest(BaseTest):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
 
-
     def test_multi_delete_with_empty_pks_parameter(self):
         """If pks parameter is empty the user is redirected to list view"""
         self.login()
@@ -584,20 +589,18 @@ class MultiUpdateiewTest(BaseTest):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
 
-
     def test_mapentity_template(self):
         multiupdateview = GeoPointMultiUpdate()
         multiupdateview.object_list = GeoPoint.objects.none()
         self.assertEqual(
-            multiupdateview.get_template_names()[-1], "mapentity/mapentity_multi_update_form.html"
+            multiupdateview.get_template_names()[-1],
+            "mapentity/mapentity_multi_update_form.html",
         )
 
     def test_mapentity_title(self):
         multiupdateview = GeoPointMultiUpdate()
         multiupdateview.object_list = GeoPoint.objects.none()
-        self.assertEqual(
-            multiupdateview.get_title(), "Update selected geopoint"
-        )
+        self.assertEqual(multiupdateview.get_title(), "Update selected geopoint")
 
     def test_multi_update_should_have_number_of_selected_objects_in_context(self):
         view = GeoPointMultiUpdate()
@@ -625,7 +628,14 @@ class MultiUpdateiewTest(BaseTest):
         editable_fields = view.get_editable_fields()
         self.assertEqual(
             editable_fields,
-            ['public', 'public_en', 'public_fr', 'public_zh_hant', 'located_in', 'sector']
+            [
+                "public",
+                "public_en",
+                "public_fr",
+                "public_zh_hant",
+                "located_in",
+                "sector",
+            ],
         )
 
     def test_multi_update_form_fields(self):
@@ -638,26 +648,33 @@ class MultiUpdateiewTest(BaseTest):
         # check translated fields
         self.assertEqual(
             list(form.fields.keys()),
-            ['public_en', 'public_fr', 'public_zh_hant', 'located_in', 'sector']
+            ["public_en", "public_fr", "public_zh_hant", "located_in", "sector"],
         )
 
         # check choices depends on the type on the field
-        self.assertEqual(form.fields['public_en'].widget.choices, [('unknown', "Do nothing"), ('true', 'Yes'), ('false', 'No')])
-        self.assertIn(('unknown', "Do nothing"), form.fields['located_in'].widget.choices)
-        self.assertIn(('', "Null"), form.fields['located_in'].widget.choices)
-        self.assertIn(('unknown', "Do nothing"), form.fields['sector'].widget.choices)
-        self.assertNotIn(('', "Null"), form.fields['sector'].widget.choices)
+        self.assertEqual(
+            form.fields["public_en"].widget.choices,
+            [("unknown", "Do nothing"), ("true", "Yes"), ("false", "No")],
+        )
+        self.assertIn(
+            ("unknown", "Do nothing"), form.fields["located_in"].widget.choices
+        )
+        self.assertIn(("", "Null"), form.fields["located_in"].widget.choices)
+        self.assertIn(("unknown", "Do nothing"), form.fields["sector"].widget.choices)
+        self.assertNotIn(("", "Null"), form.fields["sector"].widget.choices)
 
     def test_multi_update_post_do_nothing(self):
         self.login()
         data = {
-            'public_en': 'unknown',
-            'public_fr': 'unknown',
-            'public_zh_hant': 'unknown',
-            'located_in': 'unknown',
-            'sector': 'unknown',
+            "public_en": "unknown",
+            "public_fr": "unknown",
+            "public_zh_hant": "unknown",
+            "located_in": "unknown",
+            "sector": "unknown",
         }
-        response = self.client.post(self.model.get_multi_update_url() + "?pks=1%2C2", data=data)
+        response = self.client.post(
+            self.model.get_multi_update_url() + "?pks=1%2C2", data=data
+        )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
 
@@ -672,10 +689,12 @@ class MultiUpdateiewTest(BaseTest):
     def test_multi_update_post_boolean(self):
         self.login()
         data = {
-            'public_en': True,
-            'public_fr': False,
+            "public_en": True,
+            "public_fr": False,
         }
-        response = self.client.post(self.model.get_multi_update_url() + "?pks=1%2C2", data=data)
+        response = self.client.post(
+            self.model.get_multi_update_url() + "?pks=1%2C2", data=data
+        )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
         db_geopoint1 = GeoPoint.objects.get(pk=self.geopoint1.pk)
@@ -690,10 +709,12 @@ class MultiUpdateiewTest(BaseTest):
         self.login()
         selected_sector = self.geopoint1.sector
         data = {
-            'located_in': '',
-            'sector': selected_sector.pk,
+            "located_in": "",
+            "sector": selected_sector.pk,
         }
-        response = self.client.post(self.model.get_multi_update_url() + "?pks=1%2C2", data=data)
+        response = self.client.post(
+            self.model.get_multi_update_url() + "?pks=1%2C2", data=data
+        )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
         db_geopoint1 = GeoPoint.objects.get(pk=self.geopoint1.pk)

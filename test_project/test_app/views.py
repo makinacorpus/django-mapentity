@@ -5,7 +5,7 @@ from mapentity import views as mapentity_views
 
 from .filters import DummyModelFilterSet, RoadFilterSet
 from .forms import DummyModelForm, MushroomSpotForm, RoadForm
-from .models import DummyModel, MushroomSpot, Road, GeoPoint
+from .models import DummyModel, GeoPoint, MushroomSpot, Road
 from .serializers import DummyGeojsonSerializer, DummySerializer, RoadSerializer
 
 

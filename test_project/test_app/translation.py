@@ -1,6 +1,6 @@
 from modeltranslation.translator import TranslationOptions, translator
 
-from test_project.test_app.models import DummyModel, Road, GeoPoint
+from test_project.test_app.models import DummyModel, GeoPoint, Road
 
 
 class DummyModelTO(TranslationOptions):

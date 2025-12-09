@@ -2,7 +2,7 @@ from django import forms
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from mapentity.forms import MapEntityForm, MultiUpdateFilter, BaseMultiUpdateForm
+from mapentity.forms import BaseMultiUpdateForm, MapEntityForm, MultiUpdateFilter
 from mapentity.settings import app_settings
 
 from ..models import DummyModel, GeoPoint
@@ -76,7 +76,7 @@ class MapEntityRichTextFormTest(TestCase):
 class GeoPointForm(MultiUpdateFilter):
     class Meta:
         model = GeoPoint
-        exclude = ['geom']
+        exclude = ["geom"]
         form = BaseMultiUpdateForm
 
 
@@ -95,7 +95,10 @@ class MultiUpdateFilterTest(TestCase):
         fields = self.form.fields
         for field in ["public_en", "public_fr", "public_zh_hant"]:
             self.assertTrue(isinstance(fields[field], forms.NullBooleanField))
-            self.assertEqual(fields[field].widget.choices, [('unknown', 'Do nothing'), ('true', 'Yes'), ('false', 'No')])
+            self.assertEqual(
+                fields[field].widget.choices,
+                [("unknown", "Do nothing"), ("true", "Yes"), ("false", "No")],
+            )
 
     def test_nullable_foreign_key_fields(self):
         fields = self.form.fields

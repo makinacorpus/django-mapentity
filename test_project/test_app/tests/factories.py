@@ -3,7 +3,15 @@ import random
 import factory
 from django.contrib.gis.geos import Point
 
-from test_project.test_app.models import DummyModel, ManikinModel, Sector, Tag, GeoPoint, WeatherStation, City
+from test_project.test_app.models import (
+    City,
+    DummyModel,
+    GeoPoint,
+    ManikinModel,
+    Sector,
+    Tag,
+    WeatherStation,
+)
 
 
 class TagFactory(factory.django.DjangoModelFactory):
