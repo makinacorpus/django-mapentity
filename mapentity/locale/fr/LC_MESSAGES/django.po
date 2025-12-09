@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-25 08:36+0000\n"
+"POT-Creation-Date: 2025-12-09 09:57+0000\n"
 "PO-Revision-Date: 2025-10-24 15:28+0000\n"
 "Last-Translator: J-E Castagnede <jean-etienne.castagnede@makina-corpus.com>\n"
 "Language-Team: French <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/fr/>\n"
@@ -42,6 +42,15 @@ msgstr "Soumettre le fichier"
 
 msgid "Update attachment"
 msgstr "Modifier le fichier"
+
+msgid "Save"
+msgstr "Sauvegarder"
+
+msgid "Do nothing"
+msgstr "Ne rien faire"
+
+msgid "Null"
+msgstr "Nulle"
 
 msgid "object"
 msgstr "objet"
@@ -200,11 +209,21 @@ msgstr "Fichier shape"
 msgid "GPX"
 msgstr "GPX"
 
-msgid "Do you really wish to delete the following objects ?"
-msgstr "Voulez-vous vraiment supprimer les objets suivants ?"
+msgid "Do you really wish to delete <strong>%(nb_objects)s objects</strong> ?"
+msgstr "Voulez-vous vraiment supprimer <strong>%(nb_objects)s</strong> objets ?"
 
 msgid "No, back to list view"
 msgstr "Non, retour à la vue liste"
+
+msgid "Modify selected items"
+msgstr "Modifier les éléments sélectionnés"
+
+msgid "Confirme modification"
+msgstr "Conformer la modification"
+
+#, python-format
+msgid "Do you want to apply the following modifications on the <strong>%(nb_objects)s selected objects</strong> ?"
+msgstr "Voulez-vous appliquer les modifications suivantes sur les <strong>%(nb_objects)s objets sélectionnés </strong> ?"
 
 msgid "Last author"
 msgstr "Dernier auteur"
@@ -259,7 +278,19 @@ msgstr "Fiche détail"
 
 #, python-format
 msgid "Delete selected %s"
-msgstr "Supprimer %s sélectionnés"
+msgstr "Supprimer les %s éléments sélectionnés"
+
+#, python-format
+msgid "%s items deleted"
+msgstr "% éléments supprimés"
+
+#, python-format
+msgid "Update selected %s"
+msgstr "Modifier les %s sélectionnés"
+
+#, python-format
+msgid "%s items updated"
+msgstr "%s éléments modifiés"
 
 msgid "Created"
 msgstr "Créé"
@@ -285,3 +316,6 @@ msgstr "Modifier %s"
 
 msgid "Saved"
 msgstr "Sauvegardé"
+
+msgid "At least one object must be selected"
+msgstr "Au moins un ojet doit être sélectionné"
