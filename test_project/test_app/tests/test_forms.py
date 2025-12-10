@@ -5,7 +5,7 @@ from django.test.utils import override_settings
 from mapentity.forms import BaseMultiUpdateForm, MapEntityForm, MultiUpdateFilter
 from mapentity.settings import app_settings
 
-from ..models import DummyModel, GeoPoint, City
+from ..models import City, DummyModel, GeoPoint
 
 
 class DummyForm(MapEntityForm):
