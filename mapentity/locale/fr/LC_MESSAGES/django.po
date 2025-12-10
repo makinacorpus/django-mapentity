@@ -283,7 +283,7 @@ msgstr "Supprimer les %s éléments sélectionnés"
 
 #, python-format
 msgid "%s items deleted"
-msgstr "% éléments supprimés"
+msgstr "%s éléments supprimés"
 
 #, python-format
 msgid "Update selected %s"
