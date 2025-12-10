@@ -519,6 +519,11 @@ class MultiDeleteViewTest(BaseTest):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
 
+    def test_multi_delete_with_pks_parameter(self):
+        self.login()
+        response = self.client.get(self.model.get_multi_delete_url() + "?pks=1%2C2")
+        self.assertEqual(response.status_code, 200)
+
     def test_mapentity_template(self):
         multideleteview = GeoPointMultiDelete()
         multideleteview.object_list = GeoPoint.objects.none()
@@ -588,6 +593,11 @@ class MultiUpdateiewTest(BaseTest):
         response = self.client.get(self.model.get_multi_delete_url() + "?pks=")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
+
+    def test_multi_update_with_pks_parameter(self):
+        self.login()
+        response = self.client.get(self.model.get_multi_update_url() + "?pks=1%2C2")
+        self.assertEqual(response.status_code, 200)
 
     def test_mapentity_template(self):
         multiupdateview = GeoPointMultiUpdate()

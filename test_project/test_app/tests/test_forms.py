@@ -5,7 +5,7 @@ from django.test.utils import override_settings
 from mapentity.forms import BaseMultiUpdateForm, MapEntityForm, MultiUpdateFilter
 from mapentity.settings import app_settings
 
-from ..models import DummyModel, GeoPoint
+from ..models import DummyModel, GeoPoint, City
 
 
 class DummyForm(MapEntityForm):
@@ -80,6 +80,13 @@ class GeoPointForm(MultiUpdateFilter):
         form = BaseMultiUpdateForm
 
 
+class CityStationForm(MultiUpdateFilter):
+    class Meta:
+        model = City
+        exclude = ["geom"]
+        form = BaseMultiUpdateForm
+
+
 class MultiUpdateFilterTest(TestCase):
     def setUp(self):
         self.form = GeoPointForm().form
@@ -90,6 +97,11 @@ class MultiUpdateFilterTest(TestCase):
         self.assertIn("public_fr", fields)
         self.assertIn("public_zh_hant", fields)
         self.assertNotIn("public", fields)
+
+    def test_translated_fields_for_not_registered_model(self):
+        form = CityStationForm().form
+        fields = list(form.fields.keys())
+        self.assertEqual(["name"], fields)
 
     def test_boolean_fields(self):
         fields = self.form.fields

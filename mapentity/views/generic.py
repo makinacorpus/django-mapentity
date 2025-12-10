@@ -457,10 +457,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
             if value == "unknown" or field not in model_fields:
                 continue
 
-            if value in ("true", "false"):
-                data[field] = value == "true"
-            else:
-                data[field] = value
+            data[field] = value
 
         return queryset.update(**data)
 
