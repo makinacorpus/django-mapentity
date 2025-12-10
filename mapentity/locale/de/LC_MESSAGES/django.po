@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-14 15:45+0000\n"
+"POT-Creation-Date: 2025-12-10 09:59+0000\n"
 "PO-Revision-Date: 2025-10-24 15:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: German <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/de/>\n"
@@ -41,6 +41,15 @@ msgid "Submit attachment"
 msgstr ""
 
 msgid "Update attachment"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Do nothing"
+msgstr ""
+
+msgid "Null"
 msgstr ""
 
 msgid "object"
@@ -188,6 +197,9 @@ msgstr ""
 msgid "Map"
 msgstr ""
 
+msgid "Access to the requested resource is restricted"
+msgstr ""
+
 msgid "CSV"
 msgstr ""
 
@@ -195,6 +207,23 @@ msgid "Shapefile"
 msgstr ""
 
 msgid "GPX"
+msgstr ""
+
+#, python-format
+msgid "Do you really wish to delete <strong>%(nb_objects)s objects</strong> ?"
+msgstr ""
+
+msgid "No, back to list view"
+msgstr ""
+
+msgid "Modify selected items"
+msgstr ""
+
+msgid "Confirme modification"
+msgstr ""
+
+#, python-format
+msgid "Do you want to apply the following modifications on the <strong>%(nb_objects)s selected objects</strong> ?"
 msgstr ""
 
 msgid "Last author"
@@ -248,6 +277,22 @@ msgstr ""
 msgid "Detail sheet"
 msgstr ""
 
+#, python-format
+msgid "Delete selected %s"
+msgstr ""
+
+#, python-format
+msgid "%s items deleted"
+msgstr ""
+
+#, python-format
+msgid "Update selected %s"
+msgstr ""
+
+#, python-format
+msgid "%s items updated"
+msgstr ""
+
 msgid "Created"
 msgstr ""
 
@@ -271,4 +316,7 @@ msgid "Edit %s"
 msgstr ""
 
 msgid "Saved"
+msgstr ""
+
+msgid "At least one object must be selected"
 msgstr ""
