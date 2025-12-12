@@ -12,11 +12,11 @@
 </div>
 
 <!-- Confirmation Modal -->
-<div id="confirmation-modal" class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div id="confirmation-modal" class="modal fade" tabindex="-1" aria-labelledby="modal-label" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">{% trans "Confirm modification" %}</h5>
+        <h5 class="modal-title" id="modal-label">{% trans "Confirm modification" %}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -44,13 +44,13 @@
     const form = document.getElementById("multi-update-form");
 
     // intercept submit event to ask confirmation to the user before modifying multiple elements
+    document.getElementById("confirm-submit").addEventListener("click", function(event) {
+        form.submit();
+    });
+
     form.addEventListener("submit", function(event) {
         // stop propagation to avoid submitting the form
         event.preventDefault();
-
-        document.getElementById("confirm-submit").onclick = () => {
-            form.submit();
-        };
 
         $(".modal-body span").each(function(index, span) {
             const fieldName = span.id.replace("_value", "");
