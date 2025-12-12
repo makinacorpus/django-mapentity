@@ -43,13 +43,6 @@
 <script>
     const form = document.getElementById("multi-update-form");
 
-    // duplicate pks params  (GET) on action url
-    const url = new URL("{{ model.get_multi_update_url }}", window.location.origin);
-    const params = new URLSearchParams(window.location.search);
-
-    url.search = params.toString();
-    form.action = url.toString();
-
     // intercept submit event to ask confirmation to the user before modifying multiple elements
     form.addEventListener("submit", function(event) {
         // stop propagation to avoid submitting the form
