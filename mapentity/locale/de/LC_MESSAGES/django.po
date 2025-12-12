@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-10 09:59+0000\n"
+"POT-Creation-Date: 2025-12-12 07:51+0000\n"
 "PO-Revision-Date: 2025-10-24 15:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: German <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/de/>\n"
@@ -219,7 +219,7 @@ msgstr ""
 msgid "Modify selected items"
 msgstr ""
 
-msgid "Confirme modification"
+msgid "Confirm modification"
 msgstr ""
 
 #, python-format
