@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-12 07:51+0000\n"
+"POT-Creation-Date: 2025-12-12 08:01+0000\n"
 "PO-Revision-Date: 2025-10-24 15:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: German <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/de/>\n"
@@ -278,19 +278,19 @@ msgid "Detail sheet"
 msgstr ""
 
 #, python-format
-msgid "Delete selected %s"
+msgid "Delete selected %(model)s"
 msgstr ""
 
 #, python-format
-msgid "%s items deleted"
+msgid "%(count)d items deleted"
 msgstr ""
 
 #, python-format
-msgid "Update selected %s"
+msgid "Update selected %(model)s"
 msgstr ""
 
 #, python-format
-msgid "%s items updated"
+msgid "%(count)d items updated"
 msgstr ""
 
 msgid "Created"

@@ -432,14 +432,14 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
         return ["mapentity/mapentity_multi_delete_confirmation.html"]
 
     def get_title(self):
-        return _("Delete selected %s") % self.model._meta.model_name
+        return _("Delete selected %(model)s") % {'model': self.model._meta.model_name}
 
     def get_redirect_url(self):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
         deleted_items = self.get_queryset().delete()
-        messages.success(self.request, _("%s items deleted") % deleted_items[0])
+        messages.success(self.request, _("%(count)d items deleted") % {'count': deleted_items[0]})
         return HttpResponseRedirect(self.get_redirect_url())
 
     def get_context_data(self):
@@ -475,14 +475,14 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
         return ["mapentity/mapentity_multi_update_form.html"]
 
     def get_title(self):
-        return _("Update selected %s") % self.model._meta.model_name
+        return _("Update selected %(model)s") % {'model': self.model._meta.model_name}
 
     def get_redirect_url(self):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
         modified_rows = self.update_queryset()
-        messages.success(self.request, _("%s items updated") % modified_rows)
+        messages.success(self.request, _("%(count)d items updated") % {'count': modified_rows})
         return HttpResponseRedirect(self.get_redirect_url())
 
     def get_context_data(self, **kwargs):
