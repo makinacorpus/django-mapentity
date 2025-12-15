@@ -4,6 +4,10 @@ CHANGELOG
 8.15.1+dev (XXXX-XX-XX)
 -----------------------
 
+**New feature**
+
+- Add bulk deletion/edition on list views (refs #5107).
+
 
 8.15.1 (2025-11-14)
 -----------------------
