@@ -4,10 +4,10 @@
 {% block mainpanel %}
 {{ block.super }}
 
-<div class="container text-center">
-    <div class="row justify-content-md-center">
-        <div class="col-5">
-            <div class="alert alert-block">
+<div class="container">
+    <div class="d-flex justify-content-center">
+        <div>
+            <div class="alert">
                 <h4 class="alert-heading">{% trans "Warning!" %}</h4>
                 {% blocktrans %}Do you really wish to delete <strong>{{ nb_objects }} objects</strong> ?{% endblocktrans %}
             </div>
