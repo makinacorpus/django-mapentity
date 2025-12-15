@@ -1,26 +1,23 @@
 {% extends "mapentity/base_site.html" %}
 {% load i18n mapentity_tags %}
 
-{% block extrahead %}
-    {{ block.super }}
-    <style>
-        .div-center { margin: 0 auto; width: 400px; }
-    </style>
-{% endblock extrahead %}
-
 {% block mainpanel %}
 {{ block.super }}
 
-<div class="div-center">
-    <div class="alert alert-block">
-        <h4 class="alert-heading">{% trans "Warning!" %}</h4>
-        {% blocktrans %}Do you really wish to delete <strong>{{ nb_objects }} objects</strong> ?{% endblocktrans %}
+<div class="container text-center">
+    <div class="row justify-content-md-center">
+        <div class="col-5">
+            <div class="alert alert-block">
+                <h4 class="alert-heading">{% trans "Warning!" %}</h4>
+                {% blocktrans %}Do you really wish to delete <strong>{{ nb_objects }} objects</strong> ?{% endblocktrans %}
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="submit" class="btn btn-danger" value="{% trans "Yes, delete" %}">
+                <a class="btn btn-inverse" href="{{ model.get_list_url }}">{% trans "No, back to list view" %}</a>
+            </form>
+        </div>
     </div>
-    <form method="POST">
-        {% csrf_token %}
-        <input type="submit" class="btn btn-danger" value="{% trans "Yes, delete" %}">
-        <a class="btn btn-inverse" href="{{ model.get_list_url }}">{% trans "No, back to list view" %}</a>
-    </form>
 </div>
 
 {% endblock mainpanel %}
