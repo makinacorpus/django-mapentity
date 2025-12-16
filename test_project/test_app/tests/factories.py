@@ -27,8 +27,7 @@ class CityFactory(factory.django.DjangoModelFactory):
     @factory.lazy_attribute
     def geom(self):
         points = [
-            (random.uniform(-180, 180), random.uniform(-80, 80))
-            for _ in range(3)
+            (random.uniform(-180, 180), random.uniform(-80, 80)) for _ in range(3)
         ]
         points.append(points[0])
         return Polygon(points, srid=4326)

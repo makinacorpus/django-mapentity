@@ -455,7 +455,11 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
         queryset = self.get_queryset()
         form = self.get_form(self.request.POST)
         form.is_valid()
-        cleaned_data = {name:value for name, value in form.cleaned_data.items() if self.request.POST.get(name) != "unknown"}
+        cleaned_data = {
+            name: value
+            for name, value in form.cleaned_data.items()
+            if self.request.POST.get(name) != "unknown"
+        }
 
         return queryset.update(**cleaned_data)
 
