@@ -1,7 +1,7 @@
 import random
 
 import factory
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point, Polygon
 
 from test_project.test_app.models import (
     City,
@@ -26,9 +26,12 @@ class CityFactory(factory.django.DjangoModelFactory):
 
     @factory.lazy_attribute
     def geom(self):
-        x = random.randint(-18000, 18000)
-        y = random.randint(-8000, 8000)
-        return Point(x / 100, y / 100, srid=4326)
+        points = [
+            (random.uniform(-180, 180), random.uniform(-80, 80))
+            for _ in range(3)
+        ]
+        points.append(points[0])
+        return Polygon(points, srid=4326)
 
     class Meta:
         model = City
@@ -111,6 +114,10 @@ class GeoPointFactory(factory.django.DjangoModelFactory):
     @factory.lazy_attribute
     def weather_station(self):
         return WeatherStationFactory.create()
+
+    @factory.lazy_attribute
+    def located_in(self):
+        return CityFactory.create()
 
     class Meta:
         model = GeoPoint

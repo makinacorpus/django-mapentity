@@ -453,15 +453,11 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
 class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
     def update_queryset(self):
         queryset = self.get_queryset()
-        data = {}
-        model_fields = [f.name for f in self.model._meta.get_fields()]
-        for field, value in self.request.POST.items():
-            if value == "unknown" or field not in model_fields:
-                continue
+        form = self.get_form(self.request.POST)
+        form.is_valid()
+        cleaned_data = {name:value for name, value in form.cleaned_data.items() if self.request.POST.get(name) != "unknown"}
 
-            data[field] = value == "true" if value in ("true", "false") else value
-
-        return queryset.update(**data)
+        return queryset.update(**cleaned_data)
 
     def get_queryset(self):
         self.pks = self.request.GET["pks"].split(",")
@@ -491,7 +487,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["form"] = self.generate_filterset().form
+        context["form"] = self.get_form()
         context["nb_objects"] = self.get_queryset().count()
 
         return context
@@ -515,16 +511,16 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
 
         return editable_fields
 
-    def generate_filterset(self):
+    def get_form(self, data=None):
         _model = self.model
 
-        class MultiUpdateForm(MultiUpdateFilter):
+        class MultiUpdateFilterset(MultiUpdateFilter):
             class Meta:
                 model = _model
                 fields = self.get_editable_fields()
                 form = BaseMultiUpdateForm
 
-        return MultiUpdateForm()
+        return MultiUpdateFilterset(data=data).form
 
 
 """

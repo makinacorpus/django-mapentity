@@ -563,7 +563,7 @@ class MultiDeleteViewTest(BaseTest):
         self.assertEqual(GeoPoint.objects.all().count(), 1)
 
 
-class MultiUpdateiewTest(BaseTest):
+class MultiUpdateViewTest(BaseTest):
     def setUp(self):
         self.user = User.objects.create_user("aah", "email@corp.com", "booh")
 
@@ -653,7 +653,7 @@ class MultiUpdateiewTest(BaseTest):
         view.object_list = []
         view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
         view.request.user = self.user
-        form = view.generate_filterset().form
+        form = view.get_form()
 
         # check translated fields
         self.assertEqual(
@@ -701,6 +701,9 @@ class MultiUpdateiewTest(BaseTest):
         data = {
             "public_en": True,
             "public_fr": False,
+            "public_zh_hant": "unknown",
+            "located_in": "unknown",
+            "sector": "unknown",
         }
         response = self.client.post(
             self.model.get_multi_update_url() + "?pks=1%2C2", data=data
@@ -719,6 +722,9 @@ class MultiUpdateiewTest(BaseTest):
         self.login()
         selected_sector = self.geopoint1.sector
         data = {
+            "public_en": "unknown",
+            "public_fr": "unknown",
+            "public_zh_hant": "unknown",
             "located_in": "",
             "sector": selected_sector.pk,
         }
