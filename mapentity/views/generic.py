@@ -440,7 +440,9 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def post(self, request, *args, **kwargs):
         deleted_items = self.get_queryset().delete()
         messages.success(
-            self.request, _("%(count)d items deleted") % {"count": deleted_items[0]}
+            self.request,
+            _("%(count)d items deleted")
+            % {"count": deleted_items[1][self.model._meta.label]},
         )
         return HttpResponseRedirect(self.get_redirect_url())
 
