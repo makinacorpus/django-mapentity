@@ -121,10 +121,10 @@ class MultiUpdateFilterTest(TestCase):
 
     def test_not_nullable_foreign_key_fields(self):
         fields = self.form.fields
-        self.assertTrue(isinstance(fields["sector"], forms.ChoiceField))
-        self.assertIn(("unknown", "Do nothing"), fields["sector"].widget.choices)
-        self.assertNotIn(("", "Null"), fields["sector"].widget.choices)
-        self.assertEqual(fields["sector"].initial, "unknown")
+        self.assertTrue(isinstance(fields["road"], forms.ChoiceField))
+        self.assertIn(("unknown", "Do nothing"), fields["road"].widget.choices)
+        self.assertNotIn(("", "Null"), fields["road"].widget.choices)
+        self.assertEqual(fields["road"].initial, "unknown")
 
     def test_crispy_form(self):
         helper = self.form.helper

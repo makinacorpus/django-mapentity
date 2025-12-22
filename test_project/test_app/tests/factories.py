@@ -1,7 +1,7 @@
 import random
 
 import factory
-from django.contrib.gis.geos import Point, Polygon
+from django.contrib.gis.geos import Point, Polygon, LineString
 
 from test_project.test_app.models import (
     City,
@@ -9,8 +9,8 @@ from test_project.test_app.models import (
     GeoPoint,
     ManikinModel,
     Sector,
+    Road,
     Tag,
-    WeatherStation,
 )
 
 
@@ -36,15 +36,18 @@ class CityFactory(factory.django.DjangoModelFactory):
         model = City
 
 
-class WeatherStationFactory(factory.django.DjangoModelFactory):
+class RoadFactory(factory.django.DjangoModelFactory):
+    name = factory.Sequence(lambda n: f"Road {n}")
+
     @factory.lazy_attribute
     def geom(self):
-        x = random.randint(-18000, 18000)
-        y = random.randint(-8000, 8000)
-        return Point(x / 100, y / 100, srid=4326)
+        points = [
+            (random.uniform(-180, 180), random.uniform(-80, 80)) for _ in range(2)
+        ]
+        return LineString(points, srid=4326)
 
     class Meta:
-        model = WeatherStation
+        model = Road
 
 
 class SectorFactory(factory.django.DjangoModelFactory):
@@ -107,12 +110,12 @@ class GeoPointFactory(factory.django.DjangoModelFactory):
                 obj.tags.add(TagFactory.create())
 
     @factory.lazy_attribute
-    def sector(self):
-        return SectorFactory.create()
+    def road(self):
+        return RoadFactory.create()
 
     @factory.lazy_attribute
-    def weather_station(self):
-        return WeatherStationFactory.create()
+    def dummy_model(self):
+        return DummyModelFactory.create()
 
     @factory.lazy_attribute
     def located_in(self):

@@ -151,9 +151,9 @@ class GeoPoint(MapEntityMixin, models.Model):
     located_in = models.ForeignKey(
         City, on_delete=models.SET_NULL, null=True, blank=True
     )
-    sector = models.ForeignKey(Sector, on_delete=models.CASCADE)
+    road = models.ForeignKey(Road, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    weather_station = models.OneToOneField(WeatherStation, on_delete=models.CASCADE)
+    dummy_model = models.OneToOneField(DummyModel, null=True, on_delete=models.CASCADE)
     internal_reference = models.CharField(max_length=20, editable=False)
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.SET_NULL)
     object_id = models.PositiveIntegerField(blank=True, null=True)

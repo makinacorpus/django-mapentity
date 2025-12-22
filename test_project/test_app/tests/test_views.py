@@ -644,7 +644,7 @@ class MultiUpdateViewTest(BaseTest):
                 "public_fr",
                 "public_zh_hant",
                 "located_in",
-                "sector",
+                "road",
             ],
         )
 
@@ -658,7 +658,7 @@ class MultiUpdateViewTest(BaseTest):
         # check translated fields
         self.assertEqual(
             list(form.fields.keys()),
-            ["public_en", "public_fr", "public_zh_hant", "located_in", "sector"],
+            ["public_en", "public_fr", "public_zh_hant", "located_in", "road"],
         )
 
         # check choices depends on the type on the field
@@ -670,8 +670,8 @@ class MultiUpdateViewTest(BaseTest):
             ("unknown", "Do nothing"), form.fields["located_in"].widget.choices
         )
         self.assertIn(("", "Null value"), form.fields["located_in"].widget.choices)
-        self.assertIn(("unknown", "Do nothing"), form.fields["sector"].widget.choices)
-        self.assertNotIn(("", "Null value"), form.fields["sector"].widget.choices)
+        self.assertIn(("unknown", "Do nothing"), form.fields["road"].widget.choices)
+        self.assertNotIn(("", "Null value"), form.fields["road"].widget.choices)
 
     def test_multi_update_post_do_nothing(self):
         self.login()
@@ -680,7 +680,7 @@ class MultiUpdateViewTest(BaseTest):
             "public_fr": "unknown",
             "public_zh_hant": "unknown",
             "located_in": "unknown",
-            "sector": "unknown",
+            "road": "unknown",
         }
         response = self.client.post(
             self.model.get_multi_update_url() + "?pks=1%2C2", data=data
@@ -694,7 +694,7 @@ class MultiUpdateViewTest(BaseTest):
             self.assertEqual(db_geopoint.public_fr, geopoint.public_fr)
             self.assertEqual(db_geopoint.public_zh_hant, geopoint.public_zh_hant)
             self.assertEqual(db_geopoint.located_in, geopoint.located_in)
-            self.assertEqual(db_geopoint.sector, geopoint.sector)
+            self.assertEqual(db_geopoint.road, geopoint.road)
 
     def test_multi_update_post_boolean(self):
         self.login()
@@ -703,7 +703,7 @@ class MultiUpdateViewTest(BaseTest):
             "public_fr": False,
             "public_zh_hant": "unknown",
             "located_in": "unknown",
-            "sector": "unknown",
+            "road": "unknown",
         }
         response = self.client.post(
             self.model.get_multi_update_url() + "?pks=1%2C2", data=data
@@ -720,13 +720,13 @@ class MultiUpdateViewTest(BaseTest):
 
     def test_multi_update_post_foreign_key(self):
         self.login()
-        selected_sector = self.geopoint1.sector
+        selected_road = self.geopoint1.road
         data = {
             "public_en": "unknown",
             "public_fr": "unknown",
             "public_zh_hant": "unknown",
             "located_in": "",
-            "sector": selected_sector.pk,
+            "road": selected_road.pk,
         }
         response = self.client.post(
             self.model.get_multi_update_url() + "?pks=1%2C2", data=data
@@ -735,11 +735,11 @@ class MultiUpdateViewTest(BaseTest):
         self.assertEqual(response.url, self.model.get_list_url())
         db_geopoint1 = GeoPoint.objects.get(pk=self.geopoint1.pk)
         self.assertEqual(db_geopoint1.located_in, None)
-        self.assertEqual(db_geopoint1.sector, selected_sector)
+        self.assertEqual(db_geopoint1.road, selected_road)
 
         db_geopoint2 = GeoPoint.objects.get(pk=self.geopoint2.pk)
         self.assertEqual(db_geopoint2.located_in, None)
-        self.assertEqual(db_geopoint2.sector, selected_sector)
+        self.assertEqual(db_geopoint2.road, selected_road)
 
 
 class ViewPermissionsTest(BaseTest):
