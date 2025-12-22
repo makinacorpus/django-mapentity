@@ -226,8 +226,8 @@ msgid "Confirm modification"
 msgstr "Confirmer la modification"
 
 #, python-format
-msgid "Do you want to apply the following modifications on the <strong>%(nb_objects)s selected objects</strong> ?"
-msgstr "Voulez-vous appliquer les modifications suivantes sur les <strong>%(nb_objects)s objets sélectionnés </strong> ?"
+msgid "Do you want to apply the following modifications on the <strong>%(nb_objects)s selected objects</strong>?"
+msgstr "Voulez-vous appliquer les modifications suivantes sur les <strong>%(nb_objects)s objets sélectionnés</strong> ?"
 
 msgid "Last author"
 msgstr "Dernier auteur"
