@@ -322,4 +322,4 @@ msgid "Saved"
 msgstr "Sauvegardé"
 
 msgid "At least one object must be selected"
-msgstr "Au moins un ojet doit être sélectionné"
+msgstr "Au moins un objet doit être sélectionné"
