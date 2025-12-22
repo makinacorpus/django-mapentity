@@ -38,8 +38,6 @@
 </div>
 
 
-
-
 <script>
     const form = document.getElementById("multi-update-form");
 
@@ -55,12 +53,14 @@
         $(".modal-body span").each(function(index, span) {
             const fieldName = span.id.replace("_value", "");
             const selectElement = document.getElementById("id_" + fieldName);
+            con
             const selectedOptions = Array.from(selectElement.selectedOptions);
 
             const listElement = document.getElementById(fieldName + "_li");
             let values = [];
 
             selectedOptions.forEach(option => {
+                console.log(option);
                 if (option.value === "unknown") {
                     listElement.hidden = true;
                 } else {

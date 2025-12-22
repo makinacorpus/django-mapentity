@@ -116,7 +116,7 @@ class MultiUpdateFilterTest(TestCase):
         fields = self.form.fields
         self.assertTrue(isinstance(fields["located_in"], forms.ChoiceField))
         self.assertIn(("unknown", "Do nothing"), fields["located_in"].widget.choices)
-        self.assertIn(("", "Null"), fields["located_in"].widget.choices)
+        self.assertIn(("", "Null value"), fields["located_in"].widget.choices)
         self.assertEqual(fields["located_in"].initial, "unknown")
 
     def test_not_nullable_foreign_key_fields(self):

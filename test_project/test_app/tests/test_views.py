@@ -669,9 +669,9 @@ class MultiUpdateViewTest(BaseTest):
         self.assertIn(
             ("unknown", "Do nothing"), form.fields["located_in"].widget.choices
         )
-        self.assertIn(("", "Null"), form.fields["located_in"].widget.choices)
+        self.assertIn(("", "Null value"), form.fields["located_in"].widget.choices)
         self.assertIn(("unknown", "Do nothing"), form.fields["sector"].widget.choices)
-        self.assertNotIn(("", "Null"), form.fields["sector"].widget.choices)
+        self.assertNotIn(("", "Null value"), form.fields["sector"].widget.choices)
 
     def test_multi_update_post_do_nothing(self):
         self.login()
