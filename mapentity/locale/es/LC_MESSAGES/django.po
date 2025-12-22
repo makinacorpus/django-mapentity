@@ -213,7 +213,7 @@ msgid "Warning!"
 msgstr ""
 
 #, python-format
-msgid "Do you really wish to delete <strong>%(nb_objects)s objects</strong> ?"
+msgid "Do you really wish to delete <strong>%(nb_objects)s objects</strong>?"
 msgstr ""
 
 msgid "No, back to list view"
