@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-15 08:35+0000\n"
+"POT-Creation-Date: 2025-12-22 14:06+0000\n"
 "PO-Revision-Date: 2025-10-24 15:28+0000\n"
 "Last-Translator: Anonymous <noreply@weblate.org>\n"
 "Language-Team: German <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/de/>\n"
@@ -49,7 +49,7 @@ msgstr ""
 msgid "Do nothing"
 msgstr ""
 
-msgid "Null"
+msgid "Null value"
 msgstr ""
 
 msgid "object"
@@ -213,20 +213,24 @@ msgid "Warning!"
 msgstr ""
 
 #, python-format
-msgid "Do you really wish to delete <strong>%(nb_objects)s objects</strong>?"
+msgid "Do you really wish to delete <span class=\"badge text-bg-danger\">%(nb_objects)s objects</span> ?"
 msgstr ""
 
 msgid "No, back to list view"
 msgstr ""
 
-msgid "Modify selected items"
+#, python-format
+msgid "Select values for the selected %(model_name_plural)s"
 msgstr ""
 
 msgid "Confirm modification"
 msgstr ""
 
 #, python-format
-msgid "Do you want to apply the following modifications on the <strong>%(nb_objects)s selected objects</strong>?"
+msgid "Do you want to apply the following modifications on the <span class=\"badge text-bg-danger\">%(nb_objects)s selected objects</span>"
+msgstr ""
+
+msgid "Confirm"
 msgstr ""
 
 msgid "Last author"

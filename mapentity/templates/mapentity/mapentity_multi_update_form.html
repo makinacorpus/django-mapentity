@@ -6,7 +6,7 @@
 
 <div class="row justify-content-center w-100 m-5">
     <div class="col-4 card card-body">
-        <h4>{% trans "Modify selected items" %}</h4>
+        <h4 class="card-title">{% blocktrans %}Select values for the selected {{ model_name_plural }}{% endblocktrans %}</h4>
         {% crispy form form.helper %}
     </div>
 </div>
@@ -22,7 +22,7 @@
         </button>
       </div>
       <div class="modal-body">
-          <p>{% blocktrans %}Do you want to apply the following modifications on the <strong>{{ nb_objects }} selected objects</strong>?{% endblocktrans %}</p>
+          <p>{% blocktrans %}Do you want to apply the following modifications on the <span class="badge text-bg-danger">{{ nb_objects }} selected objects</span>{% endblocktrans %}</p>
           <ul>
           {% for field_name, field in form.fields.items %}
               <li id="{{ field_name }}_li"><strong>{{ field.label }}</strong>: <span id="{{ field_name }}_value"></span></li>
@@ -31,7 +31,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans "Cancel" %}</button>
-        <button type="button" class="btn btn-primary" id="confirm-submit">{% trans "Save" %}</button>
+        <button type="button" class="btn btn-danger" id="confirm-submit">{% trans "Confirm" %}</button>
       </div>
     </div>
   </div>

@@ -495,6 +495,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["form"] = self.get_form()
         context["nb_objects"] = self.get_queryset().count()
+        context["model_name_plural"] = self.model._meta.verbose_name_plural
 
         return context
 

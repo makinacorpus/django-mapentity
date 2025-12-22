@@ -403,7 +403,7 @@ class MultiUpdateFilter(django_filters.FilterSet):
                 ] + field.widget.choices[1:]
             elif isinstance(field, forms.ChoiceField):
                 is_nullable = model._meta.get_field(name).null
-                null_label = _("Null")
+                null_label = _("Null value")
                 field.empty_label = null_label
 
                 choices = list(field.widget.choices)
