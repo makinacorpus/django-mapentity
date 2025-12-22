@@ -1,15 +1,15 @@
 import random
 
 import factory
-from django.contrib.gis.geos import Point, Polygon, LineString
+from django.contrib.gis.geos import LineString, Point, Polygon
 
 from test_project.test_app.models import (
     City,
     DummyModel,
     GeoPoint,
     ManikinModel,
-    Sector,
     Road,
+    Sector,
     Tag,
 )
 
