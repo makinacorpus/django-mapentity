@@ -210,8 +210,12 @@ class MapEntityForm(TranslatedModelForm):
         # Check if fieldslayout is defined, otherwise use Meta.fields
         fieldslayout = self.fieldslayout
         if not fieldslayout:
-            # Remove geomfields from left part
-            fieldslayout = [fl for fl in self.orig_fields if fl not in self.geomfields]
+            # Collect all translated field names (e.g. name_fr, name_en)
+            translated_names = set()
+            for x, names in getattr(self, "_translated", {}).items():
+                translated_names.update(names)
+            # Remove geomfields and translated variants from left part
+            fieldslayout = [fl for fl in self.orig_fields if fl not in self.geomfields and fl not in translated_names]
         # Replace native fields in Crispy layout by translated fields
         fieldslayout = self.__replace_translatable_fields(fieldslayout)
 
