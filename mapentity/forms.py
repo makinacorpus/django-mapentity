@@ -403,12 +403,13 @@ class MultiUpdateFilter(django_filters.FilterSet):
                 ] + field.widget.choices[1:]
             elif isinstance(field, forms.ChoiceField):
                 is_nullable = model._meta.get_field(name).null
+                is_blank = model._meta.get_field(name).blank
                 null_label = _("Null value")
                 field.empty_label = null_label
 
                 choices = list(field.widget.choices)
-                # remove null value if the field isn't nullable
-                if not is_nullable:
+                # remove null value if the field isn't nullable or if the field isn't blank
+                if not is_nullable or not is_blank:
                     choices.remove(("", null_label))
                 choices.insert(0, ("unknown", _("Do nothing")))
                 field.widget.choices = choices

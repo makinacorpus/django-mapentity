@@ -5,7 +5,7 @@ from django.test.utils import override_settings
 from mapentity.forms import BaseMultiUpdateForm, MapEntityForm, MultiUpdateFilter
 from mapentity.settings import app_settings
 
-from ..models import City, DummyModel, GeoPoint
+from ..models import City, DummyModel, GeoPoint, ManikinModel
 
 
 class DummyForm(MapEntityForm):
@@ -87,6 +87,13 @@ class CityStationForm(MultiUpdateFilter):
         form = BaseMultiUpdateForm
 
 
+class ManikinModelForm(MultiUpdateFilter):
+    class Meta:
+        model = ManikinModel
+        fields = "__all__"
+        form = BaseMultiUpdateForm
+
+
 class MultiUpdateFilterTest(TestCase):
     def setUp(self):
         self.form = GeoPointForm().form
@@ -118,6 +125,14 @@ class MultiUpdateFilterTest(TestCase):
         self.assertIn(("unknown", "Do nothing"), fields["located_in"].widget.choices)
         self.assertIn(("", "Null value"), fields["located_in"].widget.choices)
         self.assertEqual(fields["located_in"].initial, "unknown")
+
+    def test_nullable_but_not_blank_foreign_key_fields(self):
+        form = ManikinModelForm().form
+        fields = form.fields
+        self.assertTrue(isinstance(fields["dummy"], forms.ChoiceField))
+        self.assertIn(("unknown", "Do nothing"), fields["dummy"].widget.choices)
+        self.assertNotIn(("", "Null value"), fields["dummy"].widget.choices)
+        self.assertEqual(fields["dummy"].initial, "unknown")
 
     def test_not_nullable_foreign_key_fields(self):
         fields = self.form.fields
