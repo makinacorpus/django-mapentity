@@ -539,6 +539,8 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
         form = MultiUpdateFilterset(data=data).form
         form.helper = FormHelper()
         form.helper.form_class = "form-horizontal"
+        form.helper.form_id = "multi-update-form"
+
 
         form.helper.label_class = "col-md-3"
         form.helper.field_class = "col-md-9"
