@@ -102,31 +102,48 @@ $(window).on('entity:view:list', function (e, data) {
     expandDatatableHeight();
 
     // batch edition
-    $("#btn-batch-editing").on("click", async () => {
-        var pks_list = [];
+    $("#btn-batch-editing").on("click", () => {
+        makeButtonDisabled("#btn-delete", "#tooltip-delete");
+        makeButtonDisabled("#btn-edit", "#tooltip-edit");
+    });
+
+    function makeButtonDisabled(btnSelector, tooltipSelector){
+        var btn = $(btnSelector);
+        var tooltip = $(tooltipSelector);
+        if($('.dt-select-checkbox:checked').length === 0){
+            btn.attr({'disabled': 'true'});
+            tooltip.attr({'title': 'At least one item must be selected'});
+        } else {
+            btn.removeAttr('disabled');
+            tooltip.removeAttr('title');
+        }
+    }
+
+    $('#btn-delete, #btn-edit').on('click',  async function () {
+        var $btn = $(this);
+        if (!$btn.length) return;
+
+        const selectedPks = await getSelectedPks();
+        const url = new URL($btn.data('url'), window.location.origin);
+        url.searchParams.set("pks", selectedPks);
+        if (url) {
+            window.location.href = url;
+        }
+    });
+
+    async function getSelectedPks() {
+        var pksList = [];
         if ($('.dt-scroll-headInner .dt-select-checkbox').is(":checked")) {
             const url = $('#mainfilter').attr('action').replace('.datatables', '/filter_infos.json');
             const params = $('#mainfilter').serialize();
 
             const data = await $.get(url, params);
-            pks_list = data.pk_list;
+            pksList = data.pk_list;
         } else {
-            pks_list = MapEntity.mainDatatable.rows( { selected: true } ).data().pluck('id').toArray();
+            pksList = MapEntity.mainDatatable.rows( { selected: true } ).data().pluck('id').toArray();
         }
 
-        var selected_pks = pks_list.join(",");
-
-        updateButtonHref("#btn-delete", "pks", selected_pks);
-        updateButtonHref("#btn-edit", "pks", selected_pks);
-    });
-
-    function updateButtonHref(selector, paramName, paramValue) {
-        var btn = $(selector);
-        if (btn.length !== 0) {
-            var url = new URL(btn[0].getAttribute("href"), window.location.origin);
-            url.searchParams.set(paramName, paramValue);
-            btn[0].setAttribute("href", url.toString());
-        }
+        return pksList.join(",");
     }
 });
 

@@ -56,14 +56,25 @@
                             <div class="dropdown-menu">
                                 {% block actions %}{% endblock %}
                                 {% if can_edit %}
-                                    <a class="dropdown-item" href="{{ model.get_multi_update_url }}" id="btn-edit" role="button">
-                                        <i class="bi bi-pencil-square"></i> {% trans "Edit" %}
-                                    </a>
-                                {%  endif %}
+                                    <span id="tooltip-edit">
+                                        <button type="button"
+                                                class="dropdown-item"
+                                                id="btn-edit"
+                                                data-url="{{ model.get_multi_update_url }}">
+                                            <i class="bi bi-pencil-square"></i> {% trans "Edit" %}
+                                        </button>
+                                    </span>
+                                {% endif %}
+
                                 {% if can_delete %}
-                                    <a class="dropdown-item text-danger" href="{{ model.get_multi_delete_url }}" id="btn-delete" role="button">
+                                    <span id="tooltip-delete">
+                                        <button type="button"
+                                                class="dropdown-item text-danger"
+                                                id="btn-delete"
+                                                data-url="{{ model.get_multi_delete_url }}">
                                             <i class="bi bi-trash"></i> {% trans "Delete" %}
-                                    </a>
+                                        </button>
+                                    </span>
                                 {% endif %}
                             </div>
                         </div>

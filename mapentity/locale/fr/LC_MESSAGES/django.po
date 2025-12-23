@@ -212,10 +212,9 @@ msgstr "GPX"
 msgid "Warning!"
 msgstr "Attention !"
 
-#, fuzzy, python-format
-#| msgid "Do you really wish to delete <strong>%(nb_objects)s objects</strong> ?"
+#, python-format
 msgid "Do you really wish to delete <span class=\"badge text-bg-danger\">%(nb_objects)s objects</span> ?"
-msgstr "Voulez-vous vraiment supprimer <span class=\"badge text-bg-danger\">%(nb_objects)s</span> objets ?"
+msgstr "Voulez-vous vraiment supprimer <span class=\"badge text-bg-danger\">%(nb_objects)s objets</span> ?"
 
 msgid "No, back to list view"
 msgstr "Non, retour à la vue liste"
