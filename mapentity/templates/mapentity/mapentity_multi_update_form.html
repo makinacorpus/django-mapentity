@@ -50,10 +50,9 @@
         // stop propagation to avoid submitting the form
         event.preventDefault();
 
-        $(".modal-body span").each(function(index, span) {
+        $(".modal-body li span").each(function(index, span) {
             const fieldName = span.id.replace("_value", "");
             const selectElement = document.getElementById("id_" + fieldName);
-            con
             const selectedOptions = Array.from(selectElement.selectedOptions);
 
             const listElement = document.getElementById(fieldName + "_li");

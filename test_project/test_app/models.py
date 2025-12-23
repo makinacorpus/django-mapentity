@@ -155,7 +155,9 @@ class GeoPoint(MapEntityMixin, models.Model):
     name = models.CharField(max_length=255)
     dummy_model = models.OneToOneField(DummyModel, null=True, on_delete=models.CASCADE)
     internal_reference = models.CharField(max_length=20, editable=False)
-    content_type = models.ForeignKey(ContentType, blank=True, null=True, on_delete=models.SET_NULL)
+    content_type = models.ForeignKey(
+        ContentType, blank=True, null=True, on_delete=models.SET_NULL
+    )
     object_id = models.PositiveIntegerField(blank=True, null=True)
     related_object = GenericForeignKey("content_type", "object_id")
     tags = models.ManyToManyField(Tag, blank=True)
