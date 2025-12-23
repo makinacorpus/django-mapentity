@@ -541,6 +541,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
 
         form.helper.label_class = "col-md-3"
         form.helper.field_class = "col-md-9"
+        form.helper.add_input(form.helper.submit(_("Save changes"), css_class="btn"))
         return form
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
