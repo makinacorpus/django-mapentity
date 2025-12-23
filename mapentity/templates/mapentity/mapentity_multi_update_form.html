@@ -23,7 +23,7 @@
       </div>
       <div class="modal-body">
           <p>
-              {% blocktrans count counter=nb_objects %}Do you want to apply the following modifications on this <span class="badge text-bg-danger">selected object</span>?{% plural %}Do you want to apply the following modifications on these <span class="badge text-bg-danger">{{ counter }} selected objects</span>?{% endblocktrans %}
+              {% blocktrans count counter=nb_objects %}Do you want to apply the following modifications on this <span class="badge badge-danger">selected object</span>?{% plural %}Do you want to apply the following modifications on these <span class="badge badge-danger">{{ counter }} selected objects</span>?{% endblocktrans %}
           </p>
           <ul>
           {% for field_name, field in form.fields.items %}

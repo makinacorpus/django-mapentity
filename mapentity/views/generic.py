@@ -541,10 +541,17 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
         form.helper.form_class = "form-horizontal"
         form.helper.form_id = "multi-update-form"
 
-
         form.helper.label_class = "col-md-3"
         form.helper.field_class = "col-md-9"
-        form.helper.add_input(Submit("save", _("Save"), css_class="btn btn-success", data_toggle="modal", data_target="#confirmation-modal"))
+        form.helper.add_input(
+            Submit(
+                "save",
+                _("Save"),
+                css_class="btn btn-success",
+                data_toggle="modal",
+                data_target="#confirmation-modal",
+            )
+        )
         return form
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
