@@ -3,11 +3,21 @@ $(window).on('entity:view:list', function (e, data) {
      * Datatables
      * .......................
      */
+    const canSelect = !!window.USER_CAN_SELECT;
+
     MapEntity.mainDatatable = $('#objects-list').DataTable({
         'processing': true,
         'serverSide': true,
         aoColumnDefs: [
-            { "render": DataTable.render.select(), "orderable": false, "searchable": false, "targets": [0]},
+            {
+                data: null,                 // ⭐ empêche l’erreur tn/4
+                defaultContent: '',
+                orderable: false,
+                searchable: false,
+                render: canSelect ? DataTable.render.select() : null,
+                visible: canSelect,
+                targets: 0
+            },
             { "bVisible": false, "aTargets": [ 1 ] },  // don't show first column (ID)
             // {
             //     "aTargets": [ 1 ],
@@ -57,11 +67,10 @@ $(window).on('entity:view:list', function (e, data) {
                 }
             );
         },
-    select: {
+        select: canSelect ? {
             style: 'multi',
-            selector: 'td:first-child',
-
-        },
+            selector: 'td:first-child'
+        } : false,
     order: [[1, 'asc']]
     });
     var paging = document.getElementsByClassName('dt-paging')[0];
