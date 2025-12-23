@@ -5,6 +5,7 @@ from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -37,7 +38,7 @@ from ..decorators import save_history, view_permission_required
 from ..forms import (
     AttachmentForm,
     BaseMultiUpdateForm,
-    MultiUpdateFilter,
+    MultiUpdateFilter, SubmitButton,
 )
 from ..helpers import (
     convertit_url,
@@ -541,7 +542,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
 
         form.helper.label_class = "col-md-3"
         form.helper.field_class = "col-md-9"
-        form.helper.add_input(form.helper.submit(_("Save changes"), css_class="btn"))
+        form.helper.add_input(Submit('save', 'save', css_class="btn"))
         return form
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
