@@ -38,7 +38,7 @@ from ..decorators import save_history, view_permission_required
 from ..forms import (
     AttachmentForm,
     BaseMultiUpdateForm,
-    MultiUpdateFilter, SubmitButton,
+    MultiUpdateFilter,
 )
 from ..helpers import (
     convertit_url,
@@ -542,7 +542,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
 
         form.helper.label_class = "col-md-3"
         form.helper.field_class = "col-md-9"
-        form.helper.add_input(Submit('save', 'save', css_class="btn"))
+        form.helper.add_input(Submit("save", _("Save"), css_class="btn btn-success"))
         return form
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
