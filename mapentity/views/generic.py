@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
+from crispy_forms.helper import FormHelper
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -416,7 +417,10 @@ class DocumentConvert(Convert, DetailView):
     def source_url(self):
         return self.get_object().get_document_url()
 
+
 """ CRUD """
+
+
 class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_queryset(self):
         pks = self.request.GET["pks"].split(",")
@@ -531,11 +535,18 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
                 fields = self.get_editable_fields()
                 form = BaseMultiUpdateForm
 
-        return MultiUpdateFilterset(data=data).form
+        form = MultiUpdateFilterset(data=data).form
+        form.helper = FormHelper()
+        form.helper.form_class = "form-horizontal"
+
+        form.helper.label_class = "col-md-3"
+        form.helper.field_class = "col-md-9"
+        return form
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
+
 
 class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
     @classmethod
