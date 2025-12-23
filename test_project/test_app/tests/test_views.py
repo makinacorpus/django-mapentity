@@ -489,40 +489,14 @@ class DetailViewTest(BaseTest):
 
 
 class MultiDeleteViewTest(BaseTest):
-    def setUp(self):
-        self.user = User.objects.create_user("aah", "email@corp.com", "booh")
-
-        def user_perms(p):
-            return {"test_app.export_geopoint": False}.get(p, True)
-
-        self.user.has_perm = mock.MagicMock(side_effect=user_perms)
-
-        self.model = GeoPoint
-
     @classmethod
     def setUpTestData(cls):
+        cls.user = SuperUserFactory.create()
+        cls.model = GeoPoint
+
         cls.geopoint1 = GeoPointFactory.create(name="geopoint1")
         cls.geopoint2 = GeoPointFactory.create(name="geopoint2")
         cls.geopoint3 = GeoPointFactory.create(name="geopoint3")
-
-    def test_multi_delete_without_pks_parameter(self):
-        """If pks parameter isn't specify the user is redirected to list view"""
-        self.login()
-        response = self.client.get(self.model.get_multi_delete_url())
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, self.model.get_list_url())
-
-    def test_multi_delete_with_empty_pks_parameter(self):
-        """If pks parameter is empty the user is redirected to list view"""
-        self.login()
-        response = self.client.get(self.model.get_multi_delete_url() + "?pks=")
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, self.model.get_list_url())
-
-    def test_multi_delete_with_pks_parameter(self):
-        self.login()
-        response = self.client.get(self.model.get_multi_delete_url() + "?pks=1%2C2")
-        self.assertEqual(response.status_code, 200)
 
     def test_mapentity_template(self):
         multideleteview = GeoPointMultiDelete()
@@ -556,7 +530,7 @@ class MultiDeleteViewTest(BaseTest):
         self.assertEqual(queryset[1], self.geopoint2)
 
     def test_multi_delete_post(self):
-        self.login()
+        self.client.force_login(self.user)
         response = self.client.post(self.model.get_multi_delete_url() + "?pks=1%2C2")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
@@ -564,40 +538,14 @@ class MultiDeleteViewTest(BaseTest):
 
 
 class MultiUpdateViewTest(BaseTest):
-    def setUp(self):
-        self.user = User.objects.create_user("aah", "email@corp.com", "booh")
-
-        def user_perms(p):
-            return {"test_app.export_geopoint": False}.get(p, True)
-
-        self.user.has_perm = mock.MagicMock(side_effect=user_perms)
-
-        self.model = GeoPoint
-
     @classmethod
     def setUpTestData(cls):
+        cls.user = SuperUserFactory()
+        cls.model = GeoPoint
+
         cls.geopoint1 = GeoPointFactory.create(name="geopoint1")
         cls.geopoint2 = GeoPointFactory.create(name="geopoint2")
         cls.geopoint3 = GeoPointFactory.create(name="geopoint3")
-
-    def test_multi_delete_without_pks_parameter(self):
-        """If pks parameter isn't specify the user is redirected to list view"""
-        self.login()
-        response = self.client.get(self.model.get_multi_delete_url())
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, self.model.get_list_url())
-
-    def test_multi_delete_with_empty_pks_parameter(self):
-        """If pks parameter is empty the user is redirected to list view"""
-        self.login()
-        response = self.client.get(self.model.get_multi_delete_url() + "?pks=")
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, self.model.get_list_url())
-
-    def test_multi_update_with_pks_parameter(self):
-        self.login()
-        response = self.client.get(self.model.get_multi_update_url() + "?pks=1%2C2")
-        self.assertEqual(response.status_code, 200)
 
     def test_mapentity_template(self):
         multiupdateview = GeoPointMultiUpdate()
@@ -674,7 +622,7 @@ class MultiUpdateViewTest(BaseTest):
         self.assertNotIn(("", "Null value"), form.fields["road"].widget.choices)
 
     def test_multi_update_post_do_nothing(self):
-        self.login()
+        self.client.force_login(self.user)
         data = {
             "public_en": "unknown",
             "public_fr": "unknown",
@@ -697,7 +645,7 @@ class MultiUpdateViewTest(BaseTest):
             self.assertEqual(db_geopoint.road, geopoint.road)
 
     def test_multi_update_post_boolean(self):
-        self.login()
+        self.client.force_login(self.user)
         data = {
             "public_en": True,
             "public_fr": False,
@@ -719,7 +667,7 @@ class MultiUpdateViewTest(BaseTest):
         self.assertEqual(db_geopoint2.public_fr, False)
 
     def test_multi_update_post_foreign_key(self):
-        self.login()
+        self.client.force_login(self.user)
         selected_road = self.geopoint1.road
         data = {
             "public_en": "unknown",

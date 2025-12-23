@@ -41,6 +41,7 @@
                             <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{% trans "Add" %}</span>
                         </a>
                         {% endif %}
+                        {% block actionsbutton %}
                         <div class="btn-group" role="group">
                             <button id="btn-batch-editing"
                                     class="btn btn-sm btn-primary dropdown-toggle"
@@ -78,6 +79,7 @@
                                 {% endif %}
                             </div>
                         </div>
+                        {% endblock actionsbutton %}
                         {% endblock mainactions %}
                         {% smart_include "listactions" %}
                     </div>
