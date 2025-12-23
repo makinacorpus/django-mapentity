@@ -416,7 +416,7 @@ class DocumentConvert(Convert, DetailView):
     def source_url(self):
         return self.get_object().get_document_url()
 
-
+""" CRUD """
 class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_queryset(self):
         pks = self.request.GET["pks"].split(",")
@@ -450,6 +450,10 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
         context = super().get_context_data()
         context["nb_objects"] = self.get_queryset().count()
         return context
+
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
@@ -529,13 +533,9 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
 
         return MultiUpdateFilterset(data=data).form
 
-
-"""
-
-    CRUD
-
-"""
-
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
     @classmethod
