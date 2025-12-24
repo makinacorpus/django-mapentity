@@ -3,11 +3,22 @@ $(window).on('entity:view:list', function (e, data) {
      * Datatables
      * .......................
      */
+    const canSelect = !!window.USER_CAN_SELECT;
+
     MapEntity.mainDatatable = $('#objects-list').DataTable({
         'processing': true,
         'serverSide': true,
         aoColumnDefs: [
-            { "bVisible": false, "aTargets": [ 0 ] },  // don't show first column (ID)
+            {
+                data: null,
+                defaultContent: '',
+                orderable: false,
+                searchable: false,
+                render: canSelect ? DataTable.render.select() : null,
+                visible: canSelect,
+                targets: 0
+            },
+            { "bVisible": false, "aTargets": [ 1 ] },  // don't show first column (ID)
             // {
             //     "aTargets": [ 1 ],
             //     "mRender": function ( column_data, type, full ) {  // render second column as detail link
@@ -55,7 +66,12 @@ $(window).on('entity:view:list', function (e, data) {
                     window.objectsLayer.highlight(pk, false);
                 }
             );
-        }
+        },
+        select: canSelect ? {
+            style: 'multi',
+            selector: 'td:first-child'
+        } : false,
+    order: [[1, 'asc']]
     });
     var paging = document.getElementsByClassName('dt-paging')[0];
     paging.classList.add('d-flex', 'flex-row-reverse');
@@ -93,6 +109,51 @@ $(window).on('entity:view:list', function (e, data) {
 
   // Adjust vertically
     expandDatatableHeight();
+
+    // batch edition
+    $("#btn-batch-editing").on("click", () => {
+        makeButtonDisabled("#btn-delete", "#tooltip-delete");
+        makeButtonDisabled("#btn-edit", "#tooltip-edit");
+    });
+
+    function makeButtonDisabled(btnSelector, tooltipSelector){
+        var btn = $(btnSelector);
+        var tooltip = $(tooltipSelector);
+        if($('.dt-select-checkbox:checked').length === 0){
+            btn.attr({'disabled': 'true'});
+            tooltip.attr({'title': 'At least one item must be selected'});
+        } else {
+            btn.removeAttr('disabled');
+            tooltip.removeAttr('title');
+        }
+    }
+
+    $('#btn-delete, #btn-edit').on('click',  async function () {
+        var $btn = $(this);
+        if (!$btn.length) return;
+
+        const selectedPks = await getSelectedPks();
+        const url = new URL($btn.data('url'), window.location.origin);
+        url.searchParams.set("pks", selectedPks);
+        if (url) {
+            window.location.href = url;
+        }
+    });
+
+    async function getSelectedPks() {
+        var pksList = [];
+        if ($('.dt-scroll-headInner .dt-select-checkbox').is(":checked")) {
+            const url = $('#mainfilter').attr('action').replace('.datatables', '/filter_infos.json');
+            const params = $('#mainfilter').serialize();
+
+            const data = await $.get(url, params);
+            pksList = data.pk_list;
+        } else {
+            pksList = MapEntity.mainDatatable.rows( { selected: true } ).data().pluck('id').toArray();
+        }
+
+        return pksList.join(",");
+    }
 });
 
 

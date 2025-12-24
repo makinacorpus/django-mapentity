@@ -1,6 +1,7 @@
 import copy
 from warnings import warn
 
+import django_filters
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Button, Div, Layout, Submit
@@ -9,7 +10,6 @@ from django.conf import settings
 from django.contrib.gis.db.models.fields import GeometryField
 from django.core.exceptions import FieldDoesNotExist
 from django.utils.translation import gettext_lazy as _
-from modeltranslation.utils import build_localized_fieldname
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 from tinymce.widgets import TinyMCE
 
@@ -18,6 +18,7 @@ from .widgets import MapWidget
 
 if "modeltranslation" in settings.INSTALLED_APPS:
     from modeltranslation.translator import NotRegistered, translator
+    from modeltranslation.utils import build_localized_fieldname
 
 
 class TranslatedModelForm(forms.ModelForm):
@@ -209,8 +210,16 @@ class MapEntityForm(TranslatedModelForm):
         # Check if fieldslayout is defined, otherwise use Meta.fields
         fieldslayout = self.fieldslayout
         if not fieldslayout:
-            # Remove geomfields from left part
-            fieldslayout = [fl for fl in self.orig_fields if fl not in self.geomfields]
+            # Collect all translated field names (e.g. name_fr, name_en)
+            translated_names = set()
+            for x, names in getattr(self, "_translated", {}).items():
+                translated_names.update(names)
+            # Remove geomfields and translated variants from left part
+            fieldslayout = [
+                fl
+                for fl in self.orig_fields
+                if fl not in self.geomfields and fl not in translated_names
+            ]
         # Replace native fields in Crispy layout by translated fields
         fieldslayout = self.__replace_translatable_fields(fieldslayout)
 
@@ -357,3 +366,70 @@ class AttachmentForm(BaseAttachmentForm):
         self.helper.layout.fields.append(
             FormActions(*form_actions, css_class="form-actions")
         )
+
+
+class BaseMultiUpdateForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = "multi-update-form"
+        self.helper.form_class = ""
+        self.helper.form_method = "post"
+        self.helper.form_action = ""
+        self.helper.add_input(
+            Submit(
+                "save",
+                _("Save"),
+                css_class="btn btn-success",
+                data_toggle="modal",
+                data_target="#confirmation-modal",
+            )
+        )
+
+
+class MultiUpdateFilter(django_filters.FilterSet):
+    """
+    Create a filter form using the Boolean and ForeignKey fields of a model to update multiple instances at once.
+    Use the Django filter instead of the form because the "do nothing" option is automatically created with filters.
+    """
+
+    class Meta:
+        model = None
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        model = self._meta.model
+
+        # adapt available choices to add "do nothing" choice
+        for name in self.base_filters.keys():
+            field = self.form.fields[name]
+
+            if isinstance(field, forms.NullBooleanField):
+                field.widget.choices = [
+                    ("unknown", _("Do nothing"))
+                ] + field.widget.choices[1:]
+            elif isinstance(field, forms.ChoiceField):
+                is_nullable = model._meta.get_field(name).null
+                is_blank = model._meta.get_field(name).blank
+                null_label = _("Null value")
+                field.empty_label = null_label
+
+                choices = list(field.widget.choices)
+                # remove null value if the field isn't nullable or if the field isn't blank
+                if not is_nullable or not is_blank:
+                    choices.remove(("", null_label))
+                choices.insert(0, ("unknown", _("Do nothing")))
+                field.widget.choices = choices
+                field.initial = choices[0][0]
+
+        # delete translated fields without language specification
+        try:
+            translated_options = translator.get_options_for_model(self._meta.model)
+            translated_fields = list(translated_options.fields)
+        except NotRegistered:
+            translated_fields = list()
+
+        for field in list(self.form.fields.keys()):
+            if field in translated_fields:
+                self.form.fields.pop(field, None)

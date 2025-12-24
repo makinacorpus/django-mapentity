@@ -1,0 +1,75 @@
+{% extends "mapentity/base_site.html" %}
+{% load i18n mapentity_tags crispy_forms_tags %}
+
+{% block mainpanel %}
+{{ block.super }}
+
+<div class="row justify-content-center w-100 m-5">
+    <div class="col-4 card card-body">
+        <h4 class="card-title">{% blocktrans %}Select values for the selected {{ model_name_plural }}{% endblocktrans %}</h4>
+        {% crispy form form.helper %}
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="modal fade" tabindex="-1" aria-labelledby="modal-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-label">{% trans "Confirm modification" %}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <p>
+              {% blocktrans count counter=nb_objects %}Do you want to apply the following modifications on this <span class="badge badge-danger">selected object</span>?{% plural %}Do you want to apply the following modifications on these <span class="badge badge-danger">{{ counter }} selected objects</span>?{% endblocktrans %}
+          </p>
+          <ul>
+          {% for field_name, field in form.fields.items %}
+              <li id="{{ field_name }}_li"><strong>{{ field.label }}</strong>: <span id="{{ field_name }}_value"></span></li>
+          {% endfor %}
+          </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans "Cancel" %}</button>
+        <button type="button" class="btn btn-danger" id="confirm-submit">{% trans "Confirm" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    const form = document.getElementById("multi-update-form");
+
+    // intercept submit event to ask confirmation to the user before modifying multiple elements
+    document.getElementById("confirm-submit").addEventListener("click", function(event) {
+        form.submit();
+    });
+
+    form.addEventListener("submit", function(event) {
+        // stop propagation to avoid submitting the form
+        event.preventDefault();
+
+        $(".modal-body li span").each(function(index, span) {
+            const fieldName = span.id.replace("_value", "");
+            const selectElement = document.getElementById("id_" + fieldName);
+            const selectedOptions = Array.from(selectElement.selectedOptions);
+
+            const listElement = document.getElementById(fieldName + "_li");
+            let values = [];
+
+            selectedOptions.forEach(option => {
+                if (option.value === "unknown") {
+                    listElement.hidden = true;
+                } else {
+                    listElement.hidden = false;
+                    values.push(option.textContent.trim());
+                }
+            });
+            span.textContent = values.join(", ");
+        });
+    });
+</script>
+{% endblock mainpanel %}

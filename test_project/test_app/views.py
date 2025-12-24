@@ -5,7 +5,7 @@ from mapentity import views as mapentity_views
 
 from .filters import DummyModelFilterSet, RoadFilterSet
 from .forms import DummyModelForm, MushroomSpotForm, RoadForm
-from .models import DummyModel, MushroomSpot, Road
+from .models import DummyModel, GeoPoint, MushroomSpot, Road
 from .serializers import DummyGeojsonSerializer, DummySerializer, RoadSerializer
 
 
@@ -93,3 +93,11 @@ class MushroomSpotCreate(mapentity_views.MapEntityCreate):
 class MushroomSpotUpdate(mapentity_views.MapEntityUpdate):
     model = MushroomSpot
     form_class = MushroomSpotForm
+
+
+class GeoPointMultiDelete(mapentity_views.MapEntityMultiDelete):
+    model = GeoPoint
+
+
+class GeoPointMultiUpdate(mapentity_views.MapEntityMultiUpdate):
+    model = GeoPoint
