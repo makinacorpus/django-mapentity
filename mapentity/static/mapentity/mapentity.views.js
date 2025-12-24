@@ -10,7 +10,7 @@ $(window).on('entity:view:list', function (e, data) {
         'serverSide': true,
         aoColumnDefs: [
             {
-                data: null,                 // ⭐ empêche l’erreur tn/4
+                data: null,
                 defaultContent: '',
                 orderable: false,
                 searchable: false,
