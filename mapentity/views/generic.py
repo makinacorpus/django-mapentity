@@ -4,6 +4,8 @@ import os
 from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -417,6 +419,9 @@ class DocumentConvert(Convert, DetailView):
         return self.get_object().get_document_url()
 
 
+""" CRUD """
+
+
 class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_queryset(self):
         pks = self.request.GET["pks"].split(",")
@@ -450,6 +455,10 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
         context = super().get_context_data()
         context["nb_objects"] = self.get_queryset().count()
         return context
+
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
@@ -495,7 +504,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["form"] = self.get_form()
         context["nb_objects"] = self.get_queryset().count()
-        context["model_name_plural"] = self.model._meta.verbose_name_plural
+        context["model_name_plural"] = self.model._meta.verbose_name_plural.lower()
 
         return context
 
@@ -527,14 +536,27 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
                 fields = self.get_editable_fields()
                 form = BaseMultiUpdateForm
 
-        return MultiUpdateFilterset(data=data).form
+        form = MultiUpdateFilterset(data=data).form
+        form.helper = FormHelper()
+        form.helper.form_class = "form-horizontal"
+        form.helper.form_id = "multi-update-form"
 
+        form.helper.label_class = "col-md-3"
+        form.helper.field_class = "col-md-9"
+        form.helper.add_input(
+            Submit(
+                "save",
+                _("Save"),
+                css_class="btn btn-success",
+                data_toggle="modal",
+                data_target="#confirmation-modal",
+            )
+        )
+        return form
 
-"""
-
-    CRUD
-
-"""
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):

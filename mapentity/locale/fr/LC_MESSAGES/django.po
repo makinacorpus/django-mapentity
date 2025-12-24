@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-23 09:00+0000\n"
+"POT-Creation-Date: 2025-12-23 10:29+0000\n"
 "PO-Revision-Date: 2025-10-24 15:28+0000\n"
 "Last-Translator: J-E Castagnede <jean-etienne.castagnede@makina-corpus.com>\n"
 "Language-Team: French <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/fr/>\n"
@@ -212,10 +212,11 @@ msgstr "GPX"
 msgid "Warning!"
 msgstr "Attention !"
 
-#, fuzzy, python-format
-#| msgid "Do you really wish to delete <span class=\"badge text-bg-danger\">%(nb_objects)s objects</span> ?"
-msgid "Do you really wish to delete <span class=\"badge badge-danger\">%(nb_objects)s objects</span> ?"
-msgstr "Voulez-vous vraiment supprimer <span class=\"badge badge-danger\">%(nb_objects)s objets</span> ?"
+#, python-format
+msgid "Do you really wish to delete <span class=\"badge badge-danger\">this object</span>?"
+msgid_plural "Do you really wish to delete <span class=\"badge badge-danger\">these %(counter)s objects</span>?"
+msgstr[0] "Voulez-vous vraiment supprimer cet <span class=\"badge badge-danger\">objet</span> ?"
+msgstr[1] "Voulez-vous vraiment supprimer ces<span class=\"badge badge-danger\">%(counter)s objets</span> ?"
 
 msgid "No, back to list view"
 msgstr "Non, retour à la vue liste"
@@ -228,8 +229,10 @@ msgid "Confirm modification"
 msgstr "Confirmer la modification"
 
 #, python-format
-msgid "Do you want to apply the following modifications on the <span class=\"badge badge-danger\">%(nb_objects)s selected objects</span>"
-msgstr "Voulez-vous appliquer les modifications suivantes sur les <span class=\"badge badge-danger\">%(nb_objects)s objets sélectionnés</span> ?"
+msgid "Do you want to apply the following modifications on this <span class=\"badge badge-danger\">selected object</span>?"
+msgid_plural "Do you want to apply the following modifications on these <span class=\"badge badge-danger\">%(counter)s selected objects</span>?"
+msgstr[0] "Voulez-vous appliquer les modifications suivantes sur cet <span class=\"badge badge-danger\">objet sélectionné</span> ?"
+msgstr[1] "Voulez-vous appliquer les modifications suivantes sur les <span class=\"badge badge-danger\">%(counter)s objets sélectionnés</span> ?"
 
 msgid "Confirm"
 msgstr "Confirmer"

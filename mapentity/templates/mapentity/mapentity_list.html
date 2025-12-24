@@ -3,6 +3,16 @@
 
 {% block title %}{{ objectsname }} | {{ block.super }}{% endblock title %}
 
+{% block extrahead %}
+    {{ block.super }}
+    <script>
+        {% if can_edit or can_delete %}
+        window.USER_CAN_SELECT = true;
+        {% else %}
+        window.USER_CAN_SELECT = false;
+        {% endif %}
+    </script>
+{% endblock extrahead %}
 
 {% block container %}
 {{ block.super }}

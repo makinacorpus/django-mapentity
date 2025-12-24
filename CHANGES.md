@@ -8,6 +8,10 @@ CHANGELOG
 
 - Add bulk deletion/edition on list views (refs #5107).
 
+**Bug fixes**
+
+- Fix translated fields duplicated in MapentityForm when no layout is provided
+
 
 8.15.1 (2025-11-14)
 -----------------------
