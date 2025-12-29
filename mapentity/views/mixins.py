@@ -187,7 +187,8 @@ class MultiObjectActionMixin:
     """
 
     def get(self, request, *args, **kwargs):
-        if not request.GET.get("pks"):
+        pks = self.request.GET.get("pks", None)
+        if not pks:
             messages.warning(self.request, _("At least one object must be selected"))
             return HttpResponseRedirect(self.get_redirect_url())
 

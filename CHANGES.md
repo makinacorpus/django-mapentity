@@ -4,6 +4,10 @@ CHANGELOG
 8.16.0+dev (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Fix batch deletion (refs #5107)
+
 
 8.16.0     (2025-12-24)
 -----------------------

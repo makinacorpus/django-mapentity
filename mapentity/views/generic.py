@@ -424,11 +424,8 @@ class DocumentConvert(Convert, DetailView):
 
 class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_queryset(self):
-        pks = self.request.GET["pks"].split(",")
-        self.queryset = self.model.objects.filter(pk__in=pks)
-        self.nb_objects = self.queryset.count()
-
-        return self.queryset
+        self.pks = self.request.GET.get("pks").split(",")
+        return self.model.objects.filter(pk__in=self.pks)
 
     @classmethod
     def get_entity_kind(cls):
@@ -444,17 +441,17 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
-        deleted_items = self.get_queryset().delete()
+        queryset = self.get_queryset()
+        queryset.delete()
         messages.success(
             self.request,
-            _("%(count)d items deleted")
-            % {"count": self.nb_objects},
+            _("%(count)d items deleted") % {"count": self.get_queryset().count()},
         )
         return HttpResponseRedirect(self.get_redirect_url())
 
     def get_context_data(self):
         context = super().get_context_data()
-        context["nb_objects"] = self.nb_objects
+        context["nb_objects"] = self.get_queryset().count()
         return context
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
@@ -463,8 +460,7 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
 
 
 class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
-    def update_queryset(self):
-        queryset = self.get_queryset()
+    def get_cleaned_data(self):
         form = self.get_form(self.request.POST)
         form.is_valid()
         cleaned_data = {
@@ -473,14 +469,11 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
             if self.request.POST.get(name) != "unknown"
         }
 
-        return queryset.update(**cleaned_data)
+        return cleaned_data
 
     def get_queryset(self):
-        self.pks = self.request.GET["pks"].split(",")
-        self.queryset = self.model.objects.filter(pk__in=self.pks)
-        self.nb_objects = self.queryset.count()
-
-        return self.queryset
+        self.pks = self.request.GET.get("pks").split(",")
+        return self.model.objects.filter(pk__in=self.pks)
 
     @classmethod
     def get_entity_kind(cls):
@@ -496,16 +489,19 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
-        modified_rows = self.update_queryset()
+        queryset = self.get_queryset()
+        cleaned_data = self.get_cleaned_data()
+        modified_rows = queryset.update(**cleaned_data)
         messages.success(
             self.request, _("%(count)d items updated") % {"count": modified_rows}
         )
+
         return HttpResponseRedirect(self.get_redirect_url())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["form"] = self.get_form()
-        context["nb_objects"] = self.nb_objects
+        context["nb_objects"] = self.get_queryset().count()
         context["model_name_plural"] = self.model._meta.verbose_name_plural.lower()
 
         return context
