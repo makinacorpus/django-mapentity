@@ -426,6 +426,7 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_queryset(self):
         pks = self.request.GET["pks"].split(",")
         self.queryset = self.model.objects.filter(pk__in=pks)
+        self.nb_objects = self.queryset.count()
 
         return self.queryset
 
@@ -447,13 +448,13 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
         messages.success(
             self.request,
             _("%(count)d items deleted")
-            % {"count": deleted_items[1][self.model._meta.label]},
+            % {"count": self.nb_objects},
         )
         return HttpResponseRedirect(self.get_redirect_url())
 
     def get_context_data(self):
         context = super().get_context_data()
-        context["nb_objects"] = self.get_queryset().count()
+        context["nb_objects"] = self.nb_objects
         return context
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
@@ -477,6 +478,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_queryset(self):
         self.pks = self.request.GET["pks"].split(",")
         self.queryset = self.model.objects.filter(pk__in=self.pks)
+        self.nb_objects = self.queryset.count()
 
         return self.queryset
 
@@ -503,7 +505,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["form"] = self.get_form()
-        context["nb_objects"] = self.get_queryset().count()
+        context["nb_objects"] = self.nb_objects
         context["model_name_plural"] = self.model._meta.verbose_name_plural.lower()
 
         return context
