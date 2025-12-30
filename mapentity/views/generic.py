@@ -24,7 +24,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import static
 from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormMixin
 from django.views.generic.list import ListView
 from django_filters.views import FilterView
 from django_weasyprint import WeasyTemplateResponseMixin
@@ -437,7 +437,7 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_title(self):
         return _("Delete selected %(model)s") % {"model": self.model._meta.model_name}
 
-    def get_redirect_url(self):
+    def get_success_url(self):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
@@ -447,7 +447,7 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
             self.request,
             _("%(count)d items deleted") % {"count": self.get_queryset().count()},
         )
-        return HttpResponseRedirect(self.get_redirect_url())
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self):
         context = super().get_context_data()
@@ -459,18 +459,7 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
         return super().dispatch(*args, **kwargs)
 
 
-class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
-    def get_cleaned_data(self):
-        form = self.get_form(self.request.POST)
-        form.is_valid()
-        cleaned_data = {
-            name: value
-            for name, value in form.cleaned_data.items()
-            if self.request.POST.get(name) != "unknown"
-        }
-
-        return cleaned_data
-
+class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, FormMixin, ListView):
     def get_queryset(self):
         self.pks = self.request.GET.get("pks").split(",")
         return self.model.objects.filter(pk__in=self.pks)
@@ -485,18 +474,30 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_title(self):
         return _("Update selected %(model)s") % {"model": self.model._meta.model_name}
 
-    def get_redirect_url(self):
+    def get_success_url(self):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        form = self.get_form(data=request.POST)
+        form.is_valid() # the form will always be invalid because of "unknown" answers
+        return self.form_valid(form)
+
+    def form_valid(self, form):
         queryset = self.get_queryset()
-        cleaned_data = self.get_cleaned_data()
+
+        data = form.cleaned_data
+        cleaned_data = {
+            name: value
+            for name, value in data.items()
+            if self.request.POST.get(name) != "unknown"
+        }
+
         modified_rows = queryset.update(**cleaned_data)
         messages.success(
             self.request, _("%(count)d items updated") % {"count": modified_rows}
         )
-
-        return HttpResponseRedirect(self.get_redirect_url())
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
