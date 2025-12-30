@@ -24,7 +24,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import static
 from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormMixin
+from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
 from django.views.generic.list import ListView
 from django_filters.views import FilterView
 from django_weasyprint import WeasyTemplateResponseMixin
@@ -480,7 +480,7 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, FormMixin, Li
     def post(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
         form = self.get_form(data=request.POST)
-        form.is_valid() # the form will always be invalid because of "unknown" answers
+        form.is_valid()  # the form will always be invalid because of "unknown" answers
         return self.form_valid(form)
 
     def form_valid(self, form):
