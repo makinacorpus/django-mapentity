@@ -6,21 +6,22 @@ from mapentity.widgets import HiddenGeometryWidget, SelectMultipleWithPop
 
 class HiddenGeometryWidgetTestCase(TestCase):
     def test_widget_transform_if_srid(self):
-        """ Widget should transform geometry to API_SRID if geos object provided """
+        """Widget should transform geometry to API_SRID if geos object provided"""
         widget = HiddenGeometryWidget()
         geom = Point(0, 0, srid=2154)
-        output = widget.render('geometry', geom)
+        output = widget.render("geometry", geom)
         geom.transform(4326)
-        self.assertEqual(output,
-                         f'<input type="hidden" name="geometry" value="{geom.ewkt}">')
+        self.assertEqual(
+            output, f'<input type="hidden" name="geometry" value="{geom.ewkt}">'
+        )
 
 
 class SelectMultipleWithPopTestCase(TestCase):
     def test_widget_rendering(self):
-        widget = SelectMultipleWithPop(add_url='/add/')
-        output = widget.render('select-multiple', value="value")
+        widget = SelectMultipleWithPop(add_url="/add/")
+        output = widget.render("select-multiple", value="value")
         self.assertIn('<select name="select-multiple" multiple>', output)
-        self.assertIn('</select>', output)
+        self.assertIn("</select>", output)
         self.assertIn('href="/add/"', output)
         self.assertIn('id="add_id_select-multiple"', output)
         self.assertIn('onclick="return showAddAnotherPopup(this);"', output)

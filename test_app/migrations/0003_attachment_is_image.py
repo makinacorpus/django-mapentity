@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('test_app', '0002_auto_20180504_1054'),
+        ("test_app", "0002_auto_20180504_1054"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='attachment',
-            name='is_image',
-            field=models.BooleanField(db_index=True, default=False, editable=False, help_text='Is an image file', verbose_name='Is image'),
+            model_name="attachment",
+            name="is_image",
+            field=models.BooleanField(
+                db_index=True,
+                default=False,
+                editable=False,
+                help_text="Is an image file",
+                verbose_name="Is image",
+            ),
         ),
     ]

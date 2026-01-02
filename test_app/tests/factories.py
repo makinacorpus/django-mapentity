@@ -1,26 +1,28 @@
-import factory
 import random
+
+import factory
 from django.contrib.gis.geos import Point
+
 from test_app.models import DummyModel, ManikinModel, Sector, Tag
 
 
 class TagFactory(factory.django.DjangoModelFactory):
-    label = factory.Sequence(lambda n: "Tag %s" % n)
+    label = factory.Sequence(lambda n: f"Tag {n}")
 
     class Meta:
         model = Tag
 
 
 class SectorFactory(factory.django.DjangoModelFactory):
-    code = factory.Sequence(lambda n: "#%s" % n)  # id (!) with max_length=6
-    name = factory.Sequence(lambda n: "Name %s" % n)
+    code = factory.Sequence(lambda n: f"#{n}")  # id (!) with max_length=6
+    name = factory.Sequence(lambda n: f"Name {n}")
 
     class Meta:
         model = Sector
 
 
 class DummyModelFactory(factory.django.DjangoModelFactory):
-    name = 'a dummy model'
+    name = "a dummy model"
 
     @factory.lazy_attribute
     def geom(self):

@@ -1,8 +1,7 @@
-from test_app.models import City, DummyModel, MushroomSpot, Road, DummyAptModel
-
 from mapentity.registry import registry
+from test_app.models import City, DummyAptModel, DummyModel, MushroomSpot, Road
 
-app_name = 'test_app'
+app_name = "test_app"
 
 urlpatterns = registry.register(DummyModel)
 urlpatterns += registry.register(MushroomSpot)

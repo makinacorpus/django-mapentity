@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('test_app', '0015_auto_20230215_1446'),
+        ("test_app", "0015_auto_20230215_1446"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='dummymodel',
-            name='name_en',
-            field=models.CharField(blank=True, default='', max_length=128, null=True),
+            model_name="dummymodel",
+            name="name_en",
+            field=models.CharField(blank=True, default="", max_length=128, null=True),
         ),
         migrations.AddField(
-            model_name='dummymodel',
-            name='name_fr',
-            field=models.CharField(blank=True, default='', max_length=128, null=True),
+            model_name="dummymodel",
+            name="name_fr",
+            field=models.CharField(blank=True, default="", max_length=128, null=True),
         ),
         migrations.AddField(
-            model_name='dummymodel',
-            name='name_zh_hant',
-            field=models.CharField(blank=True, default='', max_length=128, null=True),
+            model_name="dummymodel",
+            name="name_zh_hant",
+            field=models.CharField(blank=True, default="", max_length=128, null=True),
         ),
     ]

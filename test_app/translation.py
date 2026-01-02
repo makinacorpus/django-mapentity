@@ -1,27 +1,29 @@
 from modeltranslation.translator import TranslationOptions, translator
 
-from test_app.models import DummyModel, Road, DummyAptModel, City
+from test_app.models import DummyAptModel, DummyModel, Road
 
 
 class DummyModelTO(TranslationOptions):
-    fields = ('name', )
+    fields = ("name",)
 
 
 class RoadModelTO(TranslationOptions):
-    fields = ('name', )
+    fields = ("name",)
+
 
 class DummyAptModelTO(TranslationOptions):
-    fields = ('name', )
+    fields = ("name",)
+
 
 class MushroomSpotTO(TranslationOptions):
-    fields = ('name', )
+    fields = ("name",)
+
 
 class CityTO(TranslationOptions):
-    fields = ('name', )
+    fields = ("name",)
 
 
 translator.register(DummyModel, DummyModelTO)
 translator.register(Road, RoadModelTO)
 translator.register(DummyAptModel, DummyAptModelTO)
 # translator.register(City, CityTO)
-

@@ -5,17 +5,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('test_app', '0003_attachment_is_image'),
+        ("test_app", "0003_attachment_is_image"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Road',
+            name="Road",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('geom', django.contrib.gis.db.models.fields.LineStringField(default=None, null=True, srid=2154)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "geom",
+                    django.contrib.gis.db.models.fields.LineStringField(
+                        default=None, null=True, srid=2154
+                    ),
+                ),
             ],
         ),
     ]

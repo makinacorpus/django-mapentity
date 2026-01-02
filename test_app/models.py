@@ -1,10 +1,12 @@
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import gettext_lazy as _
-from paperclip.models import FileType as BaseFileType, Attachment as BaseAttachment, License as BaseLicense
+from paperclip.models import Attachment as BaseAttachment
+from paperclip.models import FileType as BaseFileType
+from paperclip.models import License as BaseLicense
 
 from mapentity.models import MapEntityMixin
-from django.conf import settings
 
 
 class FileType(BaseFileType):
@@ -27,7 +29,7 @@ class Tag(models.Model):
 
 
 class MushroomSpot(MapEntityMixin, models.Model):
-    name = models.CharField(max_length=100, default='Empty')
+    name = models.CharField(max_length=100, default="Empty")
     serialized = models.CharField(max_length=200, null=True, default=None)
     number = models.IntegerField(null=True, default=42)
     size = models.FloatField(null=True, default=3.14159)
@@ -35,10 +37,11 @@ class MushroomSpot(MapEntityMixin, models.Model):
     tags = models.ManyToManyField(Tag)
 
     def __init__(self, *args, **kwargs):
-        super(MushroomSpot, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._geom = None
 
     """geom as python attribute"""
+
     @property
     def geom(self):
         if self._geom is not None:
@@ -53,64 +56,69 @@ class MushroomSpot(MapEntityMixin, models.Model):
 
 
 class WeatherStation(models.Model):
-    """ Not a Mapentity model. should not be displayed in menu entries """
+    """Not a Mapentity model. should not be displayed in menu entries"""
+
     geom = models.PointField(null=True, default=None)
 
 
 class Road(MapEntityMixin, models.Model):
-    """ Linestring Mapentity model """
-    name = models.CharField(max_length=100, default='Empty')
+    """Linestring Mapentity model"""
+
+    name = models.CharField(max_length=100, default="Empty")
     geom = models.LineStringField(null=True, default=None, srid=2154)
     can_duplicate = False
 
     @property
     def name_display(self):
-        return _(f'<a href="{self.get_detail_url()}">{self.name}</a>')
+        return f'<a href="{self.get_detail_url()}">{self.name}</a>'
 
 
 class DummyModel(MapEntityMixin, models.Model):
-    name = models.CharField(blank=True, default='', max_length=128)
-    short_description = models.TextField(blank=True, default='', help_text=_('Short description'))
-    description = models.TextField(blank=True, default='')
+    name = models.CharField(blank=True, default="", max_length=128)
+    short_description = models.TextField(
+        blank=True, default="", help_text=_("Short description")
+    )
+    description = models.TextField(blank=True, default="")
     geom = models.PointField(null=True, default=None)
     date_update = models.DateTimeField(auto_now=True, db_index=True)
     public = models.BooleanField(default=False)
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
-        return "{} ({})".format(self.name, self.pk)
+        return f"{self.name} ({self.pk})"
 
     def is_public(self):
         return self.public
 
     def name_display(self):
-        return _(f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>')
+        return f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>'
 
     class Meta:
         verbose_name = _("Dummy Model")
 
 
 class DummyAptModel(MapEntityMixin, models.Model):
-    name = models.CharField(blank=True, default='', max_length=128)
-    short_description = models.TextField(blank=True, default='', help_text=_('Short description'))
-    description = models.TextField(blank=True, default='')
+    name = models.CharField(blank=True, default="", max_length=128)
+    short_description = models.TextField(
+        blank=True, default="", help_text=_("Short description")
+    )
+    description = models.TextField(blank=True, default="")
     geom = models.GeometryCollectionField(srid=settings.SRID, null=True, default=None)
     date_update = models.DateTimeField(auto_now=True, db_index=True)
     public = models.BooleanField(default=False)
     tags = models.ManyToManyField(Tag, blank=True)
 
     def __str__(self):
-        return "{} ({})".format(self.name, self.pk)
+        return f"{self.name} ({self.pk})"
 
     def is_public(self):
         return self.public
 
     def name_display(self):
-        return _(f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>')
+        return f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>'
 
     class Meta:
         verbose_name = _("DummyApt Model")
-
 
 
 class DollModel(MapEntityMixin, models.Model):
@@ -121,7 +129,13 @@ class DollModel(MapEntityMixin, models.Model):
 
 
 class ManikinModel(MapEntityMixin, models.Model):
-    dummy = models.ForeignKey(DummyModel, related_name='manikins', null=True, default=None, on_delete=models.SET_NULL)
+    dummy = models.ForeignKey(
+        DummyModel,
+        related_name="manikins",
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
     can_duplicate = False
 
     def __str__(self):
@@ -136,11 +150,12 @@ class City(MapEntityMixin, models.Model):
         return self.name
 
     def name_display(self):
-        return _(f'<a href="{self.get_detail_url()}">{self.name}</a>')
+        return f'<a href="{self.get_detail_url()}">{self.name}</a>'
 
 
 class Supermarket(MapEntityMixin, models.Model):
-    """ Linestring Mapentity model """
+    """Linestring Mapentity model"""
+
     geom = models.PolygonField(null=True, default=None, srid=2154)
     parking = models.PointField(null=True, default=None, srid=2154)
     tag = models.ForeignKey(Tag, null=True, default=None, on_delete=models.SET_NULL)
