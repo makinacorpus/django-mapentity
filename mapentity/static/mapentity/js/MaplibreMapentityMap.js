@@ -148,6 +148,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
+        map.getMap().addControl(
+            new maplibregl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true,
+        }), position='bottom-right'
+        );
+
         // Gestion de l'historique et des filtres
         const history = window.MapEntity.currentHistory;
 
