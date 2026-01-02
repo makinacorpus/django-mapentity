@@ -157,9 +157,12 @@ class SupermarketShapefileSerializerTest(CommonShapefileSerializerMixin, TestCas
                 return app_settings[key]
         self.serializer = ZipShapeSerializer()
         response = HttpResponse()
-        with self.assertRaisesRegex(ValueError, "More than one geodjango geometry field found, please specify "
-                                                "which to use by name using the 'geo_field' keyword. "
-                                                "Available fields are: 'geom, parking'"):
+        with self.assertRaisesRegex(
+                ValueError,
+                "More than one geodjango geometry field found, please specify "
+                "which to use by name using the 'geo_field' keyword. "
+                "Available fields are: 'geom, parking'",
+        ):
             with patch('mapentity.serializers.shapefile.app_settings') as mock:
                 mock.__getitem__.side_effect = MockedDict().__getitem__
                 self.serializer.serialize(Supermarket.objects.all(), stream=response,
