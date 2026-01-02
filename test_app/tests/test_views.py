@@ -329,7 +329,7 @@ class ListViewTest(BaseTest):
         response = view(request)
         html = response.render()
         self.assertTrue(b"btn-group disabled" in html.content)
-        self.assertTrue(b"Add a new dummy model" in html.content)
+        self.assertFalse(b"Add a new dummy model" in html.content)
 
     def test_list_view_creates_minimal_generic_filter(self):
         request = RequestFactory().get("/fake-path")

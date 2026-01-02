@@ -354,14 +354,10 @@ tr.selected-row td {
     font-size: 1.25rem;
     display: inline;
     margin: 0;
-    padding: 0.375rem 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.25rem;
 }
 
-@media (min-width: 992px) {
-    #list-panel .list-title {
-        display: none;
-    }
-}
 #list-panel .table th,
 #list-panel .table td {
     padding: 5px;

@@ -5,7 +5,7 @@
         {% block logo_header %}
             <img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;" alt="logo">
         {% endblock %}
-        <span class="d-none d-sm-inline">{% block title_header %}Mapentity{% endblock %}</span>
+        <span class="d-none d-sm-inline"></span>
     </a>
 
     {% if request.user.is_authenticated %}
@@ -33,6 +33,8 @@
         </li>
     </ul>
     {% endif %}
+
+    <span class="navbar-text mr-auto">{% block title_header %}{{ TITLE }}{% endblock %}</span>
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +67,6 @@
                     {% endfor %}
                 {% endblock toolbar %}
             </ul>
-
         <ul class="navbar-nav ml-auto">
             {% if request.user.is_authenticated %}
                 <li class="nav-item dropdown">
@@ -100,9 +101,9 @@
                         <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
                             <input name="next" type="hidden" value="{{ redirect_to }}">
                             {% for language in languages %}
-                            <button class="dropdown-item" type="submit" name="language" value="{{ language.code }}"
+                            <button class="dropdown-item" type="submit" name="language" value="{{ language.code }}" title="{{ language.code }}"
                                     class="btn btn-light m-0 language-menu-item {% if language.code == LANGUAGE_CODE %}active{% endif %}">
-                                {{ language.name_local|title }} ({{ language.code }})
+                                {{ language.name_local|title }}
                             </button>
                             {% endfor %}
                         </form>
@@ -118,4 +119,5 @@
             {% endif %}
         </ul>
     </div>
+
 </nav>
