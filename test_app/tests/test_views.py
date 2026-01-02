@@ -3,6 +3,7 @@ from unittest import mock
 
 import django
 import factory
+from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -508,6 +509,22 @@ class LogViewTest(BaseTest):
         self.login()
         response = self.client.get('/logentry/list/')
         self.assertRedirects(response, "/login/")
+
+
+class LogoutViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser(self.__class__.__name__ + 'User',
+                                            'email@corp.com', 'booh')
+    def test_logout_post(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get('/dummymodel/list/')
+        parsed = BeautifulSoup(response.content)
+        logout_tag = parsed.find("form", {"action":"/logout/", "method": "post" })
+        self.assertTrue(logout_tag)
+
+        self.assertTrue(logout_tag.find("input", {"name": "csrfmiddlewaretoken" }))
+
+        self.assertTrue(logout_tag.find("button", {"type": "submit"}))
 
 
 class LogViewMapentityTest(MapEntityTest):
