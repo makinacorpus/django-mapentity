@@ -201,12 +201,6 @@ select[multiple] {
     }
 }
 
-/* Navbar fixed */
-
-#container {
-    padding-top: 60px;
-}
-
 form.mapentity-form > div.container-fluid {
     background-color: #fff;
 }
@@ -346,7 +340,7 @@ tr.selected-row td {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    max-width: calc(100% - 40px);
+    width: 100%;
 }
 
 @media (min-width: 768px) {

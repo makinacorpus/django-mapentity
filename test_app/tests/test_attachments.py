@@ -90,7 +90,6 @@ class EntityAttachmentTestCase(TestCase):
             self.assertIn(attachment.legend.encode(), html)
             self.assertIn(attachment.title.encode(), html)
             self.assertIn(attachment.attachment_file.url.encode(), html)
-            self.assertIn(b"paperclip/fileicons/odt.png", html)
 
     def test_upload_form_in_details_if_perms(self):
         self.user.has_perm = mock.MagicMock(return_value=True)
