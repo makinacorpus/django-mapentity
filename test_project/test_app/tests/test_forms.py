@@ -2,10 +2,10 @@ from django import forms
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from mapentity.forms import BaseMultiUpdateForm, MapEntityForm, MultiUpdateFilter
+from mapentity.forms import BaseMultiUpdateForm, MapEntityForm
 from mapentity.settings import app_settings
 
-from ..models import City, DummyModel, GeoPoint, ManikinModel
+from ..models import DummyModel, GeoPoint, ManikinModel
 
 
 class DummyForm(MapEntityForm):
@@ -73,30 +73,28 @@ class MapEntityRichTextFormTest(TestCase):
             )
 
 
-class GeoPointForm(MultiUpdateFilter):
+class GeoPointForm(BaseMultiUpdateForm):
     class Meta:
         model = GeoPoint
-        exclude = ["geom"]
-        form = BaseMultiUpdateForm
+        fields = [
+            "public_en",
+            "public_fr",
+            "public_zh_hant",
+            "located_in",
+            "dummy_model",
+            "road",
+        ]
 
 
-class CityStationForm(MultiUpdateFilter):
-    class Meta:
-        model = City
-        exclude = ["geom"]
-        form = BaseMultiUpdateForm
-
-
-class ManikinModelForm(MultiUpdateFilter):
+class ManikinModelForm(BaseMultiUpdateForm):
     class Meta:
         model = ManikinModel
-        fields = "__all__"
-        form = BaseMultiUpdateForm
+        fields = ["dummy"]
 
 
 class MultiUpdateFilterTest(TestCase):
     def setUp(self):
-        self.form = GeoPointForm().form
+        self.form = GeoPointForm()
 
     def test_translated_fields(self):
         fields = list(self.form.fields.keys())
@@ -106,40 +104,40 @@ class MultiUpdateFilterTest(TestCase):
         self.assertNotIn("public", fields)
 
     def test_translated_fields_for_not_registered_model(self):
-        form = CityStationForm().form
+        form = ManikinModelForm()
         fields = list(form.fields.keys())
-        self.assertEqual(["name"], fields)
+        self.assertEqual(["dummy"], fields)
 
     def test_boolean_fields(self):
         fields = self.form.fields
         for field in ["public_en", "public_fr", "public_zh_hant"]:
-            self.assertTrue(isinstance(fields[field], forms.NullBooleanField))
+            self.assertTrue(isinstance(fields[field], forms.ChoiceField))
             self.assertEqual(
                 fields[field].widget.choices,
-                [("unknown", "Do nothing"), ("true", "Yes"), ("false", "No")],
+                [("nothing", "Do nothing"), ("true", "Yes"), ("false", "No")],
             )
 
     def test_nullable_foreign_key_fields(self):
         fields = self.form.fields
         self.assertTrue(isinstance(fields["located_in"], forms.ChoiceField))
-        self.assertIn(("unknown", "Do nothing"), fields["located_in"].widget.choices)
+        self.assertIn(("nothing", "Do nothing"), fields["located_in"].widget.choices)
         self.assertIn(("", "Null value"), fields["located_in"].widget.choices)
-        self.assertEqual(fields["located_in"].initial, "unknown")
+        self.assertEqual(fields["located_in"].initial, "nothing")
 
     def test_nullable_but_not_blank_foreign_key_fields(self):
-        form = ManikinModelForm().form
+        form = ManikinModelForm()
         fields = form.fields
         self.assertTrue(isinstance(fields["dummy"], forms.ChoiceField))
-        self.assertIn(("unknown", "Do nothing"), fields["dummy"].widget.choices)
+        self.assertIn(("nothing", "Do nothing"), fields["dummy"].widget.choices)
         self.assertNotIn(("", "Null value"), fields["dummy"].widget.choices)
-        self.assertEqual(fields["dummy"].initial, "unknown")
+        self.assertEqual(fields["dummy"].initial, "nothing")
 
     def test_not_nullable_foreign_key_fields(self):
         fields = self.form.fields
         self.assertTrue(isinstance(fields["road"], forms.ChoiceField))
-        self.assertIn(("unknown", "Do nothing"), fields["road"].widget.choices)
+        self.assertIn(("nothing", "Do nothing"), fields["road"].widget.choices)
         self.assertNotIn(("", "Null"), fields["road"].widget.choices)
-        self.assertEqual(fields["road"].initial, "unknown")
+        self.assertEqual(fields["road"].initial, "nothing")
 
     def test_crispy_form(self):
         helper = self.form.helper

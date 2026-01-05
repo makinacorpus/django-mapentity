@@ -4,8 +4,6 @@ import os
 from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -38,7 +36,6 @@ from ..decorators import save_history, view_permission_required
 from ..forms import (
     AttachmentForm,
     BaseMultiUpdateForm,
-    MultiUpdateFilter,
 )
 from ..helpers import (
     convertit_url,
@@ -480,18 +477,15 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, FormMixin, Li
     def post(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
         form = self.get_form(data=request.POST)
-        form.is_valid()  # the form will always be invalid because of "unknown" answers
-        return self.form_valid(form)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
 
     def form_valid(self, form):
         queryset = self.get_queryset()
 
-        data = form.cleaned_data
-        cleaned_data = {
-            name: value
-            for name, value in data.items()
-            if self.request.POST.get(name) != "unknown"
-        }
+        cleaned_data = form.cleaned_data
 
         modified_rows = queryset.update(**cleaned_data)
         messages.success(
@@ -529,28 +523,12 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, FormMixin, Li
     def get_form(self, data=None):
         _model = self.model
 
-        class MultiUpdateFilterset(MultiUpdateFilter):
+        class MultiUpdateForm(BaseMultiUpdateForm):
             class Meta:
                 model = _model
                 fields = self.get_editable_fields()
-                form = BaseMultiUpdateForm
 
-        form = MultiUpdateFilterset(data=data).form
-        form.helper = FormHelper()
-        form.helper.form_class = "form-horizontal"
-        form.helper.form_id = "multi-update-form"
-
-        form.helper.label_class = "col-md-3"
-        form.helper.field_class = "col-md-9"
-        form.helper.add_input(
-            Submit(
-                "save",
-                _("Save"),
-                css_class="btn btn-success",
-                data_toggle="modal",
-                data_target="#confirmation-modal",
-            )
-        )
+        form = MultiUpdateForm(data=data)
         return form
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)

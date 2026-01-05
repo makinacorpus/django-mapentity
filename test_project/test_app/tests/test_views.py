@@ -612,23 +612,23 @@ class MultiUpdateViewTest(BaseTest):
         # check choices depends on the type on the field
         self.assertEqual(
             form.fields["public_en"].widget.choices,
-            [("unknown", "Do nothing"), ("true", "Yes"), ("false", "No")],
+            [("nothing", "Do nothing"), ("true", "Yes"), ("false", "No")],
         )
         self.assertIn(
-            ("unknown", "Do nothing"), form.fields["located_in"].widget.choices
+            ("nothing", "Do nothing"), form.fields["located_in"].widget.choices
         )
         self.assertIn(("", "Null value"), form.fields["located_in"].widget.choices)
-        self.assertIn(("unknown", "Do nothing"), form.fields["road"].widget.choices)
+        self.assertIn(("nothing", "Do nothing"), form.fields["road"].widget.choices)
         self.assertNotIn(("", "Null value"), form.fields["road"].widget.choices)
 
     def test_multi_update_post_do_nothing(self):
         self.client.force_login(self.user)
         data = {
-            "public_en": "unknown",
-            "public_fr": "unknown",
-            "public_zh_hant": "unknown",
-            "located_in": "unknown",
-            "road": "unknown",
+            "public_en": "nothing",
+            "public_fr": "nothing",
+            "public_zh_hant": "nothing",
+            "located_in": "nothing",
+            "road": "nothing",
         }
         response = self.client.post(
             self.model.get_multi_update_url() + "?pks=1%2C2", data=data
@@ -647,11 +647,11 @@ class MultiUpdateViewTest(BaseTest):
     def test_multi_update_post_boolean(self):
         self.client.force_login(self.user)
         data = {
-            "public_en": True,
-            "public_fr": False,
-            "public_zh_hant": "unknown",
-            "located_in": "unknown",
-            "road": "unknown",
+            "public_en": "true",
+            "public_fr": "false",
+            "public_zh_hant": "nothing",
+            "located_in": "nothing",
+            "road": "nothing",
         }
         response = self.client.post(
             self.model.get_multi_update_url() + "?pks=1%2C2", data=data
@@ -670,9 +670,9 @@ class MultiUpdateViewTest(BaseTest):
         self.client.force_login(self.user)
         selected_road = self.geopoint1.road
         data = {
-            "public_en": "unknown",
-            "public_fr": "unknown",
-            "public_zh_hant": "unknown",
+            "public_en": "nothing",
+            "public_fr": "nothing",
+            "public_zh_hant": "nothing",
             "located_in": "",
             "road": selected_road.pk,
         }
