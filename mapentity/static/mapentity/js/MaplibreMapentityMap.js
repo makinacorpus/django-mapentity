@@ -156,6 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
             trackUserLocation: true,
         }), position='bottom-right'
         );
+        window.map = map;
 
         // Gestion de l'historique et des filtres
         const history = window.MapEntity.currentHistory;

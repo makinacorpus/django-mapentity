@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
             pageLength: 7,
             scrollY: '100vh',
             scrollCollapse: true,
+            info: false, // hide "showing 1 to n of m entries"
             lengthChange: false,
-            info: false,
-            sDom: "tpf",
+            dom: 'T<"clear">rtp',
             language: {
                 searchPlaceholder: tr("Search"),
                 paginate: {
@@ -72,6 +72,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     next: ">",
                     previous: "<"
                 },
+            },
+            layout: {
+                bottomEnd: 'inputPaging'
             },
             createdRow: function (row, data, index) {
                 const pk = data.id;
@@ -93,8 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         window.MapEntity.dt = mainDatatable;
 
-        // Ajustement vertical de la hauteur du DataTable
-       expandDatatableHeight();
+        var paging = document.getElementsByClassName('dt-paging')[0];
+        paging.classList.add('d-flex', 'flex-row-reverse');
+        document.getElementById('list-download-toolbar').appendChild(paging);
+
        window.addEventListener('resize', function (e) {
              expandDatatableHeight();
        });
@@ -126,8 +131,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(node.nodeType === Node.TEXT_NODE) {
                     node.remove();
                 }
-            })
+            });
         }
+
+        // Adjust vertically
+        expandDatatableHeight();
     });
 
 });
