@@ -143,4 +143,5 @@ class MultiUpdateFilterTest(TestCase):
         helper = self.form.helper
         self.assertEqual(helper.form_id, "multi-update-form")
         self.assertEqual(helper.form_method, "post")
-        self.assertEqual(helper.inputs[0].name, "save")
+        self.assertEqual(helper.inputs[0].name, "cancel")
+        self.assertEqual(helper.inputs[1].name, "save")

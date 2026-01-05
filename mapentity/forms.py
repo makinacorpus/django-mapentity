@@ -387,6 +387,9 @@ class BaseMultiUpdateForm(forms.Form):
         self.helper.form_method = "post"
         self.helper.form_action = ""
         self.helper.add_input(
+            Button("cancel", _("Cancel"), css_class="btn btn-light ml-auto mr-2"),
+        )
+        self.helper.add_input(
             Submit(
                 "save",
                 _("Save"),
