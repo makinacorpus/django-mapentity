@@ -27,8 +27,12 @@ class MapentityDatatableBooleanField(serializers.BooleanField):
             return '<i class="bi bi-question-circle"></i>'
 
 
-class CommaSeparatedRelatedField(serializers.ManyRelatedField):
+class CommaSeparatedRelatedField(serializers.Field):
     """ManyToMany displayed as string comma separated"""
 
-    def to_representation(self, iterable):
-        return ", ".join(str(item) for item in iterable.all())
+    def __init__(self, **kwargs):
+        kwargs["read_only"] = True
+        super().__init__(**kwargs)
+
+    def to_representation(self, value):
+        return ", ".join(str(item) for item in value.all())
