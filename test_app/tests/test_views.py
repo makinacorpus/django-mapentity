@@ -7,6 +7,7 @@ import factory
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import RequestFactory, TestCase
@@ -572,11 +573,12 @@ class LogViewMapentityTest(MapEntityTest):
     get_expected_geojson_attrs = None
 
     def get_expected_datatables_attrs(self):
+        content_type = ContentType.objects.get_for_model(DummyModel)
         data = {
             "action_flag": "Addition",
             "action_time": "10/06/2022 12:40:10",
             "change_message": "",
-            "content_type": 12,
+            "content_type": content_type.pk,
             "id": 1,
             "object": '<a data-pk="1" href="/dummymodel/1/" >Test_App | Dummy '
             "Model <class 'object'></a>",
