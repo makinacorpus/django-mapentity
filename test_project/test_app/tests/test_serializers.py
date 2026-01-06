@@ -410,9 +410,7 @@ class DatatableSerializerTests(TestCase):
                 model = DummyModel
                 fields = ["id", "name", "tags"]
 
-        serializer = DummySerializer(
-            DummyModel.objects.all().order_by("id"), many=True
-        )
+        serializer = DummySerializer(DummyModel.objects.all().order_by("id"), many=True)
         data = serializer.data
 
         self.assertEqual(len(data), 3)
@@ -475,4 +473,3 @@ class CommaSeparatedRelatedFieldTests(TestCase):
         result = field.to_representation(dummy.tags)
 
         self.assertEqual(result, "")
-

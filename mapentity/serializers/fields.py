@@ -31,7 +31,7 @@ class CommaSeparatedRelatedField(serializers.Field):
     """ManyToMany displayed as string comma separated"""
 
     def __init__(self, **kwargs):
-        kwargs['read_only'] = True
+        kwargs["read_only"] = True
         super().__init__(**kwargs)
 
     def to_representation(self, value):
