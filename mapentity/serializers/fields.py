@@ -28,7 +28,7 @@ class MapentityDatatableBooleanField(serializers.BooleanField):
 
 
 class CommaSeparatedRelatedField(serializers.ManyRelatedField):
-    """ManyToMany displayed as string coma separated"""
+    """ManyToMany displayed as string comma separated"""
 
     def to_representation(self, iterable):
         return ", ".join(str(item) for item in iterable.all())
