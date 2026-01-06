@@ -7,11 +7,11 @@ from mapentity.serializers.fields import CommaSeparatedRelatedField
 
 class MapentityDatatableSerializer(serializers.ModelSerializer):
     def build_relational_field(self, field_name, relation_info):
-        # 🔹 ForeignKey
+        # ForeignKey
         if not relation_info.to_many:
             return serializers.StringRelatedField, {"read_only": True}
 
-        # 🔹 ManyToMany → CSV
+        # ManyToMany → CSV
         return CommaSeparatedRelatedField, {
             "child_relation": serializers.StringRelatedField(),
             "read_only": True,
