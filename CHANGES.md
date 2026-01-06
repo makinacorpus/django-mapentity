@@ -4,6 +4,10 @@ CHANGELOG
 8.16.1+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Related fields in lists are now displayed by their string object representation (keep care on performances !)
+
 
 8.16.1     (2026-01-08)
 -----------------------
