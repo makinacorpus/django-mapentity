@@ -1,3 +1,4 @@
+import json
 import os
 from unittest import mock
 
@@ -10,7 +11,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils.encoding import force_str
+from django.utils.translation import get_language
 from faker import Faker
 from faker.providers import geo
 from freezegun import freeze_time
@@ -18,7 +21,7 @@ from freezegun import freeze_time
 from mapentity.models import LogEntry
 from mapentity.registry import app_settings
 from mapentity.tests import MapEntityLiveTest, MapEntityTest
-from mapentity.tests.factories import AttachmentFactory, SuperUserFactory
+from mapentity.tests.factories import AttachmentFactory, SuperUserFactory, UserFactory
 from mapentity.views import Convert, JSSettings, ServeAttachment
 
 from ..models import City, DummyModel, FileType
@@ -679,3 +682,76 @@ class FilterViewTest(BaseTest):
         response = self.client.get(City.get_filter_url())
         self.assertContains(response, '<input type="text" name="name"')
         self.assertContains(response, '<input type="hidden" name="bbox"')
+
+
+class MapScreenshotTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory.create()
+
+        cls.context = {
+            "mapview": {"lat": 42.771211138625894, "lng": 1.336212158203125, "zoom": 9},
+            "maplayers": ["OSM", "Cadastre", "Signalétiques", "POI", "▣ Tronçons"],
+            "filter": "",
+            "sortcolumns": {},
+            "fullurl": "https://test.fr/path/list/",
+            "url": "/path/list/",
+            "selector": "#map",
+            "viewport": {"width": 1854, "height": 481},
+            "timestamp": 1762525783907,
+        }
+
+    @mock.patch("mapentity.helpers.requests.get")
+    def test_map_screenshot_success(self, mock_capture):
+        self.client.force_login(self.user)
+
+        mock_capture.return_value.content = b"fake_png_data"
+        mock_capture.return_value.status_code = 200
+
+        data = {"printcontext": json.dumps(self.context)}
+
+        response = self.client.post(reverse("mapentity:map_screenshot"), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "image/png")
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertEqual(response.content, b"fake_png_data")
+
+        args, kwargs = mock_capture.call_args
+        called_url = args[0]
+
+        # check mapentity url
+        self.assertTrue(called_url.startswith("http"))
+        self.assertIn(f"lang%3D{get_language()}", called_url)
+        self.assertIn("auth_token", called_url)
+        self.assertIn("context", called_url)
+
+        # check screamshotter url
+        self.assertIn("width=1854", called_url)
+        self.assertIn("height=481", called_url)
+        self.assertIn("selector=%23map", called_url)
+
+    def test_map_screenshot_invalid_json_context(self):
+        self.client.force_login(self.user)
+
+        data = {"printcontext": "json_error"}
+
+        with self.assertLogs(level="INFO") as cm:
+            response = self.client.post(reverse("mapentity:map_screenshot"), data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "ERROR:mapentity.views.base:Expecting value: line 1 column 1 (char 0)",
+            cm.output[0],
+        )
+
+    def test_map_screenshot_invalid_length_context(self):
+        self.client.force_login(self.user)
+
+        data = {"printcontext": "{" + "test" * 1000 + "}"}
+
+        with self.assertLogs(level="INFO") as cm:
+            response = self.client.post(reverse("mapentity:map_screenshot"), data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "ERROR:mapentity.views.base:Print context is way too big", cm.output[0]
+        )

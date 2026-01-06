@@ -13,6 +13,7 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import get_language
 from django.views import View, static
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -193,9 +194,7 @@ def map_screenshot(request):
         context["print"] = True
         printcontext = json.dumps(context)
         contextencoded = quote(printcontext)
-        map_url += (
-            f"?auth_token={TokenManager.generate_token()}&context={contextencoded}"
-        )
+        map_url += f"?lang={get_language()}&auth_token={TokenManager.generate_token()}&context={contextencoded}"
 
         msg = f"Capture {map_url}"
         logger.debug(msg)
