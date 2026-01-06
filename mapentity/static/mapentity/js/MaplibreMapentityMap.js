@@ -179,6 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
             datatable: mainDatatable,
             objectsname: modelname,
             prefix: 'list',
+            load_filter_form: togglableFilter.load_filter_form.bind(togglableFilter, mapsync),
         });
 
         // Sauvegarde du contexte
