@@ -90,6 +90,7 @@ class DummyModel(MapEntityMixin, models.Model):
     def is_public(self):
         return self.public
 
+    @property
     def name_display(self):
         return f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>'
 

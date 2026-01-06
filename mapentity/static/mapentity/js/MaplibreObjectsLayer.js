@@ -44,7 +44,7 @@ class MaplibreObjectsLayer {
      * @param e {Object} - Événement de clic
      * @private
      */
-    _onClick(e) {
+    async _onClick(e) {
         if (this.options.readonly) {
             return;
         }
@@ -54,8 +54,14 @@ class MaplibreObjectsLayer {
 
         if (features.length > 0 && features[0].source !== 'geojson') {
             const feature = features[0];
-            if (this.options.objectUrl) {
-                window.location = this.options.objectUrl(feature.properties, feature);
+            if(this.options.displayPopup){
+                var popup_content;
+                try{
+                    popup_content =  await this.getPopupContent(this.options.modelname, feature.id);
+                } catch (error) {
+                    popup_content = gettext('Data unreachable');
+                }
+                new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popup_content).addTo(this._map);
             }
         }
     }
@@ -624,5 +630,28 @@ class MaplibreObjectsLayer {
      */
     getBoundsLayer() {
         return this.boundsLayer;
+    }
+
+    /**
+     * Fetch data to display in object popup
+     * @returns {Promise<String>}
+     */
+    async getPopupContent(modelname, id){
+        const popup_url = window.SETTINGS.urls.popup.replace(new RegExp('modelname', 'g'), modelname)
+                                          .replace('0', id);
+
+        // fetch data
+        var response = await window.fetch(popup_url);
+        if (!response.ok){
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        } else {
+            // parse data
+            try {
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                throw new Error('Cannot parse data');
+            }
+        }
     }
 }

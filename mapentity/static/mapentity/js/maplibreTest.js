@@ -23,7 +23,8 @@ window.addEventListener("entity:map", () => {
         category: category,
         primaryKey: primaryKey,
         dataUrl: layerUrl,
-        isLazy: true
+        isLazy: true,
+        displayPopup: false,
     });
 
     objectsLayer.initialize(map.getMap());

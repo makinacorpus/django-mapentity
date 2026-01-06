@@ -1,6 +1,9 @@
 import logging
 
+from django.conf import settings
 from django.contrib.gis.db.models.functions import Transform
+from django.template import loader
+from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import renderers, viewsets
 from rest_framework.decorators import action
@@ -96,3 +99,39 @@ class MapEntityViewSet(viewsets.ModelViewSet):
     @view_cache_response_content()
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="popup-content",
+        renderer_classes=[renderers.JSONRenderer],
+    )
+    def popup_content(self, request, *args, **kwargs):
+        obj = self.get_object()
+        model_name = self.model.__name__.lower()
+        label_config = getattr(settings, "POPUP_CONTENT", {})
+        fields = label_config.get(model_name, []).copy()
+
+        context = {
+            "button_label": _("Detail sheet"),
+            "detail_url": obj.get_detail_url(),
+            "attributes": [],
+            "title": str(obj),
+        }
+
+        for field_name in fields:
+            try:
+                value = mapentity_serializers.field_as_string(obj, field_name)
+            except AttributeError:
+                # ignore fields that are not available without raising an error
+                value = None
+
+            # add field name for boolean field for readability
+            if value in [_("yes"), _("no")]:
+                value = f"{obj._meta.get_field(field_name).verbose_name}: {value}"
+
+            if value:
+                context["attributes"].append(value)
+
+        template = loader.get_template("mapentity/mapentity_popup_content.html")
+        return Response(template.render(context))
