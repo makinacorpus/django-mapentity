@@ -6,7 +6,7 @@ CHANGELOG
 
 **Improvements**
 
-- Related fields in lists are now displayed by their string object representation (keep care on performances !)
+- Related fields in lists are now displayed by their string object representation (be mindful of performance)
 
 
 8.16.0     (2025-12-24)
