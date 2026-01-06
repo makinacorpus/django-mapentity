@@ -452,7 +452,7 @@ class CommaSeparatedRelatedFieldTests(TestCase):
         dummy = DummyModel.objects.create(name="Test")
         dummy.tags.add(self.tag1, self.tag2, self.tag3)
 
-        field = CommaSeparatedRelatedField(child_relation=None, read_only=True)
+        field = CommaSeparatedRelatedField(read_only=True)
         result = field.to_representation(dummy.tags)
 
         self.assertEqual(result, "Alpha, Beta, Gamma")
@@ -462,7 +462,7 @@ class CommaSeparatedRelatedFieldTests(TestCase):
         dummy = DummyModel.objects.create(name="Test")
         dummy.tags.add(self.tag1)
 
-        field = CommaSeparatedRelatedField(child_relation=None, read_only=True)
+        field = CommaSeparatedRelatedField(read_only=True)
         result = field.to_representation(dummy.tags)
 
         self.assertEqual(result, "Alpha")
@@ -471,7 +471,7 @@ class CommaSeparatedRelatedFieldTests(TestCase):
         """Test representation with no items"""
         dummy = DummyModel.objects.create(name="Test")
 
-        field = CommaSeparatedRelatedField(child_relation=None, read_only=True)
+        field = CommaSeparatedRelatedField(read_only=True)
         result = field.to_representation(dummy.tags)
 
         self.assertEqual(result, "")
