@@ -25,3 +25,10 @@ class MapentityDatatableBooleanField(serializers.BooleanField):
             return '<i class="bi bi-x-circle text-danger"></i>'
         else:
             return '<i class="bi bi-question-circle"></i>'
+
+
+class CommaSeparatedRelatedField(serializers.ManyRelatedField):
+    """ManyToMany displayed as string coma separated"""
+
+    def to_representation(self, iterable):
+        return ", ".join(str(item) for item in iterable.all())

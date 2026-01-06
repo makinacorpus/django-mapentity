@@ -1,10 +1,22 @@
 from django.db import models
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 
 from mapentity.serializers import fields
+from mapentity.serializers.fields import CommaSeparatedRelatedField
 
 
-class MapentityDatatableSerializer(ModelSerializer):
+class MapentityDatatableSerializer(serializers.ModelSerializer):
+    def build_relational_field(self, field_name, relation_info):
+        # 🔹 ForeignKey
+        if not relation_info.to_many:
+            return serializers.StringRelatedField, {"read_only": True}
+
+        # 🔹 ManyToMany → CSV
+        return CommaSeparatedRelatedField, {
+            "child_relation": serializers.StringRelatedField(),
+            "read_only": True,
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # patch mapping fields to use datatables format
