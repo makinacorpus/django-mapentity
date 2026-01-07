@@ -18,11 +18,5 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-msgid "Short description"
-msgstr "Description courte"
-
-msgid "Dummy Model"
-msgstr ""
-
-msgid "DummyApt Model"
-msgstr ""
+msgid "Data unreachable"
+msgstr "Données inaccessibles"
