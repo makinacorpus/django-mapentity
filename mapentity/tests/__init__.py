@@ -239,9 +239,9 @@ class MapEntityTest(TestCase):
         if self.user.has_perm(
             f"{self.model._meta.app_label}.change_geom_{self.model._meta.model_name}"
         ):
-            self.assertIn(b".modifiable = true;", response.content)
+            self.assertIn(b"modifiable: 'true'", response.content)
         else:
-            self.assertIn(b".modifiable = false;", response.content)
+            self.assertIn(b"modifiable: 'false'", response.content)
 
     def test_duplicate(self):
         if self.model is None or not self.model.can_duplicate:

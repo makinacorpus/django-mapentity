@@ -21,7 +21,7 @@ class MapWidget(BaseGeometryWidget):
         """
         Sérialise la valeur géométrique en GeoJSON.
         """
-        return value.geojson if value else ""
+        return value.geojson if hasattr(value, "geojson") else ""
 
     def _get_attrs(self, name, attrs=None):
         """
