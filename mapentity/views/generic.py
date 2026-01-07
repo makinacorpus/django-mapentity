@@ -422,11 +422,12 @@ class DocumentConvert(Convert, DetailView):
 class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_pks(self):
         pks = self.request.GET.get("pks", None)
-        return pks
+        if pks:
+            return pks.split(",")
+        return None
 
     def get_queryset(self):
-        pks = self.get_pks().split(",")
-        return self.model.objects.filter(pk__in=pks)
+        return self.model.objects.filter(pk__in=self.get_pks())
 
     @classmethod
     def get_entity_kind(cls):
@@ -463,11 +464,12 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
 class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, FormMixin, ListView):
     def get_pks(self):
         pks = self.request.GET.get("pks", None)
-        return pks
+        if pks:
+            return pks.split(",")
+        return None
 
     def get_queryset(self):
-        pks = self.get_pks().split(",")
-        return self.model.objects.filter(pk__in=pks)
+        return self.model.objects.filter(pk__in=self.get_pks())
 
     @classmethod
     def get_entity_kind(cls):
