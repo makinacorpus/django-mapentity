@@ -548,9 +548,9 @@ class MaplibreObjectsLayer {
 
             const currentSourceId = layer.source;
             const source = this._map.getSource(currentSourceId);
-            if (source && source._data && source._data.features) {
+            if (source && source._data && source._data.geojson.features) {
                 sourceId = currentSourceId;
-                fullFeatureCollection = source._data;
+                fullFeatureCollection = source._data.geojson;
                 break;
             }
         }
