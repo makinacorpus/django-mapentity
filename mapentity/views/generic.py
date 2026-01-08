@@ -4,8 +4,6 @@ import os
 from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -24,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import static
 from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
 from django.views.generic.list import ListView
 from django_filters.views import FilterView
 from django_weasyprint import WeasyTemplateResponseMixin
@@ -38,7 +36,6 @@ from ..decorators import save_history, view_permission_required
 from ..forms import (
     AttachmentForm,
     BaseMultiUpdateForm,
-    MultiUpdateFilter,
 )
 from ..helpers import (
     convertit_url,
@@ -423,11 +420,14 @@ class DocumentConvert(Convert, DetailView):
 
 
 class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
-    def get_queryset(self):
-        pks = self.request.GET["pks"].split(",")
-        self.queryset = self.model.objects.filter(pk__in=pks)
+    def get_pks(self):
+        pks = self.request.GET.get("pks", None)
+        if pks:
+            return pks.split(",")
+        return None
 
-        return self.queryset
+    def get_queryset(self):
+        return self.model.objects.filter(pk__in=self.get_pks())
 
     @classmethod
     def get_entity_kind(cls):
@@ -439,17 +439,17 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_title(self):
         return _("Delete selected %(model)s") % {"model": self.model._meta.model_name}
 
-    def get_redirect_url(self):
+    def get_success_url(self):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
-        deleted_items = self.get_queryset().delete()
+        queryset = self.get_queryset()
+        queryset.delete()
         messages.success(
             self.request,
-            _("%(count)d items deleted")
-            % {"count": deleted_items[1][self.model._meta.label]},
+            _("%(count)d items deleted") % {"count": self.get_queryset().count()},
         )
-        return HttpResponseRedirect(self.get_redirect_url())
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self):
         context = super().get_context_data()
@@ -461,24 +461,15 @@ class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
         return super().dispatch(*args, **kwargs)
 
 
-class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
-    def update_queryset(self):
-        queryset = self.get_queryset()
-        form = self.get_form(self.request.POST)
-        form.is_valid()
-        cleaned_data = {
-            name: value
-            for name, value in form.cleaned_data.items()
-            if self.request.POST.get(name) != "unknown"
-        }
-
-        return queryset.update(**cleaned_data)
+class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, FormMixin, ListView):
+    def get_pks(self):
+        pks = self.request.GET.get("pks", None)
+        if pks:
+            return pks.split(",")
+        return None
 
     def get_queryset(self):
-        self.pks = self.request.GET["pks"].split(",")
-        self.queryset = self.model.objects.filter(pk__in=self.pks)
-
-        return self.queryset
+        return self.model.objects.filter(pk__in=self.get_pks())
 
     @classmethod
     def get_entity_kind(cls):
@@ -490,15 +481,27 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_title(self):
         return _("Update selected %(model)s") % {"model": self.model._meta.model_name}
 
-    def get_redirect_url(self):
+    def get_success_url(self):
         return self.get_model().get_list_url()
 
     def post(self, request, *args, **kwargs):
-        modified_rows = self.update_queryset()
+        self.object_list = self.get_queryset()
+        form = self.get_form(data=request.POST)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        queryset = self.get_queryset()
+
+        cleaned_data = form.cleaned_data
+
+        modified_rows = queryset.update(**cleaned_data)
         messages.success(
             self.request, _("%(count)d items updated") % {"count": modified_rows}
         )
-        return HttpResponseRedirect(self.get_redirect_url())
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -530,28 +533,12 @@ class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, ListView):
     def get_form(self, data=None):
         _model = self.model
 
-        class MultiUpdateFilterset(MultiUpdateFilter):
+        class MultiUpdateForm(BaseMultiUpdateForm):
             class Meta:
                 model = _model
                 fields = self.get_editable_fields()
-                form = BaseMultiUpdateForm
 
-        form = MultiUpdateFilterset(data=data).form
-        form.helper = FormHelper()
-        form.helper.form_class = "form-horizontal"
-        form.helper.form_id = "multi-update-form"
-
-        form.helper.label_class = "col-md-3"
-        form.helper.field_class = "col-md-9"
-        form.helper.add_input(
-            Submit(
-                "save",
-                _("Save"),
-                css_class="btn btn-success",
-                data_toggle="modal",
-                data_target="#confirmation-modal",
-            )
-        )
+        form = MultiUpdateForm(data=data)
         return form
 
     @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
