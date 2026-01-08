@@ -11,7 +11,7 @@ class MapentityDatatableSerializer(serializers.ModelSerializer):
         if not relation_info.to_many:
             return serializers.StringRelatedField, {"read_only": True}
 
-        # ManyToMany → CSV
+        # ManyToMany
         return CommaSeparatedRelatedField, {"read_only": True}
 
     def __init__(self, *args, **kwargs):
