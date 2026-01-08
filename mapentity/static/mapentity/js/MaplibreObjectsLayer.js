@@ -503,7 +503,7 @@ class MaplibreObjectsLayer {
             const source = this._map.getSource(sourceId);
             if (!source || !source._data) continue;
 
-            for (const feature of source._data.features) {
+            for (const feature of source._data.geojson.features) {
                 if (!feature.id) continue;
                 const isMatch = feature.id === primaryKey;
                 this._map.setFeatureState(
