@@ -6,7 +6,7 @@ CHANGELOG
 
 **Bug fixes**
 
-- Fix batch deletion (refs #5107)
+- Fix batch deletion
 
 
 8.16.0     (2025-12-24)
