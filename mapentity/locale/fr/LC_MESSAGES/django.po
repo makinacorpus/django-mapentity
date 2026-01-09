@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 08:24+0000\n"
+"POT-Creation-Date: 2026-01-09 09:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,6 +41,21 @@ msgstr "Soumettre le fichier"
 
 msgid "Update attachment"
 msgstr "Modifier le fichier"
+
+msgid "Save"
+msgstr "Sauvegarder"
+
+msgid "Do nothing"
+msgstr "Ne rien faire"
+
+msgid "Yes"
+msgstr "Oui"
+
+msgid "No"
+msgstr "Non"
+
+msgid "Null value"
+msgstr "Valeur nulle"
 
 msgid "object"
 msgstr "objet"
@@ -178,6 +193,9 @@ msgstr "Historique complet"
 msgid "Map"
 msgstr "Carte"
 
+msgid "Access to the requested resource is restricted"
+msgstr "L'accès à la ressource demandée est restreint"
+
 msgid "CSV"
 msgstr "CSV"
 
@@ -186,6 +204,34 @@ msgstr "Shapefile"
 
 msgid "GPX"
 msgstr "GPX"
+
+msgid "Warning!"
+msgstr ""
+
+# python-format
+msgid "Do you really wish to delete <span class=\"badge badge-danger\">this object</span>?"
+msgid_plural "Do you really wish to delete <span class=\"badge badge-danger\">these %(counter)s objects</span>?"
+msgstr[0] "Voulez-vous vraiment supprimer cet <span class=\"badge badge-danger\">objet</span> ?"
+msgstr[1] "Voulez-vous vraiment supprimer ces<span class=\"badge badge-danger\">%(counter)s objets</span> ?"
+
+msgid "No, back to list view"
+msgstr "Non, retour à la vue liste"
+
+#, python-format
+msgid "Select values for the selected %(model_name_plural)s"
+msgstr "Choisissez les valeurs pour les %(model_name_plural)s sélectionnés"
+
+msgid "Confirm modification"
+msgstr "Confirmer la modification"
+
+#, python-format
+msgid "Do you want to apply the following modifications on this <span class=\"badge badge-danger\">selected object</span>?"
+msgid_plural "Do you want to apply the following modifications on these <span class=\"badge badge-danger\">%(counter)s selected objects</span>?"
+msgstr[0] "Voulez-vous appliquer les modifications suivantes sur cet <span class=\"badge badge-danger\">objet sélectionné</span> ?"
+msgstr[1] "Voulez-vous appliquer les modifications suivantes sur les <span class=\"badge badge-danger\">%(counter)s objets sélectionnés</span> ?"
+
+msgid "Confirm"
+msgstr "Confirmer"
 
 msgid "Last author"
 msgstr "Dernier auteur"
@@ -238,6 +284,22 @@ msgstr "Géométrie invalide"
 msgid "Detail sheet"
 msgstr "Fiche détail"
 
+#, python-format
+msgid "Delete selected %(model)s"
+msgstr "Supprimer les %(model)s éléments sélectionnés"
+
+#, python-format
+msgid "%(count)d items deleted"
+msgstr "%(count)d éléments supprimés"
+
+#, python-format
+msgid "Update selected %(model)s"
+msgstr "Modifier les %(model)s sélectionnés"
+
+#, python-format
+msgid "%(count)d items updated"
+msgstr "%(count)d éléments modifiés"
+
 msgid "Created"
 msgstr "Créé"
 
@@ -262,3 +324,6 @@ msgstr "Éditer %s"
 
 msgid "Saved"
 msgstr "Sauvegardé"
+
+msgid "At least one object must be selected"
+msgstr ""

@@ -1,6 +1,7 @@
 import logging
 
 from crispy_forms.helper import FormHelper
+from django.contrib import messages
 from django.contrib.contenttypes.fields import (
     GenericForeignKey,
     GenericRel,
@@ -8,7 +9,8 @@ from django.contrib.contenttypes.fields import (
 )
 from django.contrib.gis.db.models import GeometryField
 from django.db.models.fields.files import FileField
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import last_modified as cache_last_modified
 
 from ..filters import MapEntityFilterSet
@@ -177,3 +179,16 @@ class FilterListMixin:
             self.request.GET or None, queryset=queryset
         )
         return self._filterform.qs
+
+
+class MultiObjectActionMixin:
+    """
+    Perform data validation before performing an action on multiple items
+    """
+
+    def get(self, request, *args, **kwargs):
+        if not self.get_pks():
+            messages.warning(self.request, _("At least one object must be selected"))
+            return HttpResponseRedirect(self.get_success_url())
+
+        return super().get(request, *args, **kwargs)

@@ -347,6 +347,40 @@ class MapEntityTest(TestCase):
         response = self.client.get(obj.get_update_url())
         self.assertEqual(response.status_code, 302)
 
+    def test_multi_delete_view(self):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        """If pks parameter isn't specify the user is redirected to list view"""
+        response = self.client.get(self.model.get_multi_delete_url())
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        """If pks parameter is empty the user is redirected to list view"""
+        response = self.client.get(self.model.get_multi_delete_url() + "?pks=")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        response = self.client.get(self.model.get_multi_update_url() + "?pks=1%2C2")
+        self.assertEqual(response.status_code, 200)
+
+    def test_multi_update_view(self):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        """If pks parameter isn't specify the user is redirected to list view"""
+        response = self.client.get(self.model.get_multi_update_url())
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        """If pks parameter is empty the user is redirected to list view"""
+        response = self.client.get(self.model.get_multi_update_url() + "?pks=")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        response = self.client.get(self.model.get_multi_update_url() + "?pks=1%2C2")
+        self.assertEqual(response.status_code, 200)
+
     def test_formfilter_in_list_context(self):
         if self.model is None:
             return  # Abstract test should not run

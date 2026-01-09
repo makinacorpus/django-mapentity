@@ -7,9 +7,11 @@ from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
+from django.db import models
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
@@ -20,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import static
 from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
 from django.views.generic.list import ListView
 from django_filters.views import FilterView
 from django_weasyprint import WeasyTemplateResponseMixin
@@ -31,7 +33,7 @@ from mapentity.tokens import TokenManager
 from .. import models as mapentity_models
 from .. import serializers as mapentity_serializers
 from ..decorators import save_history, view_permission_required
-from ..forms import AttachmentForm
+from ..forms import AttachmentForm, BaseMultiUpdateForm
 from ..helpers import (
     convertit_url,
     download_content,
@@ -43,7 +45,12 @@ from ..helpers import (
 from ..models import ADDITION, CHANGE, DELETION, LogEntry
 from ..settings import app_settings
 from .base import BaseListView, history_delete
-from .mixins import FilterListMixin, FormViewMixin, ModelViewMixin
+from .mixins import (
+    FilterListMixin,
+    FormViewMixin,
+    ModelViewMixin,
+    MultiObjectActionMixin,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +98,12 @@ class MapEntityList(BaseListView, ListView):
         perm_create = model.get_permission_codename(mapentity_models.ENTITY_CREATE)
         can_add = user_has_perm(self.request.user, perm_create)
         context["can_add"] = can_add
+        perm_update = model.get_permission_codename(mapentity_models.ENTITY_UPDATE)
+        can_edit = user_has_perm(self.request.user, perm_update)
+        context["can_edit"] = can_edit
+        perm_delete = model.get_permission_codename(mapentity_models.ENTITY_DELETE)
+        can_delete = user_has_perm(self.request.user, perm_delete)
+        context["can_delete"] = can_delete
         perm_export = model.get_permission_codename(mapentity_models.ENTITY_FORMAT_LIST)
         can_export = user_has_perm(self.request.user, perm_export)
         context["can_export"] = can_export
@@ -405,6 +418,133 @@ class DocumentConvert(Convert, DetailView):
     CRUD
 
 """
+
+
+class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
+    def get_pks(self):
+        pks = self.request.GET.get("pks", None)
+        if pks:
+            return pks.split(",")
+        return None
+
+    def get_queryset(self):
+        return self.model.objects.filter(pk__in=self.get_pks())
+
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_MULTI_DELETE
+
+    def get_template_names(self):
+        return ["mapentity/mapentity_multi_delete_confirmation.html"]
+
+    def get_title(self):
+        return _("Delete selected %(model)s") % {"model": self.model._meta.model_name}
+
+    def get_success_url(self):
+        return self.get_model().get_list_url()
+
+    def post(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        queryset.delete()
+        messages.success(
+            self.request,
+            _("%(count)d items deleted") % {"count": self.get_queryset().count()},
+        )
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context["nb_objects"] = self.get_queryset().count()
+        return context
+
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+
+class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, FormMixin, ListView):
+    def get_pks(self):
+        pks = self.request.GET.get("pks", None)
+        if pks:
+            return pks.split(",")
+        return None
+
+    def get_queryset(self):
+        return self.model.objects.filter(pk__in=self.get_pks())
+
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_MULTI_UPDATE
+
+    def get_template_names(self):
+        return ["mapentity/mapentity_multi_update_form.html"]
+
+    def get_title(self):
+        return _("Update selected %(model)s") % {"model": self.model._meta.model_name}
+
+    def get_success_url(self):
+        return self.get_model().get_list_url()
+
+    def post(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        form = self.get_form(data=request.POST)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        queryset = self.get_queryset()
+
+        cleaned_data = form.cleaned_data
+
+        modified_rows = queryset.update(**cleaned_data)
+        messages.success(
+            self.request, _("%(count)d items updated") % {"count": modified_rows}
+        )
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form"] = self.get_form()
+        context["nb_objects"] = self.get_queryset().count()
+        context["model_name_plural"] = self.model._meta.verbose_name_plural.lower()
+
+        return context
+
+    def get_editable_fields(self):
+        ALLOWED_FIELD_TYPES = (models.BooleanField, models.ForeignKey)
+
+        editable_fields = []
+        for field in self.model._meta.fields:
+            is_valid_type = isinstance(field, ALLOWED_FIELD_TYPES)
+            is_editable = getattr(field, "editable", False)
+            is_not_unique = not getattr(
+                field, "unique", False
+            )  # do not add one to one relation fields
+            is_not_content_type = (
+                getattr(field, "related_model", None) != ContentType
+            )  # do not add genericforeignkey
+
+            if is_valid_type and is_editable and is_not_unique and is_not_content_type:
+                editable_fields.append(field.name)
+
+        return editable_fields
+
+    def get_form(self, data=None):
+        _model = self.model
+
+        class MultiUpdateForm(BaseMultiUpdateForm):
+            class Meta:
+                model = _model
+                fields = self.get_editable_fields()
+
+        form = MultiUpdateForm(data=data)
+        return form
+
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
 
 class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):

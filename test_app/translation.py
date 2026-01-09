@@ -1,6 +1,6 @@
 from modeltranslation.translator import TranslationOptions, translator
 
-from test_app.models import DummyAptModel, DummyModel, Road
+from test_app.models import DummyAptModel, DummyModel, GeoPoint, Road
 
 
 class DummyModelTO(TranslationOptions):
@@ -23,7 +23,12 @@ class CityTO(TranslationOptions):
     fields = ("name",)
 
 
+class GeoPointModelTO(TranslationOptions):
+    fields = ("name", "public")
+
+
 translator.register(DummyModel, DummyModelTO)
 translator.register(Road, RoadModelTO)
 translator.register(DummyAptModel, DummyAptModelTO)
+translator.register(GeoPoint, GeoPointModelTO)
 # translator.register(City, CityTO)

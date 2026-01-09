@@ -3,8 +3,19 @@
 
 {% block title %}{{ objectsname }} | {{ block.super }}{% endblock title %}
 
+{% block extrahead %}
+    {{ block.super }}
+    <script>
+        {% if can_edit or can_delete %}
+        window.USER_CAN_SELECT = true;
+        {% else %}
+        window.USER_CAN_SELECT = false;
+        {% endif %}
+    </script>
+{% endblock extrahead %}
 
 {% block container %}
+{{ block.super }}
 <div id="container" class="container-fluid list-container">
 
     <div id="mainpanel" class="row">
@@ -42,6 +53,45 @@
                             <i class="bi bi-plus"></i> <span class="d-none d-lg-inline">{% trans "Add" %}</span>
                         </a>
                         {% endif %}
+                        {% block actionsbutton %}
+                        <div class="btn-group" role="group">
+                            <button id="btn-batch-editing"
+                                    class="btn btn-sm btn-primary dropdown-toggle"
+                                    type="button"
+                                    data-toggle="dropdown"
+                                    aria-expanded="false"
+                                    {% if not can_edit and not can_delete %}
+                                        title="{% trans "Access to the requested resource is restricted" %}"
+                                        disabled
+                                    {% endif %}>
+                                <i class="bi bi-gear-fill"></i> <span class="d-none d-sm-inline">{% trans "Actions" %}</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                {% block actions %}{% endblock %}
+                                {% if can_edit %}
+                                    <span id="tooltip-edit">
+                                        <button type="button"
+                                                class="dropdown-item"
+                                                id="btn-edit"
+                                                data-url="{{ model.get_multi_update_url }}">
+                                            <i class="bi bi-pencil-square"></i> {% trans "Edit" %}
+                                        </button>
+                                    </span>
+                                {% endif %}
+
+                                {% if can_delete %}
+                                    <span id="tooltip-delete">
+                                        <button type="button"
+                                                class="dropdown-item"
+                                                id="btn-delete"
+                                                data-url="{{ model.get_multi_delete_url }}">
+                                            <i class="bi bi-trash"></i> {% trans "Delete" %}
+                                        </button>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endblock actionsbutton %}
                     {% endblock mainactions %}
                     {% smart_include "listactions" %}
                     </div>
@@ -53,6 +103,7 @@
                     <thead>
                     <tr>
                         {% block list-fields %}
+                        <th></th>
                         {% for field in columns %}
                         <th data-data="{{ field }}" {% if field in unorderable_columns %} data-orderable="false"
                             data-searchable="false" {% elif field not in searchable_columns %}

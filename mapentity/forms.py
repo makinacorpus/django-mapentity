@@ -8,6 +8,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.gis.db.models.fields import GeometryField
 from django.core.exceptions import FieldDoesNotExist
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 from modeltranslation.utils import build_localized_fieldname
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
@@ -359,3 +360,93 @@ class AttachmentForm(BaseAttachmentForm):
         self.helper.layout.fields.append(
             FormActions(*form_actions, css_class="form-actions")
         )
+
+
+class BaseMultiUpdateForm(forms.Form):
+    """
+    Create a form using the Boolean and ForeignKey fields of a model to update multiple instances at once.
+    """
+
+    class Meta:
+        model = None
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Setup crispy form
+        self.helper = FormHelper()
+        self.helper.form_id = "multi-update-form"
+        self.helper.form_class = ""
+        self.helper.form_method = "post"
+        self.helper.form_action = ""
+        self.helper.add_input(
+            Button("cancel", _("Cancel"), css_class="btn btn-light ml-auto mr-2"),
+        )
+        self.helper.add_input(
+            Submit(
+                "save",
+                _("Save"),
+                css_class="btn btn-success",
+                data_toggle="modal",
+                data_target="#confirmation-modal",
+            )
+        )
+
+        # create fields with correct choices
+        model = self.Meta.model
+        fields = self.Meta.fields
+
+        for field_name in fields:
+            field = model._meta.get_field(field_name)
+
+            if isinstance(field, models.BooleanField):
+                self.fields[field_name] = forms.ChoiceField(
+                    label=field.verbose_name,
+                    choices=[
+                        ("nothing", _("Do nothing")),
+                        ("true", _("Yes")),
+                        ("false", _("No")),
+                    ],
+                    required=False,
+                )
+                self.fields[field_name].initial = "nothing"
+            elif isinstance(field, models.ForeignKey):
+                null_label = _("Null value")
+                queryset = field.related_model.objects.all()
+                choices = [(obj.pk, str(obj)) for obj in queryset]
+
+                if field.blank and field.null:
+                    choices.insert(0, ("", null_label))
+
+                choices.insert(0, ("nothing", _("Do nothing")))
+
+                self.fields[field_name] = forms.ChoiceField(
+                    label=field.verbose_name,
+                    choices=choices,
+                    required=False,
+                )
+                self.fields[field_name].initial = "nothing"
+
+        # delete translated fields without language specification
+        try:
+            translated_options = translator.get_options_for_model(model)
+            translated_fields = list(translated_options.fields)
+        except NotRegistered:
+            translated_fields = list()
+
+        for field in list(self.fields.keys()):
+            if field in translated_fields:
+                self.fields.pop(field, None)
+
+    def clean(self):
+        data = super().clean()
+        cleaned_data = {}
+
+        for name, value in data.items():
+            if value != "nothing":
+                cleaned_data[name] = (
+                    value == "true" if value in ("true", "false") else value
+                )
+
+        return cleaned_data

@@ -1,0 +1,23 @@
+{% extends "mapentity/base_site.html" %}
+{% load i18n mapentity_tags %}
+
+{% block mainpanel %}
+{{ block.super }}
+
+<div class="container">
+    <div class="d-flex justify-content-center">
+        <div>
+            <div class="alert">
+                <h4 class="alert-heading">{% trans "Warning!" %}</h4>
+                {% blocktrans count counter=nb_objects %}Do you really wish to delete <span class="badge badge-danger">this object</span>?{% plural %}Do you really wish to delete <span class="badge badge-danger">these {{ counter }} objects</span>?{% endblocktrans %}
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="submit" class="btn btn-danger" value="{% trans "Yes, delete" %}">
+                <a class="btn btn-inverse" href="{{ model.get_list_url }}">{% trans "No, back to list view" %}</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock mainpanel %}

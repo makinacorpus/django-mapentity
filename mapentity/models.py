@@ -40,7 +40,9 @@ ENTITY_DOCUMENT = "document"
 ENTITY_MARKUP = "markup"
 ENTITY_DUPLICATE = "duplicate"
 ENTITY_CREATE = "add"
+ENTITY_MULTI_UPDATE = "multi_update"
 ENTITY_UPDATE = "update"
+ENTITY_MULTI_DELETE = "multi_delete"
 ENTITY_DELETE = "delete"
 ENTITY_UPDATE_GEOM = "update_geom"
 
@@ -56,7 +58,9 @@ ENTITY_KINDS = (
     ENTITY_CREATE,
     ENTITY_DUPLICATE,
     ENTITY_UPDATE,
+    ENTITY_MULTI_UPDATE,
     ENTITY_DELETE,
+    ENTITY_MULTI_DELETE,
     ENTITY_UPDATE_GEOM,
 )
 
@@ -175,7 +179,9 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
             ENTITY_DUPLICATE: ENTITY_PERMISSION_CREATE,
             ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
             ENTITY_UPDATE_GEOM: ENTITY_PERMISSION_UPDATE_GEOM,
+            ENTITY_MULTI_UPDATE: ENTITY_PERMISSION_UPDATE,
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
+            ENTITY_MULTI_DELETE: ENTITY_PERMISSION_DELETE,
             ENTITY_DETAIL: ENTITY_PERMISSION_READ,
             ENTITY_LIST: ENTITY_PERMISSION_READ,
             ENTITY_FILTER: ENTITY_PERMISSION_READ,
@@ -301,8 +307,16 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def get_update_url(self):
         return reverse(self._entity.url_name(ENTITY_UPDATE), args=[str(self.pk)])
 
+    @classmethod
+    def get_multi_update_url(self):
+        return reverse(self._entity.url_name(ENTITY_MULTI_UPDATE))
+
     def get_delete_url(self):
         return reverse(self._entity.url_name(ENTITY_DELETE), args=[str(self.pk)])
+
+    @classmethod
+    def get_multi_delete_url(self):
+        return reverse(self._entity.url_name(ENTITY_MULTI_DELETE))
 
     # map image
     def get_map_image_extent(self, srid=API_SRID):

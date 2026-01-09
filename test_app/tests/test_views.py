@@ -25,9 +25,16 @@ from mapentity.tests import MapEntityLiveTest, MapEntityTest
 from mapentity.tests.factories import AttachmentFactory, SuperUserFactory, UserFactory
 from mapentity.views import Convert, JSSettings, ServeAttachment
 
-from ..models import City, DummyModel, FileType
-from ..views import DummyDetail, DummyList, DummyModelFilter, RoadList
-from .factories import DummyModelFactory
+from ..models import City, DummyModel, FileType, GeoPoint
+from ..views import (
+    DummyDetail,
+    DummyList,
+    DummyModelFilter,
+    GeoPointMultiDelete,
+    GeoPointMultiUpdate,
+    RoadList,
+)
+from .factories import DummyModelFactory, GeoPointFactory
 
 fake = Faker("en_US")
 fake.add_provider(geo)
@@ -479,6 +486,208 @@ class DetailViewTest(BaseTest):
         self.login()
         response = self.client.get(self.object.get_detail_url())
         self.assertContains(response, "<h3>Fragment dummymodel</h3>")
+
+
+class MultiDeleteViewTest(BaseTest):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = SuperUserFactory.create()
+        cls.model = GeoPoint
+
+        cls.geopoint1 = GeoPointFactory.create(name="geopoint1")
+        cls.geopoint2 = GeoPointFactory.create(name="geopoint2")
+        cls.geopoint3 = GeoPointFactory.create(name="geopoint3")
+
+    def test_mapentity_template(self):
+        multideleteview = GeoPointMultiDelete()
+        multideleteview.object_list = GeoPoint.objects.none()
+        self.assertEqual(
+            multideleteview.get_template_names()[-1],
+            "mapentity/mapentity_multi_delete_confirmation.html",
+        )
+
+    def test_mapentity_title(self):
+        multideleteview = GeoPointMultiDelete()
+        multideleteview.object_list = GeoPoint.objects.none()
+        self.assertEqual(multideleteview.get_title(), "Delete selected geopoint")
+
+    def test_multi_delete_should_have_number_of_selected_objects_in_context(self):
+        view = GeoPointMultiDelete()
+        view.object_list = []
+        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request.user = self.user
+        context = view.get_context_data()
+        self.assertEqual(context["nb_objects"], 2)
+
+    def test_multi_delete_should_have_selected_objects_in_queryset(self):
+        view = GeoPointMultiDelete()
+        view.object_list = []
+        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request.user = self.user
+        queryset = view.get_queryset()
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0], self.geopoint1)
+        self.assertEqual(queryset[1], self.geopoint2)
+
+    def test_multi_delete_post(self):
+        self.client.force_login(self.user)
+        response = self.client.post(self.model.get_multi_delete_url() + "?pks=1%2C2")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+        self.assertEqual(GeoPoint.objects.all().count(), 1)
+
+
+class MultiUpdateViewTest(BaseTest):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = SuperUserFactory()
+        cls.model = GeoPoint
+
+        cls.geopoint1 = GeoPointFactory.create(name="geopoint1")
+        cls.geopoint2 = GeoPointFactory.create(name="geopoint2")
+        cls.geopoint3 = GeoPointFactory.create(name="geopoint3")
+
+    def test_mapentity_template(self):
+        multiupdateview = GeoPointMultiUpdate()
+        multiupdateview.object_list = GeoPoint.objects.none()
+        self.assertEqual(
+            multiupdateview.get_template_names()[-1],
+            "mapentity/mapentity_multi_update_form.html",
+        )
+
+    def test_mapentity_title(self):
+        multiupdateview = GeoPointMultiUpdate()
+        multiupdateview.object_list = GeoPoint.objects.none()
+        self.assertEqual(multiupdateview.get_title(), "Update selected geopoint")
+
+    def test_multi_update_should_have_number_of_selected_objects_in_context(self):
+        view = GeoPointMultiUpdate()
+        view.object_list = []
+        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request.user = self.user
+        context = view.get_context_data()
+        self.assertEqual(context["nb_objects"], 2)
+
+    def test_multi_update_should_have_selected_objects_in_queryset(self):
+        view = GeoPointMultiUpdate()
+        view.object_list = []
+        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request.user = self.user
+        queryset = view.get_queryset()
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0], self.geopoint1)
+        self.assertEqual(queryset[1], self.geopoint2)
+
+    def test_multi_update_editable_fields(self):
+        view = GeoPointMultiUpdate()
+        view.object_list = []
+        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request.user = self.user
+        editable_fields = view.get_editable_fields()
+        self.assertEqual(
+            editable_fields,
+            [
+                "public",
+                "public_en",
+                "public_fr",
+                "public_zh_hant",
+                "located_in",
+                "road",
+            ],
+        )
+
+    def test_multi_update_form_fields(self):
+        view = GeoPointMultiUpdate()
+        view.object_list = []
+        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request.user = self.user
+        form = view.get_form()
+
+        # check translated fields
+        self.assertEqual(
+            list(form.fields.keys()),
+            ["public_en", "public_fr", "public_zh_hant", "located_in", "road"],
+        )
+
+        # check choices depends on the type on the field
+        self.assertEqual(
+            form.fields["public_en"].widget.choices,
+            [("nothing", "Do nothing"), ("true", "Yes"), ("false", "No")],
+        )
+        self.assertIn(
+            ("nothing", "Do nothing"), form.fields["located_in"].widget.choices
+        )
+        self.assertIn(("", "Null value"), form.fields["located_in"].widget.choices)
+        self.assertIn(("nothing", "Do nothing"), form.fields["road"].widget.choices)
+        self.assertNotIn(("", "Null value"), form.fields["road"].widget.choices)
+
+    def test_multi_update_post_do_nothing(self):
+        self.client.force_login(self.user)
+        data = {
+            "public_en": "nothing",
+            "public_fr": "nothing",
+            "public_zh_hant": "nothing",
+            "located_in": "nothing",
+            "road": "nothing",
+        }
+        response = self.client.post(
+            self.model.get_multi_update_url() + "?pks=1%2C2", data=data
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        for i, geopoint in enumerate([self.geopoint1, self.geopoint2, self.geopoint3]):
+            db_geopoint = GeoPoint.objects.get(pk=geopoint.pk)
+            self.assertEqual(db_geopoint.public_en, geopoint.public_en)
+            self.assertEqual(db_geopoint.public_fr, geopoint.public_fr)
+            self.assertEqual(db_geopoint.public_zh_hant, geopoint.public_zh_hant)
+            self.assertEqual(db_geopoint.located_in, geopoint.located_in)
+            self.assertEqual(db_geopoint.road, geopoint.road)
+
+    def test_multi_update_post_boolean(self):
+        self.client.force_login(self.user)
+        data = {
+            "public_en": "true",
+            "public_fr": "false",
+            "public_zh_hant": "nothing",
+            "located_in": "nothing",
+            "road": "nothing",
+        }
+        response = self.client.post(
+            self.model.get_multi_update_url() + "?pks=1%2C2", data=data
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+        db_geopoint1 = GeoPoint.objects.get(pk=self.geopoint1.pk)
+        self.assertEqual(db_geopoint1.public_en, True)
+        self.assertEqual(db_geopoint1.public_fr, False)
+
+        db_geopoint2 = GeoPoint.objects.get(pk=self.geopoint2.pk)
+        self.assertEqual(db_geopoint2.public_en, True)
+        self.assertEqual(db_geopoint2.public_fr, False)
+
+    def test_multi_update_post_foreign_key(self):
+        self.client.force_login(self.user)
+        selected_road = self.geopoint1.road
+        data = {
+            "public_en": "nothing",
+            "public_fr": "nothing",
+            "public_zh_hant": "nothing",
+            "located_in": "",
+            "road": selected_road.pk,
+        }
+        response = self.client.post(
+            self.model.get_multi_update_url() + "?pks=1%2C2", data=data
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+        db_geopoint1 = GeoPoint.objects.get(pk=self.geopoint1.pk)
+        self.assertEqual(db_geopoint1.located_in, None)
+        self.assertEqual(db_geopoint1.road, selected_road)
+
+        db_geopoint2 = GeoPoint.objects.get(pk=self.geopoint2.pk)
+        self.assertEqual(db_geopoint2.located_in, None)
+        self.assertEqual(db_geopoint2.road, selected_road)
 
 
 class ViewPermissionsTest(BaseTest):

@@ -11,7 +11,7 @@ from .forms import (
     MushroomSpotForm,
     RoadForm,
 )
-from .models import City, DummyAptModel, DummyModel, MushroomSpot, Road
+from .models import City, DummyAptModel, DummyModel, GeoPoint, MushroomSpot, Road
 from .serializers import (
     CitySerializer,
     DummyAptGeojsonSerializer,
@@ -209,3 +209,11 @@ class CityViewSet(mapentity_views.MapEntityViewSet):
         if self.format_kwarg == "geojson":
             qs = qs.annotate(api_geom=Transform("geom", 4326))
         return qs
+
+
+class GeoPointMultiDelete(mapentity_views.MapEntityMultiDelete):
+    model = GeoPoint
+
+
+class GeoPointMultiUpdate(mapentity_views.MapEntityMultiUpdate):
+    model = GeoPoint

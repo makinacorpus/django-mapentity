@@ -1,16 +1,23 @@
 CHANGELOG
 =========
 
-8.16.0+dev (XXXX-XX-XX)
+8.16.1+dev (XXXX-XX-XX)
 -----------------------
 
+
+8.16.1     (2026-01-08)
+-----------------------
+
+**Bug fixes**
+
+- Fix batch deletion
 
 8.16.0     (2025-12-24)
 -----------------------
 
 **New feature**
 
-- Add bulk deletion/edition on list views (refs #5107).
+- Add bulk deletion/edition on list views
 
 **Bug fixes**
 
