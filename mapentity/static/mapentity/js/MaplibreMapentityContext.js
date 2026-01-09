@@ -127,19 +127,18 @@ class MaplibreMapentityContext {
         const lat = context?.mapview?.lat;
         const zoom = context?.mapview?.zoom;
 
-        if (Number.isFinite(lng) && Number.isFinite(lat)) {
-            map.setCenter([lng, lat]);
-        } else {
-            console.warn("Longitude ou latitude manquante ou invalide — setCenter ignoré.");
-        }
-
         if (Number.isFinite(zoom)) {
             map.setZoom(zoom);
         } else {
             console.warn("Niveau de zoom manquant ou invalide — setZoom ignoré.");
         }
 
-        map.fitBounds(this.bounds, { maxZoom: 16 });
+        if (Number.isFinite(lng) && Number.isFinite(lat)) {
+            map.setCenter([lng, lat]);
+        } else {
+            console.warn("Longitude ou latitude manquante ou invalide — setCenter ignoré.");
+        }
+
         return true;
     }
 
