@@ -595,8 +595,8 @@ class MaplibreObjectsLayer {
             if (!layer) continue;
 
             const source = this._map.getSource(layer.source);
-            if (source && source._data && source._data.features) {
-                const foundFeature = source._data.features.find(f => f.properties?.id === pk);
+            if (source && source._data && source._data.geojson.features) {
+                const foundFeature = source._data.geojson.features.find(f => f.properties?.id === pk);
                 if (foundFeature) {
                     feature = foundFeature;
                     break;
