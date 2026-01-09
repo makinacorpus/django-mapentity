@@ -129,7 +129,7 @@ class FilterListMixin:
         if self.filterset_class is None:
 
             class filterklass(MapEntityFilterSet):
-                class Meta:
+                class Meta(MapEntityFilterSet.Meta):
                     model = _model
                     fields = [
                         field.name
@@ -157,10 +157,8 @@ class FilterListMixin:
         if self.filterset_class is None:
 
             class filterklass(MapEntityFilterSet):
-                class Meta:
+                class Meta(MapEntityFilterSet.Meta):
                     model = _model
-                    fields = MapEntityFilterSet.Meta.fields
-                    filter_overrides = MapEntityFilterSet.Meta.filter_overrides
 
             return filterklass
         return self.filterset_class
