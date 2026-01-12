@@ -4,6 +4,10 @@ CHANGELOG
 8.16.1+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Improve responsive for multi update forms
+
 
 8.16.1     (2026-01-08)
 -----------------------
