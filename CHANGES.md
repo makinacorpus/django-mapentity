@@ -4,6 +4,11 @@ CHANGELOG
 8.16.1+dev (XXXX-XX-XX)
 -----------------------
 
+**Improvements**
+
+- Related fields in lists are now displayed by their string object representation (be mindful of performance)
+- Improve responsiveness for multi-update forms
+
 
 8.16.1     (2026-01-08)
 -----------------------
@@ -11,6 +16,7 @@ CHANGELOG
 **Bug fixes**
 
 - Fix batch deletion
+
 
 8.16.0     (2025-12-24)
 -----------------------

@@ -385,7 +385,9 @@ class BaseMultiUpdateForm(forms.Form):
         # Setup crispy form
         self.helper = FormHelper()
         self.helper.form_id = "multi-update-form"
-        self.helper.form_class = ""
+        self.helper.form_class = "form-horizontal"
+        self.helper.label_class = "col-12 col-sm-4"  # largeur colonne labels
+        self.helper.field_class = "col-12 col-sm-8"  # largeur colonne champs
         self.helper.form_method = "post"
         self.helper.form_action = ""
         self.helper.add_input(
