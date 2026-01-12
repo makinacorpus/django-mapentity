@@ -6,7 +6,7 @@ CHANGELOG
 
 **Improvements**
 
-- Improve responsive for multi update forms
+- Improve responsiveness for multi-update forms
 
 
 8.16.1     (2026-01-08)
