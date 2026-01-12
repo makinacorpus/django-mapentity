@@ -7,6 +7,7 @@ CHANGELOG
 **Improvements**
 
 - Related fields in lists are now displayed by their string object representation (be mindful of performance)
+- Improve responsiveness for multi-update forms
 
 
 8.16.1     (2026-01-08)
