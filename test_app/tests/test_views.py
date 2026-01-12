@@ -74,7 +74,7 @@ class DummyModelFunctionalTest(MapEntityTest):
             "name_zh_hant": "",
             "public": '<i class="bi bi-x-circle text-danger"></i>',
             "short_description": "a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object to make tests",
-            "tags": [self.obj.tags.first().pk],
+            "tags": ", ".join([str(tag) for tag in self.obj.tags.all()]),
         }
 
     def get_expected_popup_content(self):
@@ -787,7 +787,7 @@ class LogViewMapentityTest(MapEntityTest):
             "action_flag": "Addition",
             "action_time": "10/06/2022 12:40:10",
             "change_message": "",
-            "content_type": content_type.pk,
+            "content_type": str(content_type),
             "id": 1,
             "object": '<a data-pk="1" href="/dummymodel/1/" >Test_App | Dummy '
             "Model <class 'object'></a>",
