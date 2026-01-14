@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dataUrl: layerUrl,
         primaryKey: primaryKey,
         isLazy: false,
+        displayPopup: true,
     });
 
     const mapReadyEvent = new CustomEvent('entity:map:ready', {

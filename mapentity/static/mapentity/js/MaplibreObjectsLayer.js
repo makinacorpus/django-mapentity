@@ -44,7 +44,7 @@ class MaplibreObjectsLayer {
      * @param e {Object} - Événement de clic
      * @private
      */
-    _onClick(e) {
+    async _onClick(e) {
         if (this.options.readonly) {
             return;
         }
@@ -54,8 +54,14 @@ class MaplibreObjectsLayer {
 
         if (features.length > 0 && features[0].source !== 'geojson') {
             const feature = features[0];
-            if (this.options.objectUrl) {
-                window.location = this.options.objectUrl(feature.properties, feature);
+            if(this.options.displayPopup){
+                var popup_content;
+                try{
+                    popup_content =  await this.getPopupContent(this.options.modelname, feature.id);
+                } catch (error) {
+                    popup_content = gettext('Data unreachable');
+                }
+                new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popup_content).addTo(this._map);
             }
         }
     }
@@ -91,7 +97,7 @@ class MaplibreObjectsLayer {
             const source = this._map.getSource(sourceId);
             if (!source || !source._data) continue;
 
-            for (const feature of source._data.features) {
+            for (const feature of source._data.geojson.features) {
                 if (!feature.id) continue;
                 const isHovered = feature.id === hoveredFeatureId;
                 this._map.setFeatureState(
@@ -497,7 +503,7 @@ class MaplibreObjectsLayer {
             const source = this._map.getSource(sourceId);
             if (!source || !source._data) continue;
 
-            for (const feature of source._data.features) {
+            for (const feature of source._data.geojson.features) {
                 if (!feature.id) continue;
                 const isMatch = feature.id === primaryKey;
                 this._map.setFeatureState(
@@ -542,9 +548,9 @@ class MaplibreObjectsLayer {
 
             const currentSourceId = layer.source;
             const source = this._map.getSource(currentSourceId);
-            if (source && source._data && source._data.features) {
+            if (source && source._data && source._data.geojson.features) {
                 sourceId = currentSourceId;
-                fullFeatureCollection = source._data;
+                fullFeatureCollection = source._data.geojson;
                 break;
             }
         }
@@ -589,8 +595,8 @@ class MaplibreObjectsLayer {
             if (!layer) continue;
 
             const source = this._map.getSource(layer.source);
-            if (source && source._data && source._data.features) {
-                const foundFeature = source._data.features.find(f => f.properties?.id === pk);
+            if (source && source._data && source._data.geojson.features) {
+                const foundFeature = source._data.geojson.features.find(f => f.properties?.id === pk);
                 if (foundFeature) {
                     feature = foundFeature;
                     break;
@@ -624,5 +630,28 @@ class MaplibreObjectsLayer {
      */
     getBoundsLayer() {
         return this.boundsLayer;
+    }
+
+    /**
+     * Fetch data to display in object popup
+     * @returns {Promise<String>}
+     */
+    async getPopupContent(modelname, id){
+        const popup_url = window.SETTINGS.urls.popup.replace(new RegExp('modelname', 'g'), modelname)
+                                          .replace('0', id);
+
+        // fetch data
+        var response = await window.fetch(popup_url);
+        if (!response.ok){
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        } else {
+            // parse data
+            try {
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                throw new Error('Cannot parse data');
+            }
+        }
     }
 }

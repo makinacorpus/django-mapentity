@@ -148,6 +148,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
+        map.getMap().addControl(
+            new maplibregl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true,
+        }), position='bottom-right'
+        );
+        window.map = map;
+
         // Gestion de l'historique et des filtres
         const history = window.MapEntity.currentHistory;
 
@@ -169,6 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
             datatable: mainDatatable,
             objectsname: modelname,
             prefix: 'list',
+            load_filter_form: togglableFilter.load_filter_form.bind(togglableFilter, mapsync),
         });
 
         // Sauvegarde du contexte

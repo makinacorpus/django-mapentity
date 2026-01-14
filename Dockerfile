@@ -4,7 +4,7 @@ RUN apt-get update -qq && apt-get install -y -qq \
     binutils libproj-dev gdal-bin libsqlite3-mod-spatialite \
     libjpeg62 zlib1g-dev libcairo2 libpango-1.0-0 \
     libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info \
-    libldap2-dev libsasl2-dev && \
+    libldap2-dev libsasl2-dev gettext && \
     apt-get clean all && rm -rf /var/apt/lists/* && rm -rf /var/cache/apt/*
 
 RUN mkdir -p /code

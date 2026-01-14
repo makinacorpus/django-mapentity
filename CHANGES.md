@@ -1,8 +1,133 @@
 CHANGELOG
 =========
 
-8.13.0+dev (XXXX-XX-XX)
+8.16.1+dev (XXXX-XX-XX)
 -----------------------
+
+**Improvements**
+
+- Related fields in lists are now displayed by their string object representation (be mindful of performance)
+- Improve responsiveness for multi-update forms
+
+
+8.16.1     (2026-01-08)
+-----------------------
+
+**Bug fixes**
+
+- Fix batch deletion
+
+
+8.16.0     (2025-12-24)
+-----------------------
+
+**New feature**
+
+- Add bulk deletion/edition on list views
+
+**Bug fixes**
+
+- Fix translated fields duplicated in MapentityForm when no layout is provided
+
+
+8.15.1 (2025-11-14)
+-----------------------
+
+**Bug fixes**
+
+- Fix missing translation for popups
+
+
+8.15.0     (2025-11-13)
+-----------------------
+
+**Improvements**
+
+- Add popup on marker with configurable information
+
+**Bug fixes**
+
+- Fix filter context restoration
+- Fix layer restoration in screenshot
+
+
+
+8.14.5     (2025-10-30)
+-----------------------
+
+**Bug fixes**
+
+- Cache decorators can now be used with views with extra kwargs parameters
+
+
+8.14.4     (2025-09-25)
+-----------------------
+
+**Improvements**
+
+- Upgrade Datatables to 2.3.4
+
+
+8.14.3     (2025-09-23)
+-----------------------
+
+**Improvements**
+
+- Improve list button, blocks and title
+
+
+8.14.2     (2025-09-09)
+-----------------------
+
+**Warning**
+
+- Default brand logo and title added. You can override them in templates.
+
+**Improvements**
+
+- Add a default logo
+
+
+8.14.1     (2025-09-05)
+-----------------------
+
+**Warning**
+
+- Some component has been changed. User menu items, actions buttons in list, actions and download buttons in details views. Please test and update your templates before upgrading.
+
+**Improvements**
+
+- Improve responsive menu, sidebar, list and detail views
+
+
+8.14.0     (2025-09-04)
+-----------------------
+
+**New features**
+
+- Add locate button on maps to center on user's position
+
+**Improvements**
+
+- New template block on list views to add extra action buttons
+- Update bootstrap icons to 1.13.1
+
+
+8.13.2     (2025-07-21)
+-----------------------
+
+**Improvements**
+
+- lang detection in html tag
+- id attribute on logout button
+
+
+8.13.1     (2025-07-16)
+-----------------------
+
+**Bug fixes**
+
+- Use logout view in POST (https://code.djangoproject.com/ticket/15619)
 
 
 8.13.0     (2025-04-29)

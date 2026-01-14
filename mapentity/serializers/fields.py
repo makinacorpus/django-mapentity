@@ -3,20 +3,21 @@ from rest_framework import serializers
 
 class MapentityDatatableDateTimeField(serializers.DateTimeField):
     def __init__(self, *args, **kwargs):
-        """ Set default format """
-        kwargs.update({'format': "%d/%m/%Y %H:%M:%S"})
+        """Set default format"""
+        kwargs.update({"format": "%d/%m/%Y %H:%M:%S"})
         super().__init__(*args, **kwargs)
 
 
 class MapentityDatatableDateField(serializers.DateField):
     def __init__(self, *args, **kwargs):
-        """ Set default format """
-        kwargs.update({'format': "%d/%m/%Y"})
+        """Set default format"""
+        kwargs.update({"format": "%d/%m/%Y"})
         super().__init__(*args, **kwargs)
 
 
 class MapentityDatatableBooleanField(serializers.BooleanField):
-    """ Set default format """
+    """Set default format"""
+
     def to_representation(self, value):
         if value:
             return '<i class="bi bi-check-circle text-success"></i>'
@@ -24,3 +25,14 @@ class MapentityDatatableBooleanField(serializers.BooleanField):
             return '<i class="bi bi-x-circle text-danger"></i>'
         else:
             return '<i class="bi bi-question-circle"></i>'
+
+
+class CommaSeparatedRelatedField(serializers.Field):
+    """ManyToMany displayed as string comma separated"""
+
+    def __init__(self, **kwargs):
+        kwargs["read_only"] = True
+        super().__init__(**kwargs)
+
+    def to_representation(self, value):
+        return ", ".join(str(item) for item in value.all())

@@ -8,7 +8,7 @@ from mapentity.settings import app_settings
 
 def get_internal_user():
     User = get_user_model()
-    cache_key = sha256(app_settings['INTERNAL_USER'].encode()).hexdigest()
+    cache_key = sha256(app_settings["INTERNAL_USER"].encode()).hexdigest()
 
     internal_user = None
 
@@ -22,16 +22,16 @@ def get_internal_user():
 
     if not internal_user:
         internal_user, created = User.objects.update_or_create(
-            username=app_settings['INTERNAL_USER'],
+            username=app_settings["INTERNAL_USER"],
             defaults={
-                'password': '',
-                'is_active': True,
-                'is_staff': False,
-                'is_superuser': False,
-                'email': '',
-                'first_name': "Don't",
-                'last_name': "delete me",
-            }
+                "password": "",
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+                "email": "",
+                "first_name": "Don't",
+                "last_name": "delete me",
+            },
         )
         cache.set(cache_key, internal_user.pk)
     return internal_user

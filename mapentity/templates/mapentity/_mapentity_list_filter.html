@@ -1,5 +1,7 @@
 {% load i18n %}
-<a href="#" id="filters-btn" class="btn btn-info ml-auto"><i class="bi bi-filter"></i> {% trans "Filter" %}</a>
+<a href="#" id="filters-btn" class="btn btn-sm btn-info ml-auto">
+    <i class="bi bi-filter"></i> <span class="d-none d-lg-inline">{% trans "Filter" %}</span>
+</a>
 
 <div id="filters-hover"></div>
 <div id="filters-popover"></div>

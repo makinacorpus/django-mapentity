@@ -6,6 +6,7 @@ from django.test import TestCase
 from mapentity.models import LogEntry
 from mapentity.tests import SuperUserFactory
 from mapentity.views.generic import log_action
+
 from ..models import DummyModel
 
 User = get_user_model()
@@ -20,10 +21,13 @@ class TestActionsHistory(TestCase):
         self.client.force_login(self.user)
 
     def test_create_view_logs_addition(self):
-        self.client.post('/dummymodel/add/', data={
-            'geom': '{"type": "Point", "coordinates": [0, 0]}',
-            'model': 'dummymodel',
-        })
+        self.client.post(
+            "/dummymodel/add/",
+            data={
+                "geom": '{"type": "Point", "coordinates": [0, 0]}',
+                "model": "dummymodel",
+            },
+        )
         self.assertEqual(LogEntry.objects.count(), 1)
         entry = LogEntry.objects.get()
         obj = DummyModel.objects.get()
@@ -33,10 +37,13 @@ class TestActionsHistory(TestCase):
 
     def test_update_view_logs_change(self):
         obj = DummyModel.objects.create()
-        self.client.post('/dummymodel/edit/{0}/'.format(obj.pk), data={
-            'geom': '{"type": "Point", "coordinates": [0, 0]}',
-            'model': 'dummymodel',
-        })
+        self.client.post(
+            f"/dummymodel/edit/{obj.pk}/",
+            data={
+                "geom": '{"type": "Point", "coordinates": [0, 0]}',
+                "model": "dummymodel",
+            },
+        )
         self.assertEqual(LogEntry.objects.count(), 1)
         entry = LogEntry.objects.get()
         self.assertEqual(entry.get_edited_object(), obj)
@@ -45,7 +52,7 @@ class TestActionsHistory(TestCase):
 
     def test_delete_view_logs_deletion(self):
         obj = DummyModel.objects.create()
-        self.client.post('/dummymodel/delete/{0}/'.format(obj.pk))
+        self.client.post(f"/dummymodel/delete/{obj.pk}/")
         self.assertEqual(LogEntry.objects.count(), 1)
         entry = LogEntry.objects.get()
         self.assertEqual(entry.object_id, str(obj.pk))
@@ -54,10 +61,13 @@ class TestActionsHistory(TestCase):
 
     def test_anonymous_action(self):
         self.client.logout()
-        self.client.post('/dummymodel/add/', data={
-            'geom': '{"type": "Point", "coordinates": [0, 0]}',
-            'model': 'dummymodel',
-        })
+        self.client.post(
+            "/dummymodel/add/",
+            data={
+                "geom": '{"type": "Point", "coordinates": [0, 0]}',
+                "model": "dummymodel",
+            },
+        )
         self.assertEqual(LogEntry.objects.count(), 0)
 
 

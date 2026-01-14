@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('test_app', '0008_alter_attachment_author_alter_attachment_legend_and_more'),
-        ('test_app', '0008_road_name'),
+        ("test_app", "0008_alter_attachment_author_alter_attachment_legend_and_more"),
+        ("test_app", "0008_road_name"),
     ]
 
-    operations = [
-    ]
+    operations = []

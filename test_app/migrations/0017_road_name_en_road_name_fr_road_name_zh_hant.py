@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('test_app', '0016_dummymodel_name_en_dummymodel_name_fr_and_more'),
+        ("test_app", "0016_dummymodel_name_en_dummymodel_name_fr_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='road',
-            name='name_en',
-            field=models.CharField(default='Empty', max_length=100, null=True),
+            model_name="road",
+            name="name_en",
+            field=models.CharField(default="Empty", max_length=100, null=True),
         ),
         migrations.AddField(
-            model_name='road',
-            name='name_fr',
-            field=models.CharField(default='Empty', max_length=100, null=True),
+            model_name="road",
+            name="name_fr",
+            field=models.CharField(default="Empty", max_length=100, null=True),
         ),
         migrations.AddField(
-            model_name='road',
-            name='name_zh_hant',
-            field=models.CharField(default='Empty', max_length=100, null=True),
+            model_name="road",
+            name="name_zh_hant",
+            field=models.CharField(default="Empty", max_length=100, null=True),
         ),
     ]

@@ -20,7 +20,7 @@ class Command(BaseCommand):
         logger.info("Synchronize django permissions")
 
         for app_config in apps.get_app_configs():
-            create_permissions(app_config, verbosity=options['verbosity'])
+            create_permissions(app_config, verbosity=options["verbosity"])
 
         logger.info("Done.")
 
@@ -42,9 +42,9 @@ class Command(BaseCommand):
             model = content_type.model_class()
             if model and not model._meta.abstract:
                 Permission.objects.get_or_create(
-                    codename='publish_%s' % content_type.model,
+                    codename=f"publish_{content_type.model}",
                     content_type=content_type,
-                    defaults={'name': 'Can publish %s' % content_type.name}
+                    defaults={"name": f"Can publish {content_type.name}"},
                 )
 
         logger.info("Done.")

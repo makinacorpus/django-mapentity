@@ -20,10 +20,10 @@ class SmartIncludeNode(template.Node):
         self.viewname = viewname
 
     def render(self, context):
-        apps = [app.split('.')[-1] for app in settings.INSTALLED_APPS]
+        apps = [app.split(".")[-1] for app in settings.INSTALLED_APPS]
 
         # Bring current app to the top of the list
-        appname = context.get('appname', apps[0])
+        appname = context.get("appname", apps[0])
         apps.pop(apps.index(appname))
         apps = [appname] + apps
 
@@ -31,8 +31,7 @@ class SmartIncludeNode(template.Node):
         result = ""
         for module in apps:
             try:
-                template_name = "%(module)s/%(module)s_%(viewname)s_fragment.html" % {'viewname': viewname,
-                                                                                      'module': module}
+                template_name = f"{module}/{module}_{viewname}_fragment.html"
                 t = template.loader.get_template(template_name)
                 result += t.render(Context.flatten(context))
             except TemplateDoesNotExist:
@@ -45,16 +44,18 @@ def do_smart_include(parser, token):
     try:
         tag_name, viewname = token.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires one argument" % token.contents.split()[0])
+        msg = f"{token.contents.split()[0]!r} tag requires one argument"
+        raise template.TemplateSyntaxError(msg)
     if not (viewname[0] == viewname[-1] and viewname[0] in ('"', "'")):
-        raise template.TemplateSyntaxError("%r tag's viewname argument should be in quotes" % tag_name)
+        msg = f"{tag_name!r} tag's viewname argument should be in quotes"
+        raise template.TemplateSyntaxError(msg)
     return SmartIncludeNode(viewname[1:-1])
 
 
 @register.filter
 def latlngbounds(obj):
     if obj is None or isinstance(obj, str):
-        return 'null'
+        return "null"
     if isinstance(obj, GEOSGeometry):
         extent = obj.extent
     else:
@@ -62,11 +63,11 @@ def latlngbounds(obj):
     return [[extent[1], extent[0]], [extent[3], extent[2]]]
 
 
-@register.filter(name='verbose')
+@register.filter(name="verbose")
 def field_verbose_name(obj, field):
     """Usage: {{ object|get_object_field }}"""
-    if hasattr(obj, '%s_verbose_name' % field):
-        return str(getattr(obj, '%s_verbose_name' % field))
+    if hasattr(obj, f"{field}_verbose_name"):
+        return str(getattr(obj, f"{field}_verbose_name"))
     try:
         return obj._meta.get_field(field).verbose_name
     except FieldDoesNotExist:
@@ -87,7 +88,7 @@ def media_static_fallback_path(media_file, static_file, *args, **kwarg):
     return staticfiles_storage.path(static_file)
 
 
-@register.filter(name='timesince')
+@register.filter(name="timesince")
 def humanize_timesince(date):
     """
     http://djangosnippets.org/snippets/2275/
@@ -100,28 +101,28 @@ def humanize_timesince(date):
     delta = now() - date
 
     num_years = delta.days // 365
-    if (num_years > 0):
+    if num_years > 0:
         return ngettext("%d year ago", "%d years ago", num_years) % num_years
 
     num_weeks = delta.days // 7
-    if (num_weeks > 0):
+    if num_weeks > 0:
         return ngettext("%d week ago", "%d weeks ago", num_weeks) % num_weeks
 
-    if (delta.days > 0):
+    if delta.days > 0:
         return ngettext("%d day ago", "%d days ago", delta.days) % delta.days
 
     num_hours = delta.seconds // 3600
-    if (num_hours > 0):
+    if num_hours > 0:
         return ngettext("%d hour ago", "%d hours ago", num_hours) % num_hours
 
     num_minutes = delta.seconds // 60
-    if (num_minutes > 0):
+    if num_minutes > 0:
         return ngettext("%d minute ago", "%d minutes ago", num_minutes) % num_minutes
 
     return gettext("just a few seconds ago")
 
 
-@register.inclusion_tag('mapentity/_detail_valuelist_fragment.html')
+@register.inclusion_tag("mapentity/_detail_valuelist_fragment.html")
 def valuelist(items, field=None, enumeration=False):
     """
     Common template tag to show a list of values in detail pages.
@@ -135,8 +136,10 @@ def valuelist(items, field=None, enumeration=False):
         https://github.com/makinacorpus/Geotrek/issues/871
     """
     if field:
+
         def display(v):
-            return getattr(v, '%s_display' % field, getattr(v, field))
+            return getattr(v, f"{field}_display", getattr(v, field))
+
         itemslist = [display(v) for v in items]
     else:
         itemslist = items
@@ -145,63 +148,67 @@ def valuelist(items, field=None, enumeration=False):
 
     valuelist = []
     for i, item in enumerate(itemslist):
-        valuelist.append({
-            'enumeration': letters[i] if enumeration else False,
-            'pk': getattr(items[i], 'pk', None),
-            'text': item
-        })
+        valuelist.append(
+            {
+                "enumeration": letters[i] if enumeration else False,
+                "pk": getattr(items[i], "pk", None),
+                "text": item,
+            }
+        )
 
     modelname = None
     if len(items) > 0:
         oneitem = items[0]
-        if hasattr(oneitem, '_meta'):
+        if hasattr(oneitem, "_meta"):
             modelname = oneitem._meta.object_name.lower()
 
-    return {
-        'valuelist': valuelist,
-        'modelname': modelname
-    }
+    return {"valuelist": valuelist, "modelname": modelname}
 
 
-@register.inclusion_tag('mapentity/_detail_valuetable_fragment.html')
-def valuetable(items, columns='', enumeration=False):
+@register.inclusion_tag("mapentity/_detail_valuetable_fragment.html")
+def valuetable(items, columns="", enumeration=False):
     """
     Common template tag to show a table with columns in detail pages.
 
     :param enumeration: Show enumerations, see ``valuelist`` template tag.
     """
 
-    columns = columns.split(',')
+    columns = columns.split(",")
     letters = alphabet_enumeration(len(items))
 
     records = []
     for i, item in enumerate(items):
+
         def display(column):
-            return getattr(item, '%s_display' % column, getattr(item, column))
+            return getattr(item, f"{column}_display", getattr(item, column))
+
         attrs = [display(column) for column in columns]
 
-        records.append({
-            'enumeration': letters[i] if enumeration else False,
-            'attrs': attrs,
-            'pk': getattr(item, 'pk', None)
-        })
+        records.append(
+            {
+                "enumeration": letters[i] if enumeration else False,
+                "attrs": attrs,
+                "pk": getattr(item, "pk", None),
+            }
+        )
 
     if len(items) > 0:
         oneitem = items[0]
         columns_titles = []
         for column in columns:
-            columns_titles.append({'name': column,
-                                   'text': field_verbose_name(oneitem, column)})
+            columns_titles.append(
+                {"name": column, "text": field_verbose_name(oneitem, column)}
+            )
         modelname = oneitem._meta.object_name.lower()
     else:
         modelname = None
         columns_titles = None
 
     return {
-        'nbcolumns': len(columns),
-        'columns': columns_titles,
-        'records': records,
-        'modelname': modelname
+        "nbcolumns": len(columns),
+        "columns": columns_titles,
+        "records": records,
+        "modelname": modelname,
     }
 
 
@@ -211,8 +218,8 @@ def replace(value, arg):
     Replacing filter
     Use `{{ "aaa"|replace:"a|b" }}`
     """
-    if len(arg.split('|')) != 2:
+    if len(arg.split("|")) != 2:
         return value
 
-    what, to = arg.split('|')
+    what, to = arg.split("|")
     return value.replace(what, to)

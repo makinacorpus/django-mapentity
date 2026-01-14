@@ -1,0 +1,9 @@
+<div class="d-flex flex-column justify-content-center">
+    <p class="text-center m-0 p-1"><strong>{{ title }}</strong></p>
+    {% if attributes %}
+        <p class="m-0 p-1">
+            {% for field in attributes %}{{ field|truncatechars:100 }}<br>{% endfor %}
+        </p>
+    {% endif %}
+    <button id="detail-btn" class="btn btn-sm btn-info mt-2" onclick="window.location.href='{{ detail_url }}'">{{ button_label }}</button>
+</div>

@@ -7,7 +7,7 @@ from django.db.models.fields.related import ForeignKey, ManyToManyField
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext as _
 
-from .helpers import smart_plain_text, field_as_string
+from .helpers import field_as_string, smart_plain_text
 
 
 class CSVSerializer(Serializer):
@@ -19,10 +19,14 @@ class CSVSerializer(Serializer):
             except FieldDoesNotExist:
                 modelfield = None
             if isinstance(modelfield, ForeignKey):
-                getters[field] = lambda obj, field: smart_plain_text(getattr(obj, field), ascii)
+                getters[field] = lambda obj, field: smart_plain_text(
+                    getattr(obj, field), ascii
+                )
             elif isinstance(modelfield, ManyToManyField):
-                getters[field] = lambda obj, field: ','.join([smart_plain_text(o, ascii)
-                                                              for o in getattr(obj, field).all()] or '')
+                getters[field] = lambda obj, field: ",".join(
+                    [smart_plain_text(o, ascii) for o in getattr(obj, field).all()]
+                    or ""
+                )
             else:
                 getters[field] = partial(field_as_string, ascii=ascii)
         return getters
@@ -30,7 +34,7 @@ class CSVSerializer(Serializer):
     def get_csv_header(self, columns, model):
         headers = []
         for field in columns:
-            c = getattr(model, '%s_verbose_name' % field, None)
+            c = getattr(model, f"{field}_verbose_name", None)
             if c is None:
                 try:
                     f = model._meta.get_field(field)
@@ -48,10 +52,10 @@ class CSVSerializer(Serializer):
         Uses self.columns, containing fieldnames to produce the CSV.
         The header of the csv is made of the verbose name of each field.
         """
-        model = options.pop('model', None) or queryset.model
-        columns = options.pop('fields')
-        stream = options.pop('stream')
-        ascii = options.get('ensure_ascii', True)
+        model = options.pop("model", None) or queryset.model
+        columns = options.pop("fields")
+        stream = options.pop("stream")
+        ascii = options.get("ensure_ascii", True)
 
         headers = self.get_csv_header(columns, model)
 
@@ -61,5 +65,6 @@ class CSVSerializer(Serializer):
             yield headers
             for obj in queryset:
                 yield [getters[field](obj, field) for field in columns]
+
         writer = csv.writer(stream)
         writer.writerows(get_lines())

@@ -58,12 +58,13 @@
                 const objectsLayer = new MaplibreObjectsLayer(null, {
                     style: typeof style === "function" ? {} : style,
                     modelname: modelname,
-                    readonly: true,
+                    readonly: false,
                     nameHTML: '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelname,
                     category: tr("Objects"),
                     dataUrl: layerUrl,
                     primaryKey: generateUniqueId(),
                     isLazy: false,
+                    displayPopup: true,
                 });
                 objectsLayer.initialize(map.getMap());
 

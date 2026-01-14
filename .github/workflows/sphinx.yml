@@ -22,7 +22,7 @@ jobs:
       env:
         LANG: C.UTF-8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build documentation
         run: |
           cd docs/

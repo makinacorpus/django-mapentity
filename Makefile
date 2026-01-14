@@ -22,14 +22,20 @@ serve:
 ###########################
 #          Lint           #
 ###########################
+.PHONY: format
+format:
+	$(docker_compose) run --remove-orphans --no-deps --rm web ruff format mapentity test_app test_project
 
-.PHONY: check-flake8
-check-flake8:
-	@$(PRINT_COLOR) "$(COLOR_SUCCESS) \n### check-flake8 ###\n $(COLOR_RESET)\n"
-	$(docker_compose) run --rm web flake8 mapentity test_project test_app
+.PHONY: lint
+lint:
+	$(docker_compose) run --remove-orphans --no-deps --rm web ruff check --fix mapentity test_app test_project
 
-.PHONY: check-lint
-check-lint: check-flake8
+.PHONY: force_lint
+force_lint:
+	$(docker_compose) run --remove-orphans --no-deps --rm web ruff check --fix --unsafe-fixes mapentity test_app test_project
+
+.PHONY: quality
+quality: lint format
 
 ###########################
 #          Test           #
@@ -50,3 +56,11 @@ verbose_level ?= 1
 test:
 	@$(PRINT_COLOR) "$(COLOR_SUCCESS) ### Start tests ### $(COLOR_RESET)\n"
 	$(docker_compose) run --rm web ./manage.py test $(test_name) --parallel -v $(verbose_level)
+
+messages_python:
+	$(docker_compose) run --rm web ./manage.py makemessages -a --no-location --no-obsolete --no-wrap
+
+messages_js:
+	$(docker_compose) run --rm web ./manage.py makemessages -a -d djangojs --no-location --no-obsolete --no-wrap --ignore=node_modules/**
+
+messages: messages_python messages_js

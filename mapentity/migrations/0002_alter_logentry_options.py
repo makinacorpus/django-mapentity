@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mapentity', '0001_initial'),
+        ("mapentity", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='logentry',
-            options={'permissions': (('read_logentry', 'Can read log entries'),)},
+            name="logentry",
+            options={"permissions": (("read_logentry", "Can read log entries"),)},
         ),
     ]
