@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
             positionOptions: {
                 enableHighAccuracy: true
             },
-            trackUserLocation: true,
+            trackUserLocation: false,
         }), position='bottom-right'
         );
         window.map = map;
