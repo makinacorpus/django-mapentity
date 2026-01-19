@@ -60,9 +60,13 @@ class MaplibreDrawControlManager {
                         uiEnabled: false,
                         active: false,
                     },
-
                     circle: {
                         title: "Draw Circle",
+                        uiEnabled: false,
+                        active: false,
+                    },
+                    ellipse: {
+                        title: "Draw Ellipse",
                         uiEnabled: false,
                         active: false,
                     },
