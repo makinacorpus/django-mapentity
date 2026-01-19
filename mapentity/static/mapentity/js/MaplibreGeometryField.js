@@ -415,7 +415,7 @@ class MaplibreGeometryField {
                               }
 
                               // Puis remettre à jour la source
-                              source.setData(data);
+                              source.setData(data.geojson);
                             }
                         }
                     } else {
