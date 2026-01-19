@@ -169,7 +169,7 @@ class MaplibreMapentityContext {
         }
 
          // Restore filters if a filter and filter context are available.
-         console.log('Restoring filters:', filter, context.filter);
+         console.debug('Restoring filters:', filter, context.filter);
          if (filter && context.filter) {
              const formData = new URLSearchParams(context.filter);
              const params = {};

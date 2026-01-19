@@ -213,7 +213,7 @@ class MaplibreObjectsLayer {
             console.warn("Chargement déjà en cours...");
             return;
         }
-        console.log("Loading data from URL: " + url);
+        console.debug("Loading data from URL: " + url);
         this.loading = true;
 
         try {
