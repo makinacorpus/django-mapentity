@@ -108,8 +108,8 @@ class MaplibreMapListSync {
         const formData = new FormData(this.options.filter.form);
         let filter = false;
 
-        for (const value of formData.values()) {
-            if (value.name !== 'bbox' && value.value !== '') {
+        for (const [key, value] of formData.entries()) {
+            if (key !== 'bbox' && value !== '') {
                 filter = true;
             }
         }
