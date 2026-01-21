@@ -30,7 +30,7 @@ class MaplibreLayerControl {
 
         const button = document.createElement('button');
         button.type = 'button';
-        button.title = 'Layer Controller';
+        button.title = gettext('Layer controller');
         button.className = 'layer-switcher-btn';
 
         const img = document.createElement('img');

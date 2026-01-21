@@ -30,6 +30,17 @@ class MaplibreMap {
             return;
         }
 
+        const localeLanguage = {
+            'AttributionControl.ToggleAttribution': gettext('Toggle attribution'),
+            'FullscreenControl.Enter': gettext('Enter fullscreen'),
+            'FullscreenControl.Exit': gettext('Exit fullscreen'),
+            'GeolocateControl.FindMyLocation': gettext('Find my location'),
+            'GeolocateControl.LocationNotAvailable': gettext('Location not available'),
+            'NavigationControl.ResetBearing': gettext('Reset bearing to north'),
+            'NavigationControl.ZoomIn': gettext('Zoom in'),
+            'NavigationControl.ZoomOut': gettext('Zoom out'),
+        };
+
         this.map = new maplibregl.Map({
             container: this.id,
             style: {
@@ -41,6 +52,7 @@ class MaplibreMap {
             center: this.center,
             zoom: this.zoom,
             maxBounds: this.bounds,
+            locale: localeLanguage,
         });
 
         // Ajouter les contrôles standards
