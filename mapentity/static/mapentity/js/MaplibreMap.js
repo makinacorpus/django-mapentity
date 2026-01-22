@@ -4,15 +4,17 @@ class MaplibreMap {
      * @param {string} id - L'ID du conteneur de la carte.
      * @param {Array} center - Les coordonnées [longitude, latitude] du centre de la carte.
      * @param {number} zoom - Le niveau de zoom initial de la carte.
+     * @param {number} maxZoom - Le niveau maximal de zoom de la carte.
      * @param {Array} bounds - Les limites de la carte sous forme de [SW, NE] [[lon1, lat1], [lon2, lat2]].
      * @param {string} scale - L'unité de mesure pour le contrôle d'échelle ('metric' ou 'imperial').
      */
-    constructor(id, center, zoom, bounds, scale = 'metric') {
+    constructor(id, center, zoom, maxZoom, bounds, scale = 'metric') {
         this.id = id;
         this.center = center ;
         this.zoom = zoom ;
         this.bounds = bounds;
         this.scale = scale ;
+        this.max_zoom = maxZoom;
         this.map = null;
         this.container = null;
         this._init();
@@ -51,6 +53,7 @@ class MaplibreMap {
             },
             center: this.center,
             zoom: this.zoom,
+            maxZoom: this.max_zoom,
             maxBounds: this.bounds,
             locale: localeLanguage,
         });

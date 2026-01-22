@@ -90,10 +90,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // initialisation de la carte
 
-    const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES } = window.SETTINGS.map.maplibreConfig;
+    const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES, MAX_ZOOM } = window.SETTINGS.map.maplibreConfig;
     const bounds = [BOUNDS[0], BOUNDS[1]];
 
-    const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
+    const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
     const modelname = context.modelname;
     const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelname);
     const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
