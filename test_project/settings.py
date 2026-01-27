@@ -15,6 +15,8 @@ import os
 import sys
 from tempfile import TemporaryDirectory
 
+from django.contrib import messages
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -217,4 +219,12 @@ if "test" in sys.argv:
 
 POPUP_CONTENT = {
     "dummymodel": ["short_description", "public", "tags", "name", "test"],
+}
+
+MESSAGE_TAGS = {
+    messages.SUCCESS: "alert-success",
+    messages.INFO: "alert-info",
+    messages.DEBUG: "alert-info",
+    messages.WARNING: "alert-warning",
+    messages.ERROR: "alert-danger",
 }

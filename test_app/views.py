@@ -18,6 +18,7 @@ from .serializers import (
     DummyAptSerializer,
     DummyGeojsonSerializer,
     DummySerializer,
+    GeoPointSerializer,
     RoadSerializer,
 )
 
@@ -211,9 +212,25 @@ class CityViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
+class GeoPointlist(mapentity_views.MapEntityList):
+    model = GeoPoint
+    columns = ["id", "name", "public"]
+
+
 class GeoPointMultiDelete(mapentity_views.MapEntityMultiDelete):
     model = GeoPoint
 
 
 class GeoPointMultiUpdate(mapentity_views.MapEntityMultiUpdate):
     model = GeoPoint
+
+
+class GeoPointViewSet(mapentity_views.MapEntityViewSet):
+    model = GeoPoint
+    serializer_class = GeoPointSerializer  # Assuming City has similar fields to Road for the serializer
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        if self.format_kwarg == "geojson":
+            qs = qs.annotate(api_geom=Transform("geom", 4326))
+        return qs

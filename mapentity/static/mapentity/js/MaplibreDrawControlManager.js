@@ -22,6 +22,7 @@ class MaplibreDrawControlManager {
         const editEnabled = shouldShowEditForOthers;
 
         // Configuration des options Geoman
+        console.log("MaplibreDrawControlManager initializing with options:", this.options);
         const geomanOptions = {
             controls: {
                 draw: {
@@ -121,11 +122,30 @@ class MaplibreDrawControlManager {
                         active: false,
                     }
                 }
+            },
+            // Options de style pour assurer la visibilité des géométries
+            pathOptions: {
+                color: '#3388ff',
+                fillColor: '#3388ff',
+                fillOpacity: 0.2,
+                weight: 3,
+                opacity: 1
             }
         };
 
         // Initialiser Geoman
         this.geoman = new Geoman.Geoman(this.map, geomanOptions);
+
+        // Déclencher un événement quand Geoman est prêt
+        const checkLoaded = () => {
+            if (this.geoman.loaded) {
+                console.log("MaplibreDrawControlManager: Geoman loaded, firing gm:loaded");
+                this.map.fire('gm:loaded');
+            } else {
+                setTimeout(checkLoaded, 50);
+            }
+        };
+        checkLoaded();
     }
 
     /**
