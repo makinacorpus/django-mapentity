@@ -24,6 +24,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
             map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
 
+            // Add additional layers
+            window.SETTINGS.layers.forEach((model) => {
+                const nameHTML = model.name;
+                const modelname = model.id;
+                const category = model.category;
+                const layerUrl = model.url;
+
+                let style = window.SETTINGS.map.styles[modelname] ?? window.SETTINGS.map.styles['others'];
+                let primaryKey = generateUniqueId();
+
+                // Show touristic content and events layers in application maps
+                const additionalObjectsLayer = new MaplibreObjectsLayer(null, {
+                    style,
+                    modelname: modelname,
+                    readonly: true,
+                    nameHTML: nameHTML,
+                    category: category,
+                    primaryKey: primaryKey,
+                    dataUrl: layerUrl,
+                    isLazy: true,
+                    displayPopup: true,
+                });
+
+                additionalObjectsLayer.initialize(map.getMap());
+                additionalObjectsLayer.registerLazyLayer(modelname, category, nameHTML, primaryKey, layerUrl);
+            });
+
             const mergedData = Object.assign({}, context, {
                 map,
                 objectsLayer,

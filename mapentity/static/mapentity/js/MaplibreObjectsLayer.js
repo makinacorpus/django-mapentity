@@ -59,7 +59,7 @@ class MaplibreObjectsLayer {
      * @private
      */
     async _onClick(e) {
-        if (this.options.readonly && this.options.displayPopup) {
+        if (!this.options.displayPopup) {
             return;
         }
 
@@ -93,10 +93,13 @@ class MaplibreObjectsLayer {
     _onMouseMove(e){
         if(!this.currentTooltip) {
             const feature = e.features[0];
-            console.log("feature", feature);
             if (feature) {
                 // Change the cursor style as a UI indicator.
                 this._map.getCanvas().style.cursor = 'pointer';
+
+                if(this.options.readonly){
+                    return;
+                }
 
                 const coordinates = e.lngLat;
                 const descriptionContent = feature.properties.name || 'No data available';
@@ -158,7 +161,7 @@ class MaplibreObjectsLayer {
         this._map.on('layerManager:lazyLayerVisibilityChanged', (event) => {
             visible = event.visible;
             if (!visible && this.isLoaded) {
-                const layerIds = this._current_objects[primaryKey];
+                const layerIds = this._current_objects[event.primaryKey];
                 if (layerIds) {
                     this.layerManager.toggleLayer(layerIds, false);
                 }
