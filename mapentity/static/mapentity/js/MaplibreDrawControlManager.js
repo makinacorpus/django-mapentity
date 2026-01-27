@@ -12,8 +12,21 @@ class MaplibreDrawControlManager {
      */
     _initializeGeoman() {
         // Logique conditionnelle pour les contrôles d'édition
-        const shouldShowDragForPoint = this.options.isPoint || this.options.isGeneric || this.options.isCollection;
-        const shouldShowEditForOthers = (this.options.isLineString || this.options.isPolygon || this.options.isGeneric || this.options.isCollection) && this.options.modifiable;
+        const isSimpleType = this.options.isPoint || this.options.isLineString || this.options.isPolygon;
+        const isCollectionType = this.options.isCollection || this.options.isGeneric;
+
+        // On peut ajouter si :
+        // - C'est une collection/générique
+        // - OU si c'est un type simple MAIS qu'on n'est pas en mode édition (isUpdate)
+        // (En mode édition type simple, on ne peut que modifier l'existant)
+        const canAddSimple = !this.options.isUpdate;
+        
+        const showDrawPolygon = (this.options.isPolygon && canAddSimple) || isCollectionType;
+        const showDrawLine = (this.options.isLineString && canAddSimple) || isCollectionType;
+        const showDrawPoint = (this.options.isPoint && canAddSimple) || isCollectionType;
+
+        const shouldShowDragForPoint = this.options.isPoint || isCollectionType;
+        const shouldShowEditForOthers = (this.options.isLineString || this.options.isPolygon || isCollectionType) && this.options.modifiable;
 
         // Pour le drag : visible seulement pour les points (et en mode générique)
         const dragEnabled = shouldShowDragForPoint && this.options.modifiable;
@@ -28,19 +41,19 @@ class MaplibreDrawControlManager {
                 draw: {
                     polygon: {
                         title: 'Draw Polygon',
-                        uiEnabled: this.options.isPolygon || this.options.isGeneric || this.options.isCollection,
+                        uiEnabled: showDrawPolygon,
                         active: false,
                     },
 
                     line: {
                         title: 'Draw Line',
-                        uiEnabled: this.options.isLineString || this.options.isGeneric || this.options.isCollection,
+                        uiEnabled: showDrawLine,
                         active: false,
                     },
 
                     marker: {
                         title: 'Draw Point',
-                        uiEnabled: this.options.isPoint || this.options.isGeneric || this.options.isCollection,
+                        uiEnabled: showDrawPoint,
                         active: false,
                     },
 

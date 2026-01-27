@@ -31,6 +31,10 @@ class MaplibreGeometryField {
         this.rectangleStartCoord = null;
 
         this.map = map;
+        
+        // Détecter si on est en mode édition (PK présente)
+        this.options.isUpdate = !!document.body.dataset.pk;
+
         this.drawManager = new MaplibreDrawControlManager(map, this.options);
 
         // stock les Features Geoman
@@ -723,6 +727,7 @@ class MaplibreGeometryField {
                         const gmApi = this.map.gm || geoman;
 
                         // Si on est en mode géométrie unique, on supprime l'ancienne géométrie dès qu'on commence à en dessiner une nouvelle
+                        // Note: En mode édition (isUpdate), les boutons de dessin sont normalement cachés pour les types simples
                         if (!this.options.isCollection && !this.options.isGeneric) {
                             if (this.gmEvents.length > 0) {
                                 console.log('MaplibreGeometryField: removing existing features before drawing new one');
@@ -755,11 +760,13 @@ class MaplibreGeometryField {
                         // On utilise un intervalle court pour s'assurer de bloquer toute activation multiple
                         if (!this.options.isCollection && !this.options.isGeneric && this.gmEvents.length > 0) {
                             const gm = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
-                            if (gm && gm.disableDraw && !event.enabled) {
+                            if (gm && gm.disableDraw && event.enabled) {
                                 console.log('MaplibreGeometryField: geometry already exists, forcing disable draw mode');
                                 gm.disableDraw();
                                 // Double sécurité avec un court délai
-                                setTimeout(() => gm.disableDraw(), 50);
+                                setTimeout(() => {
+                                    if (gm.disableDraw) gm.disableDraw();
+                                }, 50);
                             }
                         }
 
