@@ -39,6 +39,8 @@ CACHES = {
 }
 
 MAPENTITY_CONFIG["GEOJSON_LAYERS_CACHE_BACKEND"] = "fat"
+MAPENTITY_CONFIG["GEOJSON_PRECISION"] = 7
+
 SESSION_ENGINE = "django.contrib.sessions.backends.file"
 SESSION_FILE_PATH = os.path.join(CACHE_ROOT, "sessions")
 
