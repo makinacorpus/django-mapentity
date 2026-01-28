@@ -35,6 +35,8 @@ CACHES = {
 }
 
 MAPENTITY_CONFIG["GEOJSON_LAYERS_CACHE_BACKEND"] = "fat"
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
+SESSION_FILE_PATH = os.path.join(CACHE_ROOT, "sessions")
 
 CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOST if host]
 SESSION_COOKIE_DOMAIN = os.getenv("SERVER_NAME")
