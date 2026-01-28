@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 09:52+0000\n"
+"POT-Creation-Date: 2026-01-28 14:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -208,7 +208,7 @@ msgstr "GPX"
 msgid "Warning!"
 msgstr ""
 
-# python-format
+#, python-format
 msgid "Do you really wish to delete <span class=\"badge badge-danger\">this object</span>?"
 msgid_plural "Do you really wish to delete <span class=\"badge badge-danger\">these %(counter)s objects</span>?"
 msgstr[0] "Voulez-vous vraiment supprimer cet <span class=\"badge badge-danger\">objet</span> ?"

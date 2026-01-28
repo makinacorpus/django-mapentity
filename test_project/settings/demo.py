@@ -5,6 +5,8 @@ DEBUG = False
 
 ALLOWED_HOST = os.getenv("SERVER_NAME", "").split(",")
 SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-secret-key")
+LANGUAGE_CODE = os.getenv("LANGUAGE_CODE", "en-us")
+TIME_ZONE = os.getenv("TZ", "UTC")
 
 DATABASES = {
     'default': {
