@@ -127,8 +127,10 @@ class MaplibreObjectsLayer {
      */
     _onMouseLeave(e) {
         this._map.getCanvas().style.cursor = '';
-        this.currentTooltip.remove();
-        this.currentTooltip = null;
+        if(this.currentTooltip){
+            this.currentTooltip.remove();
+            this.currentTooltip = null;
+        }
     }
 
 

@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 let style = window.SETTINGS.map.styles[modelname] ?? window.SETTINGS.map.styles['others'];
                 let primaryKey = generateUniqueId();
 
-                // Show touristic content and events layers in application maps
                 const additionalObjectsLayer = new MaplibreObjectsLayer(null, {
                     style,
                     modelname: modelname,
