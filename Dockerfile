@@ -32,6 +32,6 @@ FROM base as demo
 
 ENV DJANGO_SETTINGS_MODULE=test_project.settings.demo
 
-RUN /code/venv/bin/pip3 install gunicorn
+RUN /code/venv/bin/pip3 install gunicorn psycopg
 
 CMD ["/code/venv/bin/gunicorn", "--bind", "0.0.0.0:8000", "test_project.wsgi:application"]
