@@ -98,42 +98,44 @@ class MaplibreObjectsLayer {
 
         if (nonGeomanFeatures.length > 0) {
             const feature = nonGeomanFeatures[0];
-            if(this.options.displayPopup){
+            if (this.options.displayPopup) {
                 var popup_content;
-                try{
-                    popup_content =  await this.getPopupContent(this.options.modelname, feature.id);
+                try {
+                    popup_content = await this.getPopupContent(this.options.modelname, feature.id);
                 } catch (error) {
                     popup_content = gettext('Data unreachable');
                 }
                 new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popup_content).addTo(this._map);
-        if (this.currentPopup) {
-            this.currentPopup.remove();
-            this.currentPopup = null;
-        }
 
-        const feature = e.features[0];
-        console.log("Feature found on click:", feature);
+                if (this.currentPopup) {
+                    this.currentPopup.remove();
+                    this.currentPopup = null;
+                }
 
-        if (feature && feature.source !== 'geojson') {
-            const coordinates = e.lngLat;
-            let description;
-            try{
-                description =  await this.getPopupContent(this.options.modelname, feature.id);
-            } catch (error) {
-                description = gettext('Data unreachable');
+                const feature = e.features[0];
+                console.log("Feature found on click:", feature);
+
+                if (feature && feature.source !== 'geojson') {
+                    const coordinates = e.lngLat;
+                    let description;
+                    try {
+                        description = await this.getPopupContent(this.options.modelname, feature.id);
+                    } catch (error) {
+                        description = gettext('Data unreachable');
+                    }
+                    this.currentPopup = new maplibregl.Popup().setLngLat(coordinates).setHTML(description).addTo(this._map);
+                    e.stopPropagation;
+                }
             }
-            this.currentPopup = new maplibregl.Popup().setLngLat(coordinates).setHTML(description).addTo(this._map);
-            e.stopPropagation;
         }
     }
-
 
     /**
      * Gère le mouvement de la souris sur la carte
      * @param e {Object} - Événement de mouvement
      * @private
      */
-    _onMouseMove(e){
+    _onMouseMove(e) {
         if(!this.currentTooltip) {
             const feature = e.features[0];
             if (feature) {
