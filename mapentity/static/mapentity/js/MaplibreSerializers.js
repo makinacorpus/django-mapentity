@@ -5,7 +5,7 @@
  */
 function getWKT(geometry){
     if(geometry.type === 'Point'){
-        return `POINT(${geometry.cordinates.join(' ')})`;
+        return `POINT(${geometry.coordinates.join(' ')})`;
     }
 
     if(geometry.type === 'Polygon'){

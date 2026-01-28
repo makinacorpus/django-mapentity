@@ -1,5 +1,5 @@
 {% extends "mapentity/base_site.html" %}
-{% load i18n static leaflet_tags mapentity_tags %}
+{% load i18n static mapentity_tags %}
 
 {% block title %}{{ objectsname }} | {{ block.super }}{% endblock title %}
 
@@ -162,5 +162,4 @@
 {% block extrabody %}
 {{ block.super }}
 
-{% leaflet_map "mainmap" fitextent=False creatediv=False %}
 {% endblock extrabody %}

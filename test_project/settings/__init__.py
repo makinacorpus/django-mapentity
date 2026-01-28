@@ -17,22 +17,21 @@ from tempfile import TemporaryDirectory
 
 from django.contrib import messages
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "37r=l^!c^1-7o8z2luc%a1x&)jt^9v+ockis0ql7k_y*lm555("
+SECRET_KEY = os.getenv(
+    "SECRET_KEY", "37r=l^!c^1-7o8z2luc%a1x&)jt^9v+ockis0ql7k_y*lm555("
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
-
-# Application definition
 
 INSTALLED_APPS = (
     "django.contrib.admin",
@@ -184,7 +183,7 @@ MAPLIBRE_CONFIG_OVERRIDES = {
     "DEFAULT_CENTER": [1.3952, 43.5963],  # Toulouse, France
     "DEFAULT_ZOOM": 5,
     "SCALE": "metric",
-    "BOUNDS": [[-3.630430, 40], [6, 46]],
+    "BOUNDS": [[-3.630430, 40.120372], [3.208008, 45.061882]],
     "TILES": [
         (
             "OSM",
@@ -197,7 +196,6 @@ MAPLIBRE_CONFIG_OVERRIDES = {
             "&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.",
         ),
     ],
-    "MAX_ZOOM": 22,
 }
 
 

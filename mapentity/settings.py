@@ -39,7 +39,7 @@ _DEFAULT_TILES = [
 
 # Config MapLibre par défaut
 _DEFAULT_MAPLIBRE_CONFIG = {
-    "BOUNDS": [[-3.630430, 40.120372], [3.208008, 45.061882]],
+    "BOUNDS": [[-180, 90], [180, 90]],
     "DEFAULT_CENTER": [1.3952, 43.5963],
     "DEFAULT_ZOOM": 5,
     "SCALE": "metric",
