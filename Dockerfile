@@ -1,4 +1,4 @@
-FROM python:3.9-bookworm
+FROM python:3.9-bookworm as base
 
 RUN apt-get update -qq && apt-get install -y -qq \
     binutils libproj-dev gdal-bin libsqlite3-mod-spatialite \
@@ -27,3 +27,11 @@ COPY --chown=django:django docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+
+FROM base as demo
+
+ENV DJANGO_SETTINGS_MODULE=test_project.settings.demo
+
+RUN /code/venv/bin/pip3 install gunicorn
+
+CMD ["/code/venv/bin/gunicorn", "--bind", "0.0.0.0:8000", "test_project.wsgi:application"]

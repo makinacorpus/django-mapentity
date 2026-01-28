@@ -20,7 +20,7 @@
                     {% if entity.menu %}
                         <li class="dropdown-item d-flex">
                             <a href="{% url entity.url_list %}">
-                                <img src="{% static entity.icon_small %}" /> {{ entity.label }}</a>
+                                <img src="{% static entity.icon_small %}" alt="" /> {{ entity.label }}</a>
                             &nbsp;&nbsp;
                             <a title="{% trans 'Add' %}" href="{% url entity.url_add %}" class="btn btn-success btn-sm ml-auto">
                                 <i class="bi bi-plus"></i>
