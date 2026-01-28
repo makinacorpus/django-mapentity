@@ -52,11 +52,6 @@ class MaplibreObjectsLayer {
             this._map.on('mouseleave', layer, onMouseLeave);
         }
 
-        const onClick = (e) => this._onClick(e);
-        const onMouseMove = (e) => this._onMouseMove(e);
-        this._map.on('click', onClick);
-        this._map.on('mousemove', onMouseMove);
-
         // Gestion des exclusions (pour masquer les objets en cours d'édition)
         this._map.on('mapentity:exclude-features', (e) => {
             if (e.ids && Array.isArray(e.ids)) {
@@ -106,25 +101,11 @@ class MaplibreObjectsLayer {
                     popup_content = gettext('Data unreachable');
                 }
                 new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popup_content).addTo(this._map);
+                e.stopPropagation();
 
                 if (this.currentPopup) {
                     this.currentPopup.remove();
                     this.currentPopup = null;
-                }
-
-                const feature = e.features[0];
-                console.log("Feature found on click:", feature);
-
-                if (feature && feature.source !== 'geojson') {
-                    const coordinates = e.lngLat;
-                    let description;
-                    try {
-                        description = await this.getPopupContent(this.options.modelname, feature.id);
-                    } catch (error) {
-                        description = gettext('Data unreachable');
-                    }
-                    this.currentPopup = new maplibregl.Popup().setLngLat(coordinates).setHTML(description).addTo(this._map);
-                    e.stopPropagation;
                 }
             }
         }
