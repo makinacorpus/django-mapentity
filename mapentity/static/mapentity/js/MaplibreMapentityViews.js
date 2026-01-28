@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const mainDatatable = new DataTable('#objects-list', {
             processing: true,
             serverSide: true,
-            searching: false, // désactive la recherche intégrée de DataTables
+            searching: true,
             columnDefs: [
                 {
                 data: null,
@@ -115,6 +115,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var paging = document.getElementsByClassName('dt-paging')[0];
         paging.classList.add('d-flex', 'flex-row-reverse');
         document.getElementById('list-download-toolbar').appendChild(paging);
+
+        // custom search field
+        const searchInput = document.getElementById('object-list-search');
+
+        searchInput.addEventListener('input', function () {
+            mainDatatable.search(this.value).draw();
+        });
 
        window.addEventListener('resize', function (e) {
              expandDatatableHeight();

@@ -23,7 +23,7 @@ class MaplibreResetViewControl {
         // Bouton pour réinitialiser la carte
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
-        button.setAttribute('title', 'Réinitialiser la vue');
+        button.setAttribute('title', gettext('Reset view'));
         button.className = 'maplibregl-ctrl-icon maplibregl-resetview';
         const img = document.createElement('img');
         img.src = '/static/mapentity/images/reset-view.png';

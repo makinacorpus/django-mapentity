@@ -228,6 +228,9 @@ class MaplibreMapentityContext {
 
                 const labelText = label.textContent.trim();
                 input.checked = layers.includes(labelText);
+                if (input.checked) {
+                    input.dispatchEvent(new Event("change"));
+                }
             });
 
             // Traitement des boutons radio

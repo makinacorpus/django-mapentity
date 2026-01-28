@@ -197,6 +197,7 @@ MAPLIBRE_CONFIG_OVERRIDES = {
             "&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.",
         ),
     ],
+    "MAX_ZOOM": 22,
 }
 
 

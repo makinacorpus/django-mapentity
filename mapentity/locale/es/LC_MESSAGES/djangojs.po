@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 08:26+0000\n"
+"POT-Creation-Date: 2026-01-21 11:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,5 +18,65 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Draw Polygon"
+msgstr ""
+
+msgid "Draw Line"
+msgstr ""
+
+msgid "Draw Point"
+msgstr ""
+
+msgid "Draw Rectangle"
+msgstr ""
+
+msgid "Drag"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Upload a local file (GPX, KML, GeoJSON)"
+msgstr ""
+
+msgid "Layer controller"
+msgstr ""
+
+msgid "Toggle attribution"
+msgstr ""
+
+msgid "Enter fullscreen"
+msgstr ""
+
+msgid "Exit fullscreen"
+msgstr ""
+
+msgid "Find my location"
+msgstr ""
+
+msgid "Location not available"
+msgstr ""
+
+msgid "Reset bearing to north"
+msgstr ""
+
+msgid "Zoom in"
+msgstr ""
+
+msgid "Zoom out"
+msgstr ""
+
+msgid "Measure a distance"
+msgstr ""
+
 msgid "Data unreachable"
+msgstr ""
+
+msgid "Reset view"
+msgstr ""
+
+msgid "Screenshot"
 msgstr ""

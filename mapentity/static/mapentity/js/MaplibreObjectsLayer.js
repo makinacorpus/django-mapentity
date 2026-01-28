@@ -9,6 +9,7 @@ class MaplibreObjectsLayer {
         this._current_objects = {};
         this.options = { ...options };
         this.boundsLayer = null;
+        this.currentTooltip = null;
         this.currentPopup = null;
         this._track_objects = {};
         this.isLoaded = false; // Nouvel état pour le lazy loading
@@ -32,6 +33,23 @@ class MaplibreObjectsLayer {
         // Initialiser le gestionnaire de couches s'il ne l'est pas déjà
         if (!this.layerManager.getMap()) {
             this.layerManager.initialize(map);
+        }
+    }
+
+
+    /**
+     * Initialize events listener of the map
+     */
+    setupLayerEvents() {
+        const layersNames = this._current_objects[this.primaryKey];
+
+        for (const layer of layersNames){
+            const onClick = (e) => this._onClick(e);
+            const onMouseMove = (e) => this._onMouseMove(e);
+            const onMouseLeave = (e) => this._onMouseLeave(e);
+            this._map.on('click', layer, onClick);
+            this._map.on('mousemove', layer, onMouseMove);
+            this._map.on('mouseleave', layer, onMouseLeave);
         }
 
         const onClick = (e) => this._onClick(e);
@@ -61,7 +79,7 @@ class MaplibreObjectsLayer {
      * @private
      */
     async _onClick(e) {
-        if (this.options.readonly) {
+        if (!this.options.displayPopup) {
             return;
         }
 
@@ -88,79 +106,74 @@ class MaplibreObjectsLayer {
                     popup_content = gettext('Data unreachable');
                 }
                 new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popup_content).addTo(this._map);
+        if (this.currentPopup) {
+            this.currentPopup.remove();
+            this.currentPopup = null;
+        }
+
+        const feature = e.features[0];
+        console.log("Feature found on click:", feature);
+
+        if (feature && feature.source !== 'geojson') {
+            const coordinates = e.lngLat;
+            let description;
+            try{
+                description =  await this.getPopupContent(this.options.modelname, feature.id);
+            } catch (error) {
+                description = gettext('Data unreachable');
             }
+            this.currentPopup = new maplibregl.Popup().setLngLat(coordinates).setHTML(description).addTo(this._map);
+            e.stopPropagation;
         }
     }
+
 
     /**
      * Gère le mouvement de la souris sur la carte
      * @param e {Object} - Événement de mouvement
      * @private
      */
-    _onMouseMove(e) {
-        if (this.options.readonly) {
-            return;
-        }
+    _onMouseMove(e){
+        if(!this.currentTooltip) {
+            const feature = e.features[0];
+            if (feature) {
+                // Change the cursor style as a UI indicator.
+                this._map.getCanvas().style.cursor = 'pointer';
 
-        const features = this._map.queryRenderedFeatures(e.point);
-        const hoveredFeature = features[0];
-        let hoveredFeatureId = null;
+                if(this.options.readonly){
+                    return;
+                }
 
-        if (hoveredFeature) {
-            hoveredFeatureId = hoveredFeature.id || hoveredFeature.properties?.id;
-            this._map.getCanvas().style.cursor = 'pointer';
-        } else {
-            this._map.getCanvas().style.cursor = '';
-        }
+                const coordinates = e.lngLat;
+                const descriptionContent = feature.properties.name || 'No data available';
+                const description = `<div class="popup-content">${descriptionContent}</div>`;
 
-        // Reset hover state
-        const layers = Object.values(this._current_objects).flat();
-        for (const layerId of layers) {
-            const layer = this._map.getLayer(layerId);
-            if (!layer) continue;
-
-            const sourceId = layer.source;
-            const source = this._map.getSource(sourceId);
-            if (!source || !source._data) continue;
-
-            for (const feature of source._data.geojson.features) {
-                if (!feature.id) continue;
-                const isHovered = feature.id === hoveredFeatureId;
-                this._map.setFeatureState(
-                    { source: sourceId, id: feature.id },
-                    { hover: isHovered }
-                );
+                this.currentTooltip = new maplibregl.Popup({
+                    closeButton: false,
+                    closeOnClick: false,
+                    className: 'custom-popup',
+                    anchor: 'left',
+                    offset: 10,
+                })
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(this._map);
             }
-        }
-
-        // Gestion du popup
-        if (hoveredFeatureId) {
-            if (this.currentPopup) {
-                this.currentPopup.remove();
-                this.currentPopup = null;
-            }
-
-            const coordinates = hoveredFeature.geometry.type === 'Point'
-                ? hoveredFeature.geometry.coordinates
-                : turf.centroid(hoveredFeature).geometry.coordinates;
-
-            const description = hoveredFeature.properties.name || 'No data available';
-
-            this.currentPopup = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-                className: 'custom-popup',
-                anchor: 'left',
-                offset: 10,
-            })
-                .setLngLat(coordinates)
-                .setHTML(`<div class="popup-content">${description}</div>`)
-                .addTo(this._map);
-        } else if (this.currentPopup) {
-            this.currentPopup.remove();
-            this.currentPopup = null;
         }
     }
+
+
+    /**
+     * Gère l'évènement de la sortie de la souris de l'emplacement d'une feature
+     * @param e {Object} - Événement de mouvement
+     * @private
+     */
+    _onMouseLeave(e) {
+        this._map.getCanvas().style.cursor = '';
+        this.currentTooltip.remove();
+        this.currentTooltip = null;
+    }
+
 
     /**
      * Enregistre une couche lazy (sans données) dans le gestionnaire
@@ -191,7 +204,7 @@ class MaplibreObjectsLayer {
         this._map.on('layerManager:lazyLayerVisibilityChanged', (event) => {
             visible = event.visible;
             if (!visible && this.isLoaded) {
-                const layerIds = this._current_objects[primaryKey];
+                const layerIds = this._current_objects[event.primaryKey];
                 if (layerIds) {
                     this.layerManager.toggleLayer(layerIds, false);
                 }
@@ -353,6 +366,9 @@ class MaplibreObjectsLayer {
         if(this.isLoaded && !this.isLazy) {
             this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
         }
+
+        // Add event listeners on the created layers
+        this.setupLayerEvents();
     }
 
     /**

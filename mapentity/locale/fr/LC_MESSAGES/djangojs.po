@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 08:24+0000\n"
+"POT-Creation-Date: 2026-01-21 11:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,5 +18,65 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+msgid "Draw Polygon"
+msgstr "Dessiner un polygone"
+
+msgid "Draw Line"
+msgstr "Dessiner une ligne"
+
+msgid "Draw Point"
+msgstr "Dessiner un point"
+
+msgid "Draw Rectangle"
+msgstr "Dessiner un rectangle"
+
+msgid "Drag"
+msgstr "Déplacer"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Upload a local file (GPX, KML, GeoJSON)"
+msgstr "Charger un fichier local (GPX, KML, GeoJSON)"
+
+msgid "Layer controller"
+msgstr "Contrôleur de couches"
+
+msgid "Toggle attribution"
+msgstr "Voir l'attribution"
+
+msgid "Enter fullscreen"
+msgstr "Passer en plein écran"
+
+msgid "Exit fullscreen"
+msgstr "Quitter le plein écran"
+
+msgid "Find my location"
+msgstr "Trouver ma position"
+
+msgid "Location not available"
+msgstr "Localisation non disponible"
+
+msgid "Reset bearing to north"
+msgstr "Réinitialiser l'orientation vers le nord"
+
+msgid "Zoom in"
+msgstr "Zoomer"
+
+msgid "Zoom out"
+msgstr "Dézoomer"
+
+msgid "Measure a distance"
+msgstr "Mesurer une distance"
+
 msgid "Data unreachable"
 msgstr "Données inaccessibles"
+
+msgid "Reset view"
+msgstr "Réinitialiser l'affichage"
+
+msgid "Screenshot"
+msgstr "Capture d'écran"

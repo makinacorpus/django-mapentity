@@ -40,25 +40,25 @@ class MaplibreDrawControlManager {
             controls: {
                 draw: {
                     polygon: {
-                        title: 'Draw Polygon',
+                        title: gettext('Draw Polygon'),
                         uiEnabled: showDrawPolygon,
                         active: false,
                     },
 
                     line: {
-                        title: 'Draw Line',
+                        title: gettext('Draw Line'),
                         uiEnabled: showDrawLine,
                         active: false,
                     },
 
                     marker: {
-                        title: 'Draw Point',
+                        title: gettext('Draw Point'),
                         uiEnabled: showDrawPoint,
                         active: false,
                     },
 
                     rectangle: {
-                        title: 'Draw Rectangle',
+                        title: gettext('Draw Rectangle'),
                         uiEnabled: this.options.isGeneric || this.options.isCollection,
                         active: false,
                     },
@@ -87,21 +87,21 @@ class MaplibreDrawControlManager {
                 },
                 edit: {
                     drag: {
-                        title: 'Drag',
+                        title: gettext('Drag'),
                         // Drag visible uniquement pour les points (ou en mode générique avec points activés)
                         uiEnabled: dragEnabled,
                         active: false
                     },
 
                     change: {
-                        title: 'Edit',
+                        title: gettext('Edit'),
                         // Edit visible pour les lignes et polygones (pas pour les points seuls)
                         uiEnabled: editEnabled,
                         active: false,
                     },
 
                     delete: {
-                        title: 'Delete',
+                        title: gettext('Delete'),
                         uiEnabled: this.options.modifiable,
                         active: false,
                     },
