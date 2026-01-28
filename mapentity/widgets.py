@@ -1,16 +1,19 @@
+from django.contrib.gis.forms.widgets import BaseGeometryWidget
+from django.core import validators
 from django.forms import widgets as django_widgets
+from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
+
 from .helpers import wkt_to_geom
 from .settings import API_SRID
-from django.core import validators
-from django.template.defaultfilters import slugify
-from django.contrib.gis.forms.widgets import BaseGeometryWidget
+
 
 class MapWidget(BaseGeometryWidget):
     """
     Widget Django pour l'intégration de cartes MapLibre GL JS.
     """
-    template_name = 'mapentity/widget.html'
+
+    template_name = "mapentity/widget.html"
     display_raw = False
     modifiable = True
 
@@ -18,30 +21,41 @@ class MapWidget(BaseGeometryWidget):
         """
         Sérialise la valeur géométrique en GeoJSON.
         """
-        return value.geojson if value else ''
+        if value:
+            if hasattr(value, "transform"):
+                value = value.clone()
+                value.transform(API_SRID)
+            return value.geojson if hasattr(value, "geojson") else ""
+        return ""
 
     def _get_attrs(self, name, attrs=None):
         """
         Prépare les attributs nécessaires pour le rendu du template.
         """
         # Récupération des paramètres depuis l'initialisation du Field
-        self.geom_type = self.attrs.get('geom_type', getattr(self, 'geom_type', 'GEOMETRY'))
+        self.geom_type = self.attrs.get(
+            "geom_type", getattr(self, "geom_type", "GEOMETRY")
+        )
         attrs = attrs or {}
         # Normalisation du type de géométrie
-        if self.geom_type == 'GEOMETRY':
-            attrs['geom_type'] = 'Geometry'
+        if self.geom_type == "GEOMETRY":
+            attrs["geom_type"] = "Geometry"
         else:
-            attrs['geom_type'] = self.geom_type
+            attrs["geom_type"] = self.geom_type
         # Génération des IDs pour les éléments HTML et JavaScript
-        map_id_css = slugify(attrs.get('id', name))
-        map_id = map_id_css.replace('-', '_')
-        attrs.update({
-            'id': map_id,
-            'id_css': map_id_css,
-            'id_map': map_id_css + '_map',
-            'modifiable': self.modifiable,
-            'target_map': attrs.get('target_map', getattr(self, 'target_map', None)),
-        })
+        map_id_css = slugify(attrs.get("id", name))
+        map_id = map_id_css.replace("-", "_")
+        attrs.update(
+            {
+                "id": map_id,
+                "id_css": map_id_css,
+                "id_map": map_id_css + "_map",
+                "modifiable": self.modifiable,
+                "target_map": attrs.get(
+                    "target_map", getattr(self, "target_map", None)
+                ),
+            }
+        )
         return attrs
 
     def get_context(self, name, value, attrs):
@@ -56,8 +70,9 @@ class MapWidget(BaseGeometryWidget):
         widget_attrs = self._get_attrs(name, attrs)
         context.update(widget_attrs)
         # Ajout de la valeur sérialisée pour le template
-        context['serialized'] = self.serialize(value)
+        context["serialized"] = self.serialize(value)
         return context
+
 
 class HiddenGeometryWidget(django_widgets.HiddenInput):
     def value_from_datadict(self, data, files, name):
@@ -75,13 +90,14 @@ class HiddenGeometryWidget(django_widgets.HiddenInput):
             value.transform(API_SRID)
         return value
 
+
 class SelectMultipleWithPop(django_widgets.SelectMultiple):
     def __init__(self, *args, **kwargs):
-        self.add_url = kwargs.pop('add_url')
+        self.add_url = kwargs.pop("add_url")
         super().__init__(*args, **kwargs)
 
     def render(self, name, *args, **kwargs):
         html = super().render(name, *args, **kwargs)
-        context = {'field': name, 'add_url': self.add_url}
+        context = {"field": name, "add_url": self.add_url}
         popupplus = render_to_string("mapentity/popupplus.html", context)
         return html + popupplus

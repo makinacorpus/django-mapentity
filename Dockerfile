@@ -1,10 +1,10 @@
-FROM python:3.9-bookworm
+FROM python:3.9-bookworm AS base
 
 RUN apt-get update -qq && apt-get install -y -qq \
     binutils libproj-dev gdal-bin libsqlite3-mod-spatialite \
     libjpeg62 zlib1g-dev libcairo2 libpango-1.0-0 \
     libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info \
-    libldap2-dev libsasl2-dev && \
+    libldap2-dev libsasl2-dev gettext && \
     apt-get clean all && rm -rf /var/apt/lists/* && rm -rf /var/cache/apt/*
 
 RUN mkdir -p /code
@@ -27,3 +27,12 @@ COPY --chown=django:django docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+
+FROM base AS demo
+
+ENV DJANGO_SETTINGS_MODULE=test_project.settings.demo
+
+RUN /code/venv/bin/pip3 install gunicorn psycopg pymemcache
+RUN SECRET_KEY=temp /code/venv/bin/pip3 ./manage.py compilemessages
+
+CMD ["/code/venv/bin/gunicorn", "--bind", "0.0.0.0:8000", "test_project.wsgi:application"]

@@ -15,8 +15,8 @@ setup(
     author_email='geobi@makina-corpus.com',
     url='https://github.com/makinacorpus/django-mapentity',
     download_url="https://pypi.python.org/pypi/mapentity/",
-    description="Generic CRUD with maps",
-    long_description=(open(os.path.join(here, 'README.rst')).read()),
+    description="Generic CRUD with maps for django",
+    long_description="Mapentity is a django Framework to manage geographic entities through CRUD interface. Built with Maplibre, Bootstrap, Python and Django. Requires a spatial database backend.",
     license='BSD, see LICENSE file.',
     install_requires=[
         'BeautifulSoup4',
@@ -29,7 +29,6 @@ setup(
         'crispy-bootstrap4',
         'django-embed-video',
         'django-filter',
-        'django-leaflet>=0.19,<0.20',  # leaflet 0.7.x
         'django-modeltranslation',
         'django-tinymce>=3',
         'django-weasyprint',
@@ -47,7 +46,7 @@ setup(
     extras_require={
         'dev': [
             'django-debug-toolbar',
-            'flake8',
+            'ruff',
             'freezegun',
             'factory_boy',
             'coverage',

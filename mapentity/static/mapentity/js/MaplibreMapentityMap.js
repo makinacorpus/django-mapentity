@@ -24,6 +24,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
             map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
 
+            // Add additional layers
+            window.SETTINGS.layers.forEach((model) => {
+                const nameHTML = model.name;
+                const modelname = model.id;
+                const category = model.category;
+                const layerUrl = model.url;
+
+                let style = window.SETTINGS.map.styles[modelname] ?? window.SETTINGS.map.styles['others'];
+                let primaryKey = generateUniqueId();
+
+                const additionalObjectsLayer = new MaplibreObjectsLayer(null, {
+                    style,
+                    modelname: modelname,
+                    readonly: true,
+                    nameHTML: nameHTML,
+                    category: category,
+                    primaryKey: primaryKey,
+                    dataUrl: layerUrl,
+                    isLazy: true,
+                    displayPopup: true,
+                });
+
+                additionalObjectsLayer.initialize(map.getMap());
+                additionalObjectsLayer.registerLazyLayer(modelname, category, nameHTML, primaryKey, layerUrl);
+            });
+
             const mergedData = Object.assign({}, context, {
                 map,
                 objectsLayer,
@@ -57,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Écouteur pour la vue détail
     window.addEventListener('entity:map:detail', function(e) {
-        const { map, objectsLayer, modelname, bounds } = e.detail;
+        const { map, objectsLayer, modelname, bounds, layerUrl } = e.detail;
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
         // Restauration du contexte de la carte
@@ -67,35 +93,28 @@ document.addEventListener('DOMContentLoaded', function() {
             objectsname: modelname,
         });
 
-        // Affichage de la géométrie de l'objet
-        const feature_geojson_url = document.getElementById('detailmap').getAttribute('data-feature-url');
-
-        const fetchFeatureLayer = async (dataUrl) => {
-            try {
-                const response = await fetch(dataUrl);
-                if (!response.ok) {
-                    console.error('Erreur lors de la récupération des données GeoJSON:', response.statusText);
-                    return;
+        if (layerUrl) {
+            if (mapViewContext && mapViewContext.print) {
+                const specified = window.SETTINGS.map.styles.print[modelname];
+                if (specified) {
+                    objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
                 }
-                const featureData = await response.json();
-                if (featureData && featureData.type === 'Feature') {
-                    if (mapViewContext && mapViewContext.print) {
-                        const specified = window.SETTINGS.map.styles.print[modelname];
-                        if (specified) {
-                            objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
-                        }
-                    }
-                    objectsLayer.load(feature_geojson_url);
-                } else {
-                    console.warn('No features found in the GeoJSON data.');
-                }
-            } catch (error) {
-                console.error('Erreur lors du chargement de la feature:', error);
             }
-        };
 
-        if (feature_geojson_url) {
-            fetchFeatureLayer(feature_geojson_url);
+            // Charger tous les objets de la couche
+            objectsLayer.load(layerUrl).then(() => {
+                const pk = document.body.getAttribute('data-pk');
+                let pkVal = pk;
+                if (pk && /^\d+$/.test(pk)) {
+                    pkVal = parseInt(pk, 10);
+                }
+
+                if (pkVal) {
+                    // Sélectionner et centrer sur l'objet courant
+                    objectsLayer.select(pkVal);
+                    objectsLayer.jumpTo(pkVal);
+                }
+            });
         }
 
         // Contrôles
@@ -148,6 +167,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
+        map.getMap().addControl(
+            new maplibregl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: false,
+        }), position='bottom-right'
+        );
+        window.map = map;
+
         // Gestion de l'historique et des filtres
         const history = window.MapEntity.currentHistory;
 
@@ -169,6 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
             datatable: mainDatatable,
             objectsname: modelname,
             prefix: 'list',
+            load_filter_form: togglableFilter.load_filter_form.bind(togglableFilter, mapsync),
         });
 
         // Sauvegarde du contexte

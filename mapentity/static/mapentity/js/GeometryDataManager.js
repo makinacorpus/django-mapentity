@@ -36,6 +36,57 @@ class GeometryDataManager {
             };
         }
 
+        // Si c'est une GeometryCollection, convertir en FeatureCollection
+        if (geojson.type === 'GeometryCollection' && Array.isArray(geojson.geometries)) {
+            return {
+                type: 'FeatureCollection',
+                features: geojson.geometries
+                    .filter(g => !!g)
+                    .flatMap(g => {
+                        // Récursivement normaliser les géométries imbriquées
+                        const subResult = this.normalizeToFeatureCollection(g);
+                        return subResult.features;
+                    })
+            };
+        }
+
+        // Si c'est un MultiPoint/MultiLineString/MultiPolygon, on explose en features simples
+        // pour que Geoman puisse les éditer individuellement
+        if (geojson.type === 'MultiPoint' || geojson.type === 'MultiLineString' || geojson.type === 'MultiPolygon') {
+             const typeMap = {
+                 'MultiPoint': 'Point',
+                 'MultiLineString': 'LineString',
+                 'MultiPolygon': 'Polygon'
+             };
+             const simpleType = typeMap[geojson.type];
+             
+             if (geojson.coordinates && Array.isArray(geojson.coordinates)) {
+                 return {
+                     type: 'FeatureCollection',
+                     features: geojson.coordinates.map(coords => ({
+                         type: 'Feature',
+                         geometry: {
+                             type: simpleType,
+                             coordinates: coords
+                         },
+                         properties: {}
+                     }))
+                 };
+             }
+        }
+
+        // Si c'est une géométrie seule (Point/LineString/Polygon), l'encapsuler dans une Feature
+        if (geojson.type && geojson.coordinates) {
+            return {
+                type: 'FeatureCollection',
+                features: [{
+                    type: 'Feature',
+                    geometry: geojson,
+                    properties: {}
+                }]
+            };
+        }
+
         return this.initializeEmpty();
     }
 
@@ -50,5 +101,35 @@ class GeometryDataManager {
             geometries: geometries || []
         };
 
+    }
+
+    /**
+     * Normalise un tableau de géométries en MultiPoint.
+     */
+    normalizeToMultiPoint(geometries) {
+        return {
+            type: 'MultiPoint',
+            coordinates: geometries.map(g => g.coordinates)
+        };
+    }
+
+    /**
+     * Normalise un tableau de géométries en MultiLineString.
+     */
+    normalizeToMultiLineString(geometries) {
+        return {
+            type: 'MultiLineString',
+            coordinates: geometries.map(g => g.coordinates)
+        };
+    }
+
+    /**
+     * Normalise un tableau de géométries en MultiPolygon.
+     */
+    normalizeToMultiPolygon(geometries) {
+        return {
+            type: 'MultiPolygon',
+            coordinates: geometries.map(g => g.coordinates)
+        };
     }
 }

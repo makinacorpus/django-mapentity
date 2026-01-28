@@ -9,6 +9,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: base
+
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
@@ -16,13 +18,10 @@ services:
     depends_on:
       - screamshotter
       - convertit
+
     user: ${UID:-1000}:${GID:-1000}
     command: /code/venv/bin/python ./manage.py runserver 0.0.0.0:8000
     networks:
       default:
         aliases:
           - mapentity.local
-
-volumes:
-  postgres:
-  redis:

@@ -105,7 +105,7 @@ class MaplibreFileLayerControl {
         // Création du bouton pour charger un fichier
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
-        button.setAttribute('title', 'charger un fichier local (GPX, KML, GeoJSON)');
+        button.setAttribute('title', gettext('Upload a local file (GPX, KML, GeoJSON)'));
         button.className = 'maplibregl-ctrl-icon maplibregl-filelayerload';
 
         const img = document.createElement('img');

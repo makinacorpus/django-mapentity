@@ -99,7 +99,13 @@
         // Cas d'un seul Feature
         if (geojson.geometry) {
             const coords = flattenCoords(geojson.geometry);
-            coords.forEach(coord => bounds.extend(coord));
+            coords.forEach(coord => {
+                try {
+                    bounds.extend(coord);
+                } catch (e) {
+                    console.warn("Invalid coordinate for bounds:", coord, e);
+                }
+            });
         }
 
         // Cas d'une FeatureCollection
@@ -108,7 +114,13 @@
                 const geometry = feature.geometry;
                 if (!geometry) return;
                 const coords = flattenCoords(geometry);
-                coords.forEach(coord => bounds.extend(coord));
+                coords.forEach(coord => {
+                    try {
+                        bounds.extend(coord);
+                    } catch (e) {
+                        console.warn("Invalid coordinate for bounds:", coord, e);
+                    }
+                });
             });
         }
 

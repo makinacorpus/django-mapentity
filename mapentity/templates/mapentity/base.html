@@ -1,6 +1,7 @@
 {% load static i18n compress mapentity_tags %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ LANGUAGE_CODE }}">
     <head>
 
         <!-- maplibre -->
@@ -11,8 +12,8 @@
         <link href='/static/mapentity/css/style-maplibre.css' rel='stylesheet' />
 
         <!-- Maplibre-Geoman -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@geoman-io/maplibre-geoman-free@0.4.8/dist/maplibre-geoman.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/@geoman-io/maplibre-geoman-free@0.4.8/dist/maplibre-geoman.umd.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@geoman-io/maplibre-geoman-free@0.6.1/dist/maplibre-geoman.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/@geoman-io/maplibre-geoman-free@0.6.1/dist/maplibre-geoman.umd.min.js"></script>
 
         <!-- version {{ VERSION }} -->
         {% block head %}
@@ -21,7 +22,7 @@
             <meta name="viewport" content="width=device-width,initial-scale=1">
             <meta charset="UTF-8">
             <link rel="icon" type="image/png" href="{% media_static_fallback 'upload/favicon.png' 'images/favicon.png' %}"/>
-
+            <script src="{% url 'mapentity:javascript-catalog' %}"></script>
             {% compress css %}
                 {% if DEBUG %}
                     <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.css' %}"/>
@@ -30,8 +31,8 @@
                     <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-4.6.0/css/bootstrap.min.css' %}"/>
                     <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-datepicker-1.9.0/css/bootstrap-datepicker.min.css' %}">
                 {% endif %}
-                <link rel="stylesheet" href="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.css' %}"/>
-                <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-icons-1.2.2/font/bootstrap-icons.css' %}">
+                <link rel="stylesheet" href="{% static 'mapentity/vendor/datatables-2.3.6-sl-3.1.3/datatables.min.css' %}"/>
+                <link rel="stylesheet" href="{% static 'mapentity/vendor/bootstrap-icons-1.13.1/bootstrap-icons.css' %}">
                 <link rel="stylesheet" href="{% static 'mapentity/vendor/chosen-1.8.7/chosen.css' %}">
 
                 <style>
@@ -143,7 +144,7 @@
 
                 <script  src="{% static 'mapentity/vendor/jquery-resizable.min.js' %}"></script>
                 <script  src="{% static 'mapentity/vendor/chosen-1.8.7/chosen.jquery.min.js' %}"></script>
-                <script  src="{% static 'mapentity/vendor/datatables-1.11.5/datatables.min.js' %}"></script>
+                <script  src="{% static 'mapentity/vendor/datatables-2.3.6-sl-3.1.3/datatables.min.js' %}"></script>
 
                 {% smart_include "extrajs" %}
                 <script>

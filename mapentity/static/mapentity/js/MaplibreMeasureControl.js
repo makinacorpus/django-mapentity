@@ -51,7 +51,7 @@ class MaplibreMeasureControl {
         // Création du bouton
         this._button = document.createElement('button');
         this._button.setAttribute('type', 'button');
-        this._button.setAttribute('title', 'Mesurer une distance');
+        this._button.setAttribute('title', gettext('Measure a distance'));
         this._button.className = 'measure-control-btn';
 
         const img = document.createElement('img');
@@ -109,7 +109,7 @@ class MaplibreMeasureControl {
 
                 // Retire le style actif
                 this._button.classList.remove('measure-control-btn-active');
-                this._button.setAttribute('title', 'Mesurer une distance');
+                this._button.setAttribute('title', gettext('Measure a distance'));
             }
         };
 
@@ -354,7 +354,7 @@ class MaplibreMeasureControl {
 
         // Remet le bouton dans son état initial
         this._button.classList.remove('measure-control-btn-active', 'measure-control-btn-reset');
-        this._button.setAttribute('title', 'Mesurer une distance');
+        this._button.setAttribute('title', gettext('Measure a distance'));
         this._map.getCanvas().style.cursor = '';
     }
 

@@ -16,23 +16,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
+  quality:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
-      - name: Install flake8
+      - name: Install ruff
         run: |
-          python -m pip install flake8 -U
+          python -m pip install ruff -U
 
-      - name: Lint with flake8
+      - name: Check linting
         run: |
-          flake8 mapentity test_project test_app
+          ruff check mapentity test_app test_project
+
+      - name: Check format
+        run: |
+          ruff format --check mapentity test_app test_project
 
   test:
     runs-on: ubuntu-latest
@@ -44,17 +48,17 @@ jobs:
     strategy:
       matrix:
         python-version: [ '3.9', '3.10', '3.13' ]
-        django-version: [ '4.2.*', '5.2' ]
+        django-version: [ '4.2.*', '5.2.*' ]
         exclude:
             - python-version: '3.9'
-              django-version: '5.2'
+              django-version: '5.2.*'
 
     env:
       PYTHON: ${{ matrix.python-version }}
       DJANGO: ${{ matrix.django-version }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Install system dependencies
       run: |
@@ -89,7 +93,7 @@ jobs:
         fail_ci_if_error: true # optional (default = false)
 
   publish:
-    needs: [lint, test]
+    needs: [quality, test]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -100,9 +104,9 @@ jobs:
 
     if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 

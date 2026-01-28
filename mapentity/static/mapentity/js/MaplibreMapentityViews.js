@@ -47,12 +47,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         // Initialisation du DataTable
+        const canSelect = !!window.USER_CAN_SELECT;
+
         const mainDatatable = new DataTable('#objects-list', {
             processing: true,
             serverSide: true,
-            searching: false, // désactive la recherche intégrée de DataTables
+            searching: true,
             columnDefs: [
-                { visible: false, targets: [0] }
+                {
+                data: null,
+                defaultContent: '',
+                orderable: false,
+                searchable: false,
+                render: canSelect ? DataTable.render.select() : null,
+                visible: canSelect,
+                targets: 0
+                },
+                { visible: false, targets: [1] }
             ],
             ajax: {
                 url: `/api/${modelname}/drf/${modelname}s.datatables`
@@ -61,9 +72,9 @@ document.addEventListener('DOMContentLoaded', function() {
             pageLength: 7,
             scrollY: '100vh',
             scrollCollapse: true,
+            info: false, // hide "showing 1 to n of m entries"
             lengthChange: false,
-            info: false,
-            sDom: "tpf",
+            dom: 'T<"clear">rtp',
             language: {
                 searchPlaceholder: tr("Search"),
                 paginate: {
@@ -72,6 +83,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     next: ">",
                     previous: "<"
                 },
+            },
+            layout: {
+                bottomEnd: 'inputPaging'
             },
             createdRow: function (row, data, index) {
                 const pk = data.id;
@@ -88,13 +102,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.addEventListener('dblclick', () => {
                     objectsLayer.jumpTo(pk);
                 });
-            }
+            },
+            select: canSelect ? {
+                    style: 'multi',
+                    selector: 'td:first-child'
+                } : false,
+            order: [[1, 'asc']]
         });
 
         window.MapEntity.dt = mainDatatable;
 
-        // Ajustement vertical de la hauteur du DataTable
-       expandDatatableHeight();
+        var paging = document.getElementsByClassName('dt-paging')[0];
+        paging.classList.add('d-flex', 'flex-row-reverse');
+        document.getElementById('list-download-toolbar').appendChild(paging);
+
+        // custom search field
+        const searchInput = document.getElementById('object-list-search');
+
+        searchInput.addEventListener('input', function () {
+            mainDatatable.search(this.value).draw();
+        });
+
        window.addEventListener('resize', function (e) {
              expandDatatableHeight();
        });
@@ -126,7 +154,65 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(node.nodeType === Node.TEXT_NODE) {
                     node.remove();
                 }
-            })
+            });
+        }
+
+        // Adjust vertically
+        expandDatatableHeight();
+
+        // batch edition
+        document.getElementById("btn-batch-editing").addEventListener("click", () => {
+            makeButtonDisabled("btn-delete", "tooltip-delete");
+            makeButtonDisabled("btn-edit", "tooltip-edit");
+        });
+
+        function makeButtonDisabled(btnID, tooltipID) {
+            const btn = document.getElementById(btnID);
+            const tooltip = document.getElementById(tooltipID);
+
+            const checkedCount = document.querySelectorAll(".dt-select-checkbox:checked").length;
+
+            if (checkedCount === 0) {
+                btn.setAttribute("disabled", "true");
+                tooltip.setAttribute("title", "At least one item must be selected");
+            } else {
+                btn.removeAttribute("disabled");
+                tooltip.removeAttribute("title");
+            }
+        }
+
+        // delete / edit buttons
+        document.querySelectorAll("#btn-delete, #btn-edit").forEach(btn => {
+            btn.addEventListener("click", async (event) => {
+                const selectedPks = await getSelectedPks();
+                const url = new URL(btn.dataset.url, window.location.origin);
+                url.searchParams.set("pks", selectedPks);
+                window.location.href = url;
+            });
+        });
+
+        async function getSelectedPks() {
+            let pksList = [];
+
+            const anyChecked = document.querySelector(".dt-scroll-headInner .dt-select-checkbox:checked");
+
+            if (anyChecked) {
+                const form = document.getElementById("mainfilter");
+                const url = form.action.replace(".datatables", "/filter_infos.json");
+                const params = new URLSearchParams(new FormData(form)).toString();
+
+                const response = await fetch(url + "?" + params);
+                const data = await response.json();
+                pksList = data.pk_list;
+            } else {
+                pksList = window.MapEntity.dt
+                    .rows({ selected: true })
+                    .data()
+                    .pluck("id")
+                    .toArray();
+            }
+
+            return pksList.join(",");
         }
     });
 

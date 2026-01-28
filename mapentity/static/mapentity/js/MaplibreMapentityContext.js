@@ -44,8 +44,8 @@ class MaplibreMapentityContext {
               // A voir une fois que filter sera mise en place
 
             const formData = new FormData(form);
-            // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox'
-            const fields = Array.from(formData).filter(([name, _]) => name !== 'bbox');
+            // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox' ou ''
+            const fields = Array.from(formData).filter(([name, value]) => (name !== 'bbox' && value !== ''));
             context['filter'] = new URLSearchParams(fields).toString();
         }
 
@@ -127,19 +127,18 @@ class MaplibreMapentityContext {
         const lat = context?.mapview?.lat;
         const zoom = context?.mapview?.zoom;
 
-        if (Number.isFinite(lng) && Number.isFinite(lat)) {
-            map.setCenter([lng, lat]);
-        } else {
-            console.warn("Longitude ou latitude manquante ou invalide — setCenter ignoré.");
-        }
-
         if (Number.isFinite(zoom)) {
             map.setZoom(zoom);
         } else {
             console.warn("Niveau de zoom manquant ou invalide — setZoom ignoré.");
         }
 
-        map.fitBounds(this.bounds, { maxZoom: 16 });
+        if (Number.isFinite(lng) && Number.isFinite(lat)) {
+            map.setCenter([lng, lat]);
+        } else {
+            console.warn("Longitude ou latitude manquante ou invalide — setCenter ignoré.");
+        }
+
         return true;
     }
 
@@ -151,13 +150,15 @@ class MaplibreMapentityContext {
      * @param context {Object|null} - Le contexte de la carte à restaurer. Si null, le contexte sera chargé depuis le stockage local.
      * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'filter' pour les filtres de formulaire, 'datatable' pour les colonnes triées et 'objectsLayer' pour la couche d'objets.
      */
-    restoreFullContext(map, context, kwargs = {}) {
-        // const filter = kwargs.filter;
-        // const objectsname = kwargs.objectsname; // The name of the objects layer, used to display the layer in the layer switcher. (modelname)
+    async restoreFullContext(map, context, kwargs = {}) {
+        const filter = kwargs.filter;
+        const objectsname = kwargs.objectsname; // The name of the objects layer, used to display the layer in the layer switcher. (modelname)
         const datatable = kwargs.datatable;
-        // const objectsLayer = kwargs.objectsLayer;
+        const objectsLayer = kwargs.objectsLayer;
+        const load_filter_form = kwargs.load_filter_form;
 
         if (!context || typeof context !== 'object') {
+            // If not received from URL, load from LocalStorage
             context = this.loadFullContext(kwargs);
         }
 
@@ -167,42 +168,48 @@ class MaplibreMapentityContext {
             return;
         }
 
-        // Restore filters if a filter and filter context are available.
-        // console.log('Restoring filters:', filter, context.filter);
-        // if (filter && context.filter) {
-        //     const formData = new URLSearchParams(context.filter);
-        //     const params = {};
-        //
-        //     // S'assurer que 'filter' est un élément DOM
-        //     const filterElement = typeof filter === 'string' ? document.getElementById(filter) : filter;
-        //     if (!filterElement) return;
-        //
-        //     // Convertir les données en objet clé/valeur
-        //     for (const [key, value] of formData.entries()) {
-        //         params[key] = value;
-        //     }
-        //
-        //     // Appliquer les valeurs aux champs du formulaire
-        //     for (const [key, value] of Object.entries(params)) {
-        //         const input = filterElement.querySelector(`[name="${key}"]`);
-        //         if (input) {
-        //             if (input.type === 'checkbox' || input.type === 'radio') {
-        //                 input.checked = value === 'true' || value === 'on';
-        //             } else {
-        //                 input.value = value;
-        //             }
-        //         }
-        //     }
-        //
-        //     // Déclencher les événements 'change' pour les <select>
-        //     filterElement.querySelectorAll('select').forEach(select => {
-        //         select.dispatchEvent(new Event('change'));
-        //     });
-        // }
-        // // Restore le dernier tri des colonnes si un datatable est fourni et que des colonnes de tri sont spécifiées dans le contexte.
-        // if (datatable && context.sortcolumns) {
-        //     this.last_sort = context['sortcolumns'];
-        // }
+         // Restore filters if a filter and filter context are available.
+         console.debug('Restoring filters:', filter, context.filter);
+         if (filter && context.filter) {
+             const formData = new URLSearchParams(context.filter);
+             const params = {};
+
+             // Charger les filtres
+             await load_filter_form();
+
+             // S'assurer que 'filter' est un élément DOM
+             const filterElement = typeof filter === 'string' ? document.getElementById(filter) : filter;
+             if (!filterElement) {
+                 return;
+             }
+
+             // Convertir les données en objet clé/valeur
+             for (const [key, value] of formData.entries()) {
+                 params[key] = value;
+             }
+
+             // Appliquer les valeurs aux champs du formulaire
+             for (const [key, value] of Object.entries(params)) {
+                 const input = filterElement.querySelector(`[name="${key}"]`);
+                 if (input) {
+                     if (input.type === 'checkbox' || input.type === 'radio') {
+                         input.checked = value === 'true' || value === 'on';
+                     } else {
+                         input.value = value;
+                     }
+                 }
+             }
+
+             // Déclencher les événements 'change' pour les <select>
+             filterElement.querySelectorAll('select').forEach(select => {
+                 select.dispatchEvent(new Event('change'));
+             });
+         }
+
+         // Restore le dernier tri des colonnes si un datatable est fourni et que des colonnes de tri sont spécifiées dans le contexte.
+         //if (datatable && context.sortcolumns) {
+         //    this.last_sort = context['sortcolumns'];
+         //}
 
         // restore la vue de la carte à partir du contexte.
         this.restoreMapView(map, context, kwargs);
@@ -221,6 +228,9 @@ class MaplibreMapentityContext {
 
                 const labelText = label.textContent.trim();
                 input.checked = layers.includes(labelText);
+                if (input.checked) {
+                    input.dispatchEvent(new Event("change"));
+                }
             });
 
             // Traitement des boutons radio

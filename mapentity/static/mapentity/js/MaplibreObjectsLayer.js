@@ -9,6 +9,7 @@ class MaplibreObjectsLayer {
         this._current_objects = {};
         this.options = { ...options };
         this.boundsLayer = null;
+        this.currentTooltip = null;
         this.currentPopup = null;
         this._track_objects = {};
         this.isLoaded = false; // Nouvel état pour le lazy loading
@@ -16,6 +17,7 @@ class MaplibreObjectsLayer {
         this.isLazy = options.isLazy;
         this.loading = false; // État de chargement
         this.primaryKey = this.options.primaryKey;
+        this.excludedIds = new Set(); // IDs à exclure de l'affichage (ex: en cours d'édition)
 
         // Récupérer le gestionnaire de couches
         this.layerManager = MaplibreLayerManager.getInstance();
@@ -32,11 +34,43 @@ class MaplibreObjectsLayer {
         if (!this.layerManager.getMap()) {
             this.layerManager.initialize(map);
         }
+    }
+
+
+    /**
+     * Initialize events listener of the map
+     */
+    setupLayerEvents() {
+        const layersNames = this._current_objects[this.primaryKey];
+
+        for (const layer of layersNames){
+            const onClick = (e) => this._onClick(e);
+            const onMouseMove = (e) => this._onMouseMove(e);
+            const onMouseLeave = (e) => this._onMouseLeave(e);
+            this._map.on('click', layer, onClick);
+            this._map.on('mousemove', layer, onMouseMove);
+            this._map.on('mouseleave', layer, onMouseLeave);
+        }
 
         const onClick = (e) => this._onClick(e);
         const onMouseMove = (e) => this._onMouseMove(e);
         this._map.on('click', onClick);
         this._map.on('mousemove', onMouseMove);
+
+        // Gestion des exclusions (pour masquer les objets en cours d'édition)
+        this._map.on('mapentity:exclude-features', (e) => {
+            if (e.ids && Array.isArray(e.ids)) {
+                e.ids.forEach(id => this.excludedIds.add(id));
+                this._updateAllLayerFilters();
+            }
+        });
+
+        this._map.on('mapentity:include-features', (e) => {
+            if (e.ids && Array.isArray(e.ids)) {
+                e.ids.forEach(id => this.excludedIds.delete(id));
+                this._updateAllLayerFilters();
+            }
+        });
     }
 
     /**
@@ -44,91 +78,104 @@ class MaplibreObjectsLayer {
      * @param e {Object} - Événement de clic
      * @private
      */
-    _onClick(e) {
-        if (this.options.readonly) {
+    async _onClick(e) {
+        if (!this.options.displayPopup) {
             return;
         }
 
         const features = this._map.queryRenderedFeatures(e.point);
         console.log("Features found on click:", features);
 
-        if (features.length > 0 && features[0].source !== 'geojson') {
-            const feature = features[0];
-            if (this.options.objectUrl) {
-                window.location = this.options.objectUrl(feature.properties, feature);
+        // Exclure les features Geoman (sources commençant par gm_, gm-, geoman_, geoman-)
+        const nonGeomanFeatures = features.filter(f => {
+            const source = f.source || '';
+            return source !== 'geojson' && 
+                   !source.startsWith('gm_') && 
+                   !source.startsWith('gm-') && 
+                   !source.startsWith('geoman_') && 
+                   !source.startsWith('geoman-');
+        });
+
+        if (nonGeomanFeatures.length > 0) {
+            const feature = nonGeomanFeatures[0];
+            if(this.options.displayPopup){
+                var popup_content;
+                try{
+                    popup_content =  await this.getPopupContent(this.options.modelname, feature.id);
+                } catch (error) {
+                    popup_content = gettext('Data unreachable');
+                }
+                new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popup_content).addTo(this._map);
+        if (this.currentPopup) {
+            this.currentPopup.remove();
+            this.currentPopup = null;
+        }
+
+        const feature = e.features[0];
+        console.log("Feature found on click:", feature);
+
+        if (feature && feature.source !== 'geojson') {
+            const coordinates = e.lngLat;
+            let description;
+            try{
+                description =  await this.getPopupContent(this.options.modelname, feature.id);
+            } catch (error) {
+                description = gettext('Data unreachable');
             }
+            this.currentPopup = new maplibregl.Popup().setLngLat(coordinates).setHTML(description).addTo(this._map);
+            e.stopPropagation;
         }
     }
+
 
     /**
      * Gère le mouvement de la souris sur la carte
      * @param e {Object} - Événement de mouvement
      * @private
      */
-    _onMouseMove(e) {
-        if (this.options.readonly) {
-            return;
-        }
+    _onMouseMove(e){
+        if(!this.currentTooltip) {
+            const feature = e.features[0];
+            if (feature) {
+                // Change the cursor style as a UI indicator.
+                this._map.getCanvas().style.cursor = 'pointer';
 
-        const features = this._map.queryRenderedFeatures(e.point);
-        const hoveredFeature = features[0];
-        let hoveredFeatureId = null;
+                if(this.options.readonly){
+                    return;
+                }
 
-        if (hoveredFeature) {
-            hoveredFeatureId = hoveredFeature.id || hoveredFeature.properties?.id;
-            this._map.getCanvas().style.cursor = 'pointer';
-        } else {
-            this._map.getCanvas().style.cursor = '';
-        }
+                const coordinates = e.lngLat;
+                const descriptionContent = feature.properties.name || 'No data available';
+                const description = `<div class="popup-content">${descriptionContent}</div>`;
 
-        // Reset hover state
-        const layers = Object.values(this._current_objects).flat();
-        for (const layerId of layers) {
-            const layer = this._map.getLayer(layerId);
-            if (!layer) continue;
-
-            const sourceId = layer.source;
-            const source = this._map.getSource(sourceId);
-            if (!source || !source._data) continue;
-
-            for (const feature of source._data.features) {
-                if (!feature.id) continue;
-                const isHovered = feature.id === hoveredFeatureId;
-                this._map.setFeatureState(
-                    { source: sourceId, id: feature.id },
-                    { hover: isHovered }
-                );
+                this.currentTooltip = new maplibregl.Popup({
+                    closeButton: false,
+                    closeOnClick: false,
+                    className: 'custom-popup',
+                    anchor: 'left',
+                    offset: 10,
+                })
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(this._map);
             }
-        }
-
-        // Gestion du popup
-        if (hoveredFeatureId) {
-            if (this.currentPopup) {
-                this.currentPopup.remove();
-                this.currentPopup = null;
-            }
-
-            const coordinates = hoveredFeature.geometry.type === 'Point'
-                ? hoveredFeature.geometry.coordinates
-                : turf.centroid(hoveredFeature).geometry.coordinates;
-
-            const description = hoveredFeature.properties.name || 'No data available';
-
-            this.currentPopup = new maplibregl.Popup({
-                closeButton: false,
-                closeOnClick: false,
-                className: 'custom-popup',
-                anchor: 'left',
-                offset: 10,
-            })
-                .setLngLat(coordinates)
-                .setHTML(`<div class="popup-content">${description}</div>`)
-                .addTo(this._map);
-        } else if (this.currentPopup) {
-            this.currentPopup.remove();
-            this.currentPopup = null;
         }
     }
+
+
+    /**
+     * Gère l'évènement de la sortie de la souris de l'emplacement d'une feature
+     * @param e {Object} - Événement de mouvement
+     * @private
+     */
+    _onMouseLeave(e) {
+        this._map.getCanvas().style.cursor = '';
+        if(this.currentTooltip){
+            this.currentTooltip.remove();
+            this.currentTooltip = null;
+        }
+    }
+
 
     /**
      * Enregistre une couche lazy (sans données) dans le gestionnaire
@@ -159,7 +206,7 @@ class MaplibreObjectsLayer {
         this._map.on('layerManager:lazyLayerVisibilityChanged', (event) => {
             visible = event.visible;
             if (!visible && this.isLoaded) {
-                const layerIds = this._current_objects[primaryKey];
+                const layerIds = this._current_objects[event.primaryKey];
                 if (layerIds) {
                     this.layerManager.toggleLayer(layerIds, false);
                 }
@@ -207,7 +254,7 @@ class MaplibreObjectsLayer {
             console.warn("Chargement déjà en cours...");
             return;
         }
-        console.log("Loading data from URL: " + url);
+        console.debug("Loading data from URL: " + url);
         this.loading = true;
 
         try {
@@ -293,19 +340,25 @@ class MaplibreObjectsLayer {
         const strokeColor = style.color;
         const strokeWidth = style.weight ?? 5;
 
+        // Detail styles for 'selected' state
+        const detailStyle = this.options.detailStyle || {};
+        const detailColor = detailStyle.color || '#FF5E00';
+        const detailRgba = parseColor(detailColor);
+        const detailRgbaStr = `rgba(${detailRgba[0]},${detailRgba[1]},${detailRgba[2]},${detailRgba[3]})`;
+
         const layerIds = [];
 
         // Ajouter les couches selon les types de géométrie
         if (foundTypes.has("Point") || foundTypes.has("MultiPoint")) {
-            layerIds.push(this._addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth));
+            layerIds.push(this._addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailColor));
         }
 
         if (foundTypes.has("LineString") || foundTypes.has("MultiLineString")) {
-            layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity));
+            layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor));
         }
 
         if (foundTypes.has("Polygon") || foundTypes.has("MultiPolygon")) {
-            layerIds.push(...this._addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity));
+            layerIds.push(...this._addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity, detailRgbaStr, detailColor));
         }
 
         // Enregistrer les couches
@@ -315,6 +368,9 @@ class MaplibreObjectsLayer {
         if(this.isLoaded && !this.isLazy) {
             this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
         }
+
+        // Add event listeners on the created layers
+        this.setupLayerEvents();
     }
 
     /**
@@ -336,6 +392,79 @@ class MaplibreObjectsLayer {
     }
 
     /**
+     * Construit le filtre complet en combinant le filtre de base et les exclusions
+     * @param baseFilter {Array} - Filtre de base
+     * @returns {Array} - Filtre complet
+     * @private
+     */
+    _buildFilter(baseFilter) {
+        if (this.excludedIds.size === 0) {
+            return baseFilter;
+        }
+
+        // Convertir tous les IDs en chaînes uniques pour éviter les erreurs de type mixte et de doublons dans 'match'
+        const excludedIdsStrings = [...new Set(Array.from(this.excludedIds).map(id => String(id)))];
+
+        // Utilisation de 'match' avec conversion en chaîne pour robustesse
+        // Structure : ['match', ['to-string', ['get', 'id']], [ids...], false, true]
+        const excludeFilter = ['match', ['to-string', ['get', 'id']], excludedIdsStrings, false, true];
+
+        if (!baseFilter) {
+            return excludeFilter;
+        }
+
+        // Si le filtre de base est déjà un 'all', on ajoute juste l'exclusion
+        if (baseFilter[0] === 'all') {
+            return [...baseFilter, excludeFilter];
+        }
+
+        return ['all', baseFilter, excludeFilter];
+    }
+
+    /**
+     * Met à jour les filtres de tous les calques gérés pour refléter les exclusions
+     * @private
+     */
+    _updateAllLayerFilters() {
+        Object.values(this._current_objects).flat().forEach(layerId => {
+            if (!this._map.getLayer(layerId)) return;
+
+            const currentFilter = this._map.getFilter(layerId);
+            let baseFilter = currentFilter;
+
+            // Tentative de récupération du filtre de base (sans l'exclusion précédente)
+            if (Array.isArray(currentFilter) && currentFilter[0] === 'all') {
+                const last = currentFilter[currentFilter.length - 1];
+
+                // Détection de notre clause d'exclusion
+                // 1. Ancien format !in
+                // 2. Ancien format match simple
+                // 3. Nouveau format match avec to-string
+                const isExcludeFilter = (Array.isArray(last) && last[0] === '!in' && Array.isArray(last[1]) && last[1][1] === 'id') ||
+                                        (Array.isArray(last) && last[0] === 'match' && Array.isArray(last[1]) && last[1][1] === 'id') ||
+                                        (Array.isArray(last) && last[0] === 'match' && Array.isArray(last[1]) && last[1][0] === 'to-string');
+
+                if (isExcludeFilter) {
+                    // On enlève juste le dernier élément qui correspond à notre filtre d'exclusion
+                    baseFilter = currentFilter.slice(0, -1);
+
+                    // Si le résultat est ['all', singleFilter], MapLibre l'accepte.
+                    // Mais si baseFilter devient ['all'], c'est invalide.
+                    if (baseFilter.length === 1) baseFilter = null;
+                }
+            }
+
+            const newFilter = this._buildFilter(baseFilter);
+
+            try {
+                this._map.setFilter(layerId, newFilter);
+            } catch (e) {
+                console.warn(`Could not update filter on layer ${layerId}`, e);
+            }
+        });
+    }
+
+    /**
      * Ajoute une couche de points
      * @param layerIdBase {string} - Base de l'ID de couche
      * @param sourceId {string} - ID de la source
@@ -347,21 +476,23 @@ class MaplibreObjectsLayer {
      * @returns {string} - ID de la couche créée
      * @private
      */
-    _addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth) {
+    _addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailStrokeColor) {
         const layerId = `${layerIdBase}-points`;
         this._map.addLayer({
             id: layerId,
             type: 'circle',
             source: sourceId,
-            filter: ['any',
+            filter: this._buildFilter(['any',
                 ['==', ['geometry-type'], 'Point'],
                 ['==', ['geometry-type'], 'MultiPoint']
-            ],
+            ]),
             paint: {
                 'circle-color': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     '#FF0000',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailRgbaStr,
                     rgbaStr
                 ],
                 'circle-opacity': fillOpacity,
@@ -369,6 +500,8 @@ class MaplibreObjectsLayer {
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     '#FF0000',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailStrokeColor,
                     strokeColor
                 ],
                 'circle-stroke-opacity': strokeOpacity,
@@ -394,21 +527,23 @@ class MaplibreObjectsLayer {
      * @returns {string} - ID de la couche créée
      * @private
      */
-    _addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity) {
+    _addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor) {
         const layerId = `${layerIdBase}-lines`;
         this._map.addLayer({
             id: layerId,
             type: 'line',
             source: sourceId,
-            filter: ['any',
+            filter: this._buildFilter(['any',
                 ['==', ['geometry-type'], 'LineString'],
                 ['==', ['geometry-type'], 'MultiLineString']
-            ],
+            ]),
             paint: {
                 'line-color': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     '#FF0000',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailColor,
                     strokeColor
                 ],
                 'line-width': strokeWidth,
@@ -430,7 +565,7 @@ class MaplibreObjectsLayer {
      * @returns {Array<string>} - IDs des couches créées
      * @private
      */
-    _addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity) {
+    _addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity, detailRgbaStr, detailStrokeColor) {
         const fillLayerId = `${layerIdBase}-polygon-fill`;
         const strokeLayerId = `${layerIdBase}-polygon-stroke`;
 
@@ -439,15 +574,17 @@ class MaplibreObjectsLayer {
             id: fillLayerId,
             type: 'fill',
             source: sourceId,
-            filter: ['any',
+            filter: this._buildFilter(['any',
                 ['==', ['geometry-type'], 'Polygon'],
                 ['==', ['geometry-type'], 'MultiPolygon']
-            ],
+            ]),
             paint: {
                 'fill-color': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     '#FF0000',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailRgbaStr,
                     rgbaStr
                 ],
                 'fill-opacity': fillOpacity
@@ -459,15 +596,17 @@ class MaplibreObjectsLayer {
             id: strokeLayerId,
             type: 'line',
             source: sourceId,
-            filter: ['any',
+            filter: this._buildFilter(['any',
                 ['==', ['geometry-type'], 'Polygon'],
                 ['==', ['geometry-type'], 'MultiPolygon']
-            ],
+            ]),
             paint: {
                 'line-color': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     '#FF0000',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailStrokeColor,
                     strokeColor
                 ],
                 'line-width': strokeWidth,
@@ -497,7 +636,7 @@ class MaplibreObjectsLayer {
             const source = this._map.getSource(sourceId);
             if (!source || !source._data) continue;
 
-            for (const feature of source._data.features) {
+            for (const feature of source._data.geojson.features) {
                 if (!feature.id) continue;
                 const isMatch = feature.id === primaryKey;
                 this._map.setFeatureState(
@@ -514,7 +653,30 @@ class MaplibreObjectsLayer {
      * @param on {boolean} - Activer/désactiver
      */
     select(primaryKey, on = true) {
-        this.highlight(primaryKey, true);
+        if (this.options.readonly) {
+            return;
+        }
+
+        const layersBySource = Object.values(this._current_objects).flat();
+        for (const layerId of layersBySource) {
+            const layer = this._map.getLayer(layerId);
+            if (!layer) continue;
+
+            const sourceId = layer.source;
+            const source = this._map.getSource(sourceId);
+            if (!source || !source._data) continue;
+
+            for (const feature of source._data.geojson.features) {
+                if (!feature.id) continue;
+                const isMatch = feature.id === primaryKey;
+                if (isMatch) {
+                    this._map.setFeatureState(
+                        { source: sourceId, id: feature.id },
+                        { selected: on }
+                    );
+                }
+            }
+        }
     }
 
     /**
@@ -542,9 +704,9 @@ class MaplibreObjectsLayer {
 
             const currentSourceId = layer.source;
             const source = this._map.getSource(currentSourceId);
-            if (source && source._data && source._data.features) {
+            if (source && source._data && source._data.geojson.features) {
                 sourceId = currentSourceId;
-                fullFeatureCollection = source._data;
+                fullFeatureCollection = source._data.geojson;
                 break;
             }
         }
@@ -589,8 +751,8 @@ class MaplibreObjectsLayer {
             if (!layer) continue;
 
             const source = this._map.getSource(layer.source);
-            if (source && source._data && source._data.features) {
-                const foundFeature = source._data.features.find(f => f.properties?.id === pk);
+            if (source && source._data && source._data.geojson.features) {
+                const foundFeature = source._data.geojson.features.find(f => f.properties?.id === pk);
                 if (foundFeature) {
                     feature = foundFeature;
                     break;
@@ -624,5 +786,28 @@ class MaplibreObjectsLayer {
      */
     getBoundsLayer() {
         return this.boundsLayer;
+    }
+
+    /**
+     * Fetch data to display in object popup
+     * @returns {Promise<String>}
+     */
+    async getPopupContent(modelname, id){
+        const popup_url = window.SETTINGS.urls.popup.replace(new RegExp('modelname', 'g'), modelname)
+                                          .replace('0', id);
+
+        // fetch data
+        var response = await window.fetch(popup_url);
+        if (!response.ok){
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        } else {
+            // parse data
+            try {
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                throw new Error('Cannot parse data');
+            }
+        }
     }
 }

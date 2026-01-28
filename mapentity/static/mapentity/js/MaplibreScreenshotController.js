@@ -43,7 +43,7 @@ class MaplibreScreenshotController {
         // Bouton pour prendre une capture d'écran
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
-        button.setAttribute('title', 'Capture d\'écran');
+        button.setAttribute('title', gettext('Screenshot'));
         button.className = 'maplibregl-ctrl-icon maplibregl-screenshot';
 
         const img = document.createElement('img');
