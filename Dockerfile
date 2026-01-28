@@ -33,6 +33,6 @@ FROM base AS demo
 ENV DJANGO_SETTINGS_MODULE=test_project.settings.demo
 
 RUN /code/venv/bin/pip3 install gunicorn psycopg pymemcache
-RUN SECRET_KEY=temp /code/venv/bin/pip3 ./manage.py compilemessages
+RUN SECRET_KEY=temp /code/venv/bin/python manage.py compilemessages
 
 CMD ["/code/venv/bin/gunicorn", "--bind", "0.0.0.0:8000", "test_project.wsgi:application"]
