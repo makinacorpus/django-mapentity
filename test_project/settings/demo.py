@@ -15,6 +15,27 @@ DATABASES = {
     }
 }
 
+CACHE_ROOT = os.path.join(BASE_DIR, "cache")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "TIMEOUT": 2592000,  # 30 days
+        "LOCATION": "{}:{}".format(
+            os.getenv("MEMCACHED_HOST", "memcached"),
+            os.getenv("MEMCACHED_PORT", "11211"),
+        ),
+    },
+    # The fat backend is used to store big chunk of data (>1 Mo)
+    "fat": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": os.path.join(CACHE_ROOT, "fat"),
+        "TIMEOUT": 2592000,  # 30 days
+    },
+}
+
+MAPENTITY_CONFIG["GEOJSON_LAYERS_CACHE_BACKEND"] = "fat"
+
 CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOST if host]
 SESSION_COOKIE_DOMAIN = os.getenv("SERVER_NAME")
 

@@ -1,4 +1,4 @@
-FROM python:3.9-bookworm as base
+FROM python:3.9-bookworm AS base
 
 RUN apt-get update -qq && apt-get install -y -qq \
     binutils libproj-dev gdal-bin libsqlite3-mod-spatialite \
@@ -28,10 +28,10 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["manage.py", "runserver", "0.0.0.0:8000"]
 
-FROM base as demo
+FROM base AS demo
 
 ENV DJANGO_SETTINGS_MODULE=test_project.settings.demo
 
-RUN /code/venv/bin/pip3 install gunicorn psycopg
+RUN /code/venv/bin/pip3 install gunicorn psycopg pymemcache
 
 CMD ["/code/venv/bin/gunicorn", "--bind", "0.0.0.0:8000", "test_project.wsgi:application"]
