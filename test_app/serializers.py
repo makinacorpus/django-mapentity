@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from mapentity.serializers import MapentityGeojsonModelSerializer
-from test_app.models import City, DummyAptModel, DummyModel, GeoPoint, Road
+from test_app.models import City, DummyAptModel, DummyModel, GeoPoint, Road, MushroomSpot
 
 
 class DummySerializer(serializers.ModelSerializer):
@@ -54,3 +54,8 @@ class GeoPointSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         model = GeoPoint
+
+class MushroomSpotSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = MushroomSpot
