@@ -7,7 +7,6 @@ from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db.models import GeometryField
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
@@ -144,11 +143,16 @@ class JSSettings(JSONResponseMixin, TemplateView):
 
         # Layers
         dictsettings["layers"] = [
-            {"name": model._meta.verbose_name,
-             "id": model._meta.model_name,
-             "url": model.get_layer_url(),
-             "category": getattr(model._meta.app_config, "verbose_name", model._meta.app_label),}
-            for model, options in registry.registry.items() if model._meta.app_label != "mapentity"
+            {
+                "name": model._meta.verbose_name,
+                "id": model._meta.model_name,
+                "url": model.get_layer_url(),
+                "category": getattr(
+                    model._meta.app_config, "verbose_name", model._meta.app_label
+                ),
+            }
+            for model, options in registry.registry.items()
+            if model._meta.app_label != "mapentity"
         ]
 
         return dictsettings
