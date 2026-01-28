@@ -3,6 +3,7 @@ from . import *  # NOQA
 DEBUG = False
 
 ALLOWED_HOST = os.getenv("SERVER_NAME", "").split(",")
+SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-secret-key")
 
 DATABASES = {
     'default': {
