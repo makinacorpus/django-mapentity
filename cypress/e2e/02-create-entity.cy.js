@@ -23,7 +23,7 @@ describe('DummyModel Create', () => {
     cy.setTinyMceContent('id_description', 'Test description');
     
     // Try to submit - should fail validation
-    cy.get('button[type="submit"], input[type="submit"]').click()
+    cy.get('#save_changes').click()
     
     // Should stay on the same page with validation error
     cy.url().should('include', '/dummymodel/add/')
@@ -82,7 +82,7 @@ describe('DummyModel Create', () => {
     cy.wait(1000)
     
     // Submit the form
-    cy.get('button[type="submit"], input[type="submit"]').click()
+    cy.get('#save_changes').click()
     
     // Should redirect to detail or list page
     cy.url({ timeout: 15000 }).should('satisfy', (url) => {
