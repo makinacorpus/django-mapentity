@@ -199,7 +199,7 @@ class MaplibreObjectsLayer {
             modelname,
             dataUrl,
             labelHTML,
-            () => this.toggleLazyLayer(primaryKey) // Callback pour le chargement
+            (pk, visible) => this.toggleLazyLayer(pk, visible) // Callback pour le chargement
         );
     }
 
