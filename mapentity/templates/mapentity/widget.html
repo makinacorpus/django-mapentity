@@ -43,10 +43,10 @@
         } else {
             // Ce champ est responsable de créer la carte
             const mapId = '{{ id_map }}';
-            const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES } = window.SETTINGS.map.maplibreConfig;
+            const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES, MAX_ZOOM } = window.SETTINGS.map.maplibreConfig;
             const bounds = [BOUNDS[0], BOUNDS[1]];
 
-            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, bounds, SCALE);
+            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
             const layerManager = new MaplibreLayerManager();
 
             map.getMap().on('load', function () {
