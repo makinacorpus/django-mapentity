@@ -39,7 +39,7 @@ _DEFAULT_TILES = [
 
 # Config MapLibre par défaut
 _DEFAULT_MAPLIBRE_CONFIG = {
-    "BOUNDS": [[-180, 90], [180, 90]],
+    "BOUNDS": [[-180, -90], [180, 90]],
     "DEFAULT_CENTER": [1.3952, 43.5963],
     "DEFAULT_ZOOM": 5,
     "SCALE": "metric",
@@ -154,15 +154,14 @@ TINYMCE_DEFAULT_CONFIG = {
     "theme": "silver",
     "height": 500,
     "menubar": False,
-    "plugins": "advlist,autolink,lists,link,image,charmap,print,preview,anchor,"
-    "searchreplace,visualblocks,code,fullscreen,insertdatetime,media,table,paste,"
-    "code,help,wordcount,textcolor",
+    "plugins": "advlist,autolink,lists,link,image,charmap,preview,anchor,"
+    "searchreplace,visualblocks,code,fullscreen,insertdatetime,media,table,"
+    "code,help,wordcount",
     "toolbar": "undo redo | formatselect | "
     "bold italic forecolor backcolor | link image media | alignleft aligncenter "
     "alignright alignjustify | bullist numlist outdent indent | "
     "removeformat | code | wordcount | help",
     "paste_auto_cleanup_on_paste": True,
-    "forced_root_block": False,
     "width": "95%",
     "resize": "both",
     "browser_spellcheck": True,
@@ -175,6 +174,7 @@ TINYMCE_DEFAULT_CONFIG = {
         "iframe[src|frameborder=0|alt|title|width|height|align|name]"
     ),
     "setup": "tinyMceInit",
+    "license_key": "gpl"
 }
 TINYMCE_DEFAULT_CONFIG.update(getattr(settings, "TINYMCE_DEFAULT_CONFIG", {}))
 setattr(settings, "TINYMCE_DEFAULT_CONFIG", TINYMCE_DEFAULT_CONFIG)
