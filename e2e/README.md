@@ -14,13 +14,35 @@ npm install
 npm run playwright:install
 ```
 
-3. Create test data:
+3. Set up Django environment:
 ```bash
+# Install Python dependencies
+pip install -e .[dev]
+
+# Run migrations
 python manage.py migrate
-python manage.py create_test_data --clean
+
+# Compile messages
+python manage.py compilemessages
+
+# Collect static files
+python manage.py collectstatic --noinput
+
+# Create test data
+python manage.py create_test_data --clean --count 10
 ```
 
 ## Running Tests
+
+**Important**: You need to start the Django development server before running tests:
+
+```bash
+# In one terminal, start Django server
+python manage.py runserver 8000
+
+# In another terminal, run tests
+npm run test:e2e
+```
 
 ### Run all tests
 ```bash
@@ -42,6 +64,11 @@ npm run test:e2e:debug
 npm run test:e2e:ui
 ```
 
+### Run specific test file
+```bash
+npx playwright test e2e/auth.spec.ts
+```
+
 ## Test Structure
 
 - `fixtures.ts` - Shared test fixtures and authentication helpers
@@ -60,6 +87,15 @@ The `create_test_data` management command creates the following test users:
 ## CI/CD Integration
 
 Tests are configured to run in GitHub Actions. See `.github/workflows/e2e-tests.yml` for the CI configuration.
+
+The CI workflow:
+1. Sets up Python and Node.js environments
+2. Installs system and Python dependencies
+3. Installs Playwright browsers
+4. Runs Django migrations and creates test data
+5. Starts Django server
+6. Runs E2E tests
+7. Uploads test results and reports
 
 ## Configuration
 
@@ -89,3 +125,18 @@ test.describe('My Feature', () => {
   });
 });
 ```
+
+## Troubleshooting
+
+### Tests fail with connection refused
+- Make sure Django server is running on port 8000
+- Check that `BASE_URL` is set correctly if using a different port
+
+### Tests timeout
+- Increase timeout in playwright.config.ts
+- Check if static files are collected properly
+- Make sure test data is created
+
+### Browser not found
+- Run `npm run playwright:install` to install browsers
+- On CI, ensure the workflow installs browsers with dependencies

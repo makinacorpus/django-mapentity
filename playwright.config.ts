@@ -48,10 +48,10 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: process.env.CI ? undefined : {
-    command: 'python manage.py runserver 8000',
-    url: 'http://localhost:8000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  // webServer: process.env.CI ? undefined : {
+  //   command: 'python manage.py runserver 8000',
+  //   url: 'http://localhost:8000',
+  //   reuseExistingServer: !process.env.CI,
+  //   timeout: 120 * 1000,
+  // },
 });

@@ -3,7 +3,7 @@ import { test, expect } from './fixtures';
 test.describe('Authentication', () => {
   test('should display login page', async ({ page }) => {
     await page.goto('/login/');
-    await expect(page).toHaveTitle(/Login/);
+    await expect(page).toHaveTitle(/Mapentity/);
     await expect(page.locator('input[name="username"]')).toBeVisible();
     await expect(page.locator('input[name="password"]')).toBeVisible();
   });
