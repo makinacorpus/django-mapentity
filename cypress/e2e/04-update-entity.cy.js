@@ -34,7 +34,6 @@ describe('DummyModel Update', () => {
 
     cy.get('.maplibregl-canvas')
       .trigger('mouseup', { force: true })
-    });
 
     // Submit the form
     cy.get('#save_changes').click()
@@ -43,5 +42,5 @@ describe('DummyModel Update', () => {
     cy.url({ timeout: 15000 }).should('satisfy', (url) => {
       return url.includes('/dummymodel/') && !url.includes('/1/')
     })
-
+  });
 });
