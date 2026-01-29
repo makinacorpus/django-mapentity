@@ -17,6 +17,8 @@ from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views import static
@@ -579,10 +581,12 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
         if "geom" in form.errors:
             geom_error = "<ul>"
             for error in form.errors["geom"]:
-                geom_error += f"<li>{error}</li>"
-            geom_error += f"<li>{form.data.getlist('geom')}</li>"
+                geom_error += f"<li>{escape(error)}</li>"
+            # Safely handle form.data which might be QueryDict or dict
+            geom_data = form.data.getlist('geom') if hasattr(form.data, 'getlist') else form.data.get('geom', [])
+            geom_error += f"<li>{escape(str(geom_data))}</li>"
             geom_error += "</ul>"
-            messages.error(self.request, geom_error)
+            messages.error(self.request, mark_safe(geom_error))
         return super().form_invalid(form)
 
 
