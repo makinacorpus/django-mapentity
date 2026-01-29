@@ -16,7 +16,7 @@ describe('DummyModel Create', () => {
 
   it('should show validation error when submitting without geometry', () => {
     // Fill only text fields without drawing geometry
-    cy.get('input[name="name"]', { timeout: 10000 }).type('Test Entity Without Geom')
+    cy.get('input[name="name_en"]', { timeout: 10000 }).type('Test Entity Without Geom')
     cy.get('textarea[name="short_description"]').type('Test short description')
     cy.get('textarea[name="description"]').type('Test description')
     
