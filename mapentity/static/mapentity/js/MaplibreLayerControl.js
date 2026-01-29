@@ -17,6 +17,10 @@ class MaplibreLayerControl {
         this._populateBaseLayers(this._menu);
         this._activateFirstBaseLayer();
 
+        // Populate existing layers
+        this._populateOverlaysLayers();
+        this._populateLazyOverlaysLayers();
+
         this._map.on('layerManager:overlayAdded', () => this._populateOverlaysLayers());
         this._map.on('layerManager:lazyOverlayAdded', () => this._populateLazyOverlaysLayers());
         this._map.on('layerManager:loadingError', (e) => this._handleLoadingError(e.primaryKey));

@@ -205,6 +205,20 @@ MAPENTITY_CONFIG = {
     "CONVERSION_SERVER": "http://convertit:6543",
     "CAPTURE_SERVER": "http://screamshotter:8000",
     "SENDFILE_HTTP_HEADER": "X-Accel-Redirect",
+    "MAP_STYLES": {
+        "dummymodel": {
+            "weight": 3,
+            "opacity": 0.5,
+            "color": "green",
+        },
+        "road": {
+            "weight": 5,
+            "opacity": 0.5,
+            "color": "red",
+            "arrowColor": "#FF5E00",
+            "arrowSize": 8,
+        },
+    },
 }
 LOCALE_PATHS = (os.path.join(BASE_DIR, "test_project", "locale"),)
 LOGIN_REDIRECT_URL = "/"

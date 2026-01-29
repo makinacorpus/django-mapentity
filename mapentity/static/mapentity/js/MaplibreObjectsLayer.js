@@ -34,24 +34,15 @@ class MaplibreObjectsLayer {
         if (!this.layerManager.getMap()) {
             this.layerManager.initialize(map);
         }
+
+        this._setupGlobalEvents();
     }
 
-
     /**
-     * Initialize events listener of the map
+     * Configure les événements globaux de la carte (indépendants des couches chargées)
+     * @private
      */
-    setupLayerEvents() {
-        const layersNames = this._current_objects[this.primaryKey];
-
-        for (const layer of layersNames){
-            const onClick = (e) => this._onClick(e);
-            const onMouseMove = (e) => this._onMouseMove(e);
-            const onMouseLeave = (e) => this._onMouseLeave(e);
-            this._map.on('click', layer, onClick);
-            this._map.on('mousemove', layer, onMouseMove);
-            this._map.on('mouseleave', layer, onMouseLeave);
-        }
-
+    _setupGlobalEvents() {
         // Gestion des exclusions (pour masquer les objets en cours d'édition)
         this._map.on('mapentity:exclude-features', (e) => {
             if (e.ids && Array.isArray(e.ids)) {
@@ -66,6 +57,24 @@ class MaplibreObjectsLayer {
                 this._updateAllLayerFilters();
             }
         });
+    }
+
+    /**
+     * Initialize events listener of the map for specific layers
+     */
+    setupLayerEvents() {
+        const layersNames = this._current_objects[this.primaryKey];
+
+        if (!layersNames) return;
+
+        for (const layer of layersNames){
+            const onClick = (e) => this._onClick(e);
+            const onMouseMove = (e) => this._onMouseMove(e);
+            const onMouseLeave = (e) => this._onMouseLeave(e);
+            this._map.on('click', layer, onClick);
+            this._map.on('mousemove', layer, onMouseMove);
+            this._map.on('mouseleave', layer, onMouseLeave);
+        }
     }
 
     /**
@@ -93,6 +102,22 @@ class MaplibreObjectsLayer {
 
         if (nonGeomanFeatures.length > 0) {
             const feature = nonGeomanFeatures[0];
+
+            // Don't show popup for current object
+            const currentPk = document.body.dataset.pk;
+            if (currentPk) {
+                const currentPkStr = String(currentPk);
+                const featureIdStr = feature.id != null ? String(feature.id) : null;
+                const featurePropIdStr = feature.properties && feature.properties.id != null
+                    ? String(feature.properties.id)
+                    : null;
+
+                if ((featureIdStr && featureIdStr === currentPkStr) ||
+                    (featurePropIdStr && featurePropIdStr === currentPkStr)) {
+                    return;
+                }
+            }
+
             if (this.options.displayPopup) {
                 var popup_content;
                 try {
@@ -174,7 +199,7 @@ class MaplibreObjectsLayer {
             modelname,
             dataUrl,
             labelHTML,
-            () => this.toggleLazyLayer(primaryKey) // Callback pour le chargement
+            (pk, visible) => this.toggleLazyLayer(pk, visible) // Callback pour le chargement
         );
     }
 
@@ -389,8 +414,8 @@ class MaplibreObjectsLayer {
         const excludedIdsStrings = [...new Set(Array.from(this.excludedIds).map(id => String(id)))];
 
         // Utilisation de 'match' avec conversion en chaîne pour robustesse
-        // Structure : ['match', ['to-string', ['get', 'id']], [ids...], false, true]
-        const excludeFilter = ['match', ['to-string', ['get', 'id']], excludedIdsStrings, false, true];
+        // Structure : ['match', ['to-string', ['id']], [ids...], false, true]
+        const excludeFilter = ['match', ['to-string', ['id']], excludedIdsStrings, false, true];
 
         if (!baseFilter) {
             return excludeFilter;
