@@ -56,9 +56,8 @@ class Command(BaseCommand):
             Road.objects.all().delete()
             Sector.objects.all().delete()
             Tag.objects.all().delete()
-            # Only delete test users (not superusers created manually)
-            User.objects.filter(username__startswith="geotrek_user").delete()
-            User.objects.filter(username__startswith="test_user").delete()
+            # Delete E2E test users
+            User.objects.filter(username__startswith="e2e_").delete()
 
             self.stdout.write(self.style.SUCCESS("Test data cleaned"))
 
@@ -66,6 +65,8 @@ class Command(BaseCommand):
         self.stdout.write("Creating test users...")
         
         # Create a test superuser for E2E tests
+        # Note: The UserFactory._create method handles password hashing automatically
+        # using Django's set_password() method
         if not User.objects.filter(username="e2e_admin").exists():
             admin_user = SuperUserFactory.create(
                 username="e2e_admin",

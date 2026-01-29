@@ -47,8 +47,8 @@ test.describe('Map Interactions', () => {
     const zoomIn = adminPage.locator('.leaflet-control-zoom-in').first();
     if (await zoomIn.isVisible({ timeout: 2000 }).catch(() => false)) {
       await zoomIn.click();
-      // Map should respond to zoom
-      await adminPage.waitForTimeout(500);
+      // Wait for map to finish zoom animation
+      await adminPage.waitForLoadState('networkidle');
     }
   });
 });

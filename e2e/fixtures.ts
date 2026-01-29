@@ -14,7 +14,10 @@ export async function login(page: Page, username: string, password: string) {
 }
 
 export async function logout(page: Page) {
-  await page.click('a[href="/logout/"]');
+  // Wait for logout link to be visible before clicking
+  const logoutLink = page.locator('a[href="/logout/"]');
+  await logoutLink.waitFor({ state: 'visible', timeout: 5000 });
+  await logoutLink.click();
   await page.waitForURL('/login/');
 }
 

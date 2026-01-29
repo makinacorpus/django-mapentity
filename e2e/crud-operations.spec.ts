@@ -58,10 +58,10 @@ test.describe('DummyModel CRUD Operations', () => {
     const deleteLink = adminPage.locator('a[href*="/delete/"], button:has-text("Delete")').first();
     
     if (await deleteLink.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await deleteLink.click();
-      
-      // Confirm deletion if there's a confirmation dialog
+      // Register dialog handler before clicking to avoid race condition
       adminPage.on('dialog', dialog => dialog.accept());
+      
+      await deleteLink.click();
       
       // Or if there's a confirmation page with a submit button
       const confirmButton = adminPage.locator('button[type="submit"]:has-text("Confirm"), input[value*="confirm" i]');
