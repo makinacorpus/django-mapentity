@@ -85,35 +85,29 @@ class Command(BaseCommand):
         self.stdout.write("Creating test data...")
 
         # Create tags first (they are referenced by other models)
-        for _ in range(options["tags"]):
-            TagFactory()
+        TagFactory.create_batch(options["tags"])
         self.stdout.write(self.style.SUCCESS(f"Created {options['tags']} tags"))
 
         # Create cities
-        for _ in range(options["cities"]):
-            CityFactory()
+        CityFactory.create_batch(options["cities"])
         self.stdout.write(self.style.SUCCESS(f"Created {options['cities']} cities"))
 
         # Create roads
-        for _ in range(options["roads"]):
-            RoadFactory()
+        RoadFactory.create_batch(options["roads"])
         self.stdout.write(self.style.SUCCESS(f"Created {options['roads']} roads"))
 
         # Create sectors
-        for _ in range(options["sectors"]):
-            SectorFactory()
+        SectorFactory.create_batch(options["sectors"])
         self.stdout.write(self.style.SUCCESS(f"Created {options['sectors']} sectors"))
 
         # Create dummy models
-        for _ in range(options["dummies"]):
-            DummyModelFactory()
+        DummyModelFactory.create_batch(options["dummies"])
         self.stdout.write(
             self.style.SUCCESS(f"Created {options['dummies']} dummy models")
         )
 
         # Create geo points
-        for _ in range(options["geopoints"]):
-            GeoPointFactory()
+        GeoPointFactory.create_batch(options["geopoints"])
         self.stdout.write(
             self.style.SUCCESS(f"Created {options['geopoints']} geo points")
         )
