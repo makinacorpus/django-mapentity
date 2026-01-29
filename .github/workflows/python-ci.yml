@@ -44,6 +44,7 @@ jobs:
       image: python:${{ matrix.python-version }}-bookworm
       env:
         LANG: C.UTF-8
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
 
     strategy:
       matrix:

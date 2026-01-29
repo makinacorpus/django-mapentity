@@ -1,6 +1,7 @@
 const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
+  projectId: 'sjit2h',
   e2e: {
     baseUrl: 'http://localhost:8000',
     viewportWidth: 1280,
@@ -11,4 +12,4 @@ module.exports = defineConfig({
       // implement node event listeners here
     },
   },
-})
+});
