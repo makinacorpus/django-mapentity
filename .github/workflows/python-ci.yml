@@ -92,8 +92,114 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }} # not usually required for public repos
         fail_ci_if_error: true # optional (default = false)
 
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [quality]
+    
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: mapentity_test
+          POSTGRES_USER: mapentity
+          POSTGRES_PASSWORD: mapentity
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -y install gettext libproj-dev binutils gdal-bin libgdal-dev libsqlite3-mod-spatialite libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info libpangoft2-1.0-0 libjpeg-dev libopenjp2-7-dev libsasl2-dev python3-dev libldap2-dev libssl-dev
+
+      - name: Install python dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          pip3 install .[dev]
+          pip3 install Django==5.2.* -U
+
+      - name: Compile messages
+        run: |
+          ./manage.py compilemessages
+
+      - name: Run migrations
+        run: |
+          ./manage.py migrate
+        env:
+          DATABASE_URL: postgis://mapentity:mapentity@localhost:5432/mapentity_test
+
+      - name: Create superuser and test data
+        run: |
+          echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@test.com', 'admin')" | ./manage.py shell
+          ./manage.py create_test_data --dummies 20 --cities 5 --roads 10 --geopoints 10
+        env:
+          DATABASE_URL: postgis://mapentity:mapentity@localhost:5432/mapentity_test
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Cypress
+        run: |
+          npm ci
+
+      - name: Start Django server
+        run: |
+          ./manage.py runserver 8000 &
+          sleep 5
+        env:
+          DATABASE_URL: postgis://mapentity:mapentity@localhost:5432/mapentity_test
+
+      - name: Wait for server to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:8000/ > /dev/null; then
+              echo "Server is ready!"
+              exit 0
+            fi
+            echo "Waiting for server... ($i/30)"
+            sleep 2
+          done
+          echo "Server failed to start"
+          exit 1
+
+      - name: Run Cypress tests
+        run: |
+          npm run cypress:run
+        env:
+          CYPRESS_baseUrl: http://localhost:8000
+
+      - name: Upload Cypress screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Upload Cypress videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore
+
   publish:
-    needs: [quality, test]
+    needs: [quality, test, e2e-tests]
     runs-on: ubuntu-latest
     permissions:
       id-token: write

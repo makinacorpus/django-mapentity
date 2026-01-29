@@ -16,3 +16,9 @@ __pycache__
 coverage.xml
 .env
 .auto-claude/
+
+# Node / Cypress
+node_modules/
+cypress/screenshots/
+cypress/videos/
+package-lock.json

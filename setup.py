@@ -50,7 +50,8 @@ setup(
             'freezegun',
             'factory_boy',
             'coverage',
-            'tblib'
+            'tblib',
+            'dj-database-url',
         ]
     },
     packages=find_packages(),
