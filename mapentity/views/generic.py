@@ -583,7 +583,11 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
             for error in form.errors["geom"]:
                 geom_error += f"<li>{escape(error)}</li>"
             geom_data = form.data.getlist('geom') if hasattr(form.data, 'getlist') else form.data.get('geom', [])
-            geom_error += f"<li>{escape(geom_data)}</li>"
+            if isinstance(geom_data, list):
+                for item in geom_data:
+                    geom_error += f"<li>{escape(item)}</li>"
+            else:
+                geom_error += f"<li>{escape(geom_data)}</li>"
             geom_error += "</ul>"
             messages.error(self.request, mark_safe(geom_error))
         return super().form_invalid(form)
