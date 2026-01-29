@@ -2,13 +2,13 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
-from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import gettext_lazy as _
 from paperclip.models import Attachment as BaseAttachment
 from paperclip.models import FileType as BaseFileType
 from paperclip.models import License as BaseLicense
 
 from mapentity.models import MapEntityMixin
+from test_app.managers import MushroomSpotManager
 
 
 class FileType(BaseFileType):
@@ -37,24 +37,11 @@ class MushroomSpot(MapEntityMixin, models.Model):
     size = models.FloatField(null=True, default=3.14159)
     boolean = models.BooleanField(default=True)
     tags = models.ManyToManyField(Tag)
+    objects = MushroomSpotManager()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._geom = None
-
-    """geom as python attribute"""
-
-    @property
-    def geom(self):
-        if self._geom is not None:
-            return self._geom
-        if self.serialized is None:
-            return None
-        return GEOSGeometry(self.serialized)
-
-    @geom.setter  # NOQA
-    def geom(self, value):
-        self._geom = value
+    class Meta:
+        verbose_name = _("Mushroom Spot")
+        verbose_name_plural = _("Mushroom Spots")
 
 
 class WeatherStation(models.Model):

@@ -1,6 +1,6 @@
+from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.db.models.functions import Transform
-from django.contrib.gis.geos import GEOSGeometry
-from django.db.models import F
+from django.db.models import Func
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
@@ -21,7 +21,8 @@ from .serializers import (
     DummyGeojsonSerializer,
     DummySerializer,
     GeoPointSerializer,
-    RoadSerializer, MushroomSpotSerializer,
+    MushroomSpotSerializer,
+    RoadSerializer,
 )
 
 
@@ -128,6 +129,7 @@ class MushroomSpotUpdate(mapentity_views.MapEntityUpdate):
     model = MushroomSpot
     form_class = MushroomSpotForm
 
+
 class MushroomSpotViewSet(mapentity_views.MapEntityViewSet):
     model = MushroomSpot
     serializer_class = MushroomSpotSerializer  # Assuming City has similar fields to Road for the serializer
@@ -135,7 +137,11 @@ class MushroomSpotViewSet(mapentity_views.MapEntityViewSet):
     def get_queryset(self):
         qs = self.model.objects.all()
         if self.format_kwarg == "geojson":
-            qs = qs.annotate(api_geom=GEOSGeometry(F("serialized")))
+            qs = qs.annotate(
+                api_geom=Func(
+                    "serialized", function="GeomFromEWKT", output_field=GeometryField()
+                )
+            )
         return qs
 
 
