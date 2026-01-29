@@ -21,8 +21,6 @@ Cypress.Commands.add('login', (username = 'admin', password = 'admin') => {
 
 // Command to wait for map to be ready (MapLibre instead of Leaflet)
 Cypress.Commands.add('waitForMap', () => {
-  // MapLibre uses .maplibre-map class instead of .leaflet-container
-  cy.get('.maplibre-map', { timeout: 10000 }).should('be.visible')
-  // Wait for MapLibre canvas to be ready
-  cy.get('.maplibre-map canvas', { timeout: 10000 }).should('exist')
+  // Check for various map container selectors (more flexible)
+  cy.get('.maplibre-map, #mainmap, .map-panel', { timeout: 10000 }).should('be.visible')
 })

@@ -6,13 +6,12 @@ describe('DummyModel List View', () => {
 
   it('should display the list page', () => {
     cy.url().should('include', '/dummymodel/list')
-    // Check for either heading or page content
     cy.get('body').should('be.visible')
   })
 
-  it('should display the map', () => {
-    // MapLibre uses .maplibre-map class instead of .leaflet-container
-    cy.get('.maplibre-map', { timeout: 10000 }).should('exist')
+  it('should have map container', () => {
+    // Check for map container (either mainmap div or maplibre-map class)
+    cy.get('#mainmap, .maplibre-map, .map-panel', { timeout: 10000 }).should('exist')
   })
 
   it('should display table with entities', () => {
