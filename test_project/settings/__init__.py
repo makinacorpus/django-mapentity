@@ -49,20 +49,22 @@ INSTALLED_APPS = [
 if not DISABLE_DEBUG_TOOLBAR:
     INSTALLED_APPS.append("debug_toolbar")
 
-INSTALLED_APPS.extend([
-    "paperclip",
-    "compressor",
-    "easy_thumbnails",
-    "django_filters",
-    "crispy_forms",
-    "crispy_bootstrap4",
-    "rest_framework",
-    "embed_video",
-    "tinymce",
-    "mapentity",  # Make sure mapentity settings are loaded before leaflet ones
-    "test_project.test_app",
-    "modeltranslation",
-])
+INSTALLED_APPS.extend(
+    [
+        "paperclip",
+        "compressor",
+        "easy_thumbnails",
+        "django_filters",
+        "crispy_forms",
+        "crispy_bootstrap4",
+        "rest_framework",
+        "embed_video",
+        "tinymce",
+        "mapentity",  # Make sure mapentity settings are loaded before leaflet ones
+        "test_project.test_app",
+        "modeltranslation",
+    ]
+)
 
 MIDDLEWARE = []
 
@@ -70,17 +72,19 @@ MIDDLEWARE = []
 if not DISABLE_DEBUG_TOOLBAR:
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
-MIDDLEWARE.extend([
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django.middleware.security.SecurityMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
-    "mapentity.middleware.AutoLoginMiddleware",
-])
+MIDDLEWARE.extend(
+    [
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "django.middleware.security.SecurityMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
+        "mapentity.middleware.AutoLoginMiddleware",
+    ]
+)
 
 
 ROOT_URLCONF = "test_project.urls"
