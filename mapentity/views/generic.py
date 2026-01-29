@@ -576,8 +576,13 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
 
     def form_invalid(self, form):
         messages.error(self.request, _("Your form contains errors"))
-        if form.errors["geom"]:
-            messages.error(self.request, f"{form.errors['geom']}: {form.data['geom']})")
+        if "geom" in form.errors:
+            geom_error = "<ul>"
+            for error in form.errors["geom"]:
+                geom_error += f"<li>{error}</li>"
+            geom_error += f"<li>{form.data.getlist('geom')}</li>"
+            geom_error += "</ul>"
+            messages.error(self.request, geom_error)
         return super().form_invalid(form)
 
 

@@ -1,5 +1,12 @@
 from mapentity.forms import MapEntityForm
-from test_app.models import City, DummyAptModel, DummyModel, MushroomSpot, Road
+
+from .models import (
+    City,
+    DummyAptModel,
+    DummyModel,
+    MushroomSpot,
+    Road,
+)
 
 
 class DummyModelForm(MapEntityForm):

@@ -1,5 +1,6 @@
 from mapentity.registry import registry
-from test_app.models import (
+
+from .models import (
     City,
     DummyAptModel,
     DummyModel,

@@ -2,13 +2,15 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
+from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import gettext_lazy as _
 from paperclip.models import Attachment as BaseAttachment
 from paperclip.models import FileType as BaseFileType
 from paperclip.models import License as BaseLicense
 
 from mapentity.models import MapEntityMixin
-from test_app.managers import MushroomSpotManager
+
+from .managers import MushroomSpotManager
 
 
 class FileType(BaseFileType):
@@ -38,6 +40,11 @@ class MushroomSpot(MapEntityMixin, models.Model):
     boolean = models.BooleanField(default=True)
     tags = models.ManyToManyField(Tag)
     objects = MushroomSpotManager()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not hasattr(self, "geom"):
+            self.geom = GEOSGeometry(self.serialized) if self.serialized else None
 
     class Meta:
         verbose_name = _("Mushroom Spot")
