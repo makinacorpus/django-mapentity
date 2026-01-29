@@ -18,9 +18,9 @@ describe('DummyModel Create', () => {
     // Fill only text fields without drawing geometry
     cy.get('input[name="name_en"]', { timeout: 10000 }).type('Test Entity Without Geom')
     
-    cy.setTinyMceContent('short_description', 'Test short description');
+    cy.setTinyMceContent('id_short_description', 'Test short description');
 
-    cy.setTinyMceContent('description', 'Test description');
+    cy.setTinyMceContent('id_description', 'Test description');
     
     // Try to submit - should fail validation
     cy.get('button[type="submit"], input[type="submit"]').click()
@@ -35,9 +35,9 @@ describe('DummyModel Create', () => {
     // Fill in required fields
     cy.get('input[name="name_en"]', { timeout: 10000 }).clear().type(entityName)
     
-    cy.setTinyMceContent('short_description', 'Test short description');
+    cy.setTinyMceContent('id_short_description', 'Test short description');
 
-    cy.setTinyMceContent('description', 'Test description');
+    cy.setTinyMceContent('id_description', 'Test description');
     
     // Wait for map to be ready
     cy.get('.maplibre-map, [id*="map"]', { timeout: 15000 }).should('exist')
