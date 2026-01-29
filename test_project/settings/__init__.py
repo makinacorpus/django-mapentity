@@ -33,14 +33,23 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-INSTALLED_APPS = (
+# Disable debug toolbar for E2E tests (set E2E_TESTS=1 environment variable)
+DISABLE_DEBUG_TOOLBAR = os.getenv("E2E_TESTS", "0") == "1"
+
+INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "debug_toolbar",
+]
+
+# Add debug_toolbar only if not running E2E tests
+if not DISABLE_DEBUG_TOOLBAR:
+    INSTALLED_APPS.append("debug_toolbar")
+
+INSTALLED_APPS.extend([
     "paperclip",
     "compressor",
     "easy_thumbnails",
@@ -53,10 +62,15 @@ INSTALLED_APPS = (
     "mapentity",  # Make sure mapentity settings are loaded before leaflet ones
     "test_project.test_app",
     "modeltranslation",
-)
+])
 
-MIDDLEWARE = (
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+MIDDLEWARE = []
+
+# Add debug toolbar middleware only if not running E2E tests
+if not DISABLE_DEBUG_TOOLBAR:
+    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+
+MIDDLEWARE.extend([
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -66,7 +80,7 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "mapentity.middleware.AutoLoginMiddleware",
-)
+])
 
 
 ROOT_URLCONF = "test_project.urls"

@@ -97,6 +97,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    
+    env:
+      E2E_TESTS: "1"
 
     steps:
       - uses: actions/checkout@v6
