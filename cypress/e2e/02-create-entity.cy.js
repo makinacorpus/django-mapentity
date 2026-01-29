@@ -18,22 +18,9 @@ describe('DummyModel Create', () => {
     // Fill only text fields without drawing geometry
     cy.get('input[name="name_en"]', { timeout: 10000 }).type('Test Entity Without Geom')
     
-    // Fill TinyMCE fields using the TinyMCE API
-    // Wait for TinyMCE to initialize
-    cy.window().then((win) => {
-      if (win.tinymce && win.tinymce.editors.length > 0) {
-        // Set content for short_description (first editor)
-        const shortDescEditor = win.tinymce.editors.find(ed => ed.id.includes('short_description'))
-        if (shortDescEditor) {
-          shortDescEditor.setContent('Test short description')
-        }
-        // Set content for description (second editor)
-        const descEditor = win.tinymce.editors.find(ed => ed.id.includes('description'))
-        if (descEditor) {
-          descEditor.setContent('Test description')
-        }
-      }
-    })
+    cy.setTinyMceContent('short_description', 'Test short description');
+
+    cy.setTinyMceContent('description', 'Test description');
     
     // Try to submit - should fail validation
     cy.get('button[type="submit"], input[type="submit"]').click()
@@ -48,22 +35,9 @@ describe('DummyModel Create', () => {
     // Fill in required fields
     cy.get('input[name="name_en"]', { timeout: 10000 }).clear().type(entityName)
     
-    // Fill TinyMCE fields using the TinyMCE API
-    // Wait for TinyMCE to initialize
-    cy.window().then((win) => {
-      if (win.tinymce && win.tinymce.editors.length > 0) {
-        // Set content for short_description (first editor)
-        const shortDescEditor = win.tinymce.editors.find(ed => ed.id.includes('short_description'))
-        if (shortDescEditor) {
-          shortDescEditor.setContent('E2E test short description')
-        }
-        // Set content for description (second editor)
-        const descEditor = win.tinymce.editors.find(ed => ed.id.includes('description'))
-        if (descEditor) {
-          descEditor.setContent('E2E test full description')
-        }
-      }
-    })
+    cy.setTinyMceContent('short_description', 'Test short description');
+
+    cy.setTinyMceContent('description', 'Test description');
     
     // Wait for map to be ready
     cy.get('.maplibre-map, [id*="map"]', { timeout: 15000 }).should('exist')

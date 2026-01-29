@@ -24,3 +24,17 @@ Cypress.Commands.add('waitForMap', () => {
   // Check for various map container selectors (more flexible)
   cy.get('.maplibre-map, #mainmap, .map-panel', { timeout: 10000 }).should('be.visible')
 })
+
+Cypress.Commands.add('setTinyMceContent', (tinyMceId, content) => {
+  cy.window().then((win) => {
+    const editor = win.tinymce.get(tinyMceId);
+    editor.setContent(content);
+  });
+});
+
+Cypress.Commands.add('getTinyMceContent', (tinyMceId, content) => {
+  cy.window().then((win) => {
+    const editor = win.tinymce.get(tinyMceId);
+    return editor.getContent();
+  });
+});
