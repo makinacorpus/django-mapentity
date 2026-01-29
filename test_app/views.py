@@ -1,6 +1,5 @@
-from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.db.models.functions import Transform
-from django.db.models import Func
+from django.db.models import F
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
@@ -137,11 +136,7 @@ class MushroomSpotViewSet(mapentity_views.MapEntityViewSet):
     def get_queryset(self):
         qs = self.model.objects.all()
         if self.format_kwarg == "geojson":
-            qs = qs.annotate(
-                api_geom=Func(
-                    "serialized", function="GeomFromEWKT", output_field=GeometryField()
-                )
-            )
+            qs = qs.annotate(api_geom=F("geom"))
         return qs
 
 
