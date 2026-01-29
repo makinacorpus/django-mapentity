@@ -11,7 +11,8 @@ describe('DummyModel List View', () => {
   })
 
   it('should display the map', () => {
-    cy.get('.leaflet-container', { timeout: 10000 }).should('exist')
+    // MapLibre uses .maplibre-map class instead of .leaflet-container
+    cy.get('.maplibre-map', { timeout: 10000 }).should('exist')
   })
 
   it('should display table with entities', () => {
