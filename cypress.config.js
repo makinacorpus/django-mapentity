@@ -9,7 +9,12 @@ module.exports = defineConfig({
     video: true,
     screenshotOnRunFailure: true,
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      on('before:browser:launch', (browser = {}, launchOptions) => {
+        if (browser.family === 'chromium') {
+          launchOptions.args.push('--enable-unsafe-swiftshader')
+        }
+        return launchOptions
+      })
     },
   },
 });

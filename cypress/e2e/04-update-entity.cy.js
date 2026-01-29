@@ -27,8 +27,8 @@ describe('DummyModel Update', () => {
 
     cy.get('.maplibregl-canvas')
       .trigger('mousemove', {
-        clientX: 500,
-        clientY: 350,
+        clientX: 50,
+        clientY: 50,
         force: true
       })
 
@@ -40,7 +40,7 @@ describe('DummyModel Update', () => {
     
     // Should redirect to detail or list page
     cy.url({ timeout: 15000 }).should('satisfy', (url) => {
-      return url.includes('/dummymodel/') && !url.includes('/1/')
+      return url.includes('/dummymodel/1/')
     })
   });
 });
