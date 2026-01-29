@@ -51,7 +51,7 @@ describe('DummyModel Create', () => {
 
     cy.get('#id_draw_marker').click();
     
-    cy.get('.maplibre-map, [id*="map"]').first().click(200, 200, { force: true })
+    cy.get('.maplibregl-canvas').click(400, 300);
     
     // Wait a bit for geometry to be registered
     cy.wait(1000)
