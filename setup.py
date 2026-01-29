@@ -51,8 +51,6 @@ setup(
             'factory_boy',
             'coverage',
             'tblib',
-            'dj-database-url',
-            'psycopg2-binary',
         ]
     },
     packages=find_packages(),

@@ -96,21 +96,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    
-    services:
-      postgres:
-        image: postgis/postgis:16-3.4
-        env:
-          POSTGRES_DB: mapentity_test
-          POSTGRES_USER: mapentity
-          POSTGRES_PASSWORD: mapentity
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - uses: actions/checkout@v6
@@ -138,15 +123,11 @@ jobs:
       - name: Run migrations
         run: |
           ./manage.py migrate
-        env:
-          DATABASE_URL: postgis://mapentity:mapentity@localhost:5432/mapentity_test
 
       - name: Create superuser and test data
         run: |
           echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@test.com', 'admin')" | ./manage.py shell
           ./manage.py create_test_data --dummies 20 --cities 5 --roads 10 --geopoints 10
-        env:
-          DATABASE_URL: postgis://mapentity:mapentity@localhost:5432/mapentity_test
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -161,8 +142,6 @@ jobs:
         run: |
           ./manage.py runserver 8000 > server.log 2>&1 &
           sleep 10
-        env:
-          DATABASE_URL: postgis://mapentity:mapentity@localhost:5432/mapentity_test
 
       - name: Wait for server to be ready
         run: |
