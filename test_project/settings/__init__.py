@@ -195,7 +195,7 @@ MAPLIBRE_CONFIG_OVERRIDES = {
             "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
             "&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.",
         ),
-    ]
+    ],
 }
 
 
@@ -208,7 +208,7 @@ MAPENTITY_CONFIG = {
     "MAP_STYLES": {
         "dummymodel": {
             "weight": 3,
-            "opacity":0.5,
+            "opacity": 0.5,
             "color": "green",
         },
         "road": {

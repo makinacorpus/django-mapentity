@@ -174,7 +174,7 @@ TINYMCE_DEFAULT_CONFIG = {
         "iframe[src|frameborder=0|alt|title|width|height|align|name]"
     ),
     "setup": "tinyMceInit",
-    "license_key": "gpl"
+    "license_key": "gpl",
 }
 TINYMCE_DEFAULT_CONFIG.update(getattr(settings, "TINYMCE_DEFAULT_CONFIG", {}))
 setattr(settings, "TINYMCE_DEFAULT_CONFIG", TINYMCE_DEFAULT_CONFIG)
