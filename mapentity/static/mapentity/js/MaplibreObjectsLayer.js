@@ -105,8 +105,17 @@ class MaplibreObjectsLayer {
 
             // Don't show popup for current object
             const currentPk = document.body.dataset.pk;
-            if (currentPk && (feature.id == currentPk || feature.properties.id == currentPk)) {
-                return;
+            if (currentPk) {
+                const currentPkStr = String(currentPk);
+                const featureIdStr = feature.id != null ? String(feature.id) : null;
+                const featurePropIdStr = feature.properties && feature.properties.id != null
+                    ? String(feature.properties.id)
+                    : null;
+
+                if ((featureIdStr && featureIdStr === currentPkStr) ||
+                    (featurePropIdStr && featurePropIdStr === currentPkStr)) {
+                    return;
+                }
             }
 
             if (this.options.displayPopup) {
