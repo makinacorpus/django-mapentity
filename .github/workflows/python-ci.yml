@@ -94,7 +94,6 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
-    needs: [quality, test]
     permissions:
       contents: read
     

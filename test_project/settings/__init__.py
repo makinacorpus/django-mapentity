@@ -102,11 +102,10 @@ INTERNAL_IPS = type("c", (), {"__contains__": lambda *a: True})()
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 # Support DATABASE_URL for CI/testing
-if os.getenv('DATABASE_URL'):
+if os.getenv("DATABASE_URL"):
     import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-    }
+
+    DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"))}
 else:
     DATABASES = {
         "default": {
