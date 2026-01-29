@@ -32,11 +32,11 @@ jobs:
 
       - name: Check linting
         run: |
-          ruff check mapentity test_app test_project
+          ruff check mapentity test_project
 
       - name: Check format
         run: |
-          ruff format --check mapentity test_app test_project
+          ruff format --check mapentity test_project
 
   test:
     runs-on: ubuntu-latest
