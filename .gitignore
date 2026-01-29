@@ -14,3 +14,12 @@ __pycache__
 /.coverage
 *.mo
 coverage.xml
+
+# Node.js
+node_modules/
+package-lock.json
+
+# Playwright
+/playwright-report/
+/playwright/.cache/
+/test-results/
