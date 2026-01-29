@@ -183,7 +183,7 @@ MAPLIBRE_CONFIG_OVERRIDES = {
     "DEFAULT_CENTER": [1.3952, 43.5963],  # Toulouse, France
     "DEFAULT_ZOOM": 5,
     "SCALE": "metric",
-    "BOUNDS": [[-3.630430, 40.120372], [3.208008, 45.061882]],
+    "BOUNDS": [[-5.5, 40.120372], [10, 52]],
     "TILES": [
         (
             "OSM",
