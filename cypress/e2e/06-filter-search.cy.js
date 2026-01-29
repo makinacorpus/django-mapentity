@@ -10,24 +10,25 @@ describe('DummyModel Filter and Search', () => {
   })
 
   it('should filter by name', () => {
-    // Type in search box
-    cy.get('input[type="search"]').type('dummy')
-    
-    // Wait for results to update
-    cy.wait(1000)
-    
-    // Check that results are filtered
-    cy.get('tbody tr').should('have.length.at.least', 1)
+    // Get initial count
+    cy.get('tbody tr').its('length').then((initialCount) => {
+      // Type in search box
+      cy.get('input[type="search"]').type('dummy')
+      
+      // Results should be filtered (count may be same or different)
+      cy.get('tbody tr').should('be.visible')
+    })
   })
 
   it('should clear filters', () => {
     // Apply filter
     cy.get('input[type="search"]').type('dummy')
-    cy.wait(1000)
+    
+    // Wait for table to update
+    cy.get('tbody tr').should('be.visible')
     
     // Clear filter
     cy.get('input[type="search"]').clear()
-    cy.wait(1000)
     
     // Results should update
     cy.get('tbody tr').should('be.visible')
@@ -38,7 +39,6 @@ describe('DummyModel Filter and Search', () => {
     
     // Apply filter
     cy.get('input[type="search"]').type('dummy')
-    cy.wait(1000)
     
     // Map should still be visible
     cy.get('.leaflet-container').should('be.visible')

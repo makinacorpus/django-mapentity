@@ -94,7 +94,7 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
-    needs: [quality]
+    needs: [quality, test]
     
     services:
       postgres:
@@ -158,8 +158,8 @@ jobs:
 
       - name: Start Django server
         run: |
-          ./manage.py runserver 8000 &
-          sleep 5
+          ./manage.py runserver 8000 > server.log 2>&1 &
+          sleep 10
         env:
           DATABASE_URL: postgis://mapentity:mapentity@localhost:5432/mapentity_test
 

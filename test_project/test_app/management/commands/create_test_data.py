@@ -83,55 +83,43 @@ class Command(BaseCommand):
         self.stdout.write('Creating test data...')
 
         # Create tags first (they are referenced by other models)
-        tags = []
-        for i in range(options['tags']):
-            tag = TagFactory()
-            tags.append(tag)
+        for _ in range(options['tags']):
+            TagFactory()
         self.stdout.write(
             self.style.SUCCESS(f"Created {options['tags']} tags")
         )
 
         # Create cities
-        cities = []
-        for i in range(options['cities']):
-            city = CityFactory()
-            cities.append(city)
+        for _ in range(options['cities']):
+            CityFactory()
         self.stdout.write(
             self.style.SUCCESS(f"Created {options['cities']} cities")
         )
 
         # Create roads
-        roads = []
-        for i in range(options['roads']):
-            road = RoadFactory()
-            roads.append(road)
+        for _ in range(options['roads']):
+            RoadFactory()
         self.stdout.write(
             self.style.SUCCESS(f"Created {options['roads']} roads")
         )
 
         # Create sectors
-        sectors = []
-        for i in range(options['sectors']):
-            sector = SectorFactory()
-            sectors.append(sector)
+        for _ in range(options['sectors']):
+            SectorFactory()
         self.stdout.write(
             self.style.SUCCESS(f"Created {options['sectors']} sectors")
         )
 
         # Create dummy models
-        dummies = []
-        for i in range(options['dummies']):
-            dummy = DummyModelFactory()
-            dummies.append(dummy)
+        for _ in range(options['dummies']):
+            DummyModelFactory()
         self.stdout.write(
             self.style.SUCCESS(f"Created {options['dummies']} dummy models")
         )
 
         # Create geo points
-        geopoints = []
-        for i in range(options['geopoints']):
-            geopoint = GeoPointFactory()
-            geopoints.append(geopoint)
+        for _ in range(options['geopoints']):
+            GeoPointFactory()
         self.stdout.write(
             self.style.SUCCESS(f"Created {options['geopoints']} geo points")
         )

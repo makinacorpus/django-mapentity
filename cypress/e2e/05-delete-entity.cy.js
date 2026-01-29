@@ -13,10 +13,9 @@ describe('DummyModel Delete', () => {
     // Add geometry
     cy.waitForMap()
     cy.get('.leaflet-container').click(640, 360)
-    cy.wait(500)
     
-    // Submit
-    cy.get('button[type="submit"]').click()
+    // Submit and wait for button to be enabled
+    cy.get('button[type="submit"]').should('be.enabled').click()
     
     // Get the ID from the URL
     cy.url({ timeout: 10000 }).should('match', /\/dummymodel\/(\d+)\/$/).then((url) => {

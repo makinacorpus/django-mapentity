@@ -1,7 +1,7 @@
 describe('DummyModel List View', () => {
   beforeEach(() => {
     cy.login()
-    cy.visit('/')
+    cy.visit('/dummymodel/list/')
   })
 
   it('should display the list page', () => {

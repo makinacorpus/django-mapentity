@@ -22,5 +22,6 @@ Cypress.Commands.add('login', (username = 'admin', password = 'admin') => {
 // Command to wait for map to be ready
 Cypress.Commands.add('waitForMap', () => {
   cy.get('.leaflet-container', { timeout: 10000 }).should('be.visible')
-  cy.wait(1000) // Give map time to fully initialize
+  // Wait for map tiles to load instead of arbitrary timeout
+  cy.get('.leaflet-tile-loaded', { timeout: 10000 }).should('exist')
 })

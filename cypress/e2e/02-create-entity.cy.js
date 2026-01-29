@@ -30,11 +30,8 @@ describe('DummyModel Create', () => {
     cy.waitForMap()
     cy.get('.leaflet-container').click(640, 360)
     
-    // Wait a bit for the point to be added
-    cy.wait(500)
-    
-    // Submit the form
-    cy.get('button[type="submit"]').click()
+    // Submit the form (button should become enabled after adding geometry)
+    cy.get('button[type="submit"]').should('be.enabled').click()
     
     // Should redirect to detail page
     cy.url().should('match', /\/dummymodel\/\d+\/$/, { timeout: 10000 })
