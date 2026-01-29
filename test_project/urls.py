@@ -8,7 +8,7 @@ from django.views.generic import RedirectView
 from django.views.static import serve
 from rest_framework.reverse import reverse_lazy
 
-from .test_app.views import DummyDocumentOdt, DummyDocumentWeasyprint
+from test_project.test_app.views import DummyDocumentOdt, DummyDocumentWeasyprint
 
 admin.autodiscover()
 
