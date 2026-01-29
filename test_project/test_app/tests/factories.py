@@ -3,7 +3,7 @@ import random
 import factory
 from django.contrib.gis.geos import LineString, Point, Polygon
 
-from test_app.models import (
+from test_project.test_app.models import (
     City,
     DummyModel,
     GeoPoint,

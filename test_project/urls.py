@@ -8,7 +8,7 @@ from django.views.generic import RedirectView
 from django.views.static import serve
 from rest_framework.reverse import reverse_lazy
 
-from test_app.views import DummyDocumentOdt, DummyDocumentWeasyprint
+from test_project.test_app.views import DummyDocumentOdt, DummyDocumentWeasyprint
 
 admin.autodiscover()
 
@@ -20,7 +20,7 @@ urlpatterns = [
         ),
         name="home",
     ),
-    path("", include("test_app.urls")),
+    path("", include("test_project.test_app.urls")),
     path("", include("mapentity.urls")),
     path("tinymce/", include("tinymce.urls")),
     path("i18n/", include("django.conf.urls.i18n")),

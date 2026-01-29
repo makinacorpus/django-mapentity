@@ -1,5 +1,4 @@
 include README.rst CHANGES LICENSE mapentity/VERSION
-recursive-exclude test_app *
 recursive-exclude test_project *
 recursive-include mapentity/locale *
 recursive-include mapentity/templates *

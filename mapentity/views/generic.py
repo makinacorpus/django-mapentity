@@ -17,6 +17,8 @@ from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views import static
@@ -576,8 +578,22 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
 
     def form_invalid(self, form):
         messages.error(self.request, _("Your form contains errors"))
-        if form.errors["geom"]:
-            messages.error(self.request, f"{form.errors['geom']}: {form.data['geom']})")
+        if "geom" in form.errors:
+            geom_error = "<ul>"
+            for error in form.errors["geom"]:
+                geom_error += f"<li>{escape(error)}</li>"
+            geom_data = (
+                form.data.getlist("geom")
+                if hasattr(form.data, "getlist")
+                else form.data.get("geom", [])
+            )
+            if isinstance(geom_data, list):
+                for item in geom_data:
+                    geom_error += f"<li>{escape(item)}</li>"
+            else:
+                geom_error += f"<li>{escape(geom_data)}</li>"
+            geom_error += "</ul>"
+            messages.error(self.request, mark_safe(geom_error))
         return super().form_invalid(form)
 
 

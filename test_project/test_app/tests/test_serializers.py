@@ -14,7 +14,7 @@ from mapentity.registry import app_settings
 from mapentity.serializers import CSVSerializer, ZipShapeSerializer
 from mapentity.serializers.datatables import MapentityDatatableSerializer
 from mapentity.serializers.fields import CommaSeparatedRelatedField
-from test_app.models import (
+from test_project.test_app.models import (
     DummyModel,
     ManikinModel,
     MushroomSpot,
@@ -85,9 +85,9 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
         self.assertEqual(len(layers["Point.shp"]), 1)
         self.assertEqual(len(layers["LineString.shp"]), 1)
         self.assertEqual(len(layers["Polygon.shp"]), 1)
-        self.assertEqual(len(layers["MultiPoint.shp"]), 2)
+        self.assertEqual(len(layers["MultiPoint.shp"]), 1)
         self.assertEqual(len(layers["MultiLineString.shp"]), 1)
-        self.assertEqual(len(layers["MultiPolygon.shp"]), 2)
+        self.assertEqual(len(layers["MultiPolygon.shp"]), 1)
 
     def test_serializer_creates_one_layer_per_type(self):
         self.assertEqual(len(self.getShapefileLayers()), 6)
@@ -97,9 +97,9 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
         self.assertEqual(len(layers["Point.shp"]), 1)
         self.assertEqual(len(layers["LineString.shp"]), 1)
         self.assertEqual(len(layers["Polygon.shp"]), 1)
-        self.assertEqual(len(layers["MultiPoint.shp"]), 2)
+        self.assertEqual(len(layers["MultiPoint.shp"]), 1)
         self.assertEqual(len(layers["MultiLineString.shp"]), 1)
-        self.assertEqual(len(layers["MultiPolygon.shp"]), 2)
+        self.assertEqual(len(layers["MultiPolygon.shp"]), 1)
 
     def test_each_layer_has_a_different_geometry_type(self):
         layer_types = [

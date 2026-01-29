@@ -24,15 +24,15 @@ serve:
 ###########################
 .PHONY: format
 format:
-	$(docker_compose) run --remove-orphans --no-deps --rm web ruff format mapentity test_app test_project
+	$(docker_compose) run --remove-orphans --no-deps --rm web ruff format mapentity test_project
 
 .PHONY: lint
 lint:
-	$(docker_compose) run --remove-orphans --no-deps --rm web ruff check --fix mapentity test_app test_project
+	$(docker_compose) run --remove-orphans --no-deps --rm web ruff check --fix mapentity test_project
 
 .PHONY: force_lint
 force_lint:
-	$(docker_compose) run --remove-orphans --no-deps --rm web ruff check --fix --unsafe-fixes mapentity test_app test_project
+	$(docker_compose) run --remove-orphans --no-deps --rm web ruff check --fix --unsafe-fixes mapentity test_project
 
 .PHONY: quality
 quality: lint format

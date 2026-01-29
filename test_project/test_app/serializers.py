@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from mapentity.serializers import MapentityGeojsonModelSerializer
-from test_app.models import (
+
+from .models import (
     City,
     DummyAptModel,
     DummyModel,
