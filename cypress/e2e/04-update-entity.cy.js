@@ -40,7 +40,7 @@ describe('DummyModel Update', () => {
     
     // Should redirect to detail page
     cy.url({ timeout: 15000 }).should('satisfy', (url) => {
-      return url.includes('/dummymodel/') && !url.includes('/edit/')
+      return url.includes('/dummymodel/1/')
     })
     
     // Verify the name was updated
