@@ -31,7 +31,7 @@ describe('DummyModel Create', () => {
     const entityName = `Test Entity ${Date.now()}`
     
     // Fill in required fields
-    cy.get('input[name="name"]', { timeout: 10000 }).clear().type(entityName)
+    cy.get('input[name="name_en"]', { timeout: 10000 }).clear().type(entityName)
     cy.get('textarea[name="short_description"]').clear().type('E2E test short description')
     cy.get('textarea[name="description"]').clear().type('E2E test full description')
     
