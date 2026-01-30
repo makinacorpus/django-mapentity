@@ -585,30 +585,16 @@ class MaplibreGeometryField {
                          }
                     }
 
-                    // On récupère la feature ajoutée dans la source pour l'ajouter à notre historique local gmEvents
-                    const gmSource = this.map.getSource('gm_main') || this.map.getSource('geoman_main');
-                    if (gmSource) {
-                        const data = gmSource._data;
-                        const geojson = data?.geojson || data;
-                        if (geojson && geojson.features && geojson.features.length > 0) {
-                            // On cherche la feature qui correspond à celle qu'on vient d'ajouter
-                            // (Si on n'a pas d'ID fiable du résultat, on prend la dernière)
-                            const lastFeature = addedId 
-                                ? geojson.features.find(f => f.id === addedId) 
-                                : geojson.features.find(f => f.id === feature.id) || geojson.features[geojson.features.length - 1];
-                            
-                            if (lastFeature) {
-                                console.log('MaplibreGeometryField: updating events history with initial feature', lastFeature.id);
-                                this._updateEventsHistory({
-                                    type: 'gm:create',
-                                    feature: {
-                                        id: lastFeature.id,
-                                        getGeoJson: () => lastFeature
-                                    }
-                                });
-                            }
+                    // On met à jour l'historique local gmEvents directement avec la feature qu'on vient d'ajouter
+                    // On n'attend pas la source car le nom peut varier et l'update peut être asynchrone
+                    console.log('MaplibreGeometryField: updating events history with initial feature', addedId || feature.id);
+                    this._updateEventsHistory({
+                        type: 'gm:create',
+                        feature: {
+                            id: addedId || feature.id,
+                            getGeoJson: () => feature
                         }
-                    }
+                    });
                 } catch (e) {
                     console.warn('MaplibreGeometryField: error adding feature to Geoman', e);
                 }
