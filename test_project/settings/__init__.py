@@ -33,57 +33,39 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-# Disable debug toolbar for E2E tests (set E2E_TESTS=1 environment variable)
-DISABLE_DEBUG_TOOLBAR = os.getenv("E2E_TESTS", "0") == "1"
-
-INSTALLED_APPS = [
+INSTALLED_APPS = (
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-]
-
-# Add debug_toolbar only if not running E2E tests
-if not DISABLE_DEBUG_TOOLBAR:
-    INSTALLED_APPS.append("debug_toolbar")
-
-INSTALLED_APPS.extend(
-    [
-        "paperclip",
-        "compressor",
-        "easy_thumbnails",
-        "django_filters",
-        "crispy_forms",
-        "crispy_bootstrap4",
-        "rest_framework",
-        "embed_video",
-        "tinymce",
-        "mapentity",  # Make sure mapentity settings are loaded before leaflet ones
-        "test_project.test_app",
-        "modeltranslation",
-    ]
+    "debug_toolbar",
+    "paperclip",
+    "compressor",
+    "easy_thumbnails",
+    "django_filters",
+    "crispy_forms",
+    "crispy_bootstrap4",
+    "rest_framework",
+    "embed_video",
+    "tinymce",
+    "mapentity",  # Make sure mapentity settings are loaded before leaflet ones
+    "test_project.test_app",
+    "modeltranslation",
 )
 
-MIDDLEWARE = []
-
-# Add debug toolbar middleware only if not running E2E tests
-if not DISABLE_DEBUG_TOOLBAR:
-    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
-
-MIDDLEWARE.extend(
-    [
-        "django.contrib.sessions.middleware.SessionMiddleware",
-        "django.middleware.common.CommonMiddleware",
-        "django.middleware.csrf.CsrfViewMiddleware",
-        "django.contrib.auth.middleware.AuthenticationMiddleware",
-        "django.contrib.messages.middleware.MessageMiddleware",
-        "django.middleware.clickjacking.XFrameOptionsMiddleware",
-        "django.middleware.security.SecurityMiddleware",
-        "django.middleware.locale.LocaleMiddleware",
-        "mapentity.middleware.AutoLoginMiddleware",
-    ]
+MIDDLEWARE = (
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "mapentity.middleware.AutoLoginMiddleware",
 )
 
 

@@ -12,7 +12,7 @@ services:
       target: base
 
     ports:
-      - "127.0.0.1:8000:8000"
+      - "8000:8000"
     volumes:
       - ./:/code/src
     depends_on:

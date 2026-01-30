@@ -1,6 +1,6 @@
 *.pyc
 __pycache__
-/database.db
+/*.db
 /mapentity.egg-info/
 /.idea/
 /.vscode/
@@ -21,3 +21,4 @@ coverage.xml
 node_modules/
 cypress/screenshots/
 cypress/videos/
+cypress/downloads/
