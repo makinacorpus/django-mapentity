@@ -63,6 +63,9 @@ describe('Replace Geometry in Edit Mode', () => {
     // Wait for new geometry to be registered
     cy.wait(1000)
     
+    // Verify only ONE marker exists on the map (not two)
+    cy.get('.maplibregl-marker').should('have.length', 1)
+    
     // Update the name to confirm the edit
     const newName = `Replaced Geometry ${Date.now()}`
     cy.get('input[name="name_en"]', { timeout: 10000 }).clear().type(newName)
@@ -73,6 +76,56 @@ describe('Replace Geometry in Edit Mode', () => {
     // Should redirect to detail page
     cy.url({ timeout: 15000 }).should('satisfy', (url) => {
       return url.includes(`/dummymodel/${entityId}/`)
+    })
+    
+    // Verify the name was updated
+    cy.contains(newName, { timeout: 10000 }).should('exist')
+  });
+
+  it('should only allow ONE point when placing multiple markers in create mode', { retries: 1 }, () => {
+    // Go to create page for a fresh test
+    cy.visit('/dummymodel/add/')
+    
+    const entityName = `Test Multiple Clicks ${Date.now()}`
+    
+    // Fill in required fields
+    cy.get('input[name="name_en"]', { timeout: 10000 }).clear().type(entityName)
+    cy.setTinyMceContent('id_short_description', 'Test short description');
+    cy.setTinyMceContent('id_description', 'Test description');
+    
+    // Wait for map to be ready
+    cy.get('.maplibre-map, [id*="map"]', { timeout: 15000 }).should('exist')
+    cy.wait(2000)
+
+    // Click draw marker button
+    cy.get('#id_draw_marker').click();
+    
+    // Click on map multiple times to try to place multiple markers
+    cy.get('.maplibregl-canvas').click(400, 300);
+    cy.wait(500)
+    
+    // Try to click again
+    cy.get('.maplibregl-canvas').click(200, 200);
+    cy.wait(500)
+    
+    // Try to click a third time
+    cy.get('.maplibregl-canvas').click(300, 400);
+    cy.wait(1000)
+    
+    // Should only have ONE marker on the map (the last one)
+    cy.get('.maplibregl-marker').should('have.length', 1)
+    
+    // Submit the form
+    cy.get('#save_changes').click()
+    
+    // Should redirect successfully
+    cy.url({ timeout: 15000 }).should('satisfy', (url) => {
+      return url.includes('/dummymodel/') && !url.includes('/add/')
+    })
+    
+    // Verify the entity name appears
+    cy.contains(entityName, { timeout: 10000 }).should('exist')
+  });
     })
     
     // Verify the name was updated
