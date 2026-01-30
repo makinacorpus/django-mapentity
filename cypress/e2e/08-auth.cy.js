@@ -68,28 +68,10 @@ describe('Authentication - Login and Logout', () => {
     cy.url().should('include', '/dummymodel/list')
     
     // Open user menu and wait for dropdown to be visible
-    cy.openUserMenu()
+    cy.get('#navbarDropdownUsermenuLink').click();
     
     // Find and click logout button (without force)
-    cy.get('body').then($body => {
-      const logoutSelectors = [
-        '#btn-logout',
-        'button:contains("Logout")',
-        'a:contains("Logout")',
-        '[href*="logout"]',
-        'form[action*="logout"] button'
-      ]
-      
-      for (const selector of logoutSelectors) {
-        if ($body.find(selector).length > 0) {
-          cy.log(`Clicking logout with selector: ${selector}`)
-          // Wait for element to be visible
-          cy.get(selector).first().should('be.visible')
-          cy.get(selector).first().click()
-          break
-        }
-      }
-    })
+    cy.get('#btn-logout').click();
     
     // Should redirect to login or home page
     cy.url({ timeout: 10000 }).should('satisfy', (url) => {

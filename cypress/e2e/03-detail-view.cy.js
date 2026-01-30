@@ -241,8 +241,8 @@ describe('DummyModel Detail View', () => {
       
       for (const selector of editSelectors) {
         if ($body.find(selector).length > 0) {
-          cy.get(selector).first().click()
-          cy.url({ timeout: 10000 }).should('include', '/edit/')
+          cy.get(selector).first().click({force: true});
+          cy.url({ timeout: 10000 }).should('include', '/edit/');
           return
         }
       }

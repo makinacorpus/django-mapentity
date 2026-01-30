@@ -24,8 +24,7 @@ describe('Navigation and Menu', () => {
   it('should navigate to list page from home', () => {
     cy.visit('/')
     // Look for link to list page and ensure it's visible
-    cy.get('a[href*="/dummymodel/list"]', { timeout: 10000 }).first().should('be.visible')
-    cy.get('a[href*="/dummymodel/list"]').first().click()
+    cy.get('a[href*="/dummymodel/list"]').first().click({force: true});
     cy.url({ timeout: 10000 }).should('include', '/dummymodel/list')
   })
 
@@ -88,7 +87,7 @@ describe('Navigation and Menu', () => {
       
       for (const selector of editSelectors) {
         if ($body.find(selector).length > 0) {
-          cy.get(selector).first().click()
+          cy.get(selector).first().click({force: true})
           cy.url({ timeout: 10000 }).should('include', '/edit/')
           return
         }

@@ -26,27 +26,10 @@ Cypress.Commands.add('waitForMap', () => {
 })
 
 // Command to open user dropdown menu
-Cypress.Commands.add('openUserMenu', () => {
+Cypress.Commands.add('openUserMenu', (selector) => {
   cy.get('body').then($body => {
-    const dropdownSelectors = [
-      '.dropdown-toggle',
-      '[data-toggle="dropdown"]',
-      '.navbar .dropdown button',
-      '.navbar .dropdown a'
-    ]
-    
-    for (const selector of dropdownSelectors) {
-      if ($body.find(selector).length > 0) {
-        cy.log(`Opening user menu with selector: ${selector}`)
-        // Click the dropdown toggle
-        cy.get(selector).first().click()
-        
-        // Wait for dropdown menu to be visible
-        cy.waitForDropdownMenu()
-        return
-      }
-    }
-    cy.log('Warning: No dropdown toggle found')
+
+    cy.get('#navbarDropdownUsermenuLink').first().click()
   })
 })
 
