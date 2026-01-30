@@ -1,16 +1,28 @@
 describe('DummyModel Detail View', () => {
+  let entityId
+
   beforeEach(() => {
     cy.login()
+    
+    // Get an entity ID from the list to ensure we're accessing an existing entity
+    cy.visit('/dummymodel/list/')
+    cy.get('table tbody tr', { timeout: 10000 }).first().find('a').first().invoke('attr', 'href').then((href) => {
+      const match = href.match(/\/dummymodel\/(\d+)\//)
+      if (match) {
+        entityId = match[1]
+        cy.log(`Using entity ID: ${entityId}`)
+      }
+    })
   })
 
   it('should display detail page', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     cy.url().should('match', /\/dummymodel\/\d+\//)
     cy.get('body', { timeout: 10000 }).should('exist')
   })
 
   it('should show entity details and attributes', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     // Look for detail content
     cy.get('body').then($body => {
@@ -34,7 +46,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should have edit button', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     cy.get('body').then($body => {
       const editSelectors = [
@@ -55,7 +67,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should have delete button', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     cy.get('body').then($body => {
       const deleteSelectors = [
@@ -77,7 +89,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should have back/list button', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     cy.get('body').then($body => {
       const backSelectors = [
@@ -98,7 +110,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should display export options on detail page', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     cy.get('body').then($body => {
       const exportSelectors = [
@@ -130,7 +142,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should have ODT export option if available', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     cy.get('body').then($body => {
       const odtSelectors = [
@@ -153,7 +165,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should have PDF export option if available', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     cy.get('body').then($body => {
       const pdfSelectors = [
@@ -176,7 +188,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should trigger document export when clicked', { retries: 1 }, () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     cy.get('body').then($body => {
       // Try to find any export link
@@ -193,7 +205,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should display map on detail page if entity has geometry', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     // Look for map container
     cy.get('body').then($body => {
@@ -219,7 +231,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should navigate to edit page from detail', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     cy.get('body').then($body => {
       const editSelectors = [
@@ -238,7 +250,7 @@ describe('DummyModel Detail View', () => {
   })
 
   it('should show action buttons toolbar', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     cy.get('body').then($body => {
       const toolbarSelectors = [

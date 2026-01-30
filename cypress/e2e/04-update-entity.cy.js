@@ -1,10 +1,22 @@
 describe('DummyModel Update', () => {
+  let entityId
+
   beforeEach(() => {
-    cy.login();
+    cy.login()
+    
+    // Get an entity ID from the list to ensure we're accessing an existing entity
+    cy.visit('/dummymodel/list/')
+    cy.get('table tbody tr', { timeout: 10000 }).first().find('a').first().invoke('attr', 'href').then((href) => {
+      const match = href.match(/\/dummymodel\/(\d+)\//)
+      if (match) {
+        entityId = match[1]
+        cy.log(`Using entity ID: ${entityId}`)
+      }
+    })
   });
 
   it('should update entity name and geometry', { retries: 1 }, () => {
-    cy.visit('/dummymodel/edit/1/');
+    cy.visit(`/dummymodel/edit/${entityId}/`);
     
     // Check for map container
     cy.get('.maplibre-map, #mainmap, .map-panel, [id*="map"]', { timeout: 10000 }).should('exist')
@@ -40,7 +52,7 @@ describe('DummyModel Update', () => {
     
     // Should redirect to detail page
     cy.url({ timeout: 15000 }).should('satisfy', (url) => {
-      return url.includes('/dummymodel/1/')
+      return url.includes(`/dummymodel/${entityId}/`)
     })
     
     // Verify the name was updated

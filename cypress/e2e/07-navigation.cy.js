@@ -1,6 +1,18 @@
 describe('Navigation and Menu', () => {
+  let entityId
+
   beforeEach(() => {
     cy.login()
+    
+    // Get an entity ID from the list to ensure we're accessing an existing entity for tests that need it
+    cy.visit('/dummymodel/list/')
+    cy.get('table tbody tr', { timeout: 10000 }).first().find('a').first().invoke('attr', 'href').then((href) => {
+      const match = href.match(/\/dummymodel\/(\d+)\//)
+      if (match) {
+        entityId = match[1]
+        cy.log(`Using entity ID: ${entityId}`)
+      }
+    })
   })
 
   it('should display main navigation', () => {
@@ -61,7 +73,7 @@ describe('Navigation and Menu', () => {
   })
 
   it('should navigate to edit page from detail', () => {
-    cy.visit('/dummymodel/1/')
+    cy.visit(`/dummymodel/${entityId}/`)
     
     // Look for edit button
     cy.get('body').then($body => {
