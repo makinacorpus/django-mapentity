@@ -15,15 +15,12 @@ class MaplibreDrawControlManager {
         const isSimpleType = this.options.isPoint || this.options.isLineString || this.options.isPolygon;
         const isCollectionType = this.options.isCollection || this.options.isGeneric;
 
-        // On peut ajouter si :
-        // - C'est une collection/générique
-        // - OU si c'est un type simple MAIS qu'on n'est pas en mode édition (isUpdate)
-        // (En mode édition type simple, on ne peut que modifier l'existant)
-        const canAddSimple = !this.options.isUpdate;
-        
-        const showDrawPolygon = (this.options.isPolygon && canAddSimple) || isCollectionType;
-        const showDrawLine = (this.options.isLineString && canAddSimple) || isCollectionType;
-        const showDrawPoint = (this.options.isPoint && canAddSimple) || isCollectionType;
+        // On peut toujours ajouter :
+        // - Pour les collections/génériques : ajouter conserve les features existantes
+        // - Pour les types simples : ajouter remplace la feature existante
+        const showDrawPolygon = this.options.isPolygon || isCollectionType;
+        const showDrawLine = this.options.isLineString || isCollectionType;
+        const showDrawPoint = this.options.isPoint || isCollectionType;
 
         const shouldShowDragForPoint = this.options.isPoint || isCollectionType;
         const shouldShowEditForOthers = (this.options.isLineString || this.options.isPolygon || isCollectionType) && this.options.modifiable;

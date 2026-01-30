@@ -727,7 +727,7 @@ class MaplibreGeometryField {
                         const gmApi = this.map.gm || geoman;
 
                         // Si on est en mode géométrie unique, on supprime l'ancienne géométrie dès qu'on commence à en dessiner une nouvelle
-                        // Note: En mode édition (isUpdate), les boutons de dessin sont normalement cachés pour les types simples
+                        // Cela permet de remplacer la feature existante par une nouvelle
                         if (!this.options.isCollection && !this.options.isGeneric) {
                             if (this.gmEvents.length > 0) {
                                 console.log('MaplibreGeometryField: removing existing features before drawing new one');
@@ -754,20 +754,6 @@ class MaplibreGeometryField {
                         } else {
                             // En mode collection, on peut vouloir restreindre certains boutons si besoin,
                             // mais ici on laisse Geoman gérer l'ajout de nouvelles features.
-                        }
-
-                        // Désactiver les modes de dessin si une géométrie existe déjà pour les types simples
-                        // On utilise un intervalle court pour s'assurer de bloquer toute activation multiple
-                        if (!this.options.isCollection && !this.options.isGeneric && this.gmEvents.length > 0) {
-                            const gm = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
-                            if (gm && gm.disableDraw && event.enabled) {
-                                console.log('MaplibreGeometryField: geometry already exists, forcing disable draw mode');
-                                gm.disableDraw();
-                                // Double sécurité avec un court délai
-                                setTimeout(() => {
-                                    if (gm.disableDraw) gm.disableDraw();
-                                }, 50);
-                            }
                         }
 
                         // Activer le mode de dessin approprié
