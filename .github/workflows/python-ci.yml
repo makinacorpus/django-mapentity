@@ -162,7 +162,7 @@ jobs:
 
       - name: Run Cypress tests
         run: |
-          npx cypress run --parallel --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
+          npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
         env:
           CYPRESS_baseUrl: http://localhost:8000
 
