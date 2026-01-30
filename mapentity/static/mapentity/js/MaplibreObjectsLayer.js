@@ -294,7 +294,8 @@ class MaplibreObjectsLayer {
                 this._map.fitBounds(this.boundsLayer, {
                     maxZoom: 16,
                     padding: 50,
-                    duration: 0
+                    duration: 0,
+                    animate: false
                 });
             }
         } else {
@@ -775,7 +776,7 @@ class MaplibreObjectsLayer {
 
         const bounds = calculateBounds(feature);
         if (bounds) {
-            this._map.fitBounds(bounds, { padding: 20, maxZoom: 16 });
+            this._map.fitBounds(bounds, { padding: 20, maxZoom: 16, animate: false });
         }
     }
 

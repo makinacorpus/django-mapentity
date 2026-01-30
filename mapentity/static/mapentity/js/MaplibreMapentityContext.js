@@ -164,7 +164,7 @@ class MaplibreMapentityContext {
 
         if (!context) {
             console.warn("No context found.");
-            map.fitBounds(this.bounds);
+            map.fitBounds(this.bounds, { animate: false });
             return;
         }
 
