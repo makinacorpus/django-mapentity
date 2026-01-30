@@ -45,6 +45,7 @@ jobs:
       env:
         LANG: C.UTF-8
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+        DJANGO_SETTINGS_MODULE: test_project.settings.e2e
 
     strategy:
       matrix:
