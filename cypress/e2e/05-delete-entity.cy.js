@@ -24,45 +24,16 @@ describe('DummyModel Delete', () => {
     })
   })
 
-  it('should delete multiple entities', { retries: 1 }, () => {
+  it('should delete multiple entities via list actions', () => {
     // Go to list view
     cy.visit('/dummymodel/list/')
     cy.get('table', { timeout: 10000 }).should('exist')
     
-    // Select first 3 checkboxes (or less if not available)
-    cy.get('table tbody tr').each(($row, index) => {
-      if (index < 3) {
-        cy.wrap($row).find('input[type="checkbox"]').first().check({ force: true })
-      }
-    })
+    cy.get(".dt-select-checkbox").first().click();
+    cy.get("#btn-batch-editing").first().click();
+    cy.get("#btn-delete").first().click();
     
-    // Find and click the delete selected button
-    cy.get('body').then($body => {
-      // Look for delete button with various possible selectors
-      const deleteSelectors = [
-        'button:contains("Delete")',
-        'a:contains("Delete")',
-        'input[value*="Delete"]',
-        '[name*="delete"]',
-        '.btn-danger'
-      ]
-      
-      for (const selector of deleteSelectors) {
-        if ($body.find(selector).length > 0) {
-          cy.get(selector).first().click({ force: true })
-          return
-        }
-      }
-      
-      // If no delete button found, log and continue
-      cy.log('No bulk delete button found, skipping test')
-    })
-    
-    // If we got to a confirmation page, confirm the deletion
-    cy.url().then((url) => {
-      if (url.includes('delete')) {
-        cy.get('button[type="submit"], input[type="submit"]').click()
-      }
-    })
+    cy.get('form').get('input[type=submit]').click({ force: true })
+
   })
 })
