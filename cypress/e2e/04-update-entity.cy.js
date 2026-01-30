@@ -36,7 +36,7 @@ describe('DummyModel Update', () => {
     })
     
     // Submit the form
-    cy.get('button[type="submit"], input[type="submit"], #save_changes').first().click()
+    cy.get('#save_changes').click()
     
     // Should redirect to detail page
     cy.url({ timeout: 15000 }).should('satisfy', (url) => {
@@ -56,7 +56,7 @@ describe('DummyModel Update', () => {
     cy.get("#btn-batch-editing").first().click();
     cy.get("#btn-edit").first().click();
     
-    cy.get("select[name=public]").select(true, { force: true })
+    cy.get("select[name=public]").select('true', { force: true })
 
     cy.get('#submit-id-save').click({ force: true })
 
