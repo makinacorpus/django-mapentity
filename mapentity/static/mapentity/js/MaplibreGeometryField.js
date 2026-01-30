@@ -826,20 +826,15 @@ class MaplibreGeometryField {
                         event.feature.id = newId;
                     }
 
-                    this._processAndSaveGeometry(event);
-
-                    // Si mode unique (pas collection/générique), supprimer les anciennes features pour n'en garder qu'une
+                    // Si mode unique (pas collection/générique), supprimer les anciennes features AVANT de traiter la nouvelle
+                    // Cela garantit qu'on ne garde qu'une seule feature à la fois
                     if (!this.options.isCollection && !this.options.isGeneric && event.feature) {
                         const newFeatureId = event.feature.id;
                         const geoman = this.drawManager.getGeoman();
                         const gmApi = this.map.gm || geoman;
 
-                        // On nettoie gmEvents pour n'avoir QUE la nouvelle feature
-                        // Cela garantit que _processAndSaveGeometry (appelé juste avant) 
-                        // a bien pris la nouvelle feature, mais pour les futurs appels, 
-                        // on veut être propre.
+                        // Supprimer toutes les features existantes sauf la nouvelle
                         const eventsSnapshot = [...this.gmEvents];
-
                         eventsSnapshot.forEach(evt => {
                              if (evt.id && evt.id !== newFeatureId) {
                                  console.log('MaplibreGeometryField: removing old feature to enforce single geometry', evt.id);
@@ -853,10 +848,12 @@ class MaplibreGeometryField {
                              }
                         });
 
-                        // Forcer this.gmEvents à ne contenir que la nouvelle feature 
-                        // au cas où gm:remove n'aurait pas encore été traité de manière synchrone
+                        // Nettoyer gmEvents pour ne garder que la nouvelle feature
                         this.gmEvents = this.gmEvents.filter(evt => evt.id === newFeatureId);
                     }
+
+                    // Maintenant on traite et sauvegarde la géométrie (avec seulement la nouvelle feature pour les types simples)
+                    this._processAndSaveGeometry(event);
 
                     // Réinitialiser les coordonnées pour la prochaine forme si on est toujours en mode dessin
                     if ((event.shape === 'line' && this.isDrawingLine) ||
