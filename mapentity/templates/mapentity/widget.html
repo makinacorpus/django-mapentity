@@ -1,4 +1,4 @@
-{% load static %}
+{% load i18n static %}
 
 <style>
     {% block map_css %}
@@ -50,6 +50,7 @@
             const layerManager = new MaplibreLayerManager();
 
             map.getMap().on('load', function () {
+                window.mapentity_map = map.getMap();
                 // Ajout de la couche d’objets contextuels
                 const modelname = document.body.getAttribute('data-modelname');
                 const objects_verbose_name = document.body.getAttribute('data-objectsname');
@@ -61,7 +62,7 @@
                     modelname: modelname,
                     readonly: true,
                     nameHTML: '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + objects_verbose_name,
-                    category: tr("Objects"),
+                    category: '{% trans "Objects" %}',
                     dataUrl: layerUrl,
                     primaryKey: generateUniqueId(),
                     isLazy: false,

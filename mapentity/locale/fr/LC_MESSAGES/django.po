@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-28 14:27+0000\n"
+"POT-Creation-Date: 2026-01-30 14:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -121,7 +121,7 @@ msgid "Filter"
 msgstr "Filtrer"
 
 msgid "Loading"
-msgstr ""
+msgstr "Chargement"
 
 msgid "Search"
 msgstr "Rechercher"
@@ -206,7 +206,7 @@ msgid "GPX"
 msgstr "GPX"
 
 msgid "Warning!"
-msgstr ""
+msgstr "Attention !"
 
 #, python-format
 msgid "Do you really wish to delete <span class=\"badge badge-danger\">this object</span>?"
@@ -241,6 +241,9 @@ msgstr "Créateur"
 
 msgid "Authors"
 msgstr "Auteurs"
+
+msgid "Objects"
+msgstr "Objets"
 
 msgid "Login"
 msgstr "Connexion"
@@ -326,4 +329,4 @@ msgid "Saved"
 msgstr "Sauvegardé"
 
 msgid "At least one object must be selected"
-msgstr ""
+msgstr "AU moins un objet doit être sélectionné"
