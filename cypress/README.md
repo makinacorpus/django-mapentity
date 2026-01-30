@@ -62,20 +62,25 @@ The CI workflow:
 
 Tests are organized in `cypress/e2e/`:
 
-- `01-list-view.cy.js` - Tests for entity list views and map display
-- `02-create-entity.cy.js` - Tests for creating new entities
-- `03-detail-view.cy.js` - Tests for entity detail pages
-- `04-update-entity.cy.js` - Tests for updating entities
-- `05-delete-entity.cy.js` - Tests for deleting entities
+- `01-list-view.cy.js` - Tests for entity list views, map display, and layer switcher
+- `02-create-entity.cy.js` - Tests for creating new entities with geometry
+- `03-detail-view.cy.js` - Tests for entity detail pages and document exports
+- `04-update-entity.cy.js` - Tests for updating entities (single and bulk)
+- `05-delete-entity.cy.js` - Tests for deleting entities (single and bulk)
 - `06-filter-search.cy.js` - Tests for filtering and searching
-- `07-navigation.cy.js` - Tests for navigation and menu
+- `07-navigation.cy.js` - Tests for navigation, menu, and page transitions
+- `08-auth.cy.js` - Tests for login, logout, and authentication flows
+- `09-language.cy.js` - Tests for language switching and i18n
+- `10-list-exports.cy.js` - Tests for exporting data (CSV, Shapefile, GPX)
 
 ## Custom Commands
 
 Custom Cypress commands are defined in `cypress/support/commands.js`:
 
 - `cy.login()` - Logs in with default admin credentials
-- `cy.waitForMap()` - Waits for the Leaflet map to be ready
+- `cy.waitForMap()` - Waits for the MapLibre map to be ready
+- `cy.setTinyMceContent()` - Sets content in TinyMCE editor
+- `cy.getTinyMceContent()` - Gets content from TinyMCE editor
 
 ## Configuration
 
@@ -116,8 +121,21 @@ Make sure `cypress/support/e2e.js` imports the commands file.
 
 ### Map-related tests are flaky
 
-The `cy.waitForMap()` command adds a delay to ensure the Leaflet map is fully initialized. If tests are still flaky, you may need to increase the wait time in the command.
+The `cy.waitForMap()` command adds a delay to ensure the MapLibre map is fully initialized. If tests are still flaky, you may need to increase the wait time in the command. The tests use flexible selectors to find map containers (`.maplibre-map`, `#mainmap`, `.map-panel`).
 
 ### Server not responding in CI
 
 Check that the server has enough time to start. The CI workflow waits up to 60 seconds for the server to be ready.
+
+### Language switching tests fail
+
+Make sure translations are compiled with `./manage.py compilemessages` before running tests.
+
+### Export tests fail
+
+Export functionality requires:
+- Entities with data to export
+- Proper permissions (can_export)
+- File format handlers (CSV, Shapefile, etc.)
+
+If export buttons are not visible, check that the user has export permissions and that entities exist in the database.
