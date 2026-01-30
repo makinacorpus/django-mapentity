@@ -482,7 +482,7 @@ class MaplibreGeometryField {
                     console.log('MaplibreGeometryField: immediate fitBounds with', bounds);
                     if (bounds) {
                         console.log('MaplibreGeometryField: applying fitBounds', bounds);
-                        this.map.fitBounds(bounds, { padding: 50, maxZoom: 18, animate: true });
+                        this.map.fitBounds(bounds, { padding: 50, maxZoom: 18, animate: false });
                     }
                 } catch (e) {
                     console.warn('MaplibreGeometryField: initial fitBounds failed', e);
@@ -610,7 +610,7 @@ class MaplibreGeometryField {
                     const bounds = calculateBounds(collection);
                     if (bounds) {
                         console.log('MaplibreGeometryField: post-geoman fitBounds', bounds);
-                        this.map.fitBounds(bounds, { padding: 50, maxZoom: 18, animate: true });
+                        this.map.fitBounds(bounds, { padding: 50, maxZoom: 18, animate: false });
                     }
                 } catch (e) {
                     console.warn('MaplibreGeometryField: post-geoman fitBounds failed', e);
