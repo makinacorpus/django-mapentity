@@ -23,8 +23,9 @@ describe('Navigation and Menu', () => {
 
   it('should navigate to list page from home', () => {
     cy.visit('/')
-    // Look for link to list page
-    cy.get('a[href*="/dummymodel/list"]', { timeout: 10000 }).first().click({ force: true })
+    // Look for link to list page and ensure it's visible
+    cy.get('a[href*="/dummymodel/list"]', { timeout: 10000 }).first().should('be.visible')
+    cy.get('a[href*="/dummymodel/list"]').first().click()
     cy.url({ timeout: 10000 }).should('include', '/dummymodel/list')
   })
 
@@ -33,7 +34,8 @@ describe('Navigation and Menu', () => {
     cy.get('nav.navbar', { timeout: 10000 }).should('exist')
     
     // Check if we can navigate to home or other pages from navbar
-    cy.get('.navbar-brand').click({ force: true })
+    cy.get('.navbar-brand').should('be.visible')
+    cy.get('.navbar-brand').click()
     cy.url().should('satisfy', (url) => {
       return url.includes('/') || url.includes('/dummymodel')
     })

@@ -31,16 +31,49 @@ Cypress.Commands.add('openUserMenu', () => {
     const dropdownSelectors = [
       '.dropdown-toggle',
       '[data-toggle="dropdown"]',
-      '.navbar .dropdown button'
+      '.navbar .dropdown button',
+      '.navbar .dropdown a'
     ]
     
     for (const selector of dropdownSelectors) {
       if ($body.find(selector).length > 0) {
-        cy.get(selector).first().click({ force: true })
-        cy.wait(500)
+        cy.log(`Opening user menu with selector: ${selector}`)
+        // Click the dropdown toggle
+        cy.get(selector).first().click()
+        
+        // Wait for dropdown menu to be visible
+        cy.waitForDropdownMenu()
         return
       }
     }
+    cy.log('Warning: No dropdown toggle found')
+  })
+})
+
+// Command to wait for dropdown menu to be visible
+Cypress.Commands.add('waitForDropdownMenu', () => {
+  // Wait for dropdown menu content to be visible
+  const menuSelectors = [
+    '.dropdown-menu.show',
+    '.dropdown-menu:visible',
+    '.dropdown.open .dropdown-menu',
+    '.dropdown.show .dropdown-menu',
+    '.dropdown-menu[style*="display: block"]'
+  ]
+  
+  cy.get('body').then($body => {
+    for (const selector of menuSelectors) {
+      if ($body.find(selector).length > 0) {
+        cy.log(`Waiting for dropdown menu with selector: ${selector}`)
+        cy.get(selector, { timeout: 5000 }).should('be.visible')
+        // Small additional wait to ensure animations are complete
+        cy.wait(300)
+        return
+      }
+    }
+    // Fallback: just wait a bit if no specific menu found
+    cy.log('No specific dropdown menu found, using fallback wait')
+    cy.wait(500)
   })
 })
 
@@ -50,6 +83,10 @@ Cypress.Commands.add('findAndClick', (selectors, options = {}) => {
     for (const selector of selectors) {
       if ($body.find(selector).length > 0) {
         cy.log(`Found element with selector: ${selector}`)
+        // Wait for element to be visible before clicking (unless force is explicitly set)
+        if (!options.force) {
+          cy.get(selector).first().should('be.visible')
+        }
         cy.get(selector).first().click(options)
         return
       }

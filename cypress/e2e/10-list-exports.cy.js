@@ -82,7 +82,9 @@ describe('List View - Export Functions', () => {
           cy.stub(win, 'open').as('windowOpen')
         })
         
-        cy.get('button[name="csv"]').first().click({ force: true })
+        // Wait for button to be visible and click
+        cy.get('button[name="csv"]').first().should('be.visible')
+        cy.get('button[name="csv"]').first().click()
         
         // Check if a download was triggered or URL changed
         cy.wait(1000)
@@ -105,7 +107,9 @@ describe('List View - Export Functions', () => {
           cy.stub(win, 'open').as('windowOpen')
         })
         
-        cy.get('button[name="shp"]').first().click({ force: true })
+        // Wait for button to be visible and click
+        cy.get('button[name="shp"]').first().should('be.visible')
+        cy.get('button[name="shp"]').first().click()
         
         // Check if a download was triggered or URL changed
         cy.wait(1000)
@@ -141,7 +145,8 @@ describe('List View - Export Functions', () => {
       
       // Now try to export
       if ($body.find('button[name="csv"]').length > 0) {
-        cy.get('button[name="csv"]').first().click({ force: true })
+        cy.get('button[name="csv"]').first().should('be.visible')
+        cy.get('button[name="csv"]').first().click()
         cy.wait(1000)
         cy.log('Export with filter applied')
       }
@@ -183,7 +188,8 @@ describe('List View - Export Functions', () => {
         // Now try to export selected
         cy.get('body').then($body => {
           if ($body.find('button[name="csv"]').length > 0) {
-            cy.get('button[name="csv"]').first().click({ force: true })
+            cy.get('button[name="csv"]').first().should('be.visible')
+            cy.get('button[name="csv"]').first().click()
             cy.wait(1000)
             cy.log('Export with selected entities')
           }

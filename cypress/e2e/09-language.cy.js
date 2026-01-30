@@ -31,13 +31,16 @@ describe('Language Switching', () => {
   it('should switch to French language', { retries: 1 }, () => {
     cy.visit('/dummymodel/list/')
     
-    // Open dropdown menu
+    // Open dropdown menu and wait for it to be visible
     cy.openUserMenu()
     
     // Click French language button
     cy.get('body').then($body => {
       if ($body.find('button[value="fr"]').length > 0) {
-        cy.get('button[value="fr"]').click({ force: true })
+        cy.log('Clicking French language button')
+        // Wait for button to be visible
+        cy.get('button[value="fr"]').should('be.visible')
+        cy.get('button[value="fr"]').click()
         
         // Wait for page reload
         cy.wait(1000)
@@ -59,13 +62,16 @@ describe('Language Switching', () => {
   it('should switch to English language', { retries: 1 }, () => {
     cy.visit('/dummymodel/list/')
     
-    // Open dropdown menu
+    // Open dropdown menu and wait for it to be visible
     cy.openUserMenu()
     
     // Click English language button
     cy.get('body').then($body => {
       if ($body.find('button[value="en"]').length > 0) {
-        cy.get('button[value="en"]').click({ force: true })
+        cy.log('Clicking English language button')
+        // Wait for button to be visible
+        cy.get('button[value="en"]').should('be.visible')
+        cy.get('button[value="en"]').click()
         
         // Wait for page reload
         cy.wait(1000)
@@ -92,7 +98,10 @@ describe('Language Switching', () => {
     
     cy.get('body').then($body => {
       if ($body.find('button[value="fr"]').length > 0) {
-        cy.get('button[value="fr"]').click({ force: true })
+        cy.log('Switching to French')
+        // Wait for button to be visible
+        cy.get('button[value="fr"]').should('be.visible')
+        cy.get('button[value="fr"]').click()
         cy.wait(1000)
         
         // Navigate to another page
