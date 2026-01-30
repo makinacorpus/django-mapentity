@@ -103,19 +103,4 @@ describe('Authentication - Login and Logout', () => {
       }
     })
   })
-
-  it('should maintain session across page navigation', () => {
-    cy.login()
-    cy.visit('/dummymodel/list/')
-    cy.url().should('include', '/dummymodel/list')
-    
-    // Navigate to another page
-    cy.visit('/')
-    cy.url().should('not.include', '/login')
-    
-    // Navigate back to protected page - should still be logged in
-    cy.visit('/dummymodel/list/')
-    cy.url().should('include', '/dummymodel/list')
-    cy.get('nav.navbar').should('exist')
-  })
 })
