@@ -7,21 +7,7 @@ describe('Language Switching', () => {
     cy.visit('/dummymodel/list/')
     
     // Open user dropdown menu
-    cy.get('body').then($body => {
-      const dropdownSelectors = [
-        '.dropdown-toggle',
-        '[data-toggle="dropdown"]',
-        '.navbar .dropdown button'
-      ]
-      
-      for (const selector of dropdownSelectors) {
-        if ($body.find(selector).length > 0) {
-          cy.get(selector).first().click({ force: true })
-          cy.wait(500)
-          break
-        }
-      }
-    })
+    cy.openUserMenu()
     
     // Check for language options
     cy.get('body').then($body => {
@@ -45,17 +31,8 @@ describe('Language Switching', () => {
   it('should switch to French language', { retries: 1 }, () => {
     cy.visit('/dummymodel/list/')
     
-    // Store current URL to return after language change
-    cy.url().as('currentUrl')
-    
     // Open dropdown menu
-    cy.get('body').then($body => {
-      const dropdownToggle = $body.find('.dropdown-toggle, [data-toggle="dropdown"]')
-      if (dropdownToggle.length > 0) {
-        cy.get('.dropdown-toggle, [data-toggle="dropdown"]').first().click({ force: true })
-        cy.wait(500)
-      }
-    })
+    cy.openUserMenu()
     
     // Click French language button
     cy.get('body').then($body => {
@@ -83,13 +60,7 @@ describe('Language Switching', () => {
     cy.visit('/dummymodel/list/')
     
     // Open dropdown menu
-    cy.get('body').then($body => {
-      const dropdownToggle = $body.find('.dropdown-toggle, [data-toggle="dropdown"]')
-      if (dropdownToggle.length > 0) {
-        cy.get('.dropdown-toggle, [data-toggle="dropdown"]').first().click({ force: true })
-        cy.wait(500)
-      }
-    })
+    cy.openUserMenu()
     
     // Click English language button
     cy.get('body').then($body => {
@@ -117,13 +88,9 @@ describe('Language Switching', () => {
     cy.visit('/dummymodel/list/')
     
     // Open dropdown and switch to French
+    cy.openUserMenu()
+    
     cy.get('body').then($body => {
-      const dropdownToggle = $body.find('.dropdown-toggle, [data-toggle="dropdown"]')
-      if (dropdownToggle.length > 0) {
-        cy.get('.dropdown-toggle, [data-toggle="dropdown"]').first().click({ force: true })
-        cy.wait(500)
-      }
-      
       if ($body.find('button[value="fr"]').length > 0) {
         cy.get('button[value="fr"]').click({ force: true })
         cy.wait(1000)
@@ -149,13 +116,7 @@ describe('Language Switching', () => {
     cy.visit('/dummymodel/list/')
     
     // Open dropdown menu
-    cy.get('body').then($body => {
-      const dropdownToggle = $body.find('.dropdown-toggle, [data-toggle="dropdown"]')
-      if (dropdownToggle.length > 0) {
-        cy.get('.dropdown-toggle, [data-toggle="dropdown"]').first().click({ force: true })
-        cy.wait(500)
-      }
-    })
+    cy.openUserMenu()
     
     // Check for multiple language options
     cy.get('body').then($body => {
@@ -180,13 +141,7 @@ describe('Language Switching', () => {
     cy.visit('/dummymodel/list/')
     
     // Open dropdown menu
-    cy.get('body').then($body => {
-      const dropdownToggle = $body.find('.dropdown-toggle, [data-toggle="dropdown"]')
-      if (dropdownToggle.length > 0) {
-        cy.get('.dropdown-toggle, [data-toggle="dropdown"]').first().click({ force: true })
-        cy.wait(500)
-      }
-    })
+    cy.openUserMenu()
     
     // Check for active language indicator
     cy.get('body').then($body => {

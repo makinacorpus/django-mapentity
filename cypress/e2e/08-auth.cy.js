@@ -67,6 +67,9 @@ describe('Authentication - Login and Logout', () => {
     cy.visit('/dummymodel/list/')
     cy.url().should('include', '/dummymodel/list')
     
+    // Open user menu
+    cy.openUserMenu()
+    
     // Find and click logout button
     cy.get('body').then($body => {
       const logoutSelectors = [
@@ -79,13 +82,6 @@ describe('Authentication - Login and Logout', () => {
       
       for (const selector of logoutSelectors) {
         if ($body.find(selector).length > 0) {
-          // May need to open dropdown first
-          const dropdownToggle = $body.find('.dropdown-toggle, [data-toggle="dropdown"]')
-          if (dropdownToggle.length > 0) {
-            cy.get('.dropdown-toggle, [data-toggle="dropdown"]').first().click({ force: true })
-            cy.wait(500)
-          }
-          
           cy.get(selector).first().click({ force: true })
           break
         }
