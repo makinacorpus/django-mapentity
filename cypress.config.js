@@ -11,7 +11,7 @@ module.exports = defineConfig({
     screenshotOnRunFailure: true,
     setupNodeEvents(on, config) {
       on('before:browser:launch', (browser = {}, launchOptions) => {
-        if (browser.name === 'electron') {
+        if (browser.name !== 'electron') {
           launchOptions.args.push(
             '--enable-unsafe-swiftshader',
             '--use-gl=swiftshader',
