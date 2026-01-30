@@ -537,22 +537,7 @@ class MaplibreGeometryField {
                          if (feature.properties[k] === undefined) feature.properties[k] = v;
                     });
 
-                    const resolveGeomanSourceName = () => {
-                        // Geoman 0.6.x expose souvent un `defaultSourceName` côté `features`.
-                        const fromApi = gmApi?.features?.defaultSourceName;
-                        if (typeof fromApi === 'string' && fromApi.length > 0) {
-                            return fromApi;
-                        }
-
-                        // Fallback : essayer les sources connues côté MapLibre.
-                        if (this.map.getSource('gm_main')) return 'gm_main';
-                        if (this.map.getSource('geoman_main')) return 'geoman_main';
-
-                        // Dernier recours : chercher une source dont l'id ressemble à Geoman.
-                        const sources = this.map.getStyle?.()?.sources || {};
-                        const candidate = Object.keys(sources).find(k => k.startsWith('gm_') || k.startsWith('gm-') || k.includes('geoman'));
-                        return candidate;
-                    };
+                    const resolveGeomanSourceName = () => this._resolveGeomanSourceName();
 
                     // Utilisation de la méthode recommandée par la doc
                     console.log('MaplibreGeometryField: calling addGeoJsonFeature for', feature);
@@ -702,6 +687,164 @@ class MaplibreGeometryField {
     }
 
     /**
+     * Tente de résoudre le nom de la source de données Geoman
+     * @return {string|null} - Le nom de la source ou null
+     * @private
+     */
+    _resolveGeomanSourceName() {
+        const gmApi = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
+        
+        // Geoman 0.6.x expose souvent un `defaultSourceName` côté `features`.
+        const fromApi = gmApi?.features?.defaultSourceName;
+        if (typeof fromApi === 'string' && fromApi.length > 0) {
+            return fromApi;
+        }
+
+        // Fallback : essayer les sources connues côté MapLibre.
+        if (this.map.getSource('gm_main')) return 'gm_main';
+        if (this.map.getSource('geoman_main')) return 'geoman_main';
+
+        // Dernier recours : chercher une source dont l'id ressemble à Geoman.
+        const sources = this.map.getStyle?.()?.sources || {};
+        const candidate = Object.keys(sources).find(k => k.startsWith('gm_') || k.startsWith('gm-') || k.includes('geoman'));
+        return candidate || null;
+    }
+
+    /**
+     * Récupère la source de données Geoman
+     * @private
+     */
+    _getGeomanLayersSource() {
+        const sourceName = this._resolveGeomanSourceName();
+        return sourceName ? this.map.getSource(sourceName) : null;
+    }
+
+    /**
+     * Supprime toutes les features Geoman sauf une optionnelle
+     * @param exceptFeature {Object|null} - La feature (GeoJSON) à conserver
+     * @private
+     */
+    _removeAllGeomanFeatures(exceptFeature = null) {
+        const gmApi = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
+        const exceptId = exceptFeature ? exceptFeature.id : null;
+        
+        // 1. Try to find a removal function via API
+        let removeFunc = null;
+        if (gmApi) {
+            // Check in features namespace (standard)
+            if (gmApi.features) {
+                if (typeof gmApi.features.remove === 'function') {
+                    removeFunc = gmApi.features.remove.bind(gmApi.features);
+                } else if (typeof gmApi.features.removeFeature === 'function') {
+                    removeFunc = gmApi.features.removeFeature.bind(gmApi.features);
+                } else {
+                    // Dynamic search in features
+                    const candidate = Object.keys(gmApi.features).find(k => 
+                        (k.toLowerCase().includes('remove') || k.toLowerCase().includes('delete')) && 
+                        typeof gmApi.features[k] === 'function'
+                    );
+                    if (candidate) {
+                        removeFunc = gmApi.features[candidate].bind(gmApi.features);
+                    }
+                }
+            }
+
+            // Check on gmApi directly (fallback for some versions/wrappers)
+            if (!removeFunc) {
+                 if (typeof gmApi.remove === 'function') removeFunc = gmApi.remove.bind(gmApi);
+                 else if (typeof gmApi.removeFeature === 'function') removeFunc = gmApi.removeFeature.bind(gmApi);
+                 else if (typeof gmApi.delete === 'function') removeFunc = gmApi.delete.bind(gmApi);
+                 else if (typeof gmApi.deleteFeature === 'function') removeFunc = gmApi.deleteFeature.bind(gmApi);
+            }
+        }
+
+        if (removeFunc) {
+            // Using API to remove
+            const sources = this._findAllGeomanSources();
+            let allFeatures = [];
+            sources.forEach(source => {
+                 const data = source._data;
+                 const features = (data?.geojson?.features) || (data?.features) || [];
+                 allFeatures = allFeatures.concat(features);
+            });
+            
+            if (allFeatures.length > 0) {
+                // console.log(`MaplibreGeometryField: removing features via API (${allFeatures.length} candidates)`);
+                allFeatures.forEach(f => {
+                    // Use loose equality to match string/number IDs
+                    if (f.id && f.id != exceptId) {
+                        try {
+                            removeFunc(f.id);
+                        } catch (e) {
+                            console.warn('MaplibreGeometryField: Failed to remove feature via API', f.id, e);
+                        }
+                    }
+                });
+            }
+            return;
+        }
+
+        // 2. Fallback: Remove from ALL detected Geoman sources
+        // We assume fallback is robust enough, so we log as info instead of warn to reduce noise
+        console.log('MaplibreGeometryField: enforcing single geometry via source update (API fallback)');
+        
+        const sources = this._findAllGeomanSources();
+        if (sources.length === 0) {
+             console.warn('MaplibreGeometryField: No Geoman sources found for fallback');
+             return;
+        }
+
+        sources.forEach(source => {
+            if (source && source.setData) {
+                const data = source._data;
+                const features = (data?.geojson?.features) || (data?.features) || [];
+                
+                // On garde seulement la feature exceptée
+                const keptFromSource = features.filter(f => exceptId != null && f.id == exceptId);
+                let finalFeatures = [...keptFromSource];
+
+                // Si la feature à garder n'est pas encore dans la source (ex: création asynchrone), on l'ajoute
+                if (exceptFeature && keptFromSource.length === 0 && exceptId != null) {
+                    console.log('MaplibreGeometryField: preserving new feature not yet in source', exceptId);
+                    finalFeatures.push(exceptFeature);
+                }
+                
+                // Vérifier si une mise à jour est nécessaire
+                const currentIds = features.map(f => f.id).sort().join(',');
+                const newIds = finalFeatures.map(f => f.id).sort().join(',');
+
+                if (currentIds !== newIds) {
+                    console.log(`MaplibreGeometryField: source fallback updating source (features: ${features.length} -> ${finalFeatures.length})`, source);
+                    try {
+                        source.setData({
+                            type: 'FeatureCollection',
+                            features: finalFeatures
+                        });
+                    } catch (e) {
+                        console.error('MaplibreGeometryField: source fallback failed for source', source, e);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Trouve toutes les sources potentielles de Geoman
+     * @return {Array} - Liste des objets Source
+     * @private
+     */
+    _findAllGeomanSources() {
+        if (!this.map || !this.map.getStyle) return [];
+        const style = this.map.getStyle();
+        if (!style || !style.sources) return [];
+        
+        return Object.keys(style.sources)
+            .filter(k => k.startsWith('gm_') || k.startsWith('gm-') || k.includes('geoman'))
+            .map(k => this.map.getSource(k))
+            .filter(s => !!s);
+    }
+
+    /**
      * Configurer les événements Geoman pour la création, l'édition et le suivi en direct des géométries
      * @private
      */
@@ -709,8 +852,9 @@ class MaplibreGeometryField {
         // Charger la géométrie initiale
         this._loadInitialGeometry();
 
-        // Attendre que Geoman soit complètement chargé
-        this.map.on("gm:loaded", () => {
+        const registerGeomanHandlers = () => {
+            if (this._geomanHandlersRegistered) return;
+            this._geomanHandlersRegistered = true;
             const geoman = this.drawManager.getGeoman();
             // Vérifier si Geoman est disponible
             if (!geoman) {
@@ -728,28 +872,15 @@ class MaplibreGeometryField {
 
                         // Si on est en mode géométrie unique, on supprime l'ancienne géométrie dès qu'on commence à en dessiner une nouvelle
                         // Cela permet de remplacer la feature existante par une nouvelle
-                        if (!this.options.isCollection && !this.options.isGeneric) {
-                            if (this.gmEvents.length > 0) {
-                                console.log('MaplibreGeometryField: removing existing features before drawing new one');
-                                // Copie pour éviter les problèmes d'itération
-                                const eventsSnapshot = [...this.gmEvents];
-                                eventsSnapshot.forEach(evt => {
-                                    if (evt.id) {
-                                        try {
-                                            if (gmApi && gmApi.features && gmApi.features.remove) {
-                                                gmApi.features.remove(evt.id);
-                                            }
-                                        } catch (e) {
-                                            console.warn('MaplibreGeometryField: error removing feature before draw', e);
-                                        }
-                                    }
-                                });
-                                // On vide gmEvents immédiatement car on veut forcer le remplacement
-                                this.gmEvents = [];
-                                // On déclenche une sauvegarde (vide)
-                                if (this.fieldStore) {
-                                    this.fieldStore.save(null);
-                                }
+                        if (!this.options.isCollection) {
+                            console.log('MaplibreGeometryField: removing all existing features before drawing new one');
+                            this._removeAllGeomanFeatures();
+
+                            // On vide gmEvents immédiatement car on veut forcer le remplacement
+                            this.gmEvents = [];
+                            // On déclenche une sauvegarde (vide)
+                            if (this.fieldStore) {
+                                this.fieldStore.save(null);
                             }
                         } else {
                             // En mode collection, on peut vouloir restreindre certains boutons si besoin,
@@ -828,25 +959,19 @@ class MaplibreGeometryField {
 
                     // Si mode unique (pas collection/générique), supprimer les anciennes features AVANT de traiter la nouvelle
                     // Cela garantit qu'on ne garde qu'une seule feature à la fois
-                    if (!this.options.isCollection && !this.options.isGeneric && event.feature) {
+                    if (!this.options.isCollection && event.feature) {
                         const newFeatureId = event.feature.id;
-                        const geoman = this.drawManager.getGeoman();
-                        const gmApi = this.map.gm || geoman;
+                        console.log('MaplibreGeometryField: enforcing single geometry, removing others except', newFeatureId);
 
-                        // Supprimer toutes les features existantes sauf la nouvelle
-                        const eventsSnapshot = [...this.gmEvents];
-                        eventsSnapshot.forEach(evt => {
-                            if (evt.id && evt.id !== newFeatureId) {
-                                console.log('MaplibreGeometryField: removing old feature to enforce single geometry', evt.id);
-                                try {
-                                    if (gmApi && gmApi.features && gmApi.features.remove) {
-                                        gmApi.features.remove(evt.id);
-                                    }
-                                } catch (e) {
-                                    console.warn('MaplibreGeometryField: error removing old feature', e);
-                                }
-                            }
-                        });
+                        // On récupère le GeoJSON complet pour le passer au fallback si besoin
+                        let featureGeoJson = this._getGeoJson(event.feature);
+                        if (!featureGeoJson && event.feature && event.feature.type === 'Feature') {
+                             featureGeoJson = event.feature;
+                        }
+                        // S'assurer que l'ID est présent
+                        if (featureGeoJson && !featureGeoJson.id) featureGeoJson.id = newFeatureId;
+
+                        this._removeAllGeomanFeatures(featureGeoJson);
 
                         // Nettoyer gmEvents pour ne garder que la nouvelle feature
                         this.gmEvents = this.gmEvents.filter(evt => evt.id === newFeatureId);
@@ -863,7 +988,7 @@ class MaplibreGeometryField {
                     }
 
                     // Désactiver le mode de dessin après la création
-                    if(!this.options.isCollection && !this.options.isGeneric) {
+                    if(!this.options.isCollection) {
                         const gm = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
                         if (gm && gm.disableDraw) {
                             console.log('MaplibreGeometryField: disabling draw mode after creation');
@@ -914,6 +1039,11 @@ class MaplibreGeometryField {
                     console.error('Error during click event:', error);
                 }
             });
-        });
+        };
+
+        if (this.map.gm) {
+            registerGeomanHandlers();
+        }
+        this.map.on("gm:loaded", registerGeomanHandlers);
     }
 }
