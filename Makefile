@@ -64,3 +64,14 @@ messages_js:
 	$(docker_compose) run --rm web ./manage.py makemessages -a -d djangojs --no-location --no-obsolete --no-wrap --ignore=node_modules/**
 
 messages: messages_python messages_js
+
+start_for_e2e:
+	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py migrate
+	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py flush --no-input
+	echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@test.com', 'admin')" | $(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py shell
+	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py create_test_data --dummies 20 --cities 5 --roads 10 --geopoints 10
+	$(docker_compose) run -p 8000:8000 -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py runserver 0.0.0.0:8000
+
+BROWSER ?= electron
+run_e2e:
+	npx cypress run --browser $(BROWSER)

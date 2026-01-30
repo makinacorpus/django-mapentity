@@ -50,7 +50,7 @@ setup(
             'freezegun',
             'factory_boy',
             'coverage',
-            'tblib'
+            'tblib',
         ]
     },
     packages=find_packages(),

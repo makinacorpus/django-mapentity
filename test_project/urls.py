@@ -50,8 +50,11 @@ urlpatterns = [
             "document_root": settings.MEDIA_ROOT,
         },
     ),
-    path("__debug__/", include("debug_toolbar.urls")),
 ]
+
+# Add debug toolbar URLs only if not running E2E tests
+if "debug_toolbar" in settings.INSTALLED_APPS:
+    urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
 
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

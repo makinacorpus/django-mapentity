@@ -1,0 +1,15 @@
+{
+  "name": "django-mapentity",
+  "version": "1.0.0",
+  "description": "E2E tests for django-mapentity",
+  "author": "Makina Corpus",
+  "license": "BSD-3-Clause",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^15.9.0"
+  }
+}
