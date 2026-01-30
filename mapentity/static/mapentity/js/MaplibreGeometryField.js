@@ -836,16 +836,16 @@ class MaplibreGeometryField {
                         // Supprimer toutes les features existantes sauf la nouvelle
                         const eventsSnapshot = [...this.gmEvents];
                         eventsSnapshot.forEach(evt => {
-                             if (evt.id && evt.id !== newFeatureId) {
-                                 console.log('MaplibreGeometryField: removing old feature to enforce single geometry', evt.id);
-                                 try {
-                                     if (gmApi && gmApi.features && gmApi.features.remove) {
-                                         gmApi.features.remove(evt.id);
-                                     }
-                                 } catch (e) {
-                                     console.warn('MaplibreGeometryField: error removing old feature', e);
-                                 }
-                             }
+                            if (evt.id && evt.id !== newFeatureId) {
+                                console.log('MaplibreGeometryField: removing old feature to enforce single geometry', evt.id);
+                                try {
+                                    if (gmApi && gmApi.features && gmApi.features.remove) {
+                                        gmApi.features.remove(evt.id);
+                                    }
+                                } catch (e) {
+                                    console.warn('MaplibreGeometryField: error removing old feature', e);
+                                }
+                            }
                         });
 
                         // Nettoyer gmEvents pour ne garder que la nouvelle feature

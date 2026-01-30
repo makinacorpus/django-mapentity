@@ -126,11 +126,6 @@ describe('Replace Geometry in Edit Mode', () => {
     // Verify the entity name appears
     cy.contains(entityName, { timeout: 10000 }).should('exist')
   });
-    })
-    
-    // Verify the name was updated
-    cy.contains(newName, { timeout: 10000 }).should('exist')
-  });
 
   it('should allow deleting geometry using delete button', { retries: 1 }, () => {
     // Visit the edit page
