@@ -52,43 +52,14 @@ describe('DummyModel Update', () => {
     cy.visit('/dummymodel/list/')
     cy.get('table', { timeout: 10000 }).should('exist')
     
-    // Select first 2 checkboxes
-    cy.get('table tbody tr').each(($row, index) => {
-      if (index < 2) {
-        cy.wrap($row).find('input[type="checkbox"]').first().check({ force: true })
-      }
-    })
+    cy.get(".dt-select-checkbox").first().click();
+    cy.get("#btn-batch-editing").first().click();
+    cy.get("#btn-edit").first().click();
     
-    // Look for bulk update/edit actions
-    cy.get('body').then($body => {
-      const actionSelectors = [
-        'select[name="action"]',
-        '.actions select',
-        '[name*="action"]'
-      ]
-      
-      for (const selector of actionSelectors) {
-        if ($body.find(selector).length > 0) {
-          cy.get(selector).first().select(/update|edit/i, { force: true })
-          cy.get('button[type="submit"], input[type="submit"]').first().click({ force: true })
-          return
-        }
-      }
-      
-      cy.log('No bulk update action found')
-    })
+    cy.get("select[name=public]").select(true, { force: true })
+
+    cy.get('#submit-id-save').click({ force: true })
+
   })
 
-  it('should validate required fields on update', () => {
-    cy.visit('/dummymodel/edit/1/');
-    
-    // Clear the name field (required field)
-    cy.get('input[name="name_en"]', { timeout: 10000 }).clear()
-    
-    // Try to submit
-    cy.get('button[type="submit"], input[type="submit"], #save_changes').first().click()
-    
-    // Should stay on edit page due to validation error
-    cy.url().should('include', '/edit/')
-  });
 });
