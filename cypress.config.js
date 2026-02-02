@@ -9,17 +9,25 @@ module.exports = defineConfig({
     video: true,
     videoCompression: false,
     screenshotOnRunFailure: true,
+    chromeWebSecurity: false,
     setupNodeEvents(on, config) {
       on('before:browser:launch', (browser = {}, launchOptions) => {
-        if (browser.name !== 'electron') {
+        if (browser.family === 'chromium' && browser.name !== 'electron') {
+          // Enable WebGL for MapLibre GL JS
           launchOptions.args.push(
-            '--enable-unsafe-swiftshader',
-            '--use-gl=swiftshader',
-            '--disable-gpu',
-            '--disable-software-rasterizer',
+            '--ignore-gpu-blocklist',
+            '--enable-webgl',
+            '--enable-webgl2',
+            '--use-gl=angle',
+            '--use-angle=swiftshader',
             '--disable-dev-shm-usage',
             '--ignore-certificate-errors'
           )
+        }
+        if (browser.family === 'firefox') {
+          // Firefox WebGL settings
+          launchOptions.preferences['webgl.disabled'] = false
+          launchOptions.preferences['webgl.force-enabled'] = true
         }
         return launchOptions
       })
