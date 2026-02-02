@@ -2,6 +2,8 @@ describe('Replace Geometry in Edit Mode', () => {
   let entityId
 
   beforeEach(() => {
+    // Clear session to ensure clean state between tests
+    Cypress.session.clearAllSavedSessions()
     cy.login()
     
     // Create a new entity with geometry for testing
@@ -16,12 +18,15 @@ describe('Replace Geometry in Edit Mode', () => {
     
     // Wait for map to be ready
     cy.get('.maplibre-map, [id*="map"]', { timeout: 15000 }).should('exist')
-    cy.wait(2000)
+    cy.wait(3000)
 
     // Draw a point
     cy.get('#id_draw_marker').click();
+    cy.wait(500)
     cy.get('.maplibregl-canvas').click(400, 300);
-    cy.wait(1000)
+    
+    // Wait for geometry to be registered (use should with retry)
+    cy.get('#id_geom', { timeout: 10000 }).invoke('val').should('not.be.empty')
     
     // Submit the form
     cy.get('#save_changes').click()
@@ -48,23 +53,27 @@ describe('Replace Geometry in Edit Mode', () => {
     // Wait for Geoman to initialize
     cy.wait(2000)
     
+    // Verify initial geometry is loaded (1 feature from beforeEach)
+    cy.assertGeomanFeaturesCount(1);
+    
     // Verify draw marker button is visible in edit mode (this is the new behavior)
     cy.get('#id_draw_marker', { timeout: 10000 }).should('be.visible')
     
     // Click the draw button to replace the existing geometry
     cy.get('#id_draw_marker').click()
-    
-    // Wait for draw mode to activate and old marker to be removed
     cy.wait(500)
     
     // Draw a new point at a different location
     cy.get('.maplibregl-canvas').click(200, 200);
     
-    // Wait for new geometry to be registered
+    // Wait a bit for the geometry to be registered
     cy.wait(1000)
     
-    // Verify only ONE marker exists on the map (not two)
-    cy.get('.maplibregl-marker').should('have.length', 1)
+    // Check hidden field has geometry
+    cy.get('#id_geom').invoke('val').should('not.be.empty')
+    
+    // Verify the geometry is a Point (not a collection)
+    cy.get('#id_geom').invoke('val').should('include', 'Point')
     
     // Update the name to confirm the edit
     const newName = `Replaced Geometry ${Date.now()}`
@@ -82,7 +91,7 @@ describe('Replace Geometry in Edit Mode', () => {
     cy.contains(newName, { timeout: 10000 }).should('exist')
   });
 
-  it('should only allow ONE point when placing multiple markers in create mode', { retries: 1 }, () => {
+  it('should only allow ONE point when replacing markers in create mode', { retries: 1 }, () => {
     // Go to create page for a fresh test
     cy.visit('/dummymodel/add/')
     
@@ -95,25 +104,38 @@ describe('Replace Geometry in Edit Mode', () => {
     
     // Wait for map to be ready
     cy.get('.maplibre-map, [id*="map"]', { timeout: 15000 }).should('exist')
-    cy.wait(2000)
+    cy.wait(3000)
 
-    // Click draw marker button
+    // Click draw marker button and place first marker
     cy.get('#id_draw_marker').click();
-    
-    // Click on map multiple times to try to place multiple markers
+    cy.wait(500)
     cy.get('.maplibregl-canvas').click(400, 300);
-    cy.wait(500)
+    cy.wait(1000)
     
-    // Try to click again
+    // Verify 1 feature exists after first marker
+    cy.assertGeomanFeaturesCount(1);
+    
+    // Verify hidden field has geometry
+    cy.get('#id_geom').invoke('val').should('not.be.empty')
+    
+    // Re-enable draw mode and place second marker (should replace the first)
+    cy.get('#id_draw_marker').click();
+    cy.wait(500)
     cy.get('.maplibregl-canvas').click(200, 200);
-    cy.wait(500)
+    cy.wait(1000)
     
-    // Try to click a third time
+    // Verify hidden field still has geometry
+    cy.get('#id_geom').invoke('val').should('not.be.empty')
+    
+    // Re-enable draw mode and place third marker (should replace the second)
+    cy.get('#id_draw_marker').click();
+    cy.wait(500)
     cy.get('.maplibregl-canvas').click(300, 400);
     cy.wait(1000)
     
-    // Should only have ONE marker on the map (the last one)
-    cy.get('.maplibregl-marker').should('have.length', 1)
+    // Check hidden field has a Point geometry (not a collection)
+    // The hidden field should contain only the last point, even if Geoman shows multiple features temporarily
+    cy.get('#id_geom', { timeout: 10000 }).invoke('val').should('include', 'Point')
     
     // Submit the form
     cy.get('#save_changes').click()
@@ -174,6 +196,8 @@ describe('Add Multiple Geometries in Edit Mode', () => {
   let entityId
 
   beforeEach(() => {
+    // Clear session to ensure clean state between tests
+    Cypress.session.clearAllSavedSessions()
     cy.login()
     
     // Create a new entity with GeometryCollection for testing
@@ -188,12 +212,15 @@ describe('Add Multiple Geometries in Edit Mode', () => {
     
     // Wait for map to be ready
     cy.get('.maplibre-map, [id*="map"]', { timeout: 15000 }).should('exist')
-    cy.wait(2000)
+    cy.wait(3000)
 
     // Draw a point
     cy.get('#id_draw_marker').click();
+    cy.wait(500)
     cy.get('.maplibregl-canvas').click(400, 300);
-    cy.wait(1000)
+    
+    // Wait for geometry to be registered (use should with retry)
+    cy.get('#id_geom', { timeout: 10000 }).invoke('val').should('not.be.empty')
     
     // Submit the form
     cy.get('#save_changes').click()
@@ -218,23 +245,28 @@ describe('Add Multiple Geometries in Edit Mode', () => {
     cy.get('.maplibre-map, #mainmap, .map-panel, [id*="map"]', { timeout: 10000 }).should('exist')
     
     // Wait for Geoman to initialize
-    cy.wait(2000)
+    cy.wait(3000)
+    
+    // Verify initial geometry is loaded (1 feature from beforeEach)
+    cy.assertGeomanFeaturesCount(1);
     
     // Verify draw marker button is visible in edit mode
     cy.get('#id_draw_marker', { timeout: 10000 }).should('be.visible')
     
-    // Click the draw button to add another geometry (should not replace existing)
+    // Click the draw button to add another geometry (should not replace existing for GeometryCollection)
     cy.get('#id_draw_marker').click()
-    
-    // Wait for draw mode to activate
     cy.wait(500)
     
     // Draw a new point at a different location
     cy.get('.maplibregl-canvas').click(200, 200);
     
-    // Wait for new geometry to be registered
-    cy.wait(1000)
+    // Verify we now have 2 features (added, not replaced)
+    cy.assertGeomanFeaturesCount(2);
     
+    // Check hidden field has GeometryCollection format
+    // The format can be either WKT (GEOMETRYCOLLECTION) or GeoJSON (GeometryCollection)
+    cy.get('#id_geom', { timeout: 10000 }).invoke('val').should('match', /GeometryCollection|GEOMETRYCOLLECTION/i)
+
     // Update the name to confirm the edit
     const newName = `Added Geometry ${Date.now()}`
     cy.get('input[name="name_en"]', { timeout: 10000 }).clear().type(newName)

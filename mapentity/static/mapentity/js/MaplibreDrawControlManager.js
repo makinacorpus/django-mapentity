@@ -145,7 +145,7 @@ class MaplibreDrawControlManager {
 
         // Initialiser Geoman
         this.geoman = new Geoman.Geoman(this.map, geomanOptions);
-
+        window.gm = this.geoman;
         // Déclencher un événement quand Geoman est prêt
         const checkLoaded = () => {
             if (this.geoman.loaded) {

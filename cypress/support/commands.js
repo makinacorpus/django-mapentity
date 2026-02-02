@@ -110,3 +110,12 @@ Cypress.Commands.add('getTinyMceContent', (tinyMceId, content) => {
     return '';
   });
 });
+
+// Command to assert Geoman features count with retry capability
+Cypress.Commands.add('assertGeomanFeaturesCount', (expectedCount, options = {}) => {
+  const timeout = options.timeout || 10000;
+  cy.window({ timeout }).should((win) => {
+    const featureCount = win.gm.features.exportGeoJson()["features"].length
+    expect(featureCount).to.equal(expectedCount);
+  });
+});
