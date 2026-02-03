@@ -419,7 +419,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
 
     def get_display_label(self):
         """Get a string label to display the object in links."""
-        return str(self.pk)
+        return str(self)
 
     @property
     def name_display(self):
