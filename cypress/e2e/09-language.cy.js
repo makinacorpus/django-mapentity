@@ -1,6 +1,7 @@
 describe('Language Switching', () => {
     beforeEach(() => {
         cy.login()
+        cy.mockTiles()
     })
 
     it('should display language switcher in user menu', () => {

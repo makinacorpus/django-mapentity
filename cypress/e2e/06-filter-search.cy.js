@@ -1,6 +1,7 @@
 describe('DummyModel Filter and Search', () => {
     beforeEach(() => {
         cy.login()
+        cy.mockTiles()
         cy.visit('/dummymodel/list/')
     })
 

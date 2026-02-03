@@ -3,6 +3,7 @@ describe('Navigation and Menu', () => {
 
     beforeEach(() => {
         cy.login()
+        cy.mockTiles()
 
         // Get an entity ID from the list to ensure we're accessing an existing entity for tests that need it
         cy.visit('/dummymodel/list/')

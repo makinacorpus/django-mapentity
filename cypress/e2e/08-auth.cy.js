@@ -3,6 +3,7 @@ describe('Authentication - Login and Logout', () => {
         // Clear session before each test
         cy.clearAllCookies()
         cy.clearAllSessionStorage()
+        cy.mockTiles()
     })
 
     it('should display login page', () => {

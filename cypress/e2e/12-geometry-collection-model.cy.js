@@ -36,6 +36,7 @@ describe('GeometryCollectionModel - GeometryCollection', () => {
         cy.get('.maplibregl-canvas').click(200, 200, {force: true})
         cy.get('.maplibregl-canvas').click(250, 250, {force: true})
         cy.get('.maplibregl-marker').last().click({force: true})
+        cy.wait(500);
 
         cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
         cy.get('#id_geom').invoke('val').then((val) => {

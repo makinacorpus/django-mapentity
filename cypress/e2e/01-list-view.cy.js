@@ -1,6 +1,7 @@
 describe('DummyModel List View', () => {
     beforeEach(() => {
         cy.login()
+        cy.mockTiles()
         cy.visit('/dummymodel/list/')
     })
 

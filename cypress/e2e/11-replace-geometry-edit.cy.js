@@ -5,6 +5,7 @@ describe('Replace Geometry in Edit Mode', () => {
         // Clear session to ensure clean state between tests
         Cypress.session.clearAllSavedSessions()
         cy.login()
+        cy.mockTiles()
 
         // Create a new entity with geometry for testing
         cy.visit('/dummymodel/add/')
@@ -199,6 +200,7 @@ describe('Add Multiple Geometries in Edit Mode', () => {
         // Clear session to ensure clean state between tests
         Cypress.session.clearAllSavedSessions()
         cy.login()
+        cy.mockTiles()
 
         // Create a new entity with GeometryCollection for testing
         cy.visit('/dummyaptmodel/add/')

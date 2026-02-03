@@ -1,6 +1,7 @@
 describe('DummyModel Create', () => {
     beforeEach(() => {
         cy.login()
+        cy.mockTiles()
         cy.visit('/dummymodel/add/')
     })
 

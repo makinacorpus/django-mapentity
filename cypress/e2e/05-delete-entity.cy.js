@@ -3,6 +3,7 @@ describe('DummyModel Delete', () => {
 
     beforeEach(() => {
         cy.login()
+        cy.mockTiles()
     })
 
     it('should delete a single entity', () => {

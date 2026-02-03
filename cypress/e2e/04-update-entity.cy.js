@@ -3,6 +3,7 @@ describe('DummyModel Update', () => {
 
     beforeEach(() => {
         cy.login()
+        cy.mockTiles()
 
         // Get an entity ID from the list to ensure we're accessing an existing entity
         cy.visit('/dummymodel/list/')

@@ -1,6 +1,7 @@
 describe('List View - Export Functions', () => {
     beforeEach(() => {
         cy.login()
+        cy.mockTiles()
         cy.visit('/dummymodel/list/')
     })
 
