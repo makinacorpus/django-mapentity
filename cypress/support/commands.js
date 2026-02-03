@@ -17,7 +17,11 @@ Cypress.Commands.add('login', (username = 'admin', password = 'admin') => {
     cy.get('form').submit()
     cy.url().should('not.include', '/login/')
   })
-})
+});
+
+Cypress.Commands.add('mockTiles', () => {
+    cy.intercept("https://*.openstreetmap.org/*/*/*.png", {fixture: "images/tile.png"}).as("tiles");
+});
 
 // Command to wait for map to be ready (MapLibre instead of Leaflet)
 Cypress.Commands.add('waitForMap', () => {
@@ -112,10 +116,14 @@ Cypress.Commands.add('getTinyMceContent', (tinyMceId, content) => {
 });
 
 // Command to assert Geoman features count with retry capability
-Cypress.Commands.add('assertGeomanFeaturesCount', (expectedCount, options = {}) => {
-  const timeout = options.timeout || 10000;
-  cy.window({ timeout }).should((win) => {
-    const featureCount = win.gm.features.exportGeoJson()["features"].length
+Cypress.Commands.add('assertGeomanFeaturesCount', (expectedCount) => {
+  cy.window().should((win) => {
+    // verify Geoman is loaded before accessing logic
+    expect(win.gm, 'window.gm').to.exist;
+    expect(win.gm.features, 'gm.features').to.exist;
+
+    // execute logic and assertion (will be retried if fails)
+    const featureCount = win.gm.features.exportGeoJsonFromSource("gm_main").features.length;
     expect(featureCount).to.equal(expectedCount);
   });
 });

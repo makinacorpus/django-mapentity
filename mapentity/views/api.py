@@ -70,6 +70,10 @@ class MapEntityViewSet(viewsets.ModelViewSet):
         else:
             return self.serializer_class
 
+    @property
+    def queryset(self):
+        return self.model.objects.all()
+
     def get_queryset(self):
         """Transform projection for geojson"""
         renderer, media_type = self.perform_content_negotiation(self.request)

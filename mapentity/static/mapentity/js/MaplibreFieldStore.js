@@ -17,7 +17,7 @@ class MaplibreFieldStore {
             }
         }
 
-        const serializedData = (this.options.isGeneric || this.options.isCollection)
+        const serializedData = (this.options.isGeometryCollection || this.options.isCollection)
             ? this._serializeGeometryCollection(data)
             : this._serialize(data)
 
@@ -61,29 +61,42 @@ class MaplibreFieldStore {
     _serialize(data) {
         // Si c'est déjà une géométrie (type + coordinates)
         if (data && data.type && data.coordinates) {
+            const geomTypeLower = (this.options.geomType || '').toLowerCase();
+            const isGenericGeometry = geomTypeLower === 'geometry';
+            
             // S'assurer que MultiPolygon ne va pas dans un PolygonField
-            if (data.type === 'MultiPolygon' && this.options.geomType && this.options.geomType.toLowerCase().endsWith('polygon') && !this.options.geomType.toLowerCase().includes('multi')) {
-                 console.warn('MaplibreFieldStore: detected MultiPolygon for PolygonField, extracting first polygon');
-                 return JSON.stringify({
-                     type: 'Polygon',
-                     coordinates: data.coordinates[0]
-                 });
+            // Ou pour un type générique "Geometry", convertir Multi avec 1 élément en simple
+            if (data.type === 'MultiPolygon') {
+                if ((geomTypeLower.endsWith('polygon') && !geomTypeLower.includes('multi')) ||
+                    (isGenericGeometry && data.coordinates.length === 1)) {
+                    console.warn('MaplibreFieldStore: detected MultiPolygon, extracting first polygon');
+                    return JSON.stringify({
+                        type: 'Polygon',
+                        coordinates: data.coordinates[0]
+                    });
+                }
             }
             // S'assurer que MultiLineString ne va pas dans un LineStringField
-            if (data.type === 'MultiLineString' && this.options.geomType && this.options.geomType.toLowerCase().endsWith('linestring') && !this.options.geomType.toLowerCase().includes('multi')) {
-                console.warn('MaplibreFieldStore: detected MultiLineString for LineStringField, extracting first line');
-                return JSON.stringify({
-                    type: 'LineString',
-                    coordinates: data.coordinates[0]
-                });
+            if (data.type === 'MultiLineString') {
+                if ((geomTypeLower.endsWith('linestring') && !geomTypeLower.includes('multi')) ||
+                    (isGenericGeometry && data.coordinates.length === 1)) {
+                    console.warn('MaplibreFieldStore: detected MultiLineString, extracting first line');
+                    return JSON.stringify({
+                        type: 'LineString',
+                        coordinates: data.coordinates[0]
+                    });
+                }
             }
             // S'assurer que MultiPoint ne va pas dans un PointField
-            if (data.type === 'MultiPoint' && this.options.geomType && this.options.geomType.toLowerCase().endsWith('point') && !this.options.geomType.toLowerCase().includes('multi')) {
-                console.warn('MaplibreFieldStore: detected MultiPoint for PointField, extracting first point');
-                return JSON.stringify({
-                    type: 'Point',
-                    coordinates: data.coordinates[0]
-                });
+            if (data.type === 'MultiPoint') {
+                if ((geomTypeLower.endsWith('point') && !geomTypeLower.includes('multi')) ||
+                    (isGenericGeometry && data.coordinates.length === 1)) {
+                    console.warn('MaplibreFieldStore: detected MultiPoint, extracting first point');
+                    return JSON.stringify({
+                        type: 'Point',
+                        coordinates: data.coordinates[0]
+                    });
+                }
             }
             return JSON.stringify(data);
         }
