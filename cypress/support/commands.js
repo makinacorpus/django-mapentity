@@ -116,8 +116,9 @@ Cypress.Commands.add('getTinyMceContent', (tinyMceId, content) => {
 });
 
 // Command to assert Geoman features count with retry capability
-Cypress.Commands.add('assertGeomanFeaturesCount', (expectedCount) => {
-  cy.window().should((win) => {
+Cypress.Commands.add('assertGeomanFeaturesCount', (expectedCount, options = {}) => {
+  const timeout = options.timeout || 10000;
+  cy.window({timeout}).should((win) => {
     // verify Geoman is loaded before accessing logic
     expect(win.gm, 'window.gm').to.exist;
     expect(win.gm.features, 'gm.features').to.exist;
@@ -125,5 +126,28 @@ Cypress.Commands.add('assertGeomanFeaturesCount', (expectedCount) => {
     // execute logic and assertion (will be retried if fails)
     const featureCount = win.gm.features.exportGeoJsonFromSource("gm_main").features.length;
     expect(featureCount).to.equal(expectedCount);
+  });
+});
+
+// Command to assert geometry field value with retry capability
+// This ensures the geometry is properly set before making assertions
+Cypress.Commands.add('assertGeomFieldValue', (assertions, options = {}) => {
+  const timeout = options.timeout || 10000;
+  cy.get('#id_geom', {timeout}).should(($el) => {
+    const val = $el.val();
+    expect(val, 'id_geom value').to.not.be.empty;
+    
+    // Parse the value and run assertions
+    const data = JSON.parse(val);
+    assertions(data, val);
+  });
+});
+
+// Command to wait for Geoman to be fully initialized
+Cypress.Commands.add('waitForGeoman', (options = {}) => {
+  const timeout = options.timeout || 10000;
+  cy.window({timeout}).should((win) => {
+    expect(win.gm, 'window.gm').to.exist;
+    expect(win.gm.features, 'gm.features').to.exist;
   });
 });

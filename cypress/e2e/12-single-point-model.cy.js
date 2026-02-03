@@ -52,11 +52,7 @@ describe('SinglePointModel - Point geometry', () => {
         // Try to draw a second point
         cy.get('#id_draw_marker').click();
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
-        cy.wait(2000); // wait a moment to ensure no second point is added
-        cy.get('#id_geom', {timeout: 20000}).invoke('val').should('not.be.empty', {timeout: 20000});
-
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
+        cy.assertGeomFieldValue((data, val) => {
             // check number of arrays in data.coordinates
             expect(data.type).to.equal("Point");
             expect(data.coordinates.length).to.equal(2);

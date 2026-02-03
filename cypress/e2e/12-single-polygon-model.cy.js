@@ -34,15 +34,13 @@ describe('SinglePolygonModel - Polygon geometry', () => {
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-marker').eq(1).click({force: true});
 
-        cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
+        cy.assertGeomFieldValue((data) => {
             // check number of arrays in data.coordinates
             expect(data.type).to.equal("Polygon");
             expect(data.coordinates.length).to.equal(1);  // 1 polygon
             expect(data.coordinates[0].length).to.equal(4);  // with 4 points
         });
-        cy.assertGeomanFeaturesCount(1);  // two features
+        cy.assertGeomanFeaturesCount(1);  // one feature
 
         cy.get('#save_changes').click()
         cy.url({timeout: 15000}).should('satisfy', (url) => {
@@ -71,10 +69,7 @@ describe('SinglePolygonModel - Polygon geometry', () => {
         cy.get('.maplibregl-marker').eq(1).click({force: true});
 
         // The geometry field should still only contain one polygon
-        cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
-
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
+        cy.assertGeomFieldValue((data) => {
             expect(data.type).to.equal("Polygon");
             expect(data.coordinates.length).to.equal(1);  // still only 1 polygon
             expect(data.coordinates[0].length).to.equal(4);  // with 4 points

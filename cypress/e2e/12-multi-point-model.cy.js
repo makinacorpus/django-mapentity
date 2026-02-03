@@ -30,12 +30,8 @@ describe('MultiPointModel - MultiPoint geometry', () => {
         cy.get('#id_draw_marker').click()
         cy.get('.maplibregl-canvas').click(400, 300)
 
-        cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
-
-        // cehck there is one feature in the MultiPoint
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
-            // check number of arrays in data.coordinates
+        // check there is one feature in the MultiPoint
+        cy.assertGeomFieldValue((data) => {
             expect(data.type).to.equal("MultiPoint");
             expect(data.coordinates.length).to.equal(1);
         });
@@ -63,12 +59,8 @@ describe('MultiPointModel - MultiPoint geometry', () => {
         // Draw second point
         cy.get('.maplibregl-canvas').click(300, 200, {force: true});
 
-        cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
-
-        // cehck there is one feature in the MultiPoint WKT
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
-            // check number of arrays in data.coordinates
+        // check there are two features in the MultiPoint
+        cy.assertGeomFieldValue((data) => {
             expect(data.type).to.equal("MultiPoint");
             expect(data.coordinates.length).to.equal(2);
         });

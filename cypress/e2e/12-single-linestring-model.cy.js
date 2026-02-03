@@ -34,11 +34,7 @@ describe('SingleLineStringModel - LineString geometry', () => {
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-marker').last().click({force: true});
 
-        // The geometry field should still only contain one point
-        cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
-
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
+        cy.assertGeomFieldValue((data) => {
             // check number of arrays in data.coordinates
             expect(data.type).to.equal("LineString");
             expect(data.coordinates.length).to.equal(3);  // linstring with 3 points
@@ -73,10 +69,7 @@ describe('SingleLineStringModel - LineString geometry', () => {
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-marker').last().click({force: true});
 
-        cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
-
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
+        cy.assertGeomFieldValue((data) => {
             // check number of arrays in data.coordinates
             expect(data.type).to.equal("LineString");
             expect(data.coordinates.length).to.equal(3);  // still only one linestring with 3 points

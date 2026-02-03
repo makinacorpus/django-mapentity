@@ -38,12 +38,10 @@ describe('GeometryCollectionModel - GeometryCollection', () => {
         cy.get('.maplibregl-marker').last().click({force: true})
         cy.wait(500);
 
-        cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
+        cy.assertGeomFieldValue((data) => {
             // check number of arrays in data.coordinates
             expect(data.type).to.equal("GeometryCollection");
-            expect(data.geometries.length).to.equal(2);  // linstring with 3 points
+            expect(data.geometries.length).to.equal(2);  // point + linestring
         });
         cy.assertGeomanFeaturesCount(2);  // two features
 

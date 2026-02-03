@@ -34,9 +34,7 @@ describe('MultiLineStringModel - MultiLineString geometry', () => {
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-marker').last().click({force: true});
 
-        cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
+        cy.assertGeomFieldValue((data) => {
             // check number of arrays in data.coordinates
             expect(data.type).to.equal("MultiLineString");
             expect(data.coordinates.length).to.equal(1);  // linstring with 3 points
@@ -70,9 +68,7 @@ describe('MultiLineStringModel - MultiLineString geometry', () => {
         cy.get('.maplibregl-canvas').click(250, 200, {force: true});
         cy.get('.maplibregl-marker').last().click({force: true});
 
-        cy.get('#id_geom', {timeout: 10000}).invoke('val').should('not.be.empty');
-        cy.get('#id_geom').invoke('val').then((val) => {
-            const data = JSON.parse(val);
+        cy.assertGeomFieldValue((data) => {
             // check number of arrays in data.coordinates
             expect(data.type).to.equal("MultiLineString");
             expect(data.coordinates.length).to.equal(2);  // linstring with 3 points
