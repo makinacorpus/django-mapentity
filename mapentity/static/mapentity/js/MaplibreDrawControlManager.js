@@ -13,17 +13,20 @@ class MaplibreDrawControlManager {
     _initializeGeoman() {
         // Logique conditionnelle pour les contrôles d'édition
         const isSimpleType = this.options.isPoint || this.options.isLineString || this.options.isPolygon;
-        const isCollectionType = this.options.isCollection || this.options.isGeneric;
+        // Seuls Geometry (générique) et GeometryCollection affichent tous les contrôles
+        // Les types Multi* n'affichent que leur contrôle spécifique
+        const isGenericOrCollection = this.options.isGeneric || this.options.isGeometryCollection;
 
         // On peut toujours ajouter :
         // - Pour les collections/génériques : ajouter conserve les features existantes
         // - Pour les types simples : ajouter remplace la feature existante
-        const showDrawPolygon = this.options.isPolygon || isCollectionType;
-        const showDrawLine = this.options.isLineString || isCollectionType;
-        const showDrawPoint = this.options.isPoint || isCollectionType;
+        // MultiPoint -> marker uniquement, MultiLineString -> line uniquement, MultiPolygon -> polygon uniquement
+        const showDrawPolygon = this.options.isPolygon || this.options.isMultiPolygon || isGenericOrCollection;
+        const showDrawLine = this.options.isLineString || this.options.isMultiLineString || isGenericOrCollection;
+        const showDrawPoint = this.options.isPoint || this.options.isMultiPoint || isGenericOrCollection;
 
-        const shouldShowDragForPoint = this.options.isPoint || isCollectionType;
-        const shouldShowEditForOthers = (this.options.isLineString || this.options.isPolygon || isCollectionType) && this.options.modifiable;
+        const shouldShowDragForPoint = this.options.isPoint || this.options.isMultiPoint || isGenericOrCollection;
+        const shouldShowEditForOthers = (this.options.isLineString || this.options.isPolygon || this.options.isMultiLineString || this.options.isMultiPolygon || isGenericOrCollection) && this.options.modifiable;
 
         // Pour le drag : visible seulement pour les points (et en mode générique)
         const dragEnabled = shouldShowDragForPoint && this.options.modifiable;
@@ -56,7 +59,7 @@ class MaplibreDrawControlManager {
 
                     rectangle: {
                         title: gettext('Draw Rectangle'),
-                        uiEnabled: this.options.isGeneric || this.options.isCollection,
+                        uiEnabled: isGenericOrCollection,
                         active: false,
                     },
 

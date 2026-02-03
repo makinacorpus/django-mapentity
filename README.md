@@ -1,12 +1,12 @@
-![logo-header.png](mapentity/static/images/logo-header.png)
-# MapEntity
+<img alt="Mapentity" src="mapentity/static/images/logo-login.png" width="120" height="120"/>
 
 ![PyPI](https://img.shields.io/pypi/v/mapentity.svg)
 [![CI](https://github.com/makinacorpus/django-mapentity/actions/workflows/python-ci.yml/badge.svg)](https://github.com/makinacorpus/django-mapentity/actions/workflows/python-ci.yml)
 [![Codecov](https://codecov.io/gh/makinacorpus/django-mapentity/branch/master/graph/badge.svg?token=lFNYhcVjuz)](https://codecov.io/gh/makinacorpus/django-mapentity)
 ![Python Version](https://img.shields.io/badge/python-%3E%3D%203.9-blue.svg)
 ![Django Version](https://img.shields.io/badge/django-%3E%3D%204.2-green.svg)
-[![Mapentity](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/sjit2h&style=flat&logo=cypress)](https://cloud.cypress.io/projects/sjit2h/runs)
+[![Weblate](https://img.shields.io/badge/i18n-contribute-blue.svg)](https://weblate.makina-corpus.net/projects/django-mapentity/)
+[![E2E](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/sjit2h&style=flat&logo=cypress)](https://cloud.cypress.io/projects/sjit2h/runs)
 
 
 Mapentity is a CRUD framework for geospatial entities built with Django. It provides interface to manage geographic entities over leaflet maps.

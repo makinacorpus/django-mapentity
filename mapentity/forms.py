@@ -249,7 +249,7 @@ class MapEntityForm(TranslatedModelForm):
             )
 
         # Create form actions
-        # crispy_form bootstrap4 template is overriden
+        # crispy_form bootstrap4 template is overridden
         # because of label and field classes added but not wanted here
         formactions = FormActions(
             *actions,

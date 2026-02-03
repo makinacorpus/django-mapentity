@@ -52,6 +52,7 @@ INSTALLED_APPS = (
     "tinymce",
     "mapentity",  # Make sure mapentity settings are loaded before leaflet ones
     "test_project.test_app",
+    "test_project.test_shapes",
     "modeltranslation",
 )
 

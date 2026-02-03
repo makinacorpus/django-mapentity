@@ -31,6 +31,51 @@ In production, if you use public domain (ex: http://mapentity.com, screamshotter
 domain, so no problem will occur if this domain is public.
 
 
+Tests
+-----
+
+
+Unit tests
+##########
+
+To run unit tests :
+
+::
+
+    docker-compose run --rm web ./manage.py test mapentity
+
+
+E2E tests
+#########
+
+To run E2E tests :
+
+Prepare e2e environment (only once in separate terminal) :
+
+::
+
+    make start_for_e2e
+
+Install nvm / node and cypress:
+
+::
+
+    nvm use  # nvm install if required
+    npm ci
+
+Launch tests :
+
+::
+
+    make run_e2e
+
+With different installed browser (chrome / edge / firefox):
+
+::
+
+    BROWSER=firefox make run_e2e
+
+
 Release
 -------
 

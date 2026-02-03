@@ -78,7 +78,7 @@ class ZipShapeSerializer(Serializer):
         buffr.close()
 
     def _create_shape(self, shape_directory, queryset, model, columns):
-        """Split a shapes into one or more shapes (one for point and one for linestring)"""
+        """Split a test_shapes into one or more test_shapes (one for point and one for linestring)"""
         geo_field = geo_field_from_model(model, app_settings["GEOM_FIELD_NAME"])
         get_geom, geom_type, srid = info_from_geo_field(geo_field)
         if geom_type.upper() in (
@@ -278,7 +278,7 @@ def create_shape_format_layer(directory, headers, geom_type, srid, srid_out=None
 
 
 def geo_field_from_model(model, default_geo_field_name=None):
-    """Look for a geo field - taken from shapes"""
+    """Look for a geo field - taken from test_shapes"""
     try:
         # If the class defines a geomfield property, use it !
         return model.geomfield

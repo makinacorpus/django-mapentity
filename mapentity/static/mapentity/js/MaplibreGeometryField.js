@@ -8,16 +8,17 @@ class MaplibreGeometryField {
 
         // Détecter les types de géométrie
         const geomType = (this.options.geomType || '').toLowerCase();
-        this.options.isGeneric = /geometry/.test(geomType);
+        this.options.isGeneric = geomType === 'geometry';
+        this.options.isGeometryCollection = /geometrycollection$/.test(geomType);
         this.options.isCollection = /(^multi|collection$)/.test(geomType);
         this.options.isLineString = /linestring$/.test(geomType);
         this.options.isPolygon = /polygon$/.test(geomType);
         this.options.isPoint = /point$/.test(geomType);
 
         // Distinction entre simple et multi pour les types de base
-        this.options.isMultiPolygon = /multipolygon$/.test(geomType);
-        this.options.isMultiLineString = /multilinestring$/.test(geomType);
-        this.options.isMultiPoint = /multipoint$/.test(geomType);
+        this.options.isMultiPolygon = /^multipolygon$/.test(geomType);
+        this.options.isMultiLineString = /^multilinestring$/.test(geomType);
+        this.options.isMultiPoint = /^multipoint$/.test(geomType);
 
         // Initialiser les composants
         this.dataManager = new GeometryDataManager(this.options);
@@ -141,7 +142,20 @@ class MaplibreGeometryField {
 
         // Gestion des types 'Multi' et 'Collection'
         if (this.options.isCollection) {
-            const geometries = allFeatures.features.map(feature => feature.geometry);
+            // Extraire les géométries des features
+            // Note: feature peut être une Feature GeoJSON {type: "Feature", geometry: {...}}
+            // ou directement une geometry {type: "Polygon", coordinates: [...]}
+            const geometries = allFeatures.features.map(feature => {
+                if (feature.type === 'Feature' && feature.geometry) {
+                    return feature.geometry;
+                }
+                // Si c'est directement une geometry (a un type et des coordinates)
+                if (feature.type && feature.coordinates) {
+                    return feature;
+                }
+                // Fallback
+                return feature.geometry || feature;
+            });
             
             // On vérifie le type de champ spécifique pour savoir comment normaliser
             if (this.options.isMultiPolygon) {
