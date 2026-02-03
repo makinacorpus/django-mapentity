@@ -54,7 +54,7 @@ Prepare e2e environment (only once in separate terminal) :
 
 ::
 
-    make start_for_e2e
+    make serve_e2e
 
 Install nvm / node and cypress:
 

@@ -13,8 +13,6 @@ from .models import (
 
 
 class DummySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="name_display")
-
     class Meta:
         fields = "__all__"
         model = DummyModel
@@ -27,16 +25,12 @@ class DummyGeojsonSerializer(MapentityGeojsonModelSerializer):
 
 
 class RoadSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="name_display")
-
     class Meta:
         fields = "__all__"
         model = Road
 
 
 class DummyAptSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="name_display")
-
     class Meta:
         fields = "__all__"
         model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
@@ -49,16 +43,12 @@ class DummyAptGeojsonSerializer(MapentityGeojsonModelSerializer):
 
 
 class CitySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="name_display")
-
     class Meta:
         fields = "__all__"
         model = City
 
 
 class GeoPointSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="name_display")
-
     class Meta:
         fields = "__all__"
         model = GeoPoint
@@ -67,4 +57,10 @@ class GeoPointSerializer(serializers.ModelSerializer):
 class MushroomSpotSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
+        model = MushroomSpot
+
+
+class MushroomSpotGeojsonSerializer(MapentityGeojsonModelSerializer):
+    class Meta(MapentityGeojsonModelSerializer.Meta):
+        fields = ["id", "name"]
         model = MushroomSpot

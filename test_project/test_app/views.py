@@ -20,6 +20,7 @@ from .serializers import (
     DummyGeojsonSerializer,
     DummySerializer,
     GeoPointSerializer,
+    MushroomSpotGeojsonSerializer,
     MushroomSpotSerializer,
     RoadSerializer,
 )
@@ -27,7 +28,13 @@ from .serializers import (
 
 class DummyList(mapentity_views.MapEntityList):
     model = DummyModel
+    columns = ["id", "name", "public"]
     searchable_columns = ["id", "name"]
+
+
+class DummyFilter(mapentity_views.MapEntityFilter):
+    model = DummyModel
+    filterset_class = DummyModelFilterSet
 
 
 class DummyFormat(mapentity_views.MapEntityFormat):
@@ -119,6 +126,11 @@ class RoadFilter(mapentity_views.MapEntityFilter):
     filterset_class = RoadFilterSet
 
 
+class MushroomSpotList(mapentity_views.MapEntityList):
+    model = MushroomSpot
+    columns = ["id", "name", "number", "size", "boolean"]
+
+
 class MushroomSpotCreate(mapentity_views.MapEntityCreate):
     model = MushroomSpot
     form_class = MushroomSpotForm
@@ -132,6 +144,7 @@ class MushroomSpotUpdate(mapentity_views.MapEntityUpdate):
 class MushroomSpotViewSet(mapentity_views.MapEntityViewSet):
     model = MushroomSpot
     serializer_class = MushroomSpotSerializer  # Assuming City has similar fields to Road for the serializer
+    geojson_serializer_class = MushroomSpotGeojsonSerializer
 
     def get_queryset(self):
         qs = self.model.objects.all()
@@ -160,6 +173,7 @@ class DummyAptDuplicate(mapentity_views.MapEntityDuplicate):
 
 class DummyAptList(mapentity_views.MapEntityList):
     model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+    columns = ["id", "name", "public", "date_update"]
     searchable_columns = ["name"]
 
 

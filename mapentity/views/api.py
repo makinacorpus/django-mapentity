@@ -64,7 +64,12 @@ class MapEntityViewSet(viewsets.ModelViewSet):
                 self.serializer_class,
             ):
                 class Meta(self.serializer_class.Meta):
-                    pass
+                    fields = (
+                        mapentity_serializers.MapentityDatatableSerializer.Meta.fields
+                        + self.serializer_class.Meta.fields
+                        if self.serializer_class.Meta.fields != "__all__"
+                        else "__all__"
+                    )
 
             return DatatablesSerializer
         else:

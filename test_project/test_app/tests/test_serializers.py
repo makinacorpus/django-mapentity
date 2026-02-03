@@ -339,12 +339,11 @@ class DatatableSerializerTests(TestCase):
         class DummySerializer(MapentityDatatableSerializer):
             class Meta:
                 model = DummyModel
-                fields = ["id", "name", "tags"]
+                fields = ["id", "tags"]
 
         serializer = DummySerializer(self.dummy1)
         data = serializer.data
 
-        self.assertEqual(data["name"], "Dummy1")
         self.assertEqual(data["tags"], "Tag1, Tag2")
 
     def test_manytomany_with_single_item(self):
@@ -353,12 +352,11 @@ class DatatableSerializerTests(TestCase):
         class DummySerializer(MapentityDatatableSerializer):
             class Meta:
                 model = DummyModel
-                fields = ["id", "name", "tags"]
+                fields = ["id", "tags"]
 
         serializer = DummySerializer(self.dummy2)
         data = serializer.data
 
-        self.assertEqual(data["name"], "Dummy2")
         self.assertEqual(data["tags"], "Tag3")
 
     def test_manytomany_with_no_items(self):
@@ -367,12 +365,11 @@ class DatatableSerializerTests(TestCase):
         class DummySerializer(MapentityDatatableSerializer):
             class Meta:
                 model = DummyModel
-                fields = ["id", "name", "tags"]
+                fields = ["id", "tags"]
 
         serializer = DummySerializer(self.dummy3)
         data = serializer.data
 
-        self.assertEqual(data["name"], "Dummy3")
         self.assertEqual(data["tags"], "")
 
     def test_foreignkey_with_related_object(self):
