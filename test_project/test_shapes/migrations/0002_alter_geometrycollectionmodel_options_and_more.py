@@ -4,82 +4,105 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('test_shapes', '0001_initial'),
+        ("test_shapes", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='geometrycollectionmodel',
-            options={'verbose_name': 'GeometryCollection Model', 'verbose_name_plural': 'GeometryCollection Models'},
+            name="geometrycollectionmodel",
+            options={
+                "verbose_name": "GeometryCollection Model",
+                "verbose_name_plural": "GeometryCollection Models",
+            },
         ),
         migrations.AlterModelOptions(
-            name='geometrymodel',
-            options={'verbose_name': 'Geometry Model', 'verbose_name_plural': 'Geometry Models'},
+            name="geometrymodel",
+            options={
+                "verbose_name": "Geometry Model",
+                "verbose_name_plural": "Geometry Models",
+            },
         ),
         migrations.AlterModelOptions(
-            name='multilinestringmodel',
-            options={'verbose_name': 'Multi LineString Model', 'verbose_name_plural': 'Multi LineString Models'},
+            name="multilinestringmodel",
+            options={
+                "verbose_name": "Multi LineString Model",
+                "verbose_name_plural": "Multi LineString Models",
+            },
         ),
         migrations.AlterModelOptions(
-            name='multipointmodel',
-            options={'verbose_name': 'Multi Point Model', 'verbose_name_plural': 'Multi Point Models'},
+            name="multipointmodel",
+            options={
+                "verbose_name": "Multi Point Model",
+                "verbose_name_plural": "Multi Point Models",
+            },
         ),
         migrations.AlterModelOptions(
-            name='multipolygonmodel',
-            options={'verbose_name': 'Multi Polygon Model', 'verbose_name_plural': 'Multi Polygon Models'},
+            name="multipolygonmodel",
+            options={
+                "verbose_name": "Multi Polygon Model",
+                "verbose_name_plural": "Multi Polygon Models",
+            },
         ),
         migrations.AlterModelOptions(
-            name='singlelinestringmodel',
-            options={'verbose_name': 'Single LineString Model', 'verbose_name_plural': 'Single LineString Models'},
+            name="singlelinestringmodel",
+            options={
+                "verbose_name": "Single LineString Model",
+                "verbose_name_plural": "Single LineString Models",
+            },
         ),
         migrations.AlterModelOptions(
-            name='singlepointmodel',
-            options={'verbose_name': 'Single Point Model', 'verbose_name_plural': 'Single Point Models'},
+            name="singlepointmodel",
+            options={
+                "verbose_name": "Single Point Model",
+                "verbose_name_plural": "Single Point Models",
+            },
         ),
         migrations.AlterModelOptions(
-            name='singlepolygonmodel',
-            options={'verbose_name': 'Single Polygon Model', 'verbose_name_plural': 'Single Polygon Models'},
+            name="singlepolygonmodel",
+            options={
+                "verbose_name": "Single Polygon Model",
+                "verbose_name_plural": "Single Polygon Models",
+            },
         ),
         migrations.AlterField(
-            model_name='geometrycollectionmodel',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='Name'),
+            model_name="geometrycollectionmodel",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="Name"),
         ),
         migrations.AlterField(
-            model_name='geometrymodel',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='Name'),
+            model_name="geometrymodel",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="Name"),
         ),
         migrations.AlterField(
-            model_name='multilinestringmodel',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='Name'),
+            model_name="multilinestringmodel",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="Name"),
         ),
         migrations.AlterField(
-            model_name='multipointmodel',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='Name'),
+            model_name="multipointmodel",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="Name"),
         ),
         migrations.AlterField(
-            model_name='multipolygonmodel',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='Name'),
+            model_name="multipolygonmodel",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="Name"),
         ),
         migrations.AlterField(
-            model_name='singlelinestringmodel',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='Name'),
+            model_name="singlelinestringmodel",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="Name"),
         ),
         migrations.AlterField(
-            model_name='singlepointmodel',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='Name'),
+            model_name="singlepointmodel",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="Name"),
         ),
         migrations.AlterField(
-            model_name='singlepolygonmodel',
-            name='name',
-            field=models.CharField(max_length=100, verbose_name='Name'),
+            model_name="singlepolygonmodel",
+            name="name",
+            field=models.CharField(max_length=100, verbose_name="Name"),
         ),
     ]
