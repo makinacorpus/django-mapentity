@@ -446,7 +446,7 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
     def __str__(self):
         return f"{self.action_time} - {self.user} - {self.object_display} - {self.action_flag_display}"
 
-    def get_label(self):
+    def get_display_label(self):
         return str(self.pk)
 
     @property
