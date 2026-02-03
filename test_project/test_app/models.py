@@ -190,7 +190,3 @@ class GeoPoint(MapEntityMixin, models.Model):
 
     def get_display_label(self):
         return f"{self.name or self.id}"
-
-    @property
-    def name_display(self):
-        return f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>'

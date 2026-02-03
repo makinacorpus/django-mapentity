@@ -64,12 +64,15 @@ class MapEntityViewSet(viewsets.ModelViewSet):
                 self.serializer_class,
             ):
                 class Meta(self.serializer_class.Meta):
-                    fields = (
-                        mapentity_serializers.MapentityDatatableSerializer.Meta.fields
-                        + self.serializer_class.Meta.fields
-                        if self.serializer_class.Meta.fields != "__all__"
-                        else "__all__"
-                    )
+                    if self.serializer_class.Meta.fields != "__all__":
+                        combined_fields = (
+                            mapentity_serializers.MapentityDatatableSerializer.Meta.fields
+                            + self.serializer_class.Meta.fields
+                        )
+                        # Remove duplicates while preserving order
+                        fields = list(dict.fromkeys(combined_fields))
+                    else:
+                        fields = "__all__"
 
             return DatatablesSerializer
         else:
