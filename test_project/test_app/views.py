@@ -32,11 +32,6 @@ class DummyList(mapentity_views.MapEntityList):
     searchable_columns = ["id", "name"]
 
 
-class DummyFilter(mapentity_views.MapEntityFilter):
-    model = DummyModel
-    filterset_class = DummyModelFilterSet
-
-
 class DummyFormat(mapentity_views.MapEntityFormat):
     model = DummyModel
     filterset_class = DummyModelFilterSet
