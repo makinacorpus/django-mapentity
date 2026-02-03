@@ -6,6 +6,8 @@ from mapentity.serializers.fields import CommaSeparatedRelatedField
 
 
 class MapentityDatatableSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="name_display")
+
     def build_relational_field(self, field_name, relation_info):
         # ForeignKey
         if not relation_info.to_many:
@@ -26,3 +28,9 @@ class MapentityDatatableSerializer(serializers.ModelSerializer):
             }
         )
         self.serializer_field_mapping = mappings
+
+    class Meta:
+        fields = [
+            "id",
+            "name",
+        ]

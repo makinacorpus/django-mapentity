@@ -417,6 +417,14 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         """Get full path to map image in storage."""
         return default_storage.path(self.get_map_image_path())
 
+    def get_display_label(self):
+        """Get a string label to display the object in links."""
+        return str(self.pk)
+
+    @property
+    def name_display(self):
+        return f'<a href="{self.get_detail_url()}">{self.get_display_label()}</a>'
+
 
 class MapEntityMixin(BaseMapEntityMixin):
     attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)

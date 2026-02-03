@@ -38,8 +38,11 @@ class MushroomSpot(MapEntityMixin, models.Model):
     number = models.IntegerField(null=True, default=42)
     size = models.FloatField(null=True, default=3.14159)
     boolean = models.BooleanField(default=True)
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, blank=True)
     objects = MushroomSpotManager()
+
+    def get_display_label(self):
+        return self.name
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -64,9 +67,8 @@ class Road(MapEntityMixin, models.Model):
     geom = models.LineStringField(null=True, default=None, srid=2154)
     can_duplicate = False
 
-    @property
-    def name_display(self):
-        return f'<a href="{self.get_detail_url()}">{self.name}</a>'
+    def get_display_label(self):
+        return self.name
 
 
 class DummyModel(MapEntityMixin, models.Model):
@@ -86,9 +88,8 @@ class DummyModel(MapEntityMixin, models.Model):
     def is_public(self):
         return self.public
 
-    @property
-    def name_display(self):
-        return f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>'
+    def get_display_label(self):
+        return f"{self.name or self.id}"
 
     class Meta:
         verbose_name = _("Dummy Model")
@@ -111,8 +112,8 @@ class DummyAptModel(MapEntityMixin, models.Model):
     def is_public(self):
         return self.public
 
-    def name_display(self):
-        return f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>'
+    def get_display_label(self):
+        return f"{self.name or self.id}"
 
     class Meta:
         verbose_name = _("DummyApt Model")
@@ -187,6 +188,5 @@ class GeoPoint(MapEntityMixin, models.Model):
     def __str__(self):
         return self.name
 
-    @property
-    def name_display(self):
-        return f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>'
+    def get_display_label(self):
+        return f"{self.name or self.id}"

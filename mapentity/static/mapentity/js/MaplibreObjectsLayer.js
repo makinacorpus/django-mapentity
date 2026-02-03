@@ -152,8 +152,13 @@ class MaplibreObjectsLayer {
                     return;
                 }
 
+                const name = feature.properties?.name;
+                if (!name || String(name).trim() === '') {
+                    // Pas de tooltip si le nom est absent, vide ou null
+                    return;
+                }
                 const coordinates = e.lngLat;
-                const descriptionContent = feature.properties.name || 'No data available';
+                const descriptionContent = String(name).trim();
                 const description = `<div class="popup-content">${descriptionContent}</div>`;
 
                 this.currentTooltip = new maplibregl.Popup({
@@ -162,10 +167,8 @@ class MaplibreObjectsLayer {
                     className: 'custom-popup',
                     anchor: 'left',
                     offset: 10,
-                })
-                    .setLngLat(coordinates)
-                    .setHTML(description)
-                    .addTo(this._map);
+                });
+                this.currentTooltip.setLngLat(coordinates).setHTML(description).addTo(this._map);
             }
         }
     }

@@ -65,7 +65,7 @@ messages_js:
 
 messages: messages_python messages_js
 
-start_for_e2e:
+serve_e2e:
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py migrate
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py flush --no-input
 	echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@test.com', 'admin')" | $(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py shell

@@ -789,6 +789,7 @@ class LogViewMapentityTest(MapEntityTest):
             "change_message": "",
             "content_type": str(content_type),
             "id": 1,
+            "name": '<a href="/logentry/1/">1</a>',
             "object": '<a data-pk="1" href="/dummymodel/1/" >Test App | Dummy '
             "Model <class 'object'></a>",
             "object_id": "1",
