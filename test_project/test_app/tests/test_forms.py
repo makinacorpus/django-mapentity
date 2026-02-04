@@ -5,7 +5,7 @@ from django.test.utils import override_settings
 from mapentity.forms import BaseMultiUpdateForm, MapEntityForm
 from mapentity.settings import app_settings
 
-from ..models import DummyModel, GeoPoint, ManikinModel
+from ..models import DummyModel, GeoPoint, ManikinModel, Supermarket
 
 
 class DummyForm(MapEntityForm):
@@ -144,3 +144,57 @@ class MultiUpdateFilterTest(TestCase):
         self.assertEqual(helper.form_method, "post")
         self.assertEqual(helper.inputs[0].name, "cancel")
         self.assertEqual(helper.inputs[1].name, "save")
+
+
+class SupermarketFormTest(TestCase):
+    """Test multi-geometry field support with Supermarket model"""
+    
+    def test_multiple_geometry_fields(self):
+        """Test that SupermarketForm correctly handles multiple geometry fields"""
+        from ..forms import SupermarketForm
+        from mapentity.widgets import MapWidget
+        
+        form = SupermarketForm()
+        
+        # Both geometry fields should be present
+        self.assertIn('geom', form.fields)
+        self.assertIn('parking', form.fields)
+        
+        # Both should have MapWidget
+        self.assertIsInstance(form.fields['geom'].widget, MapWidget)
+        self.assertIsInstance(form.fields['parking'].widget, MapWidget)
+        
+        # Check geomfields configuration
+        self.assertEqual(form.geomfields, ['geom', 'parking'])
+    
+    def test_target_map_configuration(self):
+        """Test that secondary geometry field targets the first field's map"""
+        from ..forms import SupermarketForm
+        
+        form = SupermarketForm()
+        
+        # First geometry field should NOT have target_map
+        geom_widget = form.fields['geom'].widget
+        self.assertNotIn('target_map', geom_widget.attrs)
+        
+        # Second geometry field SHOULD have target_map pointing to first field
+        parking_widget = form.fields['parking'].widget
+        self.assertEqual(parking_widget.attrs.get('target_map'), 'geom')
+    
+    def test_form_layout(self):
+        """Test that form layout includes both geometry fields"""
+        from ..forms import SupermarketForm
+        
+        form = SupermarketForm()
+        
+        # Check that both geom fields are in the layout
+        layout_fields = []
+        for item in form.helper.layout:
+            if hasattr(item, 'fields'):
+                for field in item.fields:
+                    if hasattr(field, 'fields'):
+                        layout_fields.extend(field.fields)
+        
+        # Both geometry fields should be in the right panel
+        self.assertIn('geom', layout_fields)
+        self.assertIn('parking', layout_fields)
