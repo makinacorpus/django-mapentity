@@ -131,17 +131,20 @@ class SupermarketFactory(factory.django.DjangoModelFactory):
 
     @factory.lazy_attribute
     def geom(self):
+        # Lambert 93 (SRID 2154) uses meters, valid range for France approx:
+        # x: 100000-1200000, y: 6000000-7100000
         points = [
-            (random.uniform(-180, 180), random.uniform(-80, 80)) for _ in range(3)
+            (random.uniform(100000, 1200000), random.uniform(6000000, 7100000)) for _ in range(3)
         ]
         points.append(points[0])
         return Polygon(points, srid=2154)
 
     @factory.lazy_attribute
     def parking(self):
-        x = random.randint(-18000, 18000)
-        y = random.randint(-8000, 8000)
-        return Point(x / 100, y / 100, srid=2154)
+        # Lambert 93 coordinates in meters
+        x = random.uniform(100000, 1200000)
+        y = random.uniform(6000000, 7100000)
+        return Point(x, y, srid=2154)
 
     class Meta:
         model = Supermarket
