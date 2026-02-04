@@ -5,7 +5,7 @@ from django.test.utils import override_settings
 from mapentity.forms import BaseMultiUpdateForm, MapEntityForm
 from mapentity.settings import app_settings
 
-from ..models import DummyModel, GeoPoint, ManikinModel
+from ..models import ComplexModel, DummyModel, ManikinModel
 
 
 class DummyForm(MapEntityForm):
@@ -72,9 +72,9 @@ class MapEntityRichTextFormTest(TestCase):
             )
 
 
-class GeoPointForm(BaseMultiUpdateForm):
+class ComplexModelForm(BaseMultiUpdateForm):
     class Meta:
-        model = GeoPoint
+        model = ComplexModel
         fields = [
             "public_en",
             "public_fr",
@@ -93,7 +93,7 @@ class ManikinModelForm(BaseMultiUpdateForm):
 
 class MultiUpdateFilterTest(TestCase):
     def setUp(self):
-        self.form = GeoPointForm()
+        self.form = ComplexModelForm()
 
     def test_translated_fields(self):
         fields = list(self.form.fields.keys())

@@ -7,8 +7,8 @@ from django.db import transaction
 
 from test_project.test_app.tests.factories import (
     CityFactory,
+    ComplexModelFactory,
     DummyModelFactory,
-    GeoPointFactory,
     RoadFactory,
     SectorFactory,
     TagFactory,
@@ -67,14 +67,14 @@ class Command(BaseCommand):
             self.stdout.write("Clearing existing test data...")
             from test_project.test_app.models import (
                 City,
+                ComplexModel,
                 DummyModel,
-                GeoPoint,
                 Road,
                 Sector,
                 Tag,
             )
 
-            GeoPoint.objects.all().delete()
+            ComplexModel.objects.all().delete()
             DummyModel.objects.all().delete()
             Road.objects.all().delete()
             City.objects.all().delete()
@@ -107,7 +107,7 @@ class Command(BaseCommand):
         )
 
         # Create geo points
-        GeoPointFactory.create_batch(options["geopoints"])
+        ComplexModelFactory.create_batch(options["geopoints"])
         self.stdout.write(
             self.style.SUCCESS(f"Created {options['geopoints']} geo points")
         )

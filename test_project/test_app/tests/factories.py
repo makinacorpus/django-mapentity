@@ -5,8 +5,8 @@ from django.contrib.gis.geos import LineString, Point, Polygon
 
 from test_project.test_app.models import (
     City,
+    ComplexModel,
     DummyModel,
-    GeoPoint,
     ManikinModel,
     Road,
     Sector,
@@ -90,7 +90,7 @@ class DummyModelFactory(factory.django.DjangoModelFactory):
         model = DummyModel
 
 
-class GeoPointFactory(factory.django.DjangoModelFactory):
+class ComplexModelFactory(factory.django.DjangoModelFactory):
     name = "geo point"
     internal_reference = "QF536-321"
 
@@ -122,4 +122,4 @@ class GeoPointFactory(factory.django.DjangoModelFactory):
         return CityFactory.create()
 
     class Meta:
-        model = GeoPoint
+        model = ComplexModel

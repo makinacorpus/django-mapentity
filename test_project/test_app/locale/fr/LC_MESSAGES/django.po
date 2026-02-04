@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-03 20:47+0000\n"
+"POT-Creation-Date: 2026-02-04 14:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,6 +30,12 @@ msgstr "Coin à champignons"
 msgid "Mushroom Spots"
 msgstr "Coins à champignons"
 
+msgid "Road"
+msgstr "Route"
+
+msgid "Roads"
+msgstr "Routes"
+
 msgid "Short description"
 msgstr "Description courte"
 
@@ -38,9 +44,6 @@ msgstr "Modèle factice"
 
 msgid "Dummy Models"
 msgstr "Modèles factices"
-
-msgid "DummyApt Model"
-msgstr ""
 
 msgid "City"
 msgstr "Ville"
@@ -53,3 +56,9 @@ msgstr "Supermarché"
 
 msgid "Supermarkets"
 msgstr "Supermarchés"
+
+msgid "Complex Model"
+msgstr "Modèle complexe"
+
+msgid "Complex Models"
+msgstr "Modèles complexes"

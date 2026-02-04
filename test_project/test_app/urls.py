@@ -2,9 +2,8 @@ from mapentity.registry import registry
 
 from .models import (
     City,
-    DummyAptModel,
+    ComplexModel,
     DummyModel,
-    GeoPoint,
     MushroomSpot,
     Road,
     Supermarket,
@@ -16,6 +15,5 @@ urlpatterns = registry.register(DummyModel)
 urlpatterns += registry.register(MushroomSpot)
 urlpatterns += registry.register(Road)
 urlpatterns += registry.register(City)
-urlpatterns += registry.register(DummyAptModel)
-urlpatterns += registry.register(GeoPoint)
+urlpatterns += registry.register(ComplexModel)
 urlpatterns += registry.register(Supermarket)
