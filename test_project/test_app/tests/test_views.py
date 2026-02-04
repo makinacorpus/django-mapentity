@@ -509,7 +509,7 @@ class MultiDeleteViewTest(BaseTest):
     def test_mapentity_title(self):
         multideleteview = ComplexModelMultiDelete()
         multideleteview.object_list = ComplexModel.objects.none()
-        self.assertEqual(multideleteview.get_title(), "Delete selected geopoint")
+        self.assertEqual(multideleteview.get_title(), "Delete selected complexmodel")
 
     def test_multi_delete_should_have_number_of_selected_objects_in_context(self):
         view = ComplexModelMultiDelete()
@@ -558,7 +558,7 @@ class MultiUpdateViewTest(BaseTest):
     def test_mapentity_title(self):
         multiupdateview = ComplexModelMultiUpdate()
         multiupdateview.object_list = ComplexModel.objects.none()
-        self.assertEqual(multiupdateview.get_title(), "Update selected geopoint")
+        self.assertEqual(multiupdateview.get_title(), "Update selected complexmodel")
 
     def test_multi_update_should_have_number_of_selected_objects_in_context(self):
         view = ComplexModelMultiUpdate()
