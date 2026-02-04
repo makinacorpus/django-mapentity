@@ -37,7 +37,7 @@ class MaplibreMultiFieldManager {
         if (this.fields.size > 1 && !this.fieldSelectorControl) {
             this._createFieldSelector();
             // Update controls for the active field when field selector is created
-            // Use setTimeout to ensure Geoman is fully loaded
+            // Try immediately and listen for gm:loaded event to handle timing
             const updateControls = () => {
                 const activeField = this.getActiveField();
                 if (activeField) {
