@@ -1,5 +1,6 @@
 /**
  * Tests for Supermarket - Multiple geometry fields (Polygon + Point)
+ * New behavior: All controls visible simultaneously, no field selector
  */
 
 describe('Supermarket - Multiple geometry fields', () => {
@@ -8,50 +9,29 @@ describe('Supermarket - Multiple geometry fields', () => {
         cy.mockTiles();
     })
 
-    it('should display create form with field selector for multiple geometries', () => {
+    it('should display all controls simultaneously without field selector', () => {
         cy.visit('/supermarket/add/');
         cy.get('form', {timeout: 10000}).should('exist');
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
         
-        // Should have field selector control for multiple geometry fields
-        cy.get('.mapentity-field-selector', {timeout: 5000}).should('exist');
+        // Should NOT have field selector control
+        cy.get('.mapentity-field-selector').should('not.exist');
         
-        // Should have buttons for both geometry fields
-        cy.get('.mapentity-field-selector').within(() => {
-            cy.contains('Geom').should('exist');
-            cy.contains('Parking').should('exist');
-        });
-        
-        // Initially, Geom field should be active (polygon controls visible)
-        cy.get('#id_draw_polygon').should('exist');
-        cy.get('#id_draw_marker').should('not.exist');
+        // Both polygon AND marker controls should be visible simultaneously
+        cy.get('#id_draw_polygon', {timeout: 5000}).should('exist');
+        cy.get('#id_draw_marker', {timeout: 5000}).should('exist');
     });
 
-    it('should switch controls when switching between geometry fields', () => {
-        cy.visit('/supermarket/add/');
-        cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.get('.mapentity-field-selector', {timeout: 5000}).should('exist');
-        
-        // Initially on Geom field (Polygon) - should have polygon controls
-        cy.get('#id_draw_polygon').should('exist');
-        cy.get('#id_draw_marker').should('not.exist');
-        
-        // Switch to Parking field (Point)
-        cy.get('.mapentity-field-selector').contains('Parking').click();
-        cy.wait(500);
-        
-        // Now should have marker controls
-        cy.get('#id_draw_marker').should('exist');
-        cy.get('#id_draw_polygon').should('not.exist');
-    });
-
-    it('should create entity with both polygon and point geometries', {retries: 2}, () => {
+    it('should create entity with both polygon and point geometries simultaneously', {retries: 2}, () => {
         cy.visit('/supermarket/add/')
         
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.get('.mapentity-field-selector', {timeout: 5000}).should('exist');
         
-        // Draw polygon for geom field
+        // Both controls should be visible
+        cy.get('#id_draw_polygon', {timeout: 5000}).should('exist');
+        cy.get('#id_draw_marker', {timeout: 5000}).should('exist');
+        
+        // Draw polygon for geom field (no need to switch fields)
         cy.get('#id_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(300, 300);
         cy.get('.maplibregl-canvas').click(400, 300);
@@ -60,11 +40,7 @@ describe('Supermarket - Multiple geometry fields', () => {
         cy.get('.maplibregl-canvas').click(300, 300); // Close polygon
         cy.wait(500);
         
-        // Switch to Parking field
-        cy.get('.mapentity-field-selector').contains('Parking').click();
-        cy.wait(500);
-        
-        // Draw point for parking field
+        // Draw point for parking field (no need to switch fields)
         cy.get('#id_draw_marker').click();
         cy.get('.maplibregl-canvas').click(350, 350);
         cy.wait(500);
@@ -92,7 +68,10 @@ describe('Supermarket - Multiple geometry fields', () => {
         cy.visit('/supermarket/add/')
         
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.get('.mapentity-field-selector', {timeout: 5000}).should('exist');
+        
+        // Both controls should be visible
+        cy.get('#id_draw_polygon', {timeout: 5000}).should('exist');
+        cy.get('#id_draw_marker', {timeout: 5000}).should('exist');
         
         // Draw polygon for geom field
         cy.get('#id_draw_polygon').click();
@@ -108,18 +87,12 @@ describe('Supermarket - Multiple geometry fields', () => {
             expect(geomVal).to.not.be.empty;
         });
         
-        // Switch to Parking field and draw point
-        cy.get('.mapentity-field-selector').contains('Parking').click();
-        cy.wait(500);
+        // Draw point for parking field
         cy.get('#id_draw_marker').click();
         cy.get('.maplibregl-canvas').click(350, 350);
         cy.wait(500);
         
-        // Switch back to Geom field
-        cy.get('.mapentity-field-selector').contains('Geom').click();
-        cy.wait(500);
-        
-        // Draw a new polygon (should replace the old one)
+        // Draw a new polygon (should replace the old one for Polygon type)
         cy.get('#id_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(200, 200);
         cy.get('.maplibregl-canvas').click(250, 200);
@@ -144,7 +117,7 @@ describe('Supermarket - Multiple geometry fields', () => {
     });
 });
 
-describe('Supermarket - Single field models should not have field selector', () => {
+describe('Single field models should not have multi-field behavior', () => {
     beforeEach(() => {
         cy.login();
         cy.mockTiles();
