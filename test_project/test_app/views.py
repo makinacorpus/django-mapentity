@@ -13,7 +13,15 @@ from .forms import (
     RoadForm,
     SupermarketForm,
 )
-from .models import City, DummyAptModel, DummyModel, GeoPoint, MushroomSpot, Road, Supermarket
+from .models import (
+    City,
+    DummyAptModel,
+    DummyModel,
+    GeoPoint,
+    MushroomSpot,
+    Road,
+    Supermarket,
+)
 from .serializers import (
     CitySerializer,
     DummyAptGeojsonSerializer,

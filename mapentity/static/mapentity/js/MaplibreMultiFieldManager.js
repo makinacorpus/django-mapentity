@@ -123,16 +123,24 @@ class MaplibreMultiFieldManager {
     _createFieldSelector() {
         const controlDiv = document.createElement('div');
         controlDiv.className = 'maplibregl-ctrl maplibregl-ctrl-group mapentity-field-selector';
+        
+        // Set all styles including position before appending to avoid visual flash
         controlDiv.style.cssText = `
             background: white;
             padding: 5px;
             border-radius: 4px;
             box-shadow: 0 0 0 2px rgba(0,0,0,.1);
             margin: 10px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
         `;
         
+        // Use gettext if available, otherwise fall back to English
+        const labelText = (typeof gettext === 'function') ? gettext('Editing:') : 'Editing:';
         const label = document.createElement('div');
-        label.textContent = gettext('Editing:');
+        label.textContent = labelText;
         label.style.cssText = 'font-weight: bold; margin-bottom: 5px; font-size: 11px;';
         controlDiv.appendChild(label);
         
@@ -145,12 +153,6 @@ class MaplibreMultiFieldManager {
         
         // Add to map
         this.map.getContainer().appendChild(controlDiv);
-        
-        // Position it
-        controlDiv.style.position = 'absolute';
-        controlDiv.style.top = '10px';
-        controlDiv.style.left = '10px';
-        controlDiv.style.zIndex = '1';
     }
 
     /**

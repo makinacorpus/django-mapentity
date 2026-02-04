@@ -192,12 +192,20 @@ class MaplibreDrawControlManager {
         controls[category][controlName].uiEnabled = visible;
         
         // Force UI refresh - try different methods depending on Geoman version
-        if (this.geoman.refreshUI) {
+        let refreshed = false;
+        if (typeof this.geoman.refreshUI === 'function') {
             this.geoman.refreshUI();
-        } else if (this.geoman.updateControls) {
+            refreshed = true;
+        } else if (typeof this.geoman.updateControls === 'function') {
             this.geoman.updateControls();
-        } else if (this.geoman.controls && this.geoman.controls.refresh) {
+            refreshed = true;
+        } else if (this.geoman.controls && typeof this.geoman.controls.refresh === 'function') {
             this.geoman.controls.refresh();
+            refreshed = true;
+        }
+        
+        if (!refreshed) {
+            console.warn('MaplibreDrawControlManager: no refresh method available, UI may not update. Consider upgrading Geoman library.');
         }
         
         console.log('MaplibreDrawControlManager: updated control visibility', category, controlName, visible);
