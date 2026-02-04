@@ -60,7 +60,7 @@ class MaplibreMultiFieldManager {
         let showDrawLine = false;
         let showDrawPoint = false;
         let isGenericOrCollection = false;
-        let modifiable = true;
+        let allModifiable = true; // Start true, becomes false if any field is not modifiable
 
         this.fields.forEach((field) => {
             const options = field.options;
@@ -68,7 +68,7 @@ class MaplibreMultiFieldManager {
             showDrawPolygon = showDrawPolygon || options.isPolygon || options.isMultiPolygon;
             showDrawLine = showDrawLine || options.isLineString || options.isMultiLineString;
             showDrawPoint = showDrawPoint || options.isPoint || options.isMultiPoint;
-            modifiable = modifiable && options.modifiable;
+            allModifiable = allModifiable && options.modifiable;
         });
 
         // Show controls for all geometry types present across all fields
@@ -82,12 +82,12 @@ class MaplibreMultiFieldManager {
         geoman.setControlVisibility('draw', 'marker', showDrawPoint);
         geoman.setControlVisibility('draw', 'rectangle', isGenericOrCollection);
 
-        const shouldShowDrag = (showDrawPoint || isGenericOrCollection) && modifiable;
-        const shouldShowEdit = ((showDrawLine || showDrawPolygon || isGenericOrCollection) && modifiable);
+        const shouldShowDrag = (showDrawPoint || isGenericOrCollection) && allModifiable;
+        const shouldShowEdit = ((showDrawLine || showDrawPolygon || isGenericOrCollection) && allModifiable);
 
         geoman.setControlVisibility('edit', 'drag', shouldShowDrag);
         geoman.setControlVisibility('edit', 'change', shouldShowEdit);
-        geoman.setControlVisibility('edit', 'delete', modifiable);
+        geoman.setControlVisibility('edit', 'delete', allModifiable);
 
         console.log('MaplibreMultiFieldManager: updated controls for all fields', {
             polygon: showDrawPolygon,
@@ -103,7 +103,7 @@ class MaplibreMultiFieldManager {
      */
     getFieldForGeometryType(geometryType) {
         // Find the first field that matches the geometry type
-        for (const [fieldId, field] of this.fields) {
+        for (const field of this.fields.values()) {
             const options = field.options;
             
             // Check if this field handles this geometry type
