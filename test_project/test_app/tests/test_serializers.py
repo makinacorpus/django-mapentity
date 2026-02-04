@@ -288,7 +288,7 @@ class CSVSerializerTests(TestCase):
         self.assertEqual(
             self.stream.getvalue(),
             (
-                f"ID,name,number,size,boolean,tags\r\n{self.point.pk},"
+                f"ID,Name,number,size,boolean,tags\r\n{self.point.pk},"
                 'Empty,42,3.14159,yes,"Tag1,Tag2"\r\n'
             ),
         )
@@ -305,7 +305,7 @@ class CSVSerializerTests(TestCase):
             self.assertEqual(
                 self.stream.getvalue(),
                 (
-                    f"ID,name,number,size,boolean,tags\r\n{self.point.pk},"
+                    f"ID,Nom,number,size,boolean,tags\r\n{self.point.pk},"
                     'Empty,42,"3,14159",oui,"Tag1,Tag2"\r\n'
                 ),
             )

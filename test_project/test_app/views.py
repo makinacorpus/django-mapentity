@@ -4,15 +4,32 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 from mapentity import views as mapentity_views
 
-from .filters import DummyAptFilterSet, DummyModelFilterSet, RoadFilterSet
+from .filters import (
+    CityFilterSet,
+    DummyAptFilterSet,
+    DummyModelFilterSet,
+    GeoPointFilterSet,
+    MushroomSpotFilterSet,
+    RoadFilterSet,
+    SupermarketFilterSet,
+)
 from .forms import (
     CityForm,
     DummyAptModelForm,
     DummyModelForm,
     MushroomSpotForm,
     RoadForm,
+    SupermarketForm,
 )
-from .models import City, DummyAptModel, DummyModel, GeoPoint, MushroomSpot, Road
+from .models import (
+    City,
+    DummyAptModel,
+    DummyModel,
+    GeoPoint,
+    MushroomSpot,
+    Road,
+    Supermarket,
+)
 from .serializers import (
     CitySerializer,
     DummyAptGeojsonSerializer,
@@ -23,6 +40,8 @@ from .serializers import (
     MushroomSpotGeojsonSerializer,
     MushroomSpotSerializer,
     RoadSerializer,
+    SupermarketGeojsonSerializer,
+    SupermarketSerializer,
 )
 
 
@@ -30,6 +49,7 @@ class DummyList(mapentity_views.MapEntityList):
     model = DummyModel
     columns = ["id", "name", "public"]
     searchable_columns = ["id", "name"]
+    filterset_class = DummyModelFilterSet
 
 
 class DummyFormat(mapentity_views.MapEntityFormat):
@@ -105,6 +125,7 @@ class RoadViewSet(mapentity_views.MapEntityViewSet):
     queryset = Road.objects.all()
     serializer_class = RoadSerializer
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    filterset_class = RoadFilterSet
 
 
 class RoadList(mapentity_views.MapEntityList):
@@ -124,6 +145,7 @@ class RoadFilter(mapentity_views.MapEntityFilter):
 class MushroomSpotList(mapentity_views.MapEntityList):
     model = MushroomSpot
     columns = ["id", "name", "number", "size", "boolean"]
+    filterset_class = MushroomSpotFilterSet
 
 
 class MushroomSpotCreate(mapentity_views.MapEntityCreate):
@@ -140,6 +162,7 @@ class MushroomSpotViewSet(mapentity_views.MapEntityViewSet):
     model = MushroomSpot
     serializer_class = MushroomSpotSerializer  # Assuming City has similar fields to Road for the serializer
     geojson_serializer_class = MushroomSpotGeojsonSerializer
+    filterset_class = MushroomSpotFilterSet
 
     def get_queryset(self):
         qs = self.model.objects.all()
@@ -170,6 +193,7 @@ class DummyAptList(mapentity_views.MapEntityList):
     model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
     columns = ["id", "name", "public", "date_update"]
     searchable_columns = ["name"]
+    filterset_class = DummyAptFilterSet
 
 
 class DummyAptDetail(
@@ -200,6 +224,7 @@ class DummyAptViewSet(mapentity_views.MapEntityViewSet):
 class CityList(mapentity_views.MapEntityList):
     model = City
     searchable_columns = ["id", "name"]
+    filterset_class = CityFilterSet
 
 
 class CityDetail(mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail):
@@ -226,6 +251,7 @@ class CityViewSet(mapentity_views.MapEntityViewSet):
         CitySerializer  # Assuming City has similar fields to Road for the serializer
     )
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    filterset_class = CityFilterSet
 
     def get_queryset(self):
         qs = self.model.objects.all()
@@ -237,6 +263,7 @@ class CityViewSet(mapentity_views.MapEntityViewSet):
 class GeoPointlist(mapentity_views.MapEntityList):
     model = GeoPoint
     columns = ["id", "name", "public"]
+    filterset_class = GeoPointFilterSet
 
 
 class GeoPointMultiDelete(mapentity_views.MapEntityMultiDelete):
@@ -250,6 +277,48 @@ class GeoPointMultiUpdate(mapentity_views.MapEntityMultiUpdate):
 class GeoPointViewSet(mapentity_views.MapEntityViewSet):
     model = GeoPoint
     serializer_class = GeoPointSerializer  # Assuming City has similar fields to Road for the serializer
+    filterset_class = GeoPointFilterSet
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        if self.format_kwarg == "geojson":
+            qs = qs.annotate(api_geom=Transform("geom", 4326))
+        return qs
+
+
+# Supermarket views
+class SupermarketList(mapentity_views.MapEntityList):
+    model = Supermarket
+    searchable_columns = ["id", "name"]
+    filterset_class = SupermarketFilterSet
+
+
+class SupermarketDetail(
+    mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail
+):
+    model = Supermarket
+
+
+class SupermarketCreate(mapentity_views.MapEntityCreate):
+    model = Supermarket
+    form_class = SupermarketForm
+
+
+class SupermarketUpdate(mapentity_views.MapEntityUpdate):
+    model = Supermarket
+    form_class = SupermarketForm
+
+
+class SupermarketDelete(mapentity_views.MapEntityDelete):
+    model = Supermarket
+
+
+class SupermarketViewSet(mapentity_views.MapEntityViewSet):
+    model = Supermarket
+    serializer_class = SupermarketSerializer
+    geojson_serializer_class = SupermarketGeojsonSerializer
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    filterset_class = SupermarketFilterSet
 
     def get_queryset(self):
         qs = self.model.objects.all()

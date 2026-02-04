@@ -33,7 +33,7 @@ class Tag(models.Model):
 
 
 class MushroomSpot(MapEntityMixin, models.Model):
-    name = models.CharField(max_length=100, default="Empty")
+    name = models.CharField(max_length=100, default="Empty", verbose_name=_("Name"))
     serialized = models.CharField(max_length=200, null=True, default=None)
     number = models.IntegerField(null=True, default=42)
     size = models.FloatField(null=True, default=3.14159)
@@ -63,7 +63,7 @@ class WeatherStation(models.Model):
 class Road(MapEntityMixin, models.Model):
     """Linestring Mapentity model"""
 
-    name = models.CharField(max_length=100, default="Empty")
+    name = models.CharField(max_length=100, default="Empty", verbose_name=_("Name"))
     geom = models.LineStringField(null=True, default=None, srid=2154)
     can_duplicate = False
 
@@ -72,7 +72,9 @@ class Road(MapEntityMixin, models.Model):
 
 
 class DummyModel(MapEntityMixin, models.Model):
-    name = models.CharField(blank=True, default="", max_length=128)
+    name = models.CharField(
+        blank=True, default="", max_length=128, verbose_name=_("Name")
+    )
     short_description = models.TextField(
         blank=True, default="", help_text=_("Short description")
     )
@@ -93,10 +95,13 @@ class DummyModel(MapEntityMixin, models.Model):
 
     class Meta:
         verbose_name = _("Dummy Model")
+        verbose_name_plural = _("Dummy Models")
 
 
 class DummyAptModel(MapEntityMixin, models.Model):
-    name = models.CharField(blank=True, default="", max_length=128)
+    name = models.CharField(
+        blank=True, default="", max_length=128, verbose_name=_("Name")
+    )
     short_description = models.TextField(
         blank=True, default="", help_text=_("Short description")
     )
@@ -142,26 +147,30 @@ class ManikinModel(MapEntityMixin, models.Model):
 
 class City(MapEntityMixin, models.Model):
     geom = models.PolygonField(null=True, default=None, srid=2154)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
 
     def __str__(self):
         return self.name
 
-    def name_display(self):
-        return f'<a href="{self.get_detail_url()}">{self.name}</a>'
+    class Meta:
+        verbose_name = _("City")
+        verbose_name_plural = _("Cities")
 
 
 class Supermarket(MapEntityMixin, models.Model):
-    """Linestring Mapentity model"""
-
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
     geom = models.PolygonField(null=True, default=None, srid=2154)
     parking = models.PointField(null=True, default=None, srid=2154)
     tag = models.ForeignKey(Tag, null=True, default=None, on_delete=models.SET_NULL)
 
+    class Meta:
+        verbose_name = _("Supermarket")
+        verbose_name_plural = _("Supermarkets")
+
 
 class Sector(MapEntityMixin, models.Model):
     code = models.CharField(primary_key=True, max_length=6)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
     skip_attachments = True
 
     def __str__(self):
@@ -175,7 +184,7 @@ class GeoPoint(MapEntityMixin, models.Model):
         City, on_delete=models.SET_NULL, null=True, blank=True
     )
     road = models.ForeignKey(Road, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, verbose_name=_("Name"))
     dummy_model = models.OneToOneField(DummyModel, null=True, on_delete=models.CASCADE)
     internal_reference = models.CharField(max_length=20, editable=False)
     content_type = models.ForeignKey(
@@ -187,6 +196,3 @@ class GeoPoint(MapEntityMixin, models.Model):
 
     def __str__(self):
         return self.name
-
-    def get_display_label(self):
-        return f"{self.name or self.id}"

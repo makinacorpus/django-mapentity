@@ -2,7 +2,24 @@ from django_filters.rest_framework import BooleanFilter
 
 from mapentity.filters import MapEntityFilterSet
 
-from .models import City, DummyAptModel, DummyModel, Road
+from .models import (
+    City,
+    DollModel,
+    DummyAptModel,
+    DummyModel,
+    GeoPoint,
+    ManikinModel,
+    MushroomSpot,
+    Road,
+    Sector,
+    Supermarket,
+)
+
+
+class MushroomSpotFilterSet(MapEntityFilterSet):
+    class Meta:
+        model = MushroomSpot
+        fields = ("id", "name")
 
 
 class DummyModelFilterSet(MapEntityFilterSet):
@@ -23,11 +40,43 @@ class DummyAptFilterSet(MapEntityFilterSet):
     public = BooleanFilter(field_name="public", lookup_expr="exact")
 
     class Meta:
-        model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
+        model = DummyAptModel
         fields = ("public", "name")
+
+
+class DollModelFilterSet(MapEntityFilterSet):
+    class Meta:
+        model = DollModel
+        fields = ("id",)
+
+
+class ManikinModelFilterSet(MapEntityFilterSet):
+    class Meta:
+        model = ManikinModel
+        fields = ("id", "dummy")
 
 
 class CityFilterSet(MapEntityFilterSet):
     class Meta:
         model = City
         fields = ("id", "name")
+
+
+class SupermarketFilterSet(MapEntityFilterSet):
+    class Meta:
+        model = Supermarket
+        fields = ("id", "tag")
+
+
+class SectorFilterSet(MapEntityFilterSet):
+    class Meta:
+        model = Sector
+        fields = ("code", "name")
+
+
+class GeoPointFilterSet(MapEntityFilterSet):
+    public = BooleanFilter(field_name="public", lookup_expr="exact")
+
+    class Meta:
+        model = GeoPoint
+        fields = ("public", "name", "located_in", "road")

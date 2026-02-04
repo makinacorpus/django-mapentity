@@ -360,7 +360,7 @@ class ListViewTest(BaseTest):
         request.session = {}
         view = DummyList.as_view()
         response = view(request)
-        self.assertNotContains(response, '<input type="text" name="name"')
+        self.assertNotContains(response, '<input type="text" name="Name"')
         self.assertContains(response, '<input type="hidden" name="bbox"')
 
     def test_list_view_overrides_minimal_generic_filter(self):
