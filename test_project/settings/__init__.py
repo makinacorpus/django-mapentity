@@ -213,8 +213,8 @@ MAPENTITY_CONFIG = {
             "color": "green",
         },
         "road": {
-            "weight": 5,
-            "opacity": 0.5,
+            "weight": 2,
+            "opacity": 1,
             "color": "red",
             "arrowColor": "#FF5E00",
             "arrowSize": 8,

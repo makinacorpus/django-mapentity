@@ -99,7 +99,7 @@ class ValueTableTest(TestCase):
         self.assertHTMLEqual(
             out,
             f"""
-                             <table class="table"><thead><tr><th class="name">name</th></tr>
+                             <table class="table"><thead><tr><th class="name">Name</th></tr>
                              </thead><tbody><tr class="hoverable" data-modelname="dummymodel"
                               data-pk="{dummy.pk}"><td><a href="/dummymodel/{dummy.pk}/">
                               foo</a></td></tr></tbody></table>""",

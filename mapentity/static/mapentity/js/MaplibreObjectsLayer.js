@@ -490,6 +490,7 @@ class MaplibreObjectsLayer {
      */
     _addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailStrokeColor) {
         const layerId = `${layerIdBase}-points`;
+        const hoveredStrokeWidth = strokeWidth + 2;
         this._map.addLayer({
             id: layerId,
             type: 'circle',
@@ -517,7 +518,12 @@ class MaplibreObjectsLayer {
                     strokeColor
                 ],
                 'circle-stroke-opacity': strokeOpacity,
-                'circle-stroke-width': strokeWidth,
+                'circle-stroke-width': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    hoveredStrokeWidth,
+                    strokeWidth
+                ],
                 'circle-radius': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
@@ -528,6 +534,7 @@ class MaplibreObjectsLayer {
         });
         return layerId;
     }
+
 
     /**
      * Ajoute une couche de lignes
@@ -541,10 +548,18 @@ class MaplibreObjectsLayer {
      */
     _addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor) {
         const layerId = `${layerIdBase}-lines`;
+        // Augmentation de la largeur au hover (en pixels)
+        const hoverExtra = 2;
+        const hoveredWidth = strokeWidth + hoverExtra;
+
         this._map.addLayer({
             id: layerId,
             type: 'line',
             source: sourceId,
+            layout: {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
             filter: this._buildFilter(['any',
                 ['==', ['geometry-type'], 'LineString'],
                 ['==', ['geometry-type'], 'MultiLineString']
@@ -558,7 +573,12 @@ class MaplibreObjectsLayer {
                     detailColor,
                     strokeColor
                 ],
-                'line-width': strokeWidth,
+                'line-width': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    hoveredWidth,
+                    strokeWidth
+                ],
                 'line-opacity': strokeOpacity
             }
         });
@@ -581,6 +601,10 @@ class MaplibreObjectsLayer {
         const fillLayerId = `${layerIdBase}-polygon-fill`;
         const strokeLayerId = `${layerIdBase}-polygon-stroke`;
 
+        // Augmentations visuelles au survol
+        const hoveredStrokeWidth = strokeWidth + 2;
+        const hoveredFillOpacity = Math.min((fillOpacity ?? 0.7) + 0.15, 1);
+
         // Couche de remplissage
         this._map.addLayer({
             id: fillLayerId,
@@ -599,7 +623,12 @@ class MaplibreObjectsLayer {
                     detailRgbaStr,
                     rgbaStr
                 ],
-                'fill-opacity': fillOpacity
+                'fill-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    hoveredFillOpacity,
+                    fillOpacity
+                ]
             }
         });
 
@@ -608,6 +637,10 @@ class MaplibreObjectsLayer {
             id: strokeLayerId,
             type: 'line',
             source: sourceId,
+            layout: {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
             filter: this._buildFilter(['any',
                 ['==', ['geometry-type'], 'Polygon'],
                 ['==', ['geometry-type'], 'MultiPolygon']
@@ -621,7 +654,12 @@ class MaplibreObjectsLayer {
                     detailStrokeColor,
                     strokeColor
                 ],
-                'line-width': strokeWidth,
+                'line-width': [
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    hoveredStrokeWidth,
+                    strokeWidth
+                ],
                 'line-opacity': strokeOpacity
             }
         });

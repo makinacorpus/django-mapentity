@@ -1,12 +1,13 @@
 from mapentity import views as mapentity_views
 
-from . import models, serializers
+from . import filters, models, serializers
 
 
 # single point model
 class SinglePointModelList(mapentity_views.MapEntityList):
     model = models.SinglePointModel
     searchable_columns = ["id", "name"]
+    filterset_class = filters.SinglePointModelFilterSet
 
 
 class SinglePointModelDetail(
@@ -31,6 +32,7 @@ class SinglePointModelViewSet(mapentity_views.MapEntityViewSet):
     model = models.SinglePointModel
     serializer_class = serializers.SinglePointModelSerializer
     geojson_serializer_class = serializers.SinglePointModelGeojsonSerializer
+    filterset_class = filters.SinglePointModelFilterSet
 
 
 # single linestring model
@@ -39,6 +41,7 @@ class SinglePointModelViewSet(mapentity_views.MapEntityViewSet):
 class SingleLineStringModelList(mapentity_views.MapEntityList):
     model = models.SingleLineStringModel
     searchable_columns = ["id", "name"]
+    filterset_class = filters.SingleLineStringModelFilterSet
 
 
 class SingleLineStringModelDetail(
@@ -63,12 +66,14 @@ class SingleLineStringModelViewSet(mapentity_views.MapEntityViewSet):
     model = models.SingleLineStringModel
     serializer_class = serializers.SingleLineStringModelSerializer
     geojson_serializer_class = serializers.SingleLineStringModelGeojsonSerializer
+    filterset_class = filters.SingleLineStringModelFilterSet
 
 
 # single polygon model
 class SinglePolygonModelList(mapentity_views.MapEntityList):
     model = models.SinglePolygonModel
     searchable_columns = ["id", "name"]
+    filterset_class = filters.SinglePolygonModelFilterSet
 
 
 class SinglePolygonModelDetail(
@@ -93,12 +98,14 @@ class SinglePolygonModelViewSet(mapentity_views.MapEntityViewSet):
     model = models.SinglePolygonModel
     serializer_class = serializers.SinglePolygonModelSerializer
     geojson_serializer_class = serializers.SinglePolygonModelGeojsonSerializer
+    filterset_class = filters.SinglePolygonModelFilterSet
 
 
 # geometry model
 class GeometryModelList(mapentity_views.MapEntityList):
     model = models.GeometryModel
     searchable_columns = ["id", "name"]
+    filterset_class = filters.GeometryModelFilterSet
 
 
 class GeometryModelDetail(
@@ -123,12 +130,14 @@ class GeometryModelViewSet(mapentity_views.MapEntityViewSet):
     model = models.GeometryModel
     serializer_class = serializers.GeometryModelSerializer
     geojson_serializer_class = serializers.GeometryModelGeojsonSerializer
+    filterset_class = filters.GeometryModelFilterSet
 
 
 # multi point model
 class MultiPointModelList(mapentity_views.MapEntityList):
     model = models.MultiPointModel
     searchable_columns = ["id", "name"]
+    filterset_class = filters.MultiPointModelFilterSet
 
 
 class MultiPointModelDetail(
@@ -153,12 +162,14 @@ class MultiPointModelViewSet(mapentity_views.MapEntityViewSet):
     model = models.MultiPointModel
     serializer_class = serializers.MultiPointModelSerializer
     geojson_serializer_class = serializers.MultiPointModelGeojsonSerializer
+    filterset_class = filters.MultiPointModelFilterSet
 
 
 # multi linestring model
 class MultiLineStringModelList(mapentity_views.MapEntityList):
     model = models.MultiLineStringModel
     searchable_columns = ["id", "name"]
+    filterset_class = filters.MultiLineStringModelFilterSet
 
 
 class MultiLineStringModelDetail(
@@ -183,12 +194,14 @@ class MultiLineStringModelViewSet(mapentity_views.MapEntityViewSet):
     model = models.MultiLineStringModel
     serializer_class = serializers.MultiLineStringModelSerializer
     geojson_serializer_class = serializers.MultiLineStringModelGeojsonSerializer
+    filterset_class = filters.MultiLineStringModelFilterSet
 
 
 # multi polygon model
 class MultiPolygonModelList(mapentity_views.MapEntityList):
     model = models.MultiPolygonModel
     searchable_columns = ["id", "name"]
+    filterset_class = filters.MultiPolygonModelFilterSet
 
 
 class MultiPolygonModelDetail(
@@ -213,12 +226,14 @@ class MultiPolygonModelViewSet(mapentity_views.MapEntityViewSet):
     model = models.MultiPolygonModel
     serializer_class = serializers.MultiPolygonModelSerializer
     geojson_serializer_class = serializers.MultiPolygonModelGeojsonSerializer
+    filterset_class = filters.MultiPolygonModelFilterSet
 
 
 # geometry collection model
 class GeometryCollectionModelList(mapentity_views.MapEntityList):
     model = models.GeometryCollectionModel
     searchable_columns = ["id", "name"]
+    filterset_class = filters.GeometryCollectionModelFilterSet
 
 
 class GeometryCollectionModelDetail(
@@ -243,3 +258,4 @@ class GeometryCollectionModelViewSet(mapentity_views.MapEntityViewSet):
     model = models.GeometryCollectionModel
     serializer_class = serializers.GeometryCollectionModelSerializer
     geojson_serializer_class = serializers.GeometryCollectionModelGeojsonSerializer
+    filterset_class = filters.GeometryCollectionModelFilterSet

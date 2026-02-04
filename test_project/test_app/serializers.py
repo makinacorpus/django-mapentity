@@ -71,3 +71,9 @@ class SupermarketSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         model = Supermarket
+
+
+class SupermarketGeojsonSerializer(MapentityGeojsonModelSerializer):
+    class Meta(MapentityGeojsonModelSerializer.Meta):
+        fields = ["id", "name"]
+        model = Supermarket
