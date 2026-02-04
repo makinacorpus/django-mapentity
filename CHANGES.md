@@ -9,6 +9,16 @@ CHANGELOG
 - Related fields in lists are now displayed by their string object representation (be mindful of performance)
 - Improve responsiveness for multi-update forms
 
+**New Features**
+
+- **Multi-Geometry Field Support**: Added ability to manage multiple geometry fields on the same map
+  - Introduced `MaplibreMultiFieldManager` for coordinating multiple geometry fields
+  - Automatic `target_map` configuration for secondary fields
+  - Field selector UI control for switching between fields
+  - Dynamic drawing controls based on active field's geometry type
+  - Independent geometry data storage per field
+  - See `docs/multi_geometry_fields.md` for complete documentation and examples
+
 
 8.16.1     (2026-01-08)
 -----------------------
