@@ -36,6 +36,8 @@ class MaplibreMultiFieldManager {
         // Update field selector if multiple fields
         if (this.fields.size > 1 && !this.fieldSelectorControl) {
             this._createFieldSelector();
+            // Update controls for the active field when field selector is created
+            this._updateGeomanControls(this.getActiveField().options);
         } else if (this.fields.size > 1) {
             this._updateFieldSelector();
         }
