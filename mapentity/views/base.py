@@ -152,7 +152,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
                 ),
             }
             for model, options in registry.registry.items()
-            if model._meta.app_label != "mapentity"
+            if model._meta.app_label != "mapentity" and options.menu
         ]
 
         return dictsettings
