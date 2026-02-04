@@ -93,12 +93,8 @@
                 }), 'top-left');
                 map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
-                // Initialize multi-field manager for this map
-                map.getMap()._mapentityMultiFieldManager = new MaplibreMultiFieldManager(map.getMap());
-                
-                // Initialisation du champ de géométrie principal
+                // Initialisation du champ de géométrie principal (without multi-field manager for single field)
                 const field = new MaplibreGeometryField(map.getMap(), fieldId, options);
-                map.getMap()._mapentityMultiFieldManager.registerField(field);
 
                 // Notifier les autres champs géométriques de cette carte
                 window.dispatchEvent(new CustomEvent('map:init', {
