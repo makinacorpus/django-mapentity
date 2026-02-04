@@ -9,7 +9,7 @@ class SinglePointModel(MapEntityMixin, models.Model):
     geom = models.PointField(srid=4326)
 
     def __str__(self):
-        return self.name or self.pk
+        return self.name or str(self.pk)
 
     class Meta:
         verbose_name = _("Single Point Model")

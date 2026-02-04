@@ -67,7 +67,7 @@ msgid "Geometry Models"
 msgstr "Modèles de Géométrie"
 
 msgid "GeometryCollection Model"
-msgstr "Modèle de GéometrieCollection"
+msgstr "Modèle de GéométrieCollection"
 
 msgid "GeometryCollection Models"
-msgstr "Modèles de GéometrieCollection"
+msgstr "Modèles de GéométrieCollection"

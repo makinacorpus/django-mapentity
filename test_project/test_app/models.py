@@ -163,6 +163,9 @@ class Supermarket(MapEntityMixin, models.Model):
     parking = models.PointField(null=True, default=None, srid=2154)
     tag = models.ForeignKey(Tag, null=True, default=None, on_delete=models.SET_NULL)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = _("Supermarket")
         verbose_name_plural = _("Supermarkets")

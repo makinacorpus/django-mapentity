@@ -260,7 +260,7 @@ class CityViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
-class GeoPointlist(mapentity_views.MapEntityList):
+class GeoPointList(mapentity_views.MapEntityList):
     model = GeoPoint
     columns = ["id", "name", "public"]
     filterset_class = GeoPointFilterSet
