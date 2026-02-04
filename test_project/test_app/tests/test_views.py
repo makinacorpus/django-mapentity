@@ -1,7 +1,6 @@
 import json
 import os
 from unittest import mock, skip
-from unittest.mock import patch
 
 import django
 import factory
