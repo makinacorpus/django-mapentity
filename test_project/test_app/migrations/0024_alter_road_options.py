@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('test_app', '0023_rename_geopoint_complexmodel_and_more'),
+        ("test_app", "0023_rename_geopoint_complexmodel_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='road',
-            options={'verbose_name': 'Road', 'verbose_name_plural': 'Roads'},
+            name="road",
+            options={"verbose_name": "Road", "verbose_name_plural": "Roads"},
         ),
     ]
