@@ -2,7 +2,6 @@ from mapentity.forms import MapEntityForm
 
 from .models import (
     City,
-    DummyAptModel,
     DummyModel,
     MushroomSpot,
     Road,
@@ -28,12 +27,6 @@ class MushroomSpotForm(MapEntityForm):
     class Meta:
         model = MushroomSpot
         fields = "__all__"
-
-
-class DummyAptModelForm(MapEntityForm):
-    class Meta:
-        model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-        fields = ("name", "short_description", "description", "geom", "public", "tags")
 
 
 class CityForm(MapEntityForm):

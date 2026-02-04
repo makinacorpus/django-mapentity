@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
@@ -70,6 +69,13 @@ class Road(MapEntityMixin, models.Model):
     def get_display_label(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Road")
+        verbose_name_plural = _("Roads")
+
 
 class DummyModel(MapEntityMixin, models.Model):
     name = models.CharField(
@@ -96,32 +102,6 @@ class DummyModel(MapEntityMixin, models.Model):
     class Meta:
         verbose_name = _("Dummy Model")
         verbose_name_plural = _("Dummy Models")
-
-
-class DummyAptModel(MapEntityMixin, models.Model):
-    name = models.CharField(
-        blank=True, default="", max_length=128, verbose_name=_("Name")
-    )
-    short_description = models.TextField(
-        blank=True, default="", help_text=_("Short description")
-    )
-    description = models.TextField(blank=True, default="")
-    geom = models.GeometryCollectionField(srid=settings.SRID, null=True, default=None)
-    date_update = models.DateTimeField(auto_now=True, db_index=True)
-    public = models.BooleanField(default=False)
-    tags = models.ManyToManyField(Tag, blank=True)
-
-    def __str__(self):
-        return f"{self.name} ({self.pk})"
-
-    def is_public(self):
-        return self.public
-
-    def get_display_label(self):
-        return f"{self.name or self.id}"
-
-    class Meta:
-        verbose_name = _("DummyApt Model")
 
 
 class DollModel(MapEntityMixin, models.Model):
@@ -177,7 +157,7 @@ class Sector(MapEntityMixin, models.Model):
         return self.name
 
 
-class GeoPoint(MapEntityMixin, models.Model):
+class ComplexModel(MapEntityMixin, models.Model):
     public = models.BooleanField(default=False)
     geom = models.PointField(null=True, default=None)
     located_in = models.ForeignKey(
@@ -196,3 +176,7 @@ class GeoPoint(MapEntityMixin, models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = _("Complex Model")
+        verbose_name_plural = _("Complex Models")

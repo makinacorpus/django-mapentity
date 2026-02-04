@@ -6,16 +6,14 @@ from mapentity import views as mapentity_views
 
 from .filters import (
     CityFilterSet,
-    DummyAptFilterSet,
+    ComplexModelFilterSet,
     DummyModelFilterSet,
-    GeoPointFilterSet,
     MushroomSpotFilterSet,
     RoadFilterSet,
     SupermarketFilterSet,
 )
 from .forms import (
     CityForm,
-    DummyAptModelForm,
     DummyModelForm,
     MushroomSpotForm,
     RoadForm,
@@ -23,20 +21,17 @@ from .forms import (
 )
 from .models import (
     City,
-    DummyAptModel,
+    ComplexModel,
     DummyModel,
-    GeoPoint,
     MushroomSpot,
     Road,
     Supermarket,
 )
 from .serializers import (
     CitySerializer,
-    DummyAptGeojsonSerializer,
-    DummyAptSerializer,
+    ComplexModelSerializer,
     DummyGeojsonSerializer,
     DummySerializer,
-    GeoPointSerializer,
     MushroomSpotGeojsonSerializer,
     MushroomSpotSerializer,
     RoadSerializer,
@@ -171,56 +166,6 @@ class MushroomSpotViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
-class DummyAptCreate(mapentity_views.MapEntityCreate):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    form_class = DummyAptModelForm
-
-
-class DummyAptUpdate(mapentity_views.MapEntityUpdate):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    form_class = DummyAptModelForm
-
-
-class DummyAptDelete(mapentity_views.MapEntityDelete):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-
-
-class DummyAptDuplicate(mapentity_views.MapEntityDuplicate):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-
-
-class DummyAptList(mapentity_views.MapEntityList):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    columns = ["id", "name", "public", "date_update"]
-    searchable_columns = ["name"]
-    filterset_class = DummyAptFilterSet
-
-
-class DummyAptDetail(
-    mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail
-):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-
-
-class DummyAptFilter(mapentity_views.MapEntityFilter):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    filterset_class = DummyAptFilterSet
-
-
-class DummyAptViewSet(mapentity_views.MapEntityViewSet):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    serializer_class = DummyAptSerializer
-    geojson_serializer_class = DummyAptGeojsonSerializer
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-    filterset_class = DummyAptFilterSet
-
-    def get_queryset(self):
-        qs = self.model.objects.all()
-        if self.format_kwarg == "geojson":
-            qs = qs.annotate(api_geom=Transform("geom", 4326))
-        return qs
-
-
 class CityList(mapentity_views.MapEntityList):
     model = City
     searchable_columns = ["id", "name"]
@@ -260,24 +205,24 @@ class CityViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
-class GeoPointlist(mapentity_views.MapEntityList):
-    model = GeoPoint
+class ComplexModellist(mapentity_views.MapEntityList):
+    model = ComplexModel
     columns = ["id", "name", "public"]
-    filterset_class = GeoPointFilterSet
+    filterset_class = ComplexModelFilterSet
 
 
-class GeoPointMultiDelete(mapentity_views.MapEntityMultiDelete):
-    model = GeoPoint
+class ComplexModelMultiDelete(mapentity_views.MapEntityMultiDelete):
+    model = ComplexModel
 
 
-class GeoPointMultiUpdate(mapentity_views.MapEntityMultiUpdate):
-    model = GeoPoint
+class ComplexModelMultiUpdate(mapentity_views.MapEntityMultiUpdate):
+    model = ComplexModel
 
 
-class GeoPointViewSet(mapentity_views.MapEntityViewSet):
-    model = GeoPoint
-    serializer_class = GeoPointSerializer  # Assuming City has similar fields to Road for the serializer
-    filterset_class = GeoPointFilterSet
+class ComplexModelViewSet(mapentity_views.MapEntityViewSet):
+    model = ComplexModel
+    serializer_class = ComplexModelSerializer  # Assuming City has similar fields to Road for the serializer
+    filterset_class = ComplexModelFilterSet
 
     def get_queryset(self):
         qs = self.model.objects.all()
