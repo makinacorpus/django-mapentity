@@ -5,7 +5,7 @@ from django.test.utils import override_settings
 from mapentity.forms import BaseMultiUpdateForm, MapEntityForm
 from mapentity.settings import app_settings
 
-from ..models import DummyModel, GeoPoint, ManikinModel, Supermarket
+from ..models import DummyModel, GeoPoint, ManikinModel
 
 
 class DummyForm(MapEntityForm):
@@ -151,8 +151,9 @@ class SupermarketFormTest(TestCase):
     
     def test_multiple_geometry_fields(self):
         """Test that SupermarketForm correctly handles multiple geometry fields"""
-        from ..forms import SupermarketForm
         from mapentity.widgets import MapWidget
+
+        from ..forms import SupermarketForm
         
         form = SupermarketForm()
         
