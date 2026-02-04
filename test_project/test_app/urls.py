@@ -7,6 +7,7 @@ from .models import (
     GeoPoint,
     MushroomSpot,
     Road,
+    Supermarket,
 )
 
 app_name = "test_app"
@@ -17,3 +18,4 @@ urlpatterns += registry.register(Road)
 urlpatterns += registry.register(City)
 urlpatterns += registry.register(DummyAptModel)
 urlpatterns += registry.register(GeoPoint)
+urlpatterns += registry.register(Supermarket)
