@@ -36,7 +36,15 @@ class MaplibreGeometryField {
         // Détecter si on est en mode édition (PK présente)
         this.options.isUpdate = !!document.body.dataset.pk;
 
-        this.drawManager = new MaplibreDrawControlManager(map, this.options);
+        // Use shared draw manager if multi-field manager exists, otherwise create own
+        const multiFieldManager = this.map._mapentityMultiFieldManager;
+        if (multiFieldManager && multiFieldManager.drawManager) {
+            this.drawManager = multiFieldManager.drawManager;
+            console.log('MaplibreGeometryField: using shared draw manager from multi-field manager');
+        } else {
+            this.drawManager = new MaplibreDrawControlManager(map, this.options);
+            console.log('MaplibreGeometryField: created own draw manager');
+        }
 
         // stock les Features Geoman
         this.gmEvents = [];
@@ -1045,5 +1053,34 @@ class MaplibreGeometryField {
             registerGeomanHandlers();
         }
         this.map.on("gm:loaded", registerGeomanHandlers);
+    }
+
+    /**
+     * Called when this field is activated in multi-field mode
+     */
+    onActivated() {
+        console.log('MaplibreGeometryField: field activated', this.fieldId);
+        // Show this field's features
+        // In a full implementation, we'd show/hide features based on field
+    }
+
+    /**
+     * Called when this field is deactivated in multi-field mode
+     */
+    onDeactivated() {
+        console.log('MaplibreGeometryField: field deactivated', this.fieldId);
+        // Hide this field's features or make them read-only
+        // In a full implementation, we'd show/hide features based on field
+    }
+
+    /**
+     * Handle a Geoman event routed from the multi-field manager
+     * @param {string} eventType - The event type
+     * @param {Object} event - The event data
+     */
+    handleGeomanEvent(eventType, event) {
+        console.log('MaplibreGeometryField: handling routed event', eventType, this.fieldId);
+        // Route to appropriate handler based on event type
+        // For now, the existing event handlers on the map will still work
     }
 }

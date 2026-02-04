@@ -37,7 +37,14 @@
             window.addEventListener('map:init', function (e) {
                 if (e.detail.fieldId === 'id_' + targetMapId) {
                     const sharedMap = e.detail.map;
-                    new MaplibreGeometryField(sharedMap, fieldId, options);
+                    
+                    // Get or create multi-field manager
+                    if (!sharedMap._mapentityMultiFieldManager) {
+                        sharedMap._mapentityMultiFieldManager = new MaplibreMultiFieldManager(sharedMap);
+                    }
+                    
+                    const field = new MaplibreGeometryField(sharedMap, fieldId, options);
+                    sharedMap._mapentityMultiFieldManager.registerField(field);
                 }
             });
         } else {
@@ -86,8 +93,12 @@
                 }), 'top-left');
                 map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
+                // Initialize multi-field manager for this map
+                map.getMap()._mapentityMultiFieldManager = new MaplibreMultiFieldManager(map.getMap());
+                
                 // Initialisation du champ de géométrie principal
-                new MaplibreGeometryField(map.getMap(), fieldId, options);
+                const field = new MaplibreGeometryField(map.getMap(), fieldId, options);
+                map.getMap()._mapentityMultiFieldManager.registerField(field);
 
                 // Notifier les autres champs géométriques de cette carte
                 window.dispatchEvent(new CustomEvent('map:init', {

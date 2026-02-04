@@ -6,6 +6,7 @@ from .models import (
     DummyModel,
     MushroomSpot,
     Road,
+    Supermarket,
 )
 
 
@@ -39,3 +40,11 @@ class CityForm(MapEntityForm):
     class Meta:
         model = City
         fields = ("name", "geom")
+
+
+class SupermarketForm(MapEntityForm):
+    geomfields = ["geom", "parking"]
+
+    class Meta:
+        model = Supermarket
+        fields = ("geom", "parking", "tag")

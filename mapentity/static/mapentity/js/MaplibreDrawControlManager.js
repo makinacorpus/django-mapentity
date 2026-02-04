@@ -169,4 +169,38 @@ class MaplibreDrawControlManager {
         return this.geoman;
     }
 
+    /**
+     * Update visibility of a specific control
+     * @param {string} category - 'draw', 'edit', or 'helper'
+     * @param {string} controlName - The name of the control (e.g., 'polygon', 'line', 'marker')
+     * @param {boolean} visible - Whether the control should be visible
+     */
+    setControlVisibility(category, controlName, visible) {
+        if (!this.geoman || !this.geoman.loaded) {
+            console.warn('MaplibreDrawControlManager: cannot set control visibility, Geoman not loaded');
+            return;
+        }
+        
+        // Access the control configuration
+        const controls = this.geoman.options?.controls;
+        if (!controls || !controls[category] || !controls[category][controlName]) {
+            console.warn('MaplibreDrawControlManager: control not found', category, controlName);
+            return;
+        }
+        
+        // Update the uiEnabled property
+        controls[category][controlName].uiEnabled = visible;
+        
+        // Force UI refresh - try different methods depending on Geoman version
+        if (this.geoman.refreshUI) {
+            this.geoman.refreshUI();
+        } else if (this.geoman.updateControls) {
+            this.geoman.updateControls();
+        } else if (this.geoman.controls && this.geoman.controls.refresh) {
+            this.geoman.controls.refresh();
+        }
+        
+        console.log('MaplibreDrawControlManager: updated control visibility', category, controlName, visible);
+    }
+
 }
