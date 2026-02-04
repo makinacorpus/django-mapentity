@@ -96,17 +96,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.addEventListener('mouseleave', () => {
                     objectsLayer.highlight(pk, false);
                 });
-                row.addEventListener('click', () => {
-                    selectorOnce.select(pk, row);
-                });
                 row.addEventListener('dblclick', () => {
                     objectsLayer.jumpTo(pk);
                 });
             },
             select: canSelect ? {
-                    style: 'multi',
-                    selector: 'td:first-child'
-                } : false,
+                style: 'multi',
+                selector: 'td:first-child'
+            } : false,
             order: [[1, 'asc']]
         });
 

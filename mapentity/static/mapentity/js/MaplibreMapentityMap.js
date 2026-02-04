@@ -17,20 +17,24 @@ document.addEventListener('DOMContentLoaded', function() {
             let style = window.SETTINGS.map.styles[modelname] ?? window.SETTINGS.map.styles['others'];
             let primaryKey = generateUniqueId();
 
-            const additionalObjectsLayer = new MaplibreObjectsLayer(null, {
-                style,
-                modelname: modelname,
-                readonly: true,
-                nameHTML: nameHTML,
-                category: category,
-                primaryKey: primaryKey,
-                dataUrl: layerUrl,
-                isLazy: true,
-                displayPopup: true,
-            });
+            const current_modelname = document.body.getAttribute('data-modelname');
 
-            additionalObjectsLayer.initialize(map.getMap());
-            additionalObjectsLayer.registerLazyLayer(modelname, category, nameHTML, primaryKey, layerUrl);
+            if (modelname !== current_modelname) {  // current model is already initialized as objectsLayer on "Objects" section
+                const additionalObjectsLayer = new MaplibreObjectsLayer(null, {
+                    style,
+                    modelname: modelname,
+                    readonly: true,
+                    nameHTML: nameHTML,
+                    category: category,
+                    primaryKey: primaryKey,
+                    dataUrl: layerUrl,
+                    isLazy: true,
+                    displayPopup: true,
+                });
+
+                additionalObjectsLayer.initialize(map.getMap());
+                additionalObjectsLayer.registerLazyLayer(modelname, category, nameHTML, primaryKey, layerUrl);
+            }
         });
 
         map.getMap().on('load', function() {
