@@ -10,6 +10,7 @@ from test_project.test_app.models import (
     ManikinModel,
     Road,
     Sector,
+    Supermarket,
     Tag,
 )
 
@@ -123,3 +124,24 @@ class GeoPointFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = GeoPoint
+
+
+class SupermarketFactory(factory.django.DjangoModelFactory):
+    name = factory.Sequence(lambda n: f"Supermarket {n}")
+
+    @factory.lazy_attribute
+    def geom(self):
+        points = [
+            (random.uniform(-180, 180), random.uniform(-80, 80)) for _ in range(3)
+        ]
+        points.append(points[0])
+        return Polygon(points, srid=2154)
+
+    @factory.lazy_attribute
+    def parking(self):
+        x = random.randint(-18000, 18000)
+        y = random.randint(-8000, 8000)
+        return Point(x / 100, y / 100, srid=2154)
+
+    class Meta:
+        model = Supermarket

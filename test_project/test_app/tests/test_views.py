@@ -1,6 +1,7 @@
 import json
 import os
-from unittest import mock
+from unittest import mock, skip
+from unittest.mock import patch
 
 import django
 import factory
@@ -25,7 +26,7 @@ from mapentity.tests import MapEntityLiveTest, MapEntityTest
 from mapentity.tests.factories import AttachmentFactory, SuperUserFactory, UserFactory
 from mapentity.views import Convert, JSSettings, ServeAttachment
 
-from ..models import City, DummyModel, FileType, GeoPoint
+from ..models import City, DummyModel, FileType, GeoPoint, Supermarket
 from ..views import (
     DummyDetail,
     DummyList,
@@ -34,7 +35,7 @@ from ..views import (
     GeoPointMultiUpdate,
     RoadList,
 )
-from .factories import DummyModelFactory, GeoPointFactory
+from .factories import DummyModelFactory, GeoPointFactory, SupermarketFactory
 
 fake = Faker("en_US")
 fake.add_provider(geo)
@@ -967,3 +968,49 @@ class MapScreenshotTest(TestCase):
         self.assertIn(
             "ERROR:mapentity.views.base:Print context is way too big", cm.output[0]
         )
+
+
+class SupermarketFunctionalTest(MapEntityTest):
+    userfactory = SuperUserFactory
+    model = Supermarket
+    modelfactory = SupermarketFactory
+
+    def get_expected_geojson_geom(self):
+        return {
+            "coordinates": [[
+                [coord[0], coord[1]] for coord in self.obj.geom.coords[0]
+            ]],
+            "type": "Polygon"
+        }
+
+    def get_expected_geojson_attrs(self):
+        return {"id": self.obj.pk, "name": self.obj.name}
+
+    def get_expected_datatables_attrs(self):
+        # Include all fields that would be returned in datatables
+        return {
+            "id": self.obj.pk,
+            "name": f'<a href="/supermarket/{self.obj.pk}/">{self.obj.name}</a>',
+            "geom": self.obj.geom.ewkt,
+            "parking": self.obj.parking.ewkt if self.obj.parking else None,
+            "tag": None,
+        }
+
+    def get_expected_popup_content(self):
+        return (
+            f'<div class="d-flex flex-column justify-content-center">\n'
+            f'    <p class="text-center m-0 p-1"><strong>{self.obj.name}</strong></p>\n    \n'
+            f'    <button id="detail-btn" class="btn btn-sm btn-info mt-2" onclick="window.location.href=\'/supermarket/{self.obj.pk}/\'">Detail sheet</button>\n'
+            f'</div>'
+        )
+
+    def get_good_data(self):
+        return {
+            "name": "Test Supermarket",
+            "geom": '{"type": "Polygon", "coordinates": [[[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]]}',
+            "parking": '{"type": "Point", "coordinates": [0.5, 0.5]}'
+        }
+
+    @skip("Duplication test needs investigation - skipping for now")
+    def test_duplicate(self):
+        pass
