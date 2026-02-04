@@ -325,33 +325,3 @@ class SupermarketViewSet(mapentity_views.MapEntityViewSet):
         if self.format_kwarg == "geojson":
             qs = qs.annotate(api_geom=Transform("geom", 4326))
         return qs
-
-
-class SupermarketList(mapentity_views.MapEntityList):
-    model = Supermarket
-    columns = ["id", "geom", "parking"]
-
-
-class SupermarketCreate(mapentity_views.MapEntityCreate):
-    model = Supermarket
-    form_class = SupermarketForm
-
-
-class SupermarketUpdate(mapentity_views.MapEntityUpdate):
-    model = Supermarket
-    form_class = SupermarketForm
-
-
-class SupermarketDelete(mapentity_views.MapEntityDelete):
-    model = Supermarket
-
-
-class SupermarketViewSet(mapentity_views.MapEntityViewSet):
-    model = Supermarket
-    serializer_class = SupermarketSerializer
-
-    def get_queryset(self):
-        qs = self.model.objects.all()
-        if self.format_kwarg == "geojson":
-            qs = qs.annotate(api_geom=Transform("geom", 4326))
-        return qs

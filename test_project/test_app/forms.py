@@ -48,7 +48,3 @@ class SupermarketForm(MapEntityForm):
     class Meta:
         model = Supermarket
         fields = ("name", "geom", "parking", "tag")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["parking"].widget.target_map = "geom"
