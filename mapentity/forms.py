@@ -162,7 +162,7 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.widget.attrs["geom_type"] = formfield.geom_type
                         
                         # If this is a secondary geometry field, make it target the first field's map
-                        if len(self.geomfields) > 1 and fieldname != self.geomfields[0]:
+                        if len(self.geomfields) > 1 and fieldname in self.geomfields and fieldname != self.geomfields[0]:
                             formfield.widget.attrs["target_map"] = self.geomfields[0]
                 except FieldDoesNotExist:
                     pass
