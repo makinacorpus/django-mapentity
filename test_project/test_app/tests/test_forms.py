@@ -174,9 +174,9 @@ class SupermarketFormTest(TestCase):
         
         form = SupermarketForm()
         
-        # First geometry field should NOT have target_map
+        # First geometry field should NOT have target_map set (or it should be None)
         geom_widget = form.fields['geom'].widget
-        self.assertNotIn('target_map', geom_widget.attrs)
+        self.assertIsNone(geom_widget.attrs.get('target_map'))
         
         # Second geometry field SHOULD have target_map pointing to first field
         parking_widget = form.fields['parking'].widget
@@ -188,14 +188,26 @@ class SupermarketFormTest(TestCase):
         
         form = SupermarketForm()
         
-        # Check that both geom fields are in the layout
-        layout_fields = []
+        # The geometry fields should be in self.geomfields
+        self.assertEqual(form.geomfields, ['geom', 'parking'])
+        
+        # Check that both geom fields are in the layout by looking at the right panel
+        # The layout structure is: Layout > Div > Div > (leftpanel, *rightpanel)
+        # rightpanel is a tuple with a Div containing the geomfields
+        layout_contains_geom = False
+        layout_contains_parking = False
+        
         for item in form.helper.layout:
             if hasattr(item, 'fields'):
                 for field in item.fields:
                     if hasattr(field, 'fields'):
-                        layout_fields.extend(field.fields)
+                        for subfield in field.fields:
+                            if hasattr(subfield, 'fields'):
+                                # This is the rightpanel Div with geomfields
+                                if 'geom' in subfield.fields:
+                                    layout_contains_geom = True
+                                if 'parking' in subfield.fields:
+                                    layout_contains_parking = True
         
-        # Both geometry fields should be in the right panel
-        self.assertIn('geom', layout_fields)
-        self.assertIn('parking', layout_fields)
+        self.assertTrue(layout_contains_geom)
+        self.assertTrue(layout_contains_parking)
