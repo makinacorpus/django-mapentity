@@ -14,6 +14,10 @@ from test_project.test_app.models import (
     Tag,
 )
 
+# Lambert 93 (SRID 2154) coordinate ranges for France in meters
+LAMBERT93_X_MIN, LAMBERT93_X_MAX = 100000, 1200000
+LAMBERT93_Y_MIN, LAMBERT93_Y_MAX = 6000000, 7100000
+
 
 class TagFactory(factory.django.DjangoModelFactory):
     label = factory.Sequence(lambda n: f"Tag {n}")
@@ -131,19 +135,19 @@ class SupermarketFactory(factory.django.DjangoModelFactory):
 
     @factory.lazy_attribute
     def geom(self):
-        # Lambert 93 (SRID 2154) uses meters, valid range for France approx:
-        # x: 100000-1200000, y: 6000000-7100000
         points = [
-            (random.uniform(100000, 1200000), random.uniform(6000000, 7100000)) for _ in range(3)
+            (
+                random.uniform(LAMBERT93_X_MIN, LAMBERT93_X_MAX),
+                random.uniform(LAMBERT93_Y_MIN, LAMBERT93_Y_MAX)
+            ) for _ in range(3)
         ]
         points.append(points[0])
         return Polygon(points, srid=2154)
 
     @factory.lazy_attribute
     def parking(self):
-        # Lambert 93 coordinates in meters
-        x = random.uniform(100000, 1200000)
-        y = random.uniform(6000000, 7100000)
+        x = random.uniform(LAMBERT93_X_MIN, LAMBERT93_X_MAX)
+        y = random.uniform(LAMBERT93_Y_MIN, LAMBERT93_Y_MAX)
         return Point(x, y, srid=2154)
 
     class Meta:

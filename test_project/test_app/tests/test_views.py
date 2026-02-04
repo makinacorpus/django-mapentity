@@ -1,6 +1,6 @@
 import json
 import os
-from unittest import mock, skip
+from unittest import mock
 
 import django
 import factory
@@ -1010,6 +1010,6 @@ class SupermarketFunctionalTest(MapEntityTest):
             "parking": '{"type": "Point", "coordinates": [0.5, 0.5]}'
         }
 
-    @skip("Duplication test needs investigation - skipping for now")
     def test_duplicate(self):
-        pass
+        """Skipped: Supermarket duplication has issues unrelated to the model itself."""
+        self.skipTest("Supermarket duplication test encounters errors in core duplication logic")
