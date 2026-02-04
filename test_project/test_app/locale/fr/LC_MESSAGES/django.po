@@ -36,7 +36,6 @@ msgstr "Description courte"
 msgid "Dummy Model"
 msgstr "Modèle factice"
 
-
 msgid "Dummy Models"
 msgstr "Modèles factices"
 
