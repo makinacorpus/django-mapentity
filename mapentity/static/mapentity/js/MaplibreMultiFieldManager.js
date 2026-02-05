@@ -176,6 +176,8 @@ class MaplibreMultiFieldManager {
         button.className = `mapentity-draw-btn mapentity-draw-${drawType}`;
         button.setAttribute('data-field-id', fieldId);
         button.setAttribute('data-draw-type', drawType);
+        button.setAttribute('aria-label', `Draw ${drawType} for ${this._getFieldLabel(fieldId)}`);
+        button.setAttribute('type', 'button'); // Prevent form submission
         button.style.cssText = `
             padding: 8px 12px;
             border: 1px solid #ddd;
@@ -216,6 +218,8 @@ class MaplibreMultiFieldManager {
         button.className = `mapentity-action-btn mapentity-action-${actionType}`;
         button.setAttribute('data-field-id', fieldId);
         button.setAttribute('data-action-type', actionType);
+        button.setAttribute('aria-label', `${actionType} geometries for ${this._getFieldLabel(fieldId)}`);
+        button.setAttribute('type', 'button'); // Prevent form submission
         button.style.cssText = `
             padding: 8px 12px;
             border: 1px solid #ddd;
@@ -332,8 +336,13 @@ class MaplibreMultiFieldManager {
         } else if (actionType === 'delete') {
             // Delete all features for this field
             if (field.gmEvents && field.gmEvents.length > 0) {
-                const confirmDelete = confirm(`Delete all geometries for ${this._getFieldLabel(fieldId)}?`);
-                if (confirmDelete) {
+                // Simple confirmation for now - can be enhanced with custom modal
+                const fieldLabel = this._getFieldLabel(fieldId);
+                const message = `Delete all geometries for ${fieldLabel}?`;
+                
+                // Use window.confirm for basic functionality
+                // TODO: Replace with custom accessible modal dialog
+                if (window.confirm(message)) {
                     field.gmEvents.forEach(event => {
                         if (event.feature && event.feature.remove) {
                             try {
@@ -355,14 +364,17 @@ class MaplibreMultiFieldManager {
      * @private
      */
     _positionControlPanels() {
-        const panels = Array.from(this.controlPanels.values());
-        
-        // Position panels vertically along the left side
-        let topOffset = 10;
-        panels.forEach(panel => {
-            panel.style.top = `${topOffset}px`;
-            panel.style.left = '10px';
-            topOffset += panel.offsetHeight + 10;
+        // Use requestAnimationFrame to ensure DOM layout is complete
+        requestAnimationFrame(() => {
+            const panels = Array.from(this.controlPanels.values());
+            
+            // Position panels vertically along the left side
+            let topOffset = 10;
+            panels.forEach(panel => {
+                panel.style.top = `${topOffset}px`;
+                panel.style.left = '10px';
+                topOffset += panel.offsetHeight + 10;
+            });
         });
     }
 
@@ -376,7 +388,11 @@ class MaplibreMultiFieldManager {
         const match = fieldId.match(/id_(.+)$/);
         if (match) {
             const fieldName = match[1];
-            return fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+            // Replace underscores with spaces and capitalize each word
+            return fieldName
+                .split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
         }
         return fieldId;
     }
