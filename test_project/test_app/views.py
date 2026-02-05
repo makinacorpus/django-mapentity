@@ -23,6 +23,7 @@ from .models import (
     City,
     ComplexModel,
     DummyModel,
+    HiddenModel,
     MushroomSpot,
     Road,
     Supermarket,
@@ -32,6 +33,8 @@ from .serializers import (
     ComplexModelSerializer,
     DummyGeojsonSerializer,
     DummySerializer,
+    HiddenModelGeojsonSerializer,
+    HiddenModelSerializer,
     MushroomSpotGeojsonSerializer,
     MushroomSpotSerializer,
     RoadSerializer,
@@ -264,6 +267,20 @@ class SupermarketViewSet(mapentity_views.MapEntityViewSet):
     geojson_serializer_class = SupermarketGeojsonSerializer
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
     filterset_class = SupermarketFilterSet
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        if self.format_kwarg == "geojson":
+            qs = qs.annotate(api_geom=Transform("geom", 4326))
+        return qs
+
+
+# HiddenModel views (menu=False)
+class HiddenModelViewSet(mapentity_views.MapEntityViewSet):
+    model = HiddenModel
+    serializer_class = HiddenModelSerializer
+    geojson_serializer_class = HiddenModelGeojsonSerializer
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
 
     def get_queryset(self):
         qs = self.model.objects.all()
