@@ -157,6 +157,17 @@ class Sector(MapEntityMixin, models.Model):
         return self.name
 
 
+class HiddenModel(MapEntityMixin, models.Model):
+    """A MapEntity model with menu=False for testing hidden menu functionality"""
+
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
+    geom = models.PolygonField(null=True, default=None, srid=2154)
+
+    class Meta:
+        verbose_name = _("Hidden Model")
+        verbose_name_plural = _("Hidden Models")
+
+
 class ComplexModel(MapEntityMixin, models.Model):
     public = models.BooleanField(default=False)
     geom = models.PointField(null=True, default=None)
