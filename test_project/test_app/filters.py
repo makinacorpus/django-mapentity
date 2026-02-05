@@ -11,7 +11,6 @@ from .models import (
     MushroomSpot,
     Road,
     Sector,
-    Supermarket,
 )
 
 
@@ -51,12 +50,6 @@ class CityFilterSet(MapEntityFilterSet):
     class Meta:
         model = City
         fields = ("id", "name")
-
-
-class SupermarketFilterSet(MapEntityFilterSet):
-    class Meta:
-        model = Supermarket
-        fields = ("id", "tag")
 
 
 class SectorFilterSet(MapEntityFilterSet):

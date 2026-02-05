@@ -137,17 +137,6 @@ class City(MapEntityMixin, models.Model):
         verbose_name_plural = _("Cities")
 
 
-class Supermarket(MapEntityMixin, models.Model):
-    name = models.CharField(max_length=100, verbose_name=_("Name"))
-    geom = models.PolygonField(null=True, default=None, srid=2154)
-    parking = models.PointField(null=True, default=None, srid=2154)
-    tag = models.ForeignKey(Tag, null=True, default=None, on_delete=models.SET_NULL)
-
-    class Meta:
-        verbose_name = _("Supermarket")
-        verbose_name_plural = _("Supermarkets")
-
-
 class Sector(MapEntityMixin, models.Model):
     code = models.CharField(primary_key=True, max_length=6)
     name = models.CharField(max_length=100, verbose_name=_("Name"))

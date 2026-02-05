@@ -20,19 +20,6 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Dummy Models",
             },
         ),
-        migrations.AlterModelOptions(
-            name="supermarket",
-            options={
-                "verbose_name": "Supermarket",
-                "verbose_name_plural": "Supermarkets",
-            },
-        ),
-        migrations.AddField(
-            model_name="supermarket",
-            name="name",
-            field=models.CharField(default="test", max_length=100, verbose_name="Name"),
-            preserve_default=False,
-        ),
         migrations.AlterField(
             model_name="city",
             name="name",

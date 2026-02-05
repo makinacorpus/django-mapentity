@@ -10,14 +10,12 @@ from .filters import (
     DummyModelFilterSet,
     MushroomSpotFilterSet,
     RoadFilterSet,
-    SupermarketFilterSet,
 )
 from .forms import (
     CityForm,
     DummyModelForm,
     MushroomSpotForm,
     RoadForm,
-    SupermarketForm,
 )
 from .models import (
     City,
@@ -26,7 +24,6 @@ from .models import (
     HiddenModel,
     MushroomSpot,
     Road,
-    Supermarket,
 )
 from .serializers import (
     CitySerializer,
@@ -38,8 +35,6 @@ from .serializers import (
     MushroomSpotGeojsonSerializer,
     MushroomSpotSerializer,
     RoadSerializer,
-    SupermarketGeojsonSerializer,
-    SupermarketSerializer,
 )
 
 
@@ -226,47 +221,6 @@ class ComplexModelViewSet(mapentity_views.MapEntityViewSet):
     model = ComplexModel
     serializer_class = ComplexModelSerializer  # Assuming City has similar fields to Road for the serializer
     filterset_class = ComplexModelFilterSet
-
-    def get_queryset(self):
-        qs = self.model.objects.all()
-        if self.format_kwarg == "geojson":
-            qs = qs.annotate(api_geom=Transform("geom", 4326))
-        return qs
-
-
-# Supermarket views
-class SupermarketList(mapentity_views.MapEntityList):
-    model = Supermarket
-    searchable_columns = ["id", "name"]
-    filterset_class = SupermarketFilterSet
-
-
-class SupermarketDetail(
-    mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail
-):
-    model = Supermarket
-
-
-class SupermarketCreate(mapentity_views.MapEntityCreate):
-    model = Supermarket
-    form_class = SupermarketForm
-
-
-class SupermarketUpdate(mapentity_views.MapEntityUpdate):
-    model = Supermarket
-    form_class = SupermarketForm
-
-
-class SupermarketDelete(mapentity_views.MapEntityDelete):
-    model = Supermarket
-
-
-class SupermarketViewSet(mapentity_views.MapEntityViewSet):
-    model = Supermarket
-    serializer_class = SupermarketSerializer
-    geojson_serializer_class = SupermarketGeojsonSerializer
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-    filterset_class = SupermarketFilterSet
 
     def get_queryset(self):
         qs = self.model.objects.all()

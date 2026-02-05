@@ -5,7 +5,6 @@ from .models import (
     DummyModel,
     MushroomSpot,
     Road,
-    Supermarket,
 )
 
 
@@ -35,11 +34,3 @@ class CityForm(MapEntityForm):
         fields = ("name", "geom")
 
 
-class SupermarketForm(MapEntityForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["parking"].widget.target_map = "geom"
-
-    class Meta:
-        model = Supermarket
-        fields = ("name", "geom", "parking", "tag")

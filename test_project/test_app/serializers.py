@@ -9,7 +9,6 @@ from .models import (
     HiddenModel,
     MushroomSpot,
     Road,
-    Supermarket,
 )
 
 
@@ -53,18 +52,6 @@ class MushroomSpotGeojsonSerializer(MapentityGeojsonModelSerializer):
     class Meta(MapentityGeojsonModelSerializer.Meta):
         fields = ["id", "name"]
         model = MushroomSpot
-
-
-class SupermarketSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = "__all__"
-        model = Supermarket
-
-
-class SupermarketGeojsonSerializer(MapentityGeojsonModelSerializer):
-    class Meta(MapentityGeojsonModelSerializer.Meta):
-        fields = ["id", "name"]
-        model = Supermarket
 
 
 class HiddenModelSerializer(serializers.ModelSerializer):

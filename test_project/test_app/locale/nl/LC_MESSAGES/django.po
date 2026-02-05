@@ -51,12 +51,6 @@ msgstr ""
 msgid "Cities"
 msgstr ""
 
-msgid "Supermarket"
-msgstr ""
-
-msgid "Supermarkets"
-msgstr ""
-
 msgid "Hidden Model"
 msgstr ""
 

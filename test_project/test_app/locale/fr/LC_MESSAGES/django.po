@@ -51,12 +51,6 @@ msgstr "Ville"
 msgid "Cities"
 msgstr "Villes"
 
-msgid "Supermarket"
-msgstr "Supermarché"
-
-msgid "Supermarkets"
-msgstr "Supermarchés"
-
 msgid "Hidden Model"
 msgstr "Modèle caché"
 
