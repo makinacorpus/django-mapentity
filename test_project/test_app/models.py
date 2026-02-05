@@ -152,6 +152,9 @@ class HiddenModel(MapEntityMixin, models.Model):
     name = models.CharField(max_length=100, verbose_name=_("Name"))
     geom = models.PolygonField(null=True, default=None, srid=2154)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = _("Hidden Model")
         verbose_name_plural = _("Hidden Models")
