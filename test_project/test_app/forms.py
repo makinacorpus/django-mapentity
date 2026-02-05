@@ -32,5 +32,3 @@ class CityForm(MapEntityForm):
     class Meta:
         model = City
         fields = ("name", "geom")
-
-

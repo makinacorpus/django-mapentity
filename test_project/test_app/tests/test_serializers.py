@@ -1,6 +1,5 @@
 import os
 from io import StringIO
-from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.gis import gdal
@@ -10,7 +9,6 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import translation
 
-from mapentity.registry import app_settings
 from mapentity.serializers import CSVSerializer, ZipShapeSerializer
 from mapentity.serializers.datatables import MapentityDatatableSerializer
 from mapentity.serializers.fields import CommaSeparatedRelatedField

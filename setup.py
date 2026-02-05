@@ -1,49 +1,7 @@
 import os
-import subprocess
 from setuptools import setup, find_packages
-from setuptools.command.build_py import build_py
 
 here = os.path.abspath(os.path.dirname(__file__))
-
-
-class BuildPyWithCompileMessages(build_py):
-    """Custom build_py command that compiles Django translation files (.po -> .mo)."""
-
-    def run(self):
-        # First, run the standard build_py
-        build_py.run(self)
-
-        # Then compile messages in the build directory
-        self.compile_messages()
-
-    def compile_messages(self):
-        """Compile .po files to .mo files using msgfmt in the build directory."""
-        # Compile in the build directory where files have been copied
-        build_locale_dir = os.path.join(self.build_lib, 'mapentity', 'locale')
-        if not os.path.exists(build_locale_dir):
-            return
-
-        for lang in os.listdir(build_locale_dir):
-            lang_dir = os.path.join(build_locale_dir, lang, 'LC_MESSAGES')
-            if not os.path.isdir(lang_dir):
-                continue
-
-            for po_file in os.listdir(lang_dir):
-                if po_file.endswith('.po'):
-                    po_path = os.path.join(lang_dir, po_file)
-                    mo_path = po_path[:-3] + '.mo'
-                    try:
-                        subprocess.run(
-                            ['msgfmt', '-o', mo_path, po_path],
-                            check=True,
-                            capture_output=True
-                        )
-                        print(f"Compiled {po_path} -> {mo_path}")
-                    except subprocess.CalledProcessError as e:
-                        print(f"Warning: Failed to compile {po_path}: {e}")
-                    except FileNotFoundError:
-                        print("Warning: msgfmt not found. Install gettext to compile translations.")
-                        return
 
 
 with open(os.path.join(here, 'mapentity', 'VERSION')) as version_file:
@@ -98,7 +56,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    #cmdclass={'build_py': BuildPyWithCompileMessages},
     python_requires='>=3.9',
     classifiers=['Topic :: Utilities',
                  'Natural Language :: English',
