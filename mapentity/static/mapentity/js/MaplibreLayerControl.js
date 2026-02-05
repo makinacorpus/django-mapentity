@@ -46,7 +46,8 @@ class MaplibreLayerControl {
         button.appendChild(img);
         container.appendChild(button);
 
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
             this._menu.style.display = this._menu.style.display === 'none' ? 'block' : 'none';
         });
 
@@ -62,6 +63,7 @@ class MaplibreLayerControl {
     _createMenu() {
         const menu = document.createElement('div');
         menu.className = 'layer-switcher-menu';
+        menu.style = "display: none;";
         return menu;
     }
 

@@ -94,7 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const bounds = [BOUNDS[0], BOUNDS[1]];
 
     const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
+    window.map = map;
     const modelname = context.modelname;
+    const objects_verbose_name = document.body.getAttribute('data-objectsname');
     const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelname);
     const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
     const layerManager = new MaplibreLayerManager();
@@ -104,8 +106,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof style !== 'function') style = { ...style };
     let detailStyle = window.SETTINGS.map.styles.detail;
     if (typeof detailStyle !== 'function') detailStyle = { ...detailStyle };
-    const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + modelname;
-    const category = tr("Objects");
+    const nameHTML = '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + objects_verbose_name;
+    const category = gettext("Objects");
     const primaryKey = generateUniqueId();
 
     const objectsLayer = new MaplibreObjectsLayer(null, {

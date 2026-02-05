@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-03 20:47+0000\n"
+"POT-Creation-Date: 2026-02-05 16:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,6 +30,12 @@ msgstr ""
 msgid "Mushroom Spots"
 msgstr ""
 
+msgid "Road"
+msgstr ""
+
+msgid "Roads"
+msgstr ""
+
 msgid "Short description"
 msgstr ""
 
@@ -39,17 +45,20 @@ msgstr ""
 msgid "Dummy Models"
 msgstr ""
 
-msgid "DummyApt Model"
-msgstr ""
-
 msgid "City"
 msgstr ""
 
 msgid "Cities"
 msgstr ""
 
-msgid "Supermarket"
+msgid "Hidden Model"
 msgstr ""
 
-msgid "Supermarkets"
+msgid "Hidden Models"
+msgstr ""
+
+msgid "Complex Model"
+msgstr ""
+
+msgid "Complex Models"
 msgstr ""

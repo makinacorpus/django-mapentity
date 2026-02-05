@@ -25,16 +25,16 @@ from mapentity.tests import MapEntityLiveTest, MapEntityTest
 from mapentity.tests.factories import AttachmentFactory, SuperUserFactory, UserFactory
 from mapentity.views import Convert, JSSettings, ServeAttachment
 
-from ..models import City, DummyModel, FileType, GeoPoint
+from ..models import City, ComplexModel, DummyModel, FileType
 from ..views import (
+    ComplexModelMultiDelete,
+    ComplexModelMultiUpdate,
     DummyDetail,
     DummyList,
     DummyModelFilter,
-    GeoPointMultiDelete,
-    GeoPointMultiUpdate,
     RoadList,
 )
-from .factories import DummyModelFactory, GeoPointFactory
+from .factories import ComplexModelFactory, DummyModelFactory
 
 fake = Faker("en_US")
 fake.add_provider(geo)
@@ -492,27 +492,27 @@ class MultiDeleteViewTest(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = SuperUserFactory.create()
-        cls.model = GeoPoint
+        cls.model = ComplexModel
 
-        cls.geopoint1 = GeoPointFactory.create(name="geopoint1")
-        cls.geopoint2 = GeoPointFactory.create(name="geopoint2")
-        cls.geopoint3 = GeoPointFactory.create(name="geopoint3")
+        cls.geopoint1 = ComplexModelFactory.create(name="geopoint1")
+        cls.geopoint2 = ComplexModelFactory.create(name="geopoint2")
+        cls.geopoint3 = ComplexModelFactory.create(name="geopoint3")
 
     def test_mapentity_template(self):
-        multideleteview = GeoPointMultiDelete()
-        multideleteview.object_list = GeoPoint.objects.none()
+        multideleteview = ComplexModelMultiDelete()
+        multideleteview.object_list = ComplexModel.objects.none()
         self.assertEqual(
             multideleteview.get_template_names()[-1],
             "mapentity/mapentity_multi_delete_confirmation.html",
         )
 
     def test_mapentity_title(self):
-        multideleteview = GeoPointMultiDelete()
-        multideleteview.object_list = GeoPoint.objects.none()
-        self.assertEqual(multideleteview.get_title(), "Delete selected geopoint")
+        multideleteview = ComplexModelMultiDelete()
+        multideleteview.object_list = ComplexModel.objects.none()
+        self.assertEqual(multideleteview.get_title(), "Delete selected complexmodel")
 
     def test_multi_delete_should_have_number_of_selected_objects_in_context(self):
-        view = GeoPointMultiDelete()
+        view = ComplexModelMultiDelete()
         view.object_list = []
         view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
         view.request.user = self.user
@@ -520,7 +520,7 @@ class MultiDeleteViewTest(BaseTest):
         self.assertEqual(context["nb_objects"], 2)
 
     def test_multi_delete_should_have_selected_objects_in_queryset(self):
-        view = GeoPointMultiDelete()
+        view = ComplexModelMultiDelete()
         view.object_list = []
         view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
         view.request.user = self.user
@@ -534,34 +534,34 @@ class MultiDeleteViewTest(BaseTest):
         response = self.client.post(self.model.get_multi_delete_url() + "?pks=1%2C2")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
-        self.assertEqual(GeoPoint.objects.all().count(), 1)
+        self.assertEqual(ComplexModel.objects.all().count(), 1)
 
 
 class MultiUpdateViewTest(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = SuperUserFactory()
-        cls.model = GeoPoint
+        cls.model = ComplexModel
 
-        cls.geopoint1 = GeoPointFactory.create(name="geopoint1")
-        cls.geopoint2 = GeoPointFactory.create(name="geopoint2")
-        cls.geopoint3 = GeoPointFactory.create(name="geopoint3")
+        cls.geopoint1 = ComplexModelFactory.create(name="geopoint1")
+        cls.geopoint2 = ComplexModelFactory.create(name="geopoint2")
+        cls.geopoint3 = ComplexModelFactory.create(name="geopoint3")
 
     def test_mapentity_template(self):
-        multiupdateview = GeoPointMultiUpdate()
-        multiupdateview.object_list = GeoPoint.objects.none()
+        multiupdateview = ComplexModelMultiUpdate()
+        multiupdateview.object_list = ComplexModel.objects.none()
         self.assertEqual(
             multiupdateview.get_template_names()[-1],
             "mapentity/mapentity_multi_update_form.html",
         )
 
     def test_mapentity_title(self):
-        multiupdateview = GeoPointMultiUpdate()
-        multiupdateview.object_list = GeoPoint.objects.none()
-        self.assertEqual(multiupdateview.get_title(), "Update selected geopoint")
+        multiupdateview = ComplexModelMultiUpdate()
+        multiupdateview.object_list = ComplexModel.objects.none()
+        self.assertEqual(multiupdateview.get_title(), "Update selected complexmodel")
 
     def test_multi_update_should_have_number_of_selected_objects_in_context(self):
-        view = GeoPointMultiUpdate()
+        view = ComplexModelMultiUpdate()
         view.object_list = []
         view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
         view.request.user = self.user
@@ -569,7 +569,7 @@ class MultiUpdateViewTest(BaseTest):
         self.assertEqual(context["nb_objects"], 2)
 
     def test_multi_update_should_have_selected_objects_in_queryset(self):
-        view = GeoPointMultiUpdate()
+        view = ComplexModelMultiUpdate()
         view.object_list = []
         view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
         view.request.user = self.user
@@ -579,7 +579,7 @@ class MultiUpdateViewTest(BaseTest):
         self.assertEqual(queryset[1], self.geopoint2)
 
     def test_multi_update_editable_fields(self):
-        view = GeoPointMultiUpdate()
+        view = ComplexModelMultiUpdate()
         view.object_list = []
         view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
         view.request.user = self.user
@@ -597,7 +597,7 @@ class MultiUpdateViewTest(BaseTest):
         )
 
     def test_multi_update_form_fields(self):
-        view = GeoPointMultiUpdate()
+        view = ComplexModelMultiUpdate()
         view.object_list = []
         view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
         view.request.user = self.user
@@ -637,7 +637,7 @@ class MultiUpdateViewTest(BaseTest):
         self.assertEqual(response.url, self.model.get_list_url())
 
         for i, geopoint in enumerate([self.geopoint1, self.geopoint2, self.geopoint3]):
-            db_geopoint = GeoPoint.objects.get(pk=geopoint.pk)
+            db_geopoint = ComplexModel.objects.get(pk=geopoint.pk)
             self.assertEqual(db_geopoint.public_en, geopoint.public_en)
             self.assertEqual(db_geopoint.public_fr, geopoint.public_fr)
             self.assertEqual(db_geopoint.public_zh_hant, geopoint.public_zh_hant)
@@ -658,11 +658,11 @@ class MultiUpdateViewTest(BaseTest):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
-        db_geopoint1 = GeoPoint.objects.get(pk=self.geopoint1.pk)
+        db_geopoint1 = ComplexModel.objects.get(pk=self.geopoint1.pk)
         self.assertEqual(db_geopoint1.public_en, True)
         self.assertEqual(db_geopoint1.public_fr, False)
 
-        db_geopoint2 = GeoPoint.objects.get(pk=self.geopoint2.pk)
+        db_geopoint2 = ComplexModel.objects.get(pk=self.geopoint2.pk)
         self.assertEqual(db_geopoint2.public_en, True)
         self.assertEqual(db_geopoint2.public_fr, False)
 
@@ -681,11 +681,11 @@ class MultiUpdateViewTest(BaseTest):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
-        db_geopoint1 = GeoPoint.objects.get(pk=self.geopoint1.pk)
+        db_geopoint1 = ComplexModel.objects.get(pk=self.geopoint1.pk)
         self.assertEqual(db_geopoint1.located_in, None)
         self.assertEqual(db_geopoint1.road, selected_road)
 
-        db_geopoint2 = GeoPoint.objects.get(pk=self.geopoint2.pk)
+        db_geopoint2 = ComplexModel.objects.get(pk=self.geopoint2.pk)
         self.assertEqual(db_geopoint2.located_in, None)
         self.assertEqual(db_geopoint2.road, selected_road)
 

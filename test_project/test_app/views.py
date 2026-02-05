@@ -6,42 +6,35 @@ from mapentity import views as mapentity_views
 
 from .filters import (
     CityFilterSet,
-    DummyAptFilterSet,
+    ComplexModelFilterSet,
     DummyModelFilterSet,
-    GeoPointFilterSet,
     MushroomSpotFilterSet,
     RoadFilterSet,
-    SupermarketFilterSet,
 )
 from .forms import (
     CityForm,
-    DummyAptModelForm,
     DummyModelForm,
     MushroomSpotForm,
     RoadForm,
-    SupermarketForm,
 )
 from .models import (
     City,
-    DummyAptModel,
+    ComplexModel,
     DummyModel,
-    GeoPoint,
+    HiddenModel,
     MushroomSpot,
     Road,
-    Supermarket,
 )
 from .serializers import (
     CitySerializer,
-    DummyAptGeojsonSerializer,
-    DummyAptSerializer,
+    ComplexModelSerializer,
     DummyGeojsonSerializer,
     DummySerializer,
-    GeoPointSerializer,
+    HiddenModelGeojsonSerializer,
+    HiddenModelSerializer,
     MushroomSpotGeojsonSerializer,
     MushroomSpotSerializer,
     RoadSerializer,
-    SupermarketGeojsonSerializer,
-    SupermarketSerializer,
 )
 
 
@@ -171,56 +164,6 @@ class MushroomSpotViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
-class DummyAptCreate(mapentity_views.MapEntityCreate):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    form_class = DummyAptModelForm
-
-
-class DummyAptUpdate(mapentity_views.MapEntityUpdate):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    form_class = DummyAptModelForm
-
-
-class DummyAptDelete(mapentity_views.MapEntityDelete):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-
-
-class DummyAptDuplicate(mapentity_views.MapEntityDuplicate):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-
-
-class DummyAptList(mapentity_views.MapEntityList):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    columns = ["id", "name", "public", "date_update"]
-    searchable_columns = ["name"]
-    filterset_class = DummyAptFilterSet
-
-
-class DummyAptDetail(
-    mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail
-):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-
-
-class DummyAptFilter(mapentity_views.MapEntityFilter):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    filterset_class = DummyAptFilterSet
-
-
-class DummyAptViewSet(mapentity_views.MapEntityViewSet):
-    model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-    serializer_class = DummyAptSerializer
-    geojson_serializer_class = DummyAptGeojsonSerializer
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-    filterset_class = DummyAptFilterSet
-
-    def get_queryset(self):
-        qs = self.model.objects.all()
-        if self.format_kwarg == "geojson":
-            qs = qs.annotate(api_geom=Transform("geom", 4326))
-        return qs
-
-
 class CityList(mapentity_views.MapEntityList):
     model = City
     searchable_columns = ["id", "name"]
@@ -260,24 +203,24 @@ class CityViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
-class GeoPointlist(mapentity_views.MapEntityList):
-    model = GeoPoint
+class ComplexModellist(mapentity_views.MapEntityList):
+    model = ComplexModel
     columns = ["id", "name", "public"]
-    filterset_class = GeoPointFilterSet
+    filterset_class = ComplexModelFilterSet
 
 
-class GeoPointMultiDelete(mapentity_views.MapEntityMultiDelete):
-    model = GeoPoint
+class ComplexModelMultiDelete(mapentity_views.MapEntityMultiDelete):
+    model = ComplexModel
 
 
-class GeoPointMultiUpdate(mapentity_views.MapEntityMultiUpdate):
-    model = GeoPoint
+class ComplexModelMultiUpdate(mapentity_views.MapEntityMultiUpdate):
+    model = ComplexModel
 
 
-class GeoPointViewSet(mapentity_views.MapEntityViewSet):
-    model = GeoPoint
-    serializer_class = GeoPointSerializer  # Assuming City has similar fields to Road for the serializer
-    filterset_class = GeoPointFilterSet
+class ComplexModelViewSet(mapentity_views.MapEntityViewSet):
+    model = ComplexModel
+    serializer_class = ComplexModelSerializer  # Assuming City has similar fields to Road for the serializer
+    filterset_class = ComplexModelFilterSet
 
     def get_queryset(self):
         qs = self.model.objects.all()
@@ -286,39 +229,12 @@ class GeoPointViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
-# Supermarket views
-class SupermarketList(mapentity_views.MapEntityList):
-    model = Supermarket
-    searchable_columns = ["id", "name"]
-    filterset_class = SupermarketFilterSet
-
-
-class SupermarketDetail(
-    mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail
-):
-    model = Supermarket
-
-
-class SupermarketCreate(mapentity_views.MapEntityCreate):
-    model = Supermarket
-    form_class = SupermarketForm
-
-
-class SupermarketUpdate(mapentity_views.MapEntityUpdate):
-    model = Supermarket
-    form_class = SupermarketForm
-
-
-class SupermarketDelete(mapentity_views.MapEntityDelete):
-    model = Supermarket
-
-
-class SupermarketViewSet(mapentity_views.MapEntityViewSet):
-    model = Supermarket
-    serializer_class = SupermarketSerializer
-    geojson_serializer_class = SupermarketGeojsonSerializer
+# HiddenModel views (menu=False)
+class HiddenModelViewSet(mapentity_views.MapEntityViewSet):
+    model = HiddenModel
+    serializer_class = HiddenModelSerializer
+    geojson_serializer_class = HiddenModelGeojsonSerializer
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-    filterset_class = SupermarketFilterSet
 
     def get_queryset(self):
         qs = self.model.objects.all()

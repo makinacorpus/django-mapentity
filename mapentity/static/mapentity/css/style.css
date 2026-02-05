@@ -687,15 +687,11 @@ body.screamshot .map-fogged .leaflet-tile.leaflet-tile-loaded {
     opacity: 1.0;
 }
 
-body.screamshot .leaflet-control {
+body.screamshot .maplibregl-ctrl {
     display: none;
 }
 
-body.screamshot .leaflet-control-scale {
-    display: block;
-}
-
-body.screamshot .leaflet-control-attribution {
+body.screamshot .maplibregl-ctrl-attrib {
     display: block;
     text-shadow: 1px 0 0 #fff, -1px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
     background: none;
@@ -703,7 +699,7 @@ body.screamshot .leaflet-control-attribution {
     color: black;
 }
 
-body.screamshot .leaflet-top.leaflet-left {
+body.screamshot .maplibregl-ctrl-top-left{
     background-image: url(../images/compass.svg);
     display: block;
     min-height: 60px;
@@ -713,22 +709,17 @@ body.screamshot .leaflet-top.leaflet-left {
     margin-top: 5px;
 }
 
-body.screamshot .leaflet-control-scale {
+body.screamshot .maplibregl-ctrl-scale {
+    display: block;
     border: 3px solid black;
     border-top: none;
     box-shadow: 2px 2px 0 white;
     color: black;
     text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
-    max-height: 7px;
-}
-
-body.screamshot .leaflet-control-scale-line {
-    border: none;
     background: none;
     font-size: 15px;
     font-weight: bold;
     overflow: auto;
-    margin-top: -12px;
     text-align: center;
 }
 

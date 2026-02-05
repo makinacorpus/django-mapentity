@@ -4,12 +4,11 @@ from mapentity.serializers import MapentityGeojsonModelSerializer
 
 from .models import (
     City,
-    DummyAptModel,
+    ComplexModel,
     DummyModel,
-    GeoPoint,
+    HiddenModel,
     MushroomSpot,
     Road,
-    Supermarket,
 )
 
 
@@ -31,28 +30,16 @@ class RoadSerializer(serializers.ModelSerializer):
         model = Road
 
 
-class DummyAptSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = "__all__"
-        model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-
-
-class DummyAptGeojsonSerializer(MapentityGeojsonModelSerializer):
-    class Meta(MapentityGeojsonModelSerializer.Meta):
-        fields = ["id", "name"]
-        model = DummyAptModel  # Assuming DummyaptModel is similar to DummyModel
-
-
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         model = City
 
 
-class GeoPointSerializer(serializers.ModelSerializer):
+class ComplexModelSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
-        model = GeoPoint
+        model = ComplexModel
 
 
 class MushroomSpotSerializer(serializers.ModelSerializer):
@@ -67,13 +54,13 @@ class MushroomSpotGeojsonSerializer(MapentityGeojsonModelSerializer):
         model = MushroomSpot
 
 
-class SupermarketSerializer(serializers.ModelSerializer):
+class HiddenModelSerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
-        model = Supermarket
+        model = HiddenModel
 
 
-class SupermarketGeojsonSerializer(MapentityGeojsonModelSerializer):
+class HiddenModelGeojsonSerializer(MapentityGeojsonModelSerializer):
     class Meta(MapentityGeojsonModelSerializer.Meta):
         fields = ["id", "name"]
-        model = Supermarket
+        model = HiddenModel

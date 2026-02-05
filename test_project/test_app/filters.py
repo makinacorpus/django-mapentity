@@ -4,15 +4,13 @@ from mapentity.filters import MapEntityFilterSet
 
 from .models import (
     City,
+    ComplexModel,
     DollModel,
-    DummyAptModel,
     DummyModel,
-    GeoPoint,
     ManikinModel,
     MushroomSpot,
     Road,
     Sector,
-    Supermarket,
 )
 
 
@@ -36,14 +34,6 @@ class RoadFilterSet(MapEntityFilterSet):
         fields = ("id", "name")
 
 
-class DummyAptFilterSet(MapEntityFilterSet):
-    public = BooleanFilter(field_name="public", lookup_expr="exact")
-
-    class Meta:
-        model = DummyAptModel
-        fields = ("public", "name")
-
-
 class DollModelFilterSet(MapEntityFilterSet):
     class Meta:
         model = DollModel
@@ -62,21 +52,15 @@ class CityFilterSet(MapEntityFilterSet):
         fields = ("id", "name")
 
 
-class SupermarketFilterSet(MapEntityFilterSet):
-    class Meta:
-        model = Supermarket
-        fields = ("id", "tag")
-
-
 class SectorFilterSet(MapEntityFilterSet):
     class Meta:
         model = Sector
         fields = ("code", "name")
 
 
-class GeoPointFilterSet(MapEntityFilterSet):
+class ComplexModelFilterSet(MapEntityFilterSet):
     public = BooleanFilter(field_name="public", lookup_expr="exact")
 
     class Meta:
-        model = GeoPoint
+        model = ComplexModel
         fields = ("public", "name", "located_in", "road")
