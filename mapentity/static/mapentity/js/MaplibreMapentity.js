@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const bounds = [BOUNDS[0], BOUNDS[1]];
 
     const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
+    window.map = map;
     const modelname = context.modelname;
     const objects_verbose_name = document.body.getAttribute('data-objectsname');
     const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelname);
