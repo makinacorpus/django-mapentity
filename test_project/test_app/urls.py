@@ -4,15 +4,15 @@ from .models import (
     City,
     ComplexModel,
     DummyModel,
+    HiddenModel,
     MushroomSpot,
     Road,
-    Supermarket,
 )
 
 app_name = "test_app"
 
 
-class SupermarketOptions(MapEntityOptions):
+class HiddenModelOptions(MapEntityOptions):
     menu = False
 
 
@@ -21,4 +21,4 @@ urlpatterns += registry.register(MushroomSpot)
 urlpatterns += registry.register(Road)
 urlpatterns += registry.register(City)
 urlpatterns += registry.register(ComplexModel)
-urlpatterns += registry.register(Supermarket, SupermarketOptions)
+urlpatterns += registry.register(HiddenModel, HiddenModelOptions)

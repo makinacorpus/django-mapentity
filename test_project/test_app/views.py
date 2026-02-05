@@ -10,33 +10,31 @@ from .filters import (
     DummyModelFilterSet,
     MushroomSpotFilterSet,
     RoadFilterSet,
-    SupermarketFilterSet,
 )
 from .forms import (
     CityForm,
     DummyModelForm,
     MushroomSpotForm,
     RoadForm,
-    SupermarketForm,
 )
 from .models import (
     City,
     ComplexModel,
     DummyModel,
+    HiddenModel,
     MushroomSpot,
     Road,
-    Supermarket,
 )
 from .serializers import (
     CitySerializer,
     ComplexModelSerializer,
     DummyGeojsonSerializer,
     DummySerializer,
+    HiddenModelGeojsonSerializer,
+    HiddenModelSerializer,
     MushroomSpotGeojsonSerializer,
     MushroomSpotSerializer,
     RoadSerializer,
-    SupermarketGeojsonSerializer,
-    SupermarketSerializer,
 )
 
 
@@ -231,39 +229,12 @@ class ComplexModelViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
-# Supermarket views
-class SupermarketList(mapentity_views.MapEntityList):
-    model = Supermarket
-    searchable_columns = ["id", "name"]
-    filterset_class = SupermarketFilterSet
-
-
-class SupermarketDetail(
-    mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail
-):
-    model = Supermarket
-
-
-class SupermarketCreate(mapentity_views.MapEntityCreate):
-    model = Supermarket
-    form_class = SupermarketForm
-
-
-class SupermarketUpdate(mapentity_views.MapEntityUpdate):
-    model = Supermarket
-    form_class = SupermarketForm
-
-
-class SupermarketDelete(mapentity_views.MapEntityDelete):
-    model = Supermarket
-
-
-class SupermarketViewSet(mapentity_views.MapEntityViewSet):
-    model = Supermarket
-    serializer_class = SupermarketSerializer
-    geojson_serializer_class = SupermarketGeojsonSerializer
+# HiddenModel views (menu=False)
+class HiddenModelViewSet(mapentity_views.MapEntityViewSet):
+    model = HiddenModel
+    serializer_class = HiddenModelSerializer
+    geojson_serializer_class = HiddenModelGeojsonSerializer
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-    filterset_class = SupermarketFilterSet
 
     def get_queryset(self):
         qs = self.model.objects.all()

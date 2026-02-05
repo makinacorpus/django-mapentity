@@ -4,18 +4,18 @@ describe('Menu Hidden Model (menu=False)', () => {
         cy.mockTiles()
     })
 
-    it('should not display Supermarket in the sidebar menu', () => {
+    it('should not display HiddenModel in the sidebar menu', () => {
         cy.visit('/dummymodel/list/')
         cy.get('#entitylist', {timeout: 10000}).should('exist')
 
         // Verify that other models with menu=True are visible in the sidebar
         cy.get('#entitylist a[href*="/dummymodel/list"]').should('exist')
 
-        // Verify that Supermarket (menu=False) is NOT in the sidebar menu
-        cy.get('#entitylist a[href*="/supermarket/list"]').should('not.exist')
+        // Verify that HiddenModel (menu=False) is NOT in the sidebar menu
+        cy.get('#entitylist a[href*="/hiddenmodel/list"]').should('not.exist')
     })
 
-    it('should not display Supermarket in the layers list', () => {
+    it('should not display HiddenModel in the layers list', () => {
         cy.visit('/dummymodel/list/')
 
         // Wait for map to load
@@ -29,10 +29,10 @@ describe('Menu Hidden Model (menu=False)', () => {
         // Check that the layer menu is open
         cy.get('.layer-switcher-menu', {timeout: 5000}).should('exist')
 
-        // Verify that Supermarket is NOT in the layers list
+        // Verify that HiddenModel is NOT in the layers list
         cy.get('.layer-switcher-menu').then($menu => {
             const menuText = $menu.text().toLowerCase()
-            expect(menuText).to.not.include('supermarket')
+            expect(menuText).to.not.include('hidden model')
         })
 
         // Verify that other models with menu=True ARE in the layers list
@@ -47,27 +47,27 @@ describe('Menu Hidden Model (menu=False)', () => {
         })
     })
 
-    it('should return 404 when accessing Supermarket list page directly', () => {
-        // Supermarket with menu=False should still have URLs registered
+    it('should still allow accessing HiddenModel list page directly', () => {
+        // HiddenModel with menu=False should still have URLs registered
         // but should not appear in navigation menus
         // Note: The model is still accessible via URL, menu=False only hides it from menus
-        cy.visit('/supermarket/list/', {failOnStatusCode: false})
+        cy.visit('/hiddenmodel/list/', {failOnStatusCode: false})
 
         // The page should load (menu=False doesn't block URL access, just hides from menu)
-        cy.url().should('include', '/supermarket/list')
+        cy.url().should('include', '/hiddenmodel/list')
     })
 
-    it('should not include Supermarket in JS settings layers', () => {
+    it('should not include HiddenModel in JS settings layers', () => {
         cy.visit('/dummymodel/list/')
 
         // Wait for JS settings to load
         cy.wait(1000)
 
-        // Check that window.SETTINGS.layers does not include supermarket
+        // Check that window.SETTINGS.layers does not include hiddenmodel
         cy.window().then((win) => {
             if (win.SETTINGS && win.SETTINGS.layers) {
                 const layerIds = win.SETTINGS.layers.map(l => l.id)
-                expect(layerIds).to.not.include('supermarket')
+                expect(layerIds).to.not.include('hiddenmodel')
 
                 // Verify other models are present
                 const hasOtherModels = layerIds.includes('dummymodel') ||
@@ -79,11 +79,11 @@ describe('Menu Hidden Model (menu=False)', () => {
         })
     })
 
-    it('should have accessible GeoJSON endpoint for Supermarket despite menu=False', () => {
+    it('should have accessible GeoJSON endpoint for HiddenModel despite menu=False', () => {
         // menu=False only hides the model from navigation menus and layer switcher
         // The GeoJSON API endpoint should still be accessible for data retrieval
         cy.request({
-            url: '/api/supermarket/drf/supermarkets.geojson',
+            url: '/api/hiddenmodel/drf/hiddenmodels.geojson',
             failOnStatusCode: false
         }).then((response) => {
             // The endpoint should return 200 OK (data is accessible)
@@ -96,20 +96,20 @@ describe('Menu Hidden Model (menu=False)', () => {
         })
     })
 
-    it('should have accessible GeoJSON detail endpoint for Supermarket', () => {
-        // First, get a supermarket ID from the list endpoint
+    it('should have accessible GeoJSON detail endpoint for HiddenModel', () => {
+        // First, get a hiddenmodel ID from the list endpoint
         cy.request({
-            url: '/api/supermarket/drf/supermarkets.geojson',
+            url: '/api/hiddenmodel/drf/hiddenmodels.geojson',
             failOnStatusCode: false
         }).then((listResponse) => {
             expect(listResponse.status).to.eq(200)
 
-            // If there are supermarkets, test the detail endpoint
+            // If there are hiddenmodels, test the detail endpoint
             if (listResponse.body.features && listResponse.body.features.length > 0) {
-                const supermarketId = listResponse.body.features[0].id
+                const hiddenmodelId = listResponse.body.features[0].id
 
                 cy.request({
-                    url: `/api/supermarket/drf/supermarkets/${supermarketId}.geojson`,
+                    url: `/api/hiddenmodel/drf/hiddenmodels/${hiddenmodelId}.geojson`,
                     failOnStatusCode: false
                 }).then((detailResponse) => {
                     expect(detailResponse.status).to.eq(200)
