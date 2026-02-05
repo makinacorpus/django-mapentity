@@ -2,13 +2,16 @@
  * MaplibreMultiFieldManager
  * 
  * Manages multiple geometry fields on the same map.
- * Shows all controls simultaneously and routes events based on geometry type.
+ * Each field gets its own custom control panel with geometry-specific buttons.
+ * Uses a single shared Geoman instance but routes events based on active field.
  */
 class MaplibreMultiFieldManager {
     constructor(map) {
         this.map = map;
         this.fields = new Map(); // fieldId -> MaplibreGeometryField
-        this.drawManager = null;
+        this.drawManager = null; // Single shared Geoman instance
+        this.controlPanels = new Map(); // fieldId -> DOM element
+        this.activeFieldId = null;
     }
 
     /**
@@ -19,136 +22,385 @@ class MaplibreMultiFieldManager {
         console.log('MaplibreMultiFieldManager: registering field', field.fieldId);
         this.fields.set(field.fieldId, field);
         
-        // Initialize draw manager with first field's options
+        // Create shared draw manager with combined options from all fields
         if (!this.drawManager) {
-            this.drawManager = new MaplibreDrawControlManager(this.map, field.options);
-            // Store draw manager on map for future fields
+            // Initialize with options that support all geometry types
+            const combinedOptions = {
+                ...field.options,
+                isGeneric: true, // Enable all controls
+                isGeometryCollection: false
+            };
+            this.drawManager = new MaplibreDrawControlManager(this.map, combinedOptions);
             this.map._mapentityDrawManager = this.drawManager;
+            
+            // Hide default Geoman controls, we'll create custom ones
+            this._hideDefaultGeomanControls();
         }
         
-        // No active field concept - all fields are active simultaneously
-        // Update controls to show all geometry types when second field registers
-        if (this.fields.size > 1) {
-            this._updateGeomanControlsForAllFields();
+        // Set first field as active
+        if (!this.activeFieldId) {
+            this.activeFieldId = field.fieldId;
         }
+        
+        // Create custom control panel for this field
+        this._createControlPanelForField(field);
+        
+        // Position all control panels
+        this._positionControlPanels();
         
         return this.drawManager;
     }
 
     /**
-     * Get all registered fields
-     * @returns {Map} Map of fieldId -> MaplibreGeometryField
-     */
-    getAllFields() {
-        return this.fields;
-    }
-
-    /**
-     * Update Geoman controls to show all controls for all registered fields
+     * Hide default Geoman UI controls
      * @private
      */
-    _updateGeomanControlsForAllFields() {
-        const geoman = this.drawManager.getGeoman();
-        if (!geoman || !geoman.loaded) {
-            // Wait for Geoman to load
-            this.map.once('gm:loaded', () => this._updateGeomanControlsForAllFields());
-            return;
-        }
-
-        // Collect all geometry types from all fields
-        let showDrawPolygon = false;
-        let showDrawLine = false;
-        let showDrawPoint = false;
-        let isGenericOrCollection = false;
-        let allModifiable = true; // Start true, becomes false if any field is not modifiable
-
-        this.fields.forEach((field) => {
-            const options = field.options;
-            isGenericOrCollection = isGenericOrCollection || options.isGeneric || options.isGeometryCollection;
-            showDrawPolygon = showDrawPolygon || options.isPolygon || options.isMultiPolygon;
-            showDrawLine = showDrawLine || options.isLineString || options.isMultiLineString;
-            showDrawPoint = showDrawPoint || options.isPoint || options.isMultiPoint;
-            allModifiable = allModifiable && options.modifiable;
-        });
-
-        // Show controls for all geometry types present across all fields
-        showDrawPolygon = showDrawPolygon || isGenericOrCollection;
-        showDrawLine = showDrawLine || isGenericOrCollection;
-        showDrawPoint = showDrawPoint || isGenericOrCollection;
-
-        // Update control visibility
-        geoman.setControlVisibility('draw', 'polygon', showDrawPolygon);
-        geoman.setControlVisibility('draw', 'line', showDrawLine);
-        geoman.setControlVisibility('draw', 'marker', showDrawPoint);
-        geoman.setControlVisibility('draw', 'rectangle', isGenericOrCollection);
-
-        const shouldShowDrag = (showDrawPoint || isGenericOrCollection) && allModifiable;
-        const shouldShowEdit = ((showDrawLine || showDrawPolygon || isGenericOrCollection) && allModifiable);
-
-        geoman.setControlVisibility('edit', 'drag', shouldShowDrag);
-        geoman.setControlVisibility('edit', 'change', shouldShowEdit);
-        geoman.setControlVisibility('edit', 'delete', allModifiable);
-
-        console.log('MaplibreMultiFieldManager: updated controls for all fields', {
-            polygon: showDrawPolygon,
-            line: showDrawLine,
-            marker: showDrawPoint
-        });
+    _hideDefaultGeomanControls() {
+        // Wait for Geoman to load
+        const hideControls = () => {
+            const geoman = this.drawManager.getGeoman();
+            if (!geoman || !geoman.loaded) {
+                this.map.once('gm:loaded', hideControls);
+                return;
+            }
+            
+            // Hide all default Geoman control buttons
+            const controlContainer = document.querySelector('.maplibregl-ctrl-group.geoman-toolbar');
+            if (controlContainer) {
+                controlContainer.style.display = 'none';
+            }
+        };
+        
+        hideControls();
     }
 
     /**
-     * Route a feature to the appropriate field based on its geometry type
-     * @param {string} geometryType - The geometry type (Point, LineString, Polygon, etc.)
-     * @returns {MaplibreGeometryField|null} The field that should handle this feature
+     * Create a custom control panel for a field
+     * @param {MaplibreGeometryField} field
+     * @private
      */
-    getFieldForGeometryType(geometryType) {
-        // Find the first field that matches the geometry type
-        for (const field of this.fields.values()) {
-            const options = field.options;
+    _createControlPanelForField(field) {
+        const fieldId = field.fieldId;
+        const fieldLabel = this._getFieldLabel(fieldId);
+        
+        // Create panel container
+        const panel = document.createElement('div');
+        panel.className = 'mapentity-field-controls';
+        panel.setAttribute('data-field-id', fieldId);
+        panel.style.cssText = `
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            margin: 10px;
+            position: absolute;
+            z-index: 1;
+            padding: 10px;
+            min-width: 120px;
+        `;
+        
+        // Add field label
+        const label = document.createElement('div');
+        label.textContent = fieldLabel;
+        label.style.cssText = `
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-align: center;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+        `;
+        panel.appendChild(label);
+        
+        // Create buttons container
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'mapentity-field-buttons';
+        buttonsContainer.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        `;
+        
+        // Add draw buttons based on field's geometry type
+        const options = field.options;
+        const isGenericOrCollection = options.isGeneric || options.isGeometryCollection;
+        
+        if (options.isPolygon || options.isMultiPolygon || isGenericOrCollection) {
+            buttonsContainer.appendChild(this._createDrawButton(fieldId, 'polygon', '🔷 Polygon'));
+        }
+        
+        if (options.isLineString || options.isMultiLineString || isGenericOrCollection) {
+            buttonsContainer.appendChild(this._createDrawButton(fieldId, 'line', '📏 Line'));
+        }
+        
+        if (options.isPoint || options.isMultiPoint || isGenericOrCollection) {
+            buttonsContainer.appendChild(this._createDrawButton(fieldId, 'marker', '📍 Point'));
+        }
+        
+        // Add separator if we have draw buttons and edit buttons
+        if (buttonsContainer.children.length > 0 && options.modifiable) {
+            const separator = document.createElement('div');
+            separator.style.cssText = `
+                height: 1px;
+                background: #e0e0e0;
+                margin: 4px 0;
+            `;
+            buttonsContainer.appendChild(separator);
+        }
+        
+        // Add edit/delete buttons if modifiable
+        if (options.modifiable) {
+            const editBtn = this._createActionButton(fieldId, 'edit', '✏️ Edit');
+            buttonsContainer.appendChild(editBtn);
             
-            // Check if this field handles this geometry type
-            if (geometryType === 'Point' || geometryType === 'MultiPoint') {
-                if (options.isPoint || options.isMultiPoint || options.isGeneric || options.isGeometryCollection) {
-                    return field;
+            const deleteBtn = this._createActionButton(fieldId, 'delete', '🗑️ Delete');
+            buttonsContainer.appendChild(deleteBtn);
+        }
+        
+        panel.appendChild(buttonsContainer);
+        
+        // Add to map container
+        this.map.getContainer().appendChild(panel);
+        this.controlPanels.set(fieldId, panel);
+    }
+
+    /**
+     * Create a draw button for a specific geometry type
+     * @private
+     */
+    _createDrawButton(fieldId, drawType, label) {
+        const button = document.createElement('button');
+        button.textContent = label;
+        button.className = `mapentity-draw-btn mapentity-draw-${drawType}`;
+        button.setAttribute('data-field-id', fieldId);
+        button.setAttribute('data-draw-type', drawType);
+        button.style.cssText = `
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+        `;
+        
+        button.addEventListener('mouseenter', () => {
+            button.style.background = '#e3f2fd';
+            button.style.borderColor = '#2196F3';
+        });
+        
+        button.addEventListener('mouseleave', () => {
+            button.style.background = 'white';
+            button.style.borderColor = '#ddd';
+        });
+        
+        button.addEventListener('click', () => {
+            this._activateDrawMode(fieldId, drawType);
+            // Highlight active button
+            this._highlightActiveButton(button);
+        });
+        
+        return button;
+    }
+
+    /**
+     * Create an action button (edit, delete)
+     * @private
+     */
+    _createActionButton(fieldId, actionType, label) {
+        const button = document.createElement('button');
+        button.textContent = label;
+        button.className = `mapentity-action-btn mapentity-action-${actionType}`;
+        button.setAttribute('data-field-id', fieldId);
+        button.setAttribute('data-action-type', actionType);
+        button.style.cssText = `
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+        `;
+        
+        button.addEventListener('mouseenter', () => {
+            if (actionType === 'delete') {
+                button.style.background = '#ffebee';
+                button.style.borderColor = '#f44336';
+            } else {
+                button.style.background = '#fff3e0';
+                button.style.borderColor = '#ff9800';
+            }
+        });
+        
+        button.addEventListener('mouseleave', () => {
+            button.style.background = 'white';
+            button.style.borderColor = '#ddd';
+        });
+        
+        button.addEventListener('click', () => {
+            this._activateActionMode(fieldId, actionType);
+        });
+        
+        return button;
+    }
+
+    /**
+     * Highlight the active button
+     * @private
+     */
+    _highlightActiveButton(activeButton) {
+        // Remove highlight from all buttons
+        document.querySelectorAll('.mapentity-draw-btn').forEach(btn => {
+            btn.style.background = 'white';
+            btn.style.borderColor = '#ddd';
+            btn.style.fontWeight = 'normal';
+        });
+        
+        // Highlight active button
+        activeButton.style.background = '#2196F3';
+        activeButton.style.borderColor = '#1976D2';
+        activeButton.style.color = 'white';
+        activeButton.style.fontWeight = 'bold';
+    }
+
+    /**
+     * Activate draw mode for a specific field
+     * @private
+     */
+    _activateDrawMode(fieldId, drawType) {
+        console.log(`MaplibreMultiFieldManager: activating ${drawType} for field ${fieldId}`);
+        
+        // Set this field as active
+        this.activeFieldId = fieldId;
+        
+        const geoman = this.drawManager.getGeoman();
+        if (!geoman || !geoman.loaded) {
+            console.error('Geoman not loaded');
+            return;
+        }
+        
+        // Disable all draw modes first
+        if (geoman.draw) {
+            Object.keys(geoman.draw).forEach(mode => {
+                if (geoman.draw[mode] && geoman.draw[mode].enabled && typeof geoman.draw[mode].disable === 'function') {
+                    geoman.draw[mode].disable();
                 }
-            } else if (geometryType === 'LineString' || geometryType === 'MultiLineString') {
-                if (options.isLineString || options.isMultiLineString || options.isGeneric || options.isGeometryCollection) {
-                    return field;
+            });
+        }
+        
+        // Enable the requested draw mode
+        if (geoman.draw && geoman.draw[drawType] && typeof geoman.draw[drawType].enable === 'function') {
+            geoman.draw[drawType].enable();
+        }
+    }
+
+    /**
+     * Activate action mode (edit/delete) for a specific field
+     * @private
+     */
+    _activateActionMode(fieldId, actionType) {
+        console.log(`MaplibreMultiFieldManager: activating ${actionType} for field ${fieldId}`);
+        
+        this.activeFieldId = fieldId;
+        
+        const geoman = this.drawManager.getGeoman();
+        if (!geoman || !geoman.loaded) {
+            console.error('Geoman not loaded');
+            return;
+        }
+        
+        const field = this.fields.get(fieldId);
+        if (!field) {
+            console.error('Field not found', fieldId);
+            return;
+        }
+        
+        if (actionType === 'edit') {
+            // Enable edit mode for the field's features
+            if (geoman.edit && geoman.edit.change) {
+                if (geoman.edit.change.enabled) {
+                    geoman.edit.change.disable();
+                } else {
+                    geoman.edit.change.enable();
                 }
-            } else if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
-                if (options.isPolygon || options.isMultiPolygon || options.isGeneric || options.isGeometryCollection) {
-                    return field;
+            }
+        } else if (actionType === 'delete') {
+            // Delete all features for this field
+            if (field.gmEvents && field.gmEvents.length > 0) {
+                const confirmDelete = confirm(`Delete all geometries for ${this._getFieldLabel(fieldId)}?`);
+                if (confirmDelete) {
+                    field.gmEvents.forEach(event => {
+                        if (event.feature && event.feature.remove) {
+                            try {
+                                event.feature.remove();
+                            } catch (e) {
+                                console.warn('Error removing feature', e);
+                            }
+                        }
+                    });
+                    field.gmEvents = [];
+                    field._saveToTextarea();
                 }
             }
         }
-        
-        // Fallback to first field if no specific match
-        return this.fields.values().next().value || null;
     }
 
     /**
-     * Route Geoman event to the appropriate field based on geometry type
+     * Position control panels on the map
+     * @private
+     */
+    _positionControlPanels() {
+        const panels = Array.from(this.controlPanels.values());
+        
+        // Position panels vertically along the left side
+        let topOffset = 10;
+        panels.forEach(panel => {
+            panel.style.top = `${topOffset}px`;
+            panel.style.left = '10px';
+            topOffset += panel.offsetHeight + 10;
+        });
+    }
+
+    /**
+     * Get a human-readable label for a field
+     * @param {string} fieldId
+     * @returns {string}
+     * @private
+     */
+    _getFieldLabel(fieldId) {
+        const match = fieldId.match(/id_(.+)$/);
+        if (match) {
+            const fieldName = match[1];
+            return fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+        }
+        return fieldId;
+    }
+
+    /**
+     * Route Geoman event to the active field
      * @param {string} eventType - The event type
      * @param {Object} event - The event data
      */
     routeEvent(eventType, event) {
-        // For create events, route to the field that matches the geometry type
-        if (eventType === 'gm:create' && event.feature) {
-            const geometryType = event.feature.geometry?.type || event.feature.getGeoJson?.()?.geometry?.type;
-            if (geometryType) {
-                const targetField = this.getFieldForGeometryType(geometryType);
-                if (targetField) {
-                    console.log(`MaplibreMultiFieldManager: routing ${geometryType} feature to field ${targetField.fieldId}`);
-                    targetField.handleGeomanEvent(eventType, event);
-                    return;
-                }
-            }
+        // Route to the currently active field
+        const activeField = this.fields.get(this.activeFieldId);
+        if (activeField) {
+            console.log(`MaplibreMultiFieldManager: routing event to field ${this.activeFieldId}`);
+            activeField.handleGeomanEvent(eventType, event);
         }
-        
-        // For other events, route to all fields and let them handle appropriately
-        this.fields.forEach((field) => {
-            field.handleGeomanEvent(eventType, event);
-        });
+    }
+
+    /**
+     * Get all registered fields
+     * @returns {Map}
+     */
+    getAllFields() {
+        return this.fields;
     }
 
     /**
