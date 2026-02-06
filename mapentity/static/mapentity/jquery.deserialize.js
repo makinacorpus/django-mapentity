@@ -48,7 +48,27 @@
         } else if (type == 'checkbox') { 
           // see below
         } else if ($input.prop("tagName") == 'SELECT') {
-          $input.children("option[value=" + pair[1] + "]").prop("selected", true);
+            if($input.attr('data-autocomplete-light-url')){
+                const autocompleteUrl = $input.attr('data-autocomplete-light-url');
+                $.ajax({
+                    type: 'GET',
+                    url: autocompleteUrl + pair[1],
+                }).then(function (data) {
+                    // create the option and append to Select2
+                    var option = new Option(data.text, data.id, true, true);
+                    $input.append(option).trigger('change');
+
+                    // manually trigger the `select2:select` event
+                    $input.trigger({
+                        type: 'select2:select',
+                        params: {
+                            data: data
+                        }
+                    });
+                });
+            } else {
+                $input.children("option[value=" + pair[1] + "]").prop("selected", true);
+            }
         } else {
           var oldVal = $input.val();
           var newVal = pair[1];
