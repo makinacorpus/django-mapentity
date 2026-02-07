@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     "rest_framework",
     "embed_video",
     "tinymce",
+    "mapbox_baselayer",
     "mapentity",  # Make sure mapentity settings are loaded before leaflet ones
     "test_project.test_app",
     "test_project.test_shapes",

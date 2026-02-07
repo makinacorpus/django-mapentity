@@ -47,10 +47,22 @@
             const bounds = [BOUNDS[0], BOUNDS[1]];
 
             const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
-            const layerManager = new MaplibreLayerManager();
+            // Créer un layerManager dédié au widget (pas le singleton de la carte principale)
+            const layerManager = Object.create(MaplibreLayerManager.prototype);
+            layerManager.layers = {
+                baseLayers: {},
+                overlays: {},
+                lazyOverlays: {},
+                layerGroups: {}
+            };
+            layerManager.restoredContext = null;
+            layerManager._map = null;
+            layerManager._eventListeners = [];
 
             map.getMap().on('load', function () {
                 window.mapentity_map = map.getMap();
+                layerManager.initialize(map.getMap());
+
                 // Ajout de la couche d’objets contextuels
                 const modelname = document.body.getAttribute('data-modelname');
                 const objects_verbose_name = document.body.getAttribute('data-objectsname');
@@ -67,18 +79,93 @@
                     primaryKey: generateUniqueId(),
                     isLazy: false,
                 });
+                // Override the singleton layerManager for this objectsLayer
+                objectsLayer.layerManager = layerManager;
                 objectsLayer.initialize(map.getMap());
 
-                // Base layers
-                TILES.forEach(([tileName, tileUrl, tileAttribution]) => {
-                    layerManager.addBaseLayer(tileName, {
-                        id: tileName + '-base',
-                        tiles: [tileUrl],
-                        attribution: tileAttribution,
-                    });
+                // Initialize additional layers
+                window.SETTINGS.layers.forEach((model) => {
+                    const nameHTML = model.name;
+                    const additionalModelname = model.id;
+                    const category = model.category;
+                    const additionalLayerUrl = model.url;
+
+                    let additionalStyle = window.SETTINGS.map.styles[additionalModelname] ?? window.SETTINGS.map.styles['others'];
+                    let primaryKey = generateUniqueId();
+
+                    if (additionalModelname !== modelname) {
+                        const additionalObjectsLayer = new MaplibreObjectsLayer(null, {
+                            style: additionalStyle,
+                            modelname: additionalModelname,
+                            readonly: true,
+                            nameHTML: nameHTML,
+                            category: category,
+                            primaryKey: primaryKey,
+                            dataUrl: additionalLayerUrl,
+                            isLazy: true,
+                            displayPopup: true,
+                        });
+
+                        additionalObjectsLayer.layerManager = layerManager;
+                        additionalObjectsLayer.initialize(map.getMap());
+                        additionalObjectsLayer.registerLazyLayer(additionalModelname, category, nameHTML, primaryKey, additionalLayerUrl);
+                    }
                 });
 
-                map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
+                // Chargement des couches puis initialisation de Geoman une fois toutes les couches chargées
+                fetch('/mapbox/mapbox-baselayers/')
+                    .then(response => response.json())
+                    .then(async data => {
+                        const { base_layers, overlay_layers } = data;
+                        if (base_layers) {
+                            for (const layer of base_layers) {
+                                await layerManager.addLayerFromUrl(layer.name, {
+                                    id: 'mapbox-base-' + layer.slug,
+                                    url: layer.url,
+                                    isBaseLayer: true,
+                                    attribution: layer.attribution || ''
+                                });
+                            }
+                        }
+                        if (overlay_layers) {
+                            for (const layer of overlay_layers) {
+                                await layerManager.addLayerFromUrl(layer.name, {
+                                    id: 'mapbox-overlay-' + layer.slug,
+                                    url: layer.url,
+                                    isBaseLayer: false,
+                                    attribution: layer.attribution || ''
+                                });
+                            }
+                        }
+                    })
+                    .catch(err => console.error('Failed to load mapbox baselayers in widget:', err))
+                    .finally(() => {
+                        // Initialisation du champ de géométrie APRÈS le chargement de toutes les couches
+                        new MaplibreGeometryField(map.getMap(), fieldId, options);
+
+                        // Notifier les autres champs géométriques de cette carte
+                        window.dispatchEvent(new CustomEvent('map:init', {
+                            detail: {
+                                map: map.getMap(),
+                                fieldId: fieldId,
+                                options: options,
+                            }
+                        }));
+                    });
+
+                const layerControl = new MaplibreLayerControl(layerManager);
+                map.getMap().addControl(layerControl, 'top-right');
+
+                // Restauration du contexte pour le widget
+                const mapentityContext = new MaplibreMapentityContext(bounds, layerManager);
+                const mapViewContext = getURLParameter("context");
+                if (mapViewContext) {
+                    layerManager.restoredContext = { restoredFromUrl: true };
+                }
+                mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
+                    prefix: 'widget-' + fieldId,
+                });
+
                 map.getMap().addControl(new MaplibreFileLayerControl({
                     layerOptions: {
                         style: window.SETTINGS.map.styles.filelayer,
@@ -86,21 +173,12 @@
                 }), 'top-left');
                 map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
-                // Initialisation du champ de géométrie principal
-                new MaplibreGeometryField(map.getMap(), fieldId, options);
-
-                // Notifier les autres champs géométriques de cette carte
-                window.dispatchEvent(new CustomEvent('map:init', {
-                    detail: {
-                        map: map.getMap(),
-                        fieldId: fieldId,
-                        options: options,
-                    }
-                }));
-
                 // chargement des couches
                 objectsLayer.load(layerUrl);
+
+
             });
+
         }
     });
 </script>

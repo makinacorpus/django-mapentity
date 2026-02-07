@@ -1,9 +1,9 @@
-FROM python:3.9-bookworm AS base
+FROM python:3.10-trixie AS base
 
 RUN apt-get update -qq && apt-get install -y -qq \
     binutils libproj-dev gdal-bin libsqlite3-mod-spatialite \
     libjpeg62 zlib1g-dev libcairo2 libpango-1.0-0 \
-    libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info \
+    libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 libffi-dev shared-mime-info \
     libldap2-dev libsasl2-dev gettext && \
     apt-get clean all && rm -rf /var/apt/lists/* && rm -rf /var/cache/apt/*
 
@@ -14,7 +14,7 @@ RUN chown -R django:django /code
 COPY --chown=django:django . /code/src
 
 USER django
-RUN python3.9 -m venv /code/venv
+RUN python3.10 -m venv /code/venv
 
 WORKDIR /code/src
 

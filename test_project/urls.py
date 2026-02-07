@@ -33,6 +33,7 @@ urlpatterns = [
         name="logout",
     ),
     path("paperclip/", include("paperclip.urls")),
+    path("mapbox/", include("mapbox_baselayer.urls")),
     path("admin/", admin.site.urls),
     path(
         "test/document/dummymodel-<int:pk>.odt",

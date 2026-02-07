@@ -14,18 +14,34 @@ class MaplibreLayerControl {
         this._menu = this._createMenu();
         this._container.appendChild(this._menu);
 
-        this._populateBaseLayers(this._menu);
-        this._activateFirstBaseLayer();
+        this._updateMenu();
 
-        // Populate existing layers
-        this._populateOverlaysLayers();
-        this._populateLazyOverlaysLayers();
-
-        this._map.on('layerManager:overlayAdded', () => this._populateOverlaysLayers());
-        this._map.on('layerManager:lazyOverlayAdded', () => this._populateLazyOverlaysLayers());
+        this._map.on('layerManager:overlayAdded', () => this._updateMenu());
+        this._map.on('layerManager:baseLayerAdded', () => this._updateMenu());
+        this._map.on('layerManager:lazyOverlayAdded', () => this._updateMenu());
         this._map.on('layerManager:loadingError', (e) => this._handleLoadingError(e.primaryKey));
 
         return this._container;
+    }
+
+    _updateMenu() {
+        if (!this._menu) return;
+        this._menu.innerHTML = '';
+        this._populateBaseLayers(this._menu);
+        this._activateFirstBaseLayer();
+
+        const { overlays, lazyOverlays } = this.layerManager.getLayers();
+
+        // Ajoute les overlays chargés (Mapbox) juste après les fonds de plan
+        if (Object.keys(overlays).length > 0) {
+            this._populateOverlaysLayers();
+        }
+
+        // Ajoute un séparateur avant les couches additionnelles des autres modules (lazy)
+        if (Object.keys(lazyOverlays).length > 0) {
+            this._ensureSeparator();
+            this._populateLazyOverlaysLayers();
+        }
     }
 
     _createContainer() {
@@ -101,6 +117,7 @@ class MaplibreLayerControl {
      */
     _populateBaseLayers(container) {
         const baseLayers = this.layerManager.getLayers().baseLayers;
+        const restoredLayers = this.layerManager.restoredContext?.maplayers || [];
 
         Object.entries(baseLayers).forEach(([name, id], index) => {
             const label = document.createElement('label');
@@ -108,9 +125,20 @@ class MaplibreLayerControl {
 
             input.type = 'radio';
             input.name = 'baseLayer';
+            input.value = name.toLowerCase();
             input.dataset.layerId = id;
 
-            if (index === 0) this._firstBaseLayerInput = input;
+            // Maintain checked state if already selected
+            const currentBaseLayerId = this.layerManager.currentBaseLayerId;
+            const isRestored = restoredLayers.includes(name.trim());
+
+            if (currentBaseLayerId === id || isRestored) {
+                input.checked = true;
+                this.layerManager.currentBaseLayerId = id;
+                this.layerManager.toggleLayer(id, true);
+            } else if (!currentBaseLayerId && !restoredLayers.length && index === 0) {
+                this._firstBaseLayerInput = input;
+            }
 
             label.appendChild(input);
             label.append(` ${name}`);
@@ -123,6 +151,7 @@ class MaplibreLayerControl {
                         this.layerManager.toggleLayer(layerId, false);
                     });
                     this.layerManager.toggleLayer(id, true);
+                    this.layerManager.currentBaseLayerId = id;
 
                     // Remet les couches de mesure au-dessus
                     ['measure-points', 'measure-lines'].forEach(layer => {
@@ -138,10 +167,22 @@ class MaplibreLayerControl {
 
     _populateOverlaysLayers() {
         const overlays = this.layerManager.getLayers().overlays;
-        this._cleanupOverlaySection('loaded');
-        this._ensureSeparator();
+        const restoredLayers = this.layerManager.restoredContext?.maplayers || [];
 
-        for (const [category, group] of Object.entries(overlays)) {
+        // Tri explicite des catégories pour avoir "Overlays" avant "Objects"
+        const sortedCategories = Object.keys(overlays).sort((a, b) => {
+            const catOverlays = gettext('Overlays');
+            const catObjects = gettext('Objects');
+            
+            if (a === catOverlays) return -1;
+            if (b === catOverlays) return 1;
+            if (a === catObjects && b !== catOverlays) return 1;
+            if (b === catObjects && a !== catOverlays) return -1;
+            return a.localeCompare(b);
+        });
+
+        for (const category of sortedCategories) {
+            const group = overlays[category];
             const title = document.createElement('div');
             title.textContent = category;
             title.style.fontWeight = 'bold';
@@ -157,15 +198,26 @@ class MaplibreLayerControl {
 
                 const input = document.createElement('input');
                 input.type = 'checkbox';
-                input.checked = true;
+                const labelText = labelHTML.replace(/<[^>]*>?/gm, '').trim();
+                
+                // Vérifier si la couche est dans le contexte restauré
+                // Par défaut, si pas de contexte, on coche la catégorie "Objects"
+                const isRestored = restoredLayers.includes(labelText);
+                const isDefaultChecked = category === gettext('Objects') && (!this.layerManager.restoredContext || !this.layerManager.restoredContext.maplayers);
+                input.checked = isRestored || isDefaultChecked;
 
                 label.appendChild(input);
                 label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
                 label.classList.add('layer-entry');
                 this._menu.appendChild(label);
 
+                // Si restauré ou coché par défaut, s'assurer que la couche est visible sur la carte
+                if (input.checked) {
+                    this.layerManager.toggleLayer(primaryKey, true);
+                }
+
                 input.addEventListener('change', () => {
-                    this.layerManager.toggleLayer(layerIds, input.checked);
+                    this.layerManager.toggleLayer(primaryKey, input.checked);
                 });
             }
         }
@@ -173,8 +225,7 @@ class MaplibreLayerControl {
 
     _populateLazyOverlaysLayers() {
         const { lazyOverlays } = this.layerManager.getLayers();
-        this._cleanupOverlaySection('lazy');
-        this._ensureSeparator();
+        const restoredLayers = this.layerManager.restoredContext?.maplayers || [];
 
         for (const [category, group] of Object.entries(lazyOverlays)) {
             const title = document.createElement('div');
@@ -192,13 +243,29 @@ class MaplibreLayerControl {
 
                 const input = document.createElement('input');
                 input.type = 'checkbox';
-                input.checked = isVisible;
+                const labelText = labelHTML.replace(/<[^>]*>?/gm, '').trim();
+                
+                const isRestored = restoredLayers.includes(labelText);
+                input.checked = isVisible || isRestored;
                 this._lazyInputs.set(primaryKey, input);
 
                 label.appendChild(input);
                 label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
                 label.classList.add('layer-entry');
                 this._menu.appendChild(label);
+
+                // Si restauré comme coché mais pas encore visible (pas chargé), on le déclenche
+                if (isRestored && !isVisible) {
+                    this.layerManager.toggleLazyOverlay(category, primaryKey, true).then(success => {
+                        if (success) {
+                            input.checked = true;
+                            input.disabled = false;
+                        } else {
+                            this._handleLoadingError(primaryKey);
+                        }
+                    });
+                    input.disabled = true;
+                }
 
                 input.addEventListener('change', async () => {
                     input.disabled = true;

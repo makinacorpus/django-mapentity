@@ -31,7 +31,9 @@ class MaplibreMapentityContext {
         document.querySelectorAll('.layer-switcher-menu label').forEach(label => {
             const inputElement = label.querySelector('input');
             if(inputElement && inputElement.checked) {
-                layers.push(label.textContent.trim());
+                // On récupère le texte brut du label (sans les balises HTML éventuelles des icônes)
+                const labelText = label.textContent.trim();
+                layers.push(labelText);
             }
         });
 
@@ -168,6 +170,9 @@ class MaplibreMapentityContext {
             return;
         }
 
+        // Store restored context in layerManager for async layers
+        this.layerManager.restoredContext = context;
+
          // Restore filters if a filter and filter context are available.
          console.debug('Restoring filters:', filter, context.filter);
          if (filter && context.filter) {
@@ -219,33 +224,21 @@ class MaplibreMapentityContext {
             const layers = context.maplayers;
             const layerLabels = document.querySelectorAll('.layer-switcher-menu label');
 
-            // Traitement des cases à cocher (checkbox)
             layerLabels.forEach(label => {
                 const input = label.querySelector('input');
-                if (!input || input.type !== 'checkbox') {
-                    return;
-                }
+                if (!input) return;
 
                 const labelText = label.textContent.trim();
-                input.checked = layers.includes(labelText);
-                if (input.checked) {
-                    input.dispatchEvent(new Event("change"));
-                }
-            });
+                const isRestored = layers.includes(labelText);
 
-            // Traitement des boutons radio
-            layerLabels.forEach(label => {
-                const input = label.querySelector('input');
-                if (!input || input.type !== 'radio') {
-                    return;
-                }
-
-                const layerId = input.dataset.layerId;
-                if (layers.includes(layerId?.replace('-base', ''))) {
+                if (isRestored) {
                     input.checked = true;
-                    this.layerManager.toggleLayer(layerId);
-                } else {
-                    input.checked = false;
+                    if (input.type === 'radio') {
+                        const layerId = input.dataset.layerId;
+                        this.layerManager.toggleLayer(layerId, true);
+                    } else {
+                        input.dispatchEvent(new Event("change"));
+                    }
                 }
             });
         }
