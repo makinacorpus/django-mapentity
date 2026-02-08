@@ -1,6 +1,5 @@
 from unittest import mock
 
-from django.db.utils import OperationalError
 from django.test import TestCase, override_settings
 
 from mapentity.signals import migrate_tiles
@@ -55,7 +54,6 @@ class MigrateTilesTestCase(TestCase):
 
     def test_no_leaflet_config(self, mock_logger):
         """Should do nothing if LEAFLET_CONFIG not in settings"""
-        from django.conf import settings
 
         sender, bl, blt = self._make_sender()
         migrate_tiles(sender)
