@@ -160,44 +160,12 @@ PAPERCLIP_ATTACHMENT_MODEL = "test_app.Attachment"
 if os.path.exists("/usr/lib/x86_64-linux-gnu/mod_spatialite.so"):
     SPATIALITE_LIBRARY_PATH = "/usr/lib/x86_64-linux-gnu/mod_spatialite"
 
-LOGGING = {
-    "version": 1,
-    "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(name)s %(pathname)s:%(lineno)d %(message)s"
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
-    },
-    "loggers": {
-        "": {
-            "handlers": ["console"],
-            "level": "WARNING",
-        },
-    },
-}
 
 MAPLIBRE_CONFIG_OVERRIDES = {
     "DEFAULT_CENTER": [1.3952, 43.5963],  # Toulouse, France
     "DEFAULT_ZOOM": 5,
     "SCALE": "metric",
     "BOUNDS": [[-5.5, 40.120372], [10, 52]],
-    "TILES": [
-        (
-            "OSM",
-            "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            "&copy; OpenStreetMap contributors",
-        ),
-        (
-            "TOPO",
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-            "&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.",
-        ),
-    ],
 }
 
 
@@ -242,4 +210,41 @@ MESSAGE_TAGS = {
     messages.DEBUG: "alert-info",
     messages.WARNING: "alert-warning",
     messages.ERROR: "alert-danger",
+}
+
+# test migration of LEAFLET_CONFIG to BaseLayer and BaseLayerTile models
+LEAFLET_CONFIG = {
+    "TILES": [
+        (
+            "OpenStreetMap",
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                "attribution": '&copy; <a href="https://www.openstreetmap.org/copyright">Contributeurs d\'OpenStreetMap</a>',
+                "maxNativeZoom": 19,
+                "maxZoom": 22,
+            },
+        ),
+        (
+            "IGN Plan V2",
+            "//data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+            {"attribution": "Plan IGNV2 - Carte © IGN/Geoportail", "maxZoom": 19},
+        ),
+        (
+            "IGN Scan25",
+            "//data.geopf.fr/private/wmts?apikey=ign_scan_ws&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR&EXCEPTIONS=text/xml&FORMAT=image/jpeg&SERVICE=WMTS&VERSION=1.0.0&REQUEST=GetTile&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+            {"attribution": "Cadastre - Carte © IGN/Geoportail", "maxZoom": 16},
+        ),
+        (
+            "IGN Ortho",
+            "//data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+            {"attribution": "Orthophotos - Carte © IGN/Geoportail", "maxZoom": 19},
+        ),
+    ],
+    "OVERLAYS": [
+        (
+            "Cadastre",
+            "//data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=CADASTRALPARCELS.PARCELLAIRE_EXPRESS&STYLE=normal&FORMAT=image/png&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",
+            {"attribution": "Cadastre - Carte © IGN/Geoportail", "maxZoom": 19},
+        ),
+    ],
 }

@@ -29,7 +29,7 @@ setup(
         'crispy-bootstrap4',
         'django-embed-video',
         'django-filter',
-        'django-mapbox-baselayer',
+        'django-mapbox-baselayer@git+https://github.com/makinacorpus/django-mapbox-baselayer.git@improve#egg=django-mapbox-baselayer',
         'django-modeltranslation',
         'django-tinymce>=3',
         'django-weasyprint',

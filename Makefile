@@ -68,7 +68,10 @@ messages: messages_python messages_js
 serve_e2e:
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py migrate
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py flush --no-input
-	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py install_osm_baselayer
+	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py install_layer osm --order=0
+	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py install_layer opentopomap --order=1
+	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py install_layer ign cadastre --order=0 --overlay
+
 	echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@test.com', 'admin')" | $(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py shell
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py create_test_data --dummies 20 --cities 5 --roads 10 --geopoints 10
 	$(docker_compose) run -p 8000:8000 -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e  -v ./:/code/src --rm web ./manage.py runserver 0.0.0.0:8000
