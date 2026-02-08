@@ -1,7 +1,7 @@
 from django.core.checks import Warning
 from django.test import TestCase, override_settings
 
-from mapentity.apps import old_config
+from mapentity.checks import check_old_config
 
 
 class OldConfigCheckTestCase(TestCase):
@@ -12,13 +12,13 @@ class OldConfigCheckTestCase(TestCase):
 
         if hasattr(settings, "LEAFLET_CONFIG"):
             delattr(settings, "LEAFLET_CONFIG")
-        result = old_config(None)
+        result = check_old_config(None)
         self.assertEqual(result, [])
 
     @override_settings(LEAFLET_CONFIG={"TILES": []})
     def test_warning_with_leaflet_config(self):
         """Warning when LEAFLET_CONFIG is defined"""
-        result = old_config(None)
+        result = check_old_config(None)
         self.assertEqual(len(result), 1)
         self.assertIsInstance(result[0], Warning)
         self.assertEqual(result[0].id, "mapentity.W001")
