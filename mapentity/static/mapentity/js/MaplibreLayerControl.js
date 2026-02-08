@@ -204,8 +204,7 @@ class MaplibreLayerControl {
                 // Par défaut, on coche toujours la catégorie "Objects" (couche du modèle courant)
                 const isRestored = restoredLayers.includes(labelText);
                 const isObjectsCategory = category === gettext('Objects');
-                const isDefaultChecked = isObjectsCategory || (!this.layerManager.restoredContext || !this.layerManager.restoredContext.maplayers);
-                input.checked = isRestored || isDefaultChecked;
+                input.checked = isObjectsCategory || isRestored;
 
                 label.appendChild(input);
                 label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);

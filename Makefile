@@ -73,6 +73,7 @@ install_layers:
 serve_e2e:
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py migrate
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py flush --no-input
+	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py update_permissions_mapentity
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py install_layer osm --order=0
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py install_layer opentopomap --order=1
 	$(docker_compose) run -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e --rm web ./manage.py install_layer ign cadastre --order=0 --overlay

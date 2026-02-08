@@ -41,14 +41,14 @@ class MaplibreMapentityContext {
 
         // Form filters
         if (filter) {
-
             const form = document.getElementById(filter);
-              // A voir une fois que filter sera mise en place
 
-            const formData = new FormData(form);
-            // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox' ou ''
-            const fields = Array.from(formData).filter(([name, value]) => (name !== 'bbox' && value !== ''));
-            context['filter'] = new URLSearchParams(fields).toString();
+            if (form) {
+                const formData = new FormData(form);
+                // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox' ou ''
+                const fields = Array.from(formData).filter(([name, value]) => (name !== 'bbox' && value !== ''));
+                context['filter'] = new URLSearchParams(fields).toString();
+            }
         }
 
         if (datatable) {
@@ -166,6 +166,8 @@ class MaplibreMapentityContext {
 
         if (!context) {
             console.warn("No context found.");
+            // Mark as "restored" even without context so that saveContext can work
+            this.layerManager.restoredContext = { empty: true };
             map.fitBounds(this.bounds, { animate: false });
             return;
         }
