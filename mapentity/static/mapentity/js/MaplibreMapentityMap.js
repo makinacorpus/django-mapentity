@@ -147,10 +147,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Restauration du contexte (vue et couches)
         const mapViewContext = getURLParameter("context");
-        // mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
-        //     prefix: 'detail',
-        //     objectsname: modelname,
-        // });
+        if (mapViewContext) {
+            layerManager.restoredContext = { restoredFromUrl: true };
+        }
+        mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
+            prefix: 'detail',
+            objectsname: modelname,
+        });
 
         if (layerUrl) {
             if (mapViewContext && mapViewContext.print) {
@@ -195,6 +198,9 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         map.getMap().on('moveend', saveContext);
         map.getMap().on('zoomend', saveContext);
+        map.getMap().on('layerManager:baseLayerAdded', saveContext);
+        map.getMap().on('layerManager:overlayAdded', saveContext);
+        map.getMap().on('layerManager:lazyOverlayAdded', saveContext);
         window.addEventListener('visibilitychange', saveContext);
     });
 

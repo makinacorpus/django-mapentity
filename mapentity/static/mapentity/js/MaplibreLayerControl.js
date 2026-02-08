@@ -201,9 +201,10 @@ class MaplibreLayerControl {
                 const labelText = labelHTML.replace(/<[^>]*>?/gm, '').trim();
                 
                 // Vérifier si la couche est dans le contexte restauré
-                // Par défaut, si pas de contexte, on coche la catégorie "Objects"
+                // Par défaut, on coche toujours la catégorie "Objects" (couche du modèle courant)
                 const isRestored = restoredLayers.includes(labelText);
-                const isDefaultChecked = category === gettext('Objects') && (!this.layerManager.restoredContext || !this.layerManager.restoredContext.maplayers);
+                const isObjectsCategory = category === gettext('Objects');
+                const isDefaultChecked = isObjectsCategory || (!this.layerManager.restoredContext || !this.layerManager.restoredContext.maplayers);
                 input.checked = isRestored || isDefaultChecked;
 
                 label.appendChild(input);
