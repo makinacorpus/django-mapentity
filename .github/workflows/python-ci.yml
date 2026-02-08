@@ -126,8 +126,11 @@ jobs:
 
       - name: Create superuser and test data
         run: |
-          echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@test.com', 'admin')" | ./manage.py shell
-          ./manage.py create_test_data --dummies 20 --cities 5 --roads 10 --geopoints 10
+	        ./manage.py install_layer osm --order=0
+	        ./manage.py install_layer opentopomap --order=1
+	        ./manage.py install_layer ign cadastre --order=0 --overlay
+	        echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@test.com', 'admin')" | ./manage.py shell
+	        ./manage.py create_test_data --dummies 20 --cities 5 --roads 10 --geopoints 10
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
