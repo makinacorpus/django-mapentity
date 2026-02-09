@@ -15,6 +15,7 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.intercept('/mapbox/mapbox-baselayers/').as('baselayers')
             cy.login()
             cy.mockTiles()
+            cy.clearLocalStorage()
         })
 
         it('should restore base layer, overlays and map view from URL context parameter', () => {
@@ -130,12 +131,12 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.intercept('/mapbox/mapbox-baselayers/').as('baselayers')
             cy.login()
             cy.mockTiles()
+            cy.clearLocalStorage()
         })
 
         it('should have the first base layer selected and Objects layer checked by default', () => {
             cy.visit('/dummymodel/list/')
             waitForMapReady()
-
             openLayerSwitcher()
 
             // Wait for base layers
@@ -159,9 +160,8 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
         })
 
         it('should restore the selected base layer after page reload', () => {
-            cy.visit('/dummymodel/list/')
+            cy.visit('/mushroomspot/list/')
             waitForMapReady()
-
             openLayerSwitcher()
 
             // Wait for base layers and overlays to be fully loaded before interacting
@@ -175,30 +175,26 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('not.be.checked')
 
             // Switch to second base layer
+            // wait for layer present
             cy.get('.layer-switcher-menu input[type="radio"]').eq(1).check({force: true})
             cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
 
-            // Wait for context to be saved
-            cy.wait(2000)
-
             // Reload the page
             cy.reload()
-            waitForMapReady()
 
+            waitForMapReady()
             openLayerSwitcher()
-            
+
             cy.get('.layer-switcher-menu input[type="radio"]', {timeout: 10000})
                 .should('have.length.greaterThan', 1)
 
             // After reload, the second base layer should still be selected (not the first)
-            cy.get('.layer-switcher-menu input[type="radio"]').first().should('not.be.checked', {timeout: 10000})
-            cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked', {timeout: 10000})
+            cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked', )
         })
 
         it('should restore the activated overlay after page reload', () => {
             cy.visit('/dummymodel/list/')
             waitForMapReady()
-
             openLayerSwitcher()
 
             // Wait for overlays
@@ -244,6 +240,7 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.intercept('/mapbox/mapbox-baselayers/').as('baselayers')
             cy.login()
             cy.mockTiles()
+            cy.clearLocalStorage()
             // Get an entity ID
             cy.visit('/dummymodel/list/')
             cy.get('table tbody tr', {timeout: 10000}).first().find('a').first().invoke('attr', 'href').then((href) => {

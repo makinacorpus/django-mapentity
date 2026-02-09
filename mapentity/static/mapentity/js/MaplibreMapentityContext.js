@@ -126,7 +126,7 @@ class MaplibreMapentityContext {
 
 
     /**
-     * Restores la vue de la carte à partir du contexte fourni ou du contexte chargé depuis le stockage local.
+     * Restore la vue de la carte à partir du contexte fourni ou du contexte chargé depuis le stockage local.
      * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
      * @param context {Object|null} - Le contexte de la carte à restaurer. Si null, le contexte sera chargé depuis le stockage local.
      * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
