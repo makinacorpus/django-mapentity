@@ -13,7 +13,7 @@
  * $("form").deserialize(string, {checkboxesAsBools: true});
 **/
 (function($) {
-    $.fn.deserialize = function(s, options) {
+    $.fn.deserialize = async function(s, options) {
       function optionallyTrigger(element,event) {
         if (options.noEvents) 
           return;
@@ -53,7 +53,7 @@
                 const url = new URL(autocompleteUrl, window.location.origin);
                 url.searchParams.set("id", pair[1]);
 
-                $.ajax({
+                await $.ajax({
                     type: 'GET',
                     url: url.pathname + url.search,
                 }).then(function (data) {
