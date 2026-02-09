@@ -88,7 +88,7 @@ class MaplibreLayerControl {
      * @private
      */
     _activateFirstBaseLayer() {
-        if (this._firstBaseLayerInput) {
+        if (this._firstBaseLayerInput && !this.layerManager.currentBaseLayerId) {
             this._firstBaseLayerInput.checked = true;
             // Déclencher l'événement change immédiatement
             const changeEvent = new Event('change', { bubbles: true });
@@ -136,7 +136,9 @@ class MaplibreLayerControl {
                 input.checked = true;
                 this.layerManager.currentBaseLayerId = id;
                 this.layerManager.toggleLayer(id, true);
-            } else if (!currentBaseLayerId && !restoredLayers.length && index === 0) {
+            }
+
+            if (index === 0) {
                 this._firstBaseLayerInput = input;
             }
 
