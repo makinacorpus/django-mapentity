@@ -44,10 +44,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Restauration du contexte (vue et couches)
             const mapViewContext = getURLParameter("context");
             if (mapViewContext) {
-                // If context is in URL, we don't want to load from LocalStorage but we want to mark as "restored"
-                layerManager.restoredContext = { restoredFromUrl: true };
+                // Unification : stocker le contexte URL dans le localStorage, puis restaurer normalement
+                mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: context.viewname });
             }
-            mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
+            mapentityContext.restoreFullContext(map.getMap(), null, {
                 prefix: context.viewname,
                 filter: 'mainfilter',
                 datatable: window.MapEntity.dt,
@@ -148,9 +148,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Restauration du contexte (vue et couches)
         const mapViewContext = getURLParameter("context");
         if (mapViewContext) {
-            layerManager.restoredContext = { restoredFromUrl: true };
+            // Unification : stocker le contexte URL dans le localStorage, puis restaurer normalement
+            mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: 'detail' });
         }
-        mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
+        mapentityContext.restoreFullContext(map.getMap(), null, {
             prefix: 'detail',
             objectsname: modelname,
         });

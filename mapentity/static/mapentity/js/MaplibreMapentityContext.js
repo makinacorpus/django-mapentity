@@ -81,6 +81,18 @@ class MaplibreMapentityContext {
     }
 
     /**
+     * Stocke un contexte (typiquement reçu via URL) dans le localStorage.
+     * Permet d'unifier la restauration : URL → localStorage → restauration normale.
+     * @param context {Object} - Le contexte à stocker.
+     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
+     */
+    saveContextToLocalStorage(context, kwargs = {}) {
+        const prefix = kwargs.prefix || '';
+        const serialized = JSON.stringify(context);
+        localStorage.setItem(prefix + 'map-context', serialized);
+    }
+
+    /**
      * Charge le contexte complet de la carte depuis le stockage local (localStorage).
      * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
      * @returns {any|null} - Retourne le contexte chargé depuis le stockage local, ou null si aucun contexte n'est trouvé.
