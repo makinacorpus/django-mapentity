@@ -123,6 +123,7 @@ jobs:
       - name: Run migrations
         run: |
           ./manage.py migrate
+          ./manage.py update_permissions_mapentity
 
       - name: Create superuser and test data
         run: |
