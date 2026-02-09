@@ -179,10 +179,10 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
 
             // Wait for context to be saved
-            cy.wait(1000)
+            cy.wait(2000)
 
             // Reload the page
-            cy.visit('/dummymodel/list/')
+            cy.reload()
             waitForMapReady()
 
             openLayerSwitcher()
