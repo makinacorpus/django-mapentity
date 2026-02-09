@@ -10,6 +10,7 @@ module.exports = defineConfig({
     videoCompression: false,
     screenshotOnRunFailure: true,
     chromeWebSecurity: false,
+    defaultCommandTimeout: 10000,
     setupNodeEvents(on, config) {
       on('before:browser:launch', (browser = {}, launchOptions) => {
         if (browser.family === 'chromium' && browser.name !== 'electron') {
