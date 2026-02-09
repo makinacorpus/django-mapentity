@@ -30,7 +30,8 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
                 .should('have.length.greaterThan', 1)
             cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]', {timeout: 10000})
                 .should('have.length.greaterThan', 1)
-
+            cy.get('.layer-switcher-menu label[data-overlay-type="lazy"] input[type="checkbox"]', {timeout: 10000})
+                .should('have.length.greaterThan', 1)
             // Collect layer names: second base layer and first overlay
             cy.get('.layer-switcher-menu input[type="radio"]').eq(1).parent().then($label => {
                 const secondBaseLayerName = $label.text().trim()
@@ -38,33 +39,39 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
                 cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').first().parent().then($overlayLabel => {
                     const firstOverlayName = $overlayLabel.text().trim()
 
-                    // Build a context object with second base layer, first overlay, and a specific map view
-                    const urlContext = {
-                        mapview: { lat: 45.0, lng: 3.0, zoom: 10 },
-                        maplayers: [secondBaseLayerName, firstOverlayName]
-                    }
+                    cy.get('.layer-switcher-menu label[data-overlay-type="lazy"] input[type="checkbox"]').last().parent().then($overlayLabel => {
+                        const lastAdditionalLayer = $overlayLabel.text().trim()
 
-                    const contextParam = encodeURIComponent(JSON.stringify(urlContext))
+                        // Build a context object with second base layer, first overlay, and a specific map view
+                        const urlContext = {
+                            mapview: {lat: 45.0, lng: 3.0, zoom: 10},
+                            maplayers: [secondBaseLayerName, firstOverlayName, lastAdditionalLayer]
+                        }
 
-                    // Visit with context in URL
-                    cy.visit(`/dummymodel/list/?context=${contextParam}`)
-                    waitForMapReady()
+                        const contextParam = encodeURIComponent(JSON.stringify(urlContext))
 
-                    openLayerSwitcher()
+                        // Visit with context in URL
+                        cy.visit(`/dummymodel/list/?context=${contextParam}`)
+                        waitForMapReady()
 
-                    // Wait for layers
-                    cy.get('.layer-switcher-menu input[type="radio"]', {timeout: 10000})
-                        .should('have.length.greaterThan', 1)
-                    cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]', {timeout: 10000})
-                        .should('have.length.greaterThan', 1)
+                        openLayerSwitcher()
 
-                    // The second base layer should be selected (not the first)
-                    cy.get('.layer-switcher-menu input[type="radio"]').first().should('not.be.checked')
-                    cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
+                        // Wait for layers
+                        cy.get('.layer-switcher-menu input[type="radio"]', {timeout: 10000})
+                            .should('have.length.greaterThan', 1)
+                        cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]', {timeout: 10000})
+                            .should('have.length.greaterThan', 1)
 
-                    // The first overlay should be checked (restored from URL context)
-                    cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').first()
-                        .should('be.checked')
+                        // The second base layer should be selected (not the first)
+                        cy.get('.layer-switcher-menu input[type="radio"]').first().should('not.be.checked')
+                        cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
+
+                        // The first overlay should be checked (restored from URL context)
+                        cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').first()
+                            .should('be.checked')
+                        cy.get('.layer-switcher-menu label[data-overlay-type="lazy"] input[type="checkbox"]').last()
+                            .should('be.checked')
+                    })
                 })
             })
         })
@@ -269,7 +276,7 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
                 .should('have.length.greaterThan', 0)
 
             // The "Objects" category checkbox (current model layer) should be checked
-            cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').last()
+            cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').first()
                 .should('be.checked')
         })
 
@@ -291,11 +298,15 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.get('.layer-switcher-menu input[type="radio"]').eq(1).check({force: true})
             cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
 
+            // switch third additional layer if exists
+            cy.get('.layer-switcher-menu label[data-overlay-type="lazy"] input[type="checkbox"]').last().check({force: true})
+            cy.get('.layer-switcher-menu label[data-overlay-type="lazy"] input[type="checkbox"]').last().should('be.checked')
+
             // Wait for context to be saved
             cy.wait(1000)
 
             // Reload the page
-            cy.visit(`/dummymodel/${entityId}/`)
+            cy.reload()
             waitForMapReady()
 
             openLayerSwitcher()
@@ -306,9 +317,10 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             // After reload, the second base layer should still be selected (not the first)
             cy.get('.layer-switcher-menu input[type="radio"]').first().should('not.be.checked')
             cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
+            cy.get('.layer-switcher-menu label[data-overlay-type="lazy"] input[type="checkbox"]').last().should('be.checked')
         })
 
-        it('should restore the activated overlay after page reload', () => {
+        it('should restore the activated overlays after page reload', () => {
             cy.visit(`/dummymodel/${entityId}/`)
             waitForMapReady()
 
