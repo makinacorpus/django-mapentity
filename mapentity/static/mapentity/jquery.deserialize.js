@@ -50,9 +50,12 @@
         } else if ($input.prop("tagName") == 'SELECT') {
             if($input.attr('data-autocomplete-light-url')){
                 const autocompleteUrl = $input.attr('data-autocomplete-light-url');
+                const url = new URL(autocompleteUrl, window.location.origin);
+                url.searchParams.set("id", pair[1]);
+
                 $.ajax({
                     type: 'GET',
-                    url: autocompleteUrl + pair[1],
+                    url: url.pathname + url.search,
                 }).then(function (data) {
                     // create the option and append to Select2
                     var option = new Option(data.text, data.id, true, true);
