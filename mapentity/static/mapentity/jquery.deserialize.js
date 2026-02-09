@@ -70,7 +70,8 @@
                     });
                 });
             } else {
-                $input.children("option[value=" + pair[1] + "]").prop("selected", true);
+                //$input.children("option[value=" + pair[1] + "]").prop("selected", true);
+                $input.val(pair[1]).trigger('change');
             }
         } else {
           var oldVal = $input.val();
