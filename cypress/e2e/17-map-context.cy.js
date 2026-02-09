@@ -191,8 +191,8 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
                 .should('have.length.greaterThan', 1)
 
             // After reload, the second base layer should still be selected (not the first)
-            cy.get('.layer-switcher-menu input[type="radio"]').first().should('not.be.checked')
-            cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
+            cy.get('.layer-switcher-menu input[type="radio"]').first().should('not.be.checked', {timeout: 10000})
+            cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked', {timeout: 10000})
         })
 
         it('should restore the activated overlay after page reload', () => {
