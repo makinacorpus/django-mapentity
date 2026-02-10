@@ -10,6 +10,6 @@
     "test:e2e": "cypress run"
   },
   "devDependencies": {
-    "cypress": "^15.10.0"
+    "cypress": "^15.9.0"
   }
 }
