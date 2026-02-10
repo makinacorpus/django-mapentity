@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("test_app", "0017_road_name_en_road_name_fr_road_name_zh_hant"),
+        ("test_app", "0018_geopoint"),
     ]
 
     operations = [

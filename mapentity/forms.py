@@ -192,7 +192,7 @@ class MapEntityForm(TranslatedModelForm):
                 continue
 
             # mapping champs relationnels (FK, M2M)
-            for mtype, widget_cls in self.RELATED_WIDGET_MAP.items():
+            for mtype, widget_cls in self.default_widgets.items():
                 if isinstance(model_field, mtype):
                     # garde les attrs existants
                     attrs = getattr(form_field.widget, "attrs", {}).copy()

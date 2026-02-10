@@ -306,7 +306,7 @@ class CSVSerializerTests(TestCase):
                 self.stream.getvalue(),
                 (
                     f"ID,name,number,size,boolean,tags\r\n{self.point.pk},"
-                    'Empty,42,"3,14159",oui,"Tag1,Tag2"\r\n'
+                    'Empty,42,"3,14159",yes,"Tag1,Tag2"\r\n'
                 ),
             )
 
