@@ -461,6 +461,9 @@ div.dataTables_wrapper div.dataTables_filter input {
 #mainfilter select option:first-child {
     color: #999;
 }
+#mainfilter .select2-container{
+    width: 100%!important;
+}
 #mainfilter .actions {
     text-align: right;
     flex-basis: 100%;
