@@ -20,14 +20,12 @@ describe('Menu Hidden Model (menu=False)', () => {
 
         // Wait for map to load
         cy.get('#mainmap, .maplibre-map, .map-panel', {timeout: 15000}).should('exist')
-        cy.wait(2000)
 
         // Open layer switcher
-        cy.get('.layer-switcher-btn').first().click({force: true})
-        cy.wait(500)
+        cy.get('.layer-switcher-btn', {timeout: 10000}).first().click({force: true})
 
         // Check that the layer menu is open
-        cy.get('.layer-switcher-menu', {timeout: 5000}).should('exist')
+        cy.get('.layer-switcher-menu', {timeout: 5000}).should('be.visible')
 
         // Verify that HiddenModel is NOT in the layers list
         cy.get('.layer-switcher-menu').then($menu => {
@@ -59,9 +57,6 @@ describe('Menu Hidden Model (menu=False)', () => {
 
     it('should not include HiddenModel in JS settings layers', () => {
         cy.visit('/dummymodel/list/')
-
-        // Wait for JS settings to load
-        cy.wait(1000)
 
         // Check that window.SETTINGS.layers does not include hiddenmodel
         cy.window().then((win) => {
