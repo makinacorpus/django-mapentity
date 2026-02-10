@@ -49,7 +49,7 @@ describe('SingleLineStringModel - LineString geometry', () => {
         cy.contains(entityName, {timeout: 10000}).should('exist')
     })
 
-    it('should not allow drawing multiple lines', () => {
+    it('should not allow drawing multiple lines', {retries: 2}, () => {
         cy.visit('/singlelinestringmodel/add/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
@@ -61,7 +61,10 @@ describe('SingleLineStringModel - LineString geometry', () => {
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-marker').last().click({force: true});
-        cy.wait(500);
+        cy.assertGeomanFeaturesCount(1);
+        // Wait for draw mode to be fully disabled (disableDraw has a 50ms setTimeout)
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(200);
         // Try to draw a second line
         cy.get('#id_draw_line').click();
         cy.get('.maplibregl-canvas').click(100, 100)

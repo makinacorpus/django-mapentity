@@ -47,16 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Unification : stocker le contexte URL dans le localStorage, puis restaurer normalement
                 mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: context.viewname });
             }
-            mapentityContext.restoreFullContext(map.getMap(), null, {
-                prefix: context.viewname,
-                filter: 'mainfilter',
-                datatable: window.MapEntity.dt,
-                objectsname: context.modelname,
-                // On passe load_filter_form si on est en liste
-                load_filter_form: (window.MapEntity.togglableFilter && window.MapEntity.mapsync) ? 
-                    window.MapEntity.togglableFilter.load_filter_form.bind(window.MapEntity.togglableFilter, window.MapEntity.mapsync) : 
-                    async () => {},
-            });
+
 
             // Load Mapbox Baselayers
             fetch('/mapbox/mapbox-baselayers/')
@@ -85,6 +76,16 @@ document.addEventListener('DOMContentLoaded', function() {
                             });
                         }
                     }
+                    mapentityContext.restoreFullContext(map.getMap(), null, {
+                        prefix: context.viewname,
+                        filter: 'mainfilter',
+                        datatable: window.MapEntity.dt,
+                        objectsname: context.modelname,
+                        // On passe load_filter_form si on est en liste
+                        load_filter_form: (window.MapEntity.togglableFilter && window.MapEntity.mapsync) ?
+                            window.MapEntity.togglableFilter.load_filter_form.bind(window.MapEntity.togglableFilter, window.MapEntity.mapsync) :
+                            async () => {},
+                    });
                 })
                 .catch(err => console.error('Failed to load mapbox baselayers:', err));
 

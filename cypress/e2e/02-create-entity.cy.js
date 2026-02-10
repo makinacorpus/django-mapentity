@@ -47,15 +47,17 @@ describe('DummyModel Create', () => {
         // Wait for map to be ready
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
-        // Wait a bit for Geoman to initialize
-        cy.wait(2000)
+        // Wait for Geoman to initialize
+        cy.waitForGeoman()
 
         cy.get('#id_draw_marker').click();
 
         cy.get('.maplibregl-canvas').click(400, 300);
 
-        // Wait a bit for geometry to be registered
-        cy.wait(1000)
+        // Wait for geometry to be registered
+        cy.assertGeomFieldValue((data) => {
+            expect(data.type).to.equal("Point");
+        });
 
         // Submit the form
         cy.get('#save_changes').click()

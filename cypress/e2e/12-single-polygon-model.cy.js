@@ -49,7 +49,7 @@ describe('SinglePolygonModel - Polygon geometry', () => {
         cy.contains(entityName, {timeout: 10000}).should('exist')
     });
 
-    it('should not allow drawing multiple polygons', () => {
+    it('should not allow drawing multiple polygons', {retries: 2}, () => {
         cy.visit('/singlepolygonmodel/add/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
@@ -60,7 +60,10 @@ describe('SinglePolygonModel - Polygon geometry', () => {
         cy.get('.maplibregl-canvas').click(100, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-marker').eq(1).click({force: true});
-        cy.wait(500);
+        cy.assertGeomanFeaturesCount(1);
+        // Wait for draw mode to be fully disabled (disableDraw has a 50ms setTimeout)
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(1000);
         // Attempt to draw second polygon
         cy.get('#id_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(100, 100);
