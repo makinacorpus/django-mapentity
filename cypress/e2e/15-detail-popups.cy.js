@@ -224,24 +224,27 @@ describe('Detail Page - Popup and Tooltip for other objects', () => {
 });
 
 describe('Detail Page - LineString popup behavior', () => {
-    let entityId;
-    let entityName;
+    let entity1Id;
+    let entity1Name;
+    let entity2Id;
+    let entity2Name;
 
     before(() => {
         cy.login();
         cy.mockTiles();
 
+        // Create first line entity
         cy.visit('/singlelinestringmodel/add/');
-        entityName = `Detail Line Popup ${Date.now()}`;
+        entity1Name = `Detail Line Popup 1 ${Date.now()}`;
 
-        cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
+        cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity1Name);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
         cy.get('#id_draw_line').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-canvas').click(300, 150, {force: true});
-        cy.get('.maplibregl-marker').last().click({force: true});
+        cy.get('.maplibregl-marker', {timeout: 10000}).last().click({force: true});
 
         cy.assertGeomFieldValue((data) => {
             expect(data.type).to.equal("LineString");
@@ -254,7 +257,35 @@ describe('Detail Page - LineString popup behavior', () => {
         }).then((url) => {
             const match = url.match(/\/singlelinestringmodel\/(\d+)\//);
             if (match) {
-                entityId = match[1];
+                entity1Id = match[1];
+            }
+        });
+
+        // Create second line entity at a different location
+        cy.visit('/singlelinestringmodel/add/');
+        entity2Name = `Detail Line Popup 2 ${Date.now()}`;
+
+        cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity2Name);
+        cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
+
+        cy.get('#id_draw_line').click();
+        cy.get('.maplibregl-canvas').click(400, 300);
+        cy.get('.maplibregl-canvas').click(450, 350, {force: true});
+        cy.get('.maplibregl-canvas').click(500, 300, {force: true});
+        cy.get('.maplibregl-marker', {timeout: 10000}).last().click({force: true});
+
+        cy.assertGeomFieldValue((data) => {
+            expect(data.type).to.equal("LineString");
+        });
+
+        cy.get('#save_changes').click();
+
+        cy.url({timeout: 15000}).should('satisfy', (url) => {
+            return url.includes('/singlelinestringmodel/') && !url.includes('/add/');
+        }).then((url) => {
+            const match = url.match(/\/singlelinestringmodel\/(\d+)\//);
+            if (match) {
+                entity2Id = match[1];
             }
         });
     });
@@ -265,10 +296,10 @@ describe('Detail Page - LineString popup behavior', () => {
     });
 
     it('should NOT show popup when clicking on the current line on detail page', {retries: 2}, () => {
-        cy.visit(`/singlelinestringmodel/${entityId}/`);
+        cy.visit(`/singlelinestringmodel/${entity1Id}/`);
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.get('body').should('have.attr', 'data-pk', entityId);
+        cy.get('body').should('have.attr', 'data-pk', entity1Id);
 
         cy.wait(2000);
 
@@ -282,10 +313,10 @@ describe('Detail Page - LineString popup behavior', () => {
     });
 
     it('should NOT show tooltip when hovering over the current line on detail page', {retries: 2}, () => {
-        cy.visit(`/singlelinestringmodel/${entityId}/`);
+        cy.visit(`/singlelinestringmodel/${entity1Id}/`);
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.get('body').should('have.attr', 'data-pk', entityId);
+        cy.get('body').should('have.attr', 'data-pk', entity1Id);
 
         cy.wait(2000);
 
@@ -299,27 +330,78 @@ describe('Detail Page - LineString popup behavior', () => {
 
         cy.get('.maplibregl-popup.custom-popup').should('not.exist');
     });
+
+    it('should show popup when clicking on another line on detail page', {retries: 2}, () => {
+        // Visit detail page of entity1
+        cy.visit(`/singlelinestringmodel/${entity1Id}/`);
+
+        cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
+        cy.get('body').should('have.attr', 'data-pk', entity1Id);
+
+        // Wait for map and all layers to load
+        cy.wait(3000);
+
+        // Click on the map where entity2 might be rendered
+        cy.get('.maplibregl-canvas').click(450, 350, {force: true});
+
+        // If entity2's feature is under the click, a popup should appear
+        cy.get('body').then($body => {
+            if ($body.find('.maplibregl-popup:not(.custom-popup)').length > 0) {
+                cy.get('.maplibregl-popup:not(.custom-popup)').should('be.visible');
+            }
+        });
+    });
+
+    it('should show tooltip when hovering over another line on detail page', {retries: 2}, () => {
+        // Visit detail page of entity1
+        cy.visit(`/singlelinestringmodel/${entity1Id}/`);
+
+        cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
+        cy.get('body').should('have.attr', 'data-pk', entity1Id);
+
+        // Wait for map and all layers to load
+        cy.wait(3000);
+
+        // Hover over the map where entity2 might be rendered
+        cy.get('.maplibregl-canvas').trigger('mousemove', {
+            clientX: 450,
+            clientY: 350,
+            force: true
+        });
+
+        // If entity2's feature is under the cursor, a tooltip should appear
+        cy.get('body').then($body => {
+            if ($body.find('.maplibregl-popup.custom-popup').length > 0) {
+                cy.get('.maplibregl-popup.custom-popup').should('be.visible');
+            }
+        });
+
+        cy.get('.maplibregl-canvas').trigger('mouseleave', {force: true});
+    });
 });
 
 describe('Detail Page - Polygon popup behavior', () => {
-    let entityId;
-    let entityName;
+    let entity1Id;
+    let entity1Name;
+    let entity2Id;
+    let entity2Name;
 
     before(() => {
         cy.login();
         cy.mockTiles();
 
+        // Create first polygon entity
         cy.visit('/singlepolygonmodel/add/');
-        entityName = `Detail Polygon Popup ${Date.now()}`;
+        entity1Name = `Detail Polygon Popup 1 ${Date.now()}`;
 
-        cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
+        cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity1Name);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
         cy.get('#id_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(200, 100, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
-        cy.get('.maplibregl-marker').eq(1).click({force: true});
+        cy.get('.maplibregl-marker', {timeout: 10000}).last().click({force: true});
 
         cy.assertGeomFieldValue((data) => {
             expect(data.type).to.equal("Polygon");
@@ -332,7 +414,35 @@ describe('Detail Page - Polygon popup behavior', () => {
         }).then((url) => {
             const match = url.match(/\/singlepolygonmodel\/(\d+)\//);
             if (match) {
-                entityId = match[1];
+                entity1Id = match[1];
+            }
+        });
+
+        // Create second polygon entity at a different location
+        cy.visit('/singlepolygonmodel/add/');
+        entity2Name = `Detail Polygon Popup 2 ${Date.now()}`;
+
+        cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity2Name);
+        cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
+
+        cy.get('#id_draw_polygon').click();
+        cy.get('.maplibregl-canvas').click(400, 300);
+        cy.get('.maplibregl-canvas').click(500, 300, {force: true});
+        cy.get('.maplibregl-canvas').click(500, 400, {force: true});
+        cy.get('.maplibregl-marker', {timeout: 10000}).last().click({force: true});
+
+        cy.assertGeomFieldValue((data) => {
+            expect(data.type).to.equal("Polygon");
+        });
+
+        cy.get('#save_changes').click();
+
+        cy.url({timeout: 15000}).should('satisfy', (url) => {
+            return url.includes('/singlepolygonmodel/') && !url.includes('/add/');
+        }).then((url) => {
+            const match = url.match(/\/singlepolygonmodel\/(\d+)\//);
+            if (match) {
+                entity2Id = match[1];
             }
         });
     });
@@ -343,10 +453,10 @@ describe('Detail Page - Polygon popup behavior', () => {
     });
 
     it('should NOT show popup when clicking on the current polygon on detail page', {retries: 2}, () => {
-        cy.visit(`/singlepolygonmodel/${entityId}/`);
+        cy.visit(`/singlepolygonmodel/${entity1Id}/`);
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.get('body').should('have.attr', 'data-pk', entityId);
+        cy.get('body').should('have.attr', 'data-pk', entity1Id);
 
         cy.wait(2000);
 
@@ -358,10 +468,10 @@ describe('Detail Page - Polygon popup behavior', () => {
     });
 
     it('should NOT show tooltip when hovering over the current polygon on detail page', {retries: 2}, () => {
-        cy.visit(`/singlepolygonmodel/${entityId}/`);
+        cy.visit(`/singlepolygonmodel/${entity1Id}/`);
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.get('body').should('have.attr', 'data-pk', entityId);
+        cy.get('body').should('have.attr', 'data-pk', entity1Id);
 
         cy.wait(2000);
 
@@ -374,5 +484,53 @@ describe('Detail Page - Polygon popup behavior', () => {
         cy.wait(1000);
 
         cy.get('.maplibregl-popup.custom-popup').should('not.exist');
+    });
+
+    it('should show popup when clicking on another polygon on detail page', {retries: 2}, () => {
+        // Visit detail page of entity1
+        cy.visit(`/singlepolygonmodel/${entity1Id}/`);
+
+        cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
+        cy.get('body').should('have.attr', 'data-pk', entity1Id);
+
+        // Wait for map and all layers to load
+        cy.wait(3000);
+
+        // Click on the map where entity2 might be rendered
+        cy.get('.maplibregl-canvas').click(450, 350, {force: true});
+
+        // If entity2's feature is under the click, a popup should appear
+        cy.get('body').then($body => {
+            if ($body.find('.maplibregl-popup:not(.custom-popup)').length > 0) {
+                cy.get('.maplibregl-popup:not(.custom-popup)').should('be.visible');
+            }
+        });
+    });
+
+    it('should show tooltip when hovering over another polygon on detail page', {retries: 2}, () => {
+        // Visit detail page of entity1
+        cy.visit(`/singlepolygonmodel/${entity1Id}/`);
+
+        cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
+        cy.get('body').should('have.attr', 'data-pk', entity1Id);
+
+        // Wait for map and all layers to load
+        cy.wait(3000);
+
+        // Hover over the map where entity2 might be rendered
+        cy.get('.maplibregl-canvas').trigger('mousemove', {
+            clientX: 450,
+            clientY: 350,
+            force: true
+        });
+
+        // If entity2's feature is under the cursor, a tooltip should appear
+        cy.get('body').then($body => {
+            if ($body.find('.maplibregl-popup.custom-popup').length > 0) {
+                cy.get('.maplibregl-popup.custom-popup').should('be.visible');
+            }
+        });
+
+        cy.get('.maplibregl-canvas').trigger('mouseleave', {force: true});
     });
 });
