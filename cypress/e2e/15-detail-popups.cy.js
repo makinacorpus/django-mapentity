@@ -319,8 +319,7 @@ describe('Detail Page - Polygon popup behavior', () => {
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(200, 100, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
-        cy.get('.maplibregl-canvas').click(100, 200, {force: true});
-        cy.get('.maplibregl-marker').first().click({force: true});
+        cy.get('.maplibregl-marker').eq(1).click({force: true});
 
         cy.assertGeomFieldValue((data) => {
             expect(data.type).to.equal("Polygon");
@@ -355,7 +354,7 @@ describe('Detail Page - Polygon popup behavior', () => {
 
         cy.wait(1000);
 
-        cy.get('.maplibregl-popup:not(.custom-popup)').should('not.exist');
+        cy.get('.maplibregl-popup').should('not.exist');
     });
 
     it('should NOT show tooltip when hovering over the current polygon on detail page', {retries: 2}, () => {
