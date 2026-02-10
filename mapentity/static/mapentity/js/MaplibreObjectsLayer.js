@@ -126,7 +126,6 @@ class MaplibreObjectsLayer {
                     popup_content = gettext('Data unreachable');
                 }
                 new maplibregl.Popup().setLngLat(e.lngLat).setHTML(popup_content).addTo(this._map);
-                e.stopPropagation();
 
                 if (this.currentPopup) {
                     this.currentPopup.remove();
