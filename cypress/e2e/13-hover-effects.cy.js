@@ -50,29 +50,24 @@ describe('Hover Effects - Point geometry (SinglePointModel)', () => {
         cy.visit('/singlepointmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         // Find the row containing our entity
         cy.get('table tbody').contains('tr', entityName).as('entityRow');
 
         // Hover over the row - this should trigger highlight on map (red, larger style)
         cy.get('@entityRow').trigger('mouseenter', {force: true});
-        cy.wait(500);
 
         // Verify the map canvas is visible and interactive
-        // The feature-state 'hover' should be set, changing color to #FF0000 and increasing size
         cy.get('.maplibregl-canvas').should('be.visible');
 
         // Mouse leave should reset the style
         cy.get('@entityRow').trigger('mouseleave', {force: true});
-        cy.wait(300);
     });
 
     it('should display tooltip with entity name when hovering over feature on map', {retries: 2}, () => {
         cy.visit('/singlepointmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         // Trigger mousemove on the map to simulate hovering over a feature
         cy.get('.maplibregl-canvas').trigger('mousemove', {
@@ -81,10 +76,7 @@ describe('Hover Effects - Point geometry (SinglePointModel)', () => {
             force: true
         });
 
-        cy.wait(500);
-
         // If a feature with 'name' property is under the cursor, a tooltip (maplibregl-popup) should appear
-        // The tooltip contains the entity name
         cy.get('body').then($body => {
             if ($body.find('.maplibregl-popup').length > 0) {
                 cy.get('.maplibregl-popup').should('contain', entityName);
@@ -93,7 +85,6 @@ describe('Hover Effects - Point geometry (SinglePointModel)', () => {
 
         // Mouse leave should hide the tooltip
         cy.get('.maplibregl-canvas').trigger('mouseleave', {force: true});
-        cy.wait(300);
 
         // Tooltip should be removed
         cy.get('.maplibregl-popup.custom-popup').should('not.exist');
@@ -103,12 +94,9 @@ describe('Hover Effects - Point geometry (SinglePointModel)', () => {
         cy.visit('/singlepointmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         // Click on the map where the feature should be
         cy.get('.maplibregl-canvas').click(400, 300, {force: true});
-
-        cy.wait(1000);
 
         // A popup should appear (maplibregl-popup without custom-popup class is the click popup)
         cy.get('body').then($body => {
@@ -122,7 +110,6 @@ describe('Hover Effects - Point geometry (SinglePointModel)', () => {
         cy.visit('/singlepointmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         // The cursor should change to pointer when hovering over a feature
         cy.get('.maplibregl-canvas').trigger('mousemove', {
@@ -181,11 +168,10 @@ describe('Hover Effects - LineString geometry (SingleLineStringModel)', () => {
         cy.visit('/singlelinestringmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         cy.get('table tbody').contains('tr', entityName).as('entityRow');
+
         cy.get('@entityRow').trigger('mouseenter', {force: true});
-        cy.wait(500);
 
         cy.get('.maplibregl-canvas').should('be.visible');
 
@@ -196,15 +182,12 @@ describe('Hover Effects - LineString geometry (SingleLineStringModel)', () => {
         cy.visit('/singlelinestringmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         cy.get('.maplibregl-canvas').trigger('mousemove', {
             clientX: 200,
             clientY: 200,
             force: true
         });
-
-        cy.wait(500);
 
         cy.get('body').then($body => {
             if ($body.find('.maplibregl-popup.custom-popup').length > 0) {
@@ -219,10 +202,8 @@ describe('Hover Effects - LineString geometry (SingleLineStringModel)', () => {
         cy.visit('/singlelinestringmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
-        cy.wait(1000);
 
         cy.get('body').then($body => {
             if ($body.find('.maplibregl-popup:not(.custom-popup)').length > 0) {
@@ -277,11 +258,9 @@ describe('Hover Effects - Polygon geometry (SinglePolygonModel)', () => {
         cy.visit('/singlepolygonmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
-
         cy.get('table tbody').contains('tr', entityName).as('entityRow');
+
         cy.get('@entityRow').trigger('mouseenter', {force: true});
-        cy.wait(500);
 
         cy.get('.maplibregl-canvas').should('be.visible');
 
@@ -292,15 +271,12 @@ describe('Hover Effects - Polygon geometry (SinglePolygonModel)', () => {
         cy.visit('/singlepolygonmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         cy.get('.maplibregl-canvas').trigger('mousemove', {
             clientX: 150,
             clientY: 150,
             force: true
         });
-
-        cy.wait(500);
 
         cy.get('body').then($body => {
             if ($body.find('.maplibregl-popup.custom-popup').length > 0) {
@@ -315,10 +291,8 @@ describe('Hover Effects - Polygon geometry (SinglePolygonModel)', () => {
         cy.visit('/singlepolygonmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
-        cy.wait(1000);
 
         cy.get('body').then($body => {
             if ($body.find('.maplibregl-popup:not(.custom-popup)').length > 0) {
@@ -338,7 +312,8 @@ describe('Hover Effects - No tooltip on empty map area', () => {
         // Go to list view
         cy.visit('/singlepointmodel/list/');
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
+        // Wait for table data to be loaded
+        cy.get('table tbody tr', {timeout: 15000}).should('have.length.greaterThan', 0);
 
         // Hover over an empty area of the map (far from any features)
         cy.get('.maplibregl-canvas').trigger('mousemove', {
@@ -346,8 +321,6 @@ describe('Hover Effects - No tooltip on empty map area', () => {
             clientY: 50,
             force: true
         });
-
-        cy.wait(500);
 
         // Tooltip should NOT appear when no feature is under cursor
         cy.get('.maplibregl-popup.custom-popup').should('not.exist');
@@ -396,12 +369,9 @@ describe('Hover Effects - Popup on click', () => {
         cy.visit('/singlepointmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         // Click on the feature on the map
         cy.get('.maplibregl-canvas').click(400, 300, {force: true});
-
-        cy.wait(1500);
 
         // A popup should appear with entity information
         cy.get('body').then($body => {
@@ -415,15 +385,12 @@ describe('Hover Effects - Popup on click', () => {
         cy.visit('/singlepointmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
 
         // Click on feature
         cy.get('.maplibregl-canvas').click(400, 300, {force: true});
-        cy.wait(1000);
 
         // Click elsewhere to close popup
         cy.get('.maplibregl-canvas').click(100, 100, {force: true});
-        cy.wait(500);
 
         // Popup should be closed or replaced
         cy.get('.maplibregl-canvas').should('be.visible');
@@ -468,11 +435,9 @@ describe('Hover Effects - MultiPoint geometry', () => {
         cy.visit('/multipointmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
-
         cy.get('table tbody').contains('tr', entityName).as('entityRow');
+
         cy.get('@entityRow').trigger('mouseenter', {force: true});
-        cy.wait(500);
 
         cy.get('.maplibregl-canvas').should('be.visible');
 
@@ -523,11 +488,9 @@ describe('Hover Effects - MultiLineString geometry', () => {
         cy.visit('/multilinestringmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
-
         cy.get('table tbody').contains('tr', entityName).as('entityRow');
+
         cy.get('@entityRow').trigger('mouseenter', {force: true});
-        cy.wait(500);
 
         cy.get('.maplibregl-canvas').should('be.visible');
 
@@ -554,11 +517,8 @@ describe('Hover Effects - MultiPolygon geometry', () => {
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
         cy.get('.maplibregl-marker').eq(1).click({force: true});
 
-        // Draw second polygon (no need to click #id_draw_polygon again)
-        cy.get('.maplibregl-canvas').click(200, 100, {force: true});
-        cy.get('.maplibregl-canvas').click(200, 150, {force: true});
-        cy.get('.maplibregl-canvas').click(250, 150, {force: true});
-        cy.get('.maplibregl-marker').eq(1).click({force: true});
+        // Wait for first polygon to be registered — one polygon is enough for the hover test
+        cy.assertGeomanFeaturesCount(1);
 
         cy.assertGeomFieldValue((data) => {
             expect(data.type).to.equal("MultiPolygon");
@@ -580,11 +540,9 @@ describe('Hover Effects - MultiPolygon geometry', () => {
         cy.visit('/multipolygonmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
-
         cy.get('table tbody').contains('tr', entityName).as('entityRow');
+
         cy.get('@entityRow').trigger('mouseenter', {force: true});
-        cy.wait(500);
 
         cy.get('.maplibregl-canvas').should('be.visible');
 
@@ -633,11 +591,9 @@ describe('Hover Effects - GeometryCollection', () => {
         cy.visit('/geometrycollectionmodel/list/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.wait(2000);
-
         cy.get('table tbody').contains('tr', entityName).as('entityRow');
+
         cy.get('@entityRow').trigger('mouseenter', {force: true});
-        cy.wait(500);
 
         cy.get('.maplibregl-canvas').should('be.visible');
 

@@ -42,28 +42,7 @@ Cypress.Commands.add('openUserMenu', (selector) => {
 // Command to wait for dropdown menu to be visible
 Cypress.Commands.add('waitForDropdownMenu', () => {
   // Wait for dropdown menu content to be visible
-  const menuSelectors = [
-    '.dropdown-menu.show',
-    '.dropdown-menu:visible',
-    '.dropdown.open .dropdown-menu',
-    '.dropdown.show .dropdown-menu',
-    '.dropdown-menu[style*="display: block"]'
-  ]
-  
-  cy.get('body').then($body => {
-    for (const selector of menuSelectors) {
-      if ($body.find(selector).length > 0) {
-        cy.log(`Waiting for dropdown menu with selector: ${selector}`)
-        cy.get(selector, { timeout: 5000 }).should('be.visible')
-        // Small additional wait to ensure animations are complete
-        cy.wait(300)
-        return
-      }
-    }
-    // Fallback: just wait a bit if no specific menu found
-    cy.log('No specific dropdown menu found, using fallback wait')
-    cy.wait(500)
-  })
+  cy.get('.dropdown-menu.show, .dropdown.show .dropdown-menu', { timeout: 5000 }).should('be.visible')
 })
 
 // Command to find and click element using multiple selectors
@@ -151,5 +130,35 @@ Cypress.Commands.add('waitForGeoman', (options = {}) => {
   cy.window({timeout}).should((win) => {
     expect(win.gm, 'window.gm').to.exist;
     expect(win.gm.features, 'gm.features').to.exist;
+  });
+});
+// Command to wait for map data (GeoJSON layers) to be loaded on list views
+Cypress.Commands.add('waitForMapData', (options = {}) => {
+  const timeout = options.timeout || 15000;
+  // Wait for the table data to be present (indicates data is loaded)
+  cy.get('table tbody tr', {timeout}).should('have.length.greaterThan', 0);
+  // Wait for MapEntity map to be initialized with layers
+  cy.window({timeout}).should((win) => {
+    expect(win.MapEntity, 'window.MapEntity').to.exist;
+    expect(win.MapEntity.currentMap, 'MapEntity.currentMap').to.exist;
+  });
+});
+// Command to search for an entity in the DataTable and wait for it to appear
+Cypress.Commands.add('searchInTable', (name, options = {}) => {
+  const timeout = options.timeout || 15000;
+  // Type in the DataTable search box to filter results
+  cy.get('.dataTables_filter input, input[type="search"]', {timeout}).clear().type(name);
+  // Wait for the table to update and contain the entity
+  cy.get('table tbody', {timeout}).contains('tr', name, {timeout});
+});
+
+// Command to wait for map context to be saved to localStorage
+Cypress.Commands.add('waitForContextSaved', (options = {}) => {
+  const prefix = options.prefix || '';
+  const timeout = options.timeout || 10000;
+  cy.window({timeout}).should((win) => {
+    const keys = Object.keys(win.localStorage);
+    const contextKey = keys.find(k => k.includes('mapcontext') || k.includes('context'));
+    expect(contextKey, 'localStorage context key').to.exist;
   });
 });

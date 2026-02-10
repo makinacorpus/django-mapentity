@@ -50,6 +50,15 @@ describe('SinglePointModel - Point geometry', () => {
         cy.get('#id_draw_marker').click();
         cy.get('.maplibregl-canvas').click(100, 100, {force: true});
         cy.assertGeomanFeaturesCount(1);
+        cy.assertGeomFieldValue((data, val) => {
+            // check number of arrays in data.coordinates
+            expect(data.type).to.equal("Point");
+            expect(data.coordinates.length).to.equal(2);
+            // Alternatively, check WKT string for single Point occurrence
+            const pointCount = (val.match(/Point/g) || []).length;
+            expect(pointCount).to.equal(1);
+        });
+
         // Try to draw a second point
         cy.get('#id_draw_marker').click();
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
