@@ -401,7 +401,7 @@ describe('Detail Page - Polygon popup behavior', () => {
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(200, 100, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
-        cy.get('.maplibregl-marker', {timeout: 10000}).last().click({force: true});
+        cy.get('.maplibregl-marker', {timeout: 10000}).eq(1).click({force: true});
 
         cy.assertGeomFieldValue((data) => {
             expect(data.type).to.equal("Polygon");
@@ -429,7 +429,7 @@ describe('Detail Page - Polygon popup behavior', () => {
         cy.get('.maplibregl-canvas').click(400, 300);
         cy.get('.maplibregl-canvas').click(500, 300, {force: true});
         cy.get('.maplibregl-canvas').click(500, 400, {force: true});
-        cy.get('.maplibregl-marker', {timeout: 10000}).last().click({force: true});
+        cy.get('.maplibregl-marker', {timeout: 10000}).eq(1).click({force: true});
 
         cy.assertGeomFieldValue((data) => {
             expect(data.type).to.equal("Polygon");
