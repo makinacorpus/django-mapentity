@@ -156,7 +156,7 @@ class MigrateTilesTestCase(TestCase):
                 ("Valid", "https://example.com/{z}/{x}/{y}.png"),
                 "invalid_string",
                 ["only_one_element"],
-                ("Missing", ),
+                ("Missing",),
                 None,
                 ("Another Valid", "https://example2.com/{z}/{x}/{y}.png"),
             ]
@@ -170,5 +170,5 @@ class MigrateTilesTestCase(TestCase):
         self.assertEqual(len(bl.objects._created), 2)
         self.assertEqual(bl.objects._created[0]["name"], "Valid")
         self.assertEqual(bl.objects._created[1]["name"], "Another Valid")
-        # Should have logged 4 warnings for invalid entries
-        self.assertEqual(mock_logger.warning.call_count, 4)
+        # Should have logged 5 warnings: 4 for invalid entries + 1 for "Created X base layers"
+        self.assertEqual(mock_logger.warning.call_count, 5)
