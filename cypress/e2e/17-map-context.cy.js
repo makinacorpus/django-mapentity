@@ -106,8 +106,15 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
                     cy.visit(`/dummymodel/list/?context=${contextParam}`)
                     waitForMapReady()
 
-                    // Wait for context to be saved to localStorage
-                    cy.wait(1000)
+                    // Wait for context to be saved to localStorage with the correct base layer
+                    cy.window({timeout: 10000}).should((win) => {
+                        const keys = Object.keys(win.localStorage)
+                        const contextKey = keys.find(k => k.includes('map-context'))
+                        expect(contextKey, 'localStorage map-context key').to.exist
+                        const stored = JSON.parse(win.localStorage.getItem(contextKey))
+                        expect(stored.maplayers, 'stored maplayers').to.exist
+                        expect(stored.maplayers).to.include(secondBaseLayerName)
+                    })
 
                     // Reload WITHOUT URL context — should restore from localStorage
                     cy.visit('/dummymodel/list/')
@@ -121,7 +128,6 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
                         .should('have.length.greaterThan', 1)
 
                     // The second base layer should still be selected (persisted from URL context)
-                    cy.get('.layer-switcher-menu input[type="radio"]').first().should('not.be.checked')
                     cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
 
                     // The first overlay should still be checked (persisted from URL context)
@@ -218,8 +224,12 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').first()
                 .should('be.checked')
 
-            // Wait for context to be saved
-            cy.wait(1000)
+            // Wait for context to be saved to localStorage
+            cy.window({timeout: 10000}).should((win) => {
+                const keys = Object.keys(win.localStorage)
+                const contextKey = keys.find(k => k.includes('context'))
+                expect(contextKey, 'localStorage context key').to.exist
+            })
 
             // Reload the page
             cy.visit('/dummymodel/list/')
@@ -302,8 +312,12 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.get('.layer-switcher-menu label[data-overlay-type="lazy"] input[type="checkbox"]').last().check({force: true})
             cy.get('.layer-switcher-menu label[data-overlay-type="lazy"] input[type="checkbox"]').last().should('be.checked')
 
-            // Wait for context to be saved
-            cy.wait(1000)
+            // Wait for context to be saved to localStorage
+            cy.window({timeout: 10000}).should((win) => {
+                const keys = Object.keys(win.localStorage)
+                const contextKey = keys.find(k => k.includes('context'))
+                expect(contextKey, 'localStorage context key').to.exist
+            })
 
             // Reload the page
             cy.reload()
@@ -340,8 +354,12 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').first()
                 .should('be.checked')
 
-            // Wait for context to be saved
-            cy.wait(1000)
+            // Wait for context to be saved to localStorage
+            cy.window({timeout: 10000}).should((win) => {
+                const keys = Object.keys(win.localStorage)
+                const contextKey = keys.find(k => k.includes('context'))
+                expect(contextKey, 'localStorage context key').to.exist
+            })
 
             // Reload the page
             cy.visit(`/dummymodel/${entityId}/`)
