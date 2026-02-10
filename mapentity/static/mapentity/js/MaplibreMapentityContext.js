@@ -31,7 +31,9 @@ class MaplibreMapentityContext {
         document.querySelectorAll('.layer-switcher-menu label').forEach(label => {
             const inputElement = label.querySelector('input');
             if(inputElement && inputElement.checked) {
-                layers.push(label.textContent.trim());
+                // On récupère le texte brut du label (sans les balises HTML éventuelles des icônes)
+                const labelText = label.textContent.trim();
+                layers.push(labelText);
             }
         });
 
@@ -39,14 +41,14 @@ class MaplibreMapentityContext {
 
         // Form filters
         if (filter) {
-
             const form = document.getElementById(filter);
-              // A voir une fois que filter sera mise en place
 
-            const formData = new FormData(form);
-            // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox' ou ''
-            const fields = Array.from(formData).filter(([name, value]) => (name !== 'bbox' && value !== ''));
-            context['filter'] = new URLSearchParams(fields).toString();
+            if (form) {
+                const formData = new FormData(form);
+                // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox' ou ''
+                const fields = Array.from(formData).filter(([name, value]) => (name !== 'bbox' && value !== ''));
+                context['filter'] = new URLSearchParams(fields).toString();
+            }
         }
 
         if (datatable) {
@@ -75,6 +77,18 @@ class MaplibreMapentityContext {
     saveFullContext(map, kwargs = {}) {
         const prefix = kwargs.prefix || '';
         const serialized = JSON.stringify(this.getFullContext(map, kwargs));
+        localStorage.setItem(prefix + 'map-context', serialized);
+    }
+
+    /**
+     * Stocke un contexte (typiquement reçu via URL) dans le localStorage.
+     * Permet d'unifier la restauration : URL → localStorage → restauration normale.
+     * @param context {Object} - Le contexte à stocker.
+     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
+     */
+    saveContextToLocalStorage(context, kwargs = {}) {
+        const prefix = kwargs.prefix || '';
+        const serialized = JSON.stringify(context);
         localStorage.setItem(prefix + 'map-context', serialized);
     }
 
@@ -112,7 +126,7 @@ class MaplibreMapentityContext {
 
 
     /**
-     * Restores la vue de la carte à partir du contexte fourni ou du contexte chargé depuis le stockage local.
+     * Restore la vue de la carte à partir du contexte fourni ou du contexte chargé depuis le stockage local.
      * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
      * @param context {Object|null} - Le contexte de la carte à restaurer. Si null, le contexte sera chargé depuis le stockage local.
      * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
@@ -164,9 +178,14 @@ class MaplibreMapentityContext {
 
         if (!context) {
             console.warn("No context found.");
+            // Mark as "restored" even without context so that saveContext can work
+            this.layerManager.restoredContext = { empty: true };
             map.fitBounds(this.bounds, { animate: false });
             return;
         }
+
+        // Store restored context in layerManager for async layers
+        this.layerManager.restoredContext = context;
 
          // Restore filters if a filter and filter context are available.
          console.debug('Restoring filters:', filter, context.filter);
@@ -219,33 +238,21 @@ class MaplibreMapentityContext {
             const layers = context.maplayers;
             const layerLabels = document.querySelectorAll('.layer-switcher-menu label');
 
-            // Traitement des cases à cocher (checkbox)
             layerLabels.forEach(label => {
                 const input = label.querySelector('input');
-                if (!input || input.type !== 'checkbox') {
-                    return;
-                }
+                if (!input) return;
 
                 const labelText = label.textContent.trim();
-                input.checked = layers.includes(labelText);
-                if (input.checked) {
-                    input.dispatchEvent(new Event("change"));
-                }
-            });
+                const isRestored = layers.includes(labelText);
 
-            // Traitement des boutons radio
-            layerLabels.forEach(label => {
-                const input = label.querySelector('input');
-                if (!input || input.type !== 'radio') {
-                    return;
-                }
-
-                const layerId = input.dataset.layerId;
-                if (layers.includes(layerId?.replace('-base', ''))) {
+                if (isRestored) {
                     input.checked = true;
-                    this.layerManager.toggleLayer(layerId);
-                } else {
-                    input.checked = false;
+                    if (input.type === 'radio') {
+                        const layerId = input.dataset.layerId;
+                        this.layerManager.toggleLayer(layerId, true);
+                    } else {
+                        input.dispatchEvent(new Event("change"));
+                    }
                 }
             });
         }

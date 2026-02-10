@@ -47,11 +47,8 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [ '3.9', '3.10', '3.13' ]
+        python-version: [ '3.10', '3.13' ]
         django-version: [ '4.2.*', '5.2.*' ]
-        exclude:
-            - python-version: '3.9'
-              django-version: '5.2.*'
 
     env:
       PYTHON: ${{ matrix.python-version }}
@@ -126,9 +123,13 @@ jobs:
       - name: Run migrations
         run: |
           ./manage.py migrate
+          ./manage.py update_permissions_mapentity
 
       - name: Create superuser and test data
         run: |
+          ./manage.py install_layer osm --order=0
+          ./manage.py install_layer opentopomap --order=1
+          ./manage.py install_layer ign cadastre --order=0 --overlay
           echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@test.com', 'admin')" | ./manage.py shell
           ./manage.py create_test_data --dummies 20 --cities 5 --roads 10 --geopoints 10
 

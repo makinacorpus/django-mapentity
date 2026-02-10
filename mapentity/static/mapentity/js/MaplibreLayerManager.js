@@ -9,8 +9,10 @@ class MaplibreLayerManager {
         this.layers = {
             baseLayers: {},
             overlays: {},
-            lazyOverlays: {} // Nouvelles couches lazy
+            lazyOverlays: {}, // Nouvelles couches lazy
+            layerGroups: {} // Mapping ID simple -> liste d'IDs MapLibre
         };
+        this.restoredContext = null; // Stockage du contexte restauré
         this._map = null;
         this._eventListeners = [];
 
@@ -26,24 +28,135 @@ class MaplibreLayerManager {
     }
 
     /**
-     * Ajoute une couche de base
+     * Ajoute une couche à partir d'une URL (Style Mapbox ou TileJSON)
      * @param name {string} - Nom de la couche
-     * @param layerConfig {Object} - Configuration de la couche
+     * @param layerConfig {Object} - Configuration (id, url, isBaseLayer, attribution, etc.)
+     * @returns {Promise<void>}
      */
-    addBaseLayer(name, layerConfig) {
-        const { id, tiles, tileSize = 256, attribution = '' } = layerConfig;
+    async addLayerFromUrl(name, layerConfig) {
+        const { id, url, isBaseLayer = false, attribution = '', opacity = 1 } = layerConfig;
 
         if (!this._map) {
             console.error('LayerManager not initialized with map');
             return;
         }
 
-        this._map.addSource(id, {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+
+            let layerIds = [];
+
+            // Détection du type de contenu
+            if (data.layers && data.sources) {
+                // C'est un Style Mapbox
+                const styleSources = data.sources;
+                const styleLayers = data.layers;
+
+                // 1. Ajouter les sources
+                for (const [sourceId, sourceConfig] of Object.entries(styleSources)) {
+                    const newSourceId = `${id}-${sourceId}`;
+                    if (!this._map.getSource(newSourceId)) {
+                        this._map.addSource(newSourceId, sourceConfig);
+                    }
+                }
+
+                // 2. Ajouter les couches au-dessus des fonds de plan mais sous les données
+                const firstDataLayer = this._map.getStyle().layers.find(l => l.id.startsWith('layer-'));
+                const beforeId = firstDataLayer ? firstDataLayer.id : undefined;
+
+                for (const layer of styleLayers) {
+                    const newLayerId = `${id}-${layer.id}`;
+                    if (this._map.getLayer(newLayerId)) continue;
+
+                    const layerCopy = { ...layer, id: newLayerId };
+                    if (layer.source) {
+                        layerCopy.source = `${id}-${layer.source}`;
+                    }
+                    
+                    // Gérer la visibilité
+                    layerCopy.layout = { 
+                        ...(layer.layout || {}), 
+                        visibility: isBaseLayer ? 'none' : 'none' 
+                    };
+
+                    this._map.addLayer(layerCopy, beforeId);
+                    layerIds.push(newLayerId);
+                }
+            } else {
+                // C'est un TileJSON ou une source simple
+                const type = data.type || layerConfig.type || 'raster';
+                if (!this._map.getSource(id)) {
+                    const sourceConfig = {
+                        type: type,
+                        url: url,
+                        attribution: data.attribution || attribution || ''
+                    };
+                    if (type === 'raster') {
+                        sourceConfig.tileSize = layerConfig.tileSize || data.tileSize || 256;
+                    }
+                    this._map.addSource(id, sourceConfig);
+                }
+
+                if (type === 'raster') {
+                    if (!this._map.getLayer(id)) {
+                        const firstDataLayer = this._map.getStyle().layers.find(l => l.id.startsWith('layer-'));
+                        const beforeId = firstDataLayer ? firstDataLayer.id : undefined;
+
+                        this._map.addLayer({
+                            id: id,
+                            type: 'raster',
+                            source: id,
+                            layout: { visibility: 'none' },
+                            paint: { 'raster-opacity': opacity }
+                        }, beforeId);
+                        layerIds.push(id);
+                    }
+                }
+            }
+
+            if (layerIds.length > 0) {
+                if (isBaseLayer) {
+                    this.layers.baseLayers[name] = id;
+                    this.layers.layerGroups[id] = layerIds;
+                    this._fireEvent('baseLayerAdded', { name, id: id });
+                } else {
+                    this.layers.layerGroups[id] = layerIds;
+                    this.registerOverlay(layerConfig.category || gettext('Overlays'), id, layerIds, name);
+                }
+            }
+        } catch (error) {
+            console.error(`Impossible de charger la couche depuis ${url}:`, error);
+        }
+    }
+
+    /**
+     * Ajoute une couche de base
+     * @param name {string} - Nom de la couche
+     * @param layerConfig {Object} - Configuration de la couche
+     */
+    addBaseLayer(name, layerConfig) {
+        const { id, tiles, url, tileSize = 256, attribution = '' } = layerConfig;
+
+        if (!this._map) {
+            console.error('LayerManager not initialized with map');
+            return;
+        }
+
+        const sourceConfig = {
             type: 'raster',
-            tiles: tiles,
             tileSize,
             attribution
-        });
+        };
+
+        if (url) {
+            sourceConfig.url = url;
+        } else if (tiles) {
+            sourceConfig.tiles = tiles;
+        }
+
+        this._map.addSource(id, sourceConfig);
 
         this._map.addLayer({
             id,
@@ -73,6 +186,9 @@ class MaplibreLayerManager {
             labelHTML,
             type: 'loaded' // Couche déjà chargée
         };
+
+        // Enregistrer le groupe pour que toggleLayer puisse résoudre primaryKey -> layerIds
+        this.layers.layerGroups[primaryKey] = layerIds;
 
         this._fireEvent('overlayAdded', { category, primaryKey, layerIds, labelHTML, type: 'loaded' });
     }
@@ -153,7 +269,7 @@ class MaplibreLayerManager {
 
     /**
      * Bascule la visibilité d'une ou plusieurs couches
-     * @param layerIds {string|Array<string>} - ID(s) des couches
+     * @param layerIds {string|Array<string>} - ID(s) des couches ou ID de groupe
      * @param visible {boolean} - Visibilité souhaitée
      */
     toggleLayer(layerIds, visible = true) {
@@ -161,15 +277,24 @@ class MaplibreLayerManager {
             return;
         }
 
-        const ids = Array.isArray(layerIds)
-            ? layerIds
-            : typeof layerIds === 'string'
-                ? layerIds.split(',').map(id => id.trim())
-                : [];
+        let ids = [];
+        if (Array.isArray(layerIds)) {
+            ids = layerIds;
+        } else if (typeof layerIds === 'string') {
+            // Vérifier si c'est un ID de groupe
+            if (this.layers.layerGroups[layerIds]) {
+                ids = this.layers.layerGroups[layerIds];
+            } else {
+                ids = layerIds.split(',').map(id => id.trim());
+            }
+        }
 
         for (const id of ids) {
             if (this._map.getLayer(id)) {
                 this._map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+            } else if (this.layers.layerGroups[id]) {
+                // Récursion si un des IDs est lui-même un groupe (peu probable mais robuste)
+                this.toggleLayer(id, visible);
             } else {
                 console.warn(`Layer "${id}" not found.`);
             }

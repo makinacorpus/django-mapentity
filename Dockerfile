@@ -1,4 +1,4 @@
-FROM python:3.9-bookworm AS base
+FROM python:3.10-bookworm AS base
 
 RUN apt-get update -qq && apt-get install -y -qq \
     binutils libproj-dev gdal-bin libsqlite3-mod-spatialite \
@@ -14,7 +14,7 @@ RUN chown -R django:django /code
 COPY --chown=django:django . /code/src
 
 USER django
-RUN python3.9 -m venv /code/venv
+RUN python3.10 -m venv /code/venv
 
 WORKDIR /code/src
 

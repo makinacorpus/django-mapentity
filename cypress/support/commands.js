@@ -20,7 +20,9 @@ Cypress.Commands.add('login', (username = 'admin', password = 'admin') => {
 });
 
 Cypress.Commands.add('mockTiles', () => {
-    cy.intercept("https://*.openstreetmap.org/*/*/*.png", {fixture: "images/tile.png"}).as("tiles");
+    cy.intercept("https://*.openstreetmap.org/*/*/*.png", {fixture: "images/tile_osm.png"}).as("tiles_osm");
+    cy.intercept("https://*.tile.opentopomap.org/*/*/*.png", {fixture: "images/tile_otm.png"}).as("tiles_otm");
+    cy.intercept(/data\.geopf\.fr\/wmts\?LAYER=CADASTRALPARCELS/, {fixture: "images/tile_overlay.png"}).as("tiles_overlay");
 });
 
 // Command to wait for map to be ready (MapLibre instead of Leaflet)

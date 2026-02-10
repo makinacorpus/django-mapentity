@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     "rest_framework",
     "embed_video",
     "tinymce",
+    "mapbox_baselayer",
     "mapentity",  # Make sure mapentity settings are loaded before leaflet ones
     "test_project.test_app",
     "test_project.test_shapes",
@@ -159,44 +160,12 @@ PAPERCLIP_ATTACHMENT_MODEL = "test_app.Attachment"
 if os.path.exists("/usr/lib/x86_64-linux-gnu/mod_spatialite.so"):
     SPATIALITE_LIBRARY_PATH = "/usr/lib/x86_64-linux-gnu/mod_spatialite"
 
-LOGGING = {
-    "version": 1,
-    "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(name)s %(pathname)s:%(lineno)d %(message)s"
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
-    },
-    "loggers": {
-        "": {
-            "handlers": ["console"],
-            "level": "WARNING",
-        },
-    },
-}
 
 MAPLIBRE_CONFIG_OVERRIDES = {
     "DEFAULT_CENTER": [1.3952, 43.5963],  # Toulouse, France
     "DEFAULT_ZOOM": 5,
     "SCALE": "metric",
     "BOUNDS": [[-5.5, 40.120372], [10, 52]],
-    "TILES": [
-        (
-            "OSM",
-            "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            "&copy; OpenStreetMap contributors",
-        ),
-        (
-            "TOPO",
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-            "&copy; Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap.",
-        ),
-    ],
 }
 
 
