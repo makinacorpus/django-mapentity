@@ -49,15 +49,8 @@
             const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
             // Créer un layerManager dédié au widget (pas le singleton de la carte principale)
             const layerManager = Object.create(MaplibreLayerManager.prototype);
-            layerManager.layers = {
-                baseLayers: {},
-                overlays: {},
-                lazyOverlays: {},
-                layerGroups: {}
-            };
-            layerManager.restoredContext = null;
-            layerManager._map = null;
-            layerManager._eventListeners = [];
+            // Initialise correctement l'instance en réutilisant le constructeur de MaplibreLayerManager
+            MaplibreLayerManager.call(layerManager);
 
             map.getMap().on('load', function () {
                 window.mapentity_map = map.getMap();

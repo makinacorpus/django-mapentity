@@ -15,6 +15,13 @@ def migrate_tiles(sender, **kwargs):
             tiles = settings.LEAFLET_CONFIG.get("TILES", [])
 
             for idx, element in enumerate(tiles):
+                if not isinstance(element, (list, tuple)) or len(element) < 2:
+                    logger.warning(
+                        "Skipping invalid tile definition at index %s in LEAFLET_CONFIG['TILES']: %r",
+                        idx,
+                        element,
+                    )
+                    continue
                 name = element[0]
                 url = element[1]
                 options = {

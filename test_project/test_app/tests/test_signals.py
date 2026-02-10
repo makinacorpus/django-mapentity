@@ -149,3 +149,26 @@ class MigrateTilesTestCase(TestCase):
         self.assertEqual(len(bl.objects._created), 2)
         self.assertEqual(bl.objects._created[0]["order"], 0)
         self.assertEqual(bl.objects._created[1]["order"], 1)
+
+    @override_settings(
+        LEAFLET_CONFIG={
+            "TILES": [
+                ("Valid", "https://example.com/{z}/{x}/{y}.png"),
+                "invalid_string",
+                ["only_one_element"],
+                ("Missing", ),
+                None,
+                ("Another Valid", "https://example2.com/{z}/{x}/{y}.png"),
+            ]
+        }
+    )
+    def test_malformed_tiles(self, mock_logger):
+        """Should skip malformed tile definitions and log warnings"""
+        sender, bl, blt = self._make_sender()
+        migrate_tiles(sender)
+        # Should only create 2 valid layers (index 0 and 5)
+        self.assertEqual(len(bl.objects._created), 2)
+        self.assertEqual(bl.objects._created[0]["name"], "Valid")
+        self.assertEqual(bl.objects._created[1]["name"], "Another Valid")
+        # Should have logged 4 warnings for invalid entries
+        self.assertEqual(mock_logger.warning.call_count, 4)
