@@ -47,9 +47,9 @@
             const bounds = [BOUNDS[0], BOUNDS[1]];
 
             const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
-            // Créer un layerManager dédié au widget (pas le singleton de la carte principale)
+            // Create a dedicated layerManager for the widget (not the main map singleton)
             const layerManager = Object.create(MaplibreLayerManager.prototype);
-            // Initialise correctement l'instance en réutilisant le constructeur de MaplibreLayerManager
+            // Properly initialize the instance by reusing the MaplibreLayerManager constructor
             MaplibreLayerManager.call(layerManager);
 
             map.getMap().on('load', function () {
