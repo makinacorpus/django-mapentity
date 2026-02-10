@@ -87,8 +87,7 @@ describe('List View - Export Functions', () => {
                 cy.get('button[name="csv"]').first().should('be.visible')
                 cy.get('button[name="csv"]').first().click()
 
-                // Check if a download was triggered or URL changed
-                cy.wait(1000)
+                // Check if URL changed to include export format
                 cy.url().then((url) => {
                     if (url.includes('format=csv') || url.includes('.csv')) {
                         cy.log('CSV export URL detected')
@@ -112,8 +111,7 @@ describe('List View - Export Functions', () => {
                 cy.get('button[name="shp"]').first().should('be.visible')
                 cy.get('button[name="shp"]').first().click()
 
-                // Check if a download was triggered or URL changed
-                cy.wait(1000)
+                // Check if URL changed to include export format
                 cy.url().then((url) => {
                     if (url.includes('format=shp') || url.includes('.shp')) {
                         cy.log('Shapefile export URL detected')
@@ -139,7 +137,8 @@ describe('List View - Export Functions', () => {
             for (const selector of filterSelectors) {
                 if ($body.find(selector).length > 0) {
                     cy.get(selector).first().type('test')
-                    cy.wait(1000)
+                    // Wait for table to reflect the filter
+                    cy.get('table tbody', {timeout: 10000}).should('exist')
                     break
                 }
             }
@@ -148,7 +147,6 @@ describe('List View - Export Functions', () => {
             if ($body.find('button[name="csv"]').length > 0) {
                 cy.get('button[name="csv"]').first().should('be.visible')
                 cy.get('button[name="csv"]').first().click()
-                cy.wait(1000)
                 cy.log('Export with filter applied')
             }
         })
@@ -184,14 +182,11 @@ describe('List View - Export Functions', () => {
                     }
                 })
 
-                cy.wait(500)
-
                 // Now try to export selected
                 cy.get('body').then($body => {
                     if ($body.find('button[name="csv"]').length > 0) {
                         cy.get('button[name="csv"]').first().should('be.visible')
                         cy.get('button[name="csv"]').first().click()
-                        cy.wait(1000)
                         cy.log('Export with selected entities')
                     }
                 })

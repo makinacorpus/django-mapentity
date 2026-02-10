@@ -60,7 +60,7 @@ describe('SinglePolygonModel - Polygon geometry', () => {
         cy.get('.maplibregl-canvas').click(100, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-marker').eq(1).click({force: true});
-        cy.wait(500);
+        cy.assertGeomanFeaturesCount(1);
         // Attempt to draw second polygon
         cy.get('#id_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(100, 100);

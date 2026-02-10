@@ -4,6 +4,7 @@ module.exports = defineConfig({
   projectId: 'sjit2h',
   e2e: {
     baseUrl: 'http://mapentity.local:8000',
+    allowCypressEnv: false,
     viewportWidth: 1280,
     viewportHeight: 720,
     video: true,

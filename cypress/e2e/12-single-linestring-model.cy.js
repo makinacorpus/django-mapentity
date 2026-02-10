@@ -61,7 +61,7 @@ describe('SingleLineStringModel - LineString geometry', () => {
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-marker').last().click({force: true});
-        cy.wait(500);
+        cy.assertGeomanFeaturesCount(1);
         // Try to draw a second line
         cy.get('#id_draw_line').click();
         cy.get('.maplibregl-canvas').click(100, 100)

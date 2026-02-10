@@ -27,9 +27,6 @@ describe('DummyModel List View', () => {
         // Wait for map to load
         cy.get('#mainmap, .maplibre-map, .map-panel', {timeout: 15000}).should('exist')
 
-        // Wait a bit for MapLibre and controls to initialize
-        cy.wait(2000)
-
         // Check for layer switcher button
         cy.get('body').then($body => {
             const layerSwitcherSelectors = [
@@ -48,9 +45,6 @@ describe('DummyModel List View', () => {
 
                     // Try to click it to open the menu
                     cy.get(selector).first().click({force: true})
-
-                    // Wait for menu to appear
-                    cy.wait(500)
 
                     // Check if menu appeared
                     const menuSelectors = [
@@ -83,8 +77,6 @@ describe('DummyModel List View', () => {
     it('should display multiple MapEntity models in layer selector', {retries: 1}, () => {
         // Wait for map to load
         cy.get('#mainmap, .maplibre-map, .map-panel', {timeout: 15000}).should('exist')
-        cy.wait(2000)
-
         // Open layer switcher
         cy.get('body').then($body => {
             const buttonSelectors = [
@@ -96,7 +88,6 @@ describe('DummyModel List View', () => {
             for (const selector of buttonSelectors) {
                 if ($body.find(selector).length > 0) {
                     cy.get(selector).first().click({force: true})
-                    cy.wait(500)
                     break
                 }
             }

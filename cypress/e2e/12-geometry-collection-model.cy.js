@@ -36,8 +36,6 @@ describe('GeometryCollectionModel - GeometryCollection', () => {
         cy.get('.maplibregl-canvas').click(200, 200, {force: true})
         cy.get('.maplibregl-canvas').click(250, 250, {force: true})
         cy.get('.maplibregl-marker').last().click({force: true})
-        cy.wait(500);
-
         cy.assertGeomFieldValue((data) => {
             // check number of arrays in data.coordinates
             expect(data.type).to.equal("GeometryCollection");

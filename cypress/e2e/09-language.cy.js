@@ -3,13 +3,10 @@ describe('Language Switching', () => {
         cy.login()
         cy.mockTiles()
     })
-
     it('should display language switcher in user menu', () => {
         cy.visit('/dummymodel/list/')
-
         // Open user dropdown menu
         cy.openUserMenu()
-
         // Check for language options
         cy.get('body').then($body => {
             const languageSelectors = [
@@ -18,7 +15,6 @@ describe('Language Switching', () => {
                 'form[action*="set_language"]',
                 'button[value*="en"], button[value*="fr"]'
             ]
-
             for (const selector of languageSelectors) {
                 if ($body.find(selector).length > 0) {
                     cy.log(`Found language switcher with selector: ${selector}`)
@@ -28,13 +24,10 @@ describe('Language Switching', () => {
             }
         })
     })
-
     it('should switch to French language', {retries: 1}, () => {
         cy.visit('/dummymodel/list/')
-
         // Open dropdown menu and wait for it to be visible
         cy.openUserMenu()
-
         // Click French language button
         cy.get('body').then($body => {
             if ($body.find('button[value="fr"]').length > 0) {
@@ -42,10 +35,8 @@ describe('Language Switching', () => {
                 // Wait for button to be visible
                 cy.get('button[value="fr"]').should('be.visible')
                 cy.get('button[value="fr"]').click()
-
-                // Wait for page reload
-                cy.wait(1000)
-
+                // Wait for page to reload by checking the URL or page content
+                cy.url({timeout: 10000}).should('include', '/dummymodel/list')
                 // Check that page has French content
                 cy.get('body').then($newBody => {
                     const bodyText = $newBody.text().toLowerCase()
@@ -59,13 +50,10 @@ describe('Language Switching', () => {
             }
         })
     })
-
     it('should switch to English language', {retries: 1}, () => {
         cy.visit('/dummymodel/list/')
-
         // Open dropdown menu and wait for it to be visible
         cy.openUserMenu()
-
         // Click English language button
         cy.get('body').then($body => {
             if ($body.find('button[value="en"]').length > 0) {
@@ -73,10 +61,8 @@ describe('Language Switching', () => {
                 // Wait for button to be visible
                 cy.get('button[value="en"]').should('be.visible')
                 cy.get('button[value="en"]').click()
-
-                // Wait for page reload
-                cy.wait(1000)
-
+                // Wait for page to reload by checking the URL or page content
+                cy.url({timeout: 10000}).should('include', '/dummymodel/list')
                 // Check that page has English content
                 cy.get('body').then($newBody => {
                     const bodyText = $newBody.text().toLowerCase()
@@ -90,25 +76,22 @@ describe('Language Switching', () => {
             }
         })
     })
-
     it('should persist language selection across pages', {retries: 1}, () => {
         cy.visit('/dummymodel/list/')
-
         // Open dropdown and switch to French
         cy.openUserMenu()
-
         cy.get('body').then($body => {
             if ($body.find('button[value="fr"]').length > 0) {
                 cy.log('Switching to French')
                 // Wait for button to be visible
                 cy.get('button[value="fr"]').should('be.visible')
                 cy.get('button[value="fr"]').click()
-                cy.wait(1000)
-
+                // Wait for page to reload
+                cy.url({timeout: 10000}).should('include', '/dummymodel/list')
                 // Navigate to another page
                 cy.visit('/')
-                cy.wait(500)
-
+                // Wait for page to load
+                cy.get('body', {timeout: 10000}).should('be.visible')
                 // Check if French is still active
                 cy.get('body').then($newBody => {
                     const bodyText = $newBody.text().toLowerCase()
@@ -121,22 +104,17 @@ describe('Language Switching', () => {
             }
         })
     })
-
     it('should display all available languages', () => {
         cy.visit('/dummymodel/list/')
-
         // Open dropdown menu
         cy.openUserMenu()
-
         // Check for multiple language options
         cy.get('body').then($body => {
             const languageButtons = $body.find('button[name="language"]')
             if (languageButtons.length > 0) {
                 cy.log(`Found ${languageButtons.length} language options`)
-
                 // Should have at least 2 languages (English and French)
                 cy.get('button[name="language"]').should('have.length.greaterThan', 1)
-
                 // Log available languages
                 cy.get('button[name="language"]').each(($btn) => {
                     cy.log(`Language option: ${$btn.val()} - ${$btn.text()}`)
@@ -146,13 +124,10 @@ describe('Language Switching', () => {
             }
         })
     })
-
     it('should show active language highlighted', {retries: 1}, () => {
         cy.visit('/dummymodel/list/')
-
         // Open dropdown menu
         cy.openUserMenu()
-
         // Check for active language indicator
         cy.get('body').then($body => {
             const activeSelectors = [
@@ -160,7 +135,6 @@ describe('Language Switching', () => {
                 '.language-menu-item.active',
                 'button[name="language"][class*="active"]'
             ]
-
             for (const selector of activeSelectors) {
                 if ($body.find(selector).length > 0) {
                     cy.log(`Found active language with selector: ${selector}`)

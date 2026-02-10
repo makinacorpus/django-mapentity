@@ -49,7 +49,7 @@ describe('SinglePointModel - Point geometry', () => {
 
         cy.get('#id_draw_marker').click();
         cy.get('.maplibregl-canvas').click(100, 100, {force: true});
-        cy.wait(500);
+        cy.assertGeomanFeaturesCount(1);
         // Try to draw a second point
         cy.get('#id_draw_marker').click();
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});

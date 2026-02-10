@@ -65,7 +65,13 @@ describe('MultiPolygonModel - MultiPolygon geometry', () => {
         cy.get('.maplibregl-canvas').click(100, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-marker').eq(1).click({force: true});
-
+        cy.assertGeomFieldValue((data) => {
+            // check number of arrays in data.coordinates
+            expect(data.type).to.equal("MultiPolygon");
+            expect(data.coordinates.length).to.equal(1);  // 1 polygon
+            expect(data.coordinates[0].length).to.equal(1);  // with 4 points
+        });
+        cy.assertGeomanFeaturesCount(1);  // two features
         // Draw a polygon (triangle)
         cy.get('.maplibregl-canvas').click(150, 100, {force: true})
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
@@ -75,7 +81,7 @@ describe('MultiPolygonModel - MultiPolygon geometry', () => {
         cy.assertGeomFieldValue((data) => {
             // check number of arrays in data.coordinates
             expect(data.type).to.equal("MultiPolygon");
-            expect(data.coordinates.length).to.equal(1);  // 1 polygon
+            expect(data.coordinates.length).to.equal(2);  // 1 polygon
             expect(data.coordinates[0].length).to.equal(1);  // with 4 points
         });
         cy.assertGeomanFeaturesCount(2);  // two features
