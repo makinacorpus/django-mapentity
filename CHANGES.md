@@ -1,12 +1,17 @@
 CHANGELOG
 =========
 
-8.16.1+dev (XXXX-XX-XX)
+8.16.2+dev (XXXX-XX-XX)
 -----------------------
 
 **Maintenance**
 
 - Change chosen to select2 library. Use dango-autocomplete-light to let users to customize static select or multiselect to API dynamic if required. (perfs issues)
+
+**Improvements**
+
+- Related fields in lists are now displayed by their string object representation (be mindful of performance)
+- Improve responsiveness for multi-update forms
 
 
 8.16.1     (2026-01-08)
