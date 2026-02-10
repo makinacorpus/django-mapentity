@@ -6,8 +6,6 @@ class MaplibreLayerControl {
         this._menu = null;
         this._firstBaseLayerInput = null;
         this._lazyInputs = new Map();
-        this._boundUpdateMenu = () => this._updateMenu();
-        this._boundHandleLoadingError = (e) => this._handleLoadingError(e.primaryKey);
     }
 
     onAdd(map) {
@@ -18,25 +16,12 @@ class MaplibreLayerControl {
 
         this._updateMenu();
 
-        this._map.on('layerManager:overlayAdded', this._boundUpdateMenu);
-        this._map.on('layerManager:baseLayerAdded', this._boundUpdateMenu);
-        this._map.on('layerManager:lazyOverlayAdded', this._boundUpdateMenu);
-        this._map.on('layerManager:loadingError', this._boundHandleLoadingError);
+        this._map.on('layerManager:overlayAdded', () => this._updateMenu());
+        this._map.on('layerManager:baseLayerAdded', () => this._updateMenu());
+        this._map.on('layerManager:lazyOverlayAdded', () => this._updateMenu());
+        this._map.on('layerManager:loadingError', (e) => this._handleLoadingError(e.primaryKey));
 
         return this._container;
-    }
-
-    onRemove() {
-        if (this._map) {
-            this._map.off('layerManager:overlayAdded', this._boundUpdateMenu);
-            this._map.off('layerManager:baseLayerAdded', this._boundUpdateMenu);
-            this._map.off('layerManager:lazyOverlayAdded', this._boundUpdateMenu);
-            this._map.off('layerManager:loadingError', this._boundHandleLoadingError);
-        }
-        if (this._container && this._container.parentNode) {
-            this._container.parentNode.removeChild(this._container);
-        }
-        this._map = null;
     }
 
     _updateMenu() {
