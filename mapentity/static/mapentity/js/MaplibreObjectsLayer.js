@@ -151,6 +151,21 @@ class MaplibreObjectsLayer {
                     return;
                 }
 
+                // Don't show tooltip for current object
+                const currentPk = document.body.dataset.pk;
+                if (currentPk) {
+                    const currentPkStr = String(currentPk);
+                    const featureIdStr = feature.id != null ? String(feature.id) : null;
+                    const featurePropIdStr = feature.properties && feature.properties.id != null
+                        ? String(feature.properties.id)
+                        : null;
+
+                    if ((featureIdStr && featureIdStr === currentPkStr) ||
+                        (featurePropIdStr && featurePropIdStr === currentPkStr)) {
+                        return;
+                    }
+                }
+
                 const name = feature.properties?.name;
                 if (!name || String(name).trim() === '') {
                     // Pas de tooltip si le nom est absent, vide ou null
