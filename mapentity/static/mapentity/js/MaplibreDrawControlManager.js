@@ -172,11 +172,37 @@ class MaplibreDrawControlManager {
         const geomanEditSection = ctrlTopLeft.querySelector('.geoman-edit-section');
         if (geomanEditSection) {
             ctrlTopLeft.insertBefore(this._customButtonsContainer, geomanEditSection);
+            // Assign IDs to Geoman edit buttons for e2e test selectors
+            this._assignEditButtonIds(geomanEditSection);
         } else if (ctrlTopLeft.firstChild) {
             ctrlTopLeft.insertBefore(this._customButtonsContainer, ctrlTopLeft.firstChild);
         } else {
             ctrlTopLeft.appendChild(this._customButtonsContainer);
         }
+    }
+
+    /**
+     * Assigne des IDs aux boutons d'édition Geoman pour les sélecteurs e2e.
+     * Mappe les titres des boutons vers des IDs standardisés.
+     * @param {HTMLElement} editSection - La section d'édition Geoman
+     * @private
+     */
+    _assignEditButtonIds(editSection) {
+        const titleToId = {
+            'drag': 'id_edit_drag',
+            'edit': 'id_edit_change',
+            'delete': 'id_edit_delete',
+        };
+        const buttons = editSection.querySelectorAll('button');
+        buttons.forEach(btn => {
+            const title = (btn.title || btn.getAttribute('aria-label') || '').toLowerCase();
+            for (const [key, id] of Object.entries(titleToId)) {
+                if (title.includes(key) && !document.getElementById(id)) {
+                    btn.id = id;
+                    break;
+                }
+            }
+        });
     }
 
     /**
@@ -272,6 +298,14 @@ class MaplibreDrawControlManager {
             btn.className = 'mapentity-draw-btn';
             btn.dataset.fieldId = fieldId;
             btn.dataset.shape = shape;
+            // Assign an id for e2e test selectors: id_draw_{shape}
+            // If multiple fields share the same shape, append fieldId to avoid duplicates
+            const baseDrawId = 'id_draw_' + shape;
+            if (!document.getElementById(baseDrawId)) {
+                btn.id = baseDrawId;
+            } else {
+                btn.id = fieldId + '_draw_' + shape;
+            }
             btn.title = opts.fieldLabel
                 ? `${defaultLabels[shape]} (${opts.fieldLabel})`
                 : `${defaultLabels[shape]} (${fieldId})`;
