@@ -108,6 +108,8 @@ class MapEntityForm(TranslatedModelForm):
     }
 
     def __init__(self, *args, **kwargs):
+        model = getattr(self._meta, "model", None)
+
         if self.geomfields is None:
             self.geomfields = ["geom"]
         self.user = kwargs.pop("user", None)
@@ -139,9 +141,9 @@ class MapEntityForm(TranslatedModelForm):
             # Custom code because formfield_callback does not work with inherited forms
             if formfield:
                 # set max character limit :
-                if self._meta.model._meta.db_table in max_characters_by_field_config:
+                if model._meta.db_table in max_characters_by_field_config:
                     for conf in max_characters_by_field_config[
-                        self._meta.model._meta.db_table
+                        model._meta.db_table
                     ]:
                         if fieldname == conf["field"]:
                             textfield_help_text = _(
@@ -150,8 +152,7 @@ class MapEntityForm(TranslatedModelForm):
 
                 # Assign map widget to all geometry fields
                 try:
-                    formmodel = self._meta.model
-                    modelfield = formmodel._meta.get_field(fieldname)
+                    modelfield = model._meta.get_field(fieldname)
                     needs_replace_widget = isinstance(
                         modelfield, GeometryField
                     ) and not isinstance(formfield.widget, MapWidget)
@@ -177,10 +178,6 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.help_text += f", {textfield_help_text}"
                     else:
                         formfield.help_text = textfield_help_text
-
-        model = getattr(self._meta, "model", None)
-        if not model:
-            return
 
         for name, form_field in list(self.fields.items()):
             try:
