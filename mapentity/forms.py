@@ -142,9 +142,7 @@ class MapEntityForm(TranslatedModelForm):
             if formfield:
                 # set max character limit :
                 if model._meta.db_table in max_characters_by_field_config:
-                    for conf in max_characters_by_field_config[
-                        model._meta.db_table
-                    ]:
+                    for conf in max_characters_by_field_config[model._meta.db_table]:
                         if fieldname == conf["field"]:
                             textfield_help_text = _(
                                 "%(max)s characters maximum recommended"

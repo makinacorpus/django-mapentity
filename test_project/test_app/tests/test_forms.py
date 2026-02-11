@@ -1,5 +1,4 @@
 from dal import autocomplete
-
 from django import forms
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -18,6 +17,7 @@ class DummyForm(MapEntityForm):
 
 class GeopointForm(MapEntityForm):
     extra_field = forms.CharField()
+
     class Meta:
         model = GeoPoint
         fields = ["located_in", "road", "name", "tags", "extra_field"]
@@ -53,15 +53,21 @@ class MapEntityFormTest(TestCase):
         # Test that M2M have select2 widget
         form = GeopointForm()
         self.assertIn("tags", form.fields)
-        self.assertTrue(isinstance(form.fields["tags"].widget, autocomplete.Select2Multiple))
+        self.assertTrue(
+            isinstance(form.fields["tags"].widget, autocomplete.Select2Multiple)
+        )
 
     def test_fk_widget(self):
         # Test that FK have select2 widget
         form = GeopointForm()
         self.assertIn("located_in", form.fields)
-        self.assertTrue(isinstance(form.fields["located_in"].widget, autocomplete.ListSelect2))
+        self.assertTrue(
+            isinstance(form.fields["located_in"].widget, autocomplete.ListSelect2)
+        )
         self.assertIn("road", form.fields)
-        self.assertTrue(isinstance(form.fields["road"].widget, autocomplete.ListSelect2))
+        self.assertTrue(
+            isinstance(form.fields["road"].widget, autocomplete.ListSelect2)
+        )
 
     def test_do_not_change_unwanted_widgets(self):
         form = GeopointForm()
