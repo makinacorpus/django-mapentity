@@ -962,6 +962,7 @@ TODO: please help;
 .dynamic-form label.requiredField {
     font-weight: normal;
 }
+
 .select2-container {
     min-width: 150px !important;
 }
@@ -971,5 +972,7 @@ TODO: please help;
 }
 
 #modelfields .custom-select {
-  padding: 0 !important;
+    padding: 0 !important;
+    font-size: 1rem;
+    border: 1px solid #ced4da;
 }
