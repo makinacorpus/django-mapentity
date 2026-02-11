@@ -36,7 +36,18 @@ class MaplibreGeometryField {
         // Détecter si on est en mode édition (PK présente)
         this.options.isUpdate = !!document.body.dataset.pk;
 
-        this.drawManager = new MaplibreDrawControlManager(map, this.options);
+        // Ajouter le fieldId aux options pour le DrawControlManager
+        this.options.fieldId = this.fieldId;
+
+        // Réutiliser le DrawControlManager existant si la carte en a déjà un (multi-geom)
+        if (this.map._drawManager) {
+            this.drawManager = this.map._drawManager;
+            // Ajouter les contrôles spécifiques à ce champ au Geoman existant
+            this.drawManager.addFieldControls(this.options);
+        } else {
+            this.drawManager = new MaplibreDrawControlManager(map, this.options);
+            this.map._drawManager = this.drawManager;
+        }
 
         // stock les Features Geoman
         this.gmEvents = [];
@@ -845,6 +856,58 @@ class MaplibreGeometryField {
     }
 
     /**
+     * Détermine les shapes Geoman qui correspondent au type de géométrie de ce champ.
+     * @return {Array<string>} - Liste des noms de shapes Geoman acceptés
+     * @private
+     */
+    _getAcceptedShapes() {
+        if (this.options.isGeneric || this.options.isGeometryCollection) {
+            return ['marker', 'line', 'polygon', 'rectangle'];
+        }
+        if (this.options.isPoint || this.options.isMultiPoint) return ['marker'];
+        if (this.options.isLineString || this.options.isMultiLineString) return ['line'];
+        if (this.options.isPolygon || this.options.isMultiPolygon) return ['polygon', 'rectangle'];
+        return ['marker', 'line', 'polygon', 'rectangle'];
+    }
+
+    /**
+     * Vérifie si une shape Geoman correspond au type de géométrie de ce champ.
+     * @param {string} shape - Le nom de la shape Geoman (marker, line, polygon, rectangle)
+     * @return {boolean}
+     * @private
+     */
+    _isShapeForThisField(shape) {
+        return this._getAcceptedShapes().includes(shape);
+    }
+
+    /**
+     * Vérifie si ce champ est le champ actif dans le DrawControlManager.
+     * Utilisé pour les événements de dessin (create, draw) pour router vers le bon champ.
+     * @return {boolean}
+     * @private
+     */
+    _isActiveField() {
+        if (!this.drawManager) return true;
+        const activeFieldId = this.drawManager.getActiveFieldId();
+        // Si pas de champ actif défini (mode simple sans multi-geom), accepter
+        if (!activeFieldId) return true;
+        return activeFieldId === this.fieldId;
+    }
+
+    /**
+     * Vérifie si une feature éditée/déplacée/supprimée appartient à ce champ
+     * en regardant si son ID est dans gmEvents.
+     * @param {Object} event - L'événement Geoman
+     * @return {boolean}
+     * @private
+     */
+    _isFeatureOwnedByThisField(event) {
+        const featureId = event?.feature?.id;
+        if (!featureId) return false;
+        return this.gmEvents.some(e => e.id === featureId);
+    }
+
+    /**
      * Configurer les événements Geoman pour la création, l'édition et le suivi en direct des géométries
      * @private
      */
@@ -862,9 +925,15 @@ class MaplibreGeometryField {
                 return;
             }
 
+            // Configurer le listener de fin de dessin pour les boutons personnalisés
+            this.drawManager.setupDrawEndListener();
+
             // Événement de début de dessin
             this.map.on('gm:globaldrawmodetoggled', (event) => {
-                console.log('MaplibreGeometryField: gm:globaldrawmodetoggled', event);
+                // Filtrer : ne réagir qu'aux shapes qui correspondent à ce champ ET vérifier le champ actif
+                if (!this._isShapeForThisField(event.shape)) return;
+                if (!this._isActiveField()) return;
+                console.log('MaplibreGeometryField: gm:globaldrawmodetoggled', this.fieldId, event);
                 try {
                     if (event.enabled) {
                         const geoman = this.drawManager.getGeoman();
@@ -937,6 +1006,8 @@ class MaplibreGeometryField {
 
             // Événement pour le suivi en temps réel pendant le dessin
             this.map.on('_gm:draw', (event) => {
+                if (!this._isShapeForThisField(event.mode)) return;
+                if (!this._isActiveField()) return;
                 try {
                     if (event.mode === 'line' || event.mode === 'polygon' || event.mode === 'rectangle') {
                         this._handleLiveDrawing(event);
@@ -948,7 +1019,10 @@ class MaplibreGeometryField {
 
             // Événement pour la création de la géométrie
             this.map.on('gm:create', (event) => {
-                console.log('MaplibreGeometryField: gm:create', event);
+                // Filtrer : ne réagir qu'aux shapes qui correspondent à ce champ ET vérifier le champ actif
+                if (!this._isShapeForThisField(event.shape)) return;
+                if (!this._isActiveField()) return;
+                console.log('MaplibreGeometryField: gm:create', this.fieldId, event);
                 try {
                     // S'assurer que la feature a un ID avant de traiter
                     if (event.feature && !event.feature.id) {
@@ -1006,6 +1080,7 @@ class MaplibreGeometryField {
 
             // Événement pour la fin de l'édition
             this.map.on('gm:editend', (event) => {
+                if (!this._isFeatureOwnedByThisField(event)) return;
                 try {
                     this._processAndSaveGeometry(event);
                 } catch (error) {
@@ -1015,6 +1090,7 @@ class MaplibreGeometryField {
 
             // Événement de fin de déplacement
             this.map.on('gm:dragend', (event) => {
+                if (!this._isFeatureOwnedByThisField(event)) return;
                 try {
                     this._processAndSaveGeometry(event);
                 } catch (error) {
@@ -1024,6 +1100,7 @@ class MaplibreGeometryField {
 
             // Événement de suppression de la géométrie
             this.map.on('gm:remove', (event) => {
+                if (!this._isFeatureOwnedByThisField(event)) return;
                 try {
                     this._processAndSaveGeometry(event);
                 } catch (error) {

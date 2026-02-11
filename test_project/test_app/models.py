@@ -160,6 +160,25 @@ class HiddenModel(MapEntityMixin, models.Model):
         verbose_name_plural = _("Hidden Models")
 
 
+class MultiGeomModel(MapEntityMixin, models.Model):
+    """Model with three geometry fields sharing the same map"""
+
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
+    geom = models.LineStringField(null=True, default=None, srid=2154)
+    parking = models.PointField(null=True, default=None, srid=2154)
+    points = models.MultiPointField(null=True, default=None, srid=2154)
+
+    def __str__(self):
+        return self.name
+
+    def get_display_label(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Multi Geom Model")
+        verbose_name_plural = _("Multi Geom Models")
+
+
 class ComplexModel(MapEntityMixin, models.Model):
     public = models.BooleanField(default=False)
     geom = models.PointField(null=True, default=None)

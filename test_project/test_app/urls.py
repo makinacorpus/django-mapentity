@@ -5,6 +5,7 @@ from .models import (
     ComplexModel,
     DummyModel,
     HiddenModel,
+    MultiGeomModel,
     MushroomSpot,
     Road,
 )
@@ -22,3 +23,4 @@ urlpatterns += registry.register(Road)
 urlpatterns += registry.register(City)
 urlpatterns += registry.register(ComplexModel)
 urlpatterns += registry.register(HiddenModel, HiddenModelOptions)
+urlpatterns += registry.register(MultiGeomModel)

@@ -1,5 +1,5 @@
 {% load i18n static %}
-
+{% if not target_map %}
 <style>
     {% block map_css %}
     #{{ id_map }} {
@@ -15,11 +15,11 @@
 </style>
 
 {% block map %}
-{% if not target_map %}
-<div id="{{ id_map }}" class="maplibre-map"></div>
-{% endif %}
-{% endblock map %}
 
+<div id="{{ id_map }}" class="maplibre-map"></div>
+
+{% endblock map %}
+{% endif %}
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
         const fieldId = '{{ id }}';
@@ -27,10 +27,14 @@
             modifiable: '{{ modifiable|yesno:"true,false" }}',
             geomType: '{{ geom_type }}',
         };
+        {% if custom_icon %}
+        options.customIcon = `{{ custom_icon|safe }}`;
+        {% endif %}
 
         console.log('fieldId', fieldId);
         console.log('options', options);
         const targetMapId = '{{ target_map|default:"" }}';
+
         console.log('targetMapId', targetMapId);
         if (targetMapId) {
             // Se branche sur une carte existante définie par target_map
@@ -184,4 +188,4 @@
 </script>
 
 {% if display_raw %}<p>Geometry:</p>{% endif %}
-<textarea id="{{ id }}" class="required" cols="150" rows="10" name="{{ name }}">{{ serialized }}</textarea>
+<textarea id="{{ id }}" class="required" cols="150" rows="10" name="{{ name }}" style="display: none;">{{ serialized }}</textarea>

@@ -7,6 +7,7 @@ from .models import (
     ComplexModel,
     DummyModel,
     HiddenModel,
+    MultiGeomModel,
     MushroomSpot,
     Road,
 )
@@ -52,6 +53,18 @@ class MushroomSpotGeojsonSerializer(MapentityGeojsonModelSerializer):
     class Meta(MapentityGeojsonModelSerializer.Meta):
         fields = ["id", "name"]
         model = MushroomSpot
+
+
+class MultiGeomModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = MultiGeomModel
+
+
+class MultiGeomModelGeojsonSerializer(MapentityGeojsonModelSerializer):
+    class Meta(MapentityGeojsonModelSerializer.Meta):
+        fields = ["id", "name"]
+        model = MultiGeomModel
 
 
 class HiddenModelSerializer(serializers.ModelSerializer):

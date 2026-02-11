@@ -51,9 +51,6 @@ class MapWidget(BaseGeometryWidget):
                 "id_css": map_id_css,
                 "id_map": map_id_css + "_map",
                 "modifiable": self.modifiable,
-                "target_map": attrs.get(
-                    "target_map", getattr(self, "target_map", None)
-                ),
             }
         )
         return attrs

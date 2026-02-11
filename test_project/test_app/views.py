@@ -8,12 +8,14 @@ from .filters import (
     CityFilterSet,
     ComplexModelFilterSet,
     DummyModelFilterSet,
+    MultiGeomModelFilterSet,
     MushroomSpotFilterSet,
     RoadFilterSet,
 )
 from .forms import (
     CityForm,
     DummyModelForm,
+    MultiGeomForm,
     MushroomSpotForm,
     RoadForm,
 )
@@ -22,6 +24,7 @@ from .models import (
     ComplexModel,
     DummyModel,
     HiddenModel,
+    MultiGeomModel,
     MushroomSpot,
     Road,
 )
@@ -32,6 +35,8 @@ from .serializers import (
     DummySerializer,
     HiddenModelGeojsonSerializer,
     HiddenModelSerializer,
+    MultiGeomModelGeojsonSerializer,
+    MultiGeomModelSerializer,
     MushroomSpotGeojsonSerializer,
     MushroomSpotSerializer,
     RoadSerializer,
@@ -227,6 +232,69 @@ class ComplexModelViewSet(mapentity_views.MapEntityViewSet):
         if self.format_kwarg == "geojson":
             qs = qs.annotate(api_geom=Transform("geom", 4326))
         return qs
+
+
+class MultiGeomList(mapentity_views.MapEntityList):
+    model = MultiGeomModel
+    columns = ["id", "name"]
+    searchable_columns = ["id", "name"]
+    filterset_class = MultiGeomModelFilterSet
+
+
+class MultiGeomFormat(mapentity_views.MapEntityFormat):
+    model = MultiGeomModel
+    filterset_class = MultiGeomModelFilterSet
+
+
+class MultiGeomDocumentOdt(mapentity_views.MapEntityDocumentOdt):
+    model = MultiGeomModel
+
+
+class MultiGeomDocumentWeasyprint(mapentity_views.MapEntityDocumentWeasyprint):
+    model = MultiGeomModel
+
+
+class MultiGeomDetail(
+    mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail
+):
+    model = MultiGeomModel
+
+
+class MultiGeomCreate(mapentity_views.MapEntityCreate):
+    model = MultiGeomModel
+    form_class = MultiGeomForm
+
+
+class MultiGeomUpdate(mapentity_views.MapEntityUpdate):
+    model = MultiGeomModel
+    form_class = MultiGeomForm
+
+
+class MultiGeomDelete(mapentity_views.MapEntityDelete):
+    model = MultiGeomModel
+
+
+class MultiGeomDuplicate(mapentity_views.MapEntityDuplicate):
+    model = MultiGeomModel
+
+
+class MultiGeomViewSet(mapentity_views.MapEntityViewSet):
+    model = MultiGeomModel
+    serializer_class = MultiGeomModelSerializer
+    geojson_serializer_class = MultiGeomModelGeojsonSerializer
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    filterset_class = MultiGeomModelFilterSet
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        if self.format_kwarg == "geojson":
+            qs = qs.annotate(api_geom=Transform("geom", 4326))
+        return qs
+
+
+class MultiGeomFilter(mapentity_views.MapEntityFilter):
+    model = MultiGeomModel
+    filterset_class = MultiGeomModelFilterSet
 
 
 # HiddenModel views (menu=False)
