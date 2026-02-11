@@ -1,13 +1,17 @@
+import inspect
 import json
 import logging
 import os
+import re
 from datetime import datetime
+from importlib import import_module
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
@@ -654,6 +658,86 @@ class MapEntityDetail(ModelViewMixin, DetailView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
+    def _find_form_class(self):
+        """Find the MapEntityForm class for this model by scanning the app's views module."""
+        model = self.get_model()
+        try:
+            views_module_name = re.sub(r"models.*", "views", model.__module__)
+            views_module = import_module(views_module_name)
+        except (ImportError, AttributeError):
+            return None
+
+        for name, view in inspect.getmembers(views_module):
+            if inspect.isclass(view) and issubclass(view, MapEntityCreate):
+                try:
+                    view_model = view.model or (view.queryset and view.queryset.model)
+                except AttributeError:
+                    continue
+                if (
+                    view_model is model
+                    and hasattr(view, "form_class")
+                    and view.form_class
+                ):
+                    return view.form_class
+        return None
+
+    def _get_extra_geometries(self):
+        """
+        Extract secondary geometry fields (with custom_icon) from the form class.
+        Returns a list of dicts: [{"field": "parking", "custom_icon": "<svg...>", "geojson": {...}}, ...]
+        """
+        form_class = self._find_form_class()
+        if not form_class:
+            return []
+
+        # Get geomfields from form class
+        geomfields = getattr(form_class, "geomfields", None)
+        if not geomfields or len(geomfields) <= 1:
+            return []
+
+        # The primary geom field is the first one (or "geom")
+        primary_field = geomfields[0] if geomfields else "geom"
+
+        # Get custom_icon info from widget attrs in Meta.widgets
+        meta = getattr(form_class, "Meta", None)
+        widgets = getattr(meta, "widgets", {}) if meta else {}
+
+        extra_geoms = []
+        obj = self.object
+        for field_name in geomfields:
+            if field_name == primary_field:
+                continue
+
+            # Check if this field has a custom_icon widget
+            widget = widgets.get(field_name)
+            custom_icon = None
+            if widget and hasattr(widget, "attrs"):
+                custom_icon = widget.attrs.get("custom_icon")
+
+            # Get the geometry value from the object
+            geom_value = getattr(obj, field_name, None)
+            if geom_value is None:
+                continue
+
+            # Convert to GeoJSON in API_SRID (4326)
+            from ..settings import API_SRID
+
+            if isinstance(geom_value, GEOSGeometry):
+                geom_value.transform(API_SRID)
+                geojson = json.loads(geom_value.geojson)
+            else:
+                continue
+
+            extra_geoms.append(
+                {
+                    "field": field_name,
+                    "custom_icon": custom_icon or "",
+                    "geojson": geojson,
+                }
+            )
+
+        return extra_geoms
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         logentries_max = app_settings["ACTION_HISTORY_LENGTH"]
@@ -685,6 +769,15 @@ class MapEntityDetail(ModelViewMixin, DetailView):
             if "mapsize" in mapcontext:
                 context["mapwidth"] = int(mapcontext["mapsize"]["width"])
                 context["mapheight"] = int(mapcontext["mapsize"]["height"])
+
+        # Extra geometries for multi-geom models (secondary fields with custom_icon)
+        try:
+            extra_geometries = self._get_extra_geometries()
+        except Exception:
+            extra_geometries = []
+        context["extra_geometries_json"] = (
+            json.dumps(extra_geometries) if extra_geometries else ""
+        )
 
         return context
 

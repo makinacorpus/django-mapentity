@@ -159,7 +159,7 @@ class MaplibreDrawControlManager {
     _createCustomButtonsContainer() {
         const container = this.map.getContainer();
         // Chercher le conteneur de contrôles en haut à gauche (avec les contrôles Geoman d'édition/suppression)
-        let ctrlTopLeft = container.querySelector('.maplibregl-ctrl-top-left');
+        let ctrlTopLeft = container.querySelector('.geoman-controls');
         if (!ctrlTopLeft) {
             ctrlTopLeft = container;
         }

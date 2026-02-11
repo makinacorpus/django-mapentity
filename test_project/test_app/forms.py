@@ -52,6 +52,7 @@ class MultiGeomForm(MapEntityForm):
             "points": MapWidget(
                 attrs={
                     "target_map": "geom",
+                    "custom_icon": '<svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" stroke="black" stroke-width="1" fill="white" /><circle cx="10" cy="10" r="3" fill="black" /></svg>',
                 }
             ),
         }

@@ -4,5 +4,6 @@
      data-fitmaxzoom="{{ MAP_FIT_MAX_ZOOM }}"
      data-mapextent="{{ object|latlngbounds }}"
      data-readonly="{% if readonly %}readonly{% endif %}" data-feature-url="{{ object.get_layer_detail_url }}"
-     data-map-id="{{ mapname }}">
+     data-map-id="{{ mapname }}"
+     {% if extra_geometries_json %}data-extra-geometries="{{ extra_geometries_json }}"{% endif %}>
 </div>

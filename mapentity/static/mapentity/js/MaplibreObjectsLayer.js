@@ -381,6 +381,10 @@ class MaplibreObjectsLayer {
 
         if (foundTypes.has("LineString") || foundTypes.has("MultiLineString")) {
             layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor));
+            // En mode détail, ajouter des marqueurs vert (départ) et rouge (arrivée)
+            if (detailStatus) {
+                this._addLineEndpointMarkers(geojson);
+            }
         }
 
         if (foundTypes.has("Polygon") || foundTypes.has("MultiPolygon")) {
@@ -597,6 +601,58 @@ class MaplibreObjectsLayer {
             }
         });
         return layerId;
+    }
+
+    /**
+     * Ajoute des marqueurs DOM vert (départ) et rouge (arrivée) aux extrémités des lignes.
+     * Utilisé en mode détail uniquement.
+     * @param {Object} geojson - Données GeoJSON (Feature ou FeatureCollection)
+     * @private
+     */
+    _addLineEndpointMarkers(geojson) {
+        const features = geojson.type === "FeatureCollection" ? geojson.features : [geojson];
+
+        for (const feature of features) {
+            const geom = feature.geometry;
+            if (!geom) continue;
+
+            let startCoord = null;
+            let endCoord = null;
+
+            if (geom.type === "LineString" && geom.coordinates.length >= 2) {
+                startCoord = geom.coordinates[0];
+                endCoord = geom.coordinates[geom.coordinates.length - 1];
+            } else if (geom.type === "MultiLineString" && geom.coordinates.length > 0) {
+                const firstLine = geom.coordinates[0];
+                const lastLine = geom.coordinates[geom.coordinates.length - 1];
+                if (firstLine && firstLine.length > 0) startCoord = firstLine[0];
+                if (lastLine && lastLine.length > 0) endCoord = lastLine[lastLine.length - 1];
+            } else {
+                continue;
+            }
+
+            if (startCoord) this._createEndpointMarker(startCoord, '#28a745');
+            if (endCoord) this._createEndpointMarker(endCoord, '#dc3545');
+        }
+    }
+
+    /**
+     * Crée un marqueur image de carte standard (pin) à une position donnée.
+     * @param {Array} lngLat - Coordonnées [lng, lat]
+     * @param {string} color - Couleur CSS du marqueur
+     * @private
+     */
+    _createEndpointMarker(lngLat, color) {
+        const el = document.createElement('div');
+        el.innerHTML = '<svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 21.9 12.5 41 12.5 41S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="' + color + '" stroke="#fff" stroke-width="1.5"/>' +
+            '<circle cx="12.5" cy="12.5" r="5" fill="#fff"/>' +
+            '</svg>';
+        el.style.pointerEvents = 'none';
+
+        new maplibregl.Marker({ element: el, anchor: 'bottom' })
+            .setLngLat(lngLat)
+            .addTo(this._map);
     }
 
     /**

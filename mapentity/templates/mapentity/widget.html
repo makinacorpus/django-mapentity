@@ -30,6 +30,9 @@
         {% if custom_icon %}
         options.customIcon = `{{ custom_icon|safe }}`;
         {% endif %}
+        {% if field_label %}
+        options.fieldLabel = `{{ field_label|escapejs }}`;
+        {% endif %}
 
         console.log('fieldId', fieldId);
         console.log('options', options);

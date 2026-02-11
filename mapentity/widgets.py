@@ -25,7 +25,13 @@ class MapWidget(BaseGeometryWidget):
             if hasattr(value, "transform"):
                 value = value.clone()
                 value.transform(API_SRID)
-            return value.geojson if hasattr(value, "geojson") else ""
+            if hasattr(value, "geojson"):
+                return value.geojson
+            # When form is re-rendered after validation error, value is a raw
+            # GeoJSON string from POST data — return it as-is.
+            if isinstance(value, str):
+                return value
+            return ""
         return ""
 
     def _get_attrs(self, name, attrs=None):
@@ -53,6 +59,13 @@ class MapWidget(BaseGeometryWidget):
                 "modifiable": self.modifiable,
             }
         )
+        # Propager target_map et custom_icon depuis self.attrs vers le contexte du template
+        if self.attrs.get("target_map"):
+            attrs["target_map"] = self.attrs["target_map"]
+        if self.attrs.get("custom_icon"):
+            attrs["custom_icon"] = self.attrs["custom_icon"]
+        if self.attrs.get("field_label"):
+            attrs["field_label"] = self.attrs["field_label"]
         return attrs
 
     def get_context(self, name, value, attrs):

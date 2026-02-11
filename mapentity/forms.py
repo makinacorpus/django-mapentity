@@ -160,6 +160,13 @@ class MapEntityForm(TranslatedModelForm):
                             ):
                                 formfield.widget.modifiable = False
                         formfield.widget.attrs["geom_type"] = formfield.geom_type
+                    # Inject field verbose_name into MapWidget for tooltip display
+                    if isinstance(modelfield, GeometryField) and isinstance(
+                        formfield.widget, MapWidget
+                    ):
+                        formfield.widget.attrs.setdefault(
+                            "field_label", str(modelfield.verbose_name)
+                        )
                 except FieldDoesNotExist:
                     pass
 
