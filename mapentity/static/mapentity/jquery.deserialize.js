@@ -13,7 +13,7 @@
  * $("form").deserialize(string, {checkboxesAsBools: true});
 **/
 (function($) {
-    $.fn.deserialize = function(s, options) {
+    $.fn.deserialize = async function(s, options) {
       function optionallyTrigger(element,event) {
         if (options.noEvents) 
           return;
@@ -48,7 +48,30 @@
         } else if (type == 'checkbox') { 
           // see below
         } else if ($input.prop("tagName") == 'SELECT') {
-          $input.children("option[value=" + pair[1] + "]").prop("selected", true);
+            if($input.attr('data-autocomplete-light-url')){
+                const autocompleteUrl = $input.attr('data-autocomplete-light-url');
+                const url = new URL(autocompleteUrl, window.location.origin);
+                url.searchParams.set("id", pair[1]);
+
+                await $.ajax({
+                    type: 'GET',
+                    url: url.pathname + url.search,
+                }).then(function (data) {
+                    // create the option and append to Select2
+                    var option = new Option(data.text, data.id, true, true);
+                    $input.append(option).trigger('change');
+
+                    // manually trigger the `select2:select` event
+                    $input.trigger({
+                        type: 'select2:select',
+                        params: {
+                            data: data
+                        }
+                    });
+                });
+            } else {
+                $input.val(pair[1]).trigger('change');
+            }
         } else {
           var oldVal = $input.val();
           var newVal = pair[1];

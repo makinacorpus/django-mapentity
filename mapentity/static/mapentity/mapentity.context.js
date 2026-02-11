@@ -93,10 +93,9 @@ MapEntity.Context = new function() {
 
     };
 
-    self.restoreFilters = function (context, filter) {
+    self.restoreFilters = async function (context, filter) {
         var $filter = $(filter);
-        $filter.deserialize(context.filter);
-        $filter.find('select').trigger("chosen:updated").trigger("change");
+        await $filter.deserialize(context.filter);
     };
 
     self.restoreMapContext = function (context, objectsname, kwargs){
@@ -135,8 +134,8 @@ MapEntity.Context = new function() {
         }
 
         if (filter && context.filter) {
-            loadFilter(() => {
-                self.restoreFilters(context, filter);
+            loadFilter(async () => {
+                await self.restoreFilters(context, filter);
                 self.restoreMapContext(context, objectsname, kwargs);
             });
         } else {

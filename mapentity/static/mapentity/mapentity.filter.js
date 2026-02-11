@@ -95,15 +95,8 @@ MapEntity.TogglableFilter = L.Class.extend({
                     });
                     self.loaded_form = true;
 
-                    // Use chosen for multiple values
-                    $mainfilter.bind("reset", function() {
-                        setTimeout(function() {
-                            $mainfilter.find('select[multiple]').trigger('chosen:updated');
-                        }, 1);
-                    });
-
                     // Make sure filter-set class is added if a choice is selected.
-                    $mainfilter.find('select[multiple]').chosen().on('change', function (e) {
+                    $mainfilter.find('select[multiple]').on('change', function (e) {
                         var $target = $(e.target),
                             name = $target.attr('name'),
                             $container = $('div#id_' + name + '_chzn > ul');
@@ -115,9 +108,13 @@ MapEntity.TogglableFilter = L.Class.extend({
                     // Trigger event allowing to launch further processing
                     var context = $('body').data();
                     $(window).trigger('entity:view:filter', {modelname: context.modelname});
+                    // Force Select2 initialization on autocomplete fields
                     if(callback){
                         callback.apply();
                     }
+                    $('select').each(function() {
+                        $(this).select2({allowClear: true});
+                    });
                 })
                 .fail(xhr => console.error('Error:', xhr.status));
         }

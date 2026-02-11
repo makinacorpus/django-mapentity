@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
-        ("test_app", "0019_remove_geopoint_sector_and_more"),
+        ("test_app", "0020_remove_geopoint_sector_and_more"),
     ]
 
     operations = [
