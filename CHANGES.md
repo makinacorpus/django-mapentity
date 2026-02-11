@@ -1,12 +1,21 @@
 CHANGELOG
 =========
 
-8.16.2+dev (XXXX-XX-XX)
+8.17.0     (2026-02-11)
 -----------------------
 
-**Maintenance**
+**Breaking changes**
 
-- Change chosen to select2 library. Use dango-autocomplete-light to let users to customize static select or multiselect to API dynamic if required. (perfs issues)
+- Move from chozen js to django-autocomplete-light (with select2.js). Please if use custom code related to chozen, update it in your project.
+
+
+**Improvements**
+
+- Use dango-autocomplete-light to let users to customize static select or multiselect to API dynamic if required. (perfs issues)
+
+
+8.16.2     (2026-01-13)
+-----------------------
 
 **Improvements**
 
