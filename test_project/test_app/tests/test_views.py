@@ -1172,3 +1172,18 @@ class MapEntityDetailExtraGeometriesTest(TestCase):
         
         extra_geoms = view._get_extra_geometries()
         self.assertEqual(extra_geoms, [])
+
+
+    def test_find_form_class_handles_import_error(self):
+        """_find_form_class should return None on ImportError"""
+        # Create a mock model with a non-existent module
+        class FakeModel:
+            __module__ = "non_existent_module.models"
+        
+        from ..views import MultiGeomDetail
+        view = MultiGeomDetail()
+        view.object = self.obj
+        view.get_model = lambda: FakeModel
+        
+        form_class = view._find_form_class()
+        self.assertIsNone(form_class)

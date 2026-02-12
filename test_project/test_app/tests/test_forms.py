@@ -169,3 +169,12 @@ class MultiGeomFormTest(TestCase):
         # Check points field has field_label
         points_widget = form.fields["points"].widget
         self.assertIn("field_label", points_widget.attrs)
+
+    def test_geom_type_defaults_when_none(self):
+        """When widget has no geom_type, it should get it from field"""
+        from ..forms import MultiGeomForm
+        form = MultiGeomForm()
+        # Parking should have POINT type from the field
+        parking_widget = form.fields["parking"].widget
+        attrs = parking_widget._get_attrs("parking")
+        self.assertEqual(attrs["geom_type"], "POINT")
