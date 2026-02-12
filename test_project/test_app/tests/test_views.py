@@ -34,7 +34,7 @@ from ..views import (
     DummyModelFilter,
     RoadList,
 )
-from .factories import ComplexModelFactory, DummyModelFactory
+from .factories import ComplexModelFactory, DummyModelFactory, MultiGeomModelFactory
 
 fake = Faker("en_US")
 fake.add_provider(geo)
@@ -967,3 +967,103 @@ class MapScreenshotTest(TestCase):
         self.assertIn(
             "ERROR:mapentity.views.base:Print context is way too big", cm.output[0]
         )
+
+
+class MultiGeomModelTest(MapEntityTest):
+    """Tests for MultiGeomModel views and multi-geometry handling"""
+    userfactory = SuperUserFactory
+    model = None  # We'll set this in setUp
+    modelfactory = MultiGeomModelFactory
+
+    def setUp(self):
+        super().setUp()
+        from ..models import MultiGeomModel
+        self.model = MultiGeomModel
+        # Create a test object with multiple geometries
+        self.obj = MultiGeomModelFactory.create()
+
+    def test_detail_view_with_extra_geometries(self):
+        """Detail view should include extra_geometries_json in context"""
+        self.login()
+        url = reverse("test_app:multigeommodel_detail", args=[self.obj.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # Check that extra_geometries_json is in context
+        self.assertIn("extra_geometries_json", response.context)
+        extra_geoms_json = response.context["extra_geometries_json"]
+        self.assertIsInstance(extra_geoms_json, str)
+        # Parse and validate the JSON
+        import json
+        if extra_geoms_json:
+            extra_geoms = json.loads(extra_geoms_json)
+            self.assertIsInstance(extra_geoms, list)
+            # Should have parking and points (not geom, which is primary)
+            field_names = [g["field"] for g in extra_geoms]
+            self.assertIn("parking", field_names)
+            self.assertIn("points", field_names)
+            self.assertNotIn("geom", field_names)
+
+    def test_create_view_with_invalid_geometry(self):
+        """Create view should display error messages for invalid geometry fields"""
+        self.login()
+        url = reverse("test_app:multigeommodel_add")
+        # Submit invalid data for geom field
+        response = self.client.post(url, {
+            "name": "Test",
+            "geom": "INVALID_GEOM_DATA",
+        })
+        # Should re-render form with errors
+        self.assertEqual(response.status_code, 200)
+        # Check that error message is shown
+        messages_list = list(response.context["messages"])
+        self.assertTrue(any("Error in geometry field" in str(m) for m in messages_list))
+
+
+class MapEntityDetailExtraGeometriesTest(TestCase):
+    """Tests for _find_form_class and _get_extra_geometries methods"""
+    
+    def setUp(self):
+        from ..models import MultiGeomModel
+        from ..views import MultiGeomDetail
+        self.user = SuperUserFactory()
+        self.model = MultiGeomModel
+        self.view_class = MultiGeomDetail
+        # Create test object
+        self.obj = MultiGeomModelFactory.create()
+
+    def test_find_form_class(self):
+        """_find_form_class should find the MapEntityForm for the model"""
+        view = self.view_class()
+        view.object = self.obj
+        view.model = self.model
+        form_class = view._find_form_class()
+        self.assertIsNotNone(form_class)
+        from ..forms import MultiGeomForm
+        self.assertEqual(form_class, MultiGeomForm)
+
+    def test_get_extra_geometries(self):
+        """_get_extra_geometries should extract secondary geometry fields"""
+        view = self.view_class()
+        view.object = self.obj
+        view.model = self.model
+        extra_geoms = view._get_extra_geometries()
+        self.assertIsInstance(extra_geoms, list)
+        self.assertGreater(len(extra_geoms), 0)
+        # Check structure
+        for geom in extra_geoms:
+            self.assertIn("field", geom)
+            self.assertIn("custom_icon", geom)
+            self.assertIn("geojson", geom)
+        # Verify field names (parking and points, not geom)
+        field_names = [g["field"] for g in extra_geoms]
+        self.assertNotIn("geom", field_names)
+        
+    def test_get_extra_geometries_with_none_values(self):
+        """_get_extra_geometries should skip None geometry values"""
+        # Create object with only primary geometry
+        obj = MultiGeomModelFactory.create(parking=None, points=None)
+        view = self.view_class()
+        view.object = obj
+        view.model = self.model
+        extra_geoms = view._get_extra_geometries()
+        self.assertEqual(len(extra_geoms), 0)

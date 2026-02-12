@@ -144,3 +144,28 @@ class MultiUpdateFilterTest(TestCase):
         self.assertEqual(helper.form_method, "post")
         self.assertEqual(helper.inputs[0].name, "cancel")
         self.assertEqual(helper.inputs[1].name, "save")
+
+
+class MultiGeomFormTest(TestCase):
+    """Tests for MultiGeomForm and geom_type handling"""
+
+    def test_geom_type_not_overridden_by_setdefault(self):
+        """geom_type passed to MapWidget constructor should not be overridden by setdefault in forms"""
+        from ..forms import MultiGeomForm
+        form = MultiGeomForm()
+        # Check that geom field widget has LINESTRING type (set in form)
+        geom_widget = form.fields["geom"].widget
+        # The widget should have geom_type set correctly
+        attrs = geom_widget._get_attrs("geom")
+        self.assertEqual(attrs["geom_type"], "LINESTRING")
+
+    def test_secondary_geometry_fields_have_field_labels(self):
+        """Secondary geometry fields should have field_label set"""
+        from ..forms import MultiGeomForm
+        form = MultiGeomForm()
+        # Check parking field has field_label
+        parking_widget = form.fields["parking"].widget
+        self.assertIn("field_label", parking_widget.attrs)
+        # Check points field has field_label
+        points_widget = form.fields["points"].widget
+        self.assertIn("field_label", points_widget.attrs)

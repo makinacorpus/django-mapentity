@@ -5,6 +5,7 @@ __pycache__
 /.idea/
 /.vscode/
 /env/
+/venv/
 /build/
 /dist/
 /static/

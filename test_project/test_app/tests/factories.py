@@ -8,6 +8,7 @@ from test_project.test_app.models import (
     ComplexModel,
     DummyModel,
     ManikinModel,
+    MultiGeomModel,
     Road,
     Sector,
     Tag,
@@ -123,3 +124,28 @@ class ComplexModelFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = ComplexModel
+
+
+class MultiGeomModelFactory(factory.django.DjangoModelFactory):
+    name = factory.Sequence(lambda n: f"Multi Geom {n}")
+
+    @factory.lazy_attribute
+    def geom(self):
+        # Create a LineString in SRID 2154 (French Lambert 93)
+        points = [(700000, 6600000), (700100, 6600100)]
+        return LineString(points, srid=2154)
+
+    @factory.lazy_attribute
+    def parking(self):
+        # Optional Point field
+        return Point(700050, 6600050, srid=2154)
+
+    @factory.lazy_attribute
+    def points(self):
+        # Optional MultiPoint field
+        from django.contrib.gis.geos import MultiPoint
+        points = [Point(700020, 6600020, srid=2154), Point(700080, 6600080, srid=2154)]
+        return MultiPoint(*points, srid=2154)
+
+    class Meta:
+        model = MultiGeomModel

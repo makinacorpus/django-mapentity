@@ -62,6 +62,13 @@ class MapWidgetTestCase(TestCase):
 
         self.assertEqual(widget.serialize(FakeGeom()), "")
 
+    def test_serialize_string_value(self):
+        """serialize returns string value as-is (form re-render after validation error)"""
+        widget = MapWidget()
+        geojson_str = '{"type": "Point", "coordinates": [2.0, 48.0]}'
+        result = widget.serialize(geojson_str)
+        self.assertEqual(result, geojson_str)
+
     def test_get_attrs_default(self):
         widget = MapWidget()
         attrs = widget._get_attrs("myfield")
@@ -99,6 +106,25 @@ class MapWidgetTestCase(TestCase):
         widget = MapWidget()
         attrs = widget._get_attrs("myfield", {"target_map": "other_map"})
         self.assertEqual(attrs["target_map"], "other_map")
+
+    def test_get_attrs_with_target_map_from_widget_attrs(self):
+        """target_map from widget.attrs should propagate to template context"""
+        widget = MapWidget(attrs={"target_map": "main_map"})
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["target_map"], "main_map")
+
+    def test_get_attrs_with_custom_icon(self):
+        """custom_icon from widget.attrs should propagate to template context"""
+        custom_icon = '<svg>...</svg>'
+        widget = MapWidget(attrs={"custom_icon": custom_icon})
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["custom_icon"], custom_icon)
+
+    def test_get_attrs_with_field_label(self):
+        """field_label from widget.attrs should propagate to template context"""
+        widget = MapWidget(attrs={"field_label": "Parking Location"})
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["field_label"], "Parking Location")
 
     def test_get_context_with_value(self):
         widget = MapWidget()
