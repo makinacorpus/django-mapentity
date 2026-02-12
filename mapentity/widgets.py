@@ -43,11 +43,6 @@ class MapWidget(BaseGeometryWidget):
             "geom_type", getattr(self, "geom_type", "GEOMETRY")
         )
         attrs = attrs or {}
-        # Normalisation du type de géométrie
-        if self.geom_type == "GEOMETRY":
-            attrs["geom_type"] = "Geometry"
-        else:
-            attrs["geom_type"] = self.geom_type
         # Génération des IDs pour les éléments HTML et JavaScript
         map_id_css = slugify(attrs.get("id", name))
         map_id = map_id_css.replace("-", "_")

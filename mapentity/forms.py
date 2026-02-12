@@ -159,11 +159,15 @@ class MapEntityForm(TranslatedModelForm):
                                 )
                             ):
                                 formfield.widget.modifiable = False
-                        formfield.widget.attrs["geom_type"] = formfield.geom_type
-                    # Inject field verbose_name into MapWidget for tooltip display
+                    # For all MapWidgets: inject geom_type and field_label
                     if isinstance(modelfield, GeometryField) and isinstance(
                         formfield.widget, MapWidget
                     ):
+                        # BaseGeometryWidget sets geom_type="GEOMETRY" by default in attrs.
+                        # Only override if it's still the default (not explicitly set by user).
+                        current_geom_type = formfield.widget.attrs.get("geom_type")
+                        if current_geom_type is None or current_geom_type == "GEOMETRY":
+                            formfield.widget.attrs["geom_type"] = formfield.geom_type
                         formfield.widget.attrs.setdefault(
                             "field_label", str(modelfield.verbose_name)
                         )

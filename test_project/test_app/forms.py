@@ -1,3 +1,5 @@
+from django.contrib.gis.forms import LineStringField
+
 from mapentity.forms import MapEntityForm
 from mapentity.widgets import MapWidget
 
@@ -37,6 +39,7 @@ class CityForm(MapEntityForm):
 
 
 class MultiGeomForm(MapEntityForm):
+    geom = LineStringField()
     geomfields = ["geom", "parking", "points"]
 
     class Meta:

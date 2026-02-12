@@ -164,7 +164,7 @@ class MultiGeomModel(MapEntityMixin, models.Model):
     """Model with three geometry fields sharing the same map"""
 
     name = models.CharField(max_length=100, verbose_name=_("Name"))
-    geom = models.LineStringField(null=True, default=None, srid=2154)
+    geom = models.GeometryField(null=True, default=None, srid=2154)
     parking = models.PointField(null=True, default=None, srid=2154)
     points = models.MultiPointField(null=True, default=None, srid=2154)
 
