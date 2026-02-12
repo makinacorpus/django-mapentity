@@ -14,10 +14,10 @@ describe('MultiLineStringModel - MultiLineString geometry', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
         // Should have line button for MultiLineString
-        cy.get('#id_draw_line').should('exist')
+        cy.get('#id_geom_draw_line').should('exist')
         // Should NOT have marker or polygon buttons
-        cy.get('#id_draw_marker').should('not.exist')
-        cy.get('#id_draw_polygon').should('not.exist')
+        cy.get('#id_geom_draw_marker').should('not.exist')
+        cy.get('#id_geom_draw_polygon').should('not.exist')
     });
 
     it('should create entity with single line', () => {
@@ -28,7 +28,7 @@ describe('MultiLineStringModel - MultiLineString geometry', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
         // Draw line
-        cy.get('#id_draw_line').click()
+        cy.get('#id_geom_draw_line').click()
         cy.get('.maplibregl-canvas').click(100, 100)
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
@@ -56,7 +56,7 @@ describe('MultiLineStringModel - MultiLineString geometry', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
         // Draw first line
-        cy.get('#id_draw_line').click()
+        cy.get('#id_geom_draw_line').click()
         cy.get('.maplibregl-canvas').click(100, 100)
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
@@ -99,7 +99,7 @@ describe('MultiLineStringModel - Edit geometry', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
         // Draw a line
-        cy.get('#id_draw_line').click();
+        cy.get('#id_geom_draw_line').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
@@ -132,10 +132,10 @@ describe('MultiLineStringModel - Edit geometry', () => {
         cy.assertGeomanFeaturesCount(1);
 
         // Verify draw line button is visible in edit mode
-        cy.get('#id_draw_line', {timeout: 10000}).should('be.visible');
+        cy.get('#id_geom_draw_line', {timeout: 10000}).should('be.visible');
 
         // Click the draw button to add more lines
-        cy.get('#id_draw_line').click();
+        cy.get('#id_geom_draw_line').click();
 
         // Draw a new line
         cy.get('.maplibregl-canvas').click(250, 100);

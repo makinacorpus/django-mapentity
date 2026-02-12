@@ -21,7 +21,7 @@ describe('Detail Page - Popup and Tooltip behavior for current object', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(400, 300);
 
         cy.assertGeomFieldValue((data) => {
@@ -120,7 +120,7 @@ describe('Detail Page - Popup and Tooltip for other objects', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity1Name);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(200, 200);
 
         cy.assertGeomFieldValue((data) => {
@@ -145,7 +145,7 @@ describe('Detail Page - Popup and Tooltip for other objects', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity2Name);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(500, 400);
 
         cy.assertGeomFieldValue((data) => {
@@ -240,7 +240,7 @@ describe('Detail Page - LineString popup behavior', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity1Name);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_line').click();
+        cy.get('#id_geom_draw_line').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-canvas').click(300, 150, {force: true});
@@ -268,7 +268,7 @@ describe('Detail Page - LineString popup behavior', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity2Name);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_line').click();
+        cy.get('#id_geom_draw_line').click();
         cy.get('.maplibregl-canvas').click(400, 300);
         cy.get('.maplibregl-canvas').click(450, 350, {force: true});
         cy.get('.maplibregl-canvas').click(500, 300, {force: true});
@@ -397,7 +397,7 @@ describe('Detail Page - Polygon popup behavior', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity1Name);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_polygon').click();
+        cy.get('#id_geom_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(200, 100, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
@@ -425,7 +425,7 @@ describe('Detail Page - Polygon popup behavior', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entity2Name);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_polygon').click();
+        cy.get('#id_geom_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(400, 300);
         cy.get('.maplibregl-canvas').click(500, 300, {force: true});
         cy.get('.maplibregl-canvas').click(500, 400, {force: true});

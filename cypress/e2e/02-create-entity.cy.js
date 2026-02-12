@@ -16,7 +16,7 @@ describe('DummyModel Create', () => {
     })
 
     it('should have draw marker button', () => {
-        cy.get('#id_draw_marker', {timeout: 10000}).should('exist')
+        cy.get('#id_geom_draw_marker', {timeout: 10000}).should('exist')
     });
 
     it('should show validation error when submitting without geometry', () => {
@@ -50,7 +50,7 @@ describe('DummyModel Create', () => {
         // Wait for Geoman to initialize
         cy.waitForGeoman()
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
 
         cy.get('.maplibregl-canvas').click(400, 300);
 

@@ -13,10 +13,10 @@ describe('SinglePointModel - Point geometry', () => {
         cy.get('form', {timeout: 10000}).should('exist');
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
         // Should have marker button for Point
-        cy.get('#id_draw_marker').should('exist');
+        cy.get('#id_geom_draw_marker').should('exist');
         // Should NOT have line or polygon buttons
-        cy.get('#id_draw_line').should('not.exist');
-        cy.get('#id_draw_polygon').should('not.exist');
+        cy.get('#id_geom_draw_line').should('not.exist');
+        cy.get('#id_geom_draw_polygon').should('not.exist');
     });
 
     it('should create entity with Point geometry', {retries: 2}, () => {
@@ -27,7 +27,7 @@ describe('SinglePointModel - Point geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName)
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
-        cy.get('#id_draw_marker').click()
+        cy.get('#id_geom_draw_marker').click()
         cy.get('.maplibregl-canvas').click(400, 300)
 
         cy.assertGeomFieldValue((data) => {
@@ -45,9 +45,9 @@ describe('SinglePointModel - Point geometry', () => {
         cy.visit('/singlepointmodel/add/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.get('#id_draw_marker').should('exist');
+        cy.get('#id_geom_draw_marker').should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(100, 100, {force: true});
         cy.assertGeomanFeaturesCount(1);
         cy.assertGeomFieldValue((data, val) => {
@@ -60,7 +60,7 @@ describe('SinglePointModel - Point geometry', () => {
         });
 
         // Try to draw a second point
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
         cy.assertGeomFieldValue((data, val) => {
             // check number of arrays in data.coordinates
@@ -91,7 +91,7 @@ describe('SinglePointModel - Edit geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(400, 300);
 
         cy.assertGeomFieldValue((data) => {
@@ -121,10 +121,10 @@ describe('SinglePointModel - Edit geometry', () => {
         cy.assertGeomanFeaturesCount(1);
 
         // Verify draw marker button is visible in edit mode
-        cy.get('#id_draw_marker', {timeout: 10000}).should('be.visible');
+        cy.get('#id_geom_draw_marker', {timeout: 10000}).should('be.visible');
 
         // Click the draw button to replace the existing geometry
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
 
         // Draw a new point at a different location
         cy.get('.maplibregl-canvas').click(200, 200);

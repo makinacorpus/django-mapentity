@@ -311,17 +311,55 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (geom.type === 'LineString' && geom.coordinates.length >= 2) {
                     startCoord = geom.coordinates[0];
                     endCoord = geom.coordinates[geom.coordinates.length - 1];
-                } else if (geom.type === 'MultiLineString' && geom.coordinates.length > 0) {
+                } /* else if (geom.type === 'MultiLineString' && geom.coordinates.length > 0) {
                     const firstLine = geom.coordinates[0];
                     const lastLine = geom.coordinates[geom.coordinates.length - 1];
                     if (firstLine && firstLine.length > 0) startCoord = firstLine[0];
                     if (lastLine && lastLine.length > 0) endCoord = lastLine[lastLine.length - 1];
                 } else {
                     return;
-                }
+                }*/
 
                 if (startCoord) _createEndpointMarker(mapInstance, startCoord, '#28a745');
                 if (endCoord) _createEndpointMarker(mapInstance, endCoord, '#dc3545');
+
+                // style line with repeted arrows
+                if (geom.type === 'LineString') {
+                    const sourceId = 'detail-line-arrows-' + pkVal;
+                    mapInstance.addSource(sourceId, {
+                        type: 'geojson',
+                        data: { type: 'Feature', geometry: geom, properties: {} }
+                    });
+                    // load arrow-icon if not already loaded
+                    if (!mapInstance.hasImage('arrow-icon')) {
+                        const img = new Image(20, 20);
+                        img.onload = function() {
+                            mapInstance.addImage('arrow-icon', img);
+                        };
+
+                        img.src = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><polygon points="20,10 5,0 5,7 0,7 0,13 5,13 5,20" fill="#666"/></svg>');
+                    }
+                    const {arrowSize, arrowColor, arrowOpacity, arrowSpacing } = window.SETTINGS.map.styles.detail;
+
+                    mapInstance.addLayer({
+                        id: 'detail-line-arrows-' + pkVal,
+                        type: 'symbol',
+                        source: sourceId,
+                        layout: {
+                            'symbol-placement': 'line',
+                            'symbol-spacing': arrowSpacing,
+                            'icon-image': 'arrow-icon', // Assurez-vous d'avoir une icône d'arrière-plan en forme de flèche dans votre style
+                            'icon-size': arrowSize,
+                            'icon-rotate': ['get', 'bearing'], // Rotation basée sur la direction de la ligne
+                        },
+                        paint: {
+                            'icon-color': arrowColor,
+                            'icon-opacity': arrowOpacity,
+                        }
+                    });
+                }
+
+
                 return;
             }
         }

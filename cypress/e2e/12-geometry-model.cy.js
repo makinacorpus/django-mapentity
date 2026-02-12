@@ -14,9 +14,9 @@ describe('GeometryModel - Generic Geometry', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
         // Should have all draw buttons for generic Geometry
-        cy.get('#id_draw_marker').should('exist')
-        cy.get('#id_draw_line').should('exist')
-        cy.get('#id_draw_polygon').should('exist')
+        cy.get('#id_geom_draw_marker').should('exist')
+        cy.get('#id_geom_draw_line').should('exist')
+        cy.get('#id_geom_draw_polygon').should('exist')
     })
 
     it('should create entity with Point geometry', {retries: 2}, () => {
@@ -26,7 +26,7 @@ describe('GeometryModel - Generic Geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName)
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
-        cy.get('#id_draw_marker').click()
+        cy.get('#id_geom_draw_marker').click()
         cy.get('.maplibregl-canvas').click(400, 300)
 
         cy.assertGeomFieldValue((data) => {
@@ -47,7 +47,7 @@ describe('GeometryModel - Generic Geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName)
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
-        cy.get('#id_draw_line').click();
+        cy.get('#id_geom_draw_line').click();
         // Draw a line with multiple points
         cy.get('.maplibregl-canvas').click(100, 100)
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
@@ -76,7 +76,7 @@ describe('GeometryModel - Generic Geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName)
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
-        cy.get('#id_draw_polygon').click()
+        cy.get('#id_geom_draw_polygon').click()
         // Draw a polygon (triangle)
         cy.get('.maplibregl-canvas').click(100, 100)
         cy.get('.maplibregl-canvas').click(100, 150, {force: true});
@@ -114,7 +114,7 @@ describe('GeometryModel - Edit geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(400, 300);
 
         cy.assertGeomFieldValue((data) => {
@@ -144,12 +144,12 @@ describe('GeometryModel - Edit geometry', () => {
         cy.assertGeomanFeaturesCount(1);
 
         // Verify all draw buttons are visible in edit mode
-        cy.get('#id_draw_marker', {timeout: 10000}).should('be.visible');
-        cy.get('#id_draw_line').should('be.visible');
-        cy.get('#id_draw_polygon').should('be.visible');
+        cy.get('#id_geom_draw_marker', {timeout: 10000}).should('be.visible');
+        cy.get('#id_geom_draw_line').should('be.visible');
+        cy.get('#id_geom_draw_polygon').should('be.visible');
 
         // Click the draw line button to replace the existing Point with a LineString
-        cy.get('#id_draw_line').click();
+        cy.get('#id_geom_draw_line').click();
 
         // Draw a new line
         cy.get('.maplibregl-canvas').click(100, 100);
@@ -186,7 +186,7 @@ describe('GeometryModel - Edit geometry', () => {
         cy.assertGeomanFeaturesCount(1);
 
         // Click the draw polygon button to replace the existing geometry
-        cy.get('#id_draw_polygon').click();
+        cy.get('#id_geom_draw_polygon').click();
 
         // Draw a new polygon
         cy.get('.maplibregl-canvas').click(100, 100);

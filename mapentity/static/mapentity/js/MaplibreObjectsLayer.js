@@ -364,6 +364,7 @@ class MaplibreObjectsLayer {
         const fillOpacity = style.fillOpacity ?? 0.7;
         const strokeOpacity = style.opacity ?? 1.0;
         const strokeColor = style.color;
+        console.log(style.weight);
         const strokeWidth = style.weight ?? 5;
 
         // Detail styles for 'selected' state
@@ -611,7 +612,7 @@ class MaplibreObjectsLayer {
      */
     _addLineEndpointMarkers(geojson) {
         const features = geojson.type === "FeatureCollection" ? geojson.features : [geojson];
-
+        console.log(geojson);
         for (const feature of features) {
             const geom = feature.geometry;
             if (!geom) continue;
@@ -631,8 +632,8 @@ class MaplibreObjectsLayer {
                 continue;
             }
 
-            if (startCoord) this._createEndpointMarker(startCoord, '#28a745');
-            if (endCoord) this._createEndpointMarker(endCoord, '#dc3545');
+            //if (startCoord) this._createEndpointMarker(startCoord, '#28a745');
+            //if (endCoord) this._createEndpointMarker(endCoord, '#dc3545');
         }
     }
 

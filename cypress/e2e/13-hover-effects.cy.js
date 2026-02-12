@@ -21,7 +21,7 @@ describe('Hover Effects - Point geometry (SinglePointModel)', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(400, 300);
 
         cy.assertGeomFieldValue((data) => {
@@ -137,7 +137,7 @@ describe('Hover Effects - LineString geometry (SingleLineStringModel)', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_line').click();
+        cy.get('#id_geom_draw_line').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
         cy.get('.maplibregl-canvas').click(300, 150, {force: true});
@@ -227,7 +227,7 @@ describe('Hover Effects - Polygon geometry (SinglePolygonModel)', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_polygon').click();
+        cy.get('#id_geom_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(100, 200, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
@@ -341,7 +341,7 @@ describe('Hover Effects - Popup on click', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(400, 300);
 
         cy.assertGeomFieldValue((data) => {
@@ -410,9 +410,9 @@ describe('Hover Effects - MultiPoint geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(100, 100);
-        // Draw second point (no need to click #id_draw_marker again)
+        // Draw second point (no need to click #id_geom_draw_marker again)
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
 
         cy.assertGeomFieldValue((data) => {
@@ -458,12 +458,12 @@ describe('Hover Effects - MultiLineString geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_line').click();
+        cy.get('#id_geom_draw_line').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
         cy.get('.maplibregl-marker').last().click({force: true});
 
-        // Draw second line (no need to click #id_draw_line again)
+        // Draw second line (no need to click #id_geom_draw_line again)
         cy.get('.maplibregl-canvas').click(200, 100, {force: true});
         cy.get('.maplibregl-canvas').click(250, 150, {force: true});
         cy.get('.maplibregl-marker').last().click({force: true});
@@ -511,7 +511,7 @@ describe('Hover Effects - MultiPolygon geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_polygon').click();
+        cy.get('#id_geom_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(100, 150, {force: true});
         cy.get('.maplibregl-canvas').click(150, 150, {force: true});
@@ -563,10 +563,10 @@ describe('Hover Effects - GeometryCollection', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(100, 100);
 
-        cy.get('#id_draw_line').click();
+        cy.get('#id_geom_draw_line').click();
         cy.get('.maplibregl-canvas').click(200, 100, {force: true});
         cy.get('.maplibregl-canvas').click(250, 150, {force: true});
         cy.get('.maplibregl-marker').last().click({force: true});

@@ -182,11 +182,17 @@ MAPENTITY_CONFIG = {
             "color": "green",
         },
         "road": {
-            "weight": 2,
+            "weight": 6,
             "opacity": 1,
             "color": "red",
             "arrowColor": "#FF5E00",
             "arrowSize": 8,
+        },
+        "singlelinestringmodel": {
+            "weight": 10,
+            "opacity": 1,
+            "color": "yellow",
+            "arrowColor": "#FF5E00",
         },
     },
 }

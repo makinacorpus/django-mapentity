@@ -14,10 +14,10 @@ describe('SinglePolygonModel - Polygon geometry', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
         // Should have polygon button for Polygon
-        cy.get('#id_draw_polygon').should('exist')
+        cy.get('#id_geom_draw_polygon').should('exist')
         // Should NOT have marker or line buttons
-        cy.get('#id_draw_marker').should('not.exist')
-        cy.get('#id_draw_line').should('not.exist')
+        cy.get('#id_geom_draw_marker').should('not.exist')
+        cy.get('#id_geom_draw_line').should('not.exist')
     })
 
     it('should create entity with single Polygon geometry', {retries: 2}, () => {
@@ -27,7 +27,7 @@ describe('SinglePolygonModel - Polygon geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName)
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
-        cy.get('#id_draw_polygon').click()
+        cy.get('#id_geom_draw_polygon').click()
         // Draw a polygon (triangle)
         cy.get('.maplibregl-canvas').click(100, 100)
         cy.get('.maplibregl-canvas').click(100, 150, {force: true});
@@ -53,9 +53,9 @@ describe('SinglePolygonModel - Polygon geometry', () => {
         cy.visit('/singlepolygonmodel/add/');
 
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.get('#id_draw_polygon').should('exist');
+        cy.get('#id_geom_draw_polygon').should('exist');
         // Draw first polygon
-        cy.get('#id_draw_polygon').click();
+        cy.get('#id_geom_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(100, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
@@ -65,7 +65,7 @@ describe('SinglePolygonModel - Polygon geometry', () => {
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(1000);
         // Attempt to draw second polygon
-        cy.get('#id_draw_polygon').click();
+        cy.get('#id_geom_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(100, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
@@ -98,7 +98,7 @@ describe('SinglePolygonModel - Edit geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
-        cy.get('#id_draw_polygon').click();
+        cy.get('#id_geom_draw_polygon').click();
         cy.get('.maplibregl-canvas').click(100, 100);
         cy.get('.maplibregl-canvas').click(100, 150, {force: true});
         cy.get('.maplibregl-canvas').click(200, 200, {force: true});
@@ -131,10 +131,10 @@ describe('SinglePolygonModel - Edit geometry', () => {
         cy.assertGeomanFeaturesCount(1);
 
         // Verify draw polygon button is visible in edit mode
-        cy.get('#id_draw_polygon', {timeout: 10000}).should('be.visible');
+        cy.get('#id_geom_draw_polygon', {timeout: 10000}).should('be.visible');
 
         // Click the draw button to replace the existing geometry
-        cy.get('#id_draw_polygon').click();
+        cy.get('#id_geom_draw_polygon').click();
 
         // Draw a new polygon at a different location
         cy.get('.maplibregl-canvas').click(250, 100);

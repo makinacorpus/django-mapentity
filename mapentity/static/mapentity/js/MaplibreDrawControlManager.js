@@ -302,8 +302,8 @@ class MaplibreDrawControlManager {
             // If multiple fields share the same shape, append fieldId to avoid duplicates
             const baseDrawId = 'id_draw_' + shape;
             if (!document.getElementById(baseDrawId)) {
-                btn.id = baseDrawId;
-            } else {
+           /*     btn.id = baseDrawId;
+            } else {*/
                 btn.id = fieldId + '_draw_' + shape;
             }
             btn.title = opts.fieldLabel
