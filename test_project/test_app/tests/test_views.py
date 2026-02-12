@@ -1095,6 +1095,35 @@ class MapEntityDetailExtraGeometriesTest(TestCase):
         except Exception as e:
             self.fail(f"_get_extra_geometries raised exception: {e}")
 
+    def test_get_extra_geometries_handles_invalid_geometry_data(self):
+        """_get_extra_geometries should skip fields with invalid geometry data"""
+        view = self.view_class()
+        # Create an object with a mocked field that returns invalid data
+        view.object = self.obj
+        view.model = self.model
+        
+        # Mock getattr to return a non-GEOSGeometry object for one field
+        original_getattr = getattr
+        def mock_getattr(obj, name, default=None):
+            if name == "points":
+                # Return something that's not a GEOSGeometry
+                return "INVALID_GEOM"
+            return original_getattr(obj, name, default)
+        
+        import builtins
+        original_builtin_getattr = builtins.getattr
+        builtins.getattr = mock_getattr
+        
+        try:
+            extra_geoms = view._get_extra_geometries()
+            # Should still work, just skip the invalid field
+            self.assertIsInstance(extra_geoms, list)
+            # points field should be skipped
+            field_names = [g["field"] for g in extra_geoms]
+            self.assertNotIn("points", field_names)
+        finally:
+            builtins.getattr = original_builtin_getattr
+
     def test_detail_context_data_with_exception_in_extra_geometries(self):
         """get_context_data should handle exceptions in _get_extra_geometries"""
         from django.test import RequestFactory
