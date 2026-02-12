@@ -17,6 +17,12 @@ class MapWidget(BaseGeometryWidget):
     display_raw = False
     modifiable = True
 
+    def __init__(self, attrs=None, geom_type=None):
+        if geom_type:
+            attrs = attrs or {}
+            attrs["geom_type"] = geom_type
+        super().__init__(attrs=attrs)
+
     def serialize(self, value):
         """
         Sérialise la valeur géométrique en GeoJSON.
@@ -52,6 +58,7 @@ class MapWidget(BaseGeometryWidget):
                 "id_css": map_id_css,
                 "id_map": map_id_css + "_map",
                 "modifiable": self.modifiable,
+                "geom_type": self.geom_type,
             }
         )
         # Propager target_map et custom_icon depuis self.attrs vers le contexte du template

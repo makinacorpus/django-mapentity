@@ -68,7 +68,7 @@ class MapWidgetTestCase(TestCase):
         self.assertEqual(attrs["id_map"], "myfield_map")
         self.assertTrue(attrs["modifiable"])
         self.assertNotIn("target_map", attrs)
-        self.assertEqual(attrs["geom_type"], "Geometry")
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
 
     def test_get_attrs_with_geom_type(self):
         widget = MapWidget(attrs={"geom_type": "POINT"})
