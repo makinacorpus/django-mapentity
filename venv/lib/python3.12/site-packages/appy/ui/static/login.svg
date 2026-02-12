@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0"
+ viewBox="0 0 30 30" style="enable-background:new 0 0 30 30" xml:space="preserve">
+<defs id="defs19"><defs id="defs5"><rect id="I1" x="0.1" y="0" width="28.5" height="30"/></defs>
+<clipPath id="I2"><use xlink:href="#I1" style="overflow:visible;" id="use7"/></clipPath>
+</defs>
+<style id="style2" type="text/css">
+.st0{clip-path:url(#I2);fill:none;stroke:|flashyColor|;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+.st1{clip-path:url(#I2);fill:|lightColor|}
+</style>
+<path transform="matrix(-1,0,0,1,30.020136,0)" clip-path="url(#I2)" id="path10"
+  class="st0" d="m 24,26.4 c -2.5,1.9 -5.6,3.1 -8.9,3.1 C 7.1,29.5 0.6,23 0.6,15 0.6,7 7.1,0.5 15.1,0.5 c 3,0 5.9,0.9 8.2,2.5"/>
+<path transform="translate(-14)" class="st1" clip-path="url(#I2)" id="path12"
+ d="m 28.6,14.6 c -0.1,0 -0.1,0 0,0 -0.1,0 -0.1,0 0,0 -0.1,-0.2 -0.1,-0.3 -0.2,-0.4 0,0 0,0 0,0 L 24.3,9.9 c -0.4,-0.4 -1.1,-0.4 -1.5,0 -0.4,0.4 -0.4,1.1 0,1.5 l 2.4,2.5 h -9.9 c -0.6,0 -1,0.5 -1,1.1 0,0.6 0.5,1.1 1,1.1 h 9.9 l -2.4,2.5 c -0.4,0.4 -0.4,1.1 0,1.5 0.2,0.2 0.5,0.3 0.7,0.3 0.3,0 0.5,-0.1 0.7,-0.3 l 4.1,-4.4 c 0.1,-0.1 0.1,-0.2 0.2,-0.3 0,0 0,-0.1 0,-0.1 0,-0.1 0,-0.2 0.1,-0.3 0,0 0,-0.1 0,-0.1 0,-0.1 0,-0.2 0,-0.3"/>
+</svg>

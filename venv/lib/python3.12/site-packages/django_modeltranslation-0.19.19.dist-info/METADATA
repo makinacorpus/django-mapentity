@@ -1,0 +1,77 @@
+Metadata-Version: 2.4
+Name: django-modeltranslation
+Version: 0.19.19
+Summary: Translates Django models using a registration approach.
+Project-URL: Homepage, https://github.com/deschler/django-modeltranslation
+Project-URL: Source, https://github.com/deschler/django-modeltranslation
+Project-URL: Documentation, https://django-modeltranslation.readthedocs.org/en/latest
+Project-URL: Mailing List, http://groups.google.com/group/django-modeltranslation
+Project-URL: Changelog, https://github.com/deschler/django-modeltranslation/blob/master/CHANGELOG.md
+Author-email: Peter Eschler <peschler@gmail.com>, Dirk Eschler <eschler@gmail.com>
+Maintainer-email: Sergiy Tereshchenko <serg.partizan+modeltranslation@gmail.com>
+License-Expression: BSD-3-Clause
+License-File: AUTHORS.rst
+License-File: LICENSE.txt
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Requires-Python: <4,>=3.10
+Requires-Dist: django>=5.1
+Requires-Dist: typing-extensions>=4.0.1
+Description-Content-Type: text/x-rst
+
+================
+Modeltranslation
+================
+
+.. image:: https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg
+   :target: https://stand-with-ukraine.pp.ua
+   :alt: Stand With Ukraine
+
+-----
+
+.. image:: http://img.shields.io/coveralls/deschler/django-modeltranslation.svg?style=flat-square
+    :target: https://coveralls.io/r/deschler/django-modeltranslation
+
+.. image:: https://img.shields.io/pypi/v/django-modeltranslation.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/django-modeltranslation/
+    :alt: Latest PyPI version
+
+.. image:: https://img.shields.io/pypi/pyversions/django-modeltranslation.svg?style=flat-square
+    :target: https://pypi.python.org/pypi/django-modeltranslation/
+    :alt: Supported Python versions
+
+.. image:: https://img.shields.io/gitter/room/django-modeltranslation/community?color=4DB798&style=flat-square
+    :alt: Join the chat at https://gitter.im/django-modeltranslation/community
+    :target: https://gitter.im/django-modeltranslation/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+
+The modeltranslation application is used to translate dynamic content of
+existing Django models to an arbitrary number of languages without having to
+change the original model classes. It uses a registration approach (comparable
+to Django's admin app) to be able to add translations to existing or new
+projects and is fully integrated into the Django admin backend.
+
+The advantage of a registration approach is the ability to add translations to
+models on a per-app basis. You can use the same app in different projects,
+may they use translations or not, and you never have to touch the original
+model class.
+
+Features
+========
+
+- Add translations without changing existing models or views
+- Translation fields are stored in the same table (no expensive joins)
+- Supports inherited models (abstract and multi-table inheritance)
+- Handle more than just text fields
+- Django admin integration
+- Flexible fallbacks, auto-population and more!
+
+For the latest documentation, visit https://django-modeltranslation.readthedocs.io/en/latest/.

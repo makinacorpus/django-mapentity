@@ -1,0 +1,7 @@
+{% if field.help_text %}
+    {% if help_text_inline %}
+        <span id="{{ field.auto_id }}_helptext" class="text-muted">{{ field.help_text|safe }}</span>
+    {% else %}
+        <small id="{{ field.auto_id }}_helptext" class="form-text text-muted">{{ field.help_text|safe }}</small>
+    {% endif %}
+{% endif %}

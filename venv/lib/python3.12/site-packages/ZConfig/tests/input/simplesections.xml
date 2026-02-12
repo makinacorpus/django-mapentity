@@ -1,0 +1,63 @@
+<schema>
+  <sectiontype name="section">
+    <key name="var" />
+    <key name="var-one" />
+    <key name="var-two" />
+    <key name="var-three" />
+  </sectiontype>
+  <sectiontype name="minimal" />
+  <sectiontype name="trivial">
+    <key name="var" />
+  </sectiontype>
+
+  <sectiontype name="hasmin">
+    <key name="var" required="yes" />
+  </sectiontype>
+
+  <multisection type="section" name="*" attribute="sections">
+    <example>Multisection Example</example>
+  </multisection>
+  <section type="minimal" name="*" attribute="minimal" />
+  <section type="trivial" name="*" attribute="trivial" />
+  <section type="hasmin" name="+" attribute="hasmin" />
+
+  <key name="var" />
+  <key name="var-0" />
+  <key name="var-1" />
+  <key name="var-2" />
+  <key name="var-3" />
+  <key name="var-4" />
+  <key name="var-5" />
+  <key name="var-6" default="1">
+	  <description>Description</description>
+	  <metadefault>For humans</metadefault>
+  </key>
+
+  <abstracttype name="abstype" abstract="true">
+	  <description>Description</description>
+  </abstracttype>
+  <sectiontype name="implabs" implements="abstype">
+	  <description>Description</description>
+  </sectiontype>
+  <sectiontype name="extabs" extends="implabs">
+	  <description>Description</description>
+  </sectiontype>
+  <sectiontype name="extabs2" extends="implabs">
+	  <description>Description</description>
+  </sectiontype>
+  <sectiontype name="extabs3" extends="extabs2">
+	  <description>Description</description>
+  </sectiontype>
+  <section type="abstype" name="absinfo">
+	  <description>Description</description>
+	  <example>Section Example</example>
+  </section>
+  <section type="extabs" name="extabs" />
+  <section type="extabs" name="extabs2" />
+  <section type="implabs" name="implabs" />
+  <section type="extabs3" name="implabs2" />
+  <multikey name="mkey">
+	  <default>1</default>
+	  <default>2</default>
+  </multikey>
+</schema>

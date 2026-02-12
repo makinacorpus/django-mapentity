@@ -1,0 +1,2 @@
+# -*-coding: utf-8; mode: conf-*-
+This file contains a snowman, U+2603: ☃

@@ -1,0 +1,74 @@
+Metadata-Version: 2.4
+Name: BTrees
+Version: 6.3
+Summary: Scalable persistent object containers
+Author-email: Zope Foundation and contributors <zope-dev@zope.dev>
+Maintainer-email: Plone Foundation and contributors <zope-dev@zope.dev>
+License-Expression: ZPL-2.1
+Project-URL: Documentation, https://btrees.readthedocs.io
+Project-URL: Issues, https://github.com/zopefoundation/BTrees/issues
+Project-URL: Source, https://github.com/zopefoundation/BTrees
+Project-URL: Changelog, https://github.com/zopefoundation/BTrees/blob/master/CHANGES.rst
+Classifier: Development Status :: 6 - Mature
+Classifier: Framework :: ZODB
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Topic :: Database
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.10
+Description-Content-Type: text/x-rst
+License-File: LICENSE.txt
+Requires-Dist: persistent
+Requires-Dist: zope.interface
+Provides-Extra: docs
+Requires-Dist: Sphinx; extra == "docs"
+Requires-Dist: repoze.sphinx.autointerface; extra == "docs"
+Requires-Dist: furo; extra == "docs"
+Provides-Extra: test
+Requires-Dist: persistent; extra == "test"
+Requires-Dist: transaction; extra == "test"
+Requires-Dist: zope.testrunner>=6.4; extra == "test"
+Provides-Extra: zodb
+Requires-Dist: ZODB; extra == "zodb"
+Dynamic: license-file
+
+=============================================
+ ``BTrees``:  scalable persistent components
+=============================================
+
+.. image:: https://github.com/zopefoundation/BTrees/actions/workflows/tests.yml/badge.svg
+    :target: https://github.com/zopefoundation/BTrees/actions/workflows/tests.yml
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/BTrees/badge.svg?branch=master
+    :target: https://coveralls.io/github/zopefoundation/BTrees?branch=master
+
+.. image:: https://readthedocs.org/projects/btrees/badge/?version=latest
+        :target: https://btrees.readthedocs.io/en/latest/
+        :alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/v/BTrees.svg
+        :target: https://pypi.org/project/BTrees/
+        :alt: Current version on PyPI
+
+.. image:: https://img.shields.io/pypi/pyversions/BTrees.svg
+        :target: https://pypi.org/project/BTrees/
+        :alt: Supported Python versions
+
+
+This package contains a set of persistent object containers built around
+a modified BTree data structure.  The trees are optimized for use inside
+ZODB's "optimistic concurrency" paradigm, and include explicit resolution
+of conflicts detected by that mechanism.
+
+Please see `the Sphinx documentation <https://btrees.readthedocs.io/>`_ for
+further information.

@@ -1,0 +1,18 @@
+<style:style style:name="podTable" style:family="table">
+ <style:table-properties table:align="margins"/>
+</style:style>
+<style:style style:name="podCell" style:family="table-cell">
+ <style:table-cell-properties fo:padding="0.1cm" fo:border="0.05pt solid #000000"/>
+</style:style>
+<style:style style:name="podHeader" style:family="table-cell">
+ <style:table-cell-properties fo:padding="0.1cm" fo:border="0.05pt solid #000000" fo:background-color="#e6e6e6"/>
+</style:style>
+<style:style style:name="podUnbreakableRow" style:family="table-row">
+ <style:table-row-properties fo:keep-together="always"/>
+</style:style>
+<style:style style:name="podImageLeft" style:family="graphic" style:parent-style-name="Graphics">
+ <style:graphic-properties style:run-through="foreground" style:wrap="parallel" style:number-wrapped-paragraphs="no-limit" style:wrap-contour="false" style:vertical-pos="top" style:vertical-rel="paragraph" style:horizontal-pos="left" style:horizontal-rel="paragraph" style:mirror="none" fo:clip="rect(0cm, 0cm, 0cm, 0cm)" fo:margin-right="0.3cm" fo:margin-bottom="0.2cm"/>
+</style:style>
+<style:style style:name="podImageRight" style:family="graphic" style:parent-style-name="Graphics">
+ <style:graphic-properties style:run-through="foreground" style:wrap="parallel" style:number-wrapped-paragraphs="no-limit" style:wrap-contour="false" style:vertical-pos="top" style:vertical-rel="paragraph" style:horizontal-pos="right" style:horizontal-rel="paragraph" style:mirror="none" fo:clip="rect(0cm, 0cm, 0cm, 0cm)" fo:margin-left="0.3cm" fo:margin-bottom="0.2cm"/>
+</style:style>

@@ -1,0 +1,6 @@
+[console_scripts]
+fsdump = ZODB.FileStorage.fsdump:main
+fsoids = ZODB.scripts.fsoids:main
+fsrefs = ZODB.scripts.fsrefs:main
+fstail = ZODB.scripts.fstail:Main
+repozo = ZODB.scripts.repozo:main

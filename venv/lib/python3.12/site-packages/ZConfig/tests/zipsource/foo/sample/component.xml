@@ -1,0 +1,9 @@
+<component prefix="foo.sample">
+
+  <!-- `something` is an abstract type that's already defined -->
+
+  <sectiontype name="sample" implements="something">
+    <key name="data" datatype=".datatypes.data"/>
+  </sectiontype>
+
+</component>

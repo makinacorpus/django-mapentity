@@ -1,0 +1,72 @@
+Metadata-Version: 2.4
+Name: zope.proxy
+Version: 7.1
+Summary: Generic Transparent Proxies
+Author-email: Zope Foundation and contributors <zope-dev@zope.dev>
+Maintainer-email: Plone Foundation and contributors <zope-dev@zope.dev>
+License-Expression: ZPL-2.1
+Project-URL: Documentation, https://zopeproxy.readthedocs.io
+Project-URL: Issues, https://github.com/zopefoundation/zope.proxy/issues
+Project-URL: Source, https://github.com/zopefoundation/zope.proxy
+Project-URL: Changelog, https://github.com/zopefoundation/zope.proxy/blob/master/CHANGES.rst
+Keywords: zope,proxy,generic,transparent
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Framework :: Zope :: 3
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Requires-Python: >=3.10
+Description-Content-Type: text/x-rst
+License-File: LICENSE.txt
+Requires-Dist: zope.interface
+Provides-Extra: docs
+Requires-Dist: Sphinx; extra == "docs"
+Requires-Dist: repoze.sphinx.autointerface; extra == "docs"
+Requires-Dist: furo; extra == "docs"
+Provides-Extra: test
+Requires-Dist: zope.security>=7.3; extra == "test"
+Requires-Dist: zope.testrunner>=6.4; extra == "test"
+Dynamic: license-file
+
+================
+ ``zope.proxy``
+================
+
+.. image:: https://github.com/zopefoundation/zope.proxy/actions/workflows/tests.yml/badge.svg
+        :target: https://github.com/zopefoundation/zope.proxy/actions/workflows/tests.yml
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/zope.proxy/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/zope.proxy?branch=master
+
+.. image:: https://readthedocs.org/projects/zopeproxy/badge/?version=latest
+        :target: https://zopeproxy.readthedocs.io/en/latest/
+        :alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/v/zope.proxy.svg
+        :target: https://pypi.org/project/zope.proxy/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/zope.proxy.svg
+        :target: https://pypi.org/project/zope.proxy/
+        :alt: Python versions
+
+Proxies are special objects which serve as mostly-transparent
+wrappers around another object, intervening in the apparent behavior of
+the wrapped object only when necessary to apply the policy (e.g., access
+checking, location brokering, etc.) for which the proxy is responsible.
+
+zope.proxy is implemented via a C extension module, which lets it do things
+like lie about its own ``__class__`` that are difficult in pure Python (and
+were completely impossible before metaclasses).  It also proxies all the
+internal slots (such as ``__int__``/``__str__``/``__add__``).
+
+Complete documentation is at https://zopeproxy.readthedocs.io

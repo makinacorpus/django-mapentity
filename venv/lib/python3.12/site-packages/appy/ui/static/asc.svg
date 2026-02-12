@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0"
+ viewBox="0 0 15 15" style="enable-background:new 0 0 15 15;" xml:space="preserve">
+<style type="text/css">
+.st0{fill:none;stroke:|flashyColor|;stroke-width:0.603;stroke-miterlimit:10}
+.st1{clip-path:url(#I2);fill:none;stroke:|flashyColor|;stroke-width:0.603;stroke-miterlimit:10}
+.st2{fill:|mainColor|}
+</style>
+<line class="st0" x1="10.7" y1="5.4" x2="6.7" y2="5.4"/>
+<line class="st0" x1="12.2" y1="3.9" x2="6.7" y2="3.9"/>
+<g><defs><rect id="I1" x="0.4" y="2.1" width="14.4" height="10.6"/></defs>
+<clipPath id="I2"><use xlink:href="#I1" style="overflow:visible"/></clipPath>
+<line class="st1" x1="14.7" y1="2.4" x2="6.7" y2="2.4"/>
+</g>
+<polygon class="st2" points="4.9,2.1 4.9,11.3 1,7.8 0.4,8.3 5.3,12.7 10.2,8.3 9.6,7.8 5.7,11.3 5.7,2.1 "/>
+</svg>

@@ -1,0 +1,3 @@
+# More information about this file on http://robots-txt.com
+User-agent: *
+Disallow: /

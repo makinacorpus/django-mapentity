@@ -1,0 +1,7 @@
+<schema>
+  <description>
+    <!-- This description is referenced from a test. -->
+    base description
+  </description>
+  <sectiontype name="type-X"/>
+</schema>

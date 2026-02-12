@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0"
+ viewBox="0 0 65 65" style="enable-background:new 0 0 65 65;" xml:space="preserve">
+<style type="text/css">
+.st0{clip-path:url(#I2);fill:none;stroke:|flashyColor|;stroke-width:2.504;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+.st1{clip-path:url(#I2);fill:none;stroke:|mainColor|;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:10}
+.st2{clip-path:url(#I2);fill:none;stroke:|mainColor|;stroke-width:2;stroke-miterlimit:10}
+.st3{fill:none;stroke:|flashyColor|;stroke-width:2;stroke-miterlimit:10}
+</style>
+<g><defs><rect id="I1" x="-0.3" y="0" width="65" height="65"/></defs>
+<clipPath id="I2"><use xlink:href="#I1"  style="overflow:visible"/></clipPath>
+<circle class="st0" cx="32.2" cy="32.5" r="31.2"/>
+<path class="st1" d="M41.5,15.6v12.7H23V15.1h18.7l7.9,7.7v24.9c0,1.1-0.9,2-2,2H17c-1.1,0-2-0.9-2-2V17.1c0-1.1,0.9-2,2-2h2.9"/>
+<path class="st2" d="M24.5,44.3H40 M24.5,39.6H40 M19.8,49.7V36.4c0-1.2,1-2.1,2.1-2.1h20.6c1.2,0,2.1,1,2.1,2.1v13.4"/>
+</g>
+<path class="st3" d="M24.5,44.3H40 M24.5,39.6H40"/>
+</svg>

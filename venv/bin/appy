@@ -1,0 +1,93 @@
+#!/home/runner/work/django-mapentity/django-mapentity/venv/bin/python
+
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# ~license~
+
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Meta-script, deployed under the name /usr/bin/appy, running any other script
+# lying in appy/bin.
+
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+import os, sys
+from pathlib import Path
+
+import appy
+from appy import version
+from appy.utils import executeCommand, termColorize
+
+appyPath = Path(appy.__file__).parent
+
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+class MetaScript:
+    '''Calls any script from appy/bin, using syntax: appy <script>'''
+
+    # Script lying in appy/bin and being callable via this meta-script
+    scripts = ['make', 'convert', 'oclean', 'ogrep', 'osub']
+
+    # Doc for commands
+    HELP_NO   = 'Welcome to %s !\nVersion: %%s\nInstalled in:%s\n\n' \
+                'This script allows to launch Appy commands.\n' \
+                'Available commands are: %s.\n\n' \
+                'Usage: appy <command> [command_specific_options]\n\n' \
+                'To get documentation about a given command, type:\n\n' \
+                'appy help <command>.' % \
+                (termColorize('Appy'), appyPath, ', '.join(scripts))
+    CMD_NO    = 'Please specify a command: appy help <command>.'
+    CMD_KO    = 'Unkknown command "%%s". Available commands are: %s.' % \
+                ', '.join(scripts)
+
+    def exit(self, message):
+        '''Output p_message before exiting the program'''
+        print(message.strip())
+        sys.exit(0)
+
+    def runCommand(self, command, showHelp=False):
+        '''If p_showHelp is True, this method output help for this p_command.
+           Else, it executes p_command, with args retrieved from sys.argv.'''
+        # Command "convert" has a non-standard location and name, in appy/pod
+        if command == 'convert':
+            part = 'pod'
+            name = 'converter'
+        else:
+            part = 'bin'
+            name = command
+        # setuptools does not seem to set permissions correctly on files. So,
+        # the <script>.py to run here may not have any "execute" permission.
+        # Consequently, we execute it as a parameter to the "python3"
+        # executable. That way, no execute permission is required on it.
+        args = ['python3', f'{appyPath}/{part}/{name}.py']
+        if os.name == 'posix':
+            args.insert(0, '/usr/bin/env')
+        if showHelp:
+            args.append('-h')
+        else:
+            args += sys.argv[2:]
+        out, err = executeCommand(args)
+        return self.exit(out or err)
+
+    def run(self):
+        '''Retrieve the script from sys.argv and execute it'''
+        if len(sys.argv) == 1:
+            # The script is called without arg
+            return self.exit(MetaScript.HELP_NO % version.verbose)
+        # Get the command
+        command = sys.argv[1]
+        if command == 'help':
+            # Output doc for the specified command
+            if len(sys.argv) == 2: return self.exit(MetaScript.CMD_NO)
+            # Get the command
+            command = sys.argv[2]
+            if command not in MetaScript.scripts:
+                return self.exit(MetaScript.CMD_KO % command)
+            # Display help about this command
+            return self.runCommand(command, showHelp=True)
+        elif command not in MetaScript.scripts:
+            return self.exit(MetaScript.CMD_KO % command)
+        else:
+            # Runs v_command
+            return self.runCommand(command)
+
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if __name__ == '__main__':
+    MetaScript().run()
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

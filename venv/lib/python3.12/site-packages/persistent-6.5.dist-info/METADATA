@@ -1,0 +1,78 @@
+Metadata-Version: 2.4
+Name: persistent
+Version: 6.5
+Summary: Translucent persistent objects
+Author-email: Zope Foundation and contributors <zope-dev@zope.dev>
+Maintainer-email: Plone Foundation and contributors <zope-dev@zope.dev>
+License-Expression: ZPL-2.1
+Project-URL: Documentation, https://persistent.readthedocs.io
+Project-URL: Issues, https://github.com/zopefoundation/persistent/issues
+Project-URL: Source, https://github.com/zopefoundation/persistent
+Project-URL: Changelog, https://github.com/zopefoundation/persistent/blob/master/CHANGES.rst
+Classifier: Development Status :: 6 - Mature
+Classifier: Framework :: ZODB
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Topic :: Database
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.10
+Description-Content-Type: text/x-rst
+License-File: LICENSE.txt
+Requires-Dist: zope.deferredimport
+Requires-Dist: zope.interface
+Requires-Dist: cffi; platform_python_implementation == "CPython"
+Provides-Extra: docs
+Requires-Dist: Sphinx; extra == "docs"
+Requires-Dist: repoze.sphinx.autointerface; extra == "docs"
+Requires-Dist: furo; extra == "docs"
+Provides-Extra: test
+Requires-Dist: manuel; extra == "test"
+Requires-Dist: zope.testrunner>=6.4; extra == "test"
+Dynamic: license-file
+
+===========================================================
+ ``persistent``:  automatic persistence for Python objects
+===========================================================
+
+.. image:: https://github.com/zopefoundation/persistent/actions/workflows/tests.yml/badge.svg
+        :target: https://github.com/zopefoundation/persistent/actions/workflows/tests.yml
+
+.. image:: https://coveralls.io/repos/github/zopefoundation/persistent/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/persistent?branch=master
+
+.. image:: https://readthedocs.org/projects/persistent/badge/?version=latest
+        :target: https://persistent.readthedocs.io/en/latest/
+        :alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/v/persistent.svg
+        :target: https://pypi.org/project/persistent/
+        :alt: Latest release
+
+.. image:: https://img.shields.io/pypi/pyversions/persistent.svg
+        :target: https://pypi.org/project/persistent/
+        :alt: Python versions
+
+This package contains a generic persistence implementation for Python. It
+forms the core protocol for making objects interact "transparently" with
+a database such as the ZODB.
+
+Please see the Sphinx documentation (``docs/index.rst``) for further
+information, or view the documentation at Read The Docs, for either
+the latest (``https://persistent.readthedocs.io/en/latest/``) or stable
+release (``https://persistent.readthedocs.io/en/stable/``).
+
+.. note::
+
+   Use of this standalone ``persistent`` release is not recommended or
+   supported with ZODB < 3.11.  ZODB 3.10 and earlier bundle their own
+   version of  the ``persistent`` package.

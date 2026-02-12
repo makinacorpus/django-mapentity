@@ -1,0 +1,26 @@
+<schema>
+
+  <!--
+      This is for testing the support of schemas in our Sphinx
+      extension.
+  -->
+
+
+  <description>
+    This describes the schema.
+  </description>
+
+
+  <import package="ZConfig.components.logger" file="abstract.xml"/>
+  <import package="ZConfig.components.logger" file="base-logger.xml"/>
+
+  <sectiontype name="eventlog"
+               datatype="ZConfig.components.logger.logger.EventLogFactory"
+               extends="ZConfig.logger.base-logger"
+               implements="ZConfig.logger.log">
+    <description>
+      Configuration for the root logger.
+    </description>
+  </sectiontype>
+
+</schema>

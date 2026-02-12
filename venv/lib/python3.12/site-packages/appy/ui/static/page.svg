@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0"
+ viewBox="0 0 35 35" style="enable-background:new 0 0 35 35" xml:space="preserve">
+<style type="text/css">
+.st0{fill:|flashyColor|}
+.st1{fill:none;stroke:|flashyColor|;stroke-width:0.921;stroke-miterlimit:10}
+.st2{fill:none;stroke:|mainColor|;stroke-width:0.921;stroke-linejoin:round;stroke-miterlimit:10}
+.st3{clip-path:url(#I1);fill:none;stroke:|flashyColor|;stroke-width:1.418;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+</style>
+<g>
+<rect x="11.6" y="22.7" class="st0" width="0.3" height="0.3"/>
+<rect x="11.6" y="22.7" class="st1" width="0.3" height="0.3"/>
+<line class="st1" x1="13.7" y1="22.9" x2="18.8" y2="22.9"/>
+<rect x="11.6" y="19.8" class="st0" width="0.3" height="0.3"/>
+<rect x="11.6" y="19.8" class="st1" width="0.3" height="0.3"/>
+<line class="st1" x1="13.7" y1="20" x2="20.1" y2="20"/>
+<polygon class="st2" points="24.1,27.6 24.1,6.8 12.5,6.8 8.5,10.8 8.5,27.5 19.4,27.5"/>
+<rect x="11.6" y="16.9" class="st0" width="0.3" height="0.3"/>
+<rect x="11.6" y="16.9" class="st1" width="0.3" height="0.3"/>
+<line class="st1" x1="13.7" y1="17" x2="21.8" y2="17"/>
+<g>
+ <g><g><defs><rect id="I2" width="35" height="35"/></defs>
+ <clipPath id="I4"><use xlink:href="#I2" style="overflow:visible"/></clipPath>
+ </g></g>
+ <g><g><defs><rect id="I3" width="35" height="35"/></defs>
+ <clipPath id="I1"><use xlink:href="#I3" style="overflow:visible"/></clipPath>
+ <circle class="st3" cx="17.5" cy="17.5" r="16.8"/>
+ </g></g>
+</g></g>
+</svg>

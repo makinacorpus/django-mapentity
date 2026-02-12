@@ -1,0 +1,7 @@
+<component>
+
+    <sectiontype name='foo'>
+        <section type='foo' attribute='bar' />
+    </sectiontype>
+
+</component>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0"
+ viewBox="0 0 35 35" style="enable-background:new 0 0 35 35;" xml:space="preserve">
+<style type="text/css">
+.st0{clip-path:url(#I2);fill:none;stroke:|flashyColor|;stroke-width:1.418;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+.st1{fill:none;stroke:|mainColor|;stroke-width:0.8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+.st2{fill:|flashyColor|}
+</style>
+<g><defs><rect id="I1" width="35" height="35"/></defs>
+<clipPath id="I2"><use xlink:href="#I1" style="overflow:visible"/></clipPath>
+<circle class="st0" cx="17.5" cy="17.5" r="16.8"/>
+</g>
+<g>
+<line class="st1" x1="17.5" y1="3.7" x2="17.5" y2="31.9"/>
+<circle class="st2" cx="17.5" cy="7.3" r="2.1"/>
+<circle class="st2" cx="17.5" cy="14.2" r="2.1"/>
+<circle class="st2" cx="17.5" cy="21.4" r="2.1"/>
+<line class="st1" x1="21" y1="7.3" x2="26.9" y2="7.3"/>
+<line class="st1" x1="21" y1="21.3" x2="26.9" y2="21.3"/>
+<line class="st1" x1="8.3" y1="14.3" x2="14.2" y2="14.3"/>
+<circle class="st2" cx="17.5" cy="28.5" r="2.1"/>
+<line class="st1" x1="8.3" y1="28.6" x2="14.2" y2="28.6"/>
+</g>
+</svg>

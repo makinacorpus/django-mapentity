@@ -1,0 +1,124 @@
+Metadata-Version: 2.4
+Name: django-tinymce
+Version: 5.0.0
+Summary: A Django application that contains a widget to render a
+Author-email: Aljosa Mohorovic <aljosa.mohorovic@gmail.com>
+Maintainer-email: Rémy Hubscher <hubscher.remy@gmail.com>, Claude Paroz <claude@2xlibre.net>
+License-Expression: MIT AND GPL-2.0-or-later
+Project-URL: Homepage, https://github.com/jazzband/django-tinymce
+Project-URL: Documentation, https://django-tinymce.readthedocs.org/
+Project-URL: Changelog, https://github.com/jazzband/django-tinymce/blob/master/CHANGELOG.rst
+Keywords: django,widget,tinymce
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 4.2
+Classifier: Framework :: Django :: 5.0
+Classifier: Framework :: Django :: 5.1
+Classifier: Framework :: Django :: 5.2
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Libraries :: Application Frameworks
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.9
+Description-Content-Type: text/x-rst
+License-File: LICENSE.txt
+License-File: tinymce/static/tinymce/license.md
+Requires-Dist: django>=4.2
+Dynamic: license-file
+
+django-tinymce
+==============
+
+**django-tinymce** is a Django application that contains a widget to render a form field as a TinyMCE editor.
+
+It supports Python 3.9+ and Django 4.2 to 5.2. Using TinyMCE 7.8.0.
+
+.. image:: https://jazzband.co/static/img/badge.svg
+        :target: https://jazzband.co/
+        :alt: Jazzband
+
+.. image:: https://img.shields.io/pypi/v/django-tinymce.svg
+        :target: https://pypi.python.org/pypi/django-tinymce
+
+.. image:: https://img.shields.io/pypi/pyversions/django-tinymce.svg
+        :target: https://pypi.python.org/pypi/django-tinymce
+
+.. image:: https://img.shields.io/pypi/djversions/django-tinymce.svg
+        :target: https://pypi.org/project/django-tinymce/
+
+.. image:: https://img.shields.io/pypi/dm/django-tinymce.svg
+        :target: https://pypi.python.org/pypi/django-tinymce
+
+.. image:: https://github.com/jazzband/django-tinymce/workflows/Test/badge.svg
+   :target: https://github.com/jazzband/django-tinymce/actions
+   :alt: GitHub Actions
+
+.. image:: https://codecov.io/gh/jazzband/django-tinymce/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/jazzband/django-tinymce
+   :alt: Code coverage
+
+
+Quickstart
+==========
+
+Install django-tinymce:
+
+.. code-block:: bash
+
+    $ pip install django-tinymce
+
+Add tinymce to INSTALLED_APPS in settings.py for your project:
+
+.. code-block:: python
+
+    INSTALLED_APPS = (
+        ...
+        'tinymce',
+    )
+
+Add tinymce.urls to urls.py for your project:
+
+.. code-block:: python
+
+    urlpatterns = [
+        ...
+        path('tinymce/', include('tinymce.urls')),
+    ]
+
+In your code:
+
+.. code-block:: python
+
+    from django.db import models
+    from tinymce.models import HTMLField
+
+    class MyModel(models.Model):
+        ...
+        content = HTMLField()
+
+**django-tinymce** uses staticfiles so everything should work as expected, different use cases (like using widget instead of HTMLField) and other stuff is available in documentation.
+
+Documentation
+=============
+
+https://django-tinymce.readthedocs.org/
+
+Support and updates
+===================
+
+Use github issues https://github.com/jazzband/django-tinymce/issues
+
+License
+=======
+
+Originally written by Joost Cassee.
+
+This program is licensed under the MIT License (see LICENSE.txt)

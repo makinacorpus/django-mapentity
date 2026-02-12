@@ -1,0 +1,27 @@
+{% load i18n %}
+
+<h4>{{ form_title }}</h4>
+
+{{ form.media }}
+
+<form action="{{ attachment_form.form_url }}"
+      enctype="multipart/form-data"
+      method="post">
+  {% csrf_token %}
+
+  {{ attachment_form.as_p }}
+
+  {% if attachment_form.is_creation %}
+      <input type="submit"
+             id="submit_attachment"
+             name="submit_attachment"
+             value="{% trans "Submit attachment" %}"/>
+  {% else %}
+      <input type="button"
+             value="{% trans "Cancel" %}"/>
+      <input type="submit"
+             id="submit_attachment"
+             name="submit_attachment"
+             value="{% trans "Update attachment" %}"/>
+  {% endif %}
+</form> 

@@ -1,0 +1,87 @@
+<style:style style:name="ParaKWN" style:family="paragraph" style:class="text" style:master-page-name="" style:parent-style-name="Standard">
+ <style:paragraph-properties fo:keep-with-next="always"/>
+</style:style>
+<style:style style:name="podH1" style:display-name="Heading 1" style:family="paragraph" style:parent-style-name="Heading"
+             style:next-style-name="Standard" style:default-outline-level="1" style:class="text">
+ <style:paragraph-properties fo:margin-top="0.423cm" fo:margin-bottom="0.212cm" style:contextual-spacing="false"/>
+ <style:text-properties fo:font-size="130%" fo:font-weight="bold" style:font-size-asian="130%" style:font-weight-asian="bold"
+                        style:font-size-complex="130%" style:font-weight-complex="bold"/>
+</style:style>
+<style:style style:name="podH2" style:display-name="Heading 2" style:family="paragraph" style:parent-style-name="Heading"
+             style:next-style-name="Standard" style:default-outline-level="2" style:class="text">
+  <style:paragraph-properties fo:margin-top="0.353cm" fo:margin-bottom="0.212cm" style:contextual-spacing="false"/>
+  <style:text-properties fo:font-size="115%" fo:font-weight="bold" style:font-size-asian="115%" style:font-weight-asian="bold"
+             style:font-size-complex="115%" style:font-weight-complex="bold"/>
+</style:style>
+<style:style style:name="podH3" style:display-name="Heading 3" style:family="paragraph" style:parent-style-name="Heading"
+             style:next-style-name="Standard" style:default-outline-level="3" style:class="text">
+  <style:paragraph-properties fo:margin-top="0.247cm" fo:margin-bottom="0.212cm" style:contextual-spacing="false"/>
+  <style:text-properties fo:color="#808080" fo:font-size="14pt" fo:font-weight="bold" style:font-size-asian="14pt"
+                         style:font-weight-asian="bold" style:font-size-complex="14pt" style:font-weight-complex="bold"/>
+</style:style>
+<style:style style:name="podH4" style:display-name="Heading 4" style:family="paragraph" style:parent-style-name="Heading"
+             style:next-style-name="Standard" style:default-outline-level="4" style:class="text">
+  <style:paragraph-properties fo:margin-top="0.212cm" fo:margin-bottom="0.212cm" style:contextual-spacing="false"/>
+  <style:text-properties fo:color="#808080" fo:font-size="95%" fo:font-style="italic" fo:font-weight="bold" style:font-size-asian="95%"
+                         style:font-style-asian="italic" style:font-weight-asian="bold" style:font-size-complex="95%"
+                         style:font-style-complex="italic" style:font-weight-complex="bold"/>
+</style:style>
+<style:style style:name="podH5" style:display-name="Heading 5" style:family="paragraph" style:parent-style-name="Heading"
+             style:next-style-name="Standard" style:default-outline-level="5" style:class="text">
+  <style:paragraph-properties fo:margin-top="0.212cm" fo:margin-bottom="0.106cm" style:contextual-spacing="false"/>
+  <style:text-properties fo:font-size="85%" fo:font-weight="bold" style:font-size-asian="85%" style:font-weight-asian="bold"
+                         style:font-size-complex="85%" style:font-weight-complex="bold"/>
+</style:style>
+<style:style style:name="podH6" style:display-name="Heading 6" style:family="paragraph" style:parent-style-name="Heading"
+             style:next-style-name="Standard" style:default-outline-level="6" style:class="text">
+  <style:paragraph-properties fo:margin-top="0.106cm" fo:margin-bottom="0.106cm" style:contextual-spacing="false"/>
+  <style:text-properties fo:font-size="85%" fo:font-style="italic" fo:font-weight="bold" style:font-size-asian="85%"
+                         style:font-style-asian="italic" style:font-weight-asian="bold" style:font-size-complex="85%"
+                         style:font-style-complex="italic" style:font-weight-complex="bold"/>
+</style:style>
+<style:style style:name="podPageBreakBefore" style:family="paragraph">
+ <style:paragraph-properties fo:break-before="page" fo:margin="0cm"/>
+ <style:text-properties fo:font-size="2pt"/>
+</style:style>
+<style:style style:name="podPageBreakBeforeDuplex" style:family="paragraph"
+             style:parent-style-name="podPageBreakBefore" style:master-page-name="Standard">
+</style:style>
+<style:style style:name="podPageBreakAfter" style:family="paragraph">
+ <style:paragraph-properties fo:break-after="page" fo:margin="0cm"/>
+ <style:text-properties fo:font-size="2pt"/>
+</style:style>
+<style:style style:name="podColumnBreak" style:family="paragraph">
+ <style:paragraph-properties fo:break-before="column"/>
+</style:style>
+<style:style style:name="podBulletItem" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="podBulletedList"/>
+<style:style style:name="podNumberItem" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="podNumberedList"/>
+<style:style style:name="podBulletItemKeepWithNext" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="podBulletedList">
+ <style:paragraph-properties fo:keep-with-next="always"/>
+</style:style>
+<style:style style:name="podNumberItemKeepWithNext" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="podNumberedList">
+ <style:paragraph-properties fo:keep-with-next="always"/>
+</style:style>
+<style:style style:name="podNumberStyle" style:display-name="POD Numbering Symbols" style:family="text"/>
+<style:style style:name="podBulletStyle" style:display-name="POD Bullet Symbols" style:family="text">
+ <style:text-properties style:font-name="OpenSymbol"/>
+</style:style>
+<style:style style:name="podCellContent" style:display-name="Table cell" style:family="paragraph" style:parent-style-name="Standard" style:class="extra">
+ <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0cm" text:number-lines="false" text:line-number="0"/>
+</style:style>
+<style:style style:name="podHeaderCellContent" style:display-name="Table heading" style:family="paragraph" style:parent-style-name="podCellContent" style:class="extra">
+ <style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+</style:style>
+<style:style style:name="podTablePara" style:family="paragraph" style:parent-style-name="podCellContent">
+ <style:text-properties fo:font-size="8pt" fo:font-weight="normal" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+</style:style>
+<style:style style:name="podTableParaBold" style:family="paragraph" style:parent-style-name="podCellContent">
+ <style:text-properties fo:font-size="8pt" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+</style:style>
+<style:style style:name="podTableParaRight" style:family="paragraph" style:parent-style-name="podCellContent">
+ <style:paragraph-properties fo:text-align="end" style:justify-single-word="false"/>
+ <style:text-properties fo:font-size="8pt" fo:font-weight="normal" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+</style:style>
+<style:style style:name="podTableParaBoldRight" style:family="paragraph" style:parent-style-name="podCellContent">
+ <style:paragraph-properties fo:text-align="end" style:justify-single-word="false"/>
+ <style:text-properties fo:font-size="8pt" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+</style:style>

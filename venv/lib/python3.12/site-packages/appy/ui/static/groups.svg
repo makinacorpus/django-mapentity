@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 65 65" xml:space="preserve" id="1">
+<style>
+.st1{fill:none;stroke:|mainColor|;stroke-width:1.567;stroke-linejoin:round;stroke-miterlimit:10}
+.st2{fill:none;stroke:|flashyColor|;stroke-width:1.567;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+.st3{fill:none;stroke:|flashyColor|;stroke-width:2.504;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+</style>
+<g id="gear" transform="translate(0.26993355,-3.2392027)"> 
+ <path id="path106" class="st2"
+       d="m 29.6,20.6 c 0.9,-0.4 1.9,-0.6 2.9,-0.6 4.2,0 7.6,3.4 7.6,7.6 0,4.2 -3.4,7.6 -7.6,7.6 -4.2,0 -7.6,-3.4 -7.6,-7.6 0,-1.8 0.6,-3.4 1.6,-4.7 m 1,15.3 c 0.7,0.3 1.4,0.6 2.1,0.8 l 0.7,4.1 h 4.4 L 35.4,39 c 0.7,-0.2 1.4,-0.4 2,-0.7 m 6.3,-7.7 4.1,-0.7 v -4.4 l -4.1,-0.7 c -0.3,-1.1 -0.7,-2.1 -1.2,-3 l 2.4,-3.4 -3.1,-3.1 -3.4,2.4 c -0.9,-0.6 -2,-1 -3,-1.3 l -0.7,-4.1 h -4.4 l -0.7,4.1 c -1.1,0.3 -2.1,0.7 -3,1.3 l -3.4,-2.4 -3.1,3.1 2.4,3.4 c -0.5,0.9 -1,1.9 -1.2,3 l -4.1,0.7 v 4.4 l 4.1,0.7"/></g>
+<g id="rounding"><circle id="circle110" r="31.200001" cy="32.599998" cx="32.5" class="st3"/></g>
+<use href="#man1" class="st1" transform="matrix(1,0,0,1,18,-13)"/>
+<use href="#man1" class="st1" transform="matrix(1,0,0,1,17,0)"/>
+<use href="#man1" class="st1" transform="matrix(1,0,0,1,27,-6)"/>
+<use href="#man1" class="st1" transform="matrix(1,0,0,1,-12,-6)"/>
+<use href="#man1" class="st1" transform="matrix(1,0,0,1,-3,-13)"/>
+<g id="man1" class="st1"  transform="matrix(0.6638869,0,0,0.63860446,11,21)" >
+ <path id="path86" d="m 13.8,52.1 v -4.6 c 0,-2.7 1.9,-3.6 4.4,-3.6 l 3,3.3 2.8,-3.3 c 2.5,0 4.6,1 4.6,3.6 v 4.6"/>
+ <path id="path90" d="m 24.6,38.3 c 0,1.8 -1.5,3.3 -3.3,3.3 -1.8,0 -3.3,-1.5 -3.3,-3.3 V 37 c 0,-1.8 1.5,-3.3 3.3,-3.3 1.8,0 3.3,1.5 3.3,3.3 z"/>
+ <path id="path104" d="m 25.241528,49.492027 v 2.5 m -8.1,-2.5 v 2.5"/>
+</g>
+</svg>

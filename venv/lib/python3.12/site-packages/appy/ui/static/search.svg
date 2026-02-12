@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0"
+ viewBox="0 0 15 15" style="enable-background:new 0 0 15 15" xml:space="preserve">
+<style type="text/css">
+.st0{clip-path:url(#I2);fill:none;stroke:|flashyColor|;stroke-linecap:round;stroke-miterlimit:10}
+.st1{clip-path:url(#I2);fill:none;stroke:|mainColor|;stroke-miterlimit:10}
+.st2{clip-path:url(#I2);fill:none;stroke:|flashyColor|;stroke-width:0.579;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+</style>
+<g><defs><rect id="I1" width="15" height="15"/></defs>
+<clipPath id="I2"><use xlink:href="#I1" style="overflow:visible"/></clipPath>
+<path class="st0" d="M9.4,9.5l1.8,2.2 M5.6,6.7c0-0.7,0.4-1.3,1.1-1.6"/>
+<path class="st1" d="M10.8,6.7c0,1.9-1.6,3.5-3.5,3.5S3.8,8.6,3.8,6.7c0-1.9,1.6-3.5,3.5-3.5S10.8,4.8,10.8,6.7z"/>
+<path class="st2" d="M14.7,7.5c0,4-3.2,7.2-7.2,7.2s-7.2-3.2-7.2-7.2s3.2-7.2,7.2-7.2S14.7,3.5,14.7,7.5z"/>
+</g>
+</svg>

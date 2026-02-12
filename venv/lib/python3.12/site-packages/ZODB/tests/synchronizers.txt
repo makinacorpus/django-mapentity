@@ -1,0 +1,96 @@
+=============
+Synchronizers
+=============
+
+Here are some tests that storage ``sync()`` methods get called at appropriate
+times in the life of a transaction.  The tested behavior is new in ZODB 3.4.
+
+First define a lightweight storage with a ``sync()`` method:
+
+    >>> import ZODB
+    >>> from ZODB.MappingStorage import MappingStorage
+    >>> import transaction
+
+    >>> class SimpleStorage(MappingStorage):
+    ...     sync_called = False
+    ...
+    ...     def sync(self, *args):
+    ...         self.sync_called = True
+
+Make a change locally:
+
+    >>> st = SimpleStorage()
+    >>> db = ZODB.DB(st)
+    >>> st.sync_called = False
+    >>> cn = db.open()
+    >>> rt = cn.root()
+    >>> rt['a'] = 1
+
+Sync isn't called when a connection is opened, even though that
+implicitly starts a new transaction:
+
+    >>> st.sync_called
+    False
+
+Sync is only called when we explicitly start a new transaction:
+
+    >>> _ = transaction.begin()
+
+    >>> st.sync_called
+    True
+    >>> st.sync_called = False
+
+BTW, calling ``sync()`` on a connection starts a new transaction, which
+caused ``sync()`` to be called on the storage:
+
+    >>> cn.sync()
+    >>> st.sync_called
+    True
+    >>> st.sync_called = False
+
+``sync()`` is not called by the Connection's ``afterCompletion()``
+hook after the commit completes, because we'll sync when a new
+transaction begins:
+
+    >>> transaction.commit()
+    >>> st.sync_called  # False before 3.4
+    False
+
+``sync()`` is also not called by the ``afterCompletion()`` hook after an abort.
+
+    >>> st.sync_called = False
+    >>> rt['b'] = 2
+    >>> transaction.abort()
+    >>> st.sync_called  # False before 3.4
+    False
+
+And ``sync()`` is called whenever we explicitly start a new transaction, via
+the ``newTransaction()`` hook.
+
+    >>> st.sync_called = False
+    >>> dummy = transaction.begin()
+    >>> st.sync_called  # False before 3.4
+    True
+
+Clean up.  Closing db isn't enough -- closing a DB doesn't close its
+`Connections`.  Leaving our `Connection` open here can cause the
+``SimpleStorage.sync()`` method to get called later, during another test, and
+our doctest-synthesized module globals no longer exist then.  You get a weird
+traceback then ;-)
+
+    >>> cn.close()
+
+As a special case, if a synchronizer registers while a transaction is
+in flight, then newTransaction and thus the storage sync method is
+called:
+
+    >>> tm = transaction.TransactionManager()
+    >>> st.sync_called = False
+    >>> _ = tm.begin()  # we're doing this _before_ opening a connection
+    >>> cn = db.open(transaction_manager=tm)
+    >>> st.sync_called
+    True
+
+    >>> cn.close()
+    >>> db.close()
+

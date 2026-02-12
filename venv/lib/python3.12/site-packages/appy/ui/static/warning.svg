@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="1" xmlns="http://www.w3.org/2000/svg" x="0" y="0"
+ viewBox="0 0 15 15" style="enable-background:new 0 0 15 15;" xml:space="preserve">
+<style type="text/css">
+.st0{fill:none;stroke:|mainColor|;stroke-width:0.497;stroke-miterlimit:10}
+.st1{fill:|flashyColor|}
+</style>
+<g><g><circle class="st0" cx="7.5" cy="7.5" r="7.2"/></g></g>
+<path class="st1" d="M7.5,9.9L7.5,9.9c-0.4,0-0.7-0.1-0.7-0.3L6.2,2.9C6.2,2.2,6.7,1.6,7.5,1.6l0,0c0.7,0,1.3,0.6,1.2,1.2L8.2,9.5
+C8.1,9.7,7.8,9.9,7.5,9.9z"/>
+<path class="st1" d="M8.5,11.7c0,0.6-0.5,1.1-1.1,1.1c-0.6,0-1.1-0.5-1.1-1.1c0-0.6,0.5-1.1,1.1-1.1C8,10.6,8.5,11.1,8.5,11.7z"/>
+</svg>

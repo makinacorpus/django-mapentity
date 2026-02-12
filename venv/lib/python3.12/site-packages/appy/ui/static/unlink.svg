@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="1" xmlns="http://www.w3.org/2000/svg" x="0" y="0"
+ viewBox="0 0 15 15" style="enable-background:new 0 0 15 15;" xml:space="preserve">
+<style type="text/css">
+.st0{fill:none;stroke:|mainColor|;stroke-width:0.497;stroke-miterlimit:10}
+.st1{fill:none;stroke:|flashyColor|;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10}
+</style>
+<g><circle class="st0" cx="7.5" cy="7.5" r="7.2"/></g>
+<g><path class="st1" d="M11.4,7.5H3.8"/></g>
+</svg>

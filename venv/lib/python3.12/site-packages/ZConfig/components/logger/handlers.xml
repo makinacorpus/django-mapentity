@@ -1,0 +1,263 @@
+<component prefix="ZConfig.components.logger">
+  <description>
+  </description>
+
+  <import package="ZConfig.components.logger" file="abstract.xml"/>
+
+  <sectiontype name="ZConfig.logger.base-log-handler">
+    <description>
+      Base type for most log handlers.  This is cannot be used as a
+      loghandler directly since it doesn't implement the loghandler
+      abstract section type.
+    </description>
+    <key name="formatter" datatype="dotted-name" required="no">
+      <description>
+        Logging formatter class.
+
+        The default is :class:`logging.Formatter`.
+
+        One alternative is 'zope.exceptions.log.Formatter',
+        which enhances exception tracebacks with information from
+        ``__traceback_info__`` and ``__traceback_supplement__``
+        variables from each stack frame.
+      </description>
+    </key>
+    <key name="dateformat"
+         default="%Y-%m-%dT%H:%M:%S">
+      <description>
+        Timestamp format used for the 'asctime' field.
+
+        This is used with Python's :func:`time.strftime` function,
+        so must be compatible with that function on the host platform.
+      </description>
+    </key>
+    <key name="level"
+         default="notset"
+         datatype="ZConfig.components.logger.datatypes.logging_level">
+      <description>
+        Output level for the log handler.
+
+        Python standard logging levels are supported by name
+        (case-insensitive), as are the following additional names:
+
+        * ``all`` (level 1)
+        * ``trace`` (level 5)
+        * ``blather`` (level 15)
+
+        These additional level names are not defined using
+        :func:`logging.addLevelName`, though an application may do so.
+
+        Numeric values ``0`` through ``50`` (inclusive) are permitted.
+      </description>
+    </key>
+    <key name="style"
+         default="classic"
+         datatype=".formatter.log_format_style">
+      <description>
+        Replacement mechanism to use with the ``format`` string.
+
+        The value must be one of ``classic`` (the default), ``format``,
+        ``template``, or ``safe-template``.
+      </description>
+    </key>
+    <key name="arbitrary-fields"
+         default="false"
+         datatype="boolean">
+      <description>
+        If true, allow arbitrary fields in the log record object to be
+        referenced from the ``format`` value.
+
+        This does not cause references to fields not present in the log
+        record to be accepted; it only means unknown fields will not
+        cause configuration of the formatter to be denied.
+
+        To get both effects, set this to ``true`` and use a ``style`` of
+        ``safe-template``.
+      </description>
+    </key>
+  </sectiontype>
+
+  <sectiontype name="logfile"
+               datatype=".handlers.FileHandlerFactory"
+               implements="ZConfig.logger.handler"
+               extends="ZConfig.logger.base-log-handler">
+    <example><![CDATA[
+        <logfile>
+            path STDOUT
+            format %(name)s %(message)s
+        </logfile>
+    ]]>
+    </example>
+    <key name="path" required="yes">
+      <description>
+        Path of the log file to write.
+
+        Specifying ``STDOUT`` or ``STDERR`` will cause the appropriate
+        standard stream to be used instead of a file.  In these cases,
+        rotation, encoding, and delayed opening are not available, and
+        will be considered configuration errors.
+      </description>
+    </key>
+    <key name="old-files" required="no" default="0" datatype="integer">
+      <description>
+        Number of old log files which will be retained when rotation is
+        configured.
+
+        This must be set to a positive integer if rotation is
+        configured.  An error is generated if rotation is requested
+        without setting ``old-files``.
+      </description>
+    </key>
+    <key name="max-size" required="no" default="0" datatype="byte-size">
+      <description>
+        Target maximum size for a logfile; once a logfile reaches the
+        maximum size, it will be rotated.
+      </description>
+    </key>
+    <key name="when" required="no" default="" datatype="string">
+      <description>
+        Specification for specific time at which rotation should occur.
+
+        Allowed values are described for
+        :class:`logging.handlers.TimedRotatingFileHandler`; this value is
+        passed through to the underlying handler.
+      </description>
+    </key>
+    <key name="interval" required="no" default="0" datatype="integer">
+      <description>
+        Frequency of rotation at the time specified by ``when``.
+
+        If not specified, but ``when`` is specified, this will default
+        to ``1``.
+
+        If ``when`` is not specified, it is an error to specify
+        ``interval``.
+      </description>
+    </key>
+    <key name="format"
+         default="------\n%(asctime)s %(levelname)s %(name)s %(message)s"
+         datatype=".formatter.escaped_string">
+      <description>
+        Format string for log entries.  This value is used to create an
+        instance of the class identified by ``formatter``.
+
+        The following escape characters are supported with the same
+        replacements as in Python string literals::
+
+            \b  \f  \n  \r  \t
+
+        Field placeholders are checked to refer to the fields available in
+        the :class:`logging.LogRecord` instances created without extra
+        fields.  Referring to other fields will generate an error in
+        loading the configuration, unless ``arbitrary-fields`` is true.
+      </description>
+    </key>
+    <key name="encoding" required="no" datatype="string">
+      <description>
+        Encoding for the underlying file.
+
+        If not specified, Python's default encoding handling is used.
+
+        This cannot be specified for ``STDOUT`` or ``STDERR``
+        destinations, and must be omitted in such cases.
+      </description>
+    </key>
+    <key name="delay" required="no" default="false" datatype="boolean">
+      <description>
+        If true, opening of the log file will be delayed until a message
+        is emitted.  This avoids creating logfiles that may only be
+        written to rarely or under special conditions.
+
+        This cannot be specified for ``STDOUT`` or ``STDERR``
+        destinations, and must be omitted in such cases.
+      </description>
+    </key>
+  </sectiontype>
+
+  <sectiontype name="syslog"
+               datatype=".handlers.SyslogHandlerFactory"
+               implements="ZConfig.logger.handler"
+               extends="ZConfig.logger.base-log-handler">
+    <key name="facility" default="user" datatype=".handlers.syslog_facility"/>
+    <key name="address" datatype="socket-address" default="localhost:514"/>
+    <key name="format"
+         default="%(name)s %(message)s"
+         datatype=".formatter.escaped_string"/>
+  </sectiontype>
+
+  <sectiontype name="win32-eventlog"
+               datatype=".handlers.Win32EventLogFactory"
+               implements="ZConfig.logger.handler"
+               extends="ZConfig.logger.base-log-handler">
+    <key name="appname" default="Zope"/>
+    <key name="format"
+         default="%(levelname)s %(name)s %(message)s"
+         datatype=".formatter.escaped_string"/>
+  </sectiontype>
+
+  <sectiontype name="http-logger"
+               datatype=".handlers.HTTPHandlerFactory"
+               implements="ZConfig.logger.handler"
+               extends="ZConfig.logger.base-log-handler">
+    <key name="url" default="http://localhost/"
+         datatype=".handlers.http_handler_url"/>
+    <key name="method" default="GET" datatype=".handlers.get_or_post"/>
+    <key name="format"
+         default="%(asctime)s %(levelname)s %(name)s %(message)s"
+         datatype=".formatter.escaped_string"/>
+  </sectiontype>
+
+  <sectiontype name="email-notifier"
+               datatype=".handlers.SMTPHandlerFactory"
+               implements="ZConfig.logger.handler"
+               extends="ZConfig.logger.base-log-handler">
+    <example><![CDATA[
+      <email-notifier>
+        to sysadmin@example.com
+        to john@example.com
+        from zlog-user@example.com
+        level fatal
+        smtp-username john
+        smtp-password johnpw
+      </email-notifier>
+    ]]>
+    </example>
+    <key name="from" required="yes" attribute="fromaddr"/>
+    <multikey name="to" required="yes" attribute="toaddrs"/>
+    <key name="subject" default="Message from Zope"/>
+    <key name="smtp-server" default="localhost" datatype="inet-address"/>
+    <key name="smtp-username" default="" datatype="string">
+      <description>
+        User name to use for SMTP authentication.  This can only be
+        specified if ``smtp-password`` is also specified.
+      </description>
+    </key>
+    <key name="smtp-password" default="" datatype="string">
+      <description>
+        Password to use for SMTP authentication.  This can only be
+        specified if ``smtp-username`` is also specified.
+      </description>
+    </key>
+    <key name="format"
+         default="%(asctime)s %(levelname)s %(name)s %(message)s"
+         datatype=".formatter.escaped_string">
+      <description>
+        Format string for the email content.
+
+        The following escape characters are supported with the same
+        replacements as in Python string literals::
+
+            \b  \f  \n  \r  \t
+
+        %-replacements are checked to refer to the fields available in
+        the :class:`logging.LogRecord` instances created without extra
+        fields.  Referring to other fields will generate an error in
+        loading the configuration.
+
+        Emails will be sent without a ``Content-Type`` header, so the
+        content will be interpreted as ``text/plain``.
+      </description>
+    </key>
+  </sectiontype>
+
+</component>

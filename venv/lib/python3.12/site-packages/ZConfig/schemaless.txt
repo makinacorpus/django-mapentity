@@ -1,0 +1,293 @@
+=================================
+Using ZConfig data without schema
+=================================
+
+Sometimes it's useful to use ZConfig configuration data without a
+schema.  This is most interesting when assembling a configuration from
+fragments, as some buildout recipes do.  This is not recommended for
+general application use.
+
+The ``ZConfig.schemaless`` module provides some support for working
+without schema.  Something things are not (currently) supported,
+including the %define and %include directives.  The %import directive
+is supported.
+
+This module provides basic support for loading configuration,
+inspecting and modifying it, and re-serializing the result.
+
+  >>> from ZConfig import schemaless
+
+There is a single function which loads configuration data from a file
+open for reading.  Let's take a look at this, and what it returns::
+
+  >>> config_text = '''
+  ...
+  ... some-key some-value
+  ...
+  ... some-key another-value
+  ...
+  ... <section>
+  ...   key1 value1.1
+  ...   key1 value1.2
+  ...   key2 value2
+  ...
+  ...   <deeper>
+  ...     another key
+  ...     another value
+  ...   </deeper>
+  ... </section>
+  ...
+  ... another-key  whee!
+  ...
+  ...
+  ... <another named>
+  ...   nothing here
+  ... </another>
+  ...
+  ... '''
+
+  >>> from io import StringIO
+  >>> config = schemaless.loadConfigFile(StringIO(config_text))
+
+The `config` object is a mapping from top-level keys to lists of
+values::
+
+  >>> config["some-key"]
+  ['some-value', 'another-value']
+
+  >>> config["another-key"]
+  ['whee!']
+
+  >>> config["no-such-key-in-the-config"]
+  Traceback (most recent call last):
+  KeyError: 'no-such-key-in-the-config'
+
+  >>> lst = list(config)
+  >>> lst.sort()
+  >>> lst
+  ['another-key', 'some-key']
+
+There is also a ``sections`` attribute that lists child sections::
+
+  >>> len(config.sections)
+  2
+
+Let's take a look at one of the sections.  Like the top-level
+configuration, the section maps keys
+
+  >>> section = config.sections[0]
+
+  >>> section["key1"]
+  ['value1.1', 'value1.2']
+
+  >>> section["key2"]
+  ['value2']
+
+  >>> section["no-such-key-in-the-config"]
+  Traceback (most recent call last):
+  KeyError: 'no-such-key-in-the-config'
+
+  >>> lst = list(section)
+  >>> lst.sort()
+  >>> lst
+  ['key1', 'key2']
+
+Child sections are again available via the ``sections`` attribute::
+
+  >>> len(section.sections)
+  1
+
+In addition, the section has ``type`` and ``name`` attributes that
+record the type and name of the section as ZConfig understands them::
+
+  >>> section.type
+  'section'
+
+  >>> print(section.name)
+  None
+
+Let's look at the named section from our example, so we can see the
+name::
+
+  >>> section = config.sections[1]
+  >>> section.type
+  'another'
+  >>> section.name
+  'named'
+
+We can also mutate the configuration, adding new keys and values as
+desired::
+
+  >>> config["new-key"] = ["new-value-1", "new-value-2"]
+  >>> config["some-key"].append("third-value")
+
+New sections can also be added::
+
+  >>> section = schemaless.Section("sectiontype", "my-name")
+  >>> section["key"] = ["value"]
+  >>> config.sections.insert(1, section)
+
+The configuration can be re-serialized using ``str()``::
+
+  >>> print(str(config))
+  another-key whee!
+  new-key new-value-1
+  new-key new-value-2
+  some-key some-value
+  some-key another-value
+  some-key third-value
+  <BLANKLINE>
+  <section>
+    key1 value1.1
+    key1 value1.2
+    key2 value2
+  <BLANKLINE>
+    <deeper>
+      another key
+      another value
+    </deeper>
+  </section>
+  <BLANKLINE>
+  <sectiontype my-name>
+    key value
+  </sectiontype>
+  <BLANKLINE>
+  <another named>
+    nothing here
+  </another>
+  <BLANKLINE>
+
+Note that some adjustments have been made:
+
+- key/value pairs come before child sections
+
+- keys are sorted at each level
+
+- blank lines are removed, with new blank lines inserted to preserve
+  some semblance of readability
+
+These are all presentation changes, but not essential changes to the
+configuration data.  The ordering of sections is not modified in
+rendering, nor are the values for a single key re-ordered within a
+section or top-level configuration.
+
+
+Support for %import
+-------------------
+
+Imports are supported, and are re-ordered in much the same way that
+other elements of a configuration are::
+
+  >>> config_text = '''
+  ...
+  ... %import some.package
+  ...
+  ... <section>
+  ...
+  ...   %import another.package
+  ...
+  ...   <another>
+  ...     some value
+  ...   </another>
+  ...
+  ... </section>
+  ...
+  ... some-key some-value
+  ...
+  ... '''
+
+  >>> config = schemaless.loadConfigFile(StringIO(config_text))
+
+  >>> print(config)
+  %import some.package
+  %import another.package
+  <BLANKLINE>
+  some-key some-value
+  <BLANKLINE>
+  <section>
+    <another>
+      some value
+    </another>
+  </section>
+  <BLANKLINE>
+
+The imports are also available as the ``imports`` attribute of the
+configuration object::
+
+  >>> config.imports
+  ('some.package', 'another.package')
+
+Multiple imports of the same name are removed::
+
+  >>> config_text = '''
+  ...
+  ... %import some.package
+  ... %import another.package
+  ... %import some.package
+  ...
+  ... '''
+
+  >>> config = schemaless.loadConfigFile(StringIO(config_text))
+
+  >>> print(config)
+  %import some.package
+  %import another.package
+  <BLANKLINE>
+
+  >>> config.imports
+  ('some.package', 'another.package')
+
+
+Limitations
+-----------
+
+There are some limitations of handling ZConfig-based configurations
+using the ``ZConfig.schemaless`` module.  Some of these are
+implementation issues, and may be corrected in the future:
+
+- %define is not supported.
+
+- %include is not supported.
+
+Others are a function of not processing the schema, and can't easily
+be avoided:
+
+- normalization of keys based on keytypes specified in the <schema> or
+  <sectiontype> elements of the schema if not performed.
+
+  If the transformation of a key might affect the behavior controlled
+  by the resulting configuration, the generated configuration may not
+  be equivalent.  Examples of this are unusual, but exist.
+
+Limitations related to the non-processing of the schema cannot be
+detected by the ``ZConfig.schemaless``, so no errors are reported in
+these situations.
+
+For the strictly syntactic limitations, we do get errors when the
+input data requires they be supported.  Let's look at both the %define
+and %include handling.
+
+When %define is used in the input configuration, an exception is
+raised when loading the configuration::
+
+  >>> config_text = '''
+  ...
+  ... %define  somename  somevalue
+  ...
+  ... '''
+
+  >>> schemaless.loadConfigFile(StringIO(config_text))
+  Traceback (most recent call last):
+  NotImplementedError: defines are not supported
+
+A similar exception is raised for %include::
+
+  >>> config_text = '''
+  ...
+  ... %include  some/other/file.conf
+  ...
+  ... '''
+
+  >>> schemaless.loadConfigFile(StringIO(config_text))
+  Traceback (most recent call last):
+  NotImplementedError: includes are not supported

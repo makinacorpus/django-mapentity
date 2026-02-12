@@ -1,0 +1,185 @@
+FileStorage-specific iterator tests
+===================================
+
+The FileStorage iterator has some special features that deserve some
+special tests.
+
+We'll make some assertions about time, so we'll take it over:
+
+    >>> now = 1229959248
+    >>> def faux_time():
+    ...     global now
+    ...     now += 0.1
+    ...     return now
+    >>> import time
+    >>> time_time = time.time
+    >>> if isinstance(time,type):
+    ...    time.time = staticmethod(faux_time) # Jython
+    ... else:
+    ...     time.time = faux_time
+
+Commit a bunch of transactions:
+
+    >>> import ZODB.FileStorage, transaction
+    >>> db = ZODB.DB('data.fs')
+    >>> tids = [db.storage.lastTransaction()]
+    >>> poss = [db.storage._pos]
+    >>> conn = db.open()
+    >>> for i in range(100):
+    ...     conn.root()[i] = conn.root().__class__()
+    ...     transaction.commit()
+    ...     tids.append(db.storage.lastTransaction())
+    ...     poss.append(db.storage._pos)
+
+Deciding where to start
+-----------------------
+
+By default, we start at the beginning:
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs')
+    >>> it.next().tid == tids[0]
+    True
+
+    >>> it.close()
+
+The file iterator has an optimization to deal with large files.  It
+can serarch from either the front or the back of the file, depending
+on the starting transaction given.  To see this, we'll turn on debug
+logging:
+
+    >>> import logging, sys
+    >>> old_log_level = logging.getLogger().getEffectiveLevel()
+    >>> old_log_disabled = logging.getLogger().disabled
+    >>> logging.getLogger().setLevel(logging.DEBUG)
+    >>> logging.getLogger().disabled = False
+    >>> handler = logging.StreamHandler(sys.stdout)
+    >>> logging.getLogger().addHandler(handler)
+
+If we specify a start transaction, we'll scan forward or backward, as
+seems best and set the next record to that:
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[0])
+    >>> it.next().tid == tids[0]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[1])
+    ... # doctest: +ELLIPSIS
+    Scan forward data.fs:<OFFSET> looking for ...
+    >>> it.next().tid == tids[1]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[30])
+    ... # doctest: +ELLIPSIS
+    Scan forward data.fs:<OFFSET> looking for ...
+    >>> it.next().tid == tids[30]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[70])
+    ... # doctest: +ELLIPSIS
+    Scan backward data.fs:<OFFSET> looking for ...
+    >>> it.next().tid == tids[70]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[-2])
+    ... # doctest: +ELLIPSIS
+    Scan backward data.fs:<OFFSET> looking for ...
+    >>> it.next().tid == tids[-2]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[-1])
+    >>> it.next().tid == tids[-1]
+    True
+
+    >>> it.close()
+
+We can also supply a file position.  This can speed up finding the
+starting point, or just pick up where another iterator left off:
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', pos=poss[50])
+    >>> it.next().tid == tids[51]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[0], pos=4)
+    >>> it.next().tid == tids[0]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[-1], pos=poss[-2])
+    >>> it.next().tid == tids[-1]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[50], pos=poss[50])
+    ... # doctest: +ELLIPSIS
+    Scan backward data.fs:<OFFSET> looking for ...
+    >>> it.next().tid == tids[50]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[49], pos=poss[50])
+    ... # doctest: +ELLIPSIS
+    Scan backward data.fs:<OFFSET> looking for ...
+    >>> it.next().tid == tids[49]
+    True
+
+    >>> it.close()
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', tids[51], pos=poss[50])
+    >>> it.next().tid == tids[51]
+    True
+
+    >>> it.close()
+
+    >>> logging.getLogger().setLevel(old_log_level)
+    >>> logging.getLogger().disabled = old_log_disabled
+    >>> logging.getLogger().removeHandler(handler)
+
+
+If a starting transaction is before the first transaction in the file,
+then the first transaction is returned.
+
+    >>> from ZODB.utils import p64, u64
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', p64(u64(tids[0])-1))
+    >>> it.next().tid == tids[0]
+    True
+
+    >>> it.close()
+
+If it is after the last transaction, then iteration be empty:
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', p64(u64(tids[-1])+1))
+    >>> list(it)
+    []
+
+    >>> it.close()
+
+Even if we write more transactions:
+
+    >>> it = ZODB.FileStorage.FileIterator('data.fs', p64(u64(tids[-1])+1))
+    >>> for i in range(10):
+    ...     conn.root()[i] = conn.root().__class__()
+    ...     transaction.commit()
+    >>> list(it)
+    []
+
+    >>> it.close()
+
+.. Cleanup
+
+    >>> time.time = time_time
+    >>> db.close()

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="1" xmlns="http://www.w3.org/2000/svg" x="0" y="0"
+ viewBox="0 0 15 15" style="enable-background:new 0 0 15 15" xml:space="preserve">
+<style type="text/css">
+.st0{fill:none;stroke:|mainColor|;stroke-width:0.66}
+.st1{fill:none;stroke:|flashyColor|;stroke-width:0.66}
+.st2{fill:|flashyColor|}
+.st3{fill:none;stroke:|flashyColor|;stroke-width:0.66}
+</style>
+<g><defs><rect id="I1" y="0" width="15" height="15"/></defs>
+<path class="st0" d="M14.7,7.5c0,4-3.2,7.2-7.2,7.2c-4,0-7.2-3.2-7.2-7.2s3.2-7.2,7.2-7.2C11.5,0.3,14.7,3.5,14.7,7.5z"/>
+</g>
+<path class="st1" d="M5.5,10.7h4.3 M5.9,5.4h1.7v5.3"/>
+<g><defs><rect id="I3" y="0" width="15" height="15"/></defs>
+<path class="st2" d="M7.7,3.6c0,0.1-0.1,0.2-0.2,0.2c-0.1,0-0.2-0.1-0.2-0.2c0-0.1,0.1-0.2,0.2-0.2C7.6,3.4,7.7,3.5,7.7,3.6"/>
+<path class="st3" d="M7.7,3.6c0,0.1-0.1,0.2-0.2,0.2c-0.1,0-0.2-0.1-0.2-0.2c0-0.1,0.1-0.2,0.2-0.2C7.6,3.4,7.7,3.5,7.7,3.6z"/>
+</g>
+</svg>
