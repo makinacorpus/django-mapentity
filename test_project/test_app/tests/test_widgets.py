@@ -87,6 +87,14 @@ class MapWidgetTestCase(TestCase):
         attrs = widget._get_attrs("myfield")
         self.assertEqual(attrs["geom_type"], "LINESTRING")
 
+    def test_geom_type_constructor_with_none(self):
+        """MapWidget with geom_type=None should not set attrs"""
+        widget = MapWidget(geom_type=None)
+        # When geom_type is None, attrs should not have geom_type key initially
+        # (it will get set by _get_attrs from self.geom_type)
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
+
     def test_geom_type_constructor_not_overridden_by_form(self):
         """geom_type passed to constructor should not be overridden by setdefault in forms."""
         widget = MapWidget(geom_type="LINESTRING")
