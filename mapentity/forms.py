@@ -196,12 +196,19 @@ class MapEntityForm(TranslatedModelForm):
             # mapping champs relationnels (FK, M2M)
             for mtype, widget_cls in self.default_widgets.items():
                 if isinstance(model_field, mtype):
-                    form_field = _build_select2_widget(form_field, widget_cls, remote_queryset(model_field))
+                    form_field = _build_select2_widget(
+                        form_field, widget_cls, remote_queryset(model_field)
+                    )
                     break
 
             # manage extra fields that are not in the model
-            if isinstance(form_field, forms.ModelMultipleChoiceField) and model_field is None:
-                form_field = _build_select2_widget(form_field, autocomplete.Select2Multiple, form_field.queryset)
+            if (
+                isinstance(form_field, forms.ModelMultipleChoiceField)
+                and model_field is None
+            ):
+                form_field = _build_select2_widget(
+                    form_field, autocomplete.Select2Multiple, form_field.queryset
+                )
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(
