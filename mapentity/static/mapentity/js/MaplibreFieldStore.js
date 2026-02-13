@@ -1,5 +1,6 @@
 class MaplibreFieldStore {
     constructor(fieldId, options = {}) {
+        this.fieldId = fieldId;
         this.formField = document.getElementById(fieldId);
         this.options = { ...options };
     }

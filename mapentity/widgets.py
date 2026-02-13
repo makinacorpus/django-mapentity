@@ -17,6 +17,12 @@ class MapWidget(BaseGeometryWidget):
     display_raw = False
     modifiable = True
 
+    def __init__(self, attrs=None, geom_type=None):
+        if geom_type:
+            attrs = attrs or {}
+            attrs["geom_type"] = geom_type
+        super().__init__(attrs=attrs)
+
     def serialize(self, value):
         """
         Sérialise la valeur géométrique en GeoJSON.
@@ -25,7 +31,13 @@ class MapWidget(BaseGeometryWidget):
             if hasattr(value, "transform"):
                 value = value.clone()
                 value.transform(API_SRID)
-            return value.geojson if hasattr(value, "geojson") else ""
+            if hasattr(value, "geojson"):
+                return value.geojson
+            # When form is re-rendered after validation error, value is a raw
+            # GeoJSON string from POST data — return it as-is.
+            if isinstance(value, str):
+                return value
+            return ""
         return ""
 
     def _get_attrs(self, name, attrs=None):
@@ -37,11 +49,6 @@ class MapWidget(BaseGeometryWidget):
             "geom_type", getattr(self, "geom_type", "GEOMETRY")
         )
         attrs = attrs or {}
-        # Normalisation du type de géométrie
-        if self.geom_type == "GEOMETRY":
-            attrs["geom_type"] = "Geometry"
-        else:
-            attrs["geom_type"] = self.geom_type
         # Génération des IDs pour les éléments HTML et JavaScript
         map_id_css = slugify(attrs.get("id", name))
         map_id = map_id_css.replace("-", "_")
@@ -51,11 +58,16 @@ class MapWidget(BaseGeometryWidget):
                 "id_css": map_id_css,
                 "id_map": map_id_css + "_map",
                 "modifiable": self.modifiable,
-                "target_map": attrs.get(
-                    "target_map", getattr(self, "target_map", None)
-                ),
+                "geom_type": self.geom_type,
             }
         )
+        # Propager target_map et custom_icon depuis self.attrs vers le contexte du template
+        if self.attrs.get("target_map"):
+            attrs["target_map"] = self.attrs["target_map"]
+        if self.attrs.get("custom_icon"):
+            attrs["custom_icon"] = self.attrs["custom_icon"]
+        if self.attrs.get("field_label"):
+            attrs["field_label"] = self.attrs["field_label"]
         return attrs
 
     def get_context(self, name, value, attrs):

@@ -159,7 +159,18 @@ class MapEntityForm(TranslatedModelForm):
                                 )
                             ):
                                 formfield.widget.modifiable = False
-                        formfield.widget.attrs["geom_type"] = formfield.geom_type
+                    # For all MapWidgets: inject geom_type and field_label
+                    if isinstance(modelfield, GeometryField) and isinstance(
+                        formfield.widget, MapWidget
+                    ):
+                        # BaseGeometryWidget sets geom_type="GEOMETRY" by default in attrs.
+                        # Only override if it's still the default (not explicitly set by user).
+                        current_geom_type = formfield.widget.attrs.get("geom_type")
+                        if current_geom_type is None or current_geom_type == "GEOMETRY":
+                            formfield.widget.attrs["geom_type"] = formfield.geom_type
+                        formfield.widget.attrs.setdefault(
+                            "field_label", str(modelfield.verbose_name)
+                        )
                 except FieldDoesNotExist:
                     pass
 
@@ -225,6 +236,16 @@ class MapEntityForm(TranslatedModelForm):
         # Replace native fields in Crispy layout by translated fields
         fieldslayout = self.__replace_translatable_fields(fieldslayout)
 
+        # Separate primary geomfields from secondary ones (those with target_map)
+        primary_geomfields = []
+        secondary_geomfields = []
+        for gf in self.geomfields:
+            widget = self.fields[gf].widget if gf in self.fields else None
+            if widget and getattr(widget, "attrs", {}).get("target_map"):
+                secondary_geomfields.append(gf)
+            else:
+                primary_geomfields.append(gf)
+
         has_geomfield = len(self.geomfields) > 0
         leftpanel_css = "col-12"
         if has_geomfield:
@@ -232,8 +253,20 @@ class MapEntityForm(TranslatedModelForm):
         if self.leftpanel_scrollable:
             leftpanel_css += " scrollable"
 
+        # Secondary geomfields are rendered as raw HTML (not crispyfied)
+        # and placed hidden in the left panel
+        secondary_fields_html = ""
+        for gf in secondary_geomfields:
+            secondary_fields_html += (
+                f'<div style="display:none;">{{{{ form.{gf} }}}}</div>'
+            )
+
+        leftpanel_contents = list(fieldslayout)
+        if secondary_fields_html:
+            leftpanel_contents.append(HTML(secondary_fields_html))
+
         leftpanel = Div(
-            *fieldslayout,
+            *leftpanel_contents,
             css_class=leftpanel_css,
             css_id="modelfields",
         )
@@ -242,7 +275,7 @@ class MapEntityForm(TranslatedModelForm):
         if has_geomfield:
             rightpanel = (
                 Div(
-                    *self.geomfields,
+                    *primary_geomfields,
                     css_class="col-12 col-sm-6 col-lg-7",
                     css_id="geomfield",
                 ),

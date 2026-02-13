@@ -14,10 +14,10 @@ describe('MultiPointModel - MultiPoint geometry', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
         // Should have marker button for MultiPoint
-        cy.get('#id_draw_marker').should('exist')
+        cy.get('#id_geom_draw_marker').should('exist')
         // Should NOT have line or polygon buttons (only points allowed)
-        cy.get('#id_draw_line').should('not.exist')
-        cy.get('#id_draw_polygon').should('not.exist')
+        cy.get('#id_geom_draw_line').should('not.exist')
+        cy.get('#id_geom_draw_polygon').should('not.exist')
     })
 
     it('should create entity with single point in MultiPointModel', {retries: 2}, () => {
@@ -27,7 +27,7 @@ describe('MultiPointModel - MultiPoint geometry', () => {
         cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName)
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist')
 
-        cy.get('#id_draw_marker').click()
+        cy.get('#id_geom_draw_marker').click()
         cy.get('.maplibregl-canvas').click(400, 300)
 
         // check there is one feature in the MultiPoint
@@ -53,7 +53,7 @@ describe('MultiPointModel - MultiPoint geometry', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
         // Draw first point
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(400, 300);
 
         // Draw second point
@@ -91,7 +91,7 @@ describe('MultiPointModel - Edit geometry', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
 
         // Draw two points
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
         cy.get('.maplibregl-canvas').click(400, 300);
         cy.get('.maplibregl-canvas').click(300, 200, {force: true});
 
@@ -122,10 +122,10 @@ describe('MultiPointModel - Edit geometry', () => {
         cy.assertGeomanFeaturesCount(2);
 
         // Verify draw marker button is visible in edit mode
-        cy.get('#id_draw_marker', {timeout: 10000}).should('be.visible');
+        cy.get('#id_geom_draw_marker', {timeout: 10000}).should('be.visible');
 
         // Click the draw button to add more points
-        cy.get('#id_draw_marker').click();
+        cy.get('#id_geom_draw_marker').click();
 
         // Draw a new point
         cy.get('.maplibregl-canvas').click(200, 200);

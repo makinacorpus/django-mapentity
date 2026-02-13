@@ -10,11 +10,14 @@ API_SRID = 4326
 # Styles par défaut
 _DEFAULT_MAP_STYLES = {
     "detail": {
-        "weight": 5,
+        "weight": 10,
         "opacity": 1,
+        "line-cap": "round",
         "color": "mediumpurple",
-        "arrowColor": "#FF5E00",
-        "arrowSize": 8,
+        "arrowColor": "#000000",
+        "arrowSize": 0.5,
+        "arrowOpacity": 1,
+        "arrowSpacing": 20,
     },
     "others": {"opacity": 0.9, "fillOpacity": 0.5, "color": "yellow"},
     "filelayer": {

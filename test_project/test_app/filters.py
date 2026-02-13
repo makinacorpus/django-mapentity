@@ -8,6 +8,7 @@ from .models import (
     DollModel,
     DummyModel,
     ManikinModel,
+    MultiGeomModel,
     MushroomSpot,
     Road,
     Sector,
@@ -56,6 +57,12 @@ class SectorFilterSet(MapEntityFilterSet):
     class Meta:
         model = Sector
         fields = ("code", "name")
+
+
+class MultiGeomModelFilterSet(MapEntityFilterSet):
+    class Meta:
+        model = MultiGeomModel
+        fields = ("id", "name")
 
 
 class ComplexModelFilterSet(MapEntityFilterSet):
