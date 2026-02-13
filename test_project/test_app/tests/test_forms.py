@@ -16,7 +16,10 @@ class DummyForm(MapEntityForm):
 
 
 class GeopointForm(MapEntityForm):
-    extra_field = forms.CharField()
+    extra_field = forms.ModelMultipleChoiceField(
+        label="Extra field",
+        queryset=DummyModel.objects.all(),
+    )
 
     class Meta:
         model = GeoPoint
@@ -69,12 +72,18 @@ class MapEntityFormTest(TestCase):
             isinstance(form.fields["road"].widget, autocomplete.ListSelect2)
         )
 
+    def test_ModelMultipleChoiceField_widget(self):
+        # Test that ModelMultipleChoiceField have select2 widget
+        form = GeopointForm()
+        self.assertIn("extra_field", form.fields)
+        self.assertTrue(
+            isinstance(form.fields["extra_field"].widget, autocomplete.Select2Multiple)
+        )
+
     def test_do_not_change_unwanted_widgets(self):
         form = GeopointForm()
         self.assertIn("name_en", form.fields)
         self.assertTrue(isinstance(form.fields["name_en"].widget, forms.TextInput))
-        self.assertIn("extra_field", form.fields)
-        self.assertTrue(isinstance(form.fields["extra_field"].widget, forms.TextInput))
 
 
 class MapEntityRichTextFormTest(TestCase):

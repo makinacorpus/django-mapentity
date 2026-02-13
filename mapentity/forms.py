@@ -177,24 +177,31 @@ class MapEntityForm(TranslatedModelForm):
                     else:
                         formfield.help_text = textfield_help_text
 
+        def _build_select2_widget(form_field, widget_cls, queryset):
+            attrs = getattr(form_field.widget, "attrs", {}).copy()
+            attrs.setdefault("data-theme", "bootstrap4")
+            attrs.setdefault("data-width", "100%")
+            attrs["data-allow-clear"] = "true"
+            form_field.widget = widget_cls(attrs=attrs)
+            form_field.queryset = queryset
+            return form_field
+
         for name, form_field in list(self.fields.items()):
             try:
                 model_field = model._meta.get_field(name)
+
             except Exception:
                 model_field = None
-
-            if model_field is None:
-                continue
 
             # mapping champs relationnels (FK, M2M)
             for mtype, widget_cls in self.default_widgets.items():
                 if isinstance(model_field, mtype):
-                    # garde les attrs existants
-                    attrs = getattr(form_field.widget, "attrs", {}).copy()
-                    attrs.setdefault("class", "form-control")
-                    form_field.widget = widget_cls(attrs=attrs)
-                    form_field.queryset = remote_queryset(model_field)
+                    form_field = _build_select2_widget(form_field, widget_cls, remote_queryset(model_field))
                     break
+
+            # manage extra fields that are not in the model
+            if isinstance(form_field, forms.ModelMultipleChoiceField) and model_field is None:
+                form_field = _build_select2_widget(form_field, autocomplete.Select2Multiple, form_field.queryset)
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(
@@ -245,6 +252,7 @@ class MapEntityForm(TranslatedModelForm):
                 for fl in self.orig_fields
                 if fl not in self.geomfields and fl not in translated_names
             ]
+
         # Replace native fields in Crispy layout by translated fields
         fieldslayout = self.__replace_translatable_fields(fieldslayout)
 

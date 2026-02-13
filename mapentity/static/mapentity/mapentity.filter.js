@@ -113,7 +113,7 @@ MapEntity.TogglableFilter = L.Class.extend({
                         callback.apply();
                     }
                     $('select').each(function() {
-                        $(this).select2({allowClear: true});
+                        $(this).select2({allowClear: true, theme: 'bootstrap4',});
                     });
                 })
                 .fail(xhr => console.error('Error:', xhr.status));
