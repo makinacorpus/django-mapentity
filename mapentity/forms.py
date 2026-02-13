@@ -203,7 +203,7 @@ class MapEntityForm(TranslatedModelForm):
 
             # manage extra fields that are not in the model
             if (
-                isinstance(form_field, (forms.ModelMultipleChoiceField, forms.MultipleChoiceFilter))
+                isinstance(form_field, (forms.ModelMultipleChoiceField, forms.MultipleChoiceField))
                 and model_field is None
             ):
                 form_field = _build_select2_widget(
