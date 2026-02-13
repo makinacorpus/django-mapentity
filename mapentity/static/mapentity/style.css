@@ -724,7 +724,7 @@ label.requiredField .asteriskField {
     flex-grow: 1;
 }
 .form-horizontal .controls span {
-    font-size: .75rem;
+    font-size: 1rem;
 }
 
 @media (min-width: 768px) {
@@ -803,8 +803,6 @@ label.requiredField .asteriskField {
     border-color: #dc3545!important;
 
 }
-
-
 
 /*
  * Inline formsets
@@ -971,8 +969,7 @@ TODO: please help;
     z-index: 9999 !important;
 }
 
-#modelfields .custom-select {
+.select2-selection.custom-select {
     padding: 0 !important;
-    font-size: 1rem;
-    border: 1px solid #ced4da;
+    background-image: none;
 }
