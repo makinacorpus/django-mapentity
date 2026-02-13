@@ -37,7 +37,33 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        map.getMap().on('load', function() {
+        map.getMap().on('load', async function() {
+
+            // Chargement des base layers en premier depuis les settings
+            const baseLayersData = window.SETTINGS.map?.baseLayers || {};
+            const { base_layers, overlay_layers } = baseLayersData;
+
+            if (base_layers) {
+                for (const layer of base_layers) {
+                    await layerManager.addLayerFromUrl(layer.name, {
+                        id: 'mapbox-base-' + layer.slug,
+                        url: layer.url,
+                        isBaseLayer: true,
+                        attribution: layer.attribution || ''
+                    });
+                }
+            }
+
+            if (overlay_layers) {
+                for (const layer of overlay_layers) {
+                    await layerManager.addLayerFromUrl(layer.name, {
+                        id: 'mapbox-overlay-' + layer.slug,
+                        url: layer.url,
+                        isBaseLayer: false,
+                        attribution: layer.attribution || ''
+                    });
+                }
+            }
 
             map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
 
@@ -48,45 +74,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: context.viewname });
             }
 
-
-            // Load base layers from settings
-            const baseLayers = window.SETTINGS.map?.baseLayers || {};
-            const { base_layers, overlay_layers } = baseLayers;
-
-            async function loadBaseLayers() {
-                if (base_layers) {
-                    for (const layer of base_layers) {
-                        await layerManager.addLayerFromUrl(layer.name, {
-                            id: 'mapbox-base-' + layer.slug,
-                            url: layer.url,
-                            isBaseLayer: true,
-                            attribution: layer.attribution || ''
-                        });
-                    }
-                }
-
-                if (overlay_layers) {
-                    for (const layer of overlay_layers) {
-                        await layerManager.addLayerFromUrl(layer.name, {
-                            id: 'mapbox-overlay-' + layer.slug,
-                            url: layer.url,
-                            isBaseLayer: false,
-                            attribution: layer.attribution || ''
-                        });
-                    }
-                }
-                mapentityContext.restoreFullContext(map.getMap(), null, {
-                    prefix: context.viewname,
-                    filter: 'mainfilter',
-                    datatable: window.MapEntity.dt,
-                    objectsname: context.modelname,
-                    // On passe load_filter_form si on est en liste
-                    load_filter_form: (window.MapEntity.togglableFilter && window.MapEntity.mapsync) ?
-                        window.MapEntity.togglableFilter.load_filter_form.bind(window.MapEntity.togglableFilter, window.MapEntity.mapsync) :
-                        async () => {},
-                });
-            }
-            loadBaseLayers().catch(err => console.error('Failed to load base layers:', err));
+            mapentityContext.restoreFullContext(map.getMap(), null, {
+                prefix: context.viewname,
+                filter: 'mainfilter',
+                datatable: window.MapEntity.dt,
+                objectsname: context.modelname,
+                // On passe load_filter_form si on est en liste
+                load_filter_form: (window.MapEntity.togglableFilter && window.MapEntity.mapsync) ?
+                    window.MapEntity.togglableFilter.load_filter_form.bind(window.MapEntity.togglableFilter, window.MapEntity.mapsync) :
+                    async () => {},
+            });
 
             const mergedData = Object.assign({}, context, {
                 map,
@@ -358,6 +355,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             'icon-image': 'arrow-icon', // Assurez-vous d'avoir une icône d'arrière-plan en forme de flèche dans votre style
                             'icon-size': arrowSize,
                             'icon-rotate': ['get', 'bearing'], // Rotation basée sur la direction de la ligne
+                                                            'icon-ignore-placement': true,
+
+                                // Optionnel : permet aux icônes de dépasser des bords de la tuile
+                                'icon-allow-overlap': true,
+                            'icon-offset': [0, 5],
                         },
                         paint: {
                             'icon-color': arrowColor,

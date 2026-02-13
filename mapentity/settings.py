@@ -15,9 +15,9 @@ _DEFAULT_MAP_STYLES = {
         "line-cap": "round",
         "color": "mediumpurple",
         "arrowColor": "#000000",
-        "arrowSize": 0.5,
+        "arrowSize": 0.3,
         "arrowOpacity": 1,
-        "arrowSpacing": 20,
+        "arrowSpacing": 6,
     },
     "others": {"opacity": 0.9, "fillOpacity": 0.5, "color": "yellow"},
     "filelayer": {
@@ -132,6 +132,7 @@ app_settings = dict(
 _MAP_STYLES = deepcopy(_DEFAULT_MAP_STYLES)
 _MAP_STYLES.update(app_settings["MAP_STYLES"])
 app_settings["MAP_STYLES"] = _MAP_STYLES
+
 
 for name, override in getattr(settings, "MAP_STYLES", {}).items():
     merged = app_settings["MAP_STYLES"].get(name, {})
