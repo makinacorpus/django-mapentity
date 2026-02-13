@@ -20,7 +20,7 @@ class SelectMultipleWithPopTestCase(TestCase):
     def test_widget_rendering(self):
         widget = SelectMultipleWithPop(add_url="/add/")
         output = widget.render("select-multiple", value="value")
-        self.assertIn('<select name="select-multiple" multiple>', output)
+        self.assertIn('<select name="select-multiple" data-autocomplete-light-function="select2" data-autocomplete-light-language="en" multiple>', output)
         self.assertIn("</select>", output)
         self.assertIn('href="/add/"', output)
         self.assertIn('id="add_id_select-multiple"', output)
