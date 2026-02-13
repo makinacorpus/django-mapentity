@@ -1,13 +1,11 @@
 describe('Layer Switcher - Base Layer and Overlay', () => {
     beforeEach(() => {
-        cy.intercept('/mapbox/mapbox-baselayers/').as('baselayers')
         cy.login()
         cy.mockTiles()
         cy.visit('/dummymodel/list/')
         // Wait for map to be ready
         cy.get('#mainmap, .maplibre-map, .map-panel', {timeout: 15000}).should('exist')
         // Wait for the layers API response to be fully loaded
-        cy.wait('@baselayers', {timeout: 15000})
     })
 
     it('should change base layer via layer switcher', () => {
