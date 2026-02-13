@@ -271,7 +271,6 @@ tr.selected-row td {
 .filter-set {
     font-weight: bold;
     color: black !important;
-    border: 2px solid black !important;
 }
 
 #maphead {
