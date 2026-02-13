@@ -972,4 +972,5 @@ TODO: please help;
 .select2-selection.custom-select {
     padding: 0 !important;
     background-image: none;
+    height: initial;
 }
