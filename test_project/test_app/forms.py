@@ -1,8 +1,6 @@
 from mapentity.forms import MapEntityForm
 from test_project.test_app.models import DummyModel, MushroomSpot, Road
 
-from django import forms
-
 
 class DummyModelForm(MapEntityForm):
     class Meta:

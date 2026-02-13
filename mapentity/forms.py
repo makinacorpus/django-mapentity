@@ -201,11 +201,11 @@ class MapEntityForm(TranslatedModelForm):
 
             # manage extra fields that are not in the model
             if model_field is None:
-                if (isinstance(form_field, forms.ModelMultipleChoiceField)):
+                if isinstance(form_field, forms.ModelMultipleChoiceField):
                     attrs = _build_select2_attrs(form_field)
                     form_field.widget = autocomplete.Select2Multiple(attrs=attrs)
                     form_field.queryset = form_field.queryset
-                elif (isinstance(form_field, forms.MultipleChoiceField)):
+                elif isinstance(form_field, forms.MultipleChoiceField):
                     attrs = _build_select2_attrs(form_field)
                     form_field.widget = autocomplete.Select2Multiple(attrs=attrs)
                     form_field.choices = form_field.choices
