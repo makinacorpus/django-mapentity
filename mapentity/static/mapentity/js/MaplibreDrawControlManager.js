@@ -276,12 +276,13 @@ class MaplibreDrawControlManager {
      * @private
      */
     _createFieldButtons(fieldId, opts, shapes) {
-        // Icônes SVG par défaut pour chaque shape
+        // Icônes SVG par défaut pour chaque shape (référencées depuis les fichiers statiques)
+        const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
         const defaultIcons = {
-            marker: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>',
-            line: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 20 12 8 20 16"/></svg>',
-            polygon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 18 20 6 20 2 8.5"/></svg>',
-            rectangle: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14"/></svg>',
+            marker: `<img src="${markersBase}marker.svg" width="18" height="18" alt="marker">`,
+            line: `<img src="${markersBase}line.svg" width="18" height="18" alt="line">`,
+            polygon: `<img src="${markersBase}polygon.svg" width="18" height="18" alt="polygon">`,
+            rectangle: `<img src="${markersBase}rectangle.svg" width="18" height="18" alt="rectangle">`,
         };
 
         // Libellés par défaut

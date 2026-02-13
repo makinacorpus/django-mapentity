@@ -330,16 +330,24 @@ document.addEventListener('DOMContentLoaded', function() {
                         type: 'geojson',
                         data: { type: 'Feature', geometry: geom, properties: {} }
                     });
-                    // load arrow-icon if not already loaded
-                    if (!mapInstance.hasImage('arrow-icon')) {
-                        const img = new Image(20, 20);
-                        img.onload = function() {
-                            mapInstance.addImage('arrow-icon', img);
-                        };
-
-                        img.src = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><polygon points="20,10 5,0 5,7 0,7 0,13 5,13 5,20" fill="#666"/></svg>');
-                    }
                     const {arrowSize, arrowColor, arrowOpacity, arrowSpacing } = window.SETTINGS.map.styles.detail;
+                // load arrow-icon if not already loaded
+                    if (!mapInstance.hasImage('arrow-icon')) {
+                        const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
+                        fetch(markersBase + 'arrow.svg')
+                            .then(r => r.text())
+                            .then(svg => {
+                                const coloredSvg = svg.replace('__COLOR__', arrowColor);
+                                const blob = new Blob([coloredSvg], { type: 'image/svg+xml' });
+                                const url = URL.createObjectURL(blob);
+                                const img = new Image(20, 20);
+                                img.onload = function() {
+                                    mapInstance.addImage('arrow-icon', img, { sdf: false });
+                                    URL.revokeObjectURL(url);
+                                };
+                                img.src = url;
+                            });
+                    }
 
                     mapInstance.addLayer({
                         id: 'detail-line-arrows-' + pkVal,
@@ -370,15 +378,17 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function _createEndpointMarker(mapInstance, lngLat, color) {
         const el = document.createElement('div');
-        el.innerHTML = '<svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">' +
-            '<path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 21.9 12.5 41 12.5 41S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0z" fill="' + color + '" stroke="#fff" stroke-width="1.5"/>' +
-            '<circle cx="12.5" cy="12.5" r="5" fill="#fff"/>' +
-            '</svg>';
         el.style.pointerEvents = 'none';
 
-        new maplibregl.Marker({ element: el, anchor: 'bottom' })
-            .setLngLat(lngLat)
-            .addTo(mapInstance);
+        const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
+        fetch(markersBase + 'pin.svg')
+            .then(r => r.text())
+            .then(svg => {
+                el.innerHTML = svg.replace('__COLOR__', color);
+                new maplibregl.Marker({ element: el, anchor: 'bottom' })
+                    .setLngLat(lngLat)
+                    .addTo(mapInstance);
+            });
     }
 
     // Écouteur pour la vue détail

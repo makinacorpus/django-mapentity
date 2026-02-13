@@ -97,6 +97,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
             maplibreConfig=app_settings["MAPLIBRE_CONFIG"],
             # extent=getattr(settings, 'LEAFLET_CONFIG', {}).get('SPATIAL_EXTENT'),
             styles=app_settings["MAP_STYLES"],
+            baseLayers=[],
         )
 
         # URLs

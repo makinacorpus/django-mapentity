@@ -430,6 +430,20 @@ class WidgetTargetMapAndCustomIconTest(TestCase):
         attrs = w._get_attrs("field")
         self.assertEqual(attrs.get("custom_icon"), "<svg>icon</svg>")
 
+    def test_custom_icon_from_static_path(self):
+        """When custom_icon is a static file path, its content is loaded."""
+        w = MapWidget(attrs={"custom_icon": "parking.svg"})
+        attrs = w._get_attrs("field")
+        icon = attrs.get("custom_icon")
+        self.assertIn("<svg", icon)
+        self.assertIn("P", icon)
+
+    def test_custom_icon_unknown_path_returned_as_is(self):
+        """When custom_icon path is not found in static files, return as-is."""
+        w = MapWidget(attrs={"custom_icon": "nonexistent.svg"})
+        attrs = w._get_attrs("field")
+        self.assertEqual(attrs.get("custom_icon"), "nonexistent.svg")
+
     def test_no_target_map_not_in_attrs(self):
         w = MapWidget()
         attrs = w._get_attrs("field")

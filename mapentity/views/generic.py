@@ -704,7 +704,9 @@ class MapEntityDetail(ModelViewMixin, DetailView):
             widget = widgets.get(field_name)
             custom_icon = None
             if widget and hasattr(widget, "attrs"):
-                custom_icon = widget.attrs.get("custom_icon")
+                from ..widgets import _resolve_custom_icon
+
+                custom_icon = _resolve_custom_icon(widget.attrs.get("custom_icon"))
 
             # Get the geometry value from the object
             geom_value = getattr(obj, field_name, None)
