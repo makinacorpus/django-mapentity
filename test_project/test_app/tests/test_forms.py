@@ -16,14 +16,19 @@ class DummyForm(MapEntityForm):
 
 
 class GeopointForm(MapEntityForm):
-    extra_field = forms.ModelMultipleChoiceField(
+    extra_field_queryset = forms.ModelMultipleChoiceField(
         label="Extra field",
         queryset=DummyModel.objects.all(),
     )
 
+    extra_field_choices = forms.MultipleChoiceField(
+        label="Extra field",
+        choices=[(1, "choice 1"), (2, "choice 2")]
+    )
+
     class Meta:
         model = GeoPoint
-        fields = ["located_in", "road", "name", "tags", "extra_field"]
+        fields = ["located_in", "road", "name", "tags", "extra_field_queryset", "extra_field_choices"]
 
 
 class MapEntityFormTest(TestCase):
@@ -75,9 +80,17 @@ class MapEntityFormTest(TestCase):
     def test_ModelMultipleChoiceField_widget(self):
         # Test that ModelMultipleChoiceField have select2 widget
         form = GeopointForm()
-        self.assertIn("extra_field", form.fields)
+        self.assertIn("extra_field_queryset", form.fields)
         self.assertTrue(
-            isinstance(form.fields["extra_field"].widget, autocomplete.Select2Multiple)
+            isinstance(form.fields["extra_field_queryset"].widget, autocomplete.Select2Multiple)
+        )
+
+    def test_MultipleChoiceField_widget(self):
+        # Test that MultipleChoiceField have select2 widget
+        form = GeopointForm()
+        self.assertIn("extra_field_choices", form.fields)
+        self.assertTrue(
+            isinstance(form.fields["extra_field_choices"].widget, autocomplete.Select2Multiple)
         )
 
     def test_do_not_change_unwanted_widgets(self):

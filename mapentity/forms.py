@@ -177,14 +177,12 @@ class MapEntityForm(TranslatedModelForm):
                     else:
                         formfield.help_text = textfield_help_text
 
-        def _build_select2_widget(form_field, widget_cls, queryset):
+        def _build_select2_attrs(form_field):
             attrs = getattr(form_field.widget, "attrs", {}).copy()
             attrs.setdefault("data-theme", "bootstrap4")
             attrs.setdefault("data-width", "100%")
             attrs["data-allow-clear"] = "true"
-            form_field.widget = widget_cls(attrs=attrs)
-            form_field.queryset = queryset
-            return form_field
+            return attrs
 
         for name, form_field in list(self.fields.items()):
             try:
@@ -196,19 +194,21 @@ class MapEntityForm(TranslatedModelForm):
             # mapping champs relationnels (FK, M2M)
             for mtype, widget_cls in self.default_widgets.items():
                 if isinstance(model_field, mtype):
-                    form_field = _build_select2_widget(
-                        form_field, widget_cls, remote_queryset(model_field)
-                    )
+                    attrs = _build_select2_attrs(form_field)
+                    form_field.widget = widget_cls(attrs=attrs)
+                    form_field.queryset = remote_queryset(model_field)
                     break
 
             # manage extra fields that are not in the model
-            if (
-                isinstance(form_field, (forms.ModelMultipleChoiceField, forms.MultipleChoiceField))
-                and model_field is None
-            ):
-                form_field = _build_select2_widget(
-                    form_field, autocomplete.Select2Multiple, form_field.queryset
-                )
+            if model_field is None:
+                if (isinstance(form_field, forms.ModelMultipleChoiceField)):
+                    attrs = _build_select2_attrs(form_field)
+                    form_field.widget = autocomplete.Select2Multiple(attrs=attrs)
+                    form_field.queryset = form_field.queryset
+                elif (isinstance(form_field, forms.MultipleChoiceField)):
+                    attrs = _build_select2_attrs(form_field)
+                    form_field.widget = autocomplete.Select2Multiple(attrs=attrs)
+                    form_field.choices = form_field.choices
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(
