@@ -271,7 +271,6 @@ tr.selected-row td {
 .filter-set {
     font-weight: bold;
     color: black !important;
-    border: 2px solid black !important;
 }
 
 #maphead {
@@ -724,7 +723,7 @@ label.requiredField .asteriskField {
     flex-grow: 1;
 }
 .form-horizontal .controls span {
-    font-size: .75rem;
+    font-size: 1rem;
 }
 
 @media (min-width: 768px) {
@@ -803,8 +802,6 @@ label.requiredField .asteriskField {
     border-color: #dc3545!important;
 
 }
-
-
 
 /*
  * Inline formsets
@@ -962,6 +959,7 @@ TODO: please help;
 .dynamic-form label.requiredField {
     font-weight: normal;
 }
+
 .select2-container {
     min-width: 150px !important;
 }
@@ -970,6 +968,12 @@ TODO: please help;
     z-index: 9999 !important;
 }
 
-#modelfields .custom-select {
-  padding: 0 !important;
+.select2-selection.custom-select {
+    padding: 0 !important;
+    background-image: none;
+    height: initial;
+}
+
+.select2-search__field{
+    width: 100%;
 }

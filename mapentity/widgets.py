@@ -1,3 +1,4 @@
+from dal import autocomplete
 from django.forms import widgets as django_widgets
 from django.template.loader import render_to_string
 from leaflet.forms.widgets import LeafletWidget
@@ -32,7 +33,7 @@ class HiddenGeometryWidget(django_widgets.HiddenInput):
         return value
 
 
-class SelectMultipleWithPop(django_widgets.SelectMultiple):
+class SelectMultipleWithPop(autocomplete.Select2Multiple):
     def __init__(self, *args, **kwargs):
         self.add_url = kwargs.pop("add_url")
         super().__init__(*args, **kwargs)
