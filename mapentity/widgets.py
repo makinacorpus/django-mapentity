@@ -20,7 +20,9 @@ def _resolve_custom_icon(icon_value):
     path = finders.find(icon_value)
     if path:
         with open(path, "rb") as f:  # Ensure the file is collected and available
-            return f.read().decode("utf-8")  # Return the content of the file as a string
+            return f.read().decode(
+                "utf-8"
+            )  # Return the content of the file as a string
     return icon_value
 
 
