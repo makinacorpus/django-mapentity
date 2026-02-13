@@ -974,3 +974,7 @@ TODO: please help;
     background-image: none;
     height: initial;
 }
+
+.select2-search__field{
+    width: 100%;
+}
