@@ -1,4 +1,5 @@
 from django.contrib.gis.forms.widgets import BaseGeometryWidget
+from django.contrib.staticfiles import finders
 from django.core import validators
 from django.forms import widgets as django_widgets
 from django.template.defaultfilters import slugify
@@ -6,6 +7,21 @@ from django.template.loader import render_to_string
 
 from .helpers import wkt_to_geom
 from .settings import API_SRID
+
+
+def _resolve_custom_icon(icon_value):
+    """Resolve a custom_icon value: if it's a static file path, read and return its content."""
+    if not icon_value:
+        return icon_value
+    # If it looks like HTML/SVG content (contains '<'), return as-is
+    if "<" in icon_value:
+        return icon_value
+    # Otherwise treat as a static file path
+    path = finders.find(icon_value)
+    if path:
+        with open(path, "rb") as f:  # Ensure the file is collected and available
+            return f.read().decode("utf-8")  # Return the content of the file as a string
+    return icon_value
 
 
 class MapWidget(BaseGeometryWidget):
@@ -65,7 +81,7 @@ class MapWidget(BaseGeometryWidget):
         if self.attrs.get("target_map"):
             attrs["target_map"] = self.attrs["target_map"]
         if self.attrs.get("custom_icon"):
-            attrs["custom_icon"] = self.attrs["custom_icon"]
+            attrs["custom_icon"] = _resolve_custom_icon(self.attrs["custom_icon"])
         if self.attrs.get("field_label"):
             attrs["field_label"] = self.attrs["field_label"]
         return attrs

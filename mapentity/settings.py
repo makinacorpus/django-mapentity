@@ -14,7 +14,7 @@ _DEFAULT_MAP_STYLES = {
         "opacity": 1,
         "line-cap": "round",
         "color": "mediumpurple",
-        "arrowColor": "#0000FF",
+        "arrowColor": "#000000",
         "arrowSize": 0.5,
         "arrowOpacity": 1,
         "arrowSpacing": 20,
