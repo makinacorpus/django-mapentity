@@ -7,20 +7,17 @@ models (latest_updated, prepare_map_image, LogEntry), forms, widgets.
 
 import json
 from io import StringIO
-from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.geos import (
-    GEOSGeometry,
     LineString,
-    MultiLineString,
     MultiPoint,
     Point,
     Polygon,
 )
 from django.core.files.storage import default_storage
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import TestCase
 
 from mapentity.helpers import (
     api_bbox,
@@ -28,7 +25,7 @@ from mapentity.helpers import (
     is_file_uptodate,
     wkt_to_geom,
 )
-from mapentity.models import LogEntry, MapEntityMixin
+from mapentity.models import LogEntry
 from mapentity.serializers.commasv import CSVSerializer
 from mapentity.serializers.fields import (
     MapentityDatatableBooleanField,
@@ -183,18 +180,14 @@ class GPXSerializerTest(TestCase):
 
         city = City.objects.create(
             name="Test City",
-            geom=Polygon(
-                ((0, 0), (0, 1), (1, 1), (1, 0), (0, 0)), srid=2154
-            ),
+            geom=Polygon(((0, 0), (0, 1), (1, 1), (1, 0), (0, 0)), srid=2154),
         )
         result = self._serialize_gpx([city], gpx_field="geom", model=City)
         # Polygon exterior ring is serialized as a track
         self.assertIn("trk", result)
 
     def test_point_gpx(self):
-        obj = DummyModel.objects.create(
-            name="Test Point", geom=Point(0, 0, srid=2154)
-        )
+        obj = DummyModel.objects.create(name="Test Point", geom=Point(0, 0, srid=2154))
         result = self._serialize_gpx([obj], gpx_field="geom", model=DummyModel)
         self.assertIn("wpt", result)
 
@@ -301,9 +294,7 @@ class MapEntityDetailContextTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_superuser(
-            "ctxtest", "ctx@test.com", "password"
-        )
+        cls.user = User.objects.create_superuser("ctxtest", "ctx@test.com", "password")
         cls.road = Road.objects.create(
             name="Context Road",
             geom=LineString((700000, 6600000), (700100, 6600100), srid=2154),
@@ -383,12 +374,8 @@ class ModelGetMapImageExtentTest(TestCase):
 class LogEntryPropertiesTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_superuser(
-            "logtest", "log@test.com", "password"
-        )
-        cls.obj = DummyModel.objects.create(
-            name="LogObj", geom=Point(0, 0, srid=2154)
-        )
+        cls.user = User.objects.create_superuser("logtest", "log@test.com", "password")
+        cls.obj = DummyModel.objects.create(name="LogObj", geom=Point(0, 0, srid=2154))
         from mapentity.models import ADDITION
 
         cls.log_entry = LogEntry.objects.log_action(
@@ -598,7 +585,9 @@ class MapEntityCreateFormInvalidTest(TestCase):
         msgs = [str(m) for m in response.context["messages"]]
         self.assertTrue(any("errors" in m for m in msgs))
         # Should have specific geometry field error messages
-        geom_msgs = [m for m in msgs if "geometry field" in m.lower() or "geom" in m.lower()]
+        geom_msgs = [
+            m for m in msgs if "geometry field" in m.lower() or "geom" in m.lower()
+        ]
         self.assertTrue(len(geom_msgs) >= 1)
 
     def test_form_invalid_no_geom_error(self):
@@ -608,7 +597,9 @@ class MapEntityCreateFormInvalidTest(TestCase):
             MultiGeomModel.get_add_url(),
             data={
                 "name": "",  # required field empty
-                "geom": LineString((700000, 6600000), (700100, 6600100), srid=2154).ewkt,
+                "geom": LineString(
+                    (700000, 6600000), (700100, 6600100), srid=2154
+                ).ewkt,
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -646,7 +637,9 @@ class MultiGeomModelCRUDTest(TestCase):
             name="Full",
             geom=LineString((700000, 6600000), (700100, 6600100), srid=2154),
             parking=Point(700050, 6600050, srid=2154),
-            points=MultiPoint(Point(700000, 6600000), Point(700100, 6600100), srid=2154),
+            points=MultiPoint(
+                Point(700000, 6600000), Point(700100, 6600100), srid=2154
+            ),
         )
         self.assertEqual(str(obj), "Full")
         self.assertIsNotNone(obj.geom)
