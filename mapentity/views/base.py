@@ -18,6 +18,7 @@ from django.views import View, static
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.views.generic.base import TemplateView
+from mapbox_baselayer.utils import get_map_base_layers
 from paperclip.settings import get_attachment_model, get_attachment_permission
 
 from mapentity import models as mapentity_models
@@ -97,7 +98,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
             maplibreConfig=app_settings["MAPLIBRE_CONFIG"],
             # extent=getattr(settings, 'LEAFLET_CONFIG', {}).get('SPATIAL_EXTENT'),
             styles=app_settings["MAP_STYLES"],
-            baseLayers=[],
+            baseLayers=get_map_base_layers(),
         )
 
         # URLs

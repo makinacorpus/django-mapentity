@@ -23,7 +23,8 @@ module.exports = defineConfig({
             '--use-gl=angle',
             '--use-angle=swiftshader',
             '--disable-dev-shm-usage',
-            '--ignore-certificate-errors'
+            '--ignore-certificate-errors',
+            '--enable-unsafe-swiftshader'
           )
         }
         if (browser.family === 'firefox') {

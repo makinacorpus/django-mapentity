@@ -49,45 +49,44 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
 
-            // Load Mapbox Baselayers
-            fetch('/mapbox/mapbox-baselayers/')
-                .then(response => response.json())
-                .then(async data => {
-                    const { base_layers, overlay_layers } = data;
+            // Load base layers from settings
+            const baseLayers = window.SETTINGS.map?.baseLayers || {};
+            const { base_layers, overlay_layers } = baseLayers;
 
-                    if (base_layers) {
-                        for (const layer of base_layers) {
-                            await layerManager.addLayerFromUrl(layer.name, {
-                                id: 'mapbox-base-' + layer.slug,
-                                url: layer.url,
-                                isBaseLayer: true,
-                                attribution: layer.attribution || ''
-                            });
-                        }
+            async function loadBaseLayers() {
+                if (base_layers) {
+                    for (const layer of base_layers) {
+                        await layerManager.addLayerFromUrl(layer.name, {
+                            id: 'mapbox-base-' + layer.slug,
+                            url: layer.url,
+                            isBaseLayer: true,
+                            attribution: layer.attribution || ''
+                        });
                     }
+                }
 
-                    if (overlay_layers) {
-                        for (const layer of overlay_layers) {
-                            await layerManager.addLayerFromUrl(layer.name, {
-                                id: 'mapbox-overlay-' + layer.slug,
-                                url: layer.url,
-                                isBaseLayer: false,
-                                attribution: layer.attribution || ''
-                            });
-                        }
+                if (overlay_layers) {
+                    for (const layer of overlay_layers) {
+                        await layerManager.addLayerFromUrl(layer.name, {
+                            id: 'mapbox-overlay-' + layer.slug,
+                            url: layer.url,
+                            isBaseLayer: false,
+                            attribution: layer.attribution || ''
+                        });
                     }
-                    mapentityContext.restoreFullContext(map.getMap(), null, {
-                        prefix: context.viewname,
-                        filter: 'mainfilter',
-                        datatable: window.MapEntity.dt,
-                        objectsname: context.modelname,
-                        // On passe load_filter_form si on est en liste
-                        load_filter_form: (window.MapEntity.togglableFilter && window.MapEntity.mapsync) ?
-                            window.MapEntity.togglableFilter.load_filter_form.bind(window.MapEntity.togglableFilter, window.MapEntity.mapsync) :
-                            async () => {},
-                    });
-                })
-                .catch(err => console.error('Failed to load mapbox baselayers:', err));
+                }
+                mapentityContext.restoreFullContext(map.getMap(), null, {
+                    prefix: context.viewname,
+                    filter: 'mainfilter',
+                    datatable: window.MapEntity.dt,
+                    objectsname: context.modelname,
+                    // On passe load_filter_form si on est en liste
+                    load_filter_form: (window.MapEntity.togglableFilter && window.MapEntity.mapsync) ?
+                        window.MapEntity.togglableFilter.load_filter_form.bind(window.MapEntity.togglableFilter, window.MapEntity.mapsync) :
+                        async () => {},
+                });
+            }
+            loadBaseLayers().catch(err => console.error('Failed to load base layers:', err));
 
             const mergedData = Object.assign({}, context, {
                 map,

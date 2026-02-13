@@ -31,22 +31,12 @@ _DEFAULT_MAP_STYLES = {
     "print": {},
 }
 
-# Tuiles par défaut
-_DEFAULT_TILES = [
-    (
-        "OSM",
-        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        "&copy; OpenStreetMap contributors",
-    ),
-]
-
 # Config MapLibre par défaut
 _DEFAULT_MAPLIBRE_CONFIG = {
     "BOUNDS": [[-180, -90], [180, 90]],
     "DEFAULT_CENTER": [1.3952, 43.5963],
     "DEFAULT_ZOOM": 5,
     "SCALE": "metric",
-    "TILES": _DEFAULT_TILES,
     "MAX_ZOOM": 22,
 }
 
@@ -93,9 +83,6 @@ if SCALE is True:
 elif SCALE not in ("metric", "imperial", None, False):
     msg = "MAPLIBRE_CONFIG['SCALE'] must be True, False, None, 'metric', or  'imperial'"
     raise ImproperlyConfigured(msg)
-
-if isinstance(MAPLIBRE_CONFIG.get("TILES"), str):
-    MAPLIBRE_CONFIG["TILES"] = [(_("Background"), MAPLIBRE_CONFIG.get("TILES"), "")]
 
 MAX_ZOOM = MAPLIBRE_CONFIG.get("MAX_ZOOM")
 if not (isinstance(MAX_ZOOM, int) and (1 <= MAX_ZOOM <= 24)):
