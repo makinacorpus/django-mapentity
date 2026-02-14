@@ -10,7 +10,7 @@ API_SRID = 4326
 # Styles par défaut
 _DEFAULT_MAP_STYLES = {
     "detail": {
-        "weight": 10,
+        "weight": 5,
         "opacity": 1,
         "line-cap": "round",
         "color": "mediumpurple",

@@ -143,7 +143,7 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
 }
-
+# VECTOR_TILES_BACKEND = "vectortiles.backends.python"
 MEDIA_URL = "/media/"
 MEDIA_URL_SECURE = "/media_secure/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")

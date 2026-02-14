@@ -10,6 +10,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_datatables.filters import DatatablesFilterBackend
 from rest_framework_datatables.renderers import DatatablesRenderer
+from vectortiles import VectorLayer
+from vectortiles.mixins import BaseTileJSONView, BaseVectorTileView
+from vectortiles.rest_framework.renderers import MVTRenderer
 
 from .. import serializers as mapentity_serializers
 from ..decorators import view_cache_latest, view_cache_response_content
@@ -21,7 +24,7 @@ from ..settings import API_SRID
 logger = logging.getLogger(__name__)
 
 
-class MapEntityViewSet(viewsets.ModelViewSet):
+class MapEntityViewSet(BaseTileJSONView, BaseVectorTileView, viewsets.ModelViewSet):
     model = None
     renderer_classes = [
         DatatablesRenderer,
@@ -33,6 +36,29 @@ class MapEntityViewSet(viewsets.ModelViewSet):
     pagination_class = MapentityDatatablePagination
     filter_backends = [DatatablesFilterBackend, DjangoFilterBackend]
     filterset_class = MapEntityFilterSet
+
+    def get_layer_classes(self):
+        if self.model is None:
+            return []
+
+        class MapentityVectorLayer(VectorLayer):
+            model = self.model
+            id = self.model.__name__.lower()  # id for data layer in vector tile
+            min_zoom = 8
+            max_zoom = 22
+            # queryset_limit = 1000  # if you want to limit feature number per tile
+
+            geom_field = "geom"  # geom field to consider in qs
+            tile_fields = ("name", "id")  # other fields to include from qs
+            tile_extent = 4096  # define tile extent
+            tile_buffer = (
+                256  # buffer around tiles (intersected polygon display without borders)
+            )
+            clip_geom = True  # geometry clipped in tile
+
+        return [
+            MapentityVectorLayer,
+        ]
 
     def get_view_perm(self):
         """use by view_permission_required decorator"""
@@ -99,7 +125,6 @@ class MapEntityViewSet(viewsets.ModelViewSet):
         """List of all object primary keys according filters"""
         qs = self.get_queryset()
         qs = self.filter_queryset(qs)
-
         return Response(
             {
                 "pk_list": qs.values_list("pk", flat=True),
@@ -147,3 +172,29 @@ class MapEntityViewSet(viewsets.ModelViewSet):
 
         template = loader.get_template("mapentity/mapentity_popup_content.html")
         return Response(template.render(context))
+
+    @action(
+        detail=False,
+        methods=["get"],
+        renderer_classes=(MVTRenderer,),
+        url_path="mvt/(?P<z>\d+)/(?P<x>\d+)/(?P<y>\d+)",
+        url_name="mvt",
+    )
+    def mvt(self, request, *args, **kwargs):
+        x, y, z = int(kwargs.get("x")), int(kwargs.get("y")), int(kwargs.get("z"))
+        tile = self.get_layer_tiles(z, x, y)
+        return Response(tile)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        renderer_classes=(renderers.JSONRenderer,),
+        url_path="tilejson",
+        url_name="tilejson",
+    )
+    def tilejson(self, request, *args, **kwargs):
+        # Build the tile URL template from the mvt endpoint
+        mvt_url = self.reverse_action("mvt", kwargs={"z": 0, "x": 0, "y": 0})
+        tile_url = mvt_url.replace("0/0/0", "{z}/{x}/{y}")
+        tilejson = self.get_tilejson(tile_url)
+        return Response(tilejson)

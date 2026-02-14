@@ -48,7 +48,11 @@ class MaplibreMapListSync {
      */
     _onListFilter() {
         const results = this.dt.column(0).data().toArray();
-        this.layer.updateFromPks(results);
+        // En mode MVT, le filtrage est géré par _reloadList via filter_infos
+        // qui retourne tous les PKs filtrés, pas seulement ceux de la page courante
+        if (!this.layer._isMVT) {
+            this.layer.updateFromPks(results);
+        }
         this._handleReloaded(results.length);
     }
 

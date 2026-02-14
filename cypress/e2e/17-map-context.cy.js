@@ -7,12 +7,10 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
 
     function waitForMapReady() {
         cy.get('#mainmap, #detailmap, .maplibre-map, .map-panel', {timeout: 15000}).should('exist')
-        cy.wait('@baselayers', {timeout: 15000})
     }
 
     describe('Context restoration via URL', () => {
         beforeEach(() => {
-            cy.intercept('/mapbox/mapbox-baselayers/').as('baselayers')
             cy.login()
             cy.mockTiles()
             cy.clearLocalStorage()
@@ -285,8 +283,12 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]', {timeout: 10000})
                 .should('have.length.greaterThan', 0)
 
-            // The "Objects" category checkbox (current model layer) should be checked
+            // The "Overlays" category checkbox (e.g. cadastre) should NOT be checked by default
             cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').first()
+                .should('not.be.checked')
+
+            // The "Objects" category checkbox (current model layer) should be checked
+            cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').last()
                 .should('be.checked')
         })
 

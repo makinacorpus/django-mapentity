@@ -37,6 +37,7 @@ setup(
         'djangorestframework-gis',
         'djangorestframework-datatables',
         'easy-thumbnails',
+        'django-vectortiles',
         'fiona',
         'gpxpy',
         'lxml',
@@ -52,6 +53,7 @@ setup(
             'factory_boy',
             'coverage',
             'tblib',
+            'django-vectortiles[python]',
         ]
     },
     packages=find_packages(),

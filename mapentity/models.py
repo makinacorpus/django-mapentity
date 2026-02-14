@@ -246,6 +246,26 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         )
 
     @classmethod
+    def get_mvt_url(cls):
+        return (
+            "/api/"
+            + cls._meta.model_name.lower()
+            + "/drf/"
+            + cls._meta.model_name.lower()
+            + "s/mvt/{z}/{x}/{y}"
+        )
+
+    @classmethod
+    def get_tilejson_url(cls):
+        return (
+            "/api/"
+            + cls._meta.model_name.lower()
+            + "/drf/"
+            + cls._meta.model_name.lower()
+            + "s/tilejson"
+        )
+
+    @classmethod
     def get_layer_list_url(cls):
         return reverse(
             f"{cls._meta.app_label.lower()}:{cls._meta.model_name.lower()}-drf-list",

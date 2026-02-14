@@ -309,6 +309,8 @@ class SettingsViewTest(BaseTest):
             context["urls"],
             {
                 "layer": "/api/modelname/drf/modelnames.geojson",
+                "mvt": "/api/modelname/drf/modelnames/mvt/{z}/{x}/{y}",
+                "tilejson": "/api/modelname/drf/modelnames/tilejson",
                 "screenshot": "/map_screenshot/",
                 "detail": "/modelname/0/",
                 "popup": "/api/modelname/drf/modelnames/0/popup-content",

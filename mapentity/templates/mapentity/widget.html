@@ -100,6 +100,7 @@
                 const objects_verbose_name = document.body.getAttribute('data-objectsname');
                 console.log('modelname : ', modelname);
                 const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
+                const tilejsonUrl = window.SETTINGS.urls.tilejson ? window.SETTINGS.urls.tilejson.replace(/modelname/g, modelname) : undefined;
                 const style = window.SETTINGS.map.styles.others;
                 const objectsLayer = new MaplibreObjectsLayer(null, {
                     style: typeof style === "function" ? {} : style,
@@ -108,6 +109,7 @@
                     nameHTML: '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + objects_verbose_name,
                     category: '{% trans "Objects" %}',
                     dataUrl: layerUrl,
+                    tilejsonUrl: tilejsonUrl,
                     primaryKey: generateUniqueId(),
                     isLazy: false,
                 });
@@ -121,6 +123,7 @@
                     const additionalModelname = model.id;
                     const category = model.category;
                     const additionalLayerUrl = model.url;
+                    const additionalTilejsonUrl = model.tilejsonUrl;
 
                     let additionalStyle = window.SETTINGS.map.styles[additionalModelname] ?? window.SETTINGS.map.styles['others'];
                     let primaryKey = generateUniqueId();
@@ -134,6 +137,7 @@
                             category: category,
                             primaryKey: primaryKey,
                             dataUrl: additionalLayerUrl,
+                            tilejsonUrl: additionalTilejsonUrl,
                             isLazy: true,
                             displayPopup: true,
                         });
@@ -177,7 +181,11 @@
                 map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
                 // chargement des couches
-                objectsLayer.load(layerUrl);
+                if (tilejsonUrl) {
+                    objectsLayer.loadMVT(tilejsonUrl);
+                } else {
+                    objectsLayer.load(layerUrl);
+                }
 
 
             });

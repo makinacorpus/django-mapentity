@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('entity:map:ready', function(e) {
-        const { map, objectsLayer, context, TILES, bounds, mapentityContext, layerManager, layerUrl } = e.detail;
+        const { map, objectsLayer, context, TILES, bounds, mapentityContext, layerManager, layerUrl, mvtUrl, tilejsonUrl } = e.detail;
 
         // Initialize objectsLayer immediately to catch events early
         objectsLayer.initialize(map.getMap());
@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const modelname = model.id;
             const category = model.category;
             const layerUrl = model.url;
+            const modelTilejsonUrl = model.tilejsonUrl;
 
             let style = window.SETTINGS.map.styles[modelname] ?? window.SETTINGS.map.styles['others'];
             let primaryKey = generateUniqueId();
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     category: category,
                     primaryKey: primaryKey,
                     dataUrl: layerUrl,
+                    tilejsonUrl: modelTilejsonUrl,
                     isLazy: true,
                     displayPopup: true,
                 });
@@ -90,6 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 objectsLayer,
                 bounds,
                 layerUrl,
+                mvtUrl,
+                tilejsonUrl,
             });
 
             // Exposer l'instance
@@ -392,9 +396,134 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    /**
+     * Ajoute des marqueurs vert (départ) et rouge (arrivée) aux extrémités des lignes
+     * à partir d'un GeoJSON récupéré via fetch (pour la vue détail en mode MVT).
+     */
+    function _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal) {
+        let geom = null;
+        if (featureGeojson.type === 'Feature') {
+            geom = featureGeojson.geometry;
+        } else if (featureGeojson.type === 'FeatureCollection' && featureGeojson.features) {
+            const feature = featureGeojson.features.find(f => f.properties?.id === pkVal || f.id === pkVal);
+            if (feature) geom = feature.geometry;
+        } else if (featureGeojson.geometry) {
+            geom = featureGeojson.geometry;
+        }
+
+        if (!geom) return;
+
+        let startCoord = null;
+        let endCoord = null;
+
+        if (geom.type === 'LineString' && geom.coordinates.length >= 2) {
+            startCoord = geom.coordinates[0];
+            endCoord = geom.coordinates[geom.coordinates.length - 1];
+        }
+
+        if (startCoord) _createEndpointMarker(mapInstance, startCoord, '#28a745');
+        if (endCoord) _createEndpointMarker(mapInstance, endCoord, '#dc3545');
+
+        // Style line with repeated arrows
+        if (geom.type === 'LineString') {
+            const sourceId = 'detail-line-arrows-' + pkVal;
+            mapInstance.addSource(sourceId, {
+                type: 'geojson',
+                data: { type: 'Feature', geometry: geom, properties: {} }
+            });
+            const {arrowSize, arrowColor, arrowOpacity, arrowSpacing } = window.SETTINGS.map.styles.detail;
+            if (!mapInstance.hasImage('arrow-icon')) {
+                const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
+                fetch(markersBase + 'arrow.svg')
+                    .then(r => r.text())
+                    .then(svg => {
+                        const coloredSvg = svg.replace('__COLOR__', arrowColor);
+                        const blob = new Blob([coloredSvg], { type: 'image/svg+xml' });
+                        const url = URL.createObjectURL(blob);
+                        const img = new Image(20, 20);
+                        img.onload = function() {
+                            mapInstance.addImage('arrow-icon', img, { sdf: false });
+                            URL.revokeObjectURL(url);
+                        };
+                        img.src = url;
+                    });
+            }
+
+            mapInstance.addLayer({
+                id: 'detail-line-arrows-' + pkVal,
+                type: 'symbol',
+                source: sourceId,
+                layout: {
+                    'symbol-placement': 'line',
+                    'symbol-spacing': arrowSpacing,
+                    'icon-image': 'arrow-icon',
+                    'icon-size': arrowSize,
+                    'icon-rotate': ['get', 'bearing'],
+                    'icon-ignore-placement': true,
+                    'icon-allow-overlap': true,
+                    'icon-offset': [0, 5],
+                },
+                paint: {
+                    'icon-color': arrowColor,
+                    'icon-opacity': arrowOpacity,
+                }
+            });
+        }
+    }
+
+    /**
+     * Calcule la bounding box à partir d'un GeoJSON récupéré via fetch + extra géométries
+     * et centre la carte dessus (pour la vue détail en mode MVT).
+     */
+    function _fitBoundsFromGeojson(mapInstance, featureGeojson, extraGeometries) {
+        const allCoords = [];
+
+        // 1. Coordonnées de la géométrie principale
+        let geom = null;
+        if (featureGeojson.type === 'Feature') {
+            geom = featureGeojson.geometry;
+        } else if (featureGeojson.type === 'FeatureCollection' && featureGeojson.features) {
+            featureGeojson.features.forEach(f => {
+                if (f.geometry) _extractAllCoords(f.geometry).forEach(c => allCoords.push(c));
+            });
+        } else if (featureGeojson.geometry) {
+            geom = featureGeojson.geometry;
+        }
+        if (geom) {
+            _extractAllCoords(geom).forEach(c => allCoords.push(c));
+        }
+
+        // 2. Coordonnées des géométries secondaires
+        if (extraGeometries && extraGeometries.length > 0) {
+            extraGeometries.forEach(extra => {
+                if (extra.geojson) {
+                    _extractAllCoords(extra.geojson).forEach(c => allCoords.push(c));
+                }
+            });
+        }
+
+        // 3. Calculer et appliquer la bounding box
+        if (allCoords.length === 0) return;
+
+        let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+        allCoords.forEach(c => {
+            if (c[0] < minLng) minLng = c[0];
+            if (c[1] < minLat) minLat = c[1];
+            if (c[0] > maxLng) maxLng = c[0];
+            if (c[1] > maxLat) maxLat = c[1];
+        });
+
+        mapInstance.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
+            padding: 50,
+            maxZoom: 16,
+            duration: 0,
+            animate: false
+        });
+    }
+
     // Écouteur pour la vue détail
     window.addEventListener('entity:map:detail', function(e) {
-        const { map, objectsLayer, modelname, bounds, layerUrl, layerManager } = e.detail;
+        const { map, objectsLayer, modelname, bounds, layerUrl, tilejsonUrl, layerManager } = e.detail;
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
         // Restauration du contexte (vue et couches)
@@ -420,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        if (layerUrl) {
+        if (tilejsonUrl) {
             if (mapViewContext && mapViewContext.print) {
                 const specified = window.SETTINGS.map.styles.print[modelname];
                 if (specified) {
@@ -428,32 +557,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Charger tous les objets de la couche
-            objectsLayer.load(layerUrl).then(() => {
-                const pk = document.body.getAttribute('data-pk');
-                let pkVal = pk;
-                if (pk && /^\d+$/.test(pk)) {
-                    pkVal = parseInt(pk, 10);
-                }
+            // Charger la couche via TileJSON (MVT)
+            objectsLayer.loadMVT(tilejsonUrl);
 
-                if (pkVal) {
+            const pk = document.body.getAttribute('data-pk');
+            let pkVal = pk;
+            if (pk && /^\d+$/.test(pk)) {
+                pkVal = parseInt(pk, 10);
+            }
+
+            if (pkVal) {
+                // Attendre que les tuiles MVT soient rendues avant de sélectionner
+                // setFeatureState ne fonctionne que si la feature est présente dans une tuile rendue
+                const mapInstance_ = map.getMap();
+                const trySelect = () => {
                     objectsLayer.select(pkVal);
-                }
+                };
+                // 'idle' se déclenche quand toutes les sources et tuiles sont chargées et rendues
+                mapInstance_.once('idle', trySelect);
+            }
 
-                // Afficher les géométries secondaires
-                const mapInstance = map.getMap();
+            // Récupérer la géométrie de l'objet courant via l'URL de feature pour fitBounds et marqueurs
+            const featureUrl = detailMapEl ? detailMapEl.getAttribute('data-feature-url') : null;
+            const mapInstance = map.getMap();
+
+            if (featureUrl && pkVal) {
+                fetch(featureUrl)
+                    .then(response => response.json())
+                    .then(featureGeojson => {
+                        // Afficher les géométries secondaires
+                        _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+
+                        // Ajouter les marqueurs vert/rouge aux extrémités des lignes
+                        _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal);
+
+                        // Centrer la carte sur la bounding box de TOUTES les géométries
+                        _fitBoundsFromGeojson(mapInstance, featureGeojson, parsedExtraGeometries);
+                    })
+                    .catch(err => {
+                        console.warn('MaplibreMapentityMap: failed to fetch feature geojson', err);
+                        _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+                    });
+            } else {
                 _renderExtraGeometries(mapInstance, parsedExtraGeometries);
-
-                // Ajouter les marqueurs vert/rouge aux extrémités des lignes pour l'objet sélectionné
-                if (pkVal) {
-                    _addDetailLineEndpointMarkers(mapInstance, objectsLayer, pkVal);
-                }
-
-                // Centrer la carte sur la bounding box de TOUTES les géométries
-                _fitBoundsAllGeometries(mapInstance, objectsLayer, pkVal, parsedExtraGeometries);
-            });
+            }
         } else {
-            // Pas de layerUrl, afficher quand même les extra géométries
+            // Pas de tilejsonUrl, afficher quand même les extra géométries
             const mapInstance = map.getMap();
             _renderExtraGeometries(mapInstance, parsedExtraGeometries);
         }
@@ -485,12 +634,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Écouteur pour la vue liste
     window.addEventListener('entity:map:list', function(e) {
-        const { map, objectsLayer, modelname, bounds, layerUrl, layerManager } = e.detail;
+        const { map, objectsLayer, modelname, bounds, layerUrl, mvtUrl, tilejsonUrl, layerManager } = e.detail;
 
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
-        // Charger les objets depuis le backend
-        objectsLayer.load(layerUrl);
+        // Charger les objets depuis le backend via TileJSON
+        objectsLayer.loadMVT(tilejsonUrl);
 
         // Contrôles
         const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
