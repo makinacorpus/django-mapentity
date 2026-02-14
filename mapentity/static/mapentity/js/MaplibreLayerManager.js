@@ -190,7 +190,32 @@ class MaplibreLayerManager {
         // Enregistrer le groupe pour que toggleLayer puisse résoudre primaryKey -> layerIds
         this.layers.layerGroups[primaryKey] = layerIds;
 
+        // Initialiser le tableau de marqueurs DOM associés au groupe
+        if (!this.layers.groupMarkers) this.layers.groupMarkers = {};
+        if (!this.layers.groupMarkers[primaryKey]) this.layers.groupMarkers[primaryKey] = [];
+
         this._fireEvent('overlayAdded', { category, primaryKey, layerIds, labelHTML, type: 'loaded' });
+    }
+
+    /**
+     * Ajoute des couches et marqueurs supplémentaires à un groupe overlay existant.
+     * Utilisé pour associer les géométries secondaires au même toggle que l'objet courant.
+     * @param primaryKey {string} - Clé primaire du groupe existant
+     * @param extraLayerIds {Array<string>} - IDs des couches MapLibre à ajouter
+     * @param extraMarkers {Array<maplibregl.Marker>} - Marqueurs DOM à ajouter
+     */
+    addToGroup(primaryKey, extraLayerIds, extraMarkers) {
+        if (!this.layers.layerGroups[primaryKey]) {
+            this.layers.layerGroups[primaryKey] = [];
+        }
+        if (extraLayerIds && extraLayerIds.length > 0) {
+            this.layers.layerGroups[primaryKey].push(...extraLayerIds);
+        }
+        if (!this.layers.groupMarkers) this.layers.groupMarkers = {};
+        if (!this.layers.groupMarkers[primaryKey]) this.layers.groupMarkers[primaryKey] = [];
+        if (extraMarkers && extraMarkers.length > 0) {
+            this.layers.groupMarkers[primaryKey].push(...extraMarkers);
+        }
     }
 
     /**
@@ -297,6 +322,18 @@ class MaplibreLayerManager {
                 this.toggleLayer(id, visible);
             } else {
                 console.warn(`Layer "${id}" not found.`);
+            }
+        }
+
+        // Basculer la visibilité des marqueurs DOM associés au groupe
+        if (this.layers.groupMarkers) {
+            // Résoudre le primaryKey original (layerIds peut être un groupe ID)
+            const groupKey = (typeof layerIds === 'string' && this.layers.layerGroups[layerIds]) ? layerIds : null;
+            if (groupKey && this.layers.groupMarkers[groupKey]) {
+                this.layers.groupMarkers[groupKey].forEach(marker => {
+                    const el = marker.getElement();
+                    if (el) el.style.display = visible ? '' : 'none';
+                });
             }
         }
     }

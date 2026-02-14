@@ -60,15 +60,15 @@ class DummyModelFunctionalTest(MapEntityTest):
         return {"coordinates": [self.obj.geom.x, self.obj.geom.y], "type": "Point"}
 
     def get_expected_geojson_attrs(self):
-        return {"id": 1, "name": "a dummy model"}
+        return {"id": self.obj.pk, "name": "a dummy model"}
 
     def get_expected_datatables_attrs(self):
         return {
             "date_update": "17/03/2020 00:00:00",
             "description": "",
             "geom": self.obj.geom.ewkt,
-            "id": 1,
-            "name": '<a href="/dummymodel/1/">a dummy model</a>',
+            "id": self.obj.pk,
+            "name": f'<a href="/dummymodel/{self.obj.pk}/">a dummy model</a>',
             "name_en": "a dummy model",
             "name_fr": "",
             "name_zh_hant": "",
@@ -78,13 +78,14 @@ class DummyModelFunctionalTest(MapEntityTest):
         }
 
     def get_expected_popup_content(self):
+        pk = self.obj.pk
         return (
             f'<div class="d-flex flex-column justify-content-center">\n'
-            f'    <p class="text-center m-0 p-1"><strong>a dummy model (1)</strong></p>\n    \n'
+            f'    <p class="text-center m-0 p-1"><strong>a dummy model ({pk})</strong></p>\n    \n'
             f'        <p class="m-0 p-1">\n'
             f"            a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object…<br>public: no<br>{self.obj.tags.first().label}<br>a dummy model<br>\n"
             f"        </p>\n    \n"
-            f'    <button id="detail-btn" class="btn btn-sm btn-info mt-2" onclick="window.location.href=\'/dummymodel/{self.model.objects.first().pk}/\'">Detail sheet</button>\n'
+            f'    <button id="detail-btn" class="btn btn-sm btn-info mt-2" onclick="window.location.href=\'/dummymodel/{pk}/\'">Detail sheet</button>\n'
             f"</div>"
         )
 
@@ -387,26 +388,26 @@ class MapEntityLayerViewTest(BaseTest):
 
     def test_geojson_layer_returns_all_by_default(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_list_url())
+        response = self.client.get(DummyModel.get_geojson_list_url())
         self.assertEqual(len(response.json()["features"]), 31)
 
     def test_geojson_layer_can_be_filtered(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_list_url() + "?name=toto")
+        response = self.client.get(DummyModel.get_geojson_list_url() + "?name=toto")
         self.assertEqual(len(response.json()["features"]), 1)
 
     def test_geojson_layer_with_parameters_is_not_cached(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_list_url() + "?name=toto")
+        response = self.client.get(DummyModel.get_geojson_list_url() + "?name=toto")
         self.assertEqual(len(response.json()["features"]), 1)
-        response = self.client.get(DummyModel.get_layer_list_url())
+        response = self.client.get(DummyModel.get_geojson_list_url())
         self.assertEqual(len(response.json()["features"]), 31)
 
     def test_geojson_layer_with_parameters_does_not_use_cache(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_list_url())
+        response = self.client.get(DummyModel.get_geojson_list_url())
         self.assertEqual(len(response.json()["features"]), 31)
-        response = self.client.get(DummyModel.get_layer_list_url() + "?name=toto")
+        response = self.client.get(DummyModel.get_geojson_list_url() + "?name=toto")
         self.assertEqual(len(response.json()["features"]), 1)
 
 
@@ -516,7 +517,9 @@ class MultiDeleteViewTest(BaseTest):
     def test_multi_delete_should_have_number_of_selected_objects_in_context(self):
         view = ComplexModelMultiDelete()
         view.object_list = []
-        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
         view.request.user = self.user
         context = view.get_context_data()
         self.assertEqual(context["nb_objects"], 2)
@@ -524,7 +527,9 @@ class MultiDeleteViewTest(BaseTest):
     def test_multi_delete_should_have_selected_objects_in_queryset(self):
         view = ComplexModelMultiDelete()
         view.object_list = []
-        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
         view.request.user = self.user
         queryset = view.get_queryset()
         self.assertEqual(queryset.count(), 2)
@@ -533,7 +538,10 @@ class MultiDeleteViewTest(BaseTest):
 
     def test_multi_delete_post(self):
         self.client.force_login(self.user)
-        response = self.client.post(self.model.get_multi_delete_url() + "?pks=1%2C2")
+        response = self.client.post(
+            self.model.get_multi_delete_url()
+            + f"?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
         self.assertEqual(ComplexModel.objects.all().count(), 1)
@@ -565,7 +573,9 @@ class MultiUpdateViewTest(BaseTest):
     def test_multi_update_should_have_number_of_selected_objects_in_context(self):
         view = ComplexModelMultiUpdate()
         view.object_list = []
-        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
         view.request.user = self.user
         context = view.get_context_data()
         self.assertEqual(context["nb_objects"], 2)
@@ -573,7 +583,9 @@ class MultiUpdateViewTest(BaseTest):
     def test_multi_update_should_have_selected_objects_in_queryset(self):
         view = ComplexModelMultiUpdate()
         view.object_list = []
-        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
         view.request.user = self.user
         queryset = view.get_queryset()
         self.assertEqual(queryset.count(), 2)
@@ -583,7 +595,9 @@ class MultiUpdateViewTest(BaseTest):
     def test_multi_update_editable_fields(self):
         view = ComplexModelMultiUpdate()
         view.object_list = []
-        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
         view.request.user = self.user
         editable_fields = view.get_editable_fields()
         self.assertEqual(
@@ -601,7 +615,9 @@ class MultiUpdateViewTest(BaseTest):
     def test_multi_update_form_fields(self):
         view = ComplexModelMultiUpdate()
         view.object_list = []
-        view.request = RequestFactory().get("/fake-path/?pks=1%2C2")
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
         view.request.user = self.user
         form = view.get_form()
 
@@ -633,7 +649,9 @@ class MultiUpdateViewTest(BaseTest):
             "road": "nothing",
         }
         response = self.client.post(
-            self.model.get_multi_update_url() + "?pks=1%2C2", data=data
+            self.model.get_multi_update_url()
+            + f"?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}",
+            data=data,
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
@@ -656,7 +674,9 @@ class MultiUpdateViewTest(BaseTest):
             "road": "nothing",
         }
         response = self.client.post(
-            self.model.get_multi_update_url() + "?pks=1%2C2", data=data
+            self.model.get_multi_update_url()
+            + f"?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}",
+            data=data,
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
@@ -679,7 +699,9 @@ class MultiUpdateViewTest(BaseTest):
             "road": selected_road.pk,
         }
         response = self.client.post(
-            self.model.get_multi_update_url() + "?pks=1%2C2", data=data
+            self.model.get_multi_update_url()
+            + f"?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}",
+            data=data,
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.model.get_list_url())
@@ -785,23 +807,27 @@ class LogViewMapentityTest(MapEntityTest):
 
     def get_expected_datatables_attrs(self):
         content_type = ContentType.objects.get_for_model(DummyModel)
+        # self.obj is set by parent to modelfactory.create() which is a DummyModel
+        # The LogEntry was created in the overridden test method before super() call
+        log_entry = LogEntry.objects.latest("pk")
+        dummy_pk = log_entry.object_id
         data = {
             "action_flag": "Addition",
             "action_time": "10/06/2022 12:40:10",
             "change_message": "",
             "content_type": str(content_type),
-            "id": 1,
-            "name": '<a href="/logentry/1/">1</a>',
-            "object": '<a data-pk="1" href="/dummymodel/1/" >Test App | Dummy '
+            "id": log_entry.pk,
+            "name": f'<a href="/logentry/{log_entry.pk}/">{log_entry.pk}</a>',
+            "object": f'<a data-pk="{dummy_pk}" href="/dummymodel/{dummy_pk}/" >Test App | Dummy '
             "Model <class 'object'></a>",
-            "object_id": "1",
+            "object_id": str(dummy_pk),
             "object_repr": "<class 'object'>",
             "user": User.objects.first().username,
         }
 
         if django.__version__ < "5.0":
             data["object"] = (
-                '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '
+                f'<a data-pk="{dummy_pk}" href="/dummymodel/{dummy_pk}/" >test_app | Dummy '
                 "Model <class 'object'></a>"
             )
         return data

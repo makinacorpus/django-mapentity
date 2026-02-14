@@ -38,27 +38,17 @@ class MapEntityViewSet(BaseTileJSONView, BaseVectorTileView, viewsets.ModelViewS
     filterset_class = MapEntityFilterSet
 
     def get_layer_classes(self):
+        classes = []
         if self.model is None:
-            return []
+            return classes
 
         class MapentityVectorLayer(VectorLayer):
             model = self.model
-            id = self.model.__name__.lower()  # id for data layer in vector tile
-            min_zoom = 8
-            max_zoom = 22
-            # queryset_limit = 1000  # if you want to limit feature number per tile
+            id = f"{self.model.__name__.lower()}"  # id for data layer in vector tile
+            geom_field = self.model.main_geom_field  # geom field to consider in qs
+            tile_fields = ("name", "id")
 
-            geom_field = "geom"  # geom field to consider in qs
-            tile_fields = ("name", "id")  # other fields to include from qs
-            tile_extent = 4096  # define tile extent
-            tile_buffer = (
-                256  # buffer around tiles (intersected polygon display without borders)
-            )
-            clip_geom = True  # geometry clipped in tile
-
-        return [
-            MapentityVectorLayer,
-        ]
+        return [MapentityVectorLayer]
 
     def get_view_perm(self):
         """use by view_permission_required decorator"""

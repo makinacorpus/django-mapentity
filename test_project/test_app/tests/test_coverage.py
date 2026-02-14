@@ -629,7 +629,7 @@ class SettingsMapStylesTest(TestCase):
         from mapentity.settings import app_settings
 
         detail = app_settings["MAP_STYLES"]["detail"]
-        self.assertEqual(detail["weight"], 10)
+        self.assertEqual(detail["weight"], 5)
         self.assertEqual(detail["line-cap"], "round")
         self.assertEqual(detail["arrowColor"], "#000000")
         self.assertEqual(detail["arrowSize"], 0.3)

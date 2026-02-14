@@ -150,7 +150,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
             {
                 "name": model._meta.verbose_name,
                 "id": model._meta.model_name,
-                "url": model.get_layer_url(),
+                "url": model.get_geojson_list_url(),
                 "mvtUrl": model.get_mvt_url(),
                 "tilejsonUrl": model.get_tilejson_url(),
                 "category": getattr(

@@ -266,7 +266,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         )
 
     @classmethod
-    def get_layer_list_url(cls):
+    def get_geojson_list_url(cls):
         return reverse(
             f"{cls._meta.app_label.lower()}:{cls._meta.model_name.lower()}-drf-list",
             kwargs={"format": "geojson"},
@@ -287,7 +287,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def get_filter_url(cls):
         return reverse(cls._entity.url_name(ENTITY_FILTER))
 
-    def get_layer_detail_url(self):
+    def get_geojson_detail_url(self):
         return reverse(
             f"{self._meta.app_label.lower()}:{self._meta.model_name.lower()}-drf-detail",
             kwargs={"format": "geojson", "pk": self.pk},
@@ -444,6 +444,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     @property
     def name_display(self):
         return f'<a href="{self.get_detail_url()}">{self.get_display_label()}</a>'
+    main_geom_field = app_settings["GEOM_FIELD_NAME"]
 
 
 class MapEntityMixin(BaseMapEntityMixin):

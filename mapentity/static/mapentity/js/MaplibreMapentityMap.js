@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 layerUrl,
                 mvtUrl,
                 tilejsonUrl,
+                layerManager,
             });
 
             // Exposer l'instance
@@ -171,9 +172,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /**
      * Affiche les géométries secondaires (extra) sur la carte.
+     * @returns {Object} - { layerIds: string[], markers: maplibregl.Marker[] }
      */
     function _renderExtraGeometries(mapInstance, extraGeometries) {
-        if (!extraGeometries || extraGeometries.length === 0) return;
+        const result = { layerIds: [], markers: [] };
+        if (!extraGeometries || extraGeometries.length === 0) return result;
         extraGeometries.forEach(extra => {
             if (!extra.geojson) return;
             const geom = extra.geojson;
@@ -186,53 +189,61 @@ document.addEventListener('DOMContentLoaded', function() {
                 geom.coordinates.forEach(c => points.push(c));
             } else if (geom.type === 'LineString' || geom.type === 'MultiLineString') {
                 const sourceId = 'extra-geom-' + extra.field;
+                const layerId = 'extra-line-' + extra.field;
                 mapInstance.addSource(sourceId, {
                     type: 'geojson',
                     data: { type: 'Feature', geometry: geom, properties: {} }
                 });
                 mapInstance.addLayer({
-                    id: 'extra-line-' + extra.field,
+                    id: layerId,
                     type: 'line',
                     source: sourceId,
                     paint: { 'line-color': '#999', 'line-width': 3, 'line-dasharray': [2, 2] }
                 });
+                result.layerIds.push(layerId);
                 return;
             } else if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
                 const sourceId = 'extra-geom-' + extra.field;
+                const fillLayerId = 'extra-fill-' + extra.field;
+                const lineLayerId = 'extra-line-' + extra.field;
                 mapInstance.addSource(sourceId, {
                     type: 'geojson',
                     data: { type: 'Feature', geometry: geom, properties: {} }
                 });
                 mapInstance.addLayer({
-                    id: 'extra-fill-' + extra.field,
+                    id: fillLayerId,
                     type: 'fill',
                     source: sourceId,
                     paint: { 'fill-color': '#999', 'fill-opacity': 0.3 }
                 });
                 mapInstance.addLayer({
-                    id: 'extra-line-' + extra.field,
+                    id: lineLayerId,
                     type: 'line',
                     source: sourceId,
                     paint: { 'line-color': '#999', 'line-width': 2 }
                 });
+                result.layerIds.push(fillLayerId, lineLayerId);
                 return;
             }
 
             points.forEach(coords => {
+                let marker;
                 if (customIcon) {
                     const el = document.createElement('div');
                     el.innerHTML = customIcon;
                     el.style.pointerEvents = 'none';
-                    new maplibregl.Marker({ element: el, anchor: 'center' })
+                    marker = new maplibregl.Marker({ element: el, anchor: 'center' })
                         .setLngLat(coords)
                         .addTo(mapInstance);
                 } else {
-                    new maplibregl.Marker()
+                    marker = new maplibregl.Marker()
                         .setLngLat(coords)
                         .addTo(mapInstance);
                 }
+                result.markers.push(marker);
             });
         });
+        return result;
     }
 
     /**
@@ -291,8 +302,10 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Ajoute des marqueurs vert (départ) et rouge (arrivée) aux extrémités des lignes
      * pour l'objet sélectionné en vue détail.
+     * @returns {Object} - { layerIds: string[], markers: maplibregl.Marker[] }
      */
     function _addDetailLineEndpointMarkers(mapInstance, objectsLayer, pkVal) {
+        const result = { layerIds: [], markers: [] };
         // Trouver la feature de l'objet sélectionné dans les sources
         const layersBySource = Object.values(objectsLayer._current_objects).flat();
         for (const layerId of layersBySource) {
@@ -311,28 +324,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (geom.type === 'LineString' && geom.coordinates.length >= 2) {
                     startCoord = geom.coordinates[0];
                     endCoord = geom.coordinates[geom.coordinates.length - 1];
-                } /* else if (geom.type === 'MultiLineString' && geom.coordinates.length > 0) {
+                } else if (geom.type === 'MultiLineString' && geom.coordinates.length > 0) {
                     const firstLine = geom.coordinates[0];
                     const lastLine = geom.coordinates[geom.coordinates.length - 1];
                     if (firstLine && firstLine.length > 0) startCoord = firstLine[0];
                     if (lastLine && lastLine.length > 0) endCoord = lastLine[lastLine.length - 1];
-                } else {
-                    return;
-                }*/
+                }
 
-                if (startCoord) _createEndpointMarker(mapInstance, startCoord, '#28a745');
-                if (endCoord) _createEndpointMarker(mapInstance, endCoord, '#dc3545');
+                if (startCoord) result.markers.push(_createEndpointMarker(mapInstance, startCoord, '#28a745'));
+                if (endCoord) result.markers.push(_createEndpointMarker(mapInstance, endCoord, '#dc3545'));
 
-                // style line with repeted arrows
-                if (geom.type === 'LineString') {
+                // Style line with repeated arrows
+                if (geom.type === 'LineString' || geom.type === 'MultiLineString') {
                     const sourceId = 'detail-line-arrows-' + pkVal;
                     mapInstance.addSource(sourceId, {
                         type: 'geojson',
                         data: { type: 'Feature', geometry: geom, properties: {} }
                     });
                     const {arrowSize, arrowColor, arrowOpacity, arrowSpacing } = window.SETTINGS.map.styles.detail;
-                // load arrow-icon if not already loaded
-                    if (!mapInstance.hasImage('arrow-icon')) {
+
+                    const addArrowLayer = () => {
+                        if (mapInstance.getLayer('detail-line-arrows-' + pkVal)) return;
+                        mapInstance.addLayer({
+                            id: 'detail-line-arrows-' + pkVal,
+                            type: 'symbol',
+                            source: sourceId,
+                            layout: {
+                                'symbol-placement': 'line',
+                                'symbol-spacing': arrowSpacing,
+                                'icon-image': 'arrow-icon',
+                                'icon-size': arrowSize,
+                                'icon-ignore-placement': true,
+                                'icon-allow-overlap': true,
+                                'icon-rotation-alignment': 'map',
+                            },
+                            paint: {
+                                'icon-opacity': arrowOpacity,
+                            }
+                        });
+                    };
+
+                    if (mapInstance.hasImage('arrow-icon')) {
+                        addArrowLayer();
+                    } else {
                         const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
                         fetch(markersBase + 'arrow.svg')
                             .then(r => r.text())
@@ -342,65 +376,53 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const url = URL.createObjectURL(blob);
                                 const img = new Image(20, 20);
                                 img.onload = function() {
-                                    mapInstance.addImage('arrow-icon', img, { sdf: false });
+                                    if (!mapInstance.hasImage('arrow-icon')) {
+                                        mapInstance.addImage('arrow-icon', img, { sdf: false });
+                                    }
                                     URL.revokeObjectURL(url);
+                                    addArrowLayer();
                                 };
                                 img.src = url;
                             });
                     }
-
-                    mapInstance.addLayer({
-                        id: 'detail-line-arrows-' + pkVal,
-                        type: 'symbol',
-                        source: sourceId,
-                        layout: {
-                            'symbol-placement': 'line',
-                            'symbol-spacing': arrowSpacing,
-                            'icon-image': 'arrow-icon', // Assurez-vous d'avoir une icône d'arrière-plan en forme de flèche dans votre style
-                            'icon-size': arrowSize,
-                            'icon-rotate': ['get', 'bearing'], // Rotation basée sur la direction de la ligne
-                                                            'icon-ignore-placement': true,
-
-                                // Optionnel : permet aux icônes de dépasser des bords de la tuile
-                                'icon-allow-overlap': true,
-                            'icon-offset': [0, 5],
-                        },
-                        paint: {
-                            'icon-color': arrowColor,
-                            'icon-opacity': arrowOpacity,
-                        }
-                    });
                 }
 
 
-                return;
+                return result;
             }
         }
+        return result;
     }
 
     /**
      * Crée un marqueur image de carte standard (pin) à une position donnée.
+     * @returns {maplibregl.Marker} - Le marqueur créé (ajouté à la carte de manière asynchrone)
      */
     function _createEndpointMarker(mapInstance, lngLat, color) {
         const el = document.createElement('div');
         el.style.pointerEvents = 'none';
+
+        const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+            .setLngLat(lngLat)
+            .addTo(mapInstance);
 
         const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
         fetch(markersBase + 'pin.svg')
             .then(r => r.text())
             .then(svg => {
                 el.innerHTML = svg.replace('__COLOR__', color);
-                new maplibregl.Marker({ element: el, anchor: 'bottom' })
-                    .setLngLat(lngLat)
-                    .addTo(mapInstance);
             });
+
+        return marker;
     }
 
     /**
      * Ajoute des marqueurs vert (départ) et rouge (arrivée) aux extrémités des lignes
      * à partir d'un GeoJSON récupéré via fetch (pour la vue détail en mode MVT).
+     * @returns {Object} - { layerIds: string[], markers: maplibregl.Marker[] }
      */
     function _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal) {
+        const result = { layerIds: [], markers: [] };
         let geom = null;
         if (featureGeojson.type === 'Feature') {
             geom = featureGeojson.geometry;
@@ -411,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
             geom = featureGeojson.geometry;
         }
 
-        if (!geom) return;
+        if (!geom) return result;
 
         let startCoord = null;
         let endCoord = null;
@@ -419,20 +441,51 @@ document.addEventListener('DOMContentLoaded', function() {
         if (geom.type === 'LineString' && geom.coordinates.length >= 2) {
             startCoord = geom.coordinates[0];
             endCoord = geom.coordinates[geom.coordinates.length - 1];
+        } else if (geom.type === 'MultiLineString' && geom.coordinates.length > 0) {
+            const firstLine = geom.coordinates[0];
+            const lastLine = geom.coordinates[geom.coordinates.length - 1];
+            if (firstLine.length >= 2) startCoord = firstLine[0];
+            if (lastLine.length >= 2) endCoord = lastLine[lastLine.length - 1];
         }
 
-        if (startCoord) _createEndpointMarker(mapInstance, startCoord, '#28a745');
-        if (endCoord) _createEndpointMarker(mapInstance, endCoord, '#dc3545');
+        if (startCoord) result.markers.push(_createEndpointMarker(mapInstance, startCoord, '#28a745'));
+        if (endCoord) result.markers.push(_createEndpointMarker(mapInstance, endCoord, '#dc3545'));
 
         // Style line with repeated arrows
-        if (geom.type === 'LineString') {
+        if (geom.type === 'LineString' || geom.type === 'MultiLineString') {
+            const arrowLayerId = 'detail-line-arrows-' + pkVal;
+            result.layerIds.push(arrowLayerId);
             const sourceId = 'detail-line-arrows-' + pkVal;
             mapInstance.addSource(sourceId, {
                 type: 'geojson',
                 data: { type: 'Feature', geometry: geom, properties: {} }
             });
             const {arrowSize, arrowColor, arrowOpacity, arrowSpacing } = window.SETTINGS.map.styles.detail;
-            if (!mapInstance.hasImage('arrow-icon')) {
+
+            const addArrowLayer = () => {
+                if (mapInstance.getLayer('detail-line-arrows-' + pkVal)) return;
+                mapInstance.addLayer({
+                    id: 'detail-line-arrows-' + pkVal,
+                    type: 'symbol',
+                    source: sourceId,
+                    layout: {
+                        'symbol-placement': 'line',
+                        'symbol-spacing': arrowSpacing,
+                        'icon-image': 'arrow-icon',
+                        'icon-size': arrowSize,
+                        'icon-ignore-placement': true,
+                        'icon-allow-overlap': true,
+                        'icon-rotation-alignment': 'map',
+                    },
+                    paint: {
+                        'icon-opacity': arrowOpacity,
+                    }
+                });
+            };
+
+            if (mapInstance.hasImage('arrow-icon')) {
+                addArrowLayer();
+            } else {
                 const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
                 fetch(markersBase + 'arrow.svg')
                     .then(r => r.text())
@@ -442,33 +495,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         const url = URL.createObjectURL(blob);
                         const img = new Image(20, 20);
                         img.onload = function() {
-                            mapInstance.addImage('arrow-icon', img, { sdf: false });
+                            if (!mapInstance.hasImage('arrow-icon')) {
+                                mapInstance.addImage('arrow-icon', img, { sdf: false });
+                            }
                             URL.revokeObjectURL(url);
+                            addArrowLayer();
                         };
                         img.src = url;
                     });
             }
-
-            mapInstance.addLayer({
-                id: 'detail-line-arrows-' + pkVal,
-                type: 'symbol',
-                source: sourceId,
-                layout: {
-                    'symbol-placement': 'line',
-                    'symbol-spacing': arrowSpacing,
-                    'icon-image': 'arrow-icon',
-                    'icon-size': arrowSize,
-                    'icon-rotate': ['get', 'bearing'],
-                    'icon-ignore-placement': true,
-                    'icon-allow-overlap': true,
-                    'icon-offset': [0, 5],
-                },
-                paint: {
-                    'icon-color': arrowColor,
-                    'icon-opacity': arrowOpacity,
-                }
-            });
         }
+        return result;
     }
 
     /**
@@ -539,11 +576,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Collecter les géométries secondaires pour le fitBounds global
         const detailMapEl = document.getElementById('detailmap');
-        const extraGeometriesAttr = detailMapEl ? detailMapEl.getAttribute('data-extra-geometries') : null;
+        const extraGeometriesScript = document.getElementById('detailmap-extra-geometries');
         let parsedExtraGeometries = [];
-        if (extraGeometriesAttr) {
+        if (extraGeometriesScript) {
             try {
-                parsedExtraGeometries = JSON.parse(extraGeometriesAttr);
+                parsedExtraGeometries = JSON.parse(extraGeometriesScript.textContent);
             } catch (e) {
                 console.warn('MaplibreMapentityMap: failed to parse extra geometries', e);
             }
@@ -581,30 +618,55 @@ document.addEventListener('DOMContentLoaded', function() {
             const featureUrl = detailMapEl ? detailMapEl.getAttribute('data-feature-url') : null;
             const mapInstance = map.getMap();
 
+            // Fonction utilitaire pour enregistrer les couches/marqueurs extra dans le groupe de l'objet courant
+            const _registerExtrasInGroup = (extraResult, endpointResult) => {
+                const groupKey = objectsLayer.primaryKey;
+                const allExtraLayerIds = [
+                    ...(extraResult ? extraResult.layerIds : []),
+                    ...(endpointResult ? endpointResult.layerIds : []),
+                ];
+                const allExtraMarkers = [
+                    ...(extraResult ? extraResult.markers : []),
+                    ...(endpointResult ? endpointResult.markers : []),
+                ];
+                if (allExtraLayerIds.length > 0 || allExtraMarkers.length > 0) {
+                    layerManager.addToGroup(groupKey, allExtraLayerIds, allExtraMarkers);
+                }
+            };
+
             if (featureUrl && pkVal) {
                 fetch(featureUrl)
                     .then(response => response.json())
                     .then(featureGeojson => {
                         // Afficher les géométries secondaires
-                        _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+                        const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
 
                         // Ajouter les marqueurs vert/rouge aux extrémités des lignes
-                        _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal);
+                        const endpointResult = _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal);
+
+                        // Enregistrer les couches/marqueurs extra dans le groupe de l'objet courant
+                        _registerExtrasInGroup(extraResult, endpointResult);
 
                         // Centrer la carte sur la bounding box de TOUTES les géométries
                         _fitBoundsFromGeojson(mapInstance, featureGeojson, parsedExtraGeometries);
                     })
                     .catch(err => {
                         console.warn('MaplibreMapentityMap: failed to fetch feature geojson', err);
-                        _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+                        const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+                        _registerExtrasInGroup(extraResult, null);
                     });
             } else {
-                _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+                const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+                _registerExtrasInGroup(extraResult, null);
             }
         } else {
             // Pas de tilejsonUrl, afficher quand même les extra géométries
             const mapInstance = map.getMap();
-            _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+            const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+            const groupKey = objectsLayer.primaryKey;
+            if (extraResult.layerIds.length > 0 || extraResult.markers.length > 0) {
+                layerManager.addToGroup(groupKey, extraResult.layerIds, extraResult.markers);
+            }
         }
 
         // Contrôles

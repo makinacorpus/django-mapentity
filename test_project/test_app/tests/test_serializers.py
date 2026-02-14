@@ -56,7 +56,7 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
             serialized=f"SRID={settings.SRID};MULTIPOLYGON(((1 1, 2 2, 1 2, 1 1)))"
         )
         self.geometrycollection = MushroomSpot.objects.create(
-            serialized=f"SRID={settings.SRID};GEOMETRYCOLLECTION(POINT(0 0), POLYGON((1 1, 2 2, 1 2, 1 1))))"
+            serialized=f"SRID={settings.SRID};GEOMETRYCOLLECTION(POINT(0 0), POLYGON((1 1, 2 2, 1 2, 1 1)))"
         )
         MushroomSpot.geomfield = GeometryField(name="geom", srid=settings.SRID)
 
@@ -82,9 +82,9 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
         self.assertEqual(len(layers["Point.shp"]), 1)
         self.assertEqual(len(layers["LineString.shp"]), 1)
         self.assertEqual(len(layers["Polygon.shp"]), 1)
-        self.assertEqual(len(layers["MultiPoint.shp"]), 1)
+        self.assertEqual(len(layers["MultiPoint.shp"]), 2)
         self.assertEqual(len(layers["MultiLineString.shp"]), 1)
-        self.assertEqual(len(layers["MultiPolygon.shp"]), 1)
+        self.assertEqual(len(layers["MultiPolygon.shp"]), 2)
 
     def test_serializer_creates_one_layer_per_type(self):
         self.assertEqual(len(self.getShapefileLayers()), 6)
@@ -94,9 +94,9 @@ class MushroomShapefileSerializerTest(CommonShapefileSerializerMixin, TestCase):
         self.assertEqual(len(layers["Point.shp"]), 1)
         self.assertEqual(len(layers["LineString.shp"]), 1)
         self.assertEqual(len(layers["Polygon.shp"]), 1)
-        self.assertEqual(len(layers["MultiPoint.shp"]), 1)
+        self.assertEqual(len(layers["MultiPoint.shp"]), 2)
         self.assertEqual(len(layers["MultiLineString.shp"]), 1)
-        self.assertEqual(len(layers["MultiPolygon.shp"]), 1)
+        self.assertEqual(len(layers["MultiPolygon.shp"]), 2)
 
     def test_each_layer_has_a_different_geometry_type(self):
         layer_types = [

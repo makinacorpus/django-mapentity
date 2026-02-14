@@ -449,7 +449,6 @@ class MaplibreObjectsLayer {
         const fillOpacity = style.fillOpacity ?? 0.7;
         const strokeOpacity = style.opacity ?? 1.0;
         const strokeColor = style.color;
-        console.log(style.weight);
         const strokeWidth = style.weight ?? 5;
 
         // Detail styles for 'selected' state
@@ -467,9 +466,10 @@ class MaplibreObjectsLayer {
 
         if (foundTypes.has("LineString") || foundTypes.has("MultiLineString")) {
             layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor));
-            // En mode détail, ajouter des marqueurs vert (départ) et rouge (arrivée)
+            // En mode détail, ajouter des marqueurs vert (départ) et rouge (arrivée) et des flèches
             if (detailStatus) {
                 this._addLineEndpointMarkers(geojson);
+                this._addLineArrowLayer(layerIdBase, sourceId, strokeColor);
             }
         }
 
@@ -724,6 +724,57 @@ class MaplibreObjectsLayer {
     }
 
     /**
+     * Ajoute une couche de flèches le long des lignes (mode détail uniquement).
+     * @param {string} layerIdBase - Base de l'ID de couche
+     * @param {string} sourceId - ID de la source
+     * @param {string} strokeColor - Couleur des flèches
+     * @private
+     */
+    _addLineArrowLayer(layerIdBase, sourceId, strokeColor) {
+        const arrowImageId = 'mapentity-arrow';
+        const layerId = `${layerIdBase}-arrows`;
+        const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
+
+        const addArrowLayer = () => {
+            this._map.addLayer({
+                id: layerId,
+                type: 'symbol',
+                source: sourceId,
+                filter: ['any',
+                    ['==', ['geometry-type'], 'LineString'],
+                    ['==', ['geometry-type'], 'MultiLineString']
+                ],
+                layout: {
+                    'symbol-placement': 'line',
+                    'symbol-spacing': 100,
+                    'icon-image': arrowImageId,
+                    'icon-size': 0.7,
+                    'icon-allow-overlap': true,
+                    'icon-rotation-alignment': 'map',
+                },
+            });
+        };
+
+        if (this._map.hasImage(arrowImageId)) {
+            addArrowLayer();
+        } else {
+            fetch(markersBase + 'arrow.svg')
+                .then(r => r.text())
+                .then(svgText => {
+                    const coloredSvg = svgText.replace('__COLOR__', strokeColor);
+                    const img = new Image(20, 20);
+                    img.onload = () => {
+                        if (!this._map.hasImage(arrowImageId)) {
+                            this._map.addImage(arrowImageId, img);
+                        }
+                        addArrowLayer();
+                    };
+                    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(coloredSvg);
+                });
+        }
+    }
+
+    /**
      * Ajoute des marqueurs DOM vert (départ) et rouge (arrivée) aux extrémités des lignes.
      * Utilisé en mode détail uniquement.
      * @param {Object} geojson - Données GeoJSON (Feature ou FeatureCollection)
@@ -731,7 +782,6 @@ class MaplibreObjectsLayer {
      */
     _addLineEndpointMarkers(geojson) {
         const features = geojson.type === "FeatureCollection" ? geojson.features : [geojson];
-        console.log(geojson);
         for (const feature of features) {
             const geom = feature.geometry;
             if (!geom) continue;
@@ -751,8 +801,8 @@ class MaplibreObjectsLayer {
                 continue;
             }
 
-            //if (startCoord) this._createEndpointMarker(startCoord, '#28a745');
-            //if (endCoord) this._createEndpointMarker(endCoord, '#dc3545');
+            if (startCoord) this._createEndpointMarker(startCoord, '#28a745');
+            if (endCoord) this._createEndpointMarker(endCoord, '#dc3545');
         }
     }
 
@@ -904,7 +954,8 @@ class MaplibreObjectsLayer {
                 const source = this._map.getSource(sourceId);
                 if (!source || !source._data) continue;
 
-                for (const feature of source._data.geojson.features) {
+                const features = source._data.features || (source._data.geojson && source._data.geojson.features) || [];
+                for (const feature of features) {
                     if (!feature.id) continue;
                     const isMatch = feature.id === primaryKey;
                     this._map.setFeatureState(
@@ -932,15 +983,16 @@ class MaplibreObjectsLayer {
             if (!layer) continue;
 
             const sourceId = layer.source;
+            const source = this._map.getSource(sourceId);
 
-            if (this._isMVT) {
+            if (source && source.type === 'vector' && this._mvtSourceLayer) {
                 const featureState = { source: sourceId, sourceLayer: this._mvtSourceLayer, id: primaryKey };
                 this._map.setFeatureState(featureState, { selected: on });
-            } else {
-                const source = this._map.getSource(sourceId);
-                if (!source || !source._data) continue;
+            } else if (source && source.type === 'geojson') {
+                if (!source._data) continue;
 
-                for (const feature of source._data.geojson.features) {
+                const features = source._data.features || (source._data.geojson && source._data.geojson.features) || [];
+                for (const feature of features) {
                     if (!feature.id) continue;
                     const isMatch = feature.id === primaryKey;
                     if (isMatch) {
@@ -1000,10 +1052,13 @@ class MaplibreObjectsLayer {
 
             const currentSourceId = layer.source;
             const source = this._map.getSource(currentSourceId);
-            if (source && source._data && source._data.geojson.features) {
-                sourceId = currentSourceId;
-                fullFeatureCollection = source._data.geojson;
-                break;
+            if (source && source._data) {
+                const fc = source._data.features ? source._data : (source._data.geojson || null);
+                if (fc && fc.features) {
+                    sourceId = currentSourceId;
+                    fullFeatureCollection = fc;
+                    break;
+                }
             }
         }
 
