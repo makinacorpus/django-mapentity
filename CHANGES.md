@@ -4,6 +4,9 @@ CHANGELOG
 8.17.0+dev (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Fix the appearance of the Select2 fields
 
 
 8.17.0     (2026-02-11)
