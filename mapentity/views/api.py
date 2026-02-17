@@ -3,7 +3,9 @@ import logging
 from django.conf import settings
 from django.contrib.gis.db.models.functions import Transform
 from django.template import loader
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import condition
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import renderers, viewsets
 from rest_framework.decorators import action
@@ -15,7 +17,7 @@ from vectortiles.mixins import BaseTileJSONView, BaseVectorTileView
 from vectortiles.rest_framework.renderers import MVTRenderer
 
 from .. import serializers as mapentity_serializers
-from ..decorators import view_cache_latest, view_cache_response_content
+from ..decorators import mvt_etag, view_cache_latest, view_cache_response_content
 from ..filters import MapEntityFilterSet
 from ..pagination import MapentityDatatablePagination
 from ..renderers import GeoJSONRenderer
@@ -163,6 +165,7 @@ class MapEntityViewSet(BaseTileJSONView, BaseVectorTileView, viewsets.ModelViewS
         template = loader.get_template("mapentity/mapentity_popup_content.html")
         return Response(template.render(context))
 
+    @method_decorator(condition(etag_func=mvt_etag))
     @action(
         detail=False,
         methods=["get"],
@@ -170,6 +173,7 @@ class MapEntityViewSet(BaseTileJSONView, BaseVectorTileView, viewsets.ModelViewS
         url_path="mvt/(?P<z>\d+)/(?P<x>\d+)/(?P<y>\d+)",
         url_name="mvt",
     )
+    @view_cache_response_content()
     def mvt(self, request, *args, **kwargs):
         x, y, z = int(kwargs.get("x")), int(kwargs.get("y")), int(kwargs.get("z"))
         tile = self.get_layer_tiles(z, x, y)

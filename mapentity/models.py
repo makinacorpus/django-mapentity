@@ -1,15 +1,18 @@
 import math
 import os
 
+import mercantile
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.geos import Polygon
 from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.db import models, transaction
+from django.db.models import Count, Max
 from django.db.utils import OperationalError
 from django.urls import NoReverseMatch, reverse
 from django.utils.formats import localize
@@ -210,12 +213,33 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         return f"{appname}.{auth.get_permission_codename(perm, opts)}"
 
     @classmethod
-    def latest_updated(cls):
+    def latest_updated_with_count(cls, **kwargs):
         try:
-            fname = app_settings["DATE_UPDATE_FIELD_NAME"]
-            return cls.objects.only(fname).latest(fname).get_date_update()
+            qs = cls.objects.all()
+            z, x, y = kwargs.get("z"), kwargs.get("x"), kwargs.get("y")
+            if z is not None and x is not None and y is not None:
+                extent = Polygon.from_bbox(mercantile.xy_bounds(int(x), int(y), int(z)))
+                extent.srid = 3857
+
+                # Get the SRID of the geometry field to transform extent to the correct SRID
+                geom_field = app_settings["GEOM_FIELD_NAME"]
+                geom_field_obj = cls._meta.get_field(geom_field)
+                target_srid = getattr(geom_field_obj, "srid", 4326) or 4326
+                extent.transform(target_srid)
+                qs = qs.filter(**{f"{geom_field}__intersects": extent})
+
+            # Aggregate Max date and Count in one query
+
+            date_field = app_settings["DATE_UPDATE_FIELD_NAME"]
+            agg = qs.aggregate(latest=Max(date_field), count=Count("pk"))
+            return agg["latest"], agg["count"]
         except (cls.DoesNotExist, FieldError):
-            return None
+            return None, 0
+
+    @classmethod
+    def latest_updated(cls, **kwargs):
+        latest, count = cls.latest_updated_with_count(**kwargs)
+        return latest
 
     def get_date_update(self):
         try:
@@ -444,7 +468,26 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     @property
     def name_display(self):
         return f'<a href="{self.get_detail_url()}">{self.get_display_label()}</a>'
+
+    @classmethod
+    def geom_fields(cls):
+        """return all field name sublassed from GeometryField or GeneratedField with OutputField subclassed from GeometryField"""
+        return [
+            field.name
+            for field in cls._meta.get_fields()
+            if hasattr(field, "geom_type")
+            or (
+                hasattr(field, "output_field")
+                and hasattr(field.output_field, "geom_type")
+            )
+        ]
+
     main_geom_field = app_settings["GEOM_FIELD_NAME"]
+
+    @classmethod
+    def get_main_geom(self):
+        """Get main geometry field."""
+        return self.main_geom_field
 
 
 class MapEntityMixin(BaseMapEntityMixin):
@@ -498,10 +541,18 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
         return self.action_time
 
     @classmethod
-    def latest_updated(cls):
+    def latest_updated_with_count(cls, **kwargs):
         try:
-            return (
-                cls.objects.only("action_time").latest("action_time").get_date_update()
+            from django.db.models import Count, Max
+
+            agg = cls.objects.only("action_time").aggregate(
+                latest=Max("action_time"), count=Count("pk")
             )
+            return agg["latest"], agg["count"]
         except (cls.DoesNotExist, FieldError):
-            return None
+            return None, 0
+
+    @classmethod
+    def latest_updated(cls, **kwargs):
+        latest, count = cls.latest_updated_with_count(**kwargs)
+        return latest

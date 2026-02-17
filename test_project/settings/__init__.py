@@ -105,8 +105,12 @@ INTERNAL_IPS = type("c", (), {"__contains__": lambda *a: True})()
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.spatialite",
-        "NAME": os.path.join(BASE_DIR, "database.db"),
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": os.getenv("POSTGRES_DB", "mapentity"),
+        "USER": os.getenv("POSTGRES_USER", "mapentity"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "mapentity"),
+        "HOST": os.getenv("POSTGRES_HOST", "postgres"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
 
@@ -141,7 +145,11 @@ STATICFILES_DIRS = [
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    }
+    },
+    "files": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": os.path.join(BASE_DIR, "cache"),
+    },
 }
 # VECTOR_TILES_BACKEND = "vectortiles.backends.python"
 MEDIA_URL = "/media/"
@@ -178,6 +186,8 @@ MAPENTITY_CONFIG = {
     "CONVERSION_SERVER": "http://convertit:6543",
     "CAPTURE_SERVER": "http://screamshotter:8000",
     "SENDFILE_HTTP_HEADER": "X-Accel-Redirect",
+    "GEOJSON_LAYERS_CACHE_BACKEND": "files",
+    "DATE_UPDATE_FIELD_NAME": "date_update",
     "MAP_STYLES": {
         "dummymodel": {
             "weight": 3,
