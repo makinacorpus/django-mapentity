@@ -4,7 +4,9 @@ CHANGELOG
 8.17.1+dev (XX)
 -----------------------
 
+**Bug fixes**
 
+- Reduce the size of the help text
 
 8.17.1     (2026-02-17)
 -----------------------
