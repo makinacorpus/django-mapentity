@@ -105,12 +105,8 @@ INTERNAL_IPS = type("c", (), {"__contains__": lambda *a: True})()
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": os.getenv("POSTGRES_DB", "mapentity"),
-        "USER": os.getenv("POSTGRES_USER", "mapentity"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "mapentity"),
-        "HOST": os.getenv("POSTGRES_HOST", "postgres"),
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        "ENGINE": "django.contrib.gis.db.backends.spatialite",
+        "NAME": os.path.join(BASE_DIR, "database.db"),
     }
 }
 
@@ -151,7 +147,7 @@ CACHES = {
         "LOCATION": os.path.join(BASE_DIR, "cache"),
     },
 }
-# VECTOR_TILES_BACKEND = "vectortiles.backends.python"
+VECTOR_TILES_BACKEND = "vectortiles.backends.python"
 MEDIA_URL = "/media/"
 MEDIA_URL_SECURE = "/media_secure/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
