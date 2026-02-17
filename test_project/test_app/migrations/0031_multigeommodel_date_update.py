@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('test_app', '0030_rename_updated_at_complexmodel_date_update_and_more'),
+        ("test_app", "0030_rename_updated_at_complexmodel_date_update_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='multigeommodel',
-            name='date_update',
+            model_name="multigeommodel",
+            name="date_update",
             field=models.DateTimeField(auto_now=True, db_index=True),
         ),
     ]
