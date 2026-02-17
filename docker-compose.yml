@@ -4,23 +4,13 @@ services:
 
   screamshotter:
     image: makinacorpus/screamshotter:v2
-  postgres:
-    image: postgis/postgis:18-3.6
-    environment:
-      POSTGRES_USER: mapentity
-      POSTGRES_PASSWORD: mapentity
-      POSTGRES_DB: mapentity
-    volumes:
-      - pgdata:/var/lib/postgresql
+
   web:
     build:
       context: .
       dockerfile: Dockerfile
       target: base
-    environment:
-      POSTGRES_USER: mapentity
-      POSTGRES_PASSWORD: mapentity
-      POSTGRES_DB: mapentity
+
     ports:
       - "8000:8000"
     volumes:
@@ -28,7 +18,6 @@ services:
     depends_on:
       - screamshotter
       - convertit
-      - postgres
 
     user: ${UID:-1000}:${GID:-1000}
     command: /code/venv/bin/python ./manage.py runserver 0.0.0.0:8000
@@ -36,6 +25,3 @@ services:
       default:
         aliases:
           - mapentity.local
-
-volumes:
-  pgdata:

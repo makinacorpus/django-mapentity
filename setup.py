@@ -39,6 +39,7 @@ setup(
         'easy-thumbnails',
         'django-vectortiles',
         'fiona',
+        'mercantile',
         'gpxpy',
         'lxml',
         'paperclip',
