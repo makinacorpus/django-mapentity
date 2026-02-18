@@ -722,8 +722,8 @@ label.requiredField .asteriskField {
 .form-horizontal .controls {
     flex-grow: 1;
 }
-.form-horizontal .controls span {
-    font-size: 1rem;
+.form-horizontal .controls .text-muted {
+    font-size: 0.75rem;
 }
 
 @media (min-width: 768px) {
