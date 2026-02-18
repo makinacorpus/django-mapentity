@@ -13,54 +13,61 @@ class MVTCacheTest(TestCase):
     def setUp(self):
         self.cache = caches[app_settings["GEOJSON_LAYERS_CACHE_BACKEND"]]
         self.cache.clear()
-        # Zoom 0, Tile 0, 0 covers the whole world
-        self.z, self.x, self.y = 0, 0, 0
-        self.obj_in = DummyModelFactory.create(
-            name="Inside", geom=Point(0, 0, srid=4326)
-        )
-        self.obj_out = DummyModelFactory.create(
-            name="Outside", geom=Point(10.0, 10.0, srid=4326)
-        )
-        self.url = reverse(
-            "test_app:dummymodel-drf-mvt",
-            kwargs={"z": self.z, "x": self.x, "y": self.y},
-        )
 
     def test_mvt_spatial_cache_invalidation(self):
         """Test if MVT cache is only invalidated by objects inside the tile"""
-        # Zoom 0 covers the world.
-        self.z, self.x, self.y = 0, 0, 0
+        # Use zoom 10 where we can distinguish different tiles
+        # Point(0, 0) is in tile (512, 512, 10)
+        # Point(0.527, -0.176) is in tile (513, 512, 10)
+        self.z, self.x, self.y = 10, 512, 512
         self.url = reverse(
             "test_app:dummymodel-drf-mvt",
             kwargs={"z": self.z, "x": self.x, "y": self.y},
         )
 
-        # Point(0, 0) is definitely in (0,0,0)
+        # Create object INSIDE tile (512, 512, 10)
         obj_in = DummyModelFactory.create(name="Inside", geom=Point(0, 0, srid=4326))
+        # Create object OUTSIDE tile (512, 512, 10), in tile (513, 512, 10)
+        obj_out = DummyModelFactory.create(
+            name="Outside", geom=Point(0.527, -0.176, srid=4326)
+        )
 
-        # First request
+        # First request to get initial ETag
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertIn("ETag", response)
-        etag = response["ETag"]
+        etag_initial = response["ETag"]
 
-        # Request with If-None-Match
-        response2 = self.client.get(self.url, HTTP_IF_NONE_MATCH=etag)
+        # Request with If-None-Match should return 304
+        response2 = self.client.get(self.url, HTTP_IF_NONE_MATCH=etag_initial)
         self.assertEqual(response2.status_code, 304)
 
-        # Update object INSIDE
+        # Update object OUTSIDE the tile
+        time.sleep(1.1)
+        obj_out.name = "Updated Outside"
+        obj_out.save()
+
+        # Request should still return 304 - cache should NOT be invalidated
+        response3 = self.client.get(self.url, HTTP_IF_NONE_MATCH=etag_initial)
+        self.assertEqual(
+            response3.status_code,
+            304,
+            "Cache should NOT be invalidated by update outside tile",
+        )
+
+        # Update object INSIDE the tile
         time.sleep(1.1)
         obj_in.name = "Updated Inside"
         obj_in.save()
 
-        # Third request - should be 200
-        response3 = self.client.get(self.url, HTTP_IF_NONE_MATCH=etag)
+        # Request should return 200 - cache SHOULD be invalidated
+        response4 = self.client.get(self.url, HTTP_IF_NONE_MATCH=etag_initial)
         self.assertEqual(
-            response3.status_code,
+            response4.status_code,
             200,
             "Cache SHOULD be invalidated by update inside tile",
         )
-        self.assertNotEqual(response3["ETag"], etag)
+        self.assertNotEqual(response4["ETag"], etag_initial)
 
     def test_mvt_cache_key_includes_coords(self):
         """Test if different tiles have different cache entries"""
