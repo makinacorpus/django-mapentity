@@ -121,7 +121,7 @@ class MaplibreObjectsLayer {
             if (this.options.displayPopup) {
                 var popup_content;
                 try {
-                    popup_content = await this.getPopupContent(this.options.modelname, feature.id);
+                    popup_content = await this.getPopupContent(this.options.modelname, feature.properties.id);
                 } catch (error) {
                     popup_content = gettext('Data unreachable');
                 }
@@ -240,9 +240,15 @@ class MaplibreObjectsLayer {
         })
 
         // Si on veut afficher mais pas encore chargé, charger d'abord
-        if (visible && !this.isLoaded && this.dataUrl) {
+        if (visible && !this.isLoaded) {
             try {
-                await this.load(this.dataUrl);
+                if (this.options.tilejsonUrl) {
+                    this.loadMVT(this.options.tilejsonUrl);
+                } else if (this.dataUrl) {
+                    await this.load(this.dataUrl);
+                } else {
+                    return false;
+                }
                 // Après chargement réussi, afficher la couche
                 const layerIds = this._current_objects[primaryKey];
                 if (layerIds) {
@@ -294,6 +300,85 @@ class MaplibreObjectsLayer {
             console.error("Could not load url '" + url + "'", error);
             throw error; // Re-lancer pour que toggleLazyLayer puisse gérer l'erreur
         }
+    }
+
+    /**
+     * Charge une couche MVT (Vector Tiles) depuis une URL TileJSON
+     * @param tilejsonUrl {string} - URL du endpoint TileJSON (ex: /api/model/drf/models/tilejson)
+     */
+    loadMVT(tilejsonUrl) {
+        if (!tilejsonUrl) {
+            console.warn("TileJSON URL is undefined, falling back to GeoJSON");
+            if (this.options.dataUrl) {
+                this.load(this.options.dataUrl);
+            }
+            return;
+        }
+        if (this.loading) {
+            console.warn("Chargement déjà en cours...");
+            return;
+        }
+        console.debug("Loading MVT from TileJSON: " + tilejsonUrl);
+        this.loading = true;
+        this._isMVT = true;
+
+        const primaryKey = this.primaryKey;
+        const sourceId = `source-${primaryKey}`;
+        const layerIdBase = `layer-${primaryKey}`;
+        const sourceLayer = this.options.modelname;
+
+        // Ajouter la source vector-tile via TileJSON
+        this._map.addSource(sourceId, {
+            type: 'vector',
+            url: window.location.origin + tilejsonUrl,
+            promoteId: { [sourceLayer]: 'id' },
+        });
+
+        this._mvtSourceLayer = sourceLayer;
+
+        // Styles
+        const style = this.options.style;
+        const rgba = parseColor(style.color);
+        const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
+        const fillOpacity = style.fillOpacity ?? 0.7;
+        const strokeOpacity = style.opacity ?? 1.0;
+        const strokeColor = style.color;
+        const strokeWidth = style.weight ?? 5;
+
+        const detailStyle = this.options.detailStyle || {};
+        const detailColor = detailStyle.color || '#FF5E00';
+        const detailRgba = parseColor(detailColor);
+        const detailRgbaStr = `rgba(${detailRgba[0]},${detailRgba[1]},${detailRgba[2]},${detailRgba[3]})`;
+
+        const layerIds = [];
+
+        // Ajouter les couches pour tous les types de géométrie (on ne connaît pas les types à l'avance avec MVT)
+        layerIds.push(this._addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailColor, sourceLayer));
+        layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor, sourceLayer));
+        layerIds.push(...this._addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity, detailRgbaStr, detailColor, sourceLayer));
+
+        // Enregistrer les couches
+        this._current_objects[primaryKey] = layerIds;
+
+        // Stocker les filtres géométriques de base pour chaque layer MVT
+        // afin de pouvoir les réutiliser lors du filtrage par PKs
+        this._mvtBaseFilters = {};
+        for (const layerId of layerIds) {
+            if (this._map.getLayer(layerId)) {
+                this._mvtBaseFilters[layerId] = this._map.getFilter(layerId);
+            }
+        }
+
+        this.isLoaded = true;
+        this.loading = false;
+
+        // Enregistrer auprès du gestionnaire de couches
+        if (!this.isLazy) {
+            this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
+        }
+
+        // Add event listeners on the created layers
+        this.setupLayerEvents();
     }
 
     /**
@@ -364,7 +449,6 @@ class MaplibreObjectsLayer {
         const fillOpacity = style.fillOpacity ?? 0.7;
         const strokeOpacity = style.opacity ?? 1.0;
         const strokeColor = style.color;
-        console.log(style.weight);
         const strokeWidth = style.weight ?? 5;
 
         // Detail styles for 'selected' state
@@ -382,9 +466,10 @@ class MaplibreObjectsLayer {
 
         if (foundTypes.has("LineString") || foundTypes.has("MultiLineString")) {
             layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor));
-            // En mode détail, ajouter des marqueurs vert (départ) et rouge (arrivée)
+            // En mode détail, ajouter des marqueurs vert (départ) et rouge (arrivée) et des flèches
             if (detailStatus) {
                 this._addLineEndpointMarkers(geojson);
+                this._addLineArrowLayer(layerIdBase, sourceId, strokeColor);
             }
         }
 
@@ -507,13 +592,20 @@ class MaplibreObjectsLayer {
      * @returns {string} - ID de la couche créée
      * @private
      */
-    _addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailStrokeColor) {
+    _addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailStrokeColor, sourceLayer) {
         const layerId = `${layerIdBase}-points`;
         const hoveredStrokeWidth = strokeWidth + 2;
-        this._map.addLayer({
+        const detailStyle = this.options.detailStyle || {};
+        const detailStrokeWidth = detailStyle.weight ?? strokeWidth;
+        const detailFillOpacity = detailStyle.fillOpacity ?? fillOpacity;
+        const detailStrokeOpacity = detailStyle.opacity ?? strokeOpacity;
+        const layerDef = {
             id: layerId,
             type: 'circle',
             source: sourceId,
+        };
+        if (sourceLayer) layerDef['source-layer'] = sourceLayer;
+        Object.assign(layerDef, {
             filter: this._buildFilter(['any',
                 ['==', ['geometry-type'], 'Point'],
                 ['==', ['geometry-type'], 'MultiPoint']
@@ -527,7 +619,12 @@ class MaplibreObjectsLayer {
                     detailRgbaStr,
                     rgbaStr
                 ],
-                'circle-opacity': fillOpacity,
+                'circle-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailFillOpacity,
+                    fillOpacity
+                ],
                 'circle-stroke-color': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
@@ -536,11 +633,18 @@ class MaplibreObjectsLayer {
                     detailStrokeColor,
                     strokeColor
                 ],
-                'circle-stroke-opacity': strokeOpacity,
+                'circle-stroke-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailStrokeOpacity,
+                    strokeOpacity
+                ],
                 'circle-stroke-width': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     hoveredStrokeWidth,
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailStrokeWidth,
                     strokeWidth
                 ],
                 'circle-radius': [
@@ -551,6 +655,7 @@ class MaplibreObjectsLayer {
                 ]
             }
         });
+        this._map.addLayer(layerDef);
         return layerId;
     }
 
@@ -565,16 +670,22 @@ class MaplibreObjectsLayer {
      * @returns {string} - ID de la couche créée
      * @private
      */
-    _addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor) {
+    _addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor, sourceLayer) {
         const layerId = `${layerIdBase}-lines`;
         // Augmentation de la largeur au hover (en pixels)
         const hoverExtra = 2;
         const hoveredWidth = strokeWidth + hoverExtra;
+        const detailStyle = this.options.detailStyle || {};
+        const detailWidth = detailStyle.weight ?? strokeWidth;
+        const detailOpacity = detailStyle.opacity ?? strokeOpacity;
 
-        this._map.addLayer({
+        const layerDef = {
             id: layerId,
             type: 'line',
             source: sourceId,
+        };
+        if (sourceLayer) layerDef['source-layer'] = sourceLayer;
+        Object.assign(layerDef, {
             layout: {
                 'line-join': 'round',
                 'line-cap': 'round'
@@ -596,12 +707,71 @@ class MaplibreObjectsLayer {
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     hoveredWidth,
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailWidth,
                     strokeWidth
                 ],
-                'line-opacity': strokeOpacity
+                'line-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailOpacity,
+                    strokeOpacity
+                ]
             }
         });
+        this._map.addLayer(layerDef);
         return layerId;
+    }
+
+    /**
+     * Ajoute une couche de flèches le long des lignes (mode détail uniquement).
+     * @param {string} layerIdBase - Base de l'ID de couche
+     * @param {string} sourceId - ID de la source
+     * @param {string} strokeColor - Couleur des flèches
+     * @private
+     */
+    _addLineArrowLayer(layerIdBase, sourceId, strokeColor) {
+        const arrowImageId = 'mapentity-arrow';
+        const layerId = `${layerIdBase}-arrows`;
+        const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
+
+        const addArrowLayer = () => {
+            this._map.addLayer({
+                id: layerId,
+                type: 'symbol',
+                source: sourceId,
+                filter: ['any',
+                    ['==', ['geometry-type'], 'LineString'],
+                    ['==', ['geometry-type'], 'MultiLineString']
+                ],
+                layout: {
+                    'symbol-placement': 'line',
+                    'symbol-spacing': 100,
+                    'icon-image': arrowImageId,
+                    'icon-size': 0.7,
+                    'icon-allow-overlap': true,
+                    'icon-rotation-alignment': 'map',
+                },
+            });
+        };
+
+        if (this._map.hasImage(arrowImageId)) {
+            addArrowLayer();
+        } else {
+            fetch(markersBase + 'arrow.svg')
+                .then(r => r.text())
+                .then(svgText => {
+                    const coloredSvg = svgText.replace('__COLOR__', strokeColor);
+                    const img = new Image(20, 20);
+                    img.onload = () => {
+                        if (!this._map.hasImage(arrowImageId)) {
+                            this._map.addImage(arrowImageId, img);
+                        }
+                        addArrowLayer();
+                    };
+                    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(coloredSvg);
+                });
+        }
     }
 
     /**
@@ -612,7 +782,6 @@ class MaplibreObjectsLayer {
      */
     _addLineEndpointMarkers(geojson) {
         const features = geojson.type === "FeatureCollection" ? geojson.features : [geojson];
-        console.log(geojson);
         for (const feature of features) {
             const geom = feature.geometry;
             if (!geom) continue;
@@ -632,8 +801,8 @@ class MaplibreObjectsLayer {
                 continue;
             }
 
-            //if (startCoord) this._createEndpointMarker(startCoord, '#28a745');
-            //if (endCoord) this._createEndpointMarker(endCoord, '#dc3545');
+            if (startCoord) this._createEndpointMarker(startCoord, '#28a745');
+            if (endCoord) this._createEndpointMarker(endCoord, '#dc3545');
         }
     }
 
@@ -670,19 +839,26 @@ class MaplibreObjectsLayer {
      * @returns {Array<string>} - IDs des couches créées
      * @private
      */
-    _addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity, detailRgbaStr, detailStrokeColor) {
+    _addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity, detailRgbaStr, detailStrokeColor, sourceLayer) {
         const fillLayerId = `${layerIdBase}-polygon-fill`;
         const strokeLayerId = `${layerIdBase}-polygon-stroke`;
 
         // Augmentations visuelles au survol
         const hoveredStrokeWidth = strokeWidth + 2;
         const hoveredFillOpacity = Math.min((fillOpacity ?? 0.7) + 0.15, 1);
+        const detailStyle = this.options.detailStyle || {};
+        const detailFillOpacity = detailStyle.fillOpacity ?? fillOpacity;
+        const detailStrokeWidth = detailStyle.weight ?? strokeWidth;
+        const detailStrokeOpacity = detailStyle.opacity ?? strokeOpacity;
 
         // Couche de remplissage
-        this._map.addLayer({
+        const fillDef = {
             id: fillLayerId,
             type: 'fill',
             source: sourceId,
+        };
+        if (sourceLayer) fillDef['source-layer'] = sourceLayer;
+        Object.assign(fillDef, {
             filter: this._buildFilter(['any',
                 ['==', ['geometry-type'], 'Polygon'],
                 ['==', ['geometry-type'], 'MultiPolygon']
@@ -700,16 +876,22 @@ class MaplibreObjectsLayer {
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     hoveredFillOpacity,
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailFillOpacity,
                     fillOpacity
                 ]
             }
         });
+        this._map.addLayer(fillDef);
 
         // Couche de contour
-        this._map.addLayer({
+        const strokeDef = {
             id: strokeLayerId,
             type: 'line',
             source: sourceId,
+        };
+        if (sourceLayer) strokeDef['source-layer'] = sourceLayer;
+        Object.assign(strokeDef, {
             layout: {
                 'line-join': 'round',
                 'line-cap': 'round'
@@ -731,11 +913,19 @@ class MaplibreObjectsLayer {
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     hoveredStrokeWidth,
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailStrokeWidth,
                     strokeWidth
                 ],
-                'line-opacity': strokeOpacity
+                'line-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailStrokeOpacity,
+                    strokeOpacity
+                ]
             }
         });
+        this._map.addLayer(strokeDef);
 
         return [fillLayerId, strokeLayerId];
     }
@@ -756,16 +946,23 @@ class MaplibreObjectsLayer {
             if (!layer) continue;
 
             const sourceId = layer.source;
-            const source = this._map.getSource(sourceId);
-            if (!source || !source._data) continue;
 
-            for (const feature of source._data.geojson.features) {
-                if (!feature.id) continue;
-                const isMatch = feature.id === primaryKey;
-                this._map.setFeatureState(
-                    { source: sourceId, id: feature.id },
-                    { hover: isMatch && on }
-                );
+            if (this._isMVT) {
+                const featureState = { source: sourceId, sourceLayer: this._mvtSourceLayer, id: primaryKey };
+                this._map.setFeatureState(featureState, { hover: on });
+            } else {
+                const source = this._map.getSource(sourceId);
+                if (!source || !source._data) continue;
+
+                const features = source._data.features || (source._data.geojson && source._data.geojson.features) || [];
+                for (const feature of features) {
+                    if (!feature.id) continue;
+                    const isMatch = feature.id === primaryKey;
+                    this._map.setFeatureState(
+                        { source: sourceId, id: feature.id },
+                        { hover: isMatch && on }
+                    );
+                }
             }
         }
     }
@@ -787,16 +984,23 @@ class MaplibreObjectsLayer {
 
             const sourceId = layer.source;
             const source = this._map.getSource(sourceId);
-            if (!source || !source._data) continue;
 
-            for (const feature of source._data.geojson.features) {
-                if (!feature.id) continue;
-                const isMatch = feature.id === primaryKey;
-                if (isMatch) {
-                    this._map.setFeatureState(
-                        { source: sourceId, id: feature.id },
-                        { selected: on }
-                    );
+            if (source && source.type === 'vector' && this._mvtSourceLayer) {
+                const featureState = { source: sourceId, sourceLayer: this._mvtSourceLayer, id: primaryKey };
+                this._map.setFeatureState(featureState, { selected: on });
+            } else if (source && source.type === 'geojson') {
+                if (!source._data) continue;
+
+                const features = source._data.features || (source._data.geojson && source._data.geojson.features) || [];
+                for (const feature of features) {
+                    if (!feature.id) continue;
+                    const isMatch = feature.id === primaryKey;
+                    if (isMatch) {
+                        this._map.setFeatureState(
+                            { source: sourceId, id: feature.id },
+                            { selected: on }
+                        );
+                    }
                 }
             }
         }
@@ -807,6 +1011,27 @@ class MaplibreObjectsLayer {
      * @param primaryKeys {Array<string|number>} - Clés primaires à afficher
      */
     updateFromPks(primaryKeys) {
+        // Mode MVT : utiliser des filtres sur les layers
+        if (this._isMVT) {
+            const layersBySource = Object.values(this._current_objects).flat();
+            // Convertir les PKs en nombres pour correspondre au type des propriétés MVT
+            const numericPks = primaryKeys.map(pk => Number(pk));
+            const pkFilter = numericPks.length > 0
+                ? ['in', ['get', 'id'], ['literal', numericPks]]
+                : ['==', ['get', 'id'], -1];
+
+            for (const layerId of layersBySource) {
+                if (!this._map.getLayer(layerId)) continue;
+                // Récupérer le filtre géométrique de base (stocké lors de la création)
+                const baseGeomFilter = this._mvtBaseFilters && this._mvtBaseFilters[layerId];
+                const newFilter = baseGeomFilter
+                    ? ['all', baseGeomFilter, pkFilter]
+                    : pkFilter;
+                this._map.setFilter(layerId, this._buildFilter(newFilter));
+            }
+            return;
+        }
+
         if (!this._track_objects) {
             this._track_objects = {};
         }
@@ -827,10 +1052,13 @@ class MaplibreObjectsLayer {
 
             const currentSourceId = layer.source;
             const source = this._map.getSource(currentSourceId);
-            if (source && source._data && source._data.geojson.features) {
-                sourceId = currentSourceId;
-                fullFeatureCollection = source._data.geojson;
-                break;
+            if (source && source._data) {
+                const fc = source._data.features ? source._data : (source._data.geojson || null);
+                if (fc && fc.features) {
+                    sourceId = currentSourceId;
+                    fullFeatureCollection = fc;
+                    break;
+                }
             }
         }
 
@@ -869,16 +1097,33 @@ class MaplibreObjectsLayer {
         let feature = null;
         const layersBySource = Object.values(this._current_objects).flat();
 
-        for (const layerId of layersBySource) {
-            const layer = this._map.getLayer(layerId);
-            if (!layer) continue;
+        if (this._isMVT) {
+            // En mode MVT, utiliser querySourceFeatures pour trouver la feature
+            for (const layerId of layersBySource) {
+                const layer = this._map.getLayer(layerId);
+                if (!layer) continue;
 
-            const source = this._map.getSource(layer.source);
-            if (source && source._data && source._data.geojson.features) {
-                const foundFeature = source._data.geojson.features.find(f => f.properties?.id === pk);
-                if (foundFeature) {
-                    feature = foundFeature;
+                const features = this._map.querySourceFeatures(layer.source, {
+                    sourceLayer: this._mvtSourceLayer,
+                    filter: ['==', ['get', 'id'], pk]
+                });
+                if (features.length > 0) {
+                    feature = features[0];
                     break;
+                }
+            }
+        } else {
+            for (const layerId of layersBySource) {
+                const layer = this._map.getLayer(layerId);
+                if (!layer) continue;
+
+                const source = this._map.getSource(layer.source);
+                if (source && source._data && source._data.geojson.features) {
+                    const foundFeature = source._data.geojson.features.find(f => f.properties?.id === pk);
+                    if (foundFeature) {
+                        feature = foundFeature;
+                        break;
+                    }
                 }
             }
         }

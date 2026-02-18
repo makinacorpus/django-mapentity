@@ -99,6 +99,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const objects_verbose_name = document.body.getAttribute('data-objectsname');
     const objectUrlTemplate = window.SETTINGS.urls.detail.replace(/modelname/g, modelname);
     const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
+    const mvtUrl = window.SETTINGS.urls.mvt ? window.SETTINGS.urls.mvt.replace(/modelname/g, modelname) : undefined;
+    const tilejsonUrl = window.SETTINGS.urls.tilejson ? window.SETTINGS.urls.tilejson.replace(/modelname/g, modelname) : undefined;
     const layerManager = new MaplibreLayerManager();
     const mapentityContext = new MaplibreMapentityContext(bounds, layerManager);
 
@@ -119,6 +121,8 @@ document.addEventListener('DOMContentLoaded', function() {
         nameHTML : nameHTML,
         category: category,
         dataUrl: layerUrl,
+        mvtUrl: mvtUrl,
+        tilejsonUrl: tilejsonUrl,
         primaryKey: primaryKey,
         isLazy: false,
         displayPopup: true,
@@ -134,6 +138,8 @@ document.addEventListener('DOMContentLoaded', function() {
             bounds : bounds,
             layerManager: layerManager,
             layerUrl : layerUrl,
+            mvtUrl : mvtUrl,
+            tilejsonUrl : tilejsonUrl,
         }
     });
     window.dispatchEvent(mapReadyEvent);

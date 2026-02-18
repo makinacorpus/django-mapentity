@@ -97,7 +97,7 @@ class MapEntityTest(TestCase):
         # Make sure database is not empty for this model
         self.modelfactory.create_batch(30)
 
-        response = self.client.get(self.model.get_layer_list_url())
+        response = self.client.get(self.model.get_geojson_list_url())
         self.assertEqual(response.status_code, 200)
         response = self.client.get(self.model.get_datatablelist_url())
         self.assertEqual(response.status_code, 200)
@@ -308,7 +308,7 @@ class MapEntityTest(TestCase):
         response = self.client.get(obj.get_list_url())
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(obj.get_layer_list_url())
+        response = self.client.get(obj.get_geojson_list_url())
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
@@ -319,7 +319,7 @@ class MapEntityTest(TestCase):
         response = self.client.get(obj.get_detail_url())
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(obj.get_layer_detail_url())
+        response = self.client.get(obj.get_geojson_detail_url())
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(obj.get_update_url())
@@ -531,7 +531,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         latest_updated.return_value = now()
 
         latest = self.model.latest_updated()
-        geojson_layer_url = self.url_for(self.model.get_layer_list_url())
+        geojson_layer_url = self.url_for(self.model.get_geojson_list_url())
 
         response_1 = self.client.get(geojson_layer_url, allow_redirects=False)
         self.assertEqual(response_1.status_code, 200)

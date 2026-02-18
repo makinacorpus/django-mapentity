@@ -629,12 +629,12 @@ class SettingsMapStylesTest(TestCase):
         from mapentity.settings import app_settings
 
         detail = app_settings["MAP_STYLES"]["detail"]
-        self.assertEqual(detail["weight"], 10)
+        self.assertEqual(detail["weight"], 5)
         self.assertEqual(detail["line-cap"], "round")
         self.assertEqual(detail["arrowColor"], "#000000")
-        self.assertEqual(detail["arrowSize"], 0.5)
+        self.assertEqual(detail["arrowSize"], 0.3)
         self.assertEqual(detail["arrowOpacity"], 1)
-        self.assertEqual(detail["arrowSpacing"], 20)
+        self.assertEqual(detail["arrowSpacing"], 6)
 
     def test_draw_style_exists(self):
         from mapentity.settings import app_settings

@@ -65,6 +65,8 @@ class Road(MapEntityMixin, models.Model):
     name = models.CharField(max_length=100, default="Empty", verbose_name=_("Name"))
     geom = models.LineStringField(null=True, default=None, srid=2154)
     can_duplicate = False
+    created_at = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True, db_index=True)
 
     def get_display_label(self):
         return self.name
@@ -167,6 +169,7 @@ class MultiGeomModel(MapEntityMixin, models.Model):
     geom = models.GeometryField(srid=2154)
     parking = models.PointField(null=True, default=None, blank=True, srid=2154)
     points = models.MultiPointField(null=True, default=None, blank=True, srid=2154)
+    date_update = models.DateTimeField(auto_now=True, db_index=True)
 
     def __str__(self):
         return self.name
@@ -195,6 +198,8 @@ class ComplexModel(MapEntityMixin, models.Model):
     object_id = models.PositiveIntegerField(blank=True, null=True)
     related_object = GenericForeignKey("content_type", "object_id")
     tags = models.ManyToManyField(Tag, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True, db_index=True)
 
     def __str__(self):
         return self.name

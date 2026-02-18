@@ -24,7 +24,6 @@ module.exports = defineConfig({
             '--use-angle=swiftshader',
             '--disable-dev-shm-usage',
             '--ignore-certificate-errors',
-            '--enable-unsafe-swiftshader'
           )
         }
         if (browser.family === 'firefox') {

@@ -119,6 +119,8 @@ class JSSettings(JSONResponseMixin, TemplateView):
 
         dictsettings["urls"]["static"] = settings.STATIC_URL
         dictsettings["urls"]["layer"] = options.model.get_layer_url()
+        dictsettings["urls"]["mvt"] = options.model.get_mvt_url()
+        dictsettings["urls"]["tilejson"] = options.model.get_tilejson_url()
         dictsettings["urls"]["detail"] = f"{root_url}modelname/0/"
         dictsettings["urls"]["popup"] = "/api/modelname/drf/modelnames/0/popup-content"
         dictsettings["urls"]["format_list"] = (
@@ -148,7 +150,9 @@ class JSSettings(JSONResponseMixin, TemplateView):
             {
                 "name": model._meta.verbose_name,
                 "id": model._meta.model_name,
-                "url": model.get_layer_url(),
+                "url": model.get_geojson_list_url(),
+                "mvtUrl": model.get_mvt_url(),
+                "tilejsonUrl": model.get_tilejson_url(),
                 "category": getattr(
                     model._meta.app_config, "verbose_name", model._meta.app_label
                 ),

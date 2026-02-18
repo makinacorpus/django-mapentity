@@ -3,7 +3,9 @@
 <div id="{{ mapname }}"
      data-fitmaxzoom="{{ MAP_FIT_MAX_ZOOM }}"
      data-mapextent="{{ object|latlngbounds }}"
-     data-readonly="{% if readonly %}readonly{% endif %}" data-feature-url="{{ object.get_layer_detail_url }}"
-     data-map-id="{{ mapname }}"
-     {% if extra_geometries_json %}data-extra-geometries="{{ extra_geometries_json }}"{% endif %}>
+     data-readonly="{% if readonly %}readonly{% endif %}" data-feature-url="{{ object.get_geojson_detail_url }}"
+     data-map-id="{{ mapname }}">
 </div>
+{% if extra_geometries_json %}
+<script id="{{ mapname }}-extra-geometries" type="application/json">{{ extra_geometries_json|safe }}</script>
+{% endif %}

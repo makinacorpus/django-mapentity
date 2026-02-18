@@ -1,3 +1,4 @@
+import hashlib
 from functools import wraps
 
 from django.contrib import messages
@@ -10,6 +11,7 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.http import last_modified as cache_last_modified
 from django.views.generic.detail import BaseDetailView
 from django.views.generic.edit import BaseUpdateView
+from vectortiles.rest_framework.renderers import MVTRenderer
 
 from . import models as mapentity_models
 from .helpers import user_has_perm
@@ -37,6 +39,7 @@ def view_permission_required(login_url=None, raise_exception=None):
         return False
 
     def decorator(view_func):
+        @wraps(view_func)
         def _wrapped_view(self, request, *args, **kwargs):
             perm = self.get_view_perm()
 
@@ -80,7 +83,6 @@ def view_cache_latest():
                 # don't cache dataTables
                 return view_func(self, request, *args, **kwargs)
             view_model = self.model
-
             cache_latest = cache_last_modified(lambda x: view_model.latest_updated())
             cbv_cache_latest = method_decorator(cache_latest)
 
@@ -98,7 +100,11 @@ def view_cache_latest():
 
 def view_cache_response_content():
     def decorator(view_func):
+        @wraps(view_func)
         def _wrapped_method(self, *args, **kwargs):
+            # Check if this is an MVT endpoint (has z, x, y parameters)
+            is_mvt = all(k in kwargs for k in ["z", "x", "y"])
+
             # Do not cache if filters presents of datatables format
             params = self.request.GET.keys()
             with_filters = all([not p.startswith("_") for p in params])
@@ -113,19 +119,36 @@ def view_cache_response_content():
             geojson_lookup = None
             if hasattr(self, "view_cache_key"):
                 geojson_lookup = self.view_cache_key()
-            elif not self.request.GET:  # Do not cache filtered responses
+            elif (
+                is_mvt or not self.request.GET
+            ):  # For MVT, always cache; for others, do not cache filtered responses
                 view_model = self.model
                 language = self.request.LANGUAGE_CODE
-                latest_saved = view_model.latest_updated()
+                z, x, y = kwargs.get("z"), kwargs.get("x"), kwargs.get("y")
+                latest_saved, count = view_model.latest_updated_with_count(
+                    z=z, x=x, y=y
+                )
+
                 if latest_saved:
-                    geojson_lookup = "{}_{}_{}_json_layer".format(
-                        language,
-                        view_model._meta.model_name,
-                        latest_saved.strftime("%y%m%d%H%M%S%f"),
-                    )
+                    # Add MVT-specific cache key with tile coordinates
+                    if is_mvt:
+                        geojson_lookup = "{}_{}_{}_{}_{}_{}_{}_mvt_tile".format(
+                            language,
+                            view_model._meta.model_name,
+                            latest_saved.strftime("%y%m%d%H%M%S%f"),
+                            count,
+                            z,
+                            x,
+                            y,
+                        )
+                    else:
+                        geojson_lookup = "{}_{}_{}_json_layer".format(
+                            language,
+                            view_model._meta.model_name,
+                            latest_saved.strftime("%y%m%d%H%M%S%f"),
+                        )
 
             geojson_cache = caches[app_settings["GEOJSON_LAYERS_CACHE_BACKEND"]]
-
             if geojson_lookup:
                 content = geojson_cache.get(geojson_lookup)
                 if content:
@@ -133,11 +156,27 @@ def view_cache_response_content():
 
             response = view_func(self, *args, **kwargs)
             if geojson_lookup:
-                response.accepted_renderer = GeoJSONRenderer()
-                response.accepted_media_type = "application/json"
-                response.renderer_context = {}
-                response.render()
-                geojson_cache.set(geojson_lookup, response)
+                if not is_mvt:
+                    # Set renderer for GeoJSON
+                    response.accepted_renderer = GeoJSONRenderer()
+                    response.accepted_media_type = "application/json"
+                    response.renderer_context = {}
+                    # Render the response before caching (required for pickling)
+                    if not response.is_rendered:
+                        response.render()
+                    geojson_cache.set(geojson_lookup, response)
+                else:
+                    # Set renderer for MVT
+                    if MVTRenderer:
+                        response.accepted_renderer = MVTRenderer()
+                        response.accepted_media_type = (
+                            "application/vnd.mapbox-vector-tile"
+                        )
+                        response.renderer_context = {}
+                        # Render the response before caching (required for pickling)
+                        if not response.is_rendered:
+                            response.render()
+                        geojson_cache.set(geojson_lookup, response)
             return response
 
         return _wrapped_method
@@ -179,3 +218,22 @@ def save_history():
         return _wrapped_view
 
     return decorator
+
+
+def mvt_etag(request, *args, **kwargs):
+    view = request.parser_context["view"]
+
+    z = kwargs.get("z")
+    x = kwargs.get("x")
+    y = kwargs.get("y")
+
+    if not all([z, x, y]):
+        return None
+
+    try:
+        qs = view.filter_queryset(view.get_queryset())
+    except Exception:
+        return None
+    max_updated, count = qs.model.latest_updated_with_count(z=z, x=x, y=y)
+    raw = f"{max_updated.timestamp() if max_updated else '0'}:{count}"
+    return hashlib.md5(raw.encode()).hexdigest()

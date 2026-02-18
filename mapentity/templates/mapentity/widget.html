@@ -66,15 +66,41 @@
             layerManager._map = null;
             layerManager._eventListeners = [];
 
-            map.getMap().on('load', function () {
+            map.getMap().on('load', async function () {
                 window.mapentity_map = map.getMap();
                 layerManager.initialize(map.getMap());
+
+                // Chargement des base layers en premier depuis les settings
+                const baseLayersData = window.SETTINGS.map?.baseLayers || {};
+                const { base_layers, overlay_layers } = baseLayersData;
+
+                if (base_layers) {
+                    for (const layer of base_layers) {
+                        await layerManager.addLayerFromUrl(layer.name, {
+                            id: 'mapbox-base-' + layer.slug,
+                            url: layer.url,
+                            isBaseLayer: true,
+                            attribution: layer.attribution || ''
+                        });
+                    }
+                }
+                if (overlay_layers) {
+                    for (const layer of overlay_layers) {
+                        await layerManager.addLayerFromUrl(layer.name, {
+                            id: 'mapbox-overlay-' + layer.slug,
+                            url: layer.url,
+                            isBaseLayer: false,
+                            attribution: layer.attribution || ''
+                        });
+                    }
+                }
 
                 // Ajout de la couche d’objets contextuels
                 const modelname = document.body.getAttribute('data-modelname');
                 const objects_verbose_name = document.body.getAttribute('data-objectsname');
                 console.log('modelname : ', modelname);
                 const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
+                const tilejsonUrl = window.SETTINGS.urls.tilejson ? window.SETTINGS.urls.tilejson.replace(/modelname/g, modelname) : undefined;
                 const style = window.SETTINGS.map.styles.others;
                 const objectsLayer = new MaplibreObjectsLayer(null, {
                     style: typeof style === "function" ? {} : style,
@@ -83,6 +109,7 @@
                     nameHTML: '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + objects_verbose_name,
                     category: '{% trans "Objects" %}',
                     dataUrl: layerUrl,
+                    tilejsonUrl: tilejsonUrl,
                     primaryKey: generateUniqueId(),
                     isLazy: false,
                 });
@@ -96,6 +123,7 @@
                     const additionalModelname = model.id;
                     const category = model.category;
                     const additionalLayerUrl = model.url;
+                    const additionalTilejsonUrl = model.tilejsonUrl;
 
                     let additionalStyle = window.SETTINGS.map.styles[additionalModelname] ?? window.SETTINGS.map.styles['others'];
                     let primaryKey = generateUniqueId();
@@ -109,6 +137,7 @@
                             category: category,
                             primaryKey: primaryKey,
                             dataUrl: additionalLayerUrl,
+                            tilejsonUrl: additionalTilejsonUrl,
                             isLazy: true,
                             displayPopup: true,
                         });
@@ -119,46 +148,17 @@
                     }
                 });
 
-                // Chargement des couches puis initialisation de Geoman une fois toutes les couches chargées
-                fetch('/mapbox/mapbox-baselayers/')
-                    .then(response => response.json())
-                    .then(async data => {
-                        const { base_layers, overlay_layers } = data;
-                        if (base_layers) {
-                            for (const layer of base_layers) {
-                                await layerManager.addLayerFromUrl(layer.name, {
-                                    id: 'mapbox-base-' + layer.slug,
-                                    url: layer.url,
-                                    isBaseLayer: true,
-                                    attribution: layer.attribution || ''
-                                });
-                            }
-                        }
-                        if (overlay_layers) {
-                            for (const layer of overlay_layers) {
-                                await layerManager.addLayerFromUrl(layer.name, {
-                                    id: 'mapbox-overlay-' + layer.slug,
-                                    url: layer.url,
-                                    isBaseLayer: false,
-                                    attribution: layer.attribution || ''
-                                });
-                            }
-                        }
-                    })
-                    .catch(err => console.error('Failed to load mapbox baselayers in widget:', err))
-                    .finally(() => {
-                        // Initialisation du champ de géométrie APRÈS le chargement de toutes les couches
-                        new MaplibreGeometryField(map.getMap(), fieldId, options);
+                // Initialisation du champ de géométrie
+                new MaplibreGeometryField(map.getMap(), fieldId, options);
 
-                        // Notifier les autres champs géométriques de cette carte
-                        window.dispatchEvent(new CustomEvent('map:init', {
-                            detail: {
-                                map: map.getMap(),
-                                fieldId: fieldId,
-                                options: options,
-                            }
-                        }));
-                    });
+                // Notifier les autres champs géométriques de cette carte
+                window.dispatchEvent(new CustomEvent('map:init', {
+                    detail: {
+                        map: map.getMap(),
+                        fieldId: fieldId,
+                        options: options,
+                    }
+                }));
 
                 const layerControl = new MaplibreLayerControl(layerManager);
                 map.getMap().addControl(layerControl, 'top-right');
@@ -181,7 +181,11 @@
                 map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
                 // chargement des couches
-                objectsLayer.load(layerUrl);
+                if (tilejsonUrl) {
+                    objectsLayer.loadMVT(tilejsonUrl);
+                } else {
+                    objectsLayer.load(layerUrl);
+                }
 
 
             });

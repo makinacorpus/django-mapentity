@@ -141,9 +141,13 @@ STATICFILES_DIRS = [
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    }
+    },
+    "files": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": os.path.join(BASE_DIR, "cache"),
+    },
 }
-
+VECTOR_TILES_BACKEND = "vectortiles.backends.python"
 MEDIA_URL = "/media/"
 MEDIA_URL_SECURE = "/media_secure/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -178,6 +182,8 @@ MAPENTITY_CONFIG = {
     "CONVERSION_SERVER": "http://convertit:6543",
     "CAPTURE_SERVER": "http://screamshotter:8000",
     "SENDFILE_HTTP_HEADER": "X-Accel-Redirect",
+    "GEOJSON_LAYERS_CACHE_BACKEND": "files",
+    "DATE_UPDATE_FIELD_NAME": "date_update",
     "MAP_STYLES": {
         "dummymodel": {
             "weight": 3,
