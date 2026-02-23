@@ -1456,6 +1456,14 @@ class MaplibreGeometryField {
         Promise.all(snapLayers.map(addSnapLayer)).then(() => {
             if (!layerIds.length) return;
             const resolvedGeoman = map.gm || (this.drawManager && this.drawManager.getGeoman());
+
+            // Activate Geoman's snapping helper so it's present in actionInstances.
+            // The helper is only added to actionInstances when the mode is active;
+            // with active:false in the initial options it is never started.
+            if (resolvedGeoman && resolvedGeoman.options && resolvedGeoman.options.enableMode) {
+                resolvedGeoman.options.enableMode("helper", "snapping");
+            }
+
             enableExternalLayerSnapping(map, resolvedGeoman, {
                 layerIds: layerIds,
                 snapRadius: snapDistance * 2,
