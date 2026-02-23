@@ -195,9 +195,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
                                     entry = reg_val
                                     break
                     if entry:
-                        snap_layers.append(
-                            {"id": entry[0], "tilejsonUrl": entry[1]}
-                        )
+                        snap_layers.append({"id": entry[0], "tilejsonUrl": entry[1]})
                 snapping_configs[model._meta.model_name] = {
                     "enabled": True,
                     "snapDistance": cfg.get("snap_distance", 18),
