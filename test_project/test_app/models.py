@@ -67,6 +67,11 @@ class Road(MapEntityMixin, models.Model):
     can_duplicate = False
     created_at = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True, db_index=True)
+    snapping_config = {
+        "enabled": True,
+        "layers": ["test_app.Road"],
+        "snap_distance": 20,
+    }
 
     def get_display_label(self):
         return self.name

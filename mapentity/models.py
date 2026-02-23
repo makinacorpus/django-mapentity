@@ -168,6 +168,7 @@ class DuplicateMixin:
 class BaseMapEntityMixin(DuplicateMixin, models.Model):
     _entity = None
     capture_map_image_waitfor = ".maplibre-tile-loaded"  # faire attention à ceci au moment de mettre en place le control de capture
+    snapping_config = None
 
     class Meta:
         abstract = True

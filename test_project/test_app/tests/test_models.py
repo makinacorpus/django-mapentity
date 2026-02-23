@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from mapentity.helpers import clone_attachment
+from mapentity.models import BaseMapEntityMixin
 from mapentity.tests.factories import AttachmentFactory
 
 from ..models import Attachment, DummyModel, ManikinModel, Road, Sector
@@ -88,3 +89,21 @@ class MapEntityDuplicateMixinTest(TestCase):
         dm = DummyModelFactory.create()
         mk = ManikinModel.objects.create(dummy=dm)
         self.assertIsNone(ManikinModel.get_duplicate_url(mk))
+
+
+class SnappingConfigTest(TestCase):
+    def test_default_snapping_config_is_none(self):
+        self.assertIsNone(BaseMapEntityMixin.snapping_config)
+
+    def test_dummy_model_snapping_config_is_none(self):
+        self.assertIsNone(DummyModel.snapping_config)
+
+    def test_road_snapping_config_enabled(self):
+        self.assertIsNotNone(Road.snapping_config)
+        self.assertTrue(Road.snapping_config.get("enabled"))
+
+    def test_road_snapping_config_layers(self):
+        self.assertIn("test_app.Road", Road.snapping_config.get("layers", []))
+
+    def test_road_snapping_config_snap_distance(self):
+        self.assertEqual(Road.snapping_config.get("snap_distance"), 20)

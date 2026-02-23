@@ -146,6 +146,12 @@ class JSSettings(JSONResponseMixin, TemplateView):
         dictsettings["maxCharactersByField"] = app_settings["MAX_CHARACTERS_BY_FIELD"]
 
         # Layers
+        registered_models = [
+            (model, options)
+            for model, options in registry.registry.items()
+            if model._meta.app_label != "mapentity" and options.menu
+        ]
+
         dictsettings["layers"] = [
             {
                 "name": model._meta.verbose_name,
@@ -157,9 +163,47 @@ class JSSettings(JSONResponseMixin, TemplateView):
                     model._meta.app_config, "verbose_name", model._meta.app_label
                 ),
             }
-            for model, options in registry.registry.items()
-            if model._meta.app_label != "mapentity" and options.menu
+            for model, options in registered_models
         ]
+
+        # Snapping configs: build a dict keyed by model_name for models with snapping_config
+        # Build a lookup of "app_label.model_name" -> (model_name, tilejson_url)
+        model_label_lookup = {
+            f"{m._meta.app_label.lower()}.{m._meta.model_name}": (
+                m._meta.model_name,
+                m.get_tilejson_url(),
+            )
+            for m, _ in registered_models
+        }
+        snapping_configs = {}
+        for model, _options in registered_models:
+            cfg = getattr(model, "snapping_config", None)
+            if cfg and cfg.get("enabled"):
+                snap_layers = []
+                for label in cfg.get("layers", []):
+                    key = label.lower()
+                    # Allow "app_label.ModelName" (case-insensitive on model name)
+                    entry = model_label_lookup.get(key)
+                    if entry is None:
+                        # Try case-insensitive match on model name part
+                        parts = label.split(".", 1)
+                        if len(parts) == 2:
+                            app_l, model_name_l = parts[0].lower(), parts[1].lower()
+                            for reg_key, reg_val in model_label_lookup.items():
+                                reg_app, reg_model = reg_key.split(".", 1)
+                                if reg_app == app_l and reg_model == model_name_l:
+                                    entry = reg_val
+                                    break
+                    if entry:
+                        snap_layers.append(
+                            {"id": entry[0], "tilejsonUrl": entry[1]}
+                        )
+                snapping_configs[model._meta.model_name] = {
+                    "enabled": True,
+                    "snapDistance": cfg.get("snap_distance", 18),
+                    "snapLayers": snap_layers,
+                }
+        dictsettings["snappingConfigs"] = snapping_configs
 
         return dictsettings
 

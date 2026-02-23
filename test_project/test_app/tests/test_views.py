@@ -302,10 +302,13 @@ class AttachmentTest(BaseTest):
 
 
 class SettingsViewTest(BaseTest):
-    def test_js_settings_urls(self):
+    def _get_context(self):
         view = JSSettings()
         view.request = RequestFactory().get("/fake-path")
-        context = view.get_context_data()
+        return view.get_context_data()
+
+    def test_js_settings_urls(self):
+        context = self._get_context()
         self.assertDictEqual(
             context["urls"],
             {
@@ -320,6 +323,31 @@ class SettingsViewTest(BaseTest):
                 "root": "/",
             },
         )
+
+    def test_js_settings_snapping_configs_present(self):
+        context = self._get_context()
+        self.assertIn("snappingConfigs", context)
+
+    def test_js_settings_snapping_configs_road_enabled(self):
+        snapping_configs = self._get_context()["snappingConfigs"]
+        self.assertIn("road", snapping_configs)
+        road_cfg = snapping_configs["road"]
+        self.assertTrue(road_cfg["enabled"])
+        self.assertEqual(road_cfg["snapDistance"], 20)
+
+    def test_js_settings_snapping_configs_road_snap_layers(self):
+        road_cfg = self._get_context()["snappingConfigs"]["road"]
+        snap_layers = road_cfg["snapLayers"]
+        self.assertEqual(len(snap_layers), 1)
+        self.assertEqual(snap_layers[0]["id"], "road")
+        self.assertEqual(
+            snap_layers[0]["tilejsonUrl"],
+            "/api/road/drf/roads/tilejson",
+        )
+
+    def test_js_settings_snapping_configs_model_without_config(self):
+        snapping_configs = self._get_context()["snappingConfigs"]
+        self.assertNotIn("dummymodel", snapping_configs)
 
 
 class ListViewTest(BaseTest):
