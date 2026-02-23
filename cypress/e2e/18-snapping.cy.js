@@ -2,8 +2,9 @@
  * Tests for snapping functionality on the Road layer.
  *
  * The Road model has snapping_config = { enabled: True, layers: ["test_app.Road"], snap_distance: 20 }.
- * When creating/editing a Road, the map should load a transparent vector-tile snap layer
- * for existing Roads and wire up Geoman's custom snapping coordinates so that
+ * When creating/editing a Road, the MapWidget injects the resolved snapping config
+ * into the JS options, which loads a transparent vector-tile snap layer
+ * for existing Roads and wires up Geoman's custom snapping coordinates so that
  * new vertices snap to nearby existing road geometries.
  */
 describe('Road snapping', () => {
@@ -39,19 +40,6 @@ describe('Road snapping', () => {
     beforeEach(() => {
         cy.login();
         cy.mockTiles();
-    });
-
-    it('should have snapping config in SETTINGS for road model', () => {
-        cy.visit('/road/add/');
-        cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
-        cy.window({timeout: 10000}).should((win) => {
-            expect(win.SETTINGS, 'window.SETTINGS').to.exist;
-            expect(win.SETTINGS.snappingConfigs, 'snappingConfigs').to.exist;
-            expect(win.SETTINGS.snappingConfigs.road, 'snappingConfigs.road').to.exist;
-            expect(win.SETTINGS.snappingConfigs.road.enabled).to.be.true;
-            expect(win.SETTINGS.snappingConfigs.road.snapDistance).to.equal(20);
-            expect(win.SETTINGS.snappingConfigs.road.snapLayers).to.be.an('array').and.have.length.greaterThan(0);
-        });
     });
 
     it('should have data-modelname attribute set to road on the add page', () => {
@@ -102,10 +90,7 @@ describe('Road snapping', () => {
         // Start drawing so snapping helper is active
         cy.get('#id_geom_draw_line').click();
 
-        // Trigger a mousemove near the area where the first road was drawn.
-        // The snapping handler listens on mousemove and calls setCustomSnappingCoordinates
-        // if features are found in the snap layer.
-        // We verify the helper has the method available (it was enabled).
+        // Verify the helper has the method available (it was enabled).
         cy.window({timeout: 10000}).should((win) => {
             const helper = win.gm.actionInstances['helper__snapping'];
             expect(helper, 'snapping helper').to.exist;
@@ -144,9 +129,8 @@ describe('Road snapping', () => {
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
         cy.waitForGeoman();
 
-        // Verify snapping config and snap layer are present in edit mode too
+        // Verify snap layer is present in edit mode too
         cy.window({timeout: 15000}).should((win) => {
-            expect(win.SETTINGS.snappingConfigs.road.enabled).to.be.true;
             const map = win.MapEntity && win.MapEntity.currentMap;
             expect(map, 'MapEntity.currentMap').to.exist;
             expect(map.getSource('mapentity-snap-source-road'), 'snap source').to.exist;

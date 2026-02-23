@@ -1386,7 +1386,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Initialize external layer snapping based on window.SETTINGS.snappingConfigs.
+     * Initialize external layer snapping based on the snappingConfig option
+     * passed from the MapWidget.
      * Adds transparent vector tile layers for each snap target and wires up
      * the Geoman custom snapping coordinates API via enableExternalLayerSnapping.
      * @private
@@ -1395,12 +1396,7 @@ class MaplibreGeometryField {
         if (typeof enableExternalLayerSnapping !== 'function') {
             return;
         }
-        const modelname = document.body.getAttribute('data-modelname');
-        const snappingConfigs = window.SETTINGS && window.SETTINGS.snappingConfigs;
-        if (!snappingConfigs || !modelname) {
-            return;
-        }
-        const cfg = snappingConfigs[modelname];
+        const cfg = this.options.snappingConfig;
         if (!cfg || !cfg.enabled) {
             return;
         }

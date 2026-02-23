@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.gis.forms.widgets import BaseGeometryWidget
 from django.contrib.staticfiles import finders
 from django.core import validators
@@ -6,6 +8,7 @@ from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
 from .helpers import wkt_to_geom
+from .registry import registry
 from .settings import API_SRID
 
 
@@ -27,8 +30,94 @@ def _resolve_custom_icon(icon_value):
 
 
 class MapWidget(BaseGeometryWidget):
-    """
-    Widget Django pour l'intégration de cartes MapLibre GL JS.
+    """Widget Django pour l'intégration de cartes MapLibre GL JS.
+
+    Ce widget rend un champ de géométrie sous forme de carte interactive
+    utilisant MapLibre GL JS avec le plugin Geoman pour le dessin.
+
+    Options (passées via ``attrs`` ou en paramètres nommés) :
+
+    ``geom_type`` (str)
+        Type de géométrie OGC (``"POINT"``, ``"LINESTRING"``, ``"POLYGON"``,
+        ``"MULTIPOINT"``, ``"MULTILINESTRING"``, ``"MULTIPOLYGON"``,
+        ``"GEOMETRYCOLLECTION"``, ``"GEOMETRY"``).  Détermine les outils de
+        dessin disponibles.  Par défaut ``"GEOMETRY"`` (tous les outils).
+
+    ``modifiable`` (bool)
+        Si ``True`` (par défaut), l'utilisateur peut dessiner et modifier la
+        géométrie.  Mis à ``False`` automatiquement lorsque l'utilisateur n'a
+        pas la permission ``change_geom``.
+
+    ``target_map`` (str)
+        Identifiant d'un autre champ géométrique dont la carte sera
+        réutilisée.  Permet d'afficher plusieurs champs géométriques sur
+        une même carte.  Exemple : ``"geom"`` pour se brancher sur la carte
+        du champ ``geom``.
+
+    ``custom_icon`` (str)
+        Icône personnalisée pour les marqueurs de type Point.  Accepte :
+        - du contenu SVG/HTML inline (détecté si contient ``<``),
+        - un chemin vers un fichier statique (ex. ``"myapp/icons/parking.svg"``).
+        Le fichier est lu et son contenu SVG est injecté dans le marqueur.
+
+    ``field_label`` (str)
+        Libellé affiché au-dessus des boutons de dessin.  Par défaut, le
+        ``verbose_name`` du champ modèle est utilisé.
+
+    ``snapping_config`` (dict ou None)
+        Configuration du snapping (accrochage) sur des couches externes.
+        Quand défini, le widget charge des couches vectorielles transparentes
+        sur la carte et connecte l'API de snapping de Geoman pour que les
+        nouveaux sommets s'accrochent aux géométries existantes.
+
+        Structure brute (avec ``layers`` à résoudre) ::
+
+            {
+                "enabled": True,
+                "layers": ["myapp.Road"],
+                "snap_distance": 20,
+            }
+
+        Les entrées ``layers`` utilisent la notation ``"app_label.ModelName"``
+        (insensible à la casse sur le nom du modèle).  Chaque modèle référencé
+        doit être enregistré dans le registre MapEntity.  Le widget résout
+        automatiquement ces références en URLs tilejson.
+
+        ``snap_distance`` (défaut : 18) contrôle le rayon en pixels dans lequel
+        le snapping est déclenché.
+
+    ``display_raw`` (bool)
+        Si ``True``, affiche le textarea brut de la géométrie en plus de la
+        carte.  ``False`` par défaut.
+
+    Exemple d'utilisation dans un formulaire ::
+
+        from mapentity.widgets import MapWidget
+
+
+        class MyForm(MapEntityForm):
+            class Meta:
+                model = MyModel
+                fields = ("name", "geom", "parking")
+                widgets = {
+                    "geom": MapWidget(
+                        geom_type="LINESTRING",
+                        attrs={
+                            "snapping_config": {
+                                "enabled": True,
+                                "layers": ["myapp.Road"],
+                                "snap_distance": 20,
+                            },
+                        },
+                    ),
+                    "parking": MapWidget(
+                        attrs={
+                            "target_map": "geom",
+                            "custom_icon": "myapp/icons/parking.svg",
+                        },
+                        geom_type="POINT",
+                    ),
+                }
     """
 
     template_name = "mapentity/widget.html"
@@ -86,7 +175,58 @@ class MapWidget(BaseGeometryWidget):
             attrs["custom_icon"] = _resolve_custom_icon(self.attrs["custom_icon"])
         if self.attrs.get("field_label"):
             attrs["field_label"] = self.attrs["field_label"]
+        if self.attrs.get("snapping_config"):
+            attrs["snapping_config"] = json.dumps(
+                self._resolve_snapping_config(self.attrs["snapping_config"])
+            )
         return attrs
+
+    def _resolve_snapping_config(self, cfg):
+        """Resolve a raw snapping_config dict into a JS-ready structure.
+
+        Accepts a config with ``layers`` as ``"app_label.ModelName"`` strings
+        and resolves them into ``snapLayers`` entries with ``id`` and
+        ``tilejsonUrl`` using the MapEntity registry.
+
+        If the config already contains ``snapLayers``, it is returned as-is
+        (already resolved).
+        """
+        if not cfg or not cfg.get("enabled"):
+            return cfg
+        # Already resolved (has snapLayers with content)
+        if cfg.get("snapLayers"):
+            return cfg
+
+        # Build lookup from registry
+        model_label_lookup = {}
+        for m in registry.registry:
+            label_key = f"{m._meta.app_label.lower()}.{m._meta.model_name}"
+            model_label_lookup[label_key] = (
+                m._meta.model_name,
+                m.get_tilejson_url(),
+            )
+
+        snap_layers = []
+        for label in cfg.get("layers", []):
+            key = label.lower()
+            entry = model_label_lookup.get(key)
+            if entry is None:
+                parts = label.split(".", 1)
+                if len(parts) == 2:
+                    app_l, model_name_l = parts[0].lower(), parts[1].lower()
+                    for reg_key, reg_val in model_label_lookup.items():
+                        reg_app, reg_model = reg_key.split(".", 1)
+                        if reg_app == app_l and reg_model == model_name_l:
+                            entry = reg_val
+                            break
+            if entry:
+                snap_layers.append({"id": entry[0], "tilejsonUrl": entry[1]})
+
+        return {
+            "enabled": True,
+            "snapDistance": cfg.get("snap_distance", 18),
+            "snapLayers": snap_layers,
+        }
 
     def get_context(self, name, value, attrs):
         """
