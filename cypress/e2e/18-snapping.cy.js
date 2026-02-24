@@ -17,7 +17,7 @@ describe('Road snapping', () => {
         cy.login();
         cy.mockTiles();
         cy.visit('/road/add/');
-        cy.get('input[name="name"]', {timeout: 10000}).clear().type('Snap Target Road');
+        cy.get('input[name="name_en"]', {timeout: 10000}).clear().type('Snap Target Road');
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
         cy.waitForGeoman();
         cy.get('#id_geom_draw_line').click();
@@ -117,7 +117,7 @@ describe('Road snapping', () => {
     it('should create a second road with snapping enabled and save successfully', {retries: 3}, () => {
         cy.visit('/road/add/');
         const entityName = `Snapped Road ${Date.now()}`;
-        cy.get('input[name="name"]', {timeout: 10000}).clear().type(entityName);
+        cy.get('input[name="name_en"]', {timeout: 10000}).clear().type(entityName);
         cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
         cy.waitForGeoman();
 
