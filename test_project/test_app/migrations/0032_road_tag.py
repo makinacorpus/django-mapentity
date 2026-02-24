@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("test_app", "0026_delete_supermarket"),
+        ("test_app", "0031_multigeommodel_date_update"),
     ]
 
     operations = [
