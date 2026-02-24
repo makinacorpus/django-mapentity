@@ -1,4 +1,4 @@
-from django_filters.rest_framework import BooleanFilter
+from django_filters import BooleanFilter
 
 from mapentity.filters import MapEntityFilterSet
 
@@ -16,45 +16,43 @@ from .models import (
 
 
 class MushroomSpotFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = MushroomSpot
         fields = ("id", "name")
 
 
 class DummyModelFilterSet(MapEntityFilterSet):
-    public = BooleanFilter(field_name="public", lookup_expr="exact")
-
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = DummyModel
-        fields = ("public", "name")
+        fields = ("public", "name", "tags")
 
 
 class RoadFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = Road
-        fields = ("id", "name")
+        fields = ("id", "name", "tag")
 
 
 class DollModelFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = DollModel
         fields = ("id",)
 
 
 class ManikinModelFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = ManikinModel
         fields = ("id", "dummy")
 
 
 class CityFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = City
         fields = ("id", "name")
 
 
 class SectorFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = Sector
         fields = ("code", "name")
 
@@ -68,6 +66,6 @@ class MultiGeomModelFilterSet(MapEntityFilterSet):
 class ComplexModelFilterSet(MapEntityFilterSet):
     public = BooleanFilter(field_name="public", lookup_expr="exact")
 
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = ComplexModel
         fields = ("public", "name", "located_in", "road")

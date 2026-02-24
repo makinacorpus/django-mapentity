@@ -206,7 +206,7 @@ class MaplibreMapListSync {
         const selectElements = form.querySelectorAll('select');
         selectElements.forEach(select => {
             select.value = '';
-            select.dispatchEvent(new Event('chosen:updated')); // chosen est une bibliothèque JS pour les sélecteurs, pas possible de l'enlever
+            select.dispatchEvent(new Event('change'));
         });
     }
 }

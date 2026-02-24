@@ -13,54 +13,12 @@ select[multiple] {
     min-height: 180px;
 }
 
-/***** Chosen override ******/
-
-.chosen-container-active .chosen-choices {
-    border: 1px solid #AAA;
-}
-
-.chosen-container .chosen-results .highlighted {
-    background-color: #919191;
-    background-image: linear-gradient(#919191 20%, #747474 90%);
-    color: #fff;
-}
-
-.chosen-container .chosen-choices {
-    border-radius: 4px;
-}
-
 .controls .text-muted{
     display: block;
+    font-size: 0.75rem;
 }
 
 /* Bootstrap style */
-
-.chosen-container .chosen-single {
-    background-image: none;
-    box-shadow: none;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    background-color: #ffffff;
-    border: 1px solid #cccccc;
-    font-size: 14px;
-    font-weight: normal;
-    color: #555555;
-    height: 28px;
-    line-height: 28px;
-    text-align: left;
-    vertical-align: middle;
-    padding-left: 10px;
-    border-radius: 4px;
-}
-
-.chosen-container-single .chosen-single div b {
-    background-position-y: 5px;
-}
-
-/* Fix a Chosen bug, which sets width to 0px when initialized while hidden */
-#mainfilter .chosen-container-multi,
-#mainform .chosen-container-multi {
-    width: 220px !important;
-}
 
 .table th, .table td {
     padding: 4px;
@@ -317,7 +275,6 @@ tr.selected-row td {
 .filter-set {
     font-weight: bold;
     color: black !important;
-    border: 2px solid black !important;
 }
 
 #maphead {
@@ -326,11 +283,6 @@ tr.selected-row td {
     text-align: center;
     z-index: 999;
     width: 100%;
-}
-
-#maphead .chosen-container {
-    max-width: 180px;
-    text-align: left;
 }
 
 /***** Entity List ******/
@@ -483,10 +435,6 @@ div.dataTables_wrapper div.dataTables_filter input {
     overflow-y: scroll;
 }
 
-#mainfilter .form-group > p:last-child:has(.chosen-container-multi) {
-    padding-bottom: 12rem;
-}
-
 #mainfilter label {
     /* sr-only */
     position: absolute;
@@ -517,6 +465,9 @@ div.dataTables_wrapper div.dataTables_filter input {
 }
 #mainfilter select option:first-child {
     color: #999;
+}
+#mainfilter .select2-container{
+    width: 100%!important;
 }
 #mainfilter .actions {
     text-align: right;
@@ -769,7 +720,7 @@ label.requiredField .asteriskField {
     flex-grow: 1;
 }
 .form-horizontal .controls span {
-    font-size: .75rem;
+    font-size: 1rem;
 }
 
 @media (min-width: 768px) {
@@ -1006,4 +957,22 @@ TODO: please help;
 }
 .dynamic-form label.requiredField {
     font-weight: normal;
+}
+
+.select2-container {
+    min-width: 150px !important;
+}
+
+.select2-container--open {
+    z-index: 9999 !important;
+}
+
+.select2-selection.custom-select {
+    padding: 0 !important;
+    background-image: none;
+    height: initial;
+}
+
+.select2-search__field{
+    width: 100%;
 }

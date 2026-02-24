@@ -169,6 +169,11 @@ class MushroomSpotViewSet(mapentity_views.MapEntityViewSet):
         return qs
 
 
+class MushroomSpotFilter(mapentity_views.MapEntityFilter):
+    model = MushroomSpot
+    filterset_class = MushroomSpotFilterSet
+
+
 class CityList(mapentity_views.MapEntityList):
     model = City
     searchable_columns = ["id", "name"]
@@ -206,6 +211,11 @@ class CityViewSet(mapentity_views.MapEntityViewSet):
         if self.format_kwarg == "geojson":
             qs = qs.annotate(api_geom=Transform("geom", 4326))
         return qs
+
+
+class CityFilter(mapentity_views.MapEntityFilter):
+    model = City
+    filterset_class = CityFilterSet
 
 
 class ComplexModellist(mapentity_views.MapEntityList):

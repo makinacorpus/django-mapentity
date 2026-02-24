@@ -10,7 +10,7 @@ from .models import (
     MushroomSpot,
     Road,
 )
-
+from django import forms
 
 class DummyModelForm(MapEntityForm):
     class Meta:
@@ -21,7 +21,7 @@ class DummyModelForm(MapEntityForm):
 class RoadForm(MapEntityForm):
     class Meta:
         model = Road
-        fields = ("name", "geom")
+        fields = ("name", "tag", "geom")
 
 
 class MushroomSpotForm(MapEntityForm):

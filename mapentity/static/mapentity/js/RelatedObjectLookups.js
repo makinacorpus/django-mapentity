@@ -142,7 +142,7 @@ function dismissAddRelatedObjectPopup(win, newId, newRepr) {
         }
 
         // Déclenche un événement de changement pour mettre à jour les liens associés si nécessaire.
-        $(elem).trigger("chosen:updated");
+        $(elem).trigger("change");
     } else {
         // Si l'élément n'existe pas, traite-le comme un champ ManyToMany.
         var toId = name + "_to"; // Génère l'identifiant pour le cache.
