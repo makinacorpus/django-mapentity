@@ -10,7 +10,7 @@ from .models import (
     MushroomSpot,
     Road,
 )
-from django import forms
+
 
 class DummyModelForm(MapEntityForm):
     class Meta:

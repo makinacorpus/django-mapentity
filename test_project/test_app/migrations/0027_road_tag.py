@@ -5,15 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('test_app', '0026_delete_supermarket'),
+        ("test_app", "0026_delete_supermarket"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='road',
-            name='tag',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='test_app.tag'),
+            model_name="road",
+            name="tag",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="test_app.tag",
+            ),
         ),
     ]
