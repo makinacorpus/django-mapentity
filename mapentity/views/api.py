@@ -38,6 +38,7 @@ class MapEntityViewSet(BaseTileJSONView, BaseVectorTileView, viewsets.ModelViewS
     pagination_class = MapentityDatatablePagination
     filter_backends = [DatatablesFilterBackend, DjangoFilterBackend]
     filterset_class = MapEntityFilterSet
+    vector_tiles_fields = ("name", "id")
 
     def get_layer_classes(self):
         classes = []
@@ -48,7 +49,7 @@ class MapEntityViewSet(BaseTileJSONView, BaseVectorTileView, viewsets.ModelViewS
             model = self.model
             id = f"{self.model.__name__.lower()}"  # id for data layer in vector tile
             geom_field = self.model.main_geom_field  # geom field to consider in qs
-            tile_fields = ("name", "id")
+            tile_fields = self.vector_tiles_fields
 
         return [MapentityVectorLayer]
 
