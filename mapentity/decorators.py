@@ -116,10 +116,11 @@ def view_cache_response_content():
                 return view_func(self, *args, **kwargs)
 
             # Restore from cache or store view result
-            geojson_lookup = None
+            geojson_lookup = ""
             if hasattr(self, "view_cache_key"):
                 geojson_lookup = self.view_cache_key()
-            elif (
+
+            if (
                 is_mvt or not self.request.GET
             ):  # For MVT, always cache; for others, do not cache filtered responses
                 view_model = self.model
@@ -132,7 +133,7 @@ def view_cache_response_content():
                 if latest_saved:
                     # Add MVT-specific cache key with tile coordinates
                     if is_mvt:
-                        geojson_lookup = "{}_{}_{}_{}_{}_{}_{}_mvt_tile".format(
+                        geojson_lookup += "{}_{}_{}_{}_{}_{}_{}_mvt_tile".format(
                             language,
                             view_model._meta.model_name,
                             latest_saved.strftime("%y%m%d%H%M%S%f"),
@@ -142,10 +143,11 @@ def view_cache_response_content():
                             y,
                         )
                     else:
-                        geojson_lookup = "{}_{}_{}_json_layer".format(
+                        geojson_lookup += "{}_{}_{}_{}_json_layer".format(
                             language,
                             view_model._meta.model_name,
                             latest_saved.strftime("%y%m%d%H%M%S%f"),
+                            count,
                         )
 
             geojson_cache = caches[app_settings["GEOJSON_LAYERS_CACHE_BACKEND"]]
