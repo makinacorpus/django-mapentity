@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 
 
 class MapEntityOptions:
-    menu = True
+    menu = True  # Whether to display the entity in the menu or not
+    layer = True  # Whether to display the entity in the layer list or not
     label = ""
     modelname = ""
     url_list = ""

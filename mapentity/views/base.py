@@ -149,7 +149,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
         registered_models = [
             (model, options)
             for model, options in registry.registry.items()
-            if model._meta.app_label != "mapentity" and options.menu
+            if model._meta.app_label != "mapentity" and options.layer
         ]
 
         dictsettings["layers"] = [
