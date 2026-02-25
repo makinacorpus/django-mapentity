@@ -1374,11 +1374,97 @@ class MaplibreGeometryField {
                     console.error('Error during click event:', error);
                 }
             });
+
+            // Initialize external layer snapping if configured
+            this._initExternalSnapping();
         };
 
         if (this.map.gm) {
             registerGeomanHandlers();
         }
         this.map.on("gm:loaded", registerGeomanHandlers);
+    }
+
+    /**
+     * Initialize external layer snapping based on the snappingConfig option
+     * passed from the MapWidget.
+     * Adds transparent vector tile layers for each snap target and wires up
+     * the Geoman custom snapping coordinates API via enableExternalLayerSnapping.
+     * @private
+     */
+    _initExternalSnapping() {
+        if (typeof enableExternalLayerSnapping !== 'function') {
+            return;
+        }
+        const cfg = this.options.snappingConfig;
+        if (!cfg || !cfg.enabled) {
+            return;
+        }
+
+        const snapDistance = cfg.snapDistance || 18;
+        const snapLayers = cfg.snapLayers || [];
+        const map = this.map;
+        const geoman = map.gm || (this.drawManager && this.drawManager.getGeoman());
+
+        const layerIds = [];
+
+        const addSnapLayer = async (snapLayer) => {
+            const sourceId = 'mapentity-snap-source-' + snapLayer.id;
+            const layerId = 'mapentity-snap-layer-' + snapLayer.id;
+
+            if (map.getSource(sourceId)) {
+                layerIds.push(layerId);
+                return;
+            }
+
+            try {
+                const response = await fetch(snapLayer.tilejsonUrl);
+                if (!response.ok) return;
+                const tilejson = await response.json();
+                const tiles = tilejson.tiles || [];
+                if (!tiles.length) return;
+
+                map.addSource(sourceId, {
+                    type: 'vector',
+                    tiles: tiles,
+                    minzoom: tilejson.minzoom || 0,
+                    maxzoom: tilejson.maxzoom || 22,
+                });
+
+                // Add a transparent line layer so features are queryable
+                map.addLayer({
+                    id: layerId,
+                    type: 'line',
+                    source: sourceId,
+                    'source-layer': snapLayer.id,
+                    paint: {
+                        'line-opacity': 0,
+                        'line-width': 1,
+                    },
+                });
+
+                layerIds.push(layerId);
+            } catch (e) {
+                console.warn('MaplibreGeometryField: failed to add snap layer', snapLayer.id, e);
+            }
+        };
+
+        Promise.all(snapLayers.map(addSnapLayer)).then(() => {
+            if (!layerIds.length) return;
+            const resolvedGeoman = map.gm || (this.drawManager && this.drawManager.getGeoman());
+
+            // Activate Geoman's snapping helper so it's present in actionInstances.
+            // The helper is only added to actionInstances when the mode is active;
+            // with active:false in the initial options it is never started.
+            if (resolvedGeoman && resolvedGeoman.options && resolvedGeoman.options.enableMode) {
+                resolvedGeoman.options.enableMode("helper", "snapping");
+            }
+
+            enableExternalLayerSnapping(map, resolvedGeoman, {
+                layerIds: layerIds,
+                snapRadius: snapDistance * 2,
+                densifyGapPx: 4,
+            });
+        });
     }
 }

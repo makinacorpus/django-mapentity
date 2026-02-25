@@ -302,10 +302,13 @@ class AttachmentTest(BaseTest):
 
 
 class SettingsViewTest(BaseTest):
-    def test_js_settings_urls(self):
+    def _get_context(self):
         view = JSSettings()
         view.request = RequestFactory().get("/fake-path")
-        context = view.get_context_data()
+        return view.get_context_data()
+
+    def test_js_settings_urls(self):
+        context = self._get_context()
         self.assertDictEqual(
             context["urls"],
             {
@@ -320,6 +323,10 @@ class SettingsViewTest(BaseTest):
                 "root": "/",
             },
         )
+
+    def test_js_settings_no_snapping_configs_in_context(self):
+        context = self._get_context()
+        self.assertNotIn("snappingConfigs", context)
 
 
 class ListViewTest(BaseTest):
