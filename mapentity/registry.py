@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 class MapEntityOptions:
     menu = True
+    layer = True
     label = ""
     modelname = ""
     url_list = ""
