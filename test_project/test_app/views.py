@@ -1,6 +1,9 @@
 from django.contrib.gis.db.models.functions import Transform
-from django.db.models import F
+from django.db.models import F, Q
+from rest_framework.decorators import action
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
 
 from mapentity import views as mapentity_views
 
@@ -39,8 +42,42 @@ from .serializers import (
     MultiGeomModelSerializer,
     MushroomSpotGeojsonSerializer,
     MushroomSpotSerializer,
+    RoadAutoCompleteSerializer,
     RoadSerializer,
 )
+
+
+class AutocompleteMixin:
+    autocomplete_search_fields = None
+    serializer_autocomplete_class = None
+
+    def _get_filters(self, q):
+        filters = Q()
+        for field in self.autocomplete_search_fields:
+            filters |= Q(**{f"{field}__icontains": q})
+        return filters
+
+    @action(detail=False, renderer_classes=[JSONRenderer], pagination_class=None)
+    def autocomplete(self, request, *args, **kwargs):
+        qs = self.get_queryset_autocomplete()
+        identifier = self.request.query_params.get(
+            "id"
+        )  # filter with id parameter is used to retrieve a known value
+        if identifier:
+            qs = qs.filter(id=identifier)
+            instance = qs.first()
+            if instance is None:
+                return Response({})
+            serializer = self.serializer_autocomplete_class(instance)
+            data = serializer.data
+        else:
+            q = self.request.query_params.get(
+                "q"
+            )  # filter with q parameter is standard for select2 (dal)
+            qs = qs.filter(self._get_filters(q)) if q else qs
+            serializer = self.serializer_autocomplete_class(qs[:10], many=True)
+            data = {"results": serializer.data}
+        return Response(data)
 
 
 class DummyList(mapentity_views.MapEntityList):
@@ -118,12 +155,17 @@ class RoadDelete(mapentity_views.MapEntityDelete):
     model = Road
 
 
-class RoadViewSet(mapentity_views.MapEntityViewSet):
+class RoadViewSet(AutocompleteMixin, mapentity_views.MapEntityViewSet):
     model = Road  # Must be defined to be detected by mapentity
     queryset = Road.objects.all()
     serializer_class = RoadSerializer
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    serializer_autocomplete_class = RoadAutoCompleteSerializer
     filterset_class = RoadFilterSet
+    autocomplete_search_fields = ["name"]
+
+    def get_queryset_autocomplete(self):
+        return Road.objects.all()
 
 
 class RoadList(mapentity_views.MapEntityList):
@@ -242,6 +284,11 @@ class ComplexModelViewSet(mapentity_views.MapEntityViewSet):
         if self.format_kwarg == "geojson":
             qs = qs.annotate(api_geom=Transform("geom", 4326))
         return qs
+
+
+class ComplexModelFilter(mapentity_views.MapEntityFilter):
+    model = ComplexModel
+    filterset_class = ComplexModelFilterSet
 
 
 class MultiGeomList(mapentity_views.MapEntityList):

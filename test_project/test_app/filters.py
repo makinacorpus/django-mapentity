@@ -1,4 +1,6 @@
-from django_filters import BooleanFilter
+from dal import autocomplete
+from django.utils.translation import gettext_lazy as _
+from django_filters import BooleanFilter, ModelMultipleChoiceFilter
 
 from mapentity.filters import MapEntityFilterSet
 
@@ -65,6 +67,17 @@ class MultiGeomModelFilterSet(MapEntityFilterSet):
 
 class ComplexModelFilterSet(MapEntityFilterSet):
     public = BooleanFilter(field_name="public", lookup_expr="exact")
+    road = ModelMultipleChoiceFilter(
+        label=_("Roads"),
+        required=False,
+        queryset=Road.objects.all(),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="test_app:road-drf-autocomplete",
+            attrs={
+                "data-placeholder": _("Roads"),
+            },
+        ),
+    )
 
     class Meta(MapEntityFilterSet.Meta):
         model = ComplexModel

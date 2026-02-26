@@ -34,7 +34,7 @@ from ..views import (
     DummyModelFilter,
     RoadList,
 )
-from .factories import ComplexModelFactory, DummyModelFactory
+from .factories import ComplexModelFactory, DummyModelFactory, RoadFactory
 
 fake = Faker("en_US")
 fake.add_provider(geo)
@@ -1002,3 +1002,42 @@ class MapScreenshotTest(TestCase):
         self.assertIn(
             "ERROR:mapentity.views.base:Print context is way too big", cm.output[0]
         )
+
+
+class AutocompleteTest(TestCase):
+    factory_class = RoadFactory
+
+    def test_autocomplete_is_limit_by_10(self):
+        self.factory_class.create_batch(15, name="Cahors")
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"q": "Cahors"})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertEqual(len(response.json()["results"]), 10)
+
+    def test_autocomplete_has_default_values(self):
+        self.factory_class.create_batch(15)
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"q": ""})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertEqual(len(response.json()["results"]), 10)
+
+    def test_autocomplete_by_id_exists(self):
+        instance = self.factory_class()
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"id": instance.pk})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertEqual(response.json()["id"], instance.pk)
+
+    def test_autocomplete_by_id_not_exists(self):
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"id": "999999"})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertDictEqual(response.json(), {})
+
+    def test_autocomplete_by_filtering(self):
+        self.factory_class(name="Cahors")
+        self.factory_class(name="Toulouse")
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"q": "Cah"})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertEqual(len(response.json()["results"]), 1)

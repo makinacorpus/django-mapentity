@@ -31,6 +31,15 @@ class RoadSerializer(serializers.ModelSerializer):
         model = Road
 
 
+class RoadAutoCompleteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk")
+    text = serializers.CharField(source="name")
+
+    class Meta:
+        model = Road
+        fields = ["id", "text"]
+
+
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
