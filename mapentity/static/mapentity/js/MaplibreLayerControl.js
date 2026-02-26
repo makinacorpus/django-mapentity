@@ -130,7 +130,7 @@ class MaplibreLayerControl {
 
             // Maintain checked state if already selected
             const currentBaseLayerId = this.layerManager.currentBaseLayerId;
-            const isRestored = restoredLayers.includes(name.trim());
+            const isRestored = name && restoredLayers.includes(name.trim());
 
             if (currentBaseLayerId === id || isRestored) {
                 input.checked = true;
@@ -200,16 +200,16 @@ class MaplibreLayerControl {
 
                 const input = document.createElement('input');
                 input.type = 'checkbox';
-                const labelText = labelHTML.replace(/<[^>]*>?/gm, '').trim();
+                const labelText = (labelHTML || '').replace(/<[^>]*>?/gm, '').trim();
                 
                 // Vérifier si la couche est dans le contexte restauré
                 // Par défaut, on coche toujours la catégorie "Objects" (couche du modèle courant)
-                const isRestored = restoredLayers.includes(labelText);
+                const isRestored = labelText && restoredLayers.includes(labelText);
                 const isObjectsCategory = category === gettext('Objects');
                 input.checked = isObjectsCategory || isRestored;
 
                 label.appendChild(input);
-                label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
+                label.insertAdjacentHTML('beforeend', ` ${labelHTML || ''}`);
                 label.classList.add('layer-entry');
                 this._menu.appendChild(label);
 
@@ -245,14 +245,14 @@ class MaplibreLayerControl {
 
                 const input = document.createElement('input');
                 input.type = 'checkbox';
-                const labelText = labelHTML.replace(/<[^>]*>?/gm, '').trim();
+                const labelText = (labelHTML || '').replace(/<[^>]*>?/gm, '').trim();
                 
-                const isRestored = restoredLayers.includes(labelText);
+                const isRestored = labelText && restoredLayers.includes(labelText);
                 input.checked = isVisible || isRestored;
                 this._lazyInputs.set(primaryKey, input);
 
                 label.appendChild(input);
-                label.insertAdjacentHTML('beforeend', ` ${labelHTML}`);
+                label.insertAdjacentHTML('beforeend', ` ${labelHTML || ''}`);
                 label.classList.add('layer-entry');
                 this._menu.appendChild(label);
 
