@@ -1,6 +1,6 @@
-from dal import autocomplete
 import json
 
+from dal import autocomplete
 from django.contrib.gis.forms.widgets import BaseGeometryWidget
 from django.contrib.staticfiles import finders
 from django.core import validators
