@@ -21,7 +21,19 @@ class DummyModelForm(MapEntityForm):
 class RoadForm(MapEntityForm):
     class Meta:
         model = Road
-        fields = ("name", "tag", "geom")
+        fields = ("name", "geom", "tag")
+        widgets = {
+            "geom": MapWidget(
+                geom_type="LINESTRING",
+                attrs={
+                    "snapping_config": {
+                        "enabled": True,
+                        "layers": ["test_app.Road"],
+                        "snap_distance": 20,
+                    },
+                },
+            ),
+        }
 
 
 class MushroomSpotForm(MapEntityForm):

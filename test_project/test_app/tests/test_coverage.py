@@ -6,7 +6,9 @@ models (latest_updated, prepare_map_image, LogEntry), forms, widgets.
 """
 
 import json
+import os
 from io import StringIO
+from unittest.mock import patch
 
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
@@ -339,9 +341,12 @@ class ModelGetGeomTest(TestCase):
 class ModelPrepareMapImageTest(TestCase):
     """Test prepare_map_image edge cases."""
 
-    def test_prepare_map_image_uptodate_returns_false(self):
+    @patch("mapentity.helpers.requests")
+    def test_prepare_map_image_uptodate_returns_false(self, mock_request):
         """If image is already up-to-date, prepare_map_image returns False."""
-        import os
+        # Mock Screenshot response
+        mock_request.get.return_value.status_code = 200
+        mock_request.get.return_value.content = b"*" * 100
 
         obj = DummyModel.objects.create(
             name="Uptodate", geom=Point(700000, 6600000, srid=2154)

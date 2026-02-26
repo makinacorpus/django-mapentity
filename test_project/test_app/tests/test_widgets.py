@@ -118,6 +118,60 @@ class MapWidgetTestCase(TestCase):
         self.assertEqual(context["serialized"], "")
 
 
+class MapWidgetSnappingConfigTestCase(TestCase):
+    def test_snapping_config_not_present_by_default(self):
+        widget = MapWidget()
+        attrs = widget._get_attrs("myfield")
+        self.assertNotIn("snapping_config", attrs)
+
+    def test_snapping_config_passed_via_attrs(self):
+        cfg = {
+            "enabled": True,
+            "snapDistance": 20,
+            "snapLayers": [{"id": "road", "tilejsonUrl": "/api/road/tilejson"}],
+        }
+        widget = MapWidget(attrs={"snapping_config": cfg})
+        attrs = widget._get_attrs("myfield")
+        import json
+
+        self.assertEqual(json.loads(attrs["snapping_config"]), cfg)
+
+    def test_snapping_config_resolved_by_widget(self):
+        """MapWidget should resolve raw snapping_config layers into snapLayers."""
+        cfg = {
+            "enabled": True,
+            "layers": ["test_app.Road"],
+            "snap_distance": 20,
+        }
+        widget = MapWidget(attrs={"snapping_config": cfg})
+        attrs = widget._get_attrs("myfield")
+        import json
+
+        resolved = json.loads(attrs["snapping_config"])
+        self.assertTrue(resolved["enabled"])
+        self.assertEqual(resolved["snapDistance"], 20)
+        self.assertEqual(len(resolved["snapLayers"]), 1)
+        self.assertEqual(resolved["snapLayers"][0]["id"], "road")
+
+    def test_snapping_config_from_road_form(self):
+        """RoadForm widget should have resolved snapping_config."""
+        from test_project.test_app.forms import RoadForm
+
+        form = RoadForm()
+        widget = form.fields["geom"].widget
+        cfg = widget.attrs.get("snapping_config")
+        self.assertIsNotNone(cfg)
+        self.assertTrue(cfg["enabled"])
+
+    def test_snapping_config_not_present_for_dummy_model(self):
+        """DummyModelForm widget should not have snapping_config."""
+        from test_project.test_app.forms import DummyModelForm
+
+        form = DummyModelForm()
+        widget = form.fields["geom"].widget
+        self.assertIsNone(widget.attrs.get("snapping_config"))
+
+
 class SelectMultipleWithPopTestCase(TestCase):
     def test_widget_rendering(self):
         widget = SelectMultipleWithPop(add_url="/add/")

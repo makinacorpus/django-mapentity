@@ -146,6 +146,12 @@ class JSSettings(JSONResponseMixin, TemplateView):
         dictsettings["maxCharactersByField"] = app_settings["MAX_CHARACTERS_BY_FIELD"]
 
         # Layers
+        registered_models = [
+            (model, options)
+            for model, options in registry.registry.items()
+            if model._meta.app_label != "mapentity" and options.layer
+        ]
+
         dictsettings["layers"] = [
             {
                 "name": model._meta.verbose_name,
@@ -157,8 +163,7 @@ class JSSettings(JSONResponseMixin, TemplateView):
                     model._meta.app_config, "verbose_name", model._meta.app_label
                 ),
             }
-            for model, options in registry.registry.items()
-            if model._meta.app_label != "mapentity" and options.menu
+            for model, options in registered_models
         ]
 
         return dictsettings

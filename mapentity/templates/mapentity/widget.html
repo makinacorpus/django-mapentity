@@ -33,6 +33,9 @@
         {% if field_label %}
         options.fieldLabel = `{{ field_label|escapejs }}`;
         {% endif %}
+        {% if snapping_config %}
+        options.snappingConfig = JSON.parse('{{ snapping_config|escapejs }}');
+        {% endif %}
 
         console.log('fieldId', fieldId);
         console.log('options', options);

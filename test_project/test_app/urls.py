@@ -15,6 +15,7 @@ app_name = "test_app"
 
 class HiddenModelOptions(MapEntityOptions):
     menu = False
+    layer = False
 
 
 urlpatterns = registry.register(DummyModel)
