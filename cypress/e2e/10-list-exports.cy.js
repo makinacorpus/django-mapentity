@@ -126,29 +126,20 @@ describe('List View - Export Functions', () => {
     it('should export with filters applied', {retries: 1}, () => {
         // Apply a filter first
         cy.get('body').then($body => {
-            // Look for search or filter input
-            const filterSelectors = [
-                'input[type="search"]',
-                'input[name="search"]',
-                '#search',
-                '.filters input[type="text"]'
-            ]
-
-            for (const selector of filterSelectors) {
-                if ($body.find(selector).length > 0) {
-                    cy.get(selector).first().type('test')
-                    // Wait for table to reflect the filter
-                    cy.get('table tbody', {timeout: 10000}).should('exist')
-                    break
-                }
-            }
-
+            // Wait for the table to finish its initial loading
+            cy.get('table tbody tr').should('have.length.greaterThan', 1)
+            // Open filters
+            cy.get('#filters-btn').click()
+            // Type a search query into the name input
+            cy.get('#id_name').first().type('test')
+            // Filter list
+            cy.get('#filter').click()
+            // Wait for the table to finish processing the search results
+            cy.get('#objects-list_processing', {timeout: 10000}).should('not.be.visible')
             // Now try to export
-            if ($body.find('button[name="csv"]').length > 0) {
-                cy.get('button[name="csv"]').first().should('be.visible')
-                cy.get('button[name="csv"]').first().click()
-                cy.log('Export with filter applied')
-            }
+            cy.get('button[name="csv"]').first().should('be.visible')
+            cy.get('button[name="csv"]').first().click()
+            cy.log('Export with filter applied')
         })
     })
 
