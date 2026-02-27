@@ -24,6 +24,7 @@ setup(
         'Django',
         'tzdata',
         'django-appypod',
+        'django-autocomplete-light',
         'django-compressor',
         'django-crispy-forms>=2.0',
         'crispy-bootstrap4',

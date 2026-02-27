@@ -21,7 +21,7 @@ class DummyModelForm(MapEntityForm):
 class RoadForm(MapEntityForm):
     class Meta:
         model = Road
-        fields = ("name", "geom")
+        fields = ("name", "geom", "tag")
         widgets = {
             "geom": MapWidget(
                 geom_type="LINESTRING",

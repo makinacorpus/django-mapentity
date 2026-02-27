@@ -64,6 +64,9 @@ class Road(MapEntityMixin, models.Model):
 
     name = models.CharField(max_length=100, default="Empty", verbose_name=_("Name"))
     geom = models.LineStringField(null=True, default=None, srid=2154)
+    tag = models.ForeignKey(
+        Tag, null=True, default=None, on_delete=models.SET_NULL, blank=True
+    )
     can_duplicate = False
     created_at = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True, db_index=True)

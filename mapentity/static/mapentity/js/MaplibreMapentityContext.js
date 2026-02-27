@@ -156,7 +156,67 @@ class MaplibreMapentityContext {
         return true;
     }
 
+    /**
+     * Restores le contexte des filtres, les colonnes triées et les couches visibles.
+     * @param filter {} -
+     * @param formData {} -
+     * @param params {} -
+     */
+    async restoreFilterContext(filter, formData){
+        // S'assurer que 'filter' est un élément DOM
+        const filterElement = typeof filter === 'string' ? document.getElementById(filter) : filter;
+        if (!filterElement) {
+            return;
+        }
 
+        const params = {};
+
+        // Convertir les données en objet clé/valeur
+        for (const [key, value] of formData.entries()) {
+            params[key] = value;
+        }
+
+        // Appliquer les valeurs aux champs du formulaire
+        for (const [key, value] of Object.entries(params)) {
+            const input = filterElement.querySelector(`[name="${key}"]`);
+            if (input) {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = value === 'true' || value === 'on';
+                } else if (input.tagName === 'SELECT') {
+                    if (input.hasAttribute('data-autocomplete-light-url')){
+                        const autocompleteUrl = input.getAttribute('data-autocomplete-light-url');
+                        const url = new URL(autocompleteUrl, window.location.origin);
+                        url.searchParams.set("id", value);
+
+                        const response = await fetch(url.pathname + url.search, {
+                            method: 'GET'
+                        });
+
+                        const data = await response.json();
+
+                        // create the option and append to Select2
+                        const option = new Option(data.text, data.id, true, true);
+                        input.append(option);
+
+                        input.dispatchEvent(new Event('change'));
+                        input.dispatchEvent(new CustomEvent('select2:select', {
+                            detail: { data: data }
+                        }));
+                    } else {
+                        input.value = value;
+                        input.dispatchEvent(new Event('change'));
+                    }
+                } else {
+                    input.value = value;
+                }
+            }
+        }
+
+        // Déclencher les événements 'change' pour les <select>
+        filterElement.querySelectorAll('select').forEach(select => {
+            select.dispatchEvent(new Event('change'));
+        });
+    }
 
     /**
      * Restores le contexte complet de la carte, y compris les filtres, les colonnes triées et les couches visibles.
@@ -191,38 +251,9 @@ class MaplibreMapentityContext {
          console.debug('Restoring filters:', filter, context.filter);
          if (filter && context.filter) {
              const formData = new URLSearchParams(context.filter);
-             const params = {};
 
              // Charger les filtres
-             await load_filter_form();
-
-             // S'assurer que 'filter' est un élément DOM
-             const filterElement = typeof filter === 'string' ? document.getElementById(filter) : filter;
-             if (!filterElement) {
-                 return;
-             }
-
-             // Convertir les données en objet clé/valeur
-             for (const [key, value] of formData.entries()) {
-                 params[key] = value;
-             }
-
-             // Appliquer les valeurs aux champs du formulaire
-             for (const [key, value] of Object.entries(params)) {
-                 const input = filterElement.querySelector(`[name="${key}"]`);
-                 if (input) {
-                     if (input.type === 'checkbox' || input.type === 'radio') {
-                         input.checked = value === 'true' || value === 'on';
-                     } else {
-                         input.value = value;
-                     }
-                 }
-             }
-
-             // Déclencher les événements 'change' pour les <select>
-             filterElement.querySelectorAll('select').forEach(select => {
-                 select.dispatchEvent(new Event('change'));
-             });
+             await load_filter_form(this.restoreFilterContext.bind(this, filter, formData));
          }
 
          // Restore le dernier tri des colonnes si un datatable est fourni et que des colonnes de tri sont spécifiées dans le contexte.

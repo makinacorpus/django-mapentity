@@ -100,9 +100,10 @@ class MaplibreMapentityTogglableFilter {
     /**
      * Charge le formulaire de filtre depuis l'URL spécifiée dans l'attribut filter-url
      * @param mapsync {MaplibreMapListSync} - Instance de MaplibreMapListSync pour la synchronisation des filtres
+     * @param callback {Function} - Fonction à executer lorsque les filtres sont chargés
      * @returns {Promise<void>} - Retourne une promesse qui se résout lorsque le formulaire est chargé
      */
-    async load_filter_form(mapsync) {
+    async load_filter_form(mapsync, callback) {
         const mainfilter = document.getElementById('mainfilter');
         if (!mainfilter || this.loaded_form) {
             return;
@@ -142,7 +143,7 @@ class MaplibreMapentityTogglableFilter {
             this._attachFormEvents(mapsync, newMainFilter);
 
             // Gestion des select multiples avec Chosen
-            this._setupChosenSelects(newMainFilter);
+            this._setupSelects(newMainFilter);
 
             // Réorganiser les filtres right
             this._reorganizeRightFilters(newMainFilter);
@@ -151,6 +152,13 @@ class MaplibreMapentityTogglableFilter {
             this._dispatchFilterEvent();
 
             this.loaded_form = true;
+
+            if (callback){
+                await callback.apply();
+            }
+
+            // Force Select2 initialization on autocomplete fields
+            $('#mainfilter select').select2({allowClear: true, theme: 'bootstrap4'});
 
         } catch (error) {
             console.error('Error loading filter form:', error);
@@ -179,33 +187,18 @@ class MaplibreMapentityTogglableFilter {
         newMainFilter.querySelectorAll('select, input').forEach(element => {
             element.addEventListener('change', () => this.setfield(element));
         });
-
-        // Event pour reset avec timeout pour Chosen
-        newMainFilter.addEventListener('reset', () => {
-            setTimeout(() => {
-                newMainFilter.querySelectorAll('select[multiple]').forEach(select => {
-                    const event = new Event('chosen:updated');
-                    select.dispatchEvent(event);
-                });
-            }, 1);
-        });
     }
 
     /**
-     * Configure les sélecteurs multiples avec Chosen
+     * Configure les sélecteurs multiples
      * @param newMainFilter {HTMLElement} - Le nouvel élément de filtre principal
      * @private
      */
-    _setupChosenSelects(newMainFilter) {
+    _setupSelects(newMainFilter) {
 
         const multipleSelects = newMainFilter.querySelectorAll('select[multiple]');
 
         multipleSelects.forEach(select => {
-
-            if (typeof $.fn.chosen === 'function') {
-                $(select).chosen();
-            }
-
             // Event listener pour la classe filter-set
             select.addEventListener('change', (e) => {
                 const name = e.target.getAttribute('name');

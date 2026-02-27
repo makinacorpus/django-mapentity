@@ -26,11 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(fillmax, 0);
     window.addEventListener('resize', fillmax);
 
-    // Appliquer le plugin "Chosen" aux éléments avec la classe .chzn-select (si disponible)
-    if (window.jQuery && window.jQuery.fn.chosen) {
-        jQuery(".chzn-select").chosen();
-    }
-
     // Rendu des onglets de navigation supérieure
     const history = new MaplibreMapentityHistory();
     if (history) {

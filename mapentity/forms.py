@@ -4,12 +4,14 @@ from warnings import warn
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Button, Div, Layout, Submit
+from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib.gis.db.models.fields import GeometryField
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django_filters.filterset import remote_queryset
 from modeltranslation.utils import build_localized_fieldname
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 from tinymce.widgets import TinyMCE
@@ -100,7 +102,13 @@ class MapEntityForm(TranslatedModelForm):
     leftpanel_scrollable = True
     hidden_fields = []
 
+    default_widgets = {
+        models.ForeignKey: autocomplete.ListSelect2,
+        models.ManyToManyField: autocomplete.Select2Multiple,
+    }
+
     def __init__(self, *args, **kwargs):
+        model = getattr(self._meta, "model", None)
         if self.geomfields is None:
             self.geomfields = ["geom"]
         self.user = kwargs.pop("user", None)
@@ -132,10 +140,8 @@ class MapEntityForm(TranslatedModelForm):
             # Custom code because formfield_callback does not work with inherited forms
             if formfield:
                 # set max character limit :
-                if self._meta.model._meta.db_table in max_characters_by_field_config:
-                    for conf in max_characters_by_field_config[
-                        self._meta.model._meta.db_table
-                    ]:
+                if model._meta.db_table in max_characters_by_field_config:
+                    for conf in max_characters_by_field_config[model._meta.db_table]:
                         if fieldname == conf["field"]:
                             textfield_help_text = _(
                                 "%(max)s characters maximum recommended"
@@ -143,8 +149,7 @@ class MapEntityForm(TranslatedModelForm):
 
                 # Assign map widget to all geometry fields
                 try:
-                    formmodel = self._meta.model
-                    modelfield = formmodel._meta.get_field(fieldname)
+                    modelfield = model._meta.get_field(fieldname)
                     needs_replace_widget = isinstance(
                         modelfield, GeometryField
                     ) and not isinstance(
@@ -183,6 +188,38 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.help_text += f", {textfield_help_text}"
                     else:
                         formfield.help_text = textfield_help_text
+
+        def _build_select2_attrs(form_field):
+            attrs = getattr(form_field.widget, "attrs", {}).copy()
+            attrs.setdefault("data-theme", "bootstrap4")
+            attrs.setdefault("data-width", "100%")
+            attrs["data-allow-clear"] = "true"
+            return attrs
+
+        for name, form_field in list(self.fields.items()):
+            try:
+                model_field = model._meta.get_field(name)
+            except Exception:
+                model_field = None
+
+            # mapping champs relationnels (FK, M2M)
+            for mtype, widget_cls in self.default_widgets.items():
+                if isinstance(model_field, mtype):
+                    attrs = _build_select2_attrs(form_field)
+                    form_field.widget = widget_cls(attrs=attrs)
+                    form_field.queryset = remote_queryset(model_field)
+                    break
+
+            # manage extra fields that are not in the model
+            if model_field is None:
+                if isinstance(form_field, forms.ModelMultipleChoiceField):
+                    attrs = _build_select2_attrs(form_field)
+                    form_field.widget = autocomplete.Select2Multiple(attrs=attrs)
+                    form_field.queryset = form_field.queryset
+                elif isinstance(form_field, forms.MultipleChoiceField):
+                    attrs = _build_select2_attrs(form_field)
+                    form_field.widget = autocomplete.Select2Multiple(attrs=attrs)
+                    form_field.choices = form_field.choices
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(

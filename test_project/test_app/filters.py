@@ -1,4 +1,6 @@
-from django_filters.rest_framework import BooleanFilter
+from dal import autocomplete
+from django.utils.translation import gettext_lazy as _
+from django_filters import BooleanFilter, ModelMultipleChoiceFilter
 
 from mapentity.filters import MapEntityFilterSet
 
@@ -16,45 +18,43 @@ from .models import (
 
 
 class MushroomSpotFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = MushroomSpot
         fields = ("id", "name")
 
 
 class DummyModelFilterSet(MapEntityFilterSet):
-    public = BooleanFilter(field_name="public", lookup_expr="exact")
-
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = DummyModel
-        fields = ("public", "name")
+        fields = ("public", "name", "tags")
 
 
 class RoadFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = Road
-        fields = ("id", "name")
+        fields = ("id", "name", "tag")
 
 
 class DollModelFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = DollModel
         fields = ("id",)
 
 
 class ManikinModelFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = ManikinModel
         fields = ("id", "dummy")
 
 
 class CityFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = City
         fields = ("id", "name")
 
 
 class SectorFilterSet(MapEntityFilterSet):
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = Sector
         fields = ("code", "name")
 
@@ -67,7 +67,18 @@ class MultiGeomModelFilterSet(MapEntityFilterSet):
 
 class ComplexModelFilterSet(MapEntityFilterSet):
     public = BooleanFilter(field_name="public", lookup_expr="exact")
+    road = ModelMultipleChoiceFilter(
+        label=_("Roads"),
+        required=False,
+        queryset=Road.objects.all(),
+        widget=autocomplete.ModelSelect2Multiple(
+            url="test_app:road-drf-autocomplete",
+            attrs={
+                "data-placeholder": _("Roads"),
+            },
+        ),
+    )
 
-    class Meta:
+    class Meta(MapEntityFilterSet.Meta):
         model = ComplexModel
         fields = ("public", "name", "located_in", "road")

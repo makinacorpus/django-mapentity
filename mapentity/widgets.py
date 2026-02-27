@@ -1,5 +1,6 @@
 import json
 
+from dal import autocomplete
 from django.contrib.gis.forms.widgets import BaseGeometryWidget
 from django.contrib.staticfiles import finders
 from django.core import validators
@@ -261,7 +262,7 @@ class HiddenGeometryWidget(django_widgets.HiddenInput):
         return value
 
 
-class SelectMultipleWithPop(django_widgets.SelectMultiple):
+class SelectMultipleWithPop(autocomplete.Select2Multiple):
     def __init__(self, *args, **kwargs):
         self.add_url = kwargs.pop("add_url")
         super().__init__(*args, **kwargs)
