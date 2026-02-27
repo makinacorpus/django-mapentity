@@ -338,17 +338,21 @@ class MaplibreObjectsLayer {
 
         // Styles
         const style = this.options.style;
-        const rgba = parseColor(style.color);
-        const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
+        const isColorExpression = Array.isArray(style.color);
+        const colorForParsing = isColorExpression ? (style.default_color || '#000000') : style.color;
+        const rgba = parseColor(colorForParsing);
+        const rgbaStr = isColorExpression ? style.color : `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
         const fillOpacity = style.fillOpacity ?? 0.7;
         const strokeOpacity = style.opacity ?? 1.0;
         const strokeColor = style.color;
         const strokeWidth = style.weight ?? 5;
 
         const detailStyle = this.options.detailStyle || {};
-        const detailColor = detailStyle.color || '#FF5E00';
-        const detailRgba = parseColor(detailColor);
-        const detailRgbaStr = `rgba(${detailRgba[0]},${detailRgba[1]},${detailRgba[2]},${detailRgba[3]})`;
+        const isDetailColorExpression = Array.isArray(detailStyle.color);
+        const detailColorForParsing = isDetailColorExpression ? (detailStyle.default_color || '#FF5E00') : (detailStyle.color || '#FF5E00');
+        const detailColor = isDetailColorExpression ? detailStyle.color : (detailStyle.color || '#FF5E00');
+        const detailRgba = parseColor(detailColorForParsing);
+        const detailRgbaStr = isDetailColorExpression ? detailStyle.color : `rgba(${detailRgba[0]},${detailRgba[1]},${detailRgba[2]},${detailRgba[3]})`;
 
         const layerIds = [];
 
@@ -444,8 +448,10 @@ class MaplibreObjectsLayer {
 
         // Styles
         const style = detailStatus ? this.options.detailStyle : this.options.style;
-        const rgba = parseColor(style.color);
-        const rgbaStr = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
+        const isColorExpression = Array.isArray(style.color);
+        const colorForParsing = isColorExpression ? (style.default_color || '#000000') : style.color;
+        const rgba = parseColor(colorForParsing);
+        const rgbaStr = isColorExpression ? style.color : `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
         const fillOpacity = style.fillOpacity ?? 0.7;
         const strokeOpacity = style.opacity ?? 1.0;
         const strokeColor = style.color;
@@ -453,9 +459,11 @@ class MaplibreObjectsLayer {
 
         // Detail styles for 'selected' state
         const detailStyle = this.options.detailStyle || {};
-        const detailColor = detailStyle.color || '#FF5E00';
-        const detailRgba = parseColor(detailColor);
-        const detailRgbaStr = `rgba(${detailRgba[0]},${detailRgba[1]},${detailRgba[2]},${detailRgba[3]})`;
+        const isDetailColorExpression = Array.isArray(detailStyle.color);
+        const detailColorForParsing = isDetailColorExpression ? (detailStyle.default_color || '#FF5E00') : (detailStyle.color || '#FF5E00');
+        const detailColor = isDetailColorExpression ? detailStyle.color : (detailStyle.color || '#FF5E00');
+        const detailRgba = parseColor(detailColorForParsing);
+        const detailRgbaStr = isDetailColorExpression ? detailStyle.color : `rgba(${detailRgba[0]},${detailRgba[1]},${detailRgba[2]},${detailRgba[3]})`;
 
         const layerIds = [];
 
@@ -469,7 +477,7 @@ class MaplibreObjectsLayer {
             // En mode détail, ajouter des marqueurs vert (départ) et rouge (arrivée) et des flèches
             if (detailStatus) {
                 this._addLineEndpointMarkers(geojson);
-                this._addLineArrowLayer(layerIdBase, sourceId, strokeColor);
+                this._addLineArrowLayer(layerIdBase, sourceId, isColorExpression ? colorForParsing : strokeColor);
             }
         }
 

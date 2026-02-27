@@ -188,7 +188,8 @@ MAPENTITY_CONFIG = {
         "dummymodel": {
             "weight": 3,
             "opacity": 0.5,
-            "color": "green",
+            "color": ["get", "color"],
+            "default_color": "green",
         },
         "road": {
             "weight": 6,

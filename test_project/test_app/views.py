@@ -19,6 +19,7 @@ from .forms import (
     MushroomSpotForm,
     RoadForm,
 )
+from .layers import DummyLayer
 from .models import (
     City,
     ComplexModel,
@@ -91,6 +92,9 @@ class DummyViewSet(mapentity_views.MapEntityViewSet):
     geojson_serializer_class = DummyGeojsonSerializer
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
     filterset_class = DummyModelFilterSet
+
+    def get_layer_classes(self):
+        return [DummyLayer]
 
     def get_queryset(self):
         qs = self.model.objects.all()
