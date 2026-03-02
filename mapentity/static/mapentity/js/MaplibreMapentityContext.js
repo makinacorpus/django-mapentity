@@ -126,6 +126,24 @@ class MaplibreMapentityContext {
 
 
     /**
+     * Adds a value to a select input by selecting the matching option.
+     * Works with single and multiple select elements without clearing
+     * previously selected values.
+     *
+     * @param {HTMLSelectElement} input - The select element.
+     * @param {string} value - The value to select.
+     * @returns {void}
+     */
+    addValue(input, value) {
+        const option = input.querySelector(`option[value="${value}"]`);
+        if (option) {
+            option.selected = true; // preserves existing selections
+            input.dispatchEvent(new Event('change'));
+        }
+    }
+
+
+    /**
      * Restore la vue de la carte à partir du contexte fourni ou du contexte chargé depuis le stockage local.
      * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
      * @param context {Object|null} - Le contexte de la carte à restaurer. Si null, le contexte sera chargé depuis le stockage local.
@@ -157,10 +175,11 @@ class MaplibreMapentityContext {
     }
 
     /**
-     * Restores le contexte des filtres, les colonnes triées et les couches visibles.
-     * @param filter {} -
-     * @param formData {} -
-     * @param params {} -
+     * Restores the filter form context using the provided form data.
+     * @async
+     * @param {HTMLElement|string} filter - The filter form DOM element or its ID.
+     * @param {FormData} formData - The form data to restore, typically retrieved from storage or a request.
+     * @returns {Promise<void>} - Resolves when all form fields have been restored.
      */
     async restoreFilterContext(filter, formData){
         // S'assurer que 'filter' est un élément DOM
@@ -171,13 +190,8 @@ class MaplibreMapentityContext {
 
         const params = {};
 
-        // Convertir les données en objet clé/valeur
-        for (const [key, value] of formData.entries()) {
-            params[key] = value;
-        }
-
         // Appliquer les valeurs aux champs du formulaire
-        for (const [key, value] of Object.entries(params)) {
+        for (const [key, value] of formData.entries()) {
             const input = filterElement.querySelector(`[name="${key}"]`);
             if (input) {
                 if (input.type === 'checkbox' || input.type === 'radio') {
@@ -203,8 +217,7 @@ class MaplibreMapentityContext {
                             detail: { data: data }
                         }));
                     } else {
-                        input.value = value;
-                        input.dispatchEvent(new Event('change'));
+                        this.addValue(input, value);
                     }
                 } else {
                     input.value = value;
@@ -244,16 +257,13 @@ class MaplibreMapentityContext {
             return;
         }
 
-        // Store restored context in layerManager for async layers
-        this.layerManager.restoredContext = context;
-
          // Restore filters if a filter and filter context are available.
          console.debug('Restoring filters:', filter, context.filter);
          if (filter && context.filter) {
              const formData = new URLSearchParams(context.filter);
 
              // Charger les filtres
-             await load_filter_form(this.restoreFilterContext.bind(this, filter, formData));
+             await load_filter_form(() => this.restoreFilterContext(filter, formData));
          }
 
          // Restore le dernier tri des colonnes si un datatable est fourni et que des colonnes de tri sont spécifiées dans le contexte.
@@ -263,6 +273,9 @@ class MaplibreMapentityContext {
 
         // restore la vue de la carte à partir du contexte.
         this.restoreMapView(map, context, kwargs);
+
+        // Store restored context in layerManager for async layers
+        this.layerManager.restoredContext = context;
 
         // Affichage des couches visibles dans le sélecteur de couches.
         if (context.maplayers) {
