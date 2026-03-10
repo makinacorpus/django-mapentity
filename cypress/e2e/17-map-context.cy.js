@@ -104,6 +104,9 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
                     cy.visit(`/dummymodel/list/?context=${contextParam}`)
                     waitForMapReady()
 
+                    // Wait context to be restored
+                    cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
+
                     // Wait for context to be saved to localStorage with the correct base layer
                     cy.window({timeout: 10000}).should((win) => {
                         const keys = Object.keys(win.localStorage)
@@ -246,6 +249,51 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
             cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').last()
                 .should('be.checked')
         })
+
+        it('should restore the activated filters after page reload', () => {
+            cy.visit('/complexmodel/list/')
+            waitForMapReady()
+
+            // Wait for the filters
+            cy.get('table tbody tr').should('have.length.greaterThan', 1)
+
+            // Activate filters
+            cy.get('#filters-btn').click()
+            cy.get('#mainfilter').should('be.visible')
+
+            cy.get('#id_name').first().type('geo point')
+
+            cy.get('#id_road').parent().find('.select2').click()
+            cy.get('[data-select2-id="38"] .select2-selection--multiple').first().type('Road 17')
+            cy.contains('.select2-results__option', 'Road 17').should('be.visible').click()
+
+            cy.get('#id_located_in').select(['City 1', 'City 3'], { force: true })
+
+            cy.get('#filter').click()
+
+            // Wait for context to be saved to localStorage
+            cy.window({timeout: 10000}).should((win) => {
+                const keys = Object.keys(win.localStorage)
+                const contextKey = keys.find(k => k.includes('context'))
+                expect(contextKey, 'localStorage context key').to.exist
+            })
+
+            // Reload the page
+            cy.visit('/complexmodel/list/')
+            waitForMapReady()
+
+            // Wait for the filters
+            cy.get('table tbody tr').should('have.length.greaterThan', 1)
+
+            // Open filters
+            cy.get('#filters-btn').click()
+            cy.get('#mainfilter').should('be.visible')
+
+            cy.get('#id_name').first().should('have.value', 'geo point')
+            cy.get('#id_road').parent().find('.select2-selection__choice').should('contain.text', 'Road 17')
+            cy.get('#id_located_in').invoke('val').should('deep.equal', ['2', '4'])
+        })
+
     })
 
     describe('Detail view', () => {

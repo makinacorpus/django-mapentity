@@ -69,24 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
 
-            // Restauration du contexte (vue et couches)
-            const mapViewContext = getURLParameter("context");
-            if (mapViewContext) {
-                // Unification : stocker le contexte URL dans le localStorage, puis restaurer normalement
-                mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: context.viewname });
-            }
-
-            mapentityContext.restoreFullContext(map.getMap(), null, {
-                prefix: context.viewname,
-                filter: 'mainfilter',
-                datatable: window.MapEntity.dt,
-                objectsname: context.modelname,
-                // On passe load_filter_form si on est en liste
-                load_filter_form: (window.MapEntity.togglableFilter && window.MapEntity.mapsync) ?
-                    window.MapEntity.togglableFilter.load_filter_form.bind(window.MapEntity.togglableFilter, window.MapEntity.mapsync) :
-                    async () => {},
-            });
-
             const mergedData = Object.assign({}, context, {
                 map,
                 objectsLayer,
@@ -95,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 mvtUrl,
                 tilejsonUrl,
                 layerManager,
+                context,
             });
 
             // Exposer l'instance
@@ -560,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Écouteur pour la vue détail
     window.addEventListener('entity:map:detail', function(e) {
-        const { map, objectsLayer, modelname, bounds, layerUrl, tilejsonUrl, layerManager } = e.detail;
+        const { map, objectsLayer, modelname, bounds, layerUrl, tilejsonUrl, layerManager, context } = e.detail;
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
         // Restauration du contexte (vue et couches)
@@ -696,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Écouteur pour la vue liste
     window.addEventListener('entity:map:list', function(e) {
-        const { map, objectsLayer, modelname, bounds, layerUrl, mvtUrl, tilejsonUrl, layerManager } = e.detail;
+        const { map, objectsLayer, modelname, bounds, layerUrl, mvtUrl, tilejsonUrl, layerManager, context } = e.detail;
 
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
@@ -751,28 +734,17 @@ document.addEventListener('DOMContentLoaded', function() {
         togglableFilter.button.addEventListener('click', function (e) {
             togglableFilter.load_filter_form(mapsync);
         });
-
-        // Restauration du contexte
         const mapViewContext = getURLParameter("context");
-        // mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
-        //     filter: 'mainfilter',
-        //     datatable: mainDatatable,
-        //     objectsname: modelname,
-        //     prefix: 'list',
-        //     load_filter_form: togglableFilter.load_filter_form.bind(togglableFilter, mapsync),
-        // });
-
-        // Sauvegarde du contexte
-        const saveContext = () => {
-            if (!layerManager || !layerManager.restoredContext) return;
-            mapentityContext.saveFullContext(map.getMap(), {
-                filter: 'mainfilter',
-                datatable: mainDatatable,
-                prefix: 'list',
-            });
-        };
-        map.getMap().on('moveend', saveContext);
-        map.getMap().on('zoomend', saveContext);
-        window.addEventListener('visibilitychange', saveContext);
+        if (mapViewContext) {
+            // Unification : stocker le contexte URL dans le localStorage, puis restaurer normalement
+            mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: 'list' });
+        }
+        mapentityContext.restoreFullContext(map.getMap(), null, {
+            prefix: context.viewname,
+            filter: 'mainfilter',
+            datatable: window.MapEntity.dt,
+            objectsname: context.modelname,
+            load_filter_form: window.MapEntity.togglableFilter.load_filter_form.bind(togglableFilter, mapsync)
+        });
     });
 });
