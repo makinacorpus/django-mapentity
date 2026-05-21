@@ -141,18 +141,28 @@ class ZipShapeSerializer(Serializer):
                 subpoints, sublines, subpolygons, pp, ll, yy = self.split_bygeom(
                     geom, geom_getter=lambda geom: geom
                 )
-                if subpoints:
-                    clone = iterable.get(id=x.pk)
-                    clone.geom = MultiPoint(subpoints, srid=geom.srid)
-                    multipoints.append(clone)
-                if sublines:
-                    clone = iterable.get(id=x.pk)
-                    clone.geom = MultiLineString(sublines, srid=geom.srid)
-                    multilinestrings.append(clone)
-                if subpolygons:
-                    clone = iterable.get(id=x.pk)
-                    clone.geom = MultiPolygon(subpolygons, srid=geom.srid)
-                    multipolygons.append(clone)
+                if hasattr(x, 'pk'):
+                    # Top-level call: x is a Django model instance, clone it
+                    if subpoints:
+                        clone = iterable.get(id=x.pk)
+                        clone.geom = MultiPoint(subpoints, srid=geom.srid)
+                        multipoints.append(clone)
+                    if sublines:
+                        clone = iterable.get(id=x.pk)
+                        clone.geom = MultiLineString(sublines, srid=geom.srid)
+                        multilinestrings.append(clone)
+                    if subpolygons:
+                        clone = iterable.get(id=x.pk)
+                        clone.geom = MultiPolygon(subpolygons, srid=geom.srid)
+                        multipolygons.append(clone)
+                else:
+                    # Recursive call: x is a geometry, flatten sub-geometries directly
+                    points.extend(subpoints)
+                    linestrings.extend(sublines)
+                    polygons.extend(subpolygons)
+                    multipoints.extend(pp)
+                    multilinestrings.extend(ll)
+                    multipolygons.extend(yy)
             elif isinstance(geom, Point):
                 points.append(x)
             elif isinstance(geom, LineString):
