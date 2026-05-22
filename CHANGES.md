@@ -7,6 +7,7 @@ CHANGELOG
 **Bug fixes**
 
 - Reduce the size of the help text
+- Fix multi-select filter restoration
 
 8.17.1     (2026-02-17)
 -----------------------

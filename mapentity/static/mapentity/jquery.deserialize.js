@@ -74,7 +74,6 @@
                 if($input.val() !== null){
                     values = [...$input.val(), pair[1]];
                 }
-                console.log(values);
                 $input.val(values).trigger('change');
             }
         } else {
