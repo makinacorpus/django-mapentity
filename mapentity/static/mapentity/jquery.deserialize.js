@@ -33,7 +33,7 @@
 
       for (var i = 0; i < parts.length; i++) {
         var pair = $.map(parts[i].replace(/\+/g, '%20').split("="), function(d) {
-          return decodeURIComponent(d); 
+          return decodeURIComponent(d);
         });
 
         //collect data for checkbox handling
@@ -70,7 +70,12 @@
                     });
                 });
             } else {
-                $input.val(pair[1]).trigger('change');
+                var values = [pair[1]];
+                if($input.val() !== null){
+                    values = [...$input.val(), pair[1]];
+                }
+                console.log(values);
+                $input.val(values).trigger('change');
             }
         } else {
           var oldVal = $input.val();
