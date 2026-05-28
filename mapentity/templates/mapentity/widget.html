@@ -37,11 +37,8 @@
         options.snappingConfig = JSON.parse('{{ snapping_config|escapejs }}');
         {% endif %}
 
-        console.log('fieldId', fieldId);
-        console.log('options', options);
         const targetMapId = '{{ target_map|default:"" }}';
 
-        console.log('targetMapId', targetMapId);
         if (targetMapId) {
             // Se branche sur une carte existante définie par target_map
             window.addEventListener('map:init', function (e) {
@@ -101,7 +98,6 @@
                 // Ajout de la couche d’objets contextuels
                 const modelname = document.body.getAttribute('data-modelname');
                 const objects_verbose_name = document.body.getAttribute('data-objectsname');
-                console.log('modelname : ', modelname);
                 const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
                 const tilejsonUrl = window.SETTINGS.urls.tilejson ? window.SETTINGS.urls.tilejson.replace(/modelname/g, modelname) : undefined;
                 const style = window.SETTINGS.map.styles.others;

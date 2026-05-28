@@ -80,7 +80,6 @@ class MaplibreGeometryField {
      * @private
      */
     _getFeatureCollection() {
-        console.log('MaplibreGeometryField: gmEvents in _getFeatureCollection', this.gmEvents);
         return {
             type: 'FeatureCollection',
             features: this.gmEvents
@@ -96,7 +95,6 @@ class MaplibreGeometryField {
      * @private
      */
     _updateEventsHistory(event) {
-        console.log('MaplibreGeometryField: _updateEventsHistory', event.type, event.feature?.id);
         const eventId = event?.feature?.id;
         if (!eventId) {
             console.warn('Event without feature ID, skipping');
@@ -144,7 +142,6 @@ class MaplibreGeometryField {
      * @private
      */
     _processAndSaveGeometry(event) {
-        console.log('MaplibreGeometryField: _processAndSaveGeometry', event.type, event);
         // Mettre à jour l'historique des événements
         if (!this._updateEventsHistory(event)) {
             console.warn('MaplibreGeometryField: update events history failed');
@@ -152,7 +149,6 @@ class MaplibreGeometryField {
         }
 
         const allFeatures = this._getFeatureCollection();
-        console.log('MaplibreGeometryField: allFeatures', allFeatures);
         let normalizedData;
 
         // Gestion des types 'Multi' et 'Collection'
@@ -204,8 +200,6 @@ class MaplibreGeometryField {
                     targetFeature = allFeatures.features.at(-1);
                 }
 
-                console.log('MaplibreGeometryField: targetFeature for save', targetFeature);
-
                 if (targetFeature) {
                     // Pour un champ simple, on envoie directement la géométrie (pas une FeatureCollection)
                     // Si c'est déjà une feature, on extrait la géométrie
@@ -225,8 +219,6 @@ class MaplibreGeometryField {
                 }
             }
         }
-
-        console.log('MaplibreGeometryField: normalizedData for fieldStore', normalizedData);
 
         // Sauvegarder si des données ont été normalisées
         if (normalizedData !== undefined) {
@@ -493,7 +485,6 @@ class MaplibreGeometryField {
             }
 
             if (idsToExclude.length > 0) {
-                console.log('MaplibreGeometryField: Emitting mapentity:exclude-features', idsToExclude);
                 this.map.fire('mapentity:exclude-features', { ids: idsToExclude });
 
                 // Répéter au chargement complet pour s'assurer que les couches sont prêtes
@@ -508,9 +499,7 @@ class MaplibreGeometryField {
                 try {
                     const collection = { type: 'FeatureCollection', features: initialFeatures };
                     const bounds = calculateBounds(collection);
-                    console.log('MaplibreGeometryField: immediate fitBounds with', bounds);
                     if (bounds) {
-                        console.log('MaplibreGeometryField: applying fitBounds', bounds);
                         this.map.fitBounds(bounds, { padding: 50, maxZoom: 18, animate: false });
                     }
                 } catch (e) {
@@ -529,7 +518,6 @@ class MaplibreGeometryField {
         const addFeaturesToGeoman = () => {
             const geoman = this.drawManager.getGeoman();
             if (!geoman || !geoman.loaded) {
-                console.log(`MaplibreGeometryField: waiting for geoman.loaded`);
                 setTimeout(addFeaturesToGeoman, 100);
                 return;
             }
@@ -541,8 +529,6 @@ class MaplibreGeometryField {
                 return;
             }
 
-            console.log('MaplibreGeometryField: geoman is loaded, adding features via addGeoJsonFeature', initialFeatures);
-            
             // Forcer un rafraîchissement initial au cas où
             this.map.triggerRepaint();
 
@@ -569,9 +555,8 @@ class MaplibreGeometryField {
                     const resolveGeomanSourceName = () => this._resolveGeomanSourceName();
 
                     // Utilisation de la méthode recommandée par la doc
-                    console.log('MaplibreGeometryField: calling addGeoJsonFeature for', feature);
-
                     let result;
+
                     // Selon la version Geoman :
                     // - 0.6.x : `importGeoJsonFeature(geojsonFeature)`
                     // - certaines docs : `addGeoJsonFeature({ shapeGeoJson, sourceName })`
@@ -598,25 +583,20 @@ class MaplibreGeometryField {
                         console.warn('MaplibreGeometryField: no compatible method found to add GeoJSON feature to Geoman');
                         return;
                     }
-                    console.log('MaplibreGeometryField: addGeoJsonFeature result', result);
-                    
+
                     // Si result contient l'ID directement
                     let addedId = typeof result === 'string' || typeof result === 'number' ? result : result?.id;
-                    console.log('MaplibreGeometryField: identified addedId', addedId);
 
                     // On force l'affichage immédiat en passant par Geoman si possible
                     if (gmApi.features.getFeatureById) {
                          const f = gmApi.features.getFeatureById(addedId || feature.id);
-                         console.log('MaplibreGeometryField: getFeatureById found', f);
                          if (f && f.show) {
-                             console.log('MaplibreGeometryField: calling f.show()');
                              f.show();
                          }
                     }
 
                     // On met à jour l'historique local gmEvents directement avec la feature qu'on vient d'ajouter
                     // On n'attend pas la source car le nom peut varier et l'update peut être asynchrone
-                    console.log('MaplibreGeometryField: updating events history with initial feature', addedId || feature.id);
                     this._updateEventsHistory({
                         type: 'gm:create',
                         feature: {
@@ -650,7 +630,6 @@ class MaplibreGeometryField {
                     const collection = { type: 'FeatureCollection', features: initialFeatures };
                     const bounds = calculateBounds(collection);
                     if (bounds) {
-                        console.log('MaplibreGeometryField: post-geoman fitBounds', bounds);
                         this.map.fitBounds(bounds, { padding: 50, maxZoom: 18, animate: false });
                     }
                 } catch (e) {
@@ -662,13 +641,11 @@ class MaplibreGeometryField {
                     const style = this.map.getStyle();
                     if (style && style.layers) {
                         let updated = false;
-                        console.log('MaplibreGeometryField: checking layers for fallback styles');
                         style.layers.forEach(layer => {
                             // On cible les layers Geoman qui pourraient ne pas avoir de style défini
                             const isGeoman = layer.id.indexOf('gm_') !== -1 || layer.id.indexOf('geoman') !== -1;
 
                             if (isGeoman && layer.type !== 'symbol') {
-                                console.log(`MaplibreGeometryField: found Geoman layer ${layer.id} (${layer.type})`);
                                 if (layer.type === 'line') {
                                     this.map.setPaintProperty(layer.id, 'line-color', '#3388ff');
                                     this.map.setPaintProperty(layer.id, 'line-width', 3);
@@ -685,10 +662,7 @@ class MaplibreGeometryField {
                             }
                         });
                         if (updated) {
-                            console.log('MaplibreGeometryField: applied fallback styles to Geoman layers');
                             this.map.triggerRepaint();
-                        } else {
-                            console.log('MaplibreGeometryField: no Geoman layers found for styling fallback');
                         }
                     }
                 } catch (e) {
@@ -701,7 +675,6 @@ class MaplibreGeometryField {
             
             // Forcer Geoman à recalculer ses limites internes si besoin
             if (gmApi.update) {
-                console.log('MaplibreGeometryField: calling gmApi.update()');
                 gmApi.update();
             }
         };
@@ -805,8 +778,6 @@ class MaplibreGeometryField {
         }
 
         // 2. Fallback: mettre à jour les sources en ne supprimant que les features de ce champ
-        console.log('MaplibreGeometryField: removing owned features via source update (API fallback)');
-        
         const sources = this._findAllGeomanSources();
         if (sources.length === 0) {
              console.warn('MaplibreGeometryField: No Geoman sources found for fallback');
@@ -1161,7 +1132,6 @@ class MaplibreGeometryField {
                 // Filtrer : ne réagir qu'aux shapes qui correspondent à ce champ ET vérifier le champ actif
                 if (!this._isShapeForThisField(event.shape)) return;
                 if (!this._isActiveField()) return;
-                console.log('MaplibreGeometryField: gm:globaldrawmodetoggled', this.fieldId, event);
                 try {
                     if (event.enabled) {
                         const geoman = this.drawManager.getGeoman();
@@ -1244,12 +1214,10 @@ class MaplibreGeometryField {
                 // Filtrer : ne réagir qu'aux shapes qui correspondent à ce champ ET vérifier le champ actif
                 if (!this._isShapeForThisField(event.shape)) return;
                 if (!this._isActiveField()) return;
-                console.log('MaplibreGeometryField: gm:create', this.fieldId, event);
                 try {
                     // S'assurer que la feature a un ID avant de traiter
                     if (event.feature && !event.feature.id) {
                         const newId = generateUniqueId();
-                        console.log('MaplibreGeometryField: assigning new ID to feature', newId);
                         event.feature.id = newId;
                     }
 
@@ -1257,7 +1225,6 @@ class MaplibreGeometryField {
                     // Cela garantit qu'on ne garde qu'une seule feature à la fois
                     if (!this.options.isCollection && event.feature) {
                         const newFeatureId = event.feature.id;
-                        console.log('MaplibreGeometryField: enforcing single geometry, removing others except', newFeatureId);
 
                         // On récupère le GeoJSON complet pour le passer au fallback si besoin
                         let featureGeoJson = this._getGeoJson(event.feature);
@@ -1302,7 +1269,6 @@ class MaplibreGeometryField {
                     if(!this.options.isCollection) {
                         const gm = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
                         if (gm && gm.disableDraw) {
-                            console.log('MaplibreGeometryField: disabling draw mode after creation');
                             gm.disableDraw();
                             // Force une deuxième fois pour être sûr que l'UI suit
                             setTimeout(() => gm.disableDraw(), 50);

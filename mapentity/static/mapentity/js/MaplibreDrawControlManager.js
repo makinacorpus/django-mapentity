@@ -17,7 +17,6 @@ class MaplibreDrawControlManager {
      * Les vrais boutons seront créés manuellement par champ.
      */
     _initializeGeoman() {
-        console.log("MaplibreDrawControlManager initializing with options:", this.options);
         const geomanOptions = {
             controls: {
                 draw: {
@@ -123,7 +122,6 @@ class MaplibreDrawControlManager {
         // Déclencher un événement quand Geoman est prêt
         const checkLoaded = () => {
             if (this.geoman.loaded) {
-                console.log("MaplibreDrawControlManager: Geoman loaded, firing gm:loaded");
                 this._createCustomButtonsContainer();
                 // Enregistrer le premier champ (celui qui a créé le DrawControlManager)
                 this.registerField(this.options);
@@ -216,15 +214,12 @@ class MaplibreDrawControlManager {
             return;
         }
         if (this._fields[fieldId]) {
-            console.log('MaplibreDrawControlManager: field already registered', fieldId);
             return;
         }
 
         // Déterminer les shapes pour ce champ
         const shapes = this._getShapesForField(fieldOptions);
         this._fields[fieldId] = { options: fieldOptions, shapes };
-
-        console.log('MaplibreDrawControlManager: registering field', fieldId, 'with shapes', shapes);
 
         // Créer les boutons personnalisés pour ce champ
         if (fieldOptions.modifiable && this._customButtonsContainer) {
@@ -362,7 +357,6 @@ class MaplibreDrawControlManager {
 
         // Marquer le champ actif AVANT d'activer le mode de dessin
         this._activeFieldId = fieldId;
-        console.log('MaplibreDrawControlManager: activating draw mode', shape, 'for field', fieldId);
 
         // Désactiver d'abord tout mode de dessin actif
         if (this.geoman && this.geoman.disableDraw) {

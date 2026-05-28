@@ -22,7 +22,6 @@ class MaplibreFieldStore {
             ? this._serializeGeometryCollection(data)
             : this._serialize(data)
 
-        console.log('MaplibreFieldStore: saving to', this.formField.id, 'value:', serializedData);
         this.formField.value = serializedData;
         
         // Notification pour les validateurs et autres scripts
@@ -45,7 +44,6 @@ class MaplibreFieldStore {
             const sameNameFields = form.querySelectorAll(`[name="${this.formField.name}"]`);
             sameNameFields.forEach(field => {
                 if (field !== this.formField) {
-                    console.log('MaplibreFieldStore: syncing another field with same name', field.id);
                     field.value = serializedData;
                     field.dispatchEvent(new Event('change', { bubbles: true }));
                 }
