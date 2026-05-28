@@ -134,7 +134,6 @@
     function tinyMceInit(editor) {
         var context = $('body').data();
         editor.on('WordCountUpdate', function(event) {
-            console.log(window.SETTINGS);
             // DEPRECATED paramters maxCharacters -> to remove
             if (("container" in event.target) && (window.SETTINGS.maxCharacters > 0)) {
                 var characters = event.wordCount.characters;
