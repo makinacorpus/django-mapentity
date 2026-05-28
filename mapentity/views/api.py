@@ -171,7 +171,7 @@ class MapEntityViewSet(BaseTileJSONView, BaseVectorTileView, viewsets.ModelViewS
         detail=False,
         methods=["get"],
         renderer_classes=(MVTRenderer,),
-        url_path="mvt/(?P<z>\d+)/(?P<x>\d+)/(?P<y>\d+)",
+        url_path=r"mvt/(?P<z>\d+)/(?P<x>\d+)/(?P<y>\d+)",
         url_name="mvt",
     )
     @view_cache_response_content()
