@@ -7,6 +7,8 @@ CHANGELOG
 **Bug fixes**
 
 - Reduce the size of the help text
+- Enable right click on pop-up 'detail page' button 
+
 
 8.17.1     (2026-02-17)
 -----------------------
