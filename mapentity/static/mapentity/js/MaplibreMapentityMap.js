@@ -1,8 +1,6 @@
 // Solution 1: Déclencher les événements spécifiques APRÈS l'initialisation complète
 document.addEventListener('DOMContentLoaded', function() {
 
-    window.dispatchEvent(new CustomEvent('entity:view:' + context.viewname, { detail: mergedData }));
-
     window.addEventListener('entity:map:ready', function(e) {
         const { map, objectsLayer, context, TILES, bounds, mapentityContext, layerManager, layerUrl, mvtUrl, tilejsonUrl } = e.detail;
 
