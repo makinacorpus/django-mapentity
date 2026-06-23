@@ -6,8 +6,8 @@ class MaplibreFieldStore {
     }
 
     /**
-     * Sauvegarde les données dans le champ du formulaire.
-     * @param data - Les données à sauvegarder, qui peuvent être une collection de géométries ou un objet GeoJSON.
+     * Saves data in the form field.
+     * @param data - The data to save, which can be a collection of geometries or a GeoJSON object.
      */
     save(data) {
         if (!this.formField) {
@@ -24,7 +24,7 @@ class MaplibreFieldStore {
 
         this.formField.value = serializedData;
         
-        // Notification pour les validateurs et autres scripts
+        // Notification for validators and other scripts
         const event = new Event('change', { bubbles: true });
         this.formField.dispatchEvent(event);
         
@@ -32,15 +32,15 @@ class MaplibreFieldStore {
             window.jQuery(this.formField).trigger('change');
         }
 
-        // On déclenche aussi l'input pour être sûr
+        // We also trigger the input to be sure
         const inputEvent = new Event('input', { bubbles: true });
         this.formField.dispatchEvent(inputEvent);
 
-        // Ajout d'une synchronisation forcée sur le formulaire si possible
+        // Adding a forced synchronization to the form if possible
         const form = this.formField.closest('form');
         if (form) {
-            // Parfois Django GIS ou Leaflet.draw utilisaient un champ masqué synchronisé.
-            // On s'assure ici que si un champ avec le même name existe ailleurs (rare), il est mis à jour.
+            // Sometimes Django GIS or Leaflet.draw used a synchronized hidden field.
+            // We ensure here that if a field with the same name exists elsewhere (rare), it is updated.
             const sameNameFields = form.querySelectorAll(`[name="${this.formField.name}"]`);
             sameNameFields.forEach(field => {
                 if (field !== this.formField) {
@@ -52,19 +52,19 @@ class MaplibreFieldStore {
     }
 
     /**
-     * Sérialise un objet GeoJSON de type FeatureCollection ou GeometryCollection en chaîne JSON.
-     * @param data {Object} - L'objet GeoJSON à sérialiser (FeatureCollection ou Geometry).
-     * @returns {string} - La chaîne JSON représentant l'objet GeoJSON.
+     * Serializes a GeoJSON object of type FeatureCollection or GeometryCollection into a JSON string.
+     * @param data {Object} - The GeoJSON object to serialize (FeatureCollection or Geometry).
+     * @returns {string} - The JSON string representing the GeoJSON object.
      * @private
      */
     _serialize(data) {
-        // Si c'est déjà une géométrie (type + coordinates)
+        // If it's already a geometry (type + coordinates)
         if (data && data.type && data.coordinates) {
             const geomTypeLower = (this.options.geomType || '').toLowerCase();
             const isGenericGeometry = geomTypeLower === 'geometry';
             
-            // S'assurer que MultiPolygon ne va pas dans un PolygonField
-            // Ou pour un type générique "Geometry", convertir Multi avec 1 élément en simple
+            // Ensure MultiPolygon does not go into a PolygonField
+            // Or for a generic type "Geometry", convert a Multi with 1 element to a simple one
             if (data.type === 'MultiPolygon') {
                 if ((geomTypeLower.endsWith('polygon') && !geomTypeLower.includes('multi')) ||
                     (isGenericGeometry && data.coordinates.length === 1)) {
@@ -75,7 +75,7 @@ class MaplibreFieldStore {
                     });
                 }
             }
-            // S'assurer que MultiLineString ne va pas dans un LineStringField
+            // Ensure MultiLineString does not go into a LineStringField
             if (data.type === 'MultiLineString') {
                 if ((geomTypeLower.endsWith('linestring') && !geomTypeLower.includes('multi')) ||
                     (isGenericGeometry && data.coordinates.length === 1)) {
@@ -86,7 +86,7 @@ class MaplibreFieldStore {
                     });
                 }
             }
-            // S'assurer que MultiPoint ne va pas dans un PointField
+            // Ensure that MultiPoint does not go into a PointField
             if (data.type === 'MultiPoint') {
                 if ((geomTypeLower.endsWith('point') && !geomTypeLower.includes('multi')) ||
                     (isGenericGeometry && data.coordinates.length === 1)) {
@@ -100,7 +100,7 @@ class MaplibreFieldStore {
             return JSON.stringify(data);
         }
 
-        // Si c'est une FeatureCollection
+        // If it is a FeatureCollection
         if (data && data.type === 'FeatureCollection') {
             if (!data.features || data.features.length === 0) {
                 return '';
@@ -113,23 +113,23 @@ class MaplibreFieldStore {
     }
 
     /**
-     * Sérialise les géométries en fonction de leur type.
-     * @param features {Array} - Un tableau de géométries à sérialiser.
-     * @returns {string} - La chaîne JSON représentant les géométries.
+     * Serializes geometries based on their type.
+     * @param features {Array} - An array of geometries to serialize.
+     * @returns {string} - The JSON string representing the geometries.
      * @private
      */
     _serializeByGeomType(features) {
         const last = Array.isArray(features) ? features.at(-1) : null;
         if (last?.geometry) {
-            // S'assurer que la géométrie est simple pour un champ simple
+            // Ensure the geometry is simple for a simple field
             const geom = last.geometry;
             if (geom.type.startsWith('Multi') && !this.options.isCollection) {
-                // Si on a un Multi alors qu'on attend un simple (cas possible si Geoman a groupé)
-                // On essaie de prendre le premier élément si c'est compatible
+                // If we have a Multi when we expect a simple (possible case if Geoman has grouped)
+                // We try to take the first element if it is compatible
                 console.warn('MaplibreFieldStore: expected simple geometry but got Multi, taking first component');
                 const simpleType = geom.type.replace('Multi', '');
-                // Pour Polygon, MultiPolygon.coordinates est Array<Array<Array<Array<number>>>>
-                // Polygon.coordinates est Array<Array<Array<number>>>
+                // For Polygon, MultiPolygon.coordinates is Array<Array<Array<Array<number>>>>
+                // Polygon.coordinates is Array<Array<Array<number>>>
                 return JSON.stringify({
                     type: simpleType,
                     coordinates: geom.coordinates[0]
@@ -142,9 +142,9 @@ class MaplibreFieldStore {
     }
 
     /**
-     * Sérialise une collection de géométries en GeometryCollection.
-     * @param geoemtriesCollection {Object} - Un objet GeoJSON de type GeometryCollection à sérialiser.
-     * @returns {string} - La chaîne JSON représentant la GeometryCollection.
+     * Serializes a collection of geometries into a GeometryCollection.
+     * @param geoemtriesCollection {Object} - A GeoJSON object of type GeometryCollection to serialize.
+     * @returns {string} - The JSON string representing the GeometryCollection.
      * @private
      */
     _serializeGeometryCollection(geoemtriesCollection) {

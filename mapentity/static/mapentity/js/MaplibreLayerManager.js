@@ -9,7 +9,7 @@ class MaplibreLayerManager {
         this.layers = {
             baseLayers: {},
             overlays: {},
-            lazyOverlays: {}, // Nouvelles couches lazy
+            lazyOverlays: {}, // New lazy layers
             layerGroups: {} // Mapping ID simple -> liste d'IDs MapLibre
         };
         this.restoredContext = null; // Stockage du contexte restauré
@@ -28,8 +28,8 @@ class MaplibreLayerManager {
     }
 
     /**
-     * Ajoute une couche à partir d'une URL (Style Mapbox ou TileJSON)
-     * @param name {string} - Nom de la couche
+     * Add a layer from a URL (Mapbox Style or TileJSON)
+     * @param name {string} - Layer name
      * @param layerConfig {Object} - Configuration (id, url, isBaseLayer, attribution, etc.)
      * @returns {Promise<void>}
      */
@@ -48,13 +48,13 @@ class MaplibreLayerManager {
 
             let layerIds = [];
 
-            // Détection du type de contenu
+            // Content Type Detection
             if (data.layers && data.sources) {
-                // C'est un Style Mapbox
+                // This is a Mapbox Style
                 const styleSources = data.sources;
                 const styleLayers = data.layers;
 
-                // 1. Ajouter les sources
+                // 1. Add sources
                 for (const [sourceId, sourceConfig] of Object.entries(styleSources)) {
                     const newSourceId = `${id}-${sourceId}`;
                     if (!this._map.getSource(newSourceId)) {
@@ -62,7 +62,7 @@ class MaplibreLayerManager {
                     }
                 }
 
-                // 2. Ajouter les couches au-dessus des fonds de plan mais sous les données
+                // 2. Add layers above the base maps but below the data
                 const firstDataLayer = this._map.getStyle().layers.find(l => l.id.startsWith('layer-'));
                 const beforeId = firstDataLayer ? firstDataLayer.id : undefined;
 
@@ -75,7 +75,7 @@ class MaplibreLayerManager {
                         layerCopy.source = `${id}-${layer.source}`;
                     }
                     
-                    // Gérer la visibilité
+                    // Manage visibility
                     layerCopy.layout = { 
                         ...(layer.layout || {}), 
                         visibility: isBaseLayer ? 'none' : 'none' 
@@ -85,7 +85,7 @@ class MaplibreLayerManager {
                     layerIds.push(newLayerId);
                 }
             } else {
-                // C'est un TileJSON ou une source simple
+                // This is a TileJSON or a simple source
                 const type = data.type || layerConfig.type || 'raster';
                 if (!this._map.getSource(id)) {
                     const sourceConfig = {
@@ -127,14 +127,14 @@ class MaplibreLayerManager {
                 }
             }
         } catch (error) {
-            console.error(`Impossible de charger la couche depuis ${url}:`, error);
+            console.error(`Unable to load layer from ${url}:`, error);
         }
     }
 
     /**
-     * Ajoute une couche de base
-     * @param name {string} - Nom de la couche
-     * @param layerConfig {Object} - Configuration de la couche
+     * Add a base layer
+     * @param name {string} - Layer name
+     * @param layerConfig {Object} - Layer configuration
      */
     addBaseLayer(name, layerConfig) {
         const { id, tiles, url, tileSize = 256, attribution = '' } = layerConfig;
@@ -170,11 +170,11 @@ class MaplibreLayerManager {
     }
 
     /**
-     * Enregistre une couche overlay classique
-     * @param category {string} - Catégorie de la couche
-     * @param primaryKey {string} - Clé primaire de l'objet
-     * @param layerIds {Array} - IDs des couches MapLibre
-     * @param labelHTML {string} - Label HTML personnalisé à afficher
+     * Register a standard overlay layer
+     * @param category {string} - Layer category
+     * @param primaryKey {string} - Primary key of the object
+     * @param layerIds {Array} - MapLibre layer IDs
+     * @param labelHTML {string} - Custom HTML label to display
      */
     registerOverlay(category, primaryKey, layerIds, labelHTML) {
         if (!this.layers.overlays[category]) {
@@ -187,10 +187,10 @@ class MaplibreLayerManager {
             type: 'loaded' // Couche déjà chargée
         };
 
-        // Enregistrer le groupe pour que toggleLayer puisse résoudre primaryKey -> layerIds
+        // Register the group so that toggleLayer can resolve primaryKey -> layerIds
         this.layers.layerGroups[primaryKey] = layerIds;
 
-        // Initialiser le tableau de marqueurs DOM associés au groupe
+        // Initialize the array of DOM markers associated with the group
         if (!this.layers.groupMarkers) this.layers.groupMarkers = {};
         if (!this.layers.groupMarkers[primaryKey]) this.layers.groupMarkers[primaryKey] = [];
 
@@ -198,11 +198,11 @@ class MaplibreLayerManager {
     }
 
     /**
-     * Ajoute des couches et marqueurs supplémentaires à un groupe overlay existant.
-     * Utilisé pour associer les géométries secondaires au même toggle que l'objet courant.
-     * @param primaryKey {string} - Clé primaire du groupe existant
-     * @param extraLayerIds {Array<string>} - IDs des couches MapLibre à ajouter
-     * @param extraMarkers {Array<maplibregl.Marker>} - Marqueurs DOM à ajouter
+     * Add additional layers and markers to an existing overlay group.
+     * Used to associate secondary geometries with the same toggle as the current object.
+     * @param primaryKey {string} - Primary key of the existing group
+     * @param extraLayerIds {Array<string>} - MapLibre layer IDs to add
+     * @param extraMarkers {Array<maplibregl.Marker>} - DOM markers to add
      */
     addToGroup(primaryKey, extraLayerIds, extraMarkers) {
         if (!this.layers.layerGroups[primaryKey]) {
@@ -219,13 +219,13 @@ class MaplibreLayerManager {
     }
 
     /**
-     * Enregistre une couche overlay lazy (non chargée)
-     * @param category {string} - Catégorie de la couche
-     * @param primaryKey {string} - Clé primaire de l'objet
-     * @param name {string} - Nom de la couche
-     * @param dataUrl {string} - URL des données
-     * @param labelHTML {string} - Label HTML personnalisé à afficher
-     * @param loadCallback {Function} - Callback pour charger la couche
+     * Register a lazy overlay layer (not loaded)
+     * @param category {string} - Layer category
+     * @param primaryKey {string} - Primary key of the object
+     * @param name {string} - Layer name
+     * @param dataUrl {string} - Data URL
+     * @param labelHTML {string} - Custom HTML label to display
+     * @param loadCallback {Function} - Callback to load the layer
      */
     registerLazyOverlay(category, primaryKey, name, dataUrl, labelHTML, loadCallback) {
         if (!this.layers.lazyOverlays[category]) {
@@ -253,22 +253,22 @@ class MaplibreLayerManager {
     }
 
     /**
-     * Gère le toggle d'une couche lazy
-     * @param category {string} - Catégorie
-     * @param primaryKey {string} - Clé primaire
-     * @param visible {boolean} - Visibilité souhaitée
-     * @returns {Promise<boolean>} - Succès de l'opération
+     * Toggle the visibility of a lazy overlay layer
+     * @param category {string} - Layer category
+     * @param primaryKey {string} - Primary key of the object
+     * @param visible {boolean} - Desired visibility
+     * @returns {Promise<boolean>} - Success of the operation
      */
     async toggleLazyOverlay(category, primaryKey, visible) {
         const lazyLayer = this.layers.lazyOverlays[category]?.[primaryKey];
 
         if (!lazyLayer) {
-            console.warn(`Couche lazy introuvable: ${category}/${primaryKey}`);
+            console.warn(`Lazy layer not found: ${category}/${primaryKey}`);
             return false;
         }
 
         try {
-            // Appeler le callback de chargement de la couche
+            // Call the layer's load callback
             const success = await lazyLayer.loadCallback(primaryKey, visible);
             if (success) {
                 lazyLayer.isVisible = visible;
@@ -279,23 +279,23 @@ class MaplibreLayerManager {
             this._fireEvent('lazyLayerVisibilityChanged', { primaryKey, visible });
             return success;
         } catch (error) {
-            console.error(`Erreur lors du toggle de la couche lazy ${category}:`, error);
+            console.error(`Error toggling lazy layer ${category}:`, error);
             return false;
         }
     }
 
     /**
-     * Notifie une erreur de chargement pour décocher la case
-     * @param primaryKey {string} - Clé primaire de la couche qui a échoué
+     * Notify a loading error to uncheck the box
+     * @param primaryKey {string} - Primary key of the layer that failed
      */
     notifyLoadingError(primaryKey) {
         this._fireEvent('loadingError', { primaryKey });
     }
 
     /**
-     * Bascule la visibilité d'une ou plusieurs couches
-     * @param layerIds {string|Array<string>} - ID(s) des couches ou ID de groupe
-     * @param visible {boolean} - Visibilité souhaitée
+     * Toggle the visibility of one or more layers
+     * @param layerIds {string|Array<string>} - ID(s) of the layers or group ID
+     * @param visible {boolean} - Desired visibility
      */
     toggleLayer(layerIds, visible = true) {
         if (!this._map) {
@@ -306,7 +306,7 @@ class MaplibreLayerManager {
         if (Array.isArray(layerIds)) {
             ids = layerIds;
         } else if (typeof layerIds === 'string') {
-            // Vérifier si c'est un ID de groupe
+            // Check if it's a group ID
             if (this.layers.layerGroups[layerIds]) {
                 ids = this.layers.layerGroups[layerIds];
             } else {
@@ -318,16 +318,16 @@ class MaplibreLayerManager {
             if (this._map.getLayer(id)) {
                 this._map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
             } else if (this.layers.layerGroups[id]) {
-                // Récursion si un des IDs est lui-même un groupe (peu probable mais robuste)
+                // Recursion if one of the IDs is itself a group (unlikely but robust)
                 this.toggleLayer(id, visible);
             } else {
                 console.warn(`Layer "${id}" not found.`);
             }
         }
 
-        // Basculer la visibilité des marqueurs DOM associés au groupe
+        // Toggle the visibility of DOM markers associated with the group
         if (this.layers.groupMarkers) {
-            // Résoudre le primaryKey original (layerIds peut être un groupe ID)
+            // Resolve the original primaryKey (layerIds can be a group ID)
             const groupKey = (typeof layerIds === 'string' && this.layers.layerGroups[layerIds]) ? layerIds : null;
             if (groupKey && this.layers.groupMarkers[groupKey]) {
                 this.layers.groupMarkers[groupKey].forEach(marker => {
@@ -339,25 +339,25 @@ class MaplibreLayerManager {
     }
 
     /**
-     * Récupère toutes les couches
-     * @returns {Object} - Objet contenant baseLayers, overlays et lazyOverlays
+     * Get all layers
+     * @returns {Object} - Object containing baseLayers, overlays, and lazyOverlays
      */
     getLayers() {
         return this.layers;
     }
 
     /**
-     * Récupère la map
-     * @returns {Object} - Objet contenant la carte
+     * Get the map
+     * @returns {Object} - Object containing the map
      */
     getMap() {
         return this._map;
     }
 
     /**
-     * Déclenche un événement
-     * @param event {string} - Nom de l'événement
-     * @param data {Object} - Données de l'événement
+     * Fire an event
+     * @param event {string} - Name of the event
+     * @param data {Object} - Event data
      * @private
      */
     _fireEvent(event, data) {
@@ -365,14 +365,14 @@ class MaplibreLayerManager {
             this._eventListeners[event].forEach(callback => callback(data));
         }
 
-        // Aussi déclencher sur la carte si disponible
+        // Also trigger on the map if available
         if (this._map) {
             this._map.fire(`layerManager:${event}`, data);
         }
     }
 
     /**
-     * Récupère l'instance singleton
+     * Get the singleton instance
      * @returns {MaplibreLayerManager}
      */
     static getInstance() {

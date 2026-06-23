@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 13:35+0000\n"
+"POT-Creation-Date: 2026-06-23 14:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,8 +42,38 @@ msgstr "Supprimer"
 msgid "Upload a local file (GPX, KML, GeoJSON)"
 msgstr "Charger un fichier local (GPX, KML, GeoJSON)"
 
+msgid "Click to start drawing the line"
+msgstr "Cliquer pour commencer à dessiner la ligne"
+
+msgid "Click to continue drawing the line"
+msgstr "Cliquer pour continuer à dessiner la ligne"
+
+msgid "Click on the last point to finish the line"
+msgstr "Cliquer sur le dernier point pour terminer la ligne"
+
+msgid "Click and drag to draw the rectangle"
+msgstr ""
+
+msgid "Click to finish the rectangle"
+msgstr ""
+
+msgid "Click to start drawing the shape"
+msgstr ""
+
+msgid "Click to continue drawing the shape"
+msgstr ""
+
+msgid "Click on the first point to close the shape"
+msgstr ""
+
 msgid "Layer controller"
 msgstr "Contrôleur de couches"
+
+msgid "Overlays"
+msgstr "Surcouches"
+
+msgid "Objects"
+msgstr "Objets"
 
 msgid "Toggle attribution"
 msgstr "Voir l'attribution"
@@ -69,11 +99,20 @@ msgstr "Zoomer"
 msgid "Zoom out"
 msgstr "Dézoomer"
 
-msgid "Objects"
-msgstr "Objets"
-
 msgid "Measure a distance"
 msgstr "Mesurer une distance"
+
+msgid "Stop measurement"
+msgstr "Arrêter la mesure"
+
+msgid "Delete everything and start over"
+msgstr "Tout supprimer et recommencer"
+
+msgid "Total distance:"
+msgstr "Distance totale :"
+
+msgid "Double-click the last point to end the line"
+msgstr "Double-cliquer sur le dernier point pour terminer la ligne"
 
 msgid "Data unreachable"
 msgstr "Données inaccessibles"

@@ -1,9 +1,8 @@
-// Écouteurs d'événements pour les vues
 document.addEventListener('DOMContentLoaded', function() {
-    // Écouteur d'événement pour la vue liste
+    // Event listener for the list view
     window.addEventListener('entity:view:list', function(e) {
         const { objectsLayer, modelname } = e.detail;
-        // Sélectionneur unique défini globalement
+        // Unique selector defined globally
         const selectorOnce = (() => {
             let current = { 'pk': null, 'row': null };
 
@@ -46,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })();
 
 
-        // Initialisation du DataTable
+        // Initialization of the DataTable
         const canSelect = !!window.USER_CAN_SELECT;
 
         const mainDatatable = new DataTable('#objects-list', {

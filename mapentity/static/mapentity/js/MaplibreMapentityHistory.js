@@ -2,7 +2,7 @@ class MaplibreMapentityHistory {
     constructor() { }
 
     /**
-     * Wrapper pour l'accès sécurisé à localStorage.
+     * Wrapper for secure access to localStorage.
      * @type {{setItem: function(*, *): (boolean), getItem: function(*, null=): (*)}}
      * @private
      */
@@ -32,9 +32,9 @@ class MaplibreMapentityHistory {
     };
 
     /**
-     * Sauvegarde les informations de la liste de recherche dans localStorage.
-     * @param infos {Object} - Un objet contenant les informations de la liste de recherche.
-     * @returns {boolean} - Retourne true si la sauvegarde a réussi, sinon false.
+     * Saves the search list information in localStorage.
+     * @param infos {Object} - An object containing the search list information.
+     * @returns {boolean} - Returns true if the save was successful, otherwise false.
      */
     saveListInfo(infos) {
         if (!infos || typeof infos !== 'object') {
@@ -46,9 +46,9 @@ class MaplibreMapentityHistory {
     }
 
     /**
-     * Supprime une entrée de l'historique.
-     * @param path {string} - Le chemin de l'entrée à supprimer.
-     * @returns {Promise<void>} - Retourne une promesse qui se résout lorsque l'entrée est supprimée.
+     * Deletes an entry from the history.
+     * @param path {string} - The path of the entry to delete.
+     * @returns {Promise<void>} - Returns a promise that resolves when the entry is deleted.
      */
     async remove(path) {
         if (!path || typeof path !== 'string') {
@@ -76,15 +76,15 @@ class MaplibreMapentityHistory {
     }
 
     /**
-     * Assure la gestion du succès de la suppression d'une entrée de l'historique.
-     * @param path {string} - Le chemin de l'entrée supprimée.
+     * Ensures successful deletion of an entry from history.
+     * @param path {string} - The path of the deleted entry.
      * @private
      */
     _handleRemoveSuccess(path) {
         const entries = document.querySelectorAll("#historylist > li");
         let entry = null;
         
-        // Retrouve l'entrée correspondante dans la liste à supprimer
+        // Find the corresponding entry in the list to delete
         document.querySelectorAll('#historylist li a').forEach(a => {
             if (a.getAttribute('href') === path) {
                 entry = a.closest('li');
@@ -94,9 +94,9 @@ class MaplibreMapentityHistory {
         const closeCurrent = window.location.href.includes(path);
         
         if (closeCurrent) {
-            // si l'entrée supprimée est la page actuelle, on gère la navigation
+            // if the deleted entry is the current page, we handle navigation
             if (entries.length > 2) {
-                // Si d'autres entrées sont présentes, on redirige vers la suivante
+                // If other entries are present, we redirect to the next one
                 const nextEntry = entries[1].querySelector('> a');
                 if (nextEntry) {
                     nextEntry.click();
@@ -105,14 +105,14 @@ class MaplibreMapentityHistory {
                     entry.remove();
                 }
             } else {
-                // Si c'est la dernière entrée, on redirige vers la page d'accueil
+                // If it's the last entry, we redirect to the homepage
                 window.location.href = window.SETTINGS.urls.root;
                 if (entry) {
                     entry.remove();
                 }
             }
         } else {
-            // Si l'entrée supprimée n'est pas la page actuelle, on la supprime simplement de la liste
+            // If the deleted entry is not the current page, it is simply removed from the list
             if (entry) {
                 entry.remove();
             }
@@ -120,7 +120,7 @@ class MaplibreMapentityHistory {
     }
 
     /**
-     * Affiche les informations de la liste de recherche et gère les événements hover.
+     * Displays search list information and manages hover events.
      */
     render() {
         const defaultInfos = '{"nb": "?", "model": null}';
@@ -190,10 +190,10 @@ class MaplibreMapentityHistory {
     }
 
     /**
-     * Assure la gestion du hover in pour afficher le texte original et le bouton de fermeture.
-     * @param link {HTMLElement} - L'élément de lien sur lequel l'utilisateur survole.
-     * @param closeButton {HTMLElement} - Le bouton de fermeture associé au lien.
-     * @param contentElement {HTMLElement} - L'élément de contenu dont le texte doit être modifié.
+     * Ensures hover management to display the original text and the close button.
+     * @param link {HTMLElement} - The link element the user is hovering over.
+     * @param closeButton {HTMLElement} - The close button associated with the link.
+     * @param contentElement {HTMLElement} - The content element whose text needs to be modified.
      * @private
      */
     _onHoverIn(link, closeButton, contentElement) {
@@ -210,10 +210,10 @@ class MaplibreMapentityHistory {
     }
 
     /**
-     * Assure la gestion du hover out pour rétablir le texte original et masquer le bouton de fermeture.
-     * @param link {HTMLElement} - L'élément de lien sur lequel l'utilisateur quitte le survol.
-     * @param closeButton {HTMLElement} - Le bouton de fermeture associé au lien.
-     * @param contentElement {HTMLElement} - L'élément de contenu dont le texte doit être rétabli.
+     * Ensures hover out management to restore the original text and hide the close button.
+     * @param link {HTMLElement} - The link element the user hovers out of.
+     * @param closeButton {HTMLElement} - The close button associated with the link.
+     * @param contentElement {HTMLElement} - The content element whose text should be restored.
      * @private
      */
     _onHoverOut(link, closeButton, contentElement) {

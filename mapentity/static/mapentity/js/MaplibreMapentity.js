@@ -3,12 +3,12 @@ if (!window.MapEntity) window.MapEntity = {};
 document.addEventListener('DOMContentLoaded', function() {
 
     /**
-     * Remplit la hauteur maximale des éléments avec la classe .scrollable
+     * Fills the maximum height of elements with the class .scrollable
      */
     function fillmax() {
         document.querySelectorAll('.scrollable').forEach(function(element) {
             if (window.innerWidth >= 992) {
-                // Calcul de la hauteur disponible pour les panneaux
+                // Calculation of the available height for the panels
                 const rect = element.getBoundingClientRect();
                 const computedStyle = getComputedStyle(element);
                 const marginTop = parseFloat(computedStyle.marginTop) || 0;
@@ -16,24 +16,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 const height = window.innerHeight - rect.top - marginTop - marginBottom;
                 element.style.maxHeight = height + 'px';
             } else {
-                // Désactiver la hauteur maximale pour les petits écrans
+                // Disable maximum height for small screens
                 element.style.maxHeight = 'none';
             }
         });
     }
 
-    // Appeler la fonction fillmax après un délai et lors du redimensionnement de la fenêtre
+    // Call the fillmax function after a delay and on window resize
     setTimeout(fillmax, 0);
     window.addEventListener('resize', fillmax);
 
-    // Rendu des onglets de navigation supérieure
+    // Top navigation tabs rendering
     const history = new MaplibreMapentityHistory();
     if (history) {
         window.MapEntity.currentHistory = history;
         history.render();
     }
 
-    // Faire disparaître les messages de succès/informations après un délai
+    // Make success/information messages disappear after a delay
     const alertBox = document.querySelector('#alert-box');
     if (alertBox) {
         const alerts = alertBox.querySelectorAll('.alert');
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    // Gestion des boutons d'annulation dans les formulaires
+    // Managing cancel buttons in forms
     const cancelButton = document.getElementById('button-id-cancel');
     if (cancelButton) {
         cancelButton.addEventListener('click', function() {
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Gestion des éléments à affichage automatique
+    // Auto-display element management
     document.querySelectorAll('.autohide').forEach(function(element) {
         const parent = element.parentElement;
         if (parent) {
@@ -70,11 +70,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Récupération du contexte
+    // Context Retrieval
     const bodyElement = document.body;
     const context = Object.assign({}, bodyElement.dataset);
 
-    // Initialisation directe de la carte
+    // Direct card initialization
     const mapId = context.viewname === 'detail' ? 'detailmap' : 'mainmap';
     const mapElement = document.getElementById(mapId);
 
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // initialisation de la carte
+    // card initialization
 
     const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES, MAX_ZOOM } = window.SETTINGS.map.maplibreConfig;
     const bounds = [BOUNDS[0], BOUNDS[1]];

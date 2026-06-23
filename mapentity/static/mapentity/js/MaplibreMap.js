@@ -1,12 +1,12 @@
 class MaplibreMap {
     /**
-     * Classe MaplibreMap pour initialiser une carte MapLibre GL JS.
-     * @param {string} id - L'ID du conteneur de la carte.
-     * @param {Array} center - Les coordonnées [longitude, latitude] du centre de la carte.
-     * @param {number} zoom - Le niveau de zoom initial de la carte.
-     * @param {number} maxZoom - Le niveau maximal de zoom de la carte.
-     * @param {Array} bounds - Les limites de la carte sous forme de [SW, NE] [[lon1, lat1], [lon2, lat2]].
-     * @param {string} scale - L'unité de mesure pour le contrôle d'échelle ('metric' ou 'imperial').
+     * MaplibreMap class to initialize a MapLibre GL JS map.
+     * @param {string} id - The ID of the map container.
+     * @param {Array} center - The [longitude, latitude] coordinates of the map center.
+     * @param {number} zoom - The initial zoom level of the map.
+     * @param {number} maxZoom - The maximum zoom level of the map.
+     * @param {Array} bounds - The map bounds as [SW, NE] [[lon1, lat1], [lon2, lat2]].
+     * @param {string} scale - The unit of measurement for the scale control ('metric' or 'imperial').
      */
     constructor(id, center, zoom, maxZoom, bounds, scale = 'metric') {
         this.id = id;
@@ -21,7 +21,7 @@ class MaplibreMap {
     }
 
     /**
-     * Initialise la carte MapLibre GL JS.
+     * Initialize the MapLibre GL JS map.
      * @private
      */
     _init() {

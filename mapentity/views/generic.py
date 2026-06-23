@@ -120,11 +120,7 @@ class MapEntityList(BaseListView, ListView):
 
 
 class MapEntityFormat(BaseListView, ListView):
-    """
-
-    Export the list to a particular format.
-
-    """
+    """Export the list to a particular format."""
 
     DEFAULT_FORMAT = "csv"
 
@@ -346,9 +342,7 @@ else:
 
 
 class Convert(View):
-    """
-    A proxy view to conversion server.
-    """
+    """A proxy view to conversion server."""
 
     format = "pdf"
     http_method_names = ["get"]

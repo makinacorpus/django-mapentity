@@ -1,12 +1,12 @@
 // Handles related-objects functionality: lookup link for raw_id_fields
 // and Add Another links.
-// utilise que du JQUERY et django.JQUERY qui est une version de jquery encapsulé de django
+// uses only JQUERY and django. JQUERY which is a version of jquery encapsulated by django
 /*
-La fonction html_unescape est une fonction JavaScript qui permet de "déséchapper"
-une chaîne de caractères qui a été échappée à l'aide de la méthode
-django.utils.html.escape. Elle remplace les entités HTML (comme &lt;, &gt;, etc.)
- par leurs caractères correspondants (<, >, etc.). Cela est utile pour afficher
- du texte échappé dans sa forme originale.
+The html_unescape function is a JavaScript function that allows you to "unescape"
+a string that has been escaped using the
+django.utils.html.escape method. It replaces HTML entities (like &lt;, &gt;, etc.)
+ with their corresponding characters (<, >, etc.). This is useful for displaying
+ escaped text in its original form.
  */
 function html_unescape(text) {
     // Unescape a string that was escaped using django.utils.html.escape.
@@ -18,10 +18,10 @@ function html_unescape(text) {
     return text;
 }
 
-// considérer comme obsolète si le code ne tourne pas sur des anciens machines utilisant encore IE
-// IE doesn't accept periods or dashes in the window name, but the element IDs
-// we use to generate popup window names may contain them, therefore we map them
-// to allowed characters in a reversible way so that we can locate the correct
+// consider obsolete if the code does not run on old machines still using IE
+// IE does not accept dots or hyphens in the window name, but the element IDs
+// we use to generate popup window names may contain them, therefore, we map them
+// to allowed characters in a reversible manner so we can locate the correct
 // element when the popup window is dismissed.
 function id_to_windowname(text) {
     text = text.replace(/\./g, '__dot__');
@@ -29,7 +29,7 @@ function id_to_windowname(text) {
     return text;
 }
 
-// peut être considérer comme obsolète si le code ne tourne pas sur IE
+// may be considered obsolete if the code does not run on IE
 function windowname_to_id(text) {
     text = text.replace(/__dot__/g, '.');
     text = text.replace(/__dash__/g, '-');
@@ -58,100 +58,99 @@ function showAdminPopup(triggeringLink, name_regexp) {
     return false; // Prevent the default action of the triggering link.
 }
 
-// Affiche une fenêtre popup d'administration pour un objet lié.
-// `triggeringLink` est l'élément de lien qui a déclenché le popup.
-// Utilise une expression régulière pour extraire le nom à partir de l'ID du lien.
+// Displays an admin popup for a linked object.
+// `triggeringLink` is the link element that triggered the popup.
+// Uses a regular expression to extract the name from the link ID.
 function showRelatedObjectLookupPopup(triggeringLink) {
     return showAdminPopup(triggeringLink, /^lookup_/);
 }
 
-// Ferme une fenêtre popup de recherche d'objet lié et met à jour la valeur de l'élément associé.
-// `win` : La fenêtre popup à fermer.
-// `chosenId` : L'identifiant de l'objet sélectionné dans la popup.
+// Closes a linked object search popup window and updates the value of the associated item.
+// `win` : The popup window to close.
+// `chosenId` : The ID of the object selected in the popup.
 function dismissRelatedLookupPopup(win, chosenId) {
-    // Récupère le nom de l'élément associé en convertissant le nom de la fenêtre.
+    // Retrieve the associated element's name by converting the window name.
     var name = windowname_to_id(win.name);
 
-    // Récupère l'élément HTML correspondant à ce nom.
+    // Retrieve the HTML element corresponding to this name.
     var elem = document.getElementById(name);
 
-    // Si l'élément est un champ ManyToMany et qu'il a déjà une valeur, ajoute l'identifiant sélectionné.
+    // If the element is a ManyToMany field and it already has a value, add the selected identifier.
     if (elem.className.indexOf('vManyToManyRawIdAdminField') != -1 && elem.value) {
         elem.value += ',' + chosenId; // Ajoute l'identifiant à la liste existante.
     } else {
-        // Sinon, remplace la valeur actuelle par l'identifiant sélectionné.
+        // Otherwise, replace the current value with the selected identifier.
         document.getElementById(name).value = chosenId;
     }
 
-    // Ferme la fenêtre popup.
     win.close();
 }
 
-// Affiche une fenêtre popup d'administration pour un objet lié.
-// `triggeringLink` est l'élément de lien qui a déclenché le popup.
+// Displays an admin popup for a linked object.
+// `triggeringLink` is the link element that triggered the popup.
 function showRelatedObjectPopup(triggeringLink) {
-    // Extrait le nom de l'élément à partir de l'ID du lien déclencheur
-    // et le convertit en un nom de fenêtre valide.
+    // Extract the name of the element from the triggering link's ID
+    // and convert it to a valid window name.
     var name = triggeringLink.id.replace(/^(change|add|delete)_/, '');
     name = id_to_windowname(name);
 
-    // Récupère l'URL du lien déclencheur.
+    // Retrieve the URL of the triggering link.
     var href = triggeringLink.href;
 
-    // Ouvre une nouvelle fenêtre popup avec les dimensions et paramètres spécifiés.
+    // Open a new popup window with the specified dimensions and settings.
     var win = window.open(href, name, 'height=500,width=800,resizable=yes,scrollbars=yes');
 
-    // Met la fenêtre popup au premier plan.
+    // Bring the popup window to the foreground.
     win.focus();
 
-    // Empêche l'action par défaut du lien déclencheur.
+    // Prevent the default action of the triggering link.
     return false;
 }
 
 function dismissAddRelatedObjectPopup(win, newId, newRepr) {
-    // Les paramètres newId et newRepr sont supposés avoir été échappés
-    // auparavant à l'aide de django.utils.html.escape.
-    newId = html_unescape(newId); // Déséchapper l'identifiant.
-    newRepr = html_unescape(newRepr); // Déséchapper la représentation.
+    // The parameters newId and newRepr are assumed to have been escaped
+    // previously using django.utils.html.escape.
+    newId = html_unescape(newId); // Unescape the identifier.
+    newRepr = html_unescape(newRepr); // Unescape the representation.
 
-    // Convertit le nom de la fenêtre en un identifiant d'élément HTML.
+    // Convert the window name to an HTML element ID.
     var name = windowname_to_id(win.name);
 
-    // Récupère l'élément HTML correspondant à cet identifiant.
+    // Retrieve the HTML element corresponding to this ID.
     var elem = document.getElementById(name);
     var o;
 
     if (elem) {
-        // Vérifie le type de l'élément (SELECT ou INPUT).
+        // Check the type of the element (SELECT or INPUT).
         var elemName = elem.nodeName.toUpperCase();
 
         if (elemName == 'SELECT') {
-            // Si c'est un SELECT, ajoute une nouvelle option avec l'identifiant et la représentation.
+            // If it's a SELECT, add a new option with the identifier and representation.
             o = new Option(newRepr, newId);
-            elem.options[elem.options.length] = o; // Ajoute l'option à la liste.
-            o.selected = true; // Sélectionne la nouvelle option.
+            elem.options[elem.options.length] = o; // Add the option to the list.
+            o.selected = true; // Select the new option.
         } else if (elemName == 'INPUT') {
-            // Si c'est un INPUT, vérifie s'il s'agit d'un champ ManyToMany.
+            // If it's an INPUT, check if it's a ManyToMany field.
             if (elem.className.indexOf('vManyToManyRawIdAdminField') != -1 && elem.value) {
-                // Ajoute l'identifiant à la liste existante.
+                // Add the identifier to the existing list.
                 elem.value += ',' + newId;
             } else {
-                // Remplace la valeur actuelle par le nouvel identifiant.
+                // Replace the current value with the new identifier.
                 elem.value = newId;
             }
         }
 
-        // Déclenche un événement de changement pour mettre à jour les liens associés si nécessaire.
+        // Trigger a change event to update any associated links if necessary.
         $(elem).trigger("change");
     } else {
-        // Si l'élément n'existe pas, traite-le comme un champ ManyToMany.
-        var toId = name + "_to"; // Génère l'identifiant pour le cache.
-        o = new Option(newRepr, newId); // Crée une nouvelle option.
-        SelectBox.add_to_cache(toId, o); // Ajoute l'option au cache.
-        SelectBox.redisplay(toId); // Redistribue les options dans la boîte de sélection.
+        // If the element doesn't exist, treat it as a ManyToMany field.
+        var toId = name + "_to"; // Generate the ID for the cache.
+        o = new Option(newRepr, newId); // Create a new option.
+        SelectBox.add_to_cache(toId, o); // Add the option to the cache.
+        SelectBox.redisplay(toId); // Redisplay the options in the select box.
     }
 
-    // Ferme la fenêtre popup.
+    // Close the popup window.
     win.close();
 }
 
@@ -171,27 +170,27 @@ function dismissChangeRelatedObjectPopup(win, objId, newRepr, newId) {
 }
 
 function dismissDeleteRelatedObjectPopup(win, objId) {
-    // Déséchapper l'identifiant de l'objet pour s'assurer qu'il est dans un format utilisable.
+    // Unescape the object's identifier to ensure it's in a usable format.
     objId = html_unescape(objId);
 
-    // Convertir le nom de la fenêtre en un identifiant d'élément HTML en supprimant le préfixe "delete_".
+    // Convert the window name to an HTML element ID by removing the "delete_" prefix.
     var id = windowname_to_id(win.name).replace(/^delete_/, '');
 
-    // Construire un sélecteur pour cibler les éléments associés à cet identifiant.
+    // Build a selector to target elements associated with this ID.
     var selectsSelector = interpolate('#%s, #%s_from, #%s_to', [id, id, id]);
 
-    // Récupérer les éléments correspondants en utilisant le sélecteur.
+    // Retrieve the matching elements using the selector.
     var selects = django.jQuery(selectsSelector);
 
-    // Parcourir les options des éléments sélectionnés.
+    // Iterate over the options of the selected elements.
     selects.find('option').each(function() {
-        // Si la valeur de l'option correspond à l'identifiant de l'objet, la supprimer.
+        // If the option's value matches the object's identifier, remove it.
         if (this.value == objId) {
             django.jQuery(this).remove();
         }
-    }).trigger('change'); // Déclencher un événement "change" pour mettre à jour l'interface.
+    }).trigger('change'); // Trigger a "change" event to update the interface.
 
-    // Fermer la fenêtre popup.
+    // Close the popup window.
     win.close();
 }
 

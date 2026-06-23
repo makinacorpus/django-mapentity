@@ -31,47 +31,46 @@ def _resolve_custom_icon(icon_value):
 
 
 class MapWidget(BaseGeometryWidget):
-    """Widget Django pour l'intégration de cartes MapLibre GL JS.
+    """Django Widget for MapLibre GL JS map integration.
 
-    Ce widget rend un champ de géométrie sous forme de carte interactive
-    utilisant MapLibre GL JS avec le plugin Geoman pour le dessin.
+    This widget renders a geometry field as an interactive map
+    using MapLibre GL JS with the Geoman plugin for drawing.
 
-    Options (passées via ``attrs`` ou en paramètres nommés) :
+    Options (passed via ``attrs`` or as named parameters) :
 
     ``geom_type`` (str)
-        Type de géométrie OGC (``"POINT"``, ``"LINESTRING"``, ``"POLYGON"``,
+        OGC geometry type (``"POINT"``, ``"LINESTRING"``, ``"POLYGON"``,
         ``"MULTIPOINT"``, ``"MULTILINESTRING"``, ``"MULTIPOLYGON"``,
-        ``"GEOMETRYCOLLECTION"``, ``"GEOMETRY"``).  Détermine les outils de
-        dessin disponibles.  Par défaut ``"GEOMETRY"`` (tous les outils).
+        ``"GEOMETRYCOLLECTION"``, ``"GEOMETRY"``).  Determines the available
+        drawing tools.  Default is ``"GEOMETRY"`` (all tools).
 
     ``modifiable`` (bool)
-        Si ``True`` (par défaut), l'utilisateur peut dessiner et modifier la
-        géométrie.  Mis à ``False`` automatiquement lorsque l'utilisateur n'a
-        pas la permission ``change_geom``.
+        If ``True`` (default), the user can draw and modify the geometry.
+        Automatically set to ``False`` when the user does not have the
+        ``change_geom`` permission.
 
     ``target_map`` (str)
-        Identifiant d'un autre champ géométrique dont la carte sera
-        réutilisée.  Permet d'afficher plusieurs champs géométriques sur
-        une même carte.  Exemple : ``"geom"`` pour se brancher sur la carte
-        du champ ``geom``.
+        Identifier of another geometry field whose map will be reused.
+        Allows displaying multiple geometry fields on the same map.
+        Example: ``"geom"`` to hook into the map of the ``geom`` field.
 
     ``custom_icon`` (str)
-        Icône personnalisée pour les marqueurs de type Point.  Accepte :
-        - du contenu SVG/HTML inline (détecté si contient ``<``),
-        - un chemin vers un fichier statique (ex. ``"myapp/icons/parking.svg"``).
-        Le fichier est lu et son contenu SVG est injecté dans le marqueur.
+        Custom icon for Point markers. Accepts:
+        - inline SVG/HTML content (detected if it contains ``<``),
+        - a path to a static file (e.g., ``"myapp/icons/parking.svg"``).
+        The file is read, and its SVG content is injected into the marker.
 
     ``field_label`` (str)
-        Libellé affiché au-dessus des boutons de dessin.  Par défaut, le
-        ``verbose_name`` du champ modèle est utilisé.
+        Label displayed above the drawing buttons.  By default, the
+        ``verbose_name`` of the model field is used.
 
-    ``snapping_config`` (dict ou None)
-        Configuration du snapping (accrochage) sur des couches externes.
-        Quand défini, le widget charge des couches vectorielles transparentes
-        sur la carte et connecte l'API de snapping de Geoman pour que les
-        nouveaux sommets s'accrochent aux géométries existantes.
+    ``snapping_config`` (dict or None)
+        Configuration for snapping to external layers.
+        When defined, the widget loads transparent vector layers
+        on the map and connects the Geoman snapping API so that new
+        vertices snap to existing geometries.
 
-        Structure brute (avec ``layers`` à résoudre) ::
+        Raw structure (with ``layers`` to resolve) ::
 
             {
                 "enabled": True,
@@ -79,19 +78,19 @@ class MapWidget(BaseGeometryWidget):
                 "snap_distance": 20,
             }
 
-        Les entrées ``layers`` utilisent la notation ``"app_label.ModelName"``
-        (insensible à la casse sur le nom du modèle).  Chaque modèle référencé
-        doit être enregistré dans le registre MapEntity.  Le widget résout
-        automatiquement ces références en URLs tilejson.
+        The ``layers`` entries use the ``"app_label.ModelName"`` notation
+        (case-insensitive on the model name).  Each referenced model must be
+        registered in the MapEntity registry.  The widget automatically resolves
+        these references to tilejson URLs.
 
-        ``snap_distance`` (défaut : 18) contrôle le rayon en pixels dans lequel
-        le snapping est déclenché.
+        ``snap_distance`` (default: 18) controls the radius in pixels within which
+        snapping is triggered.
 
     ``display_raw`` (bool)
-        Si ``True``, affiche le textarea brut de la géométrie en plus de la
-        carte.  ``False`` par défaut.
+        If ``True``, displays the raw geometry textarea in addition to the
+        map.  ``False`` by default.
 
-    Exemple d'utilisation dans un formulaire ::
+    Example usage in a form ::
 
         from mapentity.widgets import MapWidget
 
@@ -133,7 +132,7 @@ class MapWidget(BaseGeometryWidget):
 
     def serialize(self, value):
         """
-        Sérialise la valeur géométrique en GeoJSON.
+        Serialize geometric value to GeoJSON
         """
         if value:
             if hasattr(value, "transform"):
@@ -150,14 +149,14 @@ class MapWidget(BaseGeometryWidget):
 
     def _get_attrs(self, name, attrs=None):
         """
-        Prépare les attributs nécessaires pour le rendu du template.
+        Prepare required attributes for the template.
         """
-        # Récupération des paramètres depuis l'initialisation du Field
+        # Retrieve parameters from the Field initialization
         self.geom_type = self.attrs.get(
             "geom_type", getattr(self, "geom_type", "GEOMETRY")
         )
         attrs = attrs or {}
-        # Génération des IDs pour les éléments HTML et JavaScript
+        # Generate IDs for HTML and JavaScript elements
         map_id_css = slugify(attrs.get("id", name))
         map_id = map_id_css.replace("-", "_")
         attrs.update(
@@ -169,7 +168,7 @@ class MapWidget(BaseGeometryWidget):
                 "geom_type": self.geom_type,
             }
         )
-        # Propager target_map et custom_icon depuis self.attrs vers le contexte du template
+        # Propagate target_map and custom_icon from self.attrs to the template context
         if self.attrs.get("target_map"):
             attrs["target_map"] = self.attrs["target_map"]
         if self.attrs.get("custom_icon"):
@@ -231,16 +230,16 @@ class MapWidget(BaseGeometryWidget):
 
     def get_context(self, name, value, attrs):
         """
-        Prépare le contexte pour le rendu du template.
+        Prepare the context for template rendering.
         """
-        # Gestion des valeurs vides
+        # Handle empty values
         value = None if value in validators.EMPTY_VALUES else value
-        # Récupération du contexte parent
+        # Retrieve parent context
         context = super().get_context(name, value, attrs)
-        # Ajout des attributs spécifiques au widget
+        # Add widget-specific attributes
         widget_attrs = self._get_attrs(name, attrs)
         context.update(widget_attrs)
-        # Ajout de la valeur sérialisée pour le template
+        # Add serialized value for the template
         context["serialized"] = self.serialize(value)
         return context
 

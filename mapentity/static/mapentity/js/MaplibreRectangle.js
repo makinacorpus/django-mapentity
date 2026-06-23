@@ -1,8 +1,8 @@
 class MaplibreRectangle {
     /**
-     * Classe représentant un rectangle sur une carte Maplibre.
-     * @param bounds {Array} - Un tableau contenant les coordonnées des coins du rectangle, sous la forme [[swLng, swLat], [neLng, neLat]].
-     * @param options {Object} - Un objet d'options pour configurer le rectangle, par exemple pour définir des styles ou des propriétés supplémentaires.
+     * Class representing a rectangle on a Maplibre map.
+     * @param bounds {Array} - An array containing the coordinates of the rectangle's corners, in the format [[swLng, swLat], [neLng, neLat]].
+     * @param options {Object} - An options object for configuring the rectangle, for example to define styles or additional properties.
      */
     constructor(bounds, options= {}) {
         this.bounds = bounds;
@@ -11,9 +11,9 @@ class MaplibreRectangle {
     }
 
     /**
-     * Définit les limites du rectangle.
-     * @param bounds {Array} - Un tableau contenant les coordonnées des coins du rectangle, sous la forme [[swLng, swLat], [neLng, neLat]].
-     * @returns {*[][]} - Un tableau contenant les coordonnées des coins du rectangle sous la forme [[swLng, swLat], [neLng, neLat]].
+     * Defines the rectangle bounds.
+     * @param bounds {Array} - An array containing the coordinates of the rectangle corners, in the form [[swLng, swLat], [neLng, neLat]].
+     * @returns {*[][]} - An array containing the coordinates of the rectangle corners in the form [[swLng, swLat], [neLng, neLat]].
      * @private
      */
     _boundsToCoordinates(bounds) {
@@ -26,16 +26,16 @@ class MaplibreRectangle {
             [sw[0], ne[1]], // Northwest
             [ne[0], ne[1]], // Northeast
             [ne[0], sw[1]], // Southeast
-            [sw[0], sw[1]]  // Fermeture du polygon
+            [sw[0], sw[1]]  // close polygon
         ];
     }
 
     /**
-     * Récupère les coordonnées du rectangle sous forme de GeoJSON.
-     * @returns {string} - Les coordonnées du rectangle sous forme WKT (Well-Known Text).
+     * Retrieves the coordinates of the rectangle as GeoJSON.
+     * @returns {string} - The coordinates of the rectangle in WKT (Well-Known Text) format.
      */
     getWKT() {
-        // Utilisation de la fonction getWKT pour récupérer les coordonnées sous format WKT
+        // Use the getWKT function to retrieve the coordinates in WKT format
         return getWKT({
             type: 'Polygon',
             coordinates: [this.coordinates]

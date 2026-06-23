@@ -32,12 +32,12 @@ class MaplibreLayerControl {
 
         const { overlays, lazyOverlays } = this.layerManager.getLayers();
 
-        // Ajoute les overlays chargés (Mapbox) juste après les fonds de plan
+        // Add the loaded overlays (Mapbox) right after the backgrounds
         if (Object.keys(overlays).length > 0) {
             this._populateOverlaysLayers();
         }
 
-        // Ajoute un séparateur avant les couches additionnelles des autres modules (lazy)
+        // Add a separator before the additional layers of other modules (lazy)
         if (Object.keys(lazyOverlays).length > 0) {
             this._ensureSeparator();
             this._populateLazyOverlaysLayers();
@@ -84,13 +84,13 @@ class MaplibreLayerControl {
     }
 
     /**
-     * Active automatiquement la première couche de base
+     * Automatically activates the first base layer
      * @private
      */
     _activateFirstBaseLayer() {
         if (this._firstBaseLayerInput && !this.layerManager.currentBaseLayerId) {
             this._firstBaseLayerInput.checked = true;
-            // Déclencher l'événement change immédiatement
+            // Trigger the event immediately
             const changeEvent = new Event('change', { bubbles: true });
             this._firstBaseLayerInput.dispatchEvent(changeEvent);
         }
@@ -111,8 +111,8 @@ class MaplibreLayerControl {
     }
 
     /**
-     * Remplit le conteneur avec les couches de base disponibles.
-     * @param {HTMLElement} container - Le conteneur dans lequel ajouter les couches de base.
+     * Fills the container with available base layers.
+     * @param {HTMLElement} container - The container in which to add the base layers.
      * @private
      */
     _populateBaseLayers(container) {
@@ -155,7 +155,7 @@ class MaplibreLayerControl {
                     this.layerManager.toggleLayer(id, true);
                     this.layerManager.currentBaseLayerId = id;
 
-                    // Remet les couches de mesure au-dessus
+                    // Put the measurement layers back on top
                     ['measure-points', 'measure-lines'].forEach(layer => {
                         if (this._map.getLayer(layer)) {
                             this._map.moveLayer(layer);
@@ -171,7 +171,7 @@ class MaplibreLayerControl {
         const overlays = this.layerManager.getLayers().overlays;
         const restoredLayers = this.layerManager.restoredContext?.maplayers || [];
 
-        // Tri explicite des catégories pour avoir "Overlays" avant "Objects"
+        // Explicit sorting of categories to have "Overlays" before "Objects"
         const sortedCategories = Object.keys(overlays).sort((a, b) => {
             const catOverlays = gettext('Overlays');
             const catObjects = gettext('Objects');
@@ -202,8 +202,8 @@ class MaplibreLayerControl {
                 input.type = 'checkbox';
                 const labelText = (labelHTML || '').replace(/<[^>]*>?/gm, '').trim();
                 
-                // Vérifier si la couche est dans le contexte restauré
-                // Par défaut, on coche toujours la catégorie "Objects" (couche du modèle courant)
+                // Check if the layer is in the restored context
+                // By default, the "Objects" category (current model layer) is always checked
                 const isRestored = labelText && restoredLayers.includes(labelText);
                 const isObjectsCategory = category === gettext('Objects');
                 input.checked = isObjectsCategory || isRestored;
@@ -213,7 +213,7 @@ class MaplibreLayerControl {
                 label.classList.add('layer-entry');
                 this._menu.appendChild(label);
 
-                // Si restauré ou coché par défaut, s'assurer que la couche est visible sur la carte
+                // If restored or checked by default, ensure that the layer is visible on the map
                 if (input.checked) {
                     this.layerManager.toggleLayer(primaryKey, true);
                 }
@@ -256,7 +256,7 @@ class MaplibreLayerControl {
                 label.classList.add('layer-entry');
                 this._menu.appendChild(label);
 
-                // Si restauré comme coché mais pas encore visible (pas chargé), on le déclenche
+                // If restored as checked but not yet visible (not loaded), it is triggered
                 if (isRestored && !isVisible) {
                     this.layerManager.toggleLazyOverlay(category, primaryKey, true).then(success => {
                         if (success) {

@@ -1,11 +1,11 @@
 class MaplibreMapListSync {
     /**
-     * Constructeur de MaplibreMapListSync
-     * @param datatable {DataTable} - L'instance de DataTable à synchroniser avec la carte MapLibre
-     * @param map {maplibregl.Map} - L'instance de la carte MapLibre à synchroniser avec la liste
-     * @param objectsLayer {MaplibreObjectsLayer} - L'instance de MaplibreObjectsLayer pour gérer les objets de la carte
-     * @param togglableFilter {MaplibreMapentityTogglableFilter} - L'instance de MaplibreMapentityTogglableFilter pour gérer les filtres
-     * @param history {MaplibreMapentityHistory} - L'instance de MaplibreMapentityHistory pour gérer l'historique des actions
+     * MaplibreMapListSync Constructor
+     * @param datatable {DataTable} - The DataTable instance to synchronize with the MapLibre map
+     * @param map {maplibregl.Map} - The MapLibre map instance to synchronize with the list
+     * @param objectsLayer {MaplibreObjectsLayer} - The MaplibreObjectsLayer instance to manage map objects
+     * @param togglableFilter {MaplibreMapentityTogglableFilter} - The MaplibreMapentityTogglableFilter instance to manage filters
+     * @param history {MaplibreMapentityHistory} - The MaplibreMapentityHistory instance to manage action history
      */
     constructor(datatable, map, objectsLayer, togglableFilter, history) {
         this.dt = datatable;
@@ -28,7 +28,7 @@ class MaplibreMapListSync {
     }
 
     /**
-     * Initialisation de MaplibreMapListSync
+     * MaplibreMapListSync Initialization
      */
      initialize() {
 
@@ -43,13 +43,13 @@ class MaplibreMapListSync {
     }
 
     /**
-     * Callback pour le filtrage de la liste
+     * Callback for list filtering
      * @private
      */
     _onListFilter() {
         const results = this.dt.column(0).data().toArray();
-        // En mode MVT, le filtrage est géré par _reloadList via filter_infos
-        // qui retourne tous les PKs filtrés, pas seulement ceux de la page courante
+        // In MVT mode, filtering is managed by _reloadList via filter_infos
+        // which returns all filtered PKs, not just those of the current page
         if (!this.layer._isMVT) {
             this.layer.updateFromPks(results);
         }
@@ -57,8 +57,8 @@ class MaplibreMapListSync {
     }
 
     /**
-     * Assure que l'historique est mis à jour avec le nombre d'enregistrements rechargés
-     * @param nbrecords {number} - Le nombre d'enregistrements rechargés
+     * Ensures that the history is updated with the number of reloaded records
+     * @param nbrecords {number} - The number of reloaded records
      * @private
      */
     _handleReloaded(nbrecords) {
@@ -67,8 +67,8 @@ class MaplibreMapListSync {
     }
 
     /**
-     * Callback pour les changements de vue de la carte
-     * @param e {Object} - L'événement de changement de vue de la carte
+     * Callback for map view changes
+     * @param e {Object} - The map view change event
      * @private
      */
     _onMapViewChanged(e) {
@@ -82,8 +82,8 @@ class MaplibreMapListSync {
     }
 
     /**
-     * Callback pour la soumission du formulaire de filtre
-     * @param e {Event} - L'événement de soumission du formulaire
+     * Callback for filter form submission
+     * @param e {Event} - The form submission event
      * @private
      */
     _onFormSubmit(e) {
@@ -92,8 +92,8 @@ class MaplibreMapListSync {
     }
 
     /**
-     * Callback pour la réinitialisation du formulaire de filtre
-     * @param e {Event} - L'événement de réinitialisation du formulaire
+     * Callback for filter form reset
+     * @param e {Event} - The form reset event
      * @private
      */
     _onFormReset(e) {
@@ -103,9 +103,9 @@ class MaplibreMapListSync {
     }
 
     /**
-     * Recharge la liste d'entités affichées sur la carte
-     * @param mapViewChangedStatue {boolean} - Indique si la vue de la carte a été modifiée
-     * @returns {Promise<boolean>} - Retourne une promesse qui se résout en false si le chargement est terminé
+     * Refreshes the list of entities displayed on the map
+     * @param mapViewChangedStatue {boolean} - Indicates if the map view has changed
+     * @returns {Promise<boolean>} - Returns a promise that resolves to false if loading is finished
      * @private
      */
     async _reloadList(mapViewChangedStatue = false) {
@@ -124,7 +124,7 @@ class MaplibreMapListSync {
         }
 
 
-        // Mettre à jour l'URL de la DataTable avec les paramètres du formulaire
+        // Update the DataTable URL with the form parameters
         const url = `${this.options.filter.form.getAttribute('action')}?${new URLSearchParams(formData).toString()}`;
         this.dt.ajax.url(url).load();
 
@@ -152,7 +152,7 @@ class MaplibreMapListSync {
     }
 
     /**
-     * Met à jour les bornes du formulaire de filtre en fonction de la vue actuelle de la carte
+     * Updates the filter form boundaries based on the current map view
      * @private
      */
     _formSetBounds() {
@@ -165,38 +165,38 @@ class MaplibreMapListSync {
             return;
         }
 
-        const bounds = this.map.getBounds(); // Le bounds utilisé doit être celle étudiée à la carte car elle est dynamique.
+        const bounds = this.map.getBounds(); // The bounds used must be the one studied on the map because it is dynamic.
 
-        // Extraire les coordonnées et les borner aux valeurs valides
+        // Extract coordinates and clip them to valid values
         const min_lon = Math.max(bounds.getWest(), -180);
         const min_lat = Math.max(bounds.getSouth(), -90);
         const max_lon = Math.min(bounds.getEast(), 180);
         const max_lat = Math.min(bounds.getNorth(), 90);
 
-        // Créer un rectangle MaplibreRectangle à partir de ces coordonnées
+        // Create a MaplibreRectangle from these coordinates
         const rect = new MaplibreRectangle([[min_lon, min_lat], [max_lon, max_lat]]);
 
-        // Vérifier que bboxfield existe avant d'y accéder
+        // Check that bboxfield exists before accessing it
         if (this.options.filter && this.options.filter.bboxfield) {
-            // Mettre à jour le champ bbox du filtre avec le WKT du rectangle
+            // Update the filter's bbox field with the rectangle's WKT
             this.options.filter.bboxfield.value = rect.getWKT();
         }
     }
 
     /**
-     * Efface les champs du formulaire de filtre
-     * @param form {HTMLFormElement} - Le formulaire à effacer
+     * Clear the filter form fields
+     * @param form {HTMLFormElement} - The form to clear
      * @private
      */
     _formClear(form) {
-        // selection des champs de saisie texte, mot de passe, fichier, nombre, sélecteurs et zones de texte
+        // selection of text input fields, password, file, number, selectors, and text areas
         const elements = form.querySelectorAll('input[type="text"], input[type="password"], input[type="file"], input[type="number"], select, textarea');
         elements.forEach(el => {
             el.value = '';
             el.dispatchEvent(new Event('change'));
         });
 
-        // Selection des inputs de type radio, checkbox et options de select
+        // Selecting radio button, checkbox, and select option inputs
         const radioCheckboxElements = form.querySelectorAll('input[type="radio"], input[type="checkbox"], select option');
         radioCheckboxElements.forEach(el => {
             el.removeAttribute('checked');

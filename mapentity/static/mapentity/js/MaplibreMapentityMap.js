@@ -1,4 +1,3 @@
-// Solution 1: Déclencher les événements spécifiques APRÈS l'initialisation complète
 document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('entity:map:ready', function(e) {
@@ -41,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         map.getMap().on('load', async function() {
 
-            // Chargement des base layers en premier depuis les settings
+            // Loading base layers first from settings
             const baseLayersData = window.SETTINGS.map?.baseLayers || {};
             const { base_layers, overlay_layers } = baseLayersData;
 
@@ -80,10 +79,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 context,
             });
 
-            // Exposer l'instance
+            // Expose the instance
             window.MapEntity.currentMap = { map, objectsLayer, context: mergedData, mapentityContext };
 
-            // Gestion des panneaux redimensionnables
+            // Resizable Panel Management
             const resizableElements = document.querySelectorAll("#panelleft, .details-panel");
             resizableElements.forEach(function(element) {
                 const resizableOptions = {
@@ -98,10 +97,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.jQuery(element).resizable(resizableOptions);
             });
 
-            // Sauvegarde du contexte
+            // Context backup
             const saveContext = () => {
-                // On ne sauvegarde que si on a déjà fini de restaurer, pour éviter d'écraser 
-                // avec un contexte vide pendant le chargement asynchrone
+                // We only save if we have already finished restoring, to avoid overwriting
+                // with an empty context during asynchronous loading
                 if (!layerManager || !layerManager.restoredContext) return;
 
                 mapentityContext.saveFullContext(map.getMap(), {
@@ -126,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     /**
-     * Extrait toutes les coordonnées [lng, lat] d'une géométrie GeoJSON.
+     * Extracts all coordinates [lng, lat] from a GeoJSON geometry.
      */
     function _extractAllCoords(geom) {
         const coords = [];
@@ -154,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Affiche les géométries secondaires (extra) sur la carte.
+     * Displays secondary (extra) geometries on the map.
      * @returns {Object} - { layerIds: string[], markers: maplibregl.Marker[] }
      */
     function _renderExtraGeometries(mapInstance, extraGeometries) {
@@ -230,13 +229,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Calcule la bounding box combinée de la géométrie principale + extra géométries
-     * et centre la carte dessus.
+     * Calculate the combined bounding box of the main geometry + extra geometries
+     * and center the map on it.
      */
     function _fitBoundsAllGeometries(mapInstance, objectsLayer, pkVal, extraGeometries) {
         const allCoords = [];
 
-        // 1. Coordonnées de la géométrie principale (depuis objectsLayer)
+        // 1. Main geometry coordinates (from objectsLayer)
         if (pkVal) {
             const layersBySource = Object.values(objectsLayer._current_objects).flat();
             for (const layerId of layersBySource) {
@@ -254,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // 2. Coordonnées des géométries secondaires
+        // 2. Coordinates of secondary geometries
         if (extraGeometries && extraGeometries.length > 0) {
             extraGeometries.forEach(extra => {
                 if (extra.geojson) {
@@ -263,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // 3. Calculer et appliquer la bounding box
+        // 3. Calculate and apply the bounding box
         if (allCoords.length === 0) return;
 
         let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
@@ -283,13 +282,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Ajoute des marqueurs vert (départ) et rouge (arrivée) aux extrémités des lignes
-     * pour l'objet sélectionné en vue détail.
+     * Adds green (start) and red (end) markers to the ends of the lines
+     * for the selected object in detail view.
      * @returns {Object} - { layerIds: string[], markers: maplibregl.Marker[] }
      */
     function _addDetailLineEndpointMarkers(mapInstance, objectsLayer, pkVal) {
         const result = { layerIds: [], markers: [] };
-        // Trouver la feature de l'objet sélectionné dans les sources
+        // Find the feature of the selected object in the sources
         const layersBySource = Object.values(objectsLayer._current_objects).flat();
         for (const layerId of layersBySource) {
             const layer = mapInstance.getLayer(layerId);
@@ -378,8 +377,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Crée un marqueur image de carte standard (pin) à une position donnée.
-     * @returns {maplibregl.Marker} - Le marqueur créé (ajouté à la carte de manière asynchrone)
+     * Creates a standard map image marker (pin) at a given position.
+     * @returns {maplibregl.Marker} - The created marker (added to the map asynchronously)
      */
     function _createEndpointMarker(mapInstance, lngLat, color) {
         const el = document.createElement('div');
@@ -400,8 +399,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Ajoute des marqueurs vert (départ) et rouge (arrivée) aux extrémités des lignes
-     * à partir d'un GeoJSON récupéré via fetch (pour la vue détail en mode MVT).
+     * Add green (start) and red (end) markers to the ends of the lines
+     * from GeoJSON retrieved via fetch (for the detail view in MVT mode).
      * @returns {Object} - { layerIds: string[], markers: maplibregl.Marker[] }
      */
     function _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal) {
@@ -492,13 +491,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * Calcule la bounding box à partir d'un GeoJSON récupéré via fetch + extra géométries
-     * et centre la carte dessus (pour la vue détail en mode MVT).
+     * Calculate the bounding box from a GeoJSON retrieved via fetch + extra geometries
+     * and center the map on it (for the detail view in MVT mode).
      */
     function _fitBoundsFromGeojson(mapInstance, featureGeojson, extraGeometries) {
         const allCoords = [];
 
-        // 1. Coordonnées de la géométrie principale
+        // 1. Main Geometry Coordinates
         let geom = null;
         if (featureGeojson.type === 'Feature') {
             geom = featureGeojson.geometry;
@@ -513,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function() {
             _extractAllCoords(geom).forEach(c => allCoords.push(c));
         }
 
-        // 2. Coordonnées des géométries secondaires
+        // 2. Secondary geometry coordinates
         if (extraGeometries && extraGeometries.length > 0) {
             extraGeometries.forEach(extra => {
                 if (extra.geojson) {
@@ -522,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // 3. Calculer et appliquer la bounding box
+        // 3. Calculate and apply the bounding box
         if (allCoords.length === 0) return;
 
         let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
@@ -541,15 +540,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Écouteur pour la vue détail
+    // Earphone for detailed view
     window.addEventListener('entity:map:detail', function(e) {
         const { map, objectsLayer, modelname, bounds, layerUrl, tilejsonUrl, layerManager, context } = e.detail;
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
-        // Restauration du contexte (vue et couches)
+        // Context restoration (view and layers)
         const mapViewContext = getURLParameter("context");
         if (mapViewContext) {
-            // Unification : stocker le contexte URL dans le localStorage, puis restaurer normalement
+            // Unification: store the URL context in localStorage, then restore normally
             mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: 'detail' });
         }
         mapentityContext.restoreFullContext(map.getMap(), null, {
@@ -557,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function() {
             objectsname: modelname,
         });
 
-        // Collecter les géométries secondaires pour le fitBounds global
+        // Collect secondary geometries for the global fitBounds
         const detailMapEl = document.getElementById('detailmap');
         const extraGeometriesScript = document.getElementById('detailmap-extra-geometries');
         let parsedExtraGeometries = [];
@@ -577,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Charger la couche via TileJSON (MVT)
+            // Load the layer via TileJSON (MVT)
             objectsLayer.loadMVT(tilejsonUrl);
 
             const pk = document.body.getAttribute('data-pk');
@@ -587,21 +586,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (pkVal) {
-                // Attendre que les tuiles MVT soient rendues avant de sélectionner
-                // setFeatureState ne fonctionne que si la feature est présente dans une tuile rendue
+                // Wait for MVT tiles to render before selecting
+                // setFeatureState only works if the feature is present in a rendered tile
                 const mapInstance_ = map.getMap();
                 const trySelect = () => {
                     objectsLayer.select(pkVal);
                 };
-                // 'idle' se déclenche quand toutes les sources et tuiles sont chargées et rendues
+                // idle' triggers when all sources and tiles are loaded and rendered
                 mapInstance_.once('idle', trySelect);
             }
 
-            // Récupérer la géométrie de l'objet courant via l'URL de feature pour fitBounds et marqueurs
+            // Retrieve the geometry of the current object via the feature URL for fitBounds and markers
             const featureUrl = detailMapEl ? detailMapEl.getAttribute('data-feature-url') : null;
             const mapInstance = map.getMap();
 
-            // Fonction utilitaire pour enregistrer les couches/marqueurs extra dans le groupe de l'objet courant
+            // Utility function to save extra layers/markers in the current object's group
             const _registerExtrasInGroup = (extraResult, endpointResult) => {
                 const groupKey = objectsLayer.primaryKey;
                 const allExtraLayerIds = [
@@ -621,16 +620,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 fetch(featureUrl)
                     .then(response => response.json())
                     .then(featureGeojson => {
-                        // Afficher les géométries secondaires
+                        // Display secondary geometries
                         const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
 
-                        // Ajouter les marqueurs vert/rouge aux extrémités des lignes
+                        // Add green/red markers to the ends of the lines
                         const endpointResult = _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal);
 
-                        // Enregistrer les couches/marqueurs extra dans le groupe de l'objet courant
+                        // Save layers/markers extracted to the current object group
                         _registerExtrasInGroup(extraResult, endpointResult);
 
-                        // Centrer la carte sur la bounding box de TOUTES les géométries
+                        // Center the map on the bounding box of ALL geometries
                         _fitBoundsFromGeojson(mapInstance, featureGeojson, parsedExtraGeometries);
                     })
                     .catch(err => {
@@ -643,7 +642,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 _registerExtrasInGroup(extraResult, null);
             }
         } else {
-            // Pas de tilejsonUrl, afficher quand même les extra géométries
+            // No tilejsonUrl, display extra geometries anyway
             const mapInstance = map.getMap();
             const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
             const groupKey = objectsLayer.primaryKey;
@@ -652,7 +651,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Contrôles
+        // Controls
         const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
             () => {
                 const context = mapentityContext.getFullContext(map.getMap());
@@ -661,10 +660,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         map.getMap().addControl(screenshotControl, 'top-left');
 
-        // const boundsLayer = objectsLayer.getBoundsLayer();
         map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
 
-        // Sauvegarde du contexte
+        // Save context
         const saveContext = () => {
             if (!layerManager || !layerManager.restoredContext) return;
             mapentityContext.saveFullContext(map.getMap(), {prefix: 'detail'});
@@ -677,16 +675,16 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('visibilitychange', saveContext);
     });
 
-    // Écouteur pour la vue liste
+    // Listener for the list view
     window.addEventListener('entity:map:list', function(e) {
         const { map, objectsLayer, modelname, bounds, layerUrl, mvtUrl, tilejsonUrl, layerManager, context } = e.detail;
 
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
-        // Charger les objets depuis le backend via TileJSON
+        // Load objects from the backend via TileJSON
         objectsLayer.loadMVT(tilejsonUrl);
 
-        // Contrôles
+        // Controls
         const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
             () => {
                 const context = mapentityContext.getFullContext(map.getMap(), {
@@ -719,7 +717,7 @@ document.addEventListener('DOMContentLoaded', function() {
         );
         window.map = map;
 
-        // Gestion de l'historique et des filtres
+        // History and filter management
         const history = window.MapEntity.currentHistory;
 
         const togglableFilter = new MaplibreMapentityTogglableFilter();

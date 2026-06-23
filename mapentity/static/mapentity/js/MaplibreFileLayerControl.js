@@ -1,7 +1,7 @@
 class MaplibreFileLayerControl {
     /**
-     * Constructeur de la classe MaplibreFileLayerControl.
-     * @param options {Object} - Options de configuration pour le contrôle de chargement de fichiers.
+     * Constructor of the MaplibreFileLayerControl class.
+     * @param options {Object} - Configuration options for the file loading control.
      */
     constructor(options = {}) {
         this.options = { ...options };
@@ -21,9 +21,9 @@ class MaplibreFileLayerControl {
     }
 
     /**
-     * Méthode appelée lors de l'ajout du contrôle à la carte.
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre.
-     * @returns {HTMLElement} - Le conteneur du contrôle.
+     * Method called when adding the control to the map.
+     * @param map {maplibregl.Map} - The Maplibre map instance.
+     * @returns {HTMLElement} - The control's container.
      */
     onAdd(map) {
         this._map = map;
@@ -32,8 +32,8 @@ class MaplibreFileLayerControl {
     }
 
     /**
-     * Charge un fichier dans la carte Maplibre.
-     * @param file {File} - Le fichier à charger, qui doit être un objet File valide.
+     * Loads a file into the Maplibre map.
+     * @param file {File} - The file to load, which must be a valid File object.
      */
     load(file) {
         const ext = file.name.split('.').pop().toLowerCase();
@@ -51,8 +51,8 @@ class MaplibreFileLayerControl {
     }
 
     /**
-     * Initialise le drag and drop pour charger des fichiers dans la carte.
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre.
+     * Initialize the drag and drop to load files into the map.
+     * @param map {maplibregl.Map} - The Maplibre map instance.
      * @private
      */
     _initDragAndDrop(map) {
@@ -92,9 +92,9 @@ class MaplibreFileLayerControl {
     }
 
     /**
-     * Initialise le conteneur principal du contrôle de chargement de fichier.
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre.
-     * @returns {HTMLElement} - Retourne le conteneur principal du contrôle.
+     * Initialise the main container for the file upload control.
+     * @param map {maplibregl.Map} - The Maplibre map instance.
+     * @returns {HTMLElement} - Returns the main container for the control.
      * @private
      */
     _initContainer(map) {
@@ -139,8 +139,8 @@ class MaplibreFileLayerControl {
     }
 
     /**
-     * Charge un contenu GeoJSON dans la carte Maplibre.
-     * @param content {Object|string} - Le contenu GeoJSON à charger, qui peut être une chaîne JSON ou un objet.
+     * Load GeoJSON content into the Maplibre map.
+     * @param content {Object|string} - The GeoJSON content to load, which can be a JSON string or an object.
      * @private
      */
     _loadGeoJSON(content) {
@@ -188,12 +188,12 @@ class MaplibreFileLayerControl {
     }
 
     /**
-     * Ajoute une couche avec un popup à la carte Maplibre.
-     * @param type {string} - Le type de la couche (par exemple, 'polygon', 'point', 'line').
-     * @param layerType {string} - Le type de la couche Maplibre (par exemple, 'fill', 'circle', 'line').
-     * @param sourceId {string} - L'ID de la source GeoJSON à utiliser pour la couche.
-     * @param style {Object} - Un objet contenant les styles pour la couche, comme 'color', 'opacity', 'radius', etc.
-     * @param filter {Array} - Un tableau de filtres pour la couche, par exemple ['==', '$type', 'Polygon'].
+     * Adds a layer with a popup to the Maplibre map.
+     * @param type {string} - The type of the layer (e.g., 'polygon', 'point', 'line').
+     * @param layerType {string} - The type of the Maplibre layer (e.g., 'fill', 'circle', 'line').
+     * @param sourceId {string} - The ID of the GeoJSON source to use for the layer.
+     * @param style {Object} - An object containing styles for the layer, such as 'color', 'opacity', 'radius', etc.
+     * @param filter {Array} - An array of filters for the layer, for example ['==', '$type', 'Polygon'].
      * @private
      */
     _addLayerWithPopup(type, layerType, sourceId, style, filter) {
@@ -247,9 +247,9 @@ class MaplibreFileLayerControl {
     }
 
     /**
-     * Convertit le contenu d'un fichier en GeoJSON.
-     * @param content {string|Document} - Le contenu du fichier, qui peut être une chaîne XML ou un document XML.
-     * @param format {string} - Le format du fichier (par exemple, 'gpx', 'kml').
+     * Converts the content of a file to GeoJSON.
+     * @param content {string|Document} - The file content, which can be an XML string or an XML document.
+     * @param format {string} - The file format (e.g., 'gpx', 'kml').
      * @private
      */
     _convertToGeoJSON(content, format) {

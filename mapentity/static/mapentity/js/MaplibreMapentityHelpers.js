@@ -9,9 +9,9 @@
     };
 
     /**
-     * Obtennir les paramètres de l'URL.
-     * @param name {string} - Le nom du paramètre à récupérer
-     * @returns {string} - La valeur du paramètre décodée ou null si le paramètre n'existe pas
+     * Get URL parameters.
+     * @param name {string} - The name of the parameter to retrieve
+     * @returns {string} - The decoded parameter value or null if the parameter does not exist
      */
     function getURLParameter(name) {
         var paramEncoded = (RegExp('[?|&]' + name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1],
@@ -26,7 +26,7 @@
     }
 
     /**
-     * Ajuste la hauteur du tableau DataTable pour remplir l'espace disponible.
+     * Adjusts the height of the DataTable to fill the available space.
      */
     function expandDatatableHeight() {
         var fill_height = $('#objects-list_wrapper').height() - 75;
@@ -36,7 +36,7 @@
     }
 
     /**
-     * Traduit un texte en utilisant le dictionnaire de traduction de MapEntity.
+     * Translates a text using the MapEntity translation dictionary.
      * @param s
      * @returns {*}
      */
@@ -45,7 +45,7 @@
     }
 
     /**
-     * Génère un ID unique
+     * Generates a unique ID.
      * @returns {string}
      * @private
      */
@@ -54,9 +54,9 @@
     }
 
     /**
-     * Calcule les limites (bounds) d'un objet GeoJSON ou d'une collection de géométries.
-     * @param geojson {Object} - Un objet GeoJSON ou une collection de géométries à partir duquel calculer les limites.
-     * @returns {null|maplibregl.LngLatBounds} - Retourne les limites calculées ou `null` si l'objet est vide.
+     * Calculates the bounds of a GeoJSON object or a collection of geometries.
+     * @param geojson {Object} - A GeoJSON object or a collection of geometries from which to calculate the bounds.
+     * @returns {null|maplibregl.LngLatBounds} - Returns the calculated bounds or `null` if the object is empty.
      * @private
      */
     function calculateBounds(geojson) {
@@ -66,7 +66,7 @@
 
         const bounds = new maplibregl.LngLatBounds();
 
-        // Fonction utilitaire pour extraire et aplatir les coordonnées
+        // Utility function to extract and flatten coordinates
         const flattenCoords = (geometry) => {
             const { type, coordinates, geometries } = geometry;
             let flattened = [];
@@ -96,7 +96,7 @@
             return flattened;
         };
 
-        // Cas d'un seul Feature
+        // Case of a single Feature
         if (geojson.geometry) {
             const coords = flattenCoords(geojson.geometry);
             coords.forEach(coord => {
@@ -108,7 +108,7 @@
             });
         }
 
-        // Cas d'une FeatureCollection
+        // Case of a FeatureCollection
         else if (geojson.features) {
             geojson.features.forEach(feature => {
                 const geometry = feature.geometry;
@@ -128,8 +128,8 @@
     }
 
     /**
-     * Initialise TinyMCE avec la gestion du comptage de mots et des caractères.
-     * @param editor {Object} - L'éditeur TinyMCE à initialiser.
+     * Initializes TinyMCE with word and character count management.
+     * @param editor {Object} - The TinyMCE editor to initialize.
      */
     function tinyMceInit(editor) {
         var context = $('body').data();

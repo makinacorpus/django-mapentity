@@ -1,7 +1,7 @@
 class MaplibreMapentityContext {
     /**
-     * Conctructeur de la classe MaplibreMapentityContext.
-     * @param bounds {Array} - Un tableau contenant les coordonnées des limites de la carte, sous la forme [[swLng, swLat], [neLng, neLat]].
+     * MaplibreMapentityContext class constructor.
+     * @param bounds {Array} - An array containing the map boundary coordinates, in the format [[swLng, swLat], [neLng, neLat]].
      * @param layerManager {MaplibreLayerManager}
      */
     constructor(bounds, layerManager) {
@@ -11,9 +11,9 @@ class MaplibreMapentityContext {
     }
 
     /**
-     * Récupère le contexte complet de la carte, y compris la vue actuelle, les couches visibles, les filtres et les colonnes triées.
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
-     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'filter' pour les filtres de formulaire et 'datatable' pour les colonnes triées.
+     * Retrieves the complete map context, including the current view, visible layers, filters, and sorted columns.
+     * @param map {maplibregl.Map} - The Maplibre GL JS map instance.
+     * @param kwargs {Object} - An object containing optional parameters, such as 'filter' for form filters and 'datatable' for sorted columns.
      */
     getFullContext(map, kwargs = {}) {
         let context = {};
@@ -31,7 +31,7 @@ class MaplibreMapentityContext {
         document.querySelectorAll('.layer-switcher-menu label').forEach(label => {
             const inputElement = label.querySelector('input');
             if(inputElement && inputElement.checked) {
-                // On récupère le texte brut du label (sans les balises HTML éventuelles des icônes)
+                // We retrieve the raw text of the label (without any HTML tags for icons)
                 const labelText = label.textContent.trim();
                 layers.push(labelText);
             }
@@ -45,7 +45,7 @@ class MaplibreMapentityContext {
 
             if (form) {
                 const formData = new FormData(form);
-                // Filtrer les paires [name, value] en excluant celles dont le name est 'bbox' ou ''
+                // Filter the [name, value] pairs, excluding those where the name is 'bbox' or ''.
                 const fields = Array.from(formData).filter(([name, value]) => (name !== 'bbox' && value !== ''));
                 context['filter'] = new URLSearchParams(fields).toString();
             }
@@ -63,16 +63,16 @@ class MaplibreMapentityContext {
         };
 
         context['timestamp'] = new Date().getTime();
-        // ajout de la classe pour les tiles chargées permettant par la suite à screamshotter de réaliser une capture d'écran
+        // Addition of the class for loaded tiles, allowing screamshotter to subsequently take a screenshot
         map.getContainer().classList.add('maplibre-tile-loaded');
 
         return context;
     }
 
     /**
-     * Sauvegarde le contexte complet de la carte dans le stockage local (localStorage).
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
-     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
+     * Saves the complete map context to local storage (localStorage).
+     * @param map {maplibregl.Map} - The Maplibre GL JS map instance.
+     * @param kwargs {Object} - An object containing optional parameters, such as 'prefix' for the storage key prefix.
      */
     saveFullContext(map, kwargs = {}) {
         const prefix = kwargs.prefix || '';
@@ -81,10 +81,10 @@ class MaplibreMapentityContext {
     }
 
     /**
-     * Stocke un contexte (typiquement reçu via URL) dans le localStorage.
-     * Permet d'unifier la restauration : URL → localStorage → restauration normale.
-     * @param context {Object} - Le contexte à stocker.
-     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
+     * Stores a context (typically received via URL) in localStorage.
+     * Allows for unified restoration: URL → localStorage → normal restoration.
+     * @param context {Object} - The context to store.
+     * @param kwargs {Object} - An object containing optional parameters, such as 'prefix' for the storage key prefix.
      */
     saveContextToLocalStorage(context, kwargs = {}) {
         const prefix = kwargs.prefix || '';
@@ -93,9 +93,9 @@ class MaplibreMapentityContext {
     }
 
     /**
-     * Charge le contexte complet de la carte depuis le stockage local (localStorage).
-     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
-     * @returns {any|null} - Retourne le contexte chargé depuis le stockage local, ou null si aucun contexte n'est trouvé.
+     * Load the complete map context from local storage.
+     * @param kwargs {Object} - An object containing optional parameters, such as 'prefix' for the storage key prefix.
+     * @returns {any|null} - Returns the context loaded from local storage, or null if no context is found.
      */
     loadFullContext(kwargs = {}) {
         const prefix = kwargs.prefix || '';
@@ -105,25 +105,6 @@ class MaplibreMapentityContext {
         }
         return null;
     }
-
-    // /**
-    //  * Restores le dernier contexte de la carte.
-    //  * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
-    //  * @param prefixes {Array} - Un tableau de préfixes pour rechercher le contexte dans le stockage local.
-    //  * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
-    //  * @returns {boolean} - Retourne true si la restauration a réussi, sinon false.
-    //  */
-    // restoreLatestMapView(map, prefixes, kwargs = {}) {
-    //     let latest = null;
-    //     for (const prefix of prefixes) {
-    //         const context = this.loadFullContext({ ...kwargs, prefix });
-    //         if (!latest || (context && context.timestamp && context.timestamp > latest.timestamp)) {
-    //             latest = context;
-    //         }
-    //     }
-    //     return this.restoreMapView(map, latest, kwargs);
-    // }
-
 
     /**
      * Adds a value to a select input by selecting the matching option.
@@ -144,11 +125,11 @@ class MaplibreMapentityContext {
 
 
     /**
-     * Restore la vue de la carte à partir du contexte fourni ou du contexte chargé depuis le stockage local.
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
-     * @param context {Object|null} - Le contexte de la carte à restaurer. Si null, le contexte sera chargé depuis le stockage local.
-     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'prefix' pour le préfixe de la clé de stockage.
-     * @returns {boolean} - Retourne true si la restauration de la vue de la carte a réussi, sinon false.
+     * Restores the map view from the provided context or the context loaded from local storage.
+     * @param map {maplibregl.Map} - The Maplibre GL JS map instance.
+     * @param context {Object|null} - The map context to restore. If null, the context will be loaded from local storage.
+     * @param kwargs {Object} - An object containing optional parameters, such as 'prefix' for the storage key prefix.
+     * @returns {boolean} - Returns true if the map view restoration was successful, otherwise false.
      */
     restoreMapView(map, context, kwargs = {}) {
         if (context === null || map === null) {
@@ -162,13 +143,13 @@ class MaplibreMapentityContext {
         if (Number.isFinite(zoom)) {
             map.setZoom(zoom);
         } else {
-            console.warn("Niveau de zoom manquant ou invalide — setZoom ignoré.");
+            console.warn("Zoom level missing or invalid — setZoom ignored.");
         }
 
         if (Number.isFinite(lng) && Number.isFinite(lat)) {
             map.setCenter([lng, lat]);
         } else {
-            console.warn("Longitude ou latitude manquante ou invalide — setCenter ignoré.");
+            console.warn("Longitude or latitude missing or invalid — setCenter ignored.");
         }
 
         return true;
@@ -182,7 +163,7 @@ class MaplibreMapentityContext {
      * @returns {Promise<void>} - Resolves when all form fields have been restored.
      */
     async restoreFilterContext(filter, formData){
-        // S'assurer que 'filter' est un élément DOM
+        // Ensure 'filter' is a DOM element
         const filterElement = typeof filter === 'string' ? document.getElementById(filter) : filter;
         if (!filterElement) {
             return;
@@ -190,7 +171,7 @@ class MaplibreMapentityContext {
 
         const params = {};
 
-        // Appliquer les valeurs aux champs du formulaire
+        // Apply values to form fields
         for (const [key, value] of formData.entries()) {
             const input = filterElement.querySelector(`[name="${key}"]`);
             if (input) {
@@ -225,17 +206,17 @@ class MaplibreMapentityContext {
             }
         }
 
-        // Déclencher les événements 'change' pour les <select>
+        // Trigger the 'change' events for the <select>
         filterElement.querySelectorAll('select').forEach(select => {
             select.dispatchEvent(new Event('change'));
         });
     }
 
     /**
-     * Restores le contexte complet de la carte, y compris les filtres, les colonnes triées et les couches visibles.
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre GL JS.
-     * @param context {Object|null} - Le contexte de la carte à restaurer. Si null, le contexte sera chargé depuis le stockage local.
-     * @param kwargs {Object} - Un objet contenant des paramètres optionnels, tels que 'filter' pour les filtres de formulaire, 'datatable' pour les colonnes triées et 'objectsLayer' pour la couche d'objets.
+     * Restores the full map context, including filters, sorted columns, and visible layers.
+     * @param map {maplibregl.Map} - The Maplibre GL JS map instance.
+     * @param context {Object|null} - The map context to restore. If null, the context will be loaded from local storage.
+     * @param kwargs {Object} - An object containing optional parameters, such as 'filter' for form filters, 'datatable' for sorted columns, and 'objectsLayer' for the objects layer.
      */
     async restoreFullContext(map, context, kwargs = {}) {
         const filter = kwargs.filter;
@@ -266,18 +247,13 @@ class MaplibreMapentityContext {
              await load_filter_form(() => this.restoreFilterContext(filter, formData));
          }
 
-         // Restore le dernier tri des colonnes si un datatable est fourni et que des colonnes de tri sont spécifiées dans le contexte.
-         //if (datatable && context.sortcolumns) {
-         //    this.last_sort = context['sortcolumns'];
-         //}
-
-        // restore la vue de la carte à partir du contexte.
+        // restore the map view from the context.
         this.restoreMapView(map, context, kwargs);
 
-        // Store restored context in layerManager for async layers
+        // Store and restore context in layerManager for async layers
         this.layerManager.restoredContext = context;
 
-        // Affichage des couches visibles dans le sélecteur de couches.
+        // Display visible layers in the layer switcher.
         if (context.maplayers) {
             const layers = context.maplayers;
             const layerLabels = document.querySelectorAll('.layer-switcher-menu label');

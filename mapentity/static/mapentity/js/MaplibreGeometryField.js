@@ -3,10 +3,10 @@ class MaplibreGeometryField {
         this.fieldId = fieldId;
         this.options = {...options};
 
-        // Les options peuvent être injectées par le template en tant que chaînes
+        // Options can be injected by the template as strings
         this.options.modifiable = this.options.modifiable === true || this.options.modifiable === 'true';
 
-        // Détecter les types de géométrie
+        // Detect geometry types
         const geomType = (this.options.geomType || '').toLowerCase();
         this.options.isGeneric = geomType === 'geometry';
         this.options.isGeometryCollection = /geometrycollection$/.test(geomType);
@@ -15,12 +15,12 @@ class MaplibreGeometryField {
         this.options.isPolygon = /polygon$/.test(geomType);
         this.options.isPoint = /point$/.test(geomType);
 
-        // Distinction entre simple et multi pour les types de base
+        // Distinction between single and multi for base types
         this.options.isMultiPolygon = /^multipolygon$/.test(geomType);
         this.options.isMultiLineString = /^multilinestring$/.test(geomType);
         this.options.isMultiPoint = /^multipoint$/.test(geomType);
 
-        // Initialiser les composants
+        // Initialize the components
         this.dataManager = new GeometryDataManager(this.options);
         this.fieldStore = new MaplibreFieldStore(this.fieldId, this.options);
 
@@ -33,26 +33,25 @@ class MaplibreGeometryField {
 
         this.map = map;
         
-        // Détecter si on est en mode édition (PK présente)
+        // Detect if in edit mode (PK present)
         this.options.isUpdate = !!document.body.dataset.pk;
 
-        // Ajouter le fieldId aux options pour le DrawControlManager
+        // Add the fieldId to the options for the DrawControlManager
         this.options.fieldId = this.fieldId;
 
-        // Réutiliser le DrawControlManager existant si la carte en a déjà un (multi-geom)
+        // Reuse the existing DrawControlManager if the map already has one (multi-geom)
         if (this.map._drawManager) {
             this.drawManager = this.map._drawManager;
-            // Ajouter les contrôles spécifiques à ce champ au Geoman existant
+            // Add the specific controls for this field to the existing Geoman
             this.drawManager.addFieldControls(this.options);
         } else {
             this.drawManager = new MaplibreDrawControlManager(map, this.options);
             this.map._drawManager = this.drawManager;
         }
 
-        // stock les Features Geoman
         this.gmEvents = [];
 
-        // DOM markers personnalisés (pour les champs avec customIcon)
+        // Custom DOM markers (for fields with customIcon)
         // Map: featureId -> maplibregl.Marker
         this._customMarkers = {};
 
@@ -60,9 +59,9 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Fonction utilitaire pour obtenir le GeoJSON d'une feature
-     * @param featureData {Object} - La feature Geoman contenant les données de la géométrie
-     * @return {Object|null} - Retourne l'objet GeoJSON ou null en cas d'erreur
+     * Utility function to get the GeoJSON of a feature
+     * @param featureData {Object} - The Geoman feature containing the geometry data
+     * @return {Object|null} - Returns the GeoJSON object or null in case of an error
      * @private
      */
     _getGeoJson(featureData) {
@@ -75,8 +74,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Obtenir la collection de features
-     * @return {Object} - Un objet GeoJSON de type FeatureCollection contenant toutes les features
+     * Get the collection of features
+     * @return {Object} - A GeoJSON object of type FeatureCollection containing all features
      * @private
      */
     _getFeatureCollection() {
@@ -89,9 +88,9 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Mis à jour de gmEvents avec de nouvelles données ou suppression
-     * @param event {Object} - L'événement Geoman contenant les données de la feature
-     * @return {boolean} - Retourne true si l'événement a été traité avec succès, false sinon
+     * Update gmEvents with new data or removal
+     * @param event {Object} - The Geoman event containing the feature data
+     * @return {boolean} - Returns true if the event was successfully processed, false otherwise
      * @private
      */
     _updateEventsHistory(event) {
@@ -136,8 +135,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Traiter et sauvegarder la géométrie après un événement create, editend, dragend ou remove
-     * @param event {Object} - L'événement Geoman contenant les données de la feature
+     * Process and save the geometry after a create, editend, dragend, or remove event
+     * @param event {Object} - The Geoman event containing the feature data
      * @return {void}
      * @private
      */
@@ -151,16 +150,16 @@ class MaplibreGeometryField {
         const allFeatures = this._getFeatureCollection();
         let normalizedData;
 
-        // Gestion des types 'Multi' et 'Collection'
+        // Management of 'Multi' and 'Collection' Types
         if (this.options.isCollection) {
-            // Extraire les géométries des features
-            // Note: feature peut être une Feature GeoJSON {type: "Feature", geometry: {...}}
-            // ou directement une geometry {type: "Polygon", coordinates: [...]}
+            // Extract geometries from features
+            // Note: feature can be a GeoJSON Feature {type: "Feature", geometry: {...}}
+            // or directly a geometry {type: "Polygon", coordinates: [...]}
             const geometries = allFeatures.features.map(feature => {
                 if (feature.type === 'Feature' && feature.geometry) {
                     return feature.geometry;
                 }
-                // Si c'est directement une geometry (a un type et des coordinates)
+                // If it's directly a geometry (with a type and coordinates)
                 if (feature.type && feature.coordinates) {
                     return feature;
                 }
@@ -168,7 +167,7 @@ class MaplibreGeometryField {
                 return feature.geometry || feature;
             });
             
-            // On vérifie le type de champ spécifique pour savoir comment normaliser
+            // We check the specific field type to know how to normalize
             if (this.options.isMultiPolygon) {
                 normalizedData = this.dataManager.normalizeToMultiPolygon(geometries);
             } else if (this.options.isMultiLineString) {
@@ -176,23 +175,23 @@ class MaplibreGeometryField {
             } else if (this.options.isMultiPoint) {
                 normalizedData = this.dataManager.normalizeToMultiPoint(geometries);
             } else {
-                // GeometryCollection générique ou cas non géré explicitement
+                // Generic GeometryCollection or unhandled case
                 normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
             }
         } else {
-            // Mode spécifique simple : normaliser selon le type
+            // Simple specific mode: normalize by type
             if (this.options.isLineString || this.options.isPolygon || this.options.isPoint || this.options.isGeneric) {
-                // Pour les événements de suppression, on prend toutes les features restantes (devrait être 0 ou 1)
-                // Pour les autres événements, on prend la feature qui vient d'être modifiée/créée
+                // For deletion events, we take all remaining features (should be 0 or 1)
+                // For other events, we take the feature that has just been modified/created
                 let targetFeature = null;
                 
                 if (event.type === 'gm:remove') {
                     targetFeature = allFeatures.features[0];
                 } else if (event.feature) {
-                    // Si l'événement fournit la feature, on utilise son GeoJSON
+                    // If the event provides the feature, we use its GeoJSON
                     targetFeature = this._getGeoJson(event.feature);
                     
-                    // Fallback si _getGeoJson échoue
+                    // Fallback if _getGeoJson fails
                     if (!targetFeature && allFeatures.features.length > 0) {
                         targetFeature = allFeatures.features.find(f => f.id === event.feature.id) || allFeatures.features.at(-1);
                     }
@@ -201,12 +200,12 @@ class MaplibreGeometryField {
                 }
 
                 if (targetFeature) {
-                    // Pour un champ simple, on envoie directement la géométrie (pas une FeatureCollection)
-                    // Si c'est déjà une feature, on extrait la géométrie
+                    // For a simple field, the geometry is sent directly (not a FeatureCollection)
+                    // If it's already a feature, the geometry is extracted
                     normalizedData = targetFeature.geometry || targetFeature;
                     
-                    // Si c'est un point simple, Geoman peut parfois renvoyer des coordonnées sous forme d'objet {lng, lat}
-                    // On s'assure d'avoir un tableau pour GeoJSON
+                    // If it is a simple point, Geoman can sometimes return coordinates as an object {lng, lat}
+                    // We ensure we have an array for GeoJSON
                     if (normalizedData.type === 'Point' && !Array.isArray(normalizedData.coordinates)) {
                         const coords = normalizedData.coordinates;
                         if (coords.lng !== undefined && coords.lat !== undefined) {
@@ -214,21 +213,21 @@ class MaplibreGeometryField {
                         }
                     }
                 } else {
-                    // Si aucune feature n'est disponible (toutes supprimées), normaliser avec null
+                    // If no feature is available (all deleted), normalize with null
                     normalizedData = null;
                 }
             }
         }
 
-        // Sauvegarder si des données ont été normalisées
+        // Save if data has been normalized
         if (normalizedData !== undefined) {
             this.fieldStore.save(normalizedData);
         }
     }
 
     /**
-     * Gestion des événements de clic pendant le dessin
-     * @param event {Object} - L'événement de clic contenant les coordonnées du clic
+     * Handling click events during drawing
+     * @param event {Object} - The click event containing the click coordinates
      * @return {void}
      * @private
      */
@@ -240,26 +239,26 @@ class MaplibreGeometryField {
         const coords = [event.lngLat.lng, event.lngLat.lat];
 
         if (this.isDrawingLine) {
-            // Ajouter le point cliqué aux coordonnées de dessin
+            // Add the clicked point to the drawing coordinates
             this.currentDrawingCoords.push(coords);
             this._updateDrawingPopup(coords, false);
         } else if (this.isDrawingRectangle) {
-            // Pour le rectangle, on ne stocke que le premier point
+            // For the rectangle, we only store the first point
             if (this.currentDrawingCoords.length === 0) {
                 this.rectangleStartCoord = coords;
                 this.currentDrawingCoords.push(coords);
                 this._updateDrawingPopup(coords, false);
             }
         } else if (this.isDrawingPolygon) {
-            // Ajouter le point cliqué aux coordonnées de dessin du polygone
+            // Add the clicked point to the polygon drawing coordinates
             this.currentDrawingCoords.push(coords);
             this._updateDrawingPopup(coords, false);
         }
     }
 
     /**
-     * Gestion des mouvements de la souris pendant le dessin en direct
-     * @param event {Object} - L'événement de mouvement de la souris contenant les données du marqueur
+     * Mouse movement handling during live drawing
+     * @param event {Object} - The mouse movement event containing marker data
      * @return {void}
      * @private
      */
@@ -271,14 +270,14 @@ class MaplibreGeometryField {
 
         const mouseCoords = event.markerData.position.coordinate;
 
-        // Mettre à jour la popup avec la position de la souris
+        // Update the popup with the mouse position
         this._updateDrawingPopup(mouseCoords, true);
     }
 
     /**
-     * Met à jour la popup de dessin en direct avec les distances ou surfaces
-     * @param currentCoords {Array} - Les coordonnées actuelles du marqueur
-     * @param isLive {boolean} - Indique si c'est un suivi en direct ou non
+     * Updates the live drawing popup with distances or areas
+     * @param currentCoords {Array} - The current coordinates of the marker
+     * @param isLive {boolean} - Indicates whether it is live tracking or not
      * @return {void}
      * @private
      */
@@ -297,20 +296,20 @@ class MaplibreGeometryField {
             formattedMessage = this._getPolygonDrawingMessage(currentCoords, isLive);
         }
 
-        // Afficher la popup à la position actuelle
+        // Show popup at current position
         this.livePopup.setLngLat(currentCoords).setHTML(formattedMessage);
     }
 
     /**
-     * Obtient le message de dessin pour la ligne
-     * @param currentCoords {Array} - Les coordonnées actuelles du marqueur
-     * @param isLive {boolean} - Indique si c'est un suivi en direct ou non
-     * @return {string} - Le message de dessin formaté
+     * Gets the drawing message for the line
+     * @param currentCoords {Array} - The current coordinates of the marker
+     * @param isLive {boolean} - Indicates if it is a live tracking or not
+     * @return {string} - The formatted drawing message
      * @private
      */
     _getLineDrawingMessage(currentCoords, isLive) {
         if (this.currentDrawingCoords.length === 0) {
-            return 'Cliquer pour commencer le dessin de la ligne';
+            return gettext('Click to start drawing the line');
         } else if (this.currentDrawingCoords.length >= 1) {
             const tempCoords = [...this.currentDrawingCoords];
 
@@ -331,30 +330,30 @@ class MaplibreGeometryField {
                 const formattedDistance = `${distance.toFixed(2)} km`;
 
                 if (this.currentDrawingCoords.length === 1) {
-                    return formattedDistance + '<br>Cliquer pour continuer le dessin de la ligne';
+                    return formattedDistance + '<br>' + gettext('Click to continue drawing the line');
                 } else {
-                    return formattedDistance + '<br>Cliquer sur le dernier point pour terminer la ligne';
+                    return formattedDistance + '<br>' + gettext('Click on the last point to finish the line');
                 }
             } else {
-                return 'Cliquer pour continuer le dessin de la ligne';
+                return gettext('Click to continue drawing the line');
             }
         }
         return '';
     }
 
     /**
-     * Obtient le message de dessin pour le rectangle
-     * @param currentCoords {Array} - Les coordonnées actuelles du marqueur
-     * @param isLive {boolean} - Indique si c'est un suivi en direct ou non
-     * @return {string} - Le message de dessin formaté
+     * Gets the drawing message for the rectangle
+     * @param currentCoords {Array} - The current coordinates of the marker
+     * @param isLive {boolean} - Indicates if it is a live tracking or not
+     * @return {string} - The formatted drawing message
      * @private
      */
     _getRectangleDrawingMessage(currentCoords, isLive) {
         if (this.currentDrawingCoords.length === 0) {
-            return 'Cliquer et glisser pour dessiner le rectangle';
+            return gettext('Click and drag to draw the rectangle');
         } else if (this.currentDrawingCoords.length === 1) {
             if (isLive && this.rectangleStartCoord) {
-                // Créer un rectangle temporaire avec les coordonnées de début et la position actuelle
+                // Create a temporary rectangle with the start coordinates and the current position
                 const tempRectangle = {
                     type: 'Feature',
                     geometry: {
@@ -369,45 +368,45 @@ class MaplibreGeometryField {
                     }
                 };
 
-                const area = turf.area(tempRectangle) / 1000000; // Convertir en km²
+                const area = turf.area(tempRectangle) / 1000000; // Convert to km²
                 const formattedArea = `${area.toFixed(2)} km²`;
-                return formattedArea + '<br>Cliquer pour terminer le rectangle';
+                return formattedArea + '<br>' + gettext('Click to finish the rectangle');
             } else {
-                return 'Cliquer pour terminer le rectangle';
+                return gettext('Click to finish the rectangle');
             }
         }
         return '';
     }
 
     /**
-     * Obtient le message de dessin pour le polygone
-     * @param currentCoords {Array} - Les coordonnées actuelles du marqueur
-     * @param isLive {boolean} - Indique si c'est un suivi en direct ou non
-     * @return {string} - Le message de dessin formaté
+     * Gets the drawing message for the polygon
+     * @param currentCoords {Array} - The current coordinates of the marker
+     * @param isLive {boolean} - Indicates if it is a live tracking or not
+     * @return {string} - The formatted drawing message
      * @private
      */
     _getPolygonDrawingMessage(currentCoords, isLive) {
         if (this.currentDrawingCoords.length === 0) {
-            return 'Cliquer pour commencer le dessin de la forme';
+            return gettext('Click to start drawing the shape');
         } else if (this.currentDrawingCoords.length === 1 || this.currentDrawingCoords.length === 2) {
-            return 'Cliquer pour continuer le dessin de la forme';
+            return gettext('Click to continue drawing the shape');
         }else if (this.currentDrawingCoords.length >= 3) {
-            return 'Cliquer sur le premier point pour fermer la forme';
+            return gettext('Click on the first point to close the shape');
         }
         return '';
     }
 
     /**
-     * Rénitialiser les coordonnées de dessin
+     * Resets the drawing coordinates
      * @return {void}
      * @private
      */
     _resetDrawingCoords() {
-        // Réinitialiser les coordonnées pour recommencer une nouvelle forme
+        // Reset the coordinates to start a new shape
         this.currentDrawingCoords = [];
         this.rectangleStartCoord = null;
 
-        // S'assurer que les couches Geoman restent au-dessus après une création
+        // Ensure Geoman layers remain on top after creation
         if (this.map.getStyle()) {
             const layers = this.map.getStyle().layers || [];
             layers.forEach(layer => {
@@ -415,7 +414,7 @@ class MaplibreGeometryField {
                     try {
                         this.map.moveLayer(layer.id);
                     } catch (e) {
-                        // Ignorer si la couche n'est plus là
+                        // Ignore if the layer is no longer there
                     }
                 }
             });
@@ -423,7 +422,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Arrêter le suivi du dessin en direct
+     * Stop live drawing tracking
      * @return {void}
      * @private
      */
@@ -433,7 +432,7 @@ class MaplibreGeometryField {
             this.livePopup = null;
         }
 
-        // Réinitialiser toutes les variables de dessin
+        // Reset all drawing variables
         this.currentDrawingCoords = [];
         this.rectangleStartCoord = null;
         this.isDrawingLine = false;
@@ -442,7 +441,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Charge la géométrie initiale à partir du champ de formulaire
+     * Load the initial geometry from the form field
      * @private
      */
     _loadInitialGeometry() {
@@ -459,7 +458,7 @@ class MaplibreGeometryField {
             return;
         }
 
-        // Assurer que chaque feature a un id stable
+        // Ensure that each feature has a stable ID
         initialFeatures.forEach(f => {
             if (!f.id) {
                 f.id = f.properties?.id || generateUniqueId();
@@ -467,13 +466,13 @@ class MaplibreGeometryField {
         });
 
         if (initialFeatures.length > 0) {
-            // Identifier et exclure les features en cours d'édition de la couche d'objets globale
+            // Identify and exclude features currently being edited from the global object layer
             const idsToExclude = initialFeatures
                 .map(f => f.id)
                 .filter(id => id !== undefined && id !== null);
 
-            // Ajouter l'ID de l'objet courant s'il est disponible dans le DOM (cas de l'édition)
-            // Cela permet de masquer l'objet original même si les features Geoman ont des UUIDs temporaires
+            // Add the current object's ID if available in the DOM (in case of editing)
+            // This allows to hide the original object even if Geoman features have temporary UUIDs
             if (document.body.dataset.pk) {
                 const pk = document.body.dataset.pk;
                 if (!idsToExclude.includes(pk)) idsToExclude.push(pk);
@@ -487,7 +486,7 @@ class MaplibreGeometryField {
             if (idsToExclude.length > 0) {
                 this.map.fire('mapentity:exclude-features', { ids: idsToExclude });
 
-                // Répéter au chargement complet pour s'assurer que les couches sont prêtes
+                // Repeat on full load to ensure layers are ready
                 if (!this.map.loaded()) {
                     this.map.once('load', () => {
                          this.map.fire('mapentity:exclude-features', { ids: idsToExclude });
@@ -514,7 +513,7 @@ class MaplibreGeometryField {
             }
         }
 
-        // Attendre que Geoman soit chargé pour ajouter les features
+        // Wait for Geoman to be loaded to add the features
         const addFeaturesToGeoman = () => {
             const geoman = this.drawManager.getGeoman();
             if (!geoman || !geoman.loaded) {
@@ -522,24 +521,24 @@ class MaplibreGeometryField {
                 return;
             }
 
-            // Selon la version/intégration, l’API peut être exposée via `map.gm` ou via l’instance créée.
+            // Depending on the version/integration, the API can be exposed via `map.gm` or via the created instance.
             const gmApi = this.map.gm || geoman;
             if (!gmApi?.features) {
                 console.warn('MaplibreGeometryField: Geoman API not available (no features), cannot add initial geometry');
                 return;
             }
 
-            // Forcer un rafraîchissement initial au cas où
+            // Force an initial refresh in case
             this.map.triggerRepaint();
 
             initialFeatures.forEach(feature => {
                 try {
-                    // S'assurer que la feature a un ID pour Geoman
+                    // Ensure the feature has an ID for Geoman
                     if (!feature.id) {
                         feature.id = generateUniqueId();
                     }
 
-                    // Injecter des styles par défaut pour assurer la visibilité (simplestyle spec)
+                    // Inject default styles to ensure visibility (simplestyle spec)
                     feature.properties = feature.properties || {};
                     const defaultStyles = {
                         'stroke': '#3388ff',
@@ -554,26 +553,26 @@ class MaplibreGeometryField {
 
                     const resolveGeomanSourceName = () => this._resolveGeomanSourceName();
 
-                    // Utilisation de la méthode recommandée par la doc
+                    // Using the method recommended by the documentation
                     let result;
 
-                    // Selon la version Geoman :
-                    // - 0.6.x : `importGeoJsonFeature(geojsonFeature)`
-                    // - certaines docs : `addGeoJsonFeature({ shapeGeoJson, sourceName })`
-                    // - d'autres : `addGeoJsonFeature(geojsonFeature)`
+                    // According to the Geoman version:
+                    // - 0.6.x: `importGeoJsonFeature(geojsonFeature)`
+                    // - some docs: `addGeoJsonFeature({ shapeGeoJson, sourceName })`
+                    // - others: `addGeoJsonFeature(geojsonFeature)`
                     if (typeof gmApi.features.importGeoJsonFeature === 'function') {
                         result = gmApi.features.importGeoJsonFeature(feature);
                     } else if (typeof gmApi.features.addGeoJsonFeature === 'function') {
                         try {
-                            // Tentative 1 : signature la plus courante (GeoJSON direct)
+                            // Tentative 1: most common signature (direct GeoJSON)
                             result = gmApi.features.addGeoJsonFeature(feature);
                         } catch (e) {
-                            // Tentative 2 : signature objet + sourceName
+                            // Tentative 2: Object signature + sourceName
                             const sourceName = resolveGeomanSourceName();
                             result = gmApi.features.addGeoJsonFeature({ shapeGeoJson: feature, sourceName });
                         }
                     } else if (typeof gmApi.features.addGeoJson === 'function') {
-                        // Certaines versions exposent une API plus simple
+                        // Certain versions expose a simpler API
                         result = gmApi.features.addGeoJson(feature);
                     } else if (typeof gmApi.features.addFeature === 'function') {
                         result = gmApi.features.addFeature(feature);
@@ -584,10 +583,10 @@ class MaplibreGeometryField {
                         return;
                     }
 
-                    // Si result contient l'ID directement
+                    // If result contains the ID directly
                     let addedId = typeof result === 'string' || typeof result === 'number' ? result : result?.id;
 
-                    // On force l'affichage immédiat en passant par Geoman si possible
+                    // Immediate display is enforced by going through Geoman if possible
                     if (gmApi.features.getFeatureById) {
                          const f = gmApi.features.getFeatureById(addedId || feature.id);
                          if (f && f.show) {
@@ -595,8 +594,8 @@ class MaplibreGeometryField {
                          }
                     }
 
-                    // On met à jour l'historique local gmEvents directement avec la feature qu'on vient d'ajouter
-                    // On n'attend pas la source car le nom peut varier et l'update peut être asynchrone
+                    // We are updating the local gmEvents history directly with the feature we just added
+                    // We don't wait for the source because the name can vary and the update can be asynchronous
                     this._updateEventsHistory({
                         type: 'gm:create',
                         feature: {
@@ -605,7 +604,7 @@ class MaplibreGeometryField {
                         }
                     });
 
-                    // Ajouter un marker DOM personnalisé pour les features Point/MultiPoint initiales
+                    // Add a custom DOM marker for initial Point/MultiPoint features
                     if (this.options.customIcon) {
                         const geomType = (feature.geometry || feature).type;
                         if (geomType === 'Point' || geomType === 'MultiPoint') {
@@ -621,10 +620,10 @@ class MaplibreGeometryField {
                 }
             });
 
-            // Forcer un rafraîchissement
+            // Force refresh
             this.map.triggerRepaint();
 
-            // Centrer à nouveau après l'ajout à Geoman pour être sûr
+            // Re-center after adding to Geoman to be sure
             setTimeout(() => {
                 try {
                     const collection = { type: 'FeatureCollection', features: initialFeatures };
@@ -636,13 +635,13 @@ class MaplibreGeometryField {
                     console.warn('MaplibreGeometryField: post-geoman fitBounds failed', e);
                 }
 
-                // Forcer le style des layers Geoman pour s'assurer qu'ils sont visibles (fallback)
+                // Force the style of Geoman layers to ensure they are visible (fallback)
                 try {
                     const style = this.map.getStyle();
                     if (style && style.layers) {
                         let updated = false;
                         style.layers.forEach(layer => {
-                            // On cible les layers Geoman qui pourraient ne pas avoir de style défini
+                            // We are targeting the Geoman layers that may not have a defined style.
                             const isGeoman = layer.id.indexOf('gm_') !== -1 || layer.id.indexOf('geoman') !== -1;
 
                             if (isGeoman && layer.type !== 'symbol') {
@@ -654,8 +653,8 @@ class MaplibreGeometryField {
                                 } else if (layer.type === 'fill') {
                                     this.map.setPaintProperty(layer.id, 'fill-color', '#3388ff');
                                     this.map.setPaintProperty(layer.id, 'fill-opacity', 0.2);
-                                    // Ajouter une couleur de contour pour le remplissage si supporté (fill-outline-color)
-                                    // Cela aide si la couche de ligne est manquante ou invisible
+                                    // Add an outline color for the fill if supported (fill-outline-color)
+                                    // This helps if the line layer is missing or invisible
                                     this.map.setPaintProperty(layer.id, 'fill-outline-color', '#3388ff');
                                     updated = true;
                                 }
@@ -670,10 +669,10 @@ class MaplibreGeometryField {
                 }
             }, 800);
             
-            // S'assurer que les couches sont au-dessus
+            // Ensure the layers are on top
             this._resetDrawingCoords();
             
-            // Forcer Geoman à recalculer ses limites internes si besoin
+            // Force Geoman to recalculate its internal boundaries if necessary
             if (gmApi.update) {
                 gmApi.update();
             }
@@ -687,31 +686,31 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Tente de résoudre le nom de la source de données Geoman
-     * @return {string|null} - Le nom de la source ou null
+     * Attempt to resolve the Geoman data source name
+     * @return {string|null} - The source name or null
      * @private
      */
     _resolveGeomanSourceName() {
         const gmApi = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
         
-        // Geoman 0.6.x expose souvent un `defaultSourceName` côté `features`.
+        // Geoman 0.6.x often exposes a `defaultSourceName` on the `features` side.
         const fromApi = gmApi?.features?.defaultSourceName;
         if (typeof fromApi === 'string' && fromApi.length > 0) {
             return fromApi;
         }
 
-        // Fallback : essayer les sources connues côté MapLibre.
+        // Fallback: try known sources on the MapLibre side.
         if (this.map.getSource('gm_main')) return 'gm_main';
         if (this.map.getSource('geoman_main')) return 'geoman_main';
 
-        // Dernier recours : chercher une source dont l'id ressemble à Geoman.
+        // Last resort: look for a source whose id resembles Geoman.
         const sources = this.map.getStyle?.()?.sources || {};
         const candidate = Object.keys(sources).find(k => k.startsWith('gm_') || k.startsWith('gm-') || k.includes('geoman'));
         return candidate || null;
     }
 
     /**
-     * Récupère la source de données Geoman
+     * Retrieve the Geoman data source
      * @private
      */
     _getGeomanLayersSource() {
@@ -720,8 +719,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Supprime toutes les features Geoman sauf une optionnelle
-     * @param exceptFeature {Object|null} - La feature (GeoJSON) à conserver
+     * Remove all Geoman features except one optional one
+     * @param exceptFeature {Object|null} - The feature (GeoJSON) to keep
      * @private
      */
     _removeAllGeomanFeatures(exceptFeature = null) {
@@ -729,19 +728,19 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Supprime uniquement les features appartenant à ce champ (celles dans gmEvents),
-     * en préservant les features des autres champs.
-     * @param exceptFeature {Object|null} - La feature (GeoJSON) à conserver
+     * Remove only features belonging to this field (those in gmEvents),
+     * while preserving features from other fields.
+     * @param exceptFeature {Object|null} - The feature (GeoJSON) to keep
      * @private
      */
     _removeOwnedGeomanFeatures(exceptFeature = null) {
         const gmApi = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
         const exceptId = exceptFeature ? exceptFeature.id : null;
         
-        // Collecter les IDs des features appartenant à ce champ
+        // Collect the feature IDs belonging to this field
         const ownedIds = new Set(this.gmEvents.map(e => e.id).filter(id => !!id));
         
-        // Si aucune feature n'appartient à ce champ, rien à supprimer
+        // If no feature belongs to this field, nothing to delete
         if (ownedIds.size === 0) return;
 
         // 1. Try to find a removal function via API
@@ -764,7 +763,7 @@ class MaplibreGeometryField {
         }
 
         if (removeFunc) {
-            // Ne supprimer que les features de ce champ (sauf exceptId)
+            // Do not delete features from this field (except exceptId)
             ownedIds.forEach(id => {
                 if (id != exceptId) {
                     try {
@@ -777,7 +776,7 @@ class MaplibreGeometryField {
             return;
         }
 
-        // 2. Fallback: mettre à jour les sources en ne supprimant que les features de ce champ
+        // 2. Fallback: update sources by only removing features from this field
         const sources = this._findAllGeomanSources();
         if (sources.length === 0) {
              console.warn('MaplibreGeometryField: No Geoman sources found for fallback');
@@ -789,18 +788,18 @@ class MaplibreGeometryField {
                 const data = source._data;
                 const features = (data?.geojson?.features) || (data?.features) || [];
                 
-                // Garder toutes les features SAUF celles de ce champ (sauf exceptId)
+                // Keep all features EXCEPT those in this field (except exceptId)
                 const finalFeatures = features.filter(f => {
                     if (!f.id) return true;
-                    // Si c'est la feature à conserver, on la garde
+                    // If it's the feature to keep, we'll keep it
                     if (exceptId != null && f.id == exceptId) return true;
-                    // Si c'est une feature de ce champ, on la supprime
+                    // If this is a feature of this field, we will remove it
                     if (ownedIds.has(f.id)) return false;
-                    // Sinon (feature d'un autre champ), on la garde
+                    // Otherwise (feature of another field), we keep it
                     return true;
                 });
 
-                // Ajouter exceptFeature si pas encore dans la source
+                // Add exceptFeature if not already in source
                 if (exceptFeature && exceptId != null && !finalFeatures.some(f => f.id == exceptId)) {
                     finalFeatures.push(exceptFeature);
                 }
@@ -823,8 +822,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Trouve toutes les sources potentielles de Geoman
-     * @return {Array} - Liste des objets Source
+     * Find all potential sources of Geoman
+     * @return {Array} - List of Source objects
      * @private
      */
     _findAllGeomanSources() {
@@ -839,8 +838,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Détermine les shapes Geoman qui correspondent au type de géométrie de ce champ.
-     * @return {Array<string>} - Liste des noms de shapes Geoman acceptés
+     * Determines the Geoman shapes that match the geometry type of this field.
+     * @return {Array<string>} - List of accepted Geoman shape names
      * @private
      */
     _getAcceptedShapes() {
@@ -854,8 +853,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Vérifie si une shape Geoman correspond au type de géométrie de ce champ.
-     * @param {string} shape - Le nom de la shape Geoman (marker, line, polygon, rectangle)
+     * Checks if a Geoman shape matches the geometry type of this field.
+     * @param {string} shape - The name of the Geoman shape (marker, line, polygon, rectangle)
      * @return {boolean}
      * @private
      */
@@ -864,23 +863,22 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Vérifie si ce champ est le champ actif dans le DrawControlManager.
-     * Utilisé pour les événements de dessin (create, draw) pour router vers le bon champ.
+     * Checks if this field is the active field in the DrawControlManager.
+     * Used for drawing events (create, draw) to route to the correct field.
      * @return {boolean}
      * @private
      */
     _isActiveField() {
         if (!this.drawManager) return true;
         const activeFieldId = this.drawManager.getActiveFieldId();
-        // Si pas de champ actif défini (mode simple sans multi-geom), accepter
+        // If no active field is set (simple mode without multi-geom), accept
         if (!activeFieldId) return true;
         return activeFieldId === this.fieldId;
     }
 
     /**
-     * Vérifie si une feature éditée/déplacée/supprimée appartient à ce champ
-     * en regardant si son ID est dans gmEvents.
-     * @param {Object} event - L'événement Geoman
+     * Checks if an edited/moved/deleted feature belongs to this layer by looking if its ID is in gmEvents.
+     * @param {Object} event - The Geoman event
      * @return {boolean}
      * @private
      */
@@ -891,18 +889,18 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Cache le marker Geoman par défaut d'une feature point.
-     * Geoman rend les points via un symbol layer MapLibre (icon-image: "default-marker").
-     * On rend le marker par défaut transparent (icon-opacity: 0) SANS le filtrer,
-     * pour que Geoman puisse toujours détecter les clics/drags sur la feature.
-     * @param {Object} feature - La feature Geoman (FeatureData)
+     * Hide the default Geoman marker for a point feature.
+     * Geoman renders points via a MapLibre symbol layer (icon-image: "default-marker").
+     * We render the default marker transparent (icon-opacity: 0) WITHOUT filtering it,
+     * so that Geoman can still detect clicks/drags on the feature.
+     * @param {Object} feature - The Geoman feature (FeatureData)
      * @private
      */
     _hideGeomanDefaultMarker(feature) {
         const featureId = feature.id;
         if (!featureId) return;
 
-        // 1. Cacher les DOM markers (utilisés pendant l'édition/drag)
+        // 1. Hide DOM markers (used during editing/drag)
         const doHideDom = (feat) => {
             if (feat && feat.markers && typeof feat.markers.forEach === 'function') {
                 feat.markers.forEach((markerEntry) => {
@@ -919,14 +917,14 @@ class MaplibreGeometryField {
         };
         doHideDom(feature);
 
-        // 2. Rendre le symbol layer Geoman transparent (mais PAS filtré)
-        // On utilise icon-opacity: 0 pour que le marker reste dans le layer
-        // et que Geoman puisse le détecter pour drag/edit/remove
+        // 2. Make the Geoman symbol layer transparent (but NOT filtered)
+        // We use icon-opacity: 0 so that the marker remains in the layer
+        // and Geoman can detect it for drag/edit/remove
         this._applySymbolLayerOpacity();
         setTimeout(() => this._applySymbolLayerOpacity(), 100);
         setTimeout(() => this._applySymbolLayerOpacity(), 500);
 
-        // 3. Fallback : chercher la feature dans Geoman par ID pour les DOM markers (chargement initial)
+        // 3. Fallback: search for the feature in Geoman by ID for DOM markers (initial load)
         const gmApi = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
         const tryHideById = (attempts) => {
             if (attempts <= 0) return;
@@ -944,9 +942,9 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Rend les symbol layers Geoman transparents (icon-opacity: 0) pour les features
-     * qui ont un customIcon, SANS les filtrer. Cela permet à Geoman de continuer
-     * à détecter les features pour le drag/edit/remove.
+     * Makes Geoman symbol layers transparent (icon-opacity: 0) for features
+     * that have a customIcon, WITHOUT filtering them. This allows Geoman to continue
+     * to detect features for drag/edit/remove.
      * @private
      */
     _applySymbolLayerOpacity() {
@@ -954,7 +952,7 @@ class MaplibreGeometryField {
         if (!style || !style.layers) return;
 
         style.layers.forEach(layer => {
-            // Cibler les symbol layers Geoman (ceux qui utilisent default-marker)
+            // Target Geoman symbol layers (those using default-marker)
             if (layer.type === 'symbol' && layer.layout && layer.layout['icon-image'] === 'default-marker') {
                 try {
                     this.map.setPaintProperty(layer.id, 'icon-opacity', 0);
@@ -967,29 +965,30 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Retire le masquage du marker Geoman par défaut pour une feature.
-     * Note: comme on utilise icon-opacity: 0 sur tout le layer, cette méthode
-     * est un no-op pour le symbol layer (on ne peut pas restaurer par feature).
-     * @param {string} featureId - L'ID de la feature
+     * Removes the default Geoman marker mask for a feature.
+     * Note: as we use icon-opacity: 0 on the whole layer, this method
+     * is a no-op for the symbol layer (we cannot restore per feature).
+     * @param {string} featureId - The feature ID
      * @private
      */
     _unhideGeomanDefaultMarker(featureId) {
-        // No-op pour le symbol layer — l'opacity est globale au layer
+        // No-op for the symbol layer — the opacity is global to the layer
     }
 
     /**
-     * Crée un marker DOM maplibregl avec le customIcon à la position d'une feature point.
-     * @param {Object} feature - La feature Geoman
+     * Create a maplibregl DOM marker with the customIcon at the position of a point feature.
+     * @param {Object} feature - The Geoman feature
+"""
      * @private
      */
     _addCustomMarkerForFeature(feature) {
         const featureId = feature.id;
         if (!featureId) return;
 
-        // Supprimer l'ancien marker DOM s'il existe
+        // Remove the old DOM marker if it exists
         this._removeCustomMarker(featureId);
 
-        // Récupérer les coordonnées
+        // Retrieve coordinates
         const geojson = this._getGeoJson(feature);
         if (!geojson) return;
         const geom = geojson.geometry || geojson;
@@ -1002,7 +1001,7 @@ class MaplibreGeometryField {
             return;
         }
 
-        // Cacher le marker DOM Geoman par défaut
+        // Hide Geoman DOM marker by default
         this._hideGeomanDefaultMarker(feature);
 
         // Créer l'élément DOM
@@ -1018,8 +1017,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Met à jour la position d'un marker DOM personnalisé après un drag.
-     * @param {Object} feature - La feature Geoman
+     * Updates the position of a custom DOM marker after a drag.
+     * @param {Object} feature - The Geoman feature
      * @private
      */
     _updateCustomMarkerPosition(feature) {
@@ -1042,8 +1041,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Supprime un marker DOM personnalisé.
-     * @param {string} featureId - L'ID de la feature
+     * Removes a custom DOM marker.
+     * @param {string} featureId - The feature ID
      * @private
      */
     _removeCustomMarker(featureId) {
@@ -1054,9 +1053,8 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Synchronise la position des custom markers DOM avec les coordonnées
-     * actuelles des features dans les sources Geoman.
-     * Appelé à chaque frame de rendu pour suivre le drag en temps réel.
+     * Synchronizes the position of custom DOM markers with the current coordinates of Geoman features.
+Called on each render frame to track real-time dragging.
      * @private
      */
     _syncCustomMarkersFromSource() {
@@ -1070,7 +1068,7 @@ class MaplibreGeometryField {
             const marker = this._customMarkers[id];
             if (!marker) continue;
 
-            // Chercher la feature dans les sources Geoman
+            // Search for the feature in Geoman sources
             for (const source of sources) {
                 const data = source._data;
                 const features = (data?.geojson?.features) || (data?.features) || [];
@@ -1084,7 +1082,7 @@ class MaplibreGeometryField {
                     }
                     if (coords) {
                         const currentLngLat = marker.getLngLat();
-                        // Ne mettre à jour que si la position a changé
+                        // Only update if the position has changed
                         if (currentLngLat.lng !== coords[0] || currentLngLat.lat !== coords[1]) {
                             marker.setLngLat(coords);
                         }
@@ -1096,7 +1094,7 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Supprime tous les markers DOM personnalisés de ce champ.
+     * Remove all custom DOM markers from this field.
      * @private
      */
     _removeAllCustomMarkers() {
@@ -1107,29 +1105,29 @@ class MaplibreGeometryField {
     }
 
     /**
-     * Configurer les événements Geoman pour la création, l'édition et le suivi en direct des géométries
+     * Configure Geoman events for the creation, editing, and live tracking of geometries
      * @private
      */
     _setupGeomanEvents() {
-        // Charger la géométrie initiale
+        // Load initial geometry
         this._loadInitialGeometry();
 
         const registerGeomanHandlers = () => {
             if (this._geomanHandlersRegistered) return;
             this._geomanHandlersRegistered = true;
             const geoman = this.drawManager.getGeoman();
-            // Vérifier si Geoman est disponible
+            // Check if Geoman is available
             if (!geoman) {
                 console.error('Geoman instance is not available');
                 return;
             }
 
-            // Configurer le listener de fin de dessin pour les boutons personnalisés
+            // Configure the drawing completion listener for custom buttons
             this.drawManager.setupDrawEndListener();
 
-            // Événement de début de dessin
+            // Drawing Start Event
             this.map.on('gm:globaldrawmodetoggled', (event) => {
-                // Filtrer : ne réagir qu'aux shapes qui correspondent à ce champ ET vérifier le champ actif
+                // Filter: only react to shapes that match this field AND check the active field
                 if (!this._isShapeForThisField(event.shape)) return;
                 if (!this._isActiveField()) return;
                 try {
@@ -1137,18 +1135,18 @@ class MaplibreGeometryField {
                         const geoman = this.drawManager.getGeoman();
                         const gmApi = this.map.gm || geoman;
 
-                        // Si on est en mode géométrie unique, on ne supprime PAS ici.
-                        // La suppression de l'ancienne feature se fait dans gm:create,
-                        // une fois la nouvelle feature créée, pour éviter de vider gmEvents
-                        // avant que gm:create puisse les utiliser.
+                        // If we are in unique geometry mode, we do NOT delete here.
+                        // The deletion of the old feature is done in gm:create,
+                        // once the new feature is created, to avoid emptying gmEvents
+                        // before gm:create can use them.
                         if (!this.options.isCollection) {
-                            // Rien à faire ici — la suppression est gérée dans gm:create
+                            // Nothing to do here — deletion is handled in gm:create
                         } else {
-                            // En mode collection, on peut vouloir restreindre certains boutons si besoin,
-                            // mais ici on laisse Geoman gérer l'ajout de nouvelles features.
+                            // In collection mode, we might want to restrict certain buttons if needed,
+                            // but here we let Geoman manage the addition of new features.
                         }
 
-                        // Activer le mode de dessin approprié
+                        // Activate the appropriate drawing mode
                         if (event.shape === 'line') {
                             this.isDrawingLine = true;
                             this.isDrawingPolygon = false;
@@ -1163,11 +1161,11 @@ class MaplibreGeometryField {
                             this.isDrawingRectangle = true;
                         }
 
-                        // Réinitialiser les coordonnées et créer la popup
+                        // Reset coordinates and create the popup
                         this.currentDrawingCoords = [];
                         this.rectangleStartCoord = null;
 
-                        // Créer la popup pour les mesures
+                        // Create the popup for measurements
                         if (!this.livePopup) {
                             this.livePopup = new maplibregl.Popup({
                                 closeButton: false,
@@ -1178,14 +1176,14 @@ class MaplibreGeometryField {
                             }).addTo(this.map);
                         }
 
-                        // Désactiver le mode de dessin après la création
+                        // Disable drawing mode after creation
                         if(this.options.isPoint || this.options.isPolygon || this.options.isLineString) {
-                            // On ne fait rien ici pour le moment car on veut que Geoman finisse sa création
-                            // On a déjà géré la suppression des anciennes features au début (gm:globaldrawmodetoggled)
-                            // et on la gère aussi à la fin (gm:create)
+                            // Nothing is being done here at the moment because we want Geoman to finish its creation
+                            // We have already handled the deletion of old features at the beginning (gm:globaldrawmodetoggled)
+                            // and we also handle it at the end (gm:create)
                         }
                     } else {
-                        // Arrêter le tracking quand le mode dessin est désactivé
+                        // Stop tracking when drawing mode is disabled
                         if (event.shape === 'line' || event.shape === 'polygon' || event.shape === 'rectangle') {
                             this._stopLiveDrawingTracking();
                         }
@@ -1196,7 +1194,7 @@ class MaplibreGeometryField {
                 }
             });
 
-            // Événement pour le suivi en temps réel pendant le dessin
+            // Real-time tracking event during drawing
             this.map.on('_gm:draw', (event) => {
                 if (!this._isShapeForThisField(event.mode)) return;
                 if (!this._isActiveField()) return;
@@ -1209,35 +1207,35 @@ class MaplibreGeometryField {
                 }
             });
 
-            // Événement pour la création de la géométrie
+            // Geometry Creation Event
             this.map.on('gm:create', (event) => {
-                // Filtrer : ne réagir qu'aux shapes qui correspondent à ce champ ET vérifier le champ actif
+                // Filter: only react to shapes that match this field AND check the active field
                 if (!this._isShapeForThisField(event.shape)) return;
                 if (!this._isActiveField()) return;
                 try {
-                    // S'assurer que la feature a un ID avant de traiter
+                    // Ensure that the feature has an ID before processing
                     if (event.feature && !event.feature.id) {
                         const newId = generateUniqueId();
                         event.feature.id = newId;
                     }
 
-                    // Si mode unique (pas collection/générique), supprimer les anciennes features AVANT de traiter la nouvelle
-                    // Cela garantit qu'on ne garde qu'une seule feature à la fois
+                    // If single mode (not collection/generic), delete old features BEFORE processing the new one
+                    // This ensures that we keep only one feature at a time
                     if (!this.options.isCollection && event.feature) {
                         const newFeatureId = event.feature.id;
 
-                        // On récupère le GeoJSON complet pour le passer au fallback si besoin
+                        // We retrieve the complete GeoJSON to pass it to the fallback if needed
                         let featureGeoJson = this._getGeoJson(event.feature);
                         if (!featureGeoJson && event.feature && event.feature.type === 'Feature') {
                              featureGeoJson = event.feature;
                         }
-                        // S'assurer que l'ID est présent
+                        // Ensure the ID is present
                         if (featureGeoJson && !featureGeoJson.id) featureGeoJson.id = newFeatureId;
 
-                        // Supprimer les anciennes features de ce champ (gmEvents contient encore les anciennes)
+                        // Remove old features from this field (gmEvents still contains the old ones)
                         this._removeAllGeomanFeatures(featureGeoJson);
 
-                        // Supprimer les anciens markers DOM personnalisés (sauf celui de la nouvelle feature)
+                        // Remove old custom DOM markers (except the one for the new feature)
                         if (this.options.customIcon) {
                             Object.keys(this._customMarkers).forEach(id => {
                                 if (id != newFeatureId) {
@@ -1246,31 +1244,31 @@ class MaplibreGeometryField {
                             });
                         }
 
-                        // Vider gmEvents APRÈS la suppression, ne garder que la nouvelle feature
+                        // Clear gmEvents AFTER deletion, keep only the new feature
                         this.gmEvents = [];
                     }
 
-                    // Maintenant on traite et sauvegarde la géométrie (avec seulement la nouvelle feature pour les types simples)
+                    // Now we process and save the geometry (with only the new feature for simple types)
                     this._processAndSaveGeometry(event);
 
-                    // Ajouter un marker DOM personnalisé si customIcon est défini
+                    // Add a custom DOM marker if customIcon is defined
                     if (this.options.customIcon && event.shape === 'marker' && event.feature) {
                         this._addCustomMarkerForFeature(event.feature);
                     }
 
-                    // Réinitialiser les coordonnées pour la prochaine forme si on est toujours en mode dessin
+                    // Reset coordinates for the next shape if still in drawing mode
                     if ((event.shape === 'line' && this.isDrawingLine) ||
                         (event.shape === 'polygon' && this.isDrawingPolygon) ||
                         (event.shape === 'rectangle' && this.isDrawingRectangle)) {
                         this._resetDrawingCoords();
                     }
 
-                    // Désactiver le mode de dessin après la création
+                    // Disable drawing mode after creation
                     if(!this.options.isCollection) {
                         const gm = this.map.gm || (this.drawManager && this.drawManager.getGeoman());
                         if (gm && gm.disableDraw) {
                             gm.disableDraw();
-                            // Force une deuxième fois pour être sûr que l'UI suit
+                            // Force a second time to be sure the UI follows
                             setTimeout(() => gm.disableDraw(), 50);
                         }
                         this._stopLiveDrawingTracking();
@@ -1281,12 +1279,12 @@ class MaplibreGeometryField {
                 }
             });
 
-            // Événement pour la fin de l'édition
+            // Event for the end of the edition
             this.map.on('gm:editend', (event) => {
                 if (!this._isFeatureOwnedByThisField(event)) return;
                 try {
                     this._processAndSaveGeometry(event);
-                    // Mettre à jour la position du marker DOM personnalisé
+                    // Update the position of the custom DOM marker
                     if (this.options.customIcon && event.feature) {
                         this._updateCustomMarkerPosition(event.feature);
                     }
@@ -1295,12 +1293,12 @@ class MaplibreGeometryField {
                 }
             });
 
-            // Événement de fin de déplacement
+            // End of trip event
             this.map.on('gm:dragend', (event) => {
                 if (!this._isFeatureOwnedByThisField(event)) return;
                 try {
                     this._processAndSaveGeometry(event);
-                    // Mettre à jour la position du marker DOM personnalisé
+                    // Update custom DOM marker position
                     if (this.options.customIcon && event.feature) {
                         this._updateCustomMarkerPosition(event.feature);
                     }
@@ -1309,20 +1307,20 @@ class MaplibreGeometryField {
                 }
             });
 
-            // Suivi en temps réel du drag pour les markers avec customIcon
-            // On écoute 'render' pour mettre à jour la position des custom markers
-            // en lisant les coordonnées depuis la source Geoman à chaque frame.
+            // Real-time drag tracking for markers with customIcon
+            // We listen for 'render' to update the position of custom markers
+            // by reading coordinates from the Geoman source on each frame.
             if (this.options.customIcon) {
                 this.map.on('render', () => {
                     this._syncCustomMarkersFromSource();
                 });
             }
 
-            // Événement de suppression de la géométrie
+            // Geometry deletion event
             this.map.on('gm:remove', (event) => {
                 if (!this._isFeatureOwnedByThisField(event)) return;
                 try {
-                    // Supprimer le marker DOM personnalisé
+                    // Remove custom DOM marker
                     if (event.feature && event.feature.id) {
                         this._removeCustomMarker(event.feature.id);
                     }
@@ -1332,7 +1330,7 @@ class MaplibreGeometryField {
                 }
             });
 
-            // Gérer les clics uniquement pendant le dessin
+            // Manage clicks only during drawing
             this.map.on('click', (event) => {
                 try {
                     this._handleDrawingClick(event);

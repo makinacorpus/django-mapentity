@@ -61,7 +61,7 @@ messages_python:
 	$(docker_compose) run --rm web ./manage.py makemessages -a --no-location --no-obsolete --no-wrap
 
 messages_js:
-	$(docker_compose) run --rm web ./manage.py makemessages -a -d djangojs --no-location --no-obsolete --no-wrap --ignore=node_modules/**
+	$(docker_compose) run --rm web ./manage.py makemessages -a -d djangojs --no-location --no-obsolete --no-wrap --ignore=node_modules/** --ignore=mapentity/static/mapentity/vendor/**
 
 messages: messages_python messages_js
 

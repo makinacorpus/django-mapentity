@@ -5,16 +5,16 @@ class MaplibreDrawControlManager {
         this.geoman = null;
         // Registre des champs : { fieldId: { options, shapes } }
         this._fields = {};
-        // Le champ actuellement actif (celui dont le bouton de dessin a été cliqué)
+        // The currently active field (the one for which the drawing button was clicked)
         this._activeFieldId = null;
-        // Conteneur pour les boutons personnalisés par champ
+        // Container for custom buttons by field
         this._customButtonsContainer = null;
         this._initializeGeoman();
     }
 
     /**
-     * Initialise Geoman avec tous les contrôles de dessin désactivés.
-     * Les vrais boutons seront créés manuellement par champ.
+     * Initialize Geoman with all drawing controls disabled.
+     * Real buttons will be created manually per field.
      */
     _initializeGeoman() {
         const geomanOptions = {
@@ -115,15 +115,15 @@ class MaplibreDrawControlManager {
             }
         };
 
-        // Initialiser Geoman
+        // Init Geoman
         this.geoman = new Geoman.Geoman(this.map, geomanOptions);
         window.gm = this.geoman;
 
-        // Déclencher un événement quand Geoman est prêt
+        // Trigger an event when Geoman is ready
         const checkLoaded = () => {
             if (this.geoman.loaded) {
                 this._createCustomButtonsContainer();
-                // Enregistrer le premier champ (celui qui a créé le DrawControlManager)
+                // Register the first field (the one that created the DrawControlManager)
                 this.registerField(this.options);
                 this.map.fire('gm:loaded');
             } else {
@@ -134,15 +134,15 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Retourne l'instance Geoman associée à ce gestionnaire.
-     * @returns {Geoman.Geoman} L'instance de Geoman
+     * Returns the Geoman instance associated with this manager.
+     * @returns {Geoman.Geoman} The Geoman instance
      */
     getGeoman() {
         return this.geoman;
     }
 
     /**
-     * Retourne l'ID du champ actuellement actif (celui dont le bouton de dessin a été cliqué).
+     * Returns the ID of the currently active field (the one whose drawing button was clicked).
      * @returns {string|null}
      */
     getActiveFieldId() {
@@ -150,13 +150,13 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Crée le conteneur pour les boutons personnalisés de dessin par champ.
-     * Ce conteneur est placé au-dessus des contrôles Geoman natifs.
+     * Creates the container for custom drawing buttons per field.
+     * This container is placed above the native Geoman controls.
      * @private
      */
     _createCustomButtonsContainer() {
         const container = this.map.getContainer();
-        // Chercher le conteneur de contrôles en haut à gauche (avec les contrôles Geoman d'édition/suppression)
+        // Look for the top-left control container (with Geoman edit/delete controls)
         let ctrlTopLeft = container.querySelector('.geoman-controls');
         if (!ctrlTopLeft) {
             ctrlTopLeft = container;
@@ -180,9 +180,9 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Assigne des IDs aux boutons d'édition Geoman pour les sélecteurs e2e.
-     * Mappe les titres des boutons vers des IDs standardisés.
-     * @param {HTMLElement} editSection - La section d'édition Geoman
+     * Assigns IDs to Geoman edit buttons for e2e test selectors.
+     * Maps button titles to standardized IDs.
+     * @param {HTMLElement} editSection - The Geoman edit section
      * @private
      */
     _assignEditButtonIds(editSection) {
@@ -204,8 +204,8 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Enregistre un champ géométrique et crée ses boutons de dessin personnalisés.
-     * @param {Object} fieldOptions - Les options du champ (fieldId, isPoint, isPolygon, etc.)
+     * Registers a geometric field and creates its custom drawing buttons.
+     * @param {Object} fieldOptions - The field options (fieldId, isPoint, isPolygon, etc.)
      */
     registerField(fieldOptions) {
         const fieldId = fieldOptions.fieldId;
@@ -228,9 +228,9 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Ajoute des contrôles de dessin supplémentaires pour un nouveau champ géométrique
-     * qui partage la même carte (via target_map).
-     * @param {Object} fieldOptions - Les options du champ (isPoint, isPolygon, etc.)
+     * Adds additional drawing controls for a new geometric field
+     * that shares the same map (via target_map).
+     * @param {Object} fieldOptions - The field options (isPoint, isPolygon, etc.)
      */
     addFieldControls(fieldOptions) {
         if (!this.geoman || !this.geoman.loaded) {
@@ -248,9 +248,9 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Détermine les shapes Geoman pour un champ donné.
-     * @param {Object} opts - Les options du champ
-     * @returns {Array<string>}
+     * Determines the Geoman shapes for a given field.
+     * @param {Object} opts - The field options
+     * @returns {Array<string>} - The Geoman shapes for the field
      * @private
      */
     _getShapesForField(opts) {
@@ -264,14 +264,14 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Crée les boutons de dessin personnalisés pour un champ.
-     * @param {string} fieldId - L'ID du champ
-     * @param {Object} opts - Les options du champ
-     * @param {Array<string>} shapes - Les shapes Geoman pour ce champ
+     * Creates custom drawing buttons for a field.
+     * @param {string} fieldId - The ID of the field
+     * @param {Object} opts - The field options
+     * @param {Array<string>} shapes - The Geoman shapes for the field
      * @private
      */
     _createFieldButtons(fieldId, opts, shapes) {
-        // Icônes SVG par défaut pour chaque shape (référencées depuis les fichiers statiques)
+        // Default SVG icons for each shape (referenced from static files)
         const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
         const defaultIcons = {
             marker: `<img src="${markersBase}marker.svg" width="18" height="18" alt="marker">`,
@@ -280,7 +280,7 @@ class MaplibreDrawControlManager {
             rectangle: `<img src="${markersBase}rectangle.svg" width="18" height="18" alt="rectangle">`,
         };
 
-        // Libellés par défaut
+        // Default labels
         const defaultLabels = {
             marker: gettext('Draw Point'),
             line: gettext('Draw Line'),
@@ -306,7 +306,7 @@ class MaplibreDrawControlManager {
                 ? `${defaultLabels[shape]} (${opts.fieldLabel})`
                 : `${defaultLabels[shape]} (${fieldId})`;
 
-            // Utiliser l'icône personnalisée si fournie, sinon l'icône par défaut
+            // Use the custom icon if provided, otherwise use the default icon
             if (opts.customIcon) {
                 btn.innerHTML = opts.customIcon;
             } else {
@@ -326,24 +326,24 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Gère le clic sur un bouton de dessin personnalisé.
-     * Active le mode de dessin Geoman pour la shape correspondante et marque le champ actif.
-     * @param {string} fieldId - L'ID du champ
-     * @param {string} shape - La shape Geoman (marker, line, polygon, rectangle)
-     * @param {HTMLElement} btn - Le bouton cliqué
+     * Handles the click on a custom drawing button.
+     * Activates the Geoman drawing mode for the corresponding shape and marks the field as active.
+     * @param {string} fieldId - The ID of the field
+     * @param {string} shape - The Geoman shape (marker, line, polygon, rectangle)
+     * @param {HTMLElement} btn - The clicked button
      * @private
      */
     _onFieldButtonClick(fieldId, shape, btn) {
         const wasActive = btn.classList.contains('active');
 
-        // Désactiver tous les boutons personnalisés
+        // Deactivate all custom buttons
         this._customButtonsContainer.querySelectorAll('.mapentity-draw-btn').forEach(b => {
             b.classList.remove('active');
             b.style.backgroundColor = 'white';
         });
 
         if (wasActive) {
-            // Désactiver le mode de dessin
+            // Deactivate drawing mode
             this._activeFieldId = null;
             if (this.geoman && this.geoman.disableDraw) {
                 this.geoman.disableDraw();
@@ -351,27 +351,27 @@ class MaplibreDrawControlManager {
             return;
         }
 
-        // Activer ce bouton
+        // Activate this button
         btn.classList.add('active');
         btn.style.backgroundColor = '#e0e0e0';
 
-        // Marquer le champ actif AVANT d'activer le mode de dessin
+        // Mark the field as active BEFORE activating the drawing mode
         this._activeFieldId = fieldId;
 
-        // Désactiver d'abord tout mode de dessin actif
+        // Deactivate any active drawing mode first
         if (this.geoman && this.geoman.disableDraw) {
             this.geoman.disableDraw();
         }
 
-        // Activer le mode de dessin Geoman pour cette shape
+        // Activate the Geoman drawing mode for this shape
         if (this.geoman && this.geoman.enableDraw) {
             this.geoman.enableDraw(shape);
         }
     }
 
     /**
-     * Écoute les événements Geoman pour désactiver les boutons quand le dessin est terminé.
-     * Appelé par MaplibreGeometryField après l'enregistrement des handlers.
+     * Listens to Geoman events to deactivate buttons when drawing is finished.
+     * Called by MaplibreGeometryField after registering the handlers.
      */
     setupDrawEndListener() {
         if (this._drawEndListenerSetup) return;
@@ -379,7 +379,7 @@ class MaplibreDrawControlManager {
 
         this.map.on('gm:globaldrawmodetoggled', (event) => {
             if (!event.enabled) {
-                // Désactiver visuellement tous les boutons personnalisés
+                // Deactivate all custom buttons visually
                 if (this._customButtonsContainer) {
                     this._customButtonsContainer.querySelectorAll('.mapentity-draw-btn').forEach(b => {
                         b.classList.remove('active');
@@ -391,9 +391,9 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Applique une icône personnalisée aux boutons de dessin Geoman.
-     * Remplace le contenu SVG des boutons par le HTML fourni.
-     * @param {string} iconHTML - Le HTML de l'icône personnalisée
+     * Applies a custom icon to Geoman drawing buttons.
+     * Replaces the SVG content of the buttons with the provided HTML.
+     * @param {string} iconHTML - The HTML of the custom icon
      * @private
      */
     _applyCustomIcons(iconHTML) {
@@ -410,8 +410,8 @@ class MaplibreDrawControlManager {
     }
 
     /**
-     * Applique une icône personnalisée uniquement aux boutons correspondant au type de géométrie du champ.
-     * @param {Object} opts - Les options du champ contenant customIcon et les flags de type géom
+     * Applies a custom icon only to buttons corresponding to the field's geometry type.
+     * @param {Object} opts - The field options containing customIcon and geometry type flags
      * @private
      */
     _applyCustomIconForShape(opts) {
@@ -435,5 +435,4 @@ class MaplibreDrawControlManager {
             }
         });
     }
-
 }

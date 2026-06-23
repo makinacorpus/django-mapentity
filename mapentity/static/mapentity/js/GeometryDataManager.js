@@ -3,8 +3,8 @@ class GeometryDataManager {
     }
 
     /**
-     * Initialise un objet GeoJSON vide de type FeatureCollection.
-     * @returns {{type: string, features: *[]}} - Un objet GeoJSON vide de type FeatureCollection
+     * Init an empty GeoJSON object of type FeatureCollection.
+     * @returns {{type: string, features: *[]}} - an empty GeoJSON FeatureCollection
      */
     initializeEmpty() {
         return {
@@ -14,21 +14,21 @@ class GeometryDataManager {
     }
 
     /**
-     * Normalise un objet GeoJSON en FeatureCollection.
-     * @param geojson {Object} - L'objet GeoJSON à normaliser.
-     * @returns {*|{type: string, features: *[]}} - Retourne un objet GeoJSON de type FeatureCollection
+     * Normalise a GeoJSON object to a FeatureCollection.
+     * @param geojson {Object} - The GeoJSON object to normalise.
+     * @returns {*|{type: string, features: *[]}} - Returns a GeoJSON object of type FeatureCollection
      */
     normalizeToFeatureCollection(geojson) {
         if (!geojson) {
             return this.initializeEmpty();
         }
 
-        // Si c'est déjà une FeatureCollection
+        // If it's already a FeatureCollection
         if (geojson.type === 'FeatureCollection') {
             return geojson;
         }
 
-        // Si c'est une Feature
+        // If it's a Feature
         if (geojson.type === 'Feature') {
             return {
                 type: 'FeatureCollection',
@@ -36,22 +36,22 @@ class GeometryDataManager {
             };
         }
 
-        // Si c'est une GeometryCollection, convertir en FeatureCollection
+        // If it's a GeometryCollection, convert to FeatureCollection
         if (geojson.type === 'GeometryCollection' && Array.isArray(geojson.geometries)) {
             return {
                 type: 'FeatureCollection',
                 features: geojson.geometries
                     .filter(g => !!g)
                     .flatMap(g => {
-                        // Récursivement normaliser les géométries imbriquées
+                        // Recursively normalize nested geometries
                         const subResult = this.normalizeToFeatureCollection(g);
                         return subResult.features;
                     })
             };
         }
 
-        // Si c'est un MultiPoint/MultiLineString/MultiPolygon, on explose en features simples
-        // pour que Geoman puisse les éditer individuellement
+        // If it's a MultiPoint/MultiLineString/MultiPolygon, explode into simple features
+        // so that Geoman can edit them individually
         if (geojson.type === 'MultiPoint' || geojson.type === 'MultiLineString' || geojson.type === 'MultiPolygon') {
              const typeMap = {
                  'MultiPoint': 'Point',
@@ -75,7 +75,7 @@ class GeometryDataManager {
              }
         }
 
-        // Si c'est une géométrie seule (Point/LineString/Polygon), l'encapsuler dans une Feature
+        // If it's a single geometry (Point/LineString/Polygon), wrap it in a Feature
         if (geojson.type && geojson.coordinates) {
             return {
                 type: 'FeatureCollection',
@@ -91,9 +91,9 @@ class GeometryDataManager {
     }
 
     /**
-     * Normalise un tableau de géométries en GeometryCollection.
-     * @param geometries {Array} - Un tableau de géométries à normaliser.
-     * @returns {{type: string, geometries: *}|{type: string, geometries: *[]}} - Retourne un objet GeoJSON de type GeometryCollection
+     * Normalise an array of geometries to a GeometryCollection.
+     * @param geometries {Array} - An array of geometries to normalise.
+     * @returns {{type: string, geometries: *}|{type: string, geometries: *[]}} - Returns a GeoJSON object of type GeometryCollection
      */
     normalizeToGeometryCollection(geometries) {
         return {
@@ -104,9 +104,9 @@ class GeometryDataManager {
     }
 
     /**
-     * Normalise un tableau de géométries en MultiPoint.
-     * @param geometries {Array} - Un tableau de géométries Point à normaliser.
-     * @returns {{type: string, coordinates: Array}} - Un objet GeoJSON de type MultiPoint
+     * Normalise an array of geometries to a MultiPoint.
+     * @param geometries {Array} - An array of Point geometries to normalise.
+     * @returns {{type: string, coordinates: Array}} - A GeoJSON object of type MultiPoint
      */
     normalizeToMultiPoint(geometries) {
         const coordinates = [];
@@ -114,24 +114,24 @@ class GeometryDataManager {
             if (!g || !g.coordinates) continue;
             
             if (g.type === 'MultiPoint') {
-                // Si c'est déjà un MultiPoint, on ajoute chaque point individuellement
+                // If it's already a MultiPoint, add each point individually
                 coordinates.push(...g.coordinates);
             } else if (g.type === 'Point') {
-                // Pour un Point, g.coordinates est [lng, lat]
+                // For a Point, g.coordinates is [lng, lat]
                 let pointCoords = g.coordinates;
                 
-                // Vérifier si les coordonnées ont un niveau d'imbrication supplémentaire
-                // Un Point valide a: coordinates = [lng, lat] (deux nombres)
-                // Si coordinates[0] est un tableau (au lieu d'un nombre), il y a un niveau de trop
+                // Check if the coordinates have an extra nesting level
+                // A valid Point has: coordinates = [lng, lat] (two numbers)
+                // If coordinates[0] is an array (instead of a number), there is an extra level
                 if (Array.isArray(pointCoords) && Array.isArray(pointCoords[0])) {
-                    // Niveau d'imbrication supplémentaire détecté, on le retire
+                    // Extra nesting level detected, unwrap it
                     console.warn('GeometryDataManager: detected extra nesting level in Point coordinates, unwrapping');
                     pointCoords = pointCoords[0];
                 }
                 
                 coordinates.push(pointCoords);
             } else {
-                // Fallback : on suppose que c'est des coordonnées de point
+                // Fallback: assume it's point coordinates
                 coordinates.push(g.coordinates);
             }
         }
@@ -142,9 +142,9 @@ class GeometryDataManager {
     }
 
     /**
-     * Normalise un tableau de géométries en MultiLineString.
-     * @param geometries {Array} - Un tableau de géométries LineString à normaliser.
-     * @returns {{type: string, coordinates: Array}} - Un objet GeoJSON de type MultiLineString
+     * Normalise an array of geometries to a MultiLineString.
+     * @param geometries {Array} - An array of LineString geometries to normalise.
+     * @returns {{type: string, coordinates: Array}} - A GeoJSON object of type MultiLineString
      */
     normalizeToMultiLineString(geometries) {
         const coordinates = [];
@@ -152,26 +152,26 @@ class GeometryDataManager {
             if (!g || !g.coordinates) continue;
             
             if (g.type === 'MultiLineString') {
-                // Si c'est déjà un MultiLineString, on ajoute chaque ligne individuellement
+                // If it's already a MultiLineString, add each line individually
                 coordinates.push(...g.coordinates);
             } else if (g.type === 'LineString') {
-                // Pour un LineString, g.coordinates est [[lng, lat], ...]
+                // For a LineString, g.coordinates is [[lng, lat], ...]
                 let lineCoords = g.coordinates;
                 
-                // Vérifier si les coordonnées ont un niveau d'imbrication supplémentaire
-                // Un LineString valide a: coordinates[0] = [lng, lat] (un point)
-                // Si coordinates[0][0] est un tableau (au lieu d'un nombre), il y a un niveau de trop
+                // Check if the coordinates have an extra nesting level
+                // A valid LineString has: coordinates[0] = [lng, lat] (a point)
+                // If coordinates[0][0] is an array (instead of a number), there is an extra level
                 if (Array.isArray(lineCoords) && 
                     Array.isArray(lineCoords[0]) && 
                     Array.isArray(lineCoords[0][0])) {
-                    // Niveau d'imbrication supplémentaire détecté, on le retire
+                    // Extra nesting level detected, unwrap it
                     console.warn('GeometryDataManager: detected extra nesting level in LineString coordinates, unwrapping');
                     lineCoords = lineCoords[0];
                 }
                 
                 coordinates.push(lineCoords);
             } else {
-                // Fallback : on suppose que c'est des coordonnées de linestring
+                // Fallback: assume it's LineString coordinates
                 coordinates.push(g.coordinates);
             }
         }
@@ -182,9 +182,9 @@ class GeometryDataManager {
     }
 
     /**
-     * Normalise un tableau de géométries en MultiPolygon.
-     * @param geometries {Array} - Un tableau de géométries Polygon à normaliser.
-     * @returns {{type: string, coordinates: Array}} - Un objet GeoJSON de type MultiPolygon
+     * Normalise an array of geometries to a MultiPolygon.
+     * @param geometries {Array} - An array of Polygon geometries to normalise.
+     * @returns {{type: string, coordinates: Array}} - A GeoJSON object of type MultiPolygon
      */
     normalizeToMultiPolygon(geometries) {
         const coordinates = [];
@@ -192,28 +192,28 @@ class GeometryDataManager {
             if (!g || !g.coordinates) continue;
             
             if (g.type === 'MultiPolygon') {
-                // Si c'est déjà un MultiPolygon, on ajoute chaque polygone individuellement
+                // If it's already a MultiPolygon, add each polygon individually
                 coordinates.push(...g.coordinates);
             } else if (g.type === 'Polygon') {
-                // Pour un Polygon, g.coordinates est déjà au bon format [ring1, ring2, ...]
-                // où ring est un tableau de points [[lng, lat], ...]
+                // For a Polygon, g.coordinates is already in the correct format [ring1, ring2, ...]
+                // where ring is an array of points [[lng, lat], ...]
                 let polygonCoords = g.coordinates;
                 
-                // Vérifier si les coordonnées ont un niveau d'imbrication supplémentaire
-                // Un polygon valide a: coordinates[0] = ring = [[lng, lat], ...]
-                // Si coordinates[0][0][0] est un tableau (au lieu d'un nombre), il y a un niveau de trop
+                // Check if the coordinates have an extra nesting level
+                // A valid Polygon has: coordinates[0] = ring = [[lng, lat], ...]
+                // If coordinates[0][0][0] is an array (instead of a number), there is an extra level
                 if (Array.isArray(polygonCoords) && 
                     Array.isArray(polygonCoords[0]) && 
                     Array.isArray(polygonCoords[0][0]) && 
                     Array.isArray(polygonCoords[0][0][0])) {
-                    // Niveau d'imbrication supplémentaire détecté, on le retire
+                    // Extra nesting level detected, unwrap it
                     console.warn('GeometryDataManager: detected extra nesting level in Polygon coordinates, unwrapping');
                     polygonCoords = polygonCoords[0];
                 }
                 
                 coordinates.push(polygonCoords);
             } else {
-                // Fallback : on suppose que c'est des coordonnées de polygon
+                // Fallback: assume it's Polygon coordinates
                 coordinates.push(g.coordinates);
             }
         }

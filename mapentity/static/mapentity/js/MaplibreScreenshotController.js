@@ -1,8 +1,8 @@
 class MaplibreScreenshotController {
     /**
-     * Contrôle pour prendre une capture d'écran de la carte MapLibre.
-     * @param url {string} - L'URL du serveur pour envoyer la capture d'écran.
-     * @param getcontext {function} - Fonction pour obtenir le contexte complet de la carte à capturer.
+     * Control to take a screenshot of the MapLibre map.
+     * @param url {string} - The server URL to send the screenshot to.
+     * @param getcontext {function} - Function to get the full context of the map to capture.
      */
     constructor(url, getcontext) {
         this.url = url;
@@ -12,35 +12,35 @@ class MaplibreScreenshotController {
     }
 
     /**
-     * Prend une capture d'écran de la carte et envoie le contexte au serveur.
+     * Take a screenshot of the map and send the context to the server.
      */
     screenshot() {
-        // Effet visuel de capture d'écran avec jQuery
+        // Screenshot visual effect with jQuery
         $('<div id="overlay" style="z-index: 5000; position:fixed; top:0; left:0; width:100%; height:100%; background-color: white;"> </div>')
             .appendTo(document.body)
             .fadeOut();
 
         const fullContext = this.getcontext();
 
-        // Hack pour télécharger une réponse en pièce jointe via Ajax avec jQuery
+        // Hack to download a response as an attachment via Ajax with jQuery
         $('<form action="' + this.url + '" method="post">' +
         '<textarea name="printcontext">' + fullContext + '</textarea>' +
         '</form>').appendTo('body').submit().remove();
     }
 
     /**
-     * Ajoute le contrôle de capture d'écran à la carte MapLibre.
-     * @param map {maplibregl.Map} - L'instance de la carte MapLibre à laquelle ajouter le contrôle.
-     * @returns {null} - Retourne le conteneur principal du contrôle de capture d'écran.
+     * Adds the screenshot control to the MapLibre map.
+     * @param map {maplibregl.Map} - The MapLibre map instance to which the control is added.
+     * @returns {null} - Returns the main container of the screenshot control.
      */
     onAdd(map) {
-        this.map = map; // faire attention : référence à la carte et pas instance de MaplibreMap qui lui possède une référence à la carte
+        this.map = map; // attention: reference to the map and not an instance of MaplibreMap which itself has a reference to the map
 
-        // Créer le conteneur principal
+        // Create the main container
         this.container = document.createElement('div');
         this.container.className = 'maplibregl-ctrl maplibregl-ctrl-group maplibregl-screenshot';
 
-        // Bouton pour prendre une capture d'écran
+        // Button to take a screenshot
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
         button.setAttribute('title', gettext('Screenshot'));
@@ -55,7 +55,7 @@ class MaplibreScreenshotController {
         button.appendChild(img);
         this.container.appendChild(button);
 
-        // Ajouter l'événement de clic pour prendre la capture d'écran
+        // Add the click event to take a screenshot
         button.onclick = () => this.screenshot();
 
         return this.container;

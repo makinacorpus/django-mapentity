@@ -141,7 +141,7 @@ class ZipShapeSerializer(Serializer):
                 subpoints, sublines, subpolygons, pp, ll, yy = self.split_bygeom(
                     geom, geom_getter=lambda geom: geom
                 )
-                if hasattr(x, 'pk'):
+                if hasattr(x, "pk"):
                     # Top-level call: x is a Django model instance, clone it
                     if subpoints:
                         clone = iterable.get(id=x.pk)

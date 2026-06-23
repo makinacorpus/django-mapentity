@@ -1,7 +1,7 @@
 class MaplibreObjectsLayer {
     /**
-     * @param geojson {Object} - Objet GeoJSON
-     * @param options {Object} - Options de configuration
+     * @param geojson {Object} - GeoJSON Object
+     * @param options {Object} - Configuration options
      */
     constructor(geojson, options = {}) {
         this._map = null;
@@ -12,25 +12,25 @@ class MaplibreObjectsLayer {
         this.currentTooltip = null;
         this.currentPopup = null;
         this._track_objects = {};
-        this.isLoaded = false; // Nouvel état pour le lazy loading
-        this.dataUrl = options.dataUrl; // URL pour le lazy loading
+        this.isLoaded = false; // New state for lazy loading
+        this.dataUrl = options.dataUrl; // URL for lazy loading
         this.isLazy = options.isLazy;
-        this.loading = false; // État de chargement
+        this.loading = false; // Loading state
         this.primaryKey = this.options.primaryKey;
-        this.excludedIds = new Set(); // IDs à exclure de l'affichage (ex: en cours d'édition)
+        this.excludedIds = new Set(); // IDs to exclude from display (e.g., currently being edited)
 
-        // Récupérer le gestionnaire de couches
+        // Get layer manager
         this.layerManager = MaplibreLayerManager.getInstance();
     }
 
     /**
-     * Initialise la couche d'objets sur la carte
-     * @param map {maplibregl.Map} - Instance de la carte Maplibre
+     * Initialize the object layer on the map
+     * @param map {maplibregl.Map} - Maplibre Map instance
      */
     initialize(map) {
         this._map = map;
 
-        // Initialiser le gestionnaire de couches s'il ne l'est pas déjà
+        // Initialize the layer manager if not already done
         if (!this.layerManager.getMap()) {
             this.layerManager.initialize(map);
         }
@@ -39,11 +39,11 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Configure les événements globaux de la carte (indépendants des couches chargées)
+     * Configure global map events (independent of loaded layers)
      * @private
      */
     _setupGlobalEvents() {
-        // Gestion des exclusions (pour masquer les objets en cours d'édition)
+        // Exclusion Management (to hide objects being edited)
         this._map.on('mapentity:exclude-features', (e) => {
             if (e.ids && Array.isArray(e.ids)) {
                 e.ids.forEach(id => this.excludedIds.add(id));
@@ -78,8 +78,8 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Gère l'événement de clic sur la carte
-     * @param e {Object} - Événement de clic
+     * Manages the map click event
+     * @param e {Object} - Click event
      * @private
      */
     async _onClick(e) {
@@ -90,7 +90,7 @@ class MaplibreObjectsLayer {
         const features = this._map.queryRenderedFeatures(e.point);
         console.log("Features found on click:", features);
 
-        // Exclure les features Geoman (sources commençant par gm_, gm-, geoman_, geoman-)
+        // Exclude the Geoman features (sources starting with gm_, gm-, geoman_, geoman-)
         const nonGeomanFeatures = features.filter(f => {
             const source = f.source || '';
             return source !== 'geojson' && 
@@ -136,8 +136,8 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Gère le mouvement de la souris sur la carte
-     * @param e {Object} - Événement de mouvement
+     * Manages mouse movement on the map
+     * @param e {Object} - Move event
      * @private
      */
     _onMouseMove(e) {
@@ -168,7 +168,7 @@ class MaplibreObjectsLayer {
 
                 const name = feature.properties?.name;
                 if (!name || String(name).trim() === '') {
-                    // Pas de tooltip si le nom est absent, vide ou null
+                    // No tooltip if the name is missing, empty, or null
                     return;
                 }
                 const coordinates = e.lngLat;
@@ -189,8 +189,8 @@ class MaplibreObjectsLayer {
 
 
     /**
-     * Gère l'évènement de la sortie de la souris de l'emplacement d'une feature
-     * @param e {Object} - Événement de mouvement
+     * Manages the event of the mouse leaving the location of a feature
+     * @param e {Object} - Movement event
      * @private
      */
     _onMouseLeave(e) {
@@ -203,28 +203,28 @@ class MaplibreObjectsLayer {
 
 
     /**
-     * Enregistre une couche lazy (sans données) dans le gestionnaire
-     * @param name {string} - Nom de la couche
-     * @param category {string} - Catégorie de la couche
-     * @param labelHTML {string} - Label HTML pour l'affichage
+     * Registers a lazy layer (without data) in the manager
+     * @param name {string} - Layer name
+     * @param category {string} - Layer category
+     * @param labelHTML {string} - HTML label for display
      */
     registerLazyLayer(modelname, category, labelHTML, primaryKey, dataUrl) {
-        // Enregistrer dans le gestionnaire avec un statut lazy
+        // Register in the manager with a lazy status
         this.layerManager.registerLazyOverlay(
             category,
             primaryKey,
             modelname,
             dataUrl,
             labelHTML,
-            (pk, visible) => this.toggleLazyLayer(pk, visible) // Callback pour le chargement
+            (pk, visible) => this.toggleLazyLayer(pk, visible) // Callback for loading
         );
     }
 
     /**
-     * Gère le toggle d'une couche lazy (chargement + affichage/masquage)
-     * @param primaryKey {string} - Clé primaire de la couche
-     * @param visible {boolean} - Visibilité souhaitée
-     * @returns {Promise<boolean>} - Succès du chargement/toggle
+     * Manages the toggle of a lazy layer (loading + display/hide)
+     * @param primaryKey {string} - Layer primary key
+     * @param visible {boolean} - Desired visibility
+     * @returns {Promise<boolean>} - Load/toggle success
      */
     async toggleLazyLayer(primaryKey, visible = true) {
 
@@ -239,7 +239,7 @@ class MaplibreObjectsLayer {
             }
         })
 
-        // Si on veut afficher mais pas encore chargé, charger d'abord
+        // If you want to display but not yet loaded, load first
         if (visible && !this.isLoaded) {
             try {
                 if (this.options.tilejsonUrl) {
@@ -249,21 +249,21 @@ class MaplibreObjectsLayer {
                 } else {
                     return false;
                 }
-                // Après chargement réussi, afficher la couche
+                // After successful loading, display the layer
                 const layerIds = this._current_objects[primaryKey];
                 if (layerIds) {
                     this.layerManager.toggleLayer(layerIds, true);
                 }
                 return true;
             } catch (error) {
-                console.error(`Impossible de charger les données pour ${this.options.name}:`, error);
-                // Notifier l'échec au gestionnaire de couches pour décocher la case
+                console.error(`Failed to load data for ${this.options.name}:`, error);
+                // Notify the layer manager of the failure to uncheck the box
                 this.layerManager.notifyLoadingError(primaryKey);
                 return false;
             }
         }
 
-        // Si déjà chargé, juste faire le toggle normal
+        // If already loaded, just do the normal toggle
         if (this.isLoaded) {
             const layerIds = this._current_objects[primaryKey];
             if (layerIds) {
@@ -276,13 +276,13 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Charge des données depuis une URL
-     * @param url {string} - URL des données GeoJSON
+     * Load data from a URL
+     * @param url {string} - GeoJSON data URL
      * @returns {Promise<void>}
      */
     async load(url) {
         if (this.loading) {
-            console.warn("Chargement déjà en cours...");
+            console.warn("Loading in progress...");
             return;
         }
         console.debug("Loading data from URL: " + url);
@@ -298,13 +298,13 @@ class MaplibreObjectsLayer {
             this.addData(data);
         } catch (error) {
             console.error("Could not load url '" + url + "'", error);
-            throw error; // Re-lancer pour que toggleLazyLayer puisse gérer l'erreur
+            throw error; // Retry so that toggleLazyLayer can handle the error
         }
     }
 
     /**
-     * Charge une couche MVT (Vector Tiles) depuis une URL TileJSON
-     * @param tilejsonUrl {string} - URL du endpoint TileJSON (ex: /api/model/drf/models/tilejson)
+     * Loads an MVT layer (Vector Tiles) from a TileJSON URL
+     * @param tilejsonUrl {string} - URL of the TileJSON endpoint (e.g.: /api/model/drf/models/tilejson)
      */
     loadMVT(tilejsonUrl) {
         if (!tilejsonUrl) {
@@ -315,7 +315,7 @@ class MaplibreObjectsLayer {
             return;
         }
         if (this.loading) {
-            console.warn("Chargement déjà en cours...");
+            console.warn("Loading already in progress...");
             return;
         }
         console.debug("Loading MVT from TileJSON: " + tilejsonUrl);
@@ -327,7 +327,7 @@ class MaplibreObjectsLayer {
         const layerIdBase = `layer-${primaryKey}`;
         const sourceLayer = this.options.modelname;
 
-        // Ajouter la source vector-tile via TileJSON
+        // Add the vector-tile source via TileJSON
         this._map.addSource(sourceId, {
             type: 'vector',
             url: window.location.origin + tilejsonUrl,
@@ -356,16 +356,16 @@ class MaplibreObjectsLayer {
 
         const layerIds = [];
 
-        // Ajouter les couches pour tous les types de géométrie (on ne connaît pas les types à l'avance avec MVT)
+        // Add layers for all geometry types (we don't know the types in advance with MVT)
         layerIds.push(this._addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailColor, sourceLayer));
         layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor, sourceLayer));
         layerIds.push(...this._addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity, detailRgbaStr, detailColor, sourceLayer));
 
-        // Enregistrer les couches
+        // Save layers
         this._current_objects[primaryKey] = layerIds;
 
-        // Stocker les filtres géométriques de base pour chaque layer MVT
-        // afin de pouvoir les réutiliser lors du filtrage par PKs
+        // Store basic geometric filters for each MVT layer
+        // to be able to reuse them during filtering by PKs
         this._mvtBaseFilters = {};
         for (const layerId of layerIds) {
             if (this._map.getLayer(layerId)) {
@@ -376,7 +376,7 @@ class MaplibreObjectsLayer {
         this.isLoaded = true;
         this.loading = false;
 
-        // Enregistrer auprès du gestionnaire de couches
+        // Register with the layer manager
         if (!this.isLazy) {
             this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
         }
@@ -386,8 +386,8 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Ajoute des données GeoJSON
-     * @param geojson {Object} - Données GeoJSON
+     * Add GeoJSON data
+     * @param geojson {Object} - GeoJSON data
      */
     addData(geojson) {
         const dataId = this.primaryKey;
@@ -410,17 +410,17 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Ajoute une couche à la carte
-     * @param geojson {Object} - Données GeoJSON
-     * @param pk {string} - Clé primaire
-     * @param detailStatus {boolean} - Mode détaillé
-     * @param readonly {boolean} - Mode lecture seule
+     * Add a layer to the map
+     * @param geojson {Object} - GeoJSON data
+     * @param pk {string} - Primary key
+     * @param detailStatus {boolean} - Detailed mode
+     * @param readonly {boolean} - Read-only mode
      */
     addLayer(geojson, pk, detailStatus = false, readonly = false) {
         const primaryKey = pk;
         const foundTypes = new Set();
 
-        // Analyse des types de géométrie
+        // Analysis of geometry types
         if (geojson.type === "Feature") {
             if (!geojson.id && geojson.properties?.id) {
                 geojson.id = geojson.properties.id;
@@ -437,10 +437,9 @@ class MaplibreObjectsLayer {
 
         const layerIdBase = `layer-${primaryKey}`;
         const sourceId = `source-${primaryKey}`;
-        const isReadonly = readonly || this.options.readonly; // peut être idéal pour la suite
+        const isReadonly = readonly || this.options.readonly;
         this.options.readonly = isReadonly;
 
-        // Ajouter la source
         this._map.addSource(sourceId, {
             type: 'geojson',
             data: geojson,
@@ -467,14 +466,14 @@ class MaplibreObjectsLayer {
 
         const layerIds = [];
 
-        // Ajouter les couches selon les types de géométrie
+        // Add layers according to geometry types
         if (foundTypes.has("Point") || foundTypes.has("MultiPoint")) {
             layerIds.push(this._addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailColor));
         }
 
         if (foundTypes.has("LineString") || foundTypes.has("MultiLineString")) {
             layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor));
-            // En mode détail, ajouter des marqueurs vert (départ) et rouge (arrivée) et des flèches
+            // In detail mode, add green (start) and red (arrival) markers and arrows
             if (detailStatus) {
                 this._addLineEndpointMarkers(geojson);
                 this._addLineArrowLayer(layerIdBase, sourceId, isColorExpression ? colorForParsing : strokeColor);
@@ -485,10 +484,10 @@ class MaplibreObjectsLayer {
             layerIds.push(...this._addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity, detailRgbaStr, detailColor));
         }
 
-        // Enregistrer les couches
+        // Save layers
         this._current_objects[primaryKey] = layerIds;
 
-        // Enregistrer auprès du gestionnaire de couches (seulement si pas déjà lazy)
+        // Register with the layer manager (only if not already lazy)
         if(this.isLoaded && !this.isLazy) {
             this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
         }
@@ -498,9 +497,9 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Analyse les types de géométrie
-     * @param geometry {Object} - Géométrie GeoJSON
-     * @param foundTypes {Set} - Set des types trouvés
+     * Analyzes geometry types
+     * @param geometry {Object} - GeoJSON geometry
+     * @param foundTypes {Set} - Set of found types
      * @private
      */
     _analyzeGeometryTypes(geometry, foundTypes) {
@@ -516,9 +515,9 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Construit le filtre complet en combinant le filtre de base et les exclusions
-     * @param baseFilter {Array} - Filtre de base
-     * @returns {Array} - Filtre complet
+     * Constructs the complete filter by combining the base filter and exclusions
+     * @param baseFilter {Array} - Base filter
+     * @returns {Array} - Complete filter
      * @private
      */
     _buildFilter(baseFilter) {
@@ -526,18 +525,18 @@ class MaplibreObjectsLayer {
             return baseFilter;
         }
 
-        // Convertir tous les IDs en chaînes uniques pour éviter les erreurs de type mixte et de doublons dans 'match'
+        // Convert all IDs to unique strings to avoid mixed-type and duplicate errors in 'match'
         const excludedIdsStrings = [...new Set(Array.from(this.excludedIds).map(id => String(id)))];
 
-        // Utilisation de 'match' avec conversion en chaîne pour robustesse
-        // Structure : ['match', ['to-string', ['id']], [ids...], false, true]
+        // Using 'match' with string conversion for robustness
+        // Structure: ['match', ['to-string', ['id']], [ids...], false, true]
         const excludeFilter = ['match', ['to-string', ['id']], excludedIdsStrings, false, true];
 
         if (!baseFilter) {
             return excludeFilter;
         }
 
-        // Si le filtre de base est déjà un 'all', on ajoute juste l'exclusion
+        // If the base filter is already 'all', we just add the exclusion
         if (baseFilter[0] === 'all') {
             return [...baseFilter, excludeFilter];
         }
@@ -546,7 +545,7 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Met à jour les filtres de tous les calques gérés pour refléter les exclusions
+     * Updates the filters of all managed layers to reflect exclusions
      * @private
      */
     _updateAllLayerFilters() {
@@ -556,24 +555,24 @@ class MaplibreObjectsLayer {
             const currentFilter = this._map.getFilter(layerId);
             let baseFilter = currentFilter;
 
-            // Tentative de récupération du filtre de base (sans l'exclusion précédente)
+            // Attempt to recover the base filter (without the previous exclusion)
             if (Array.isArray(currentFilter) && currentFilter[0] === 'all') {
                 const last = currentFilter[currentFilter.length - 1];
 
-                // Détection de notre clause d'exclusion
-                // 1. Ancien format !in
-                // 2. Ancien format match simple
-                // 3. Nouveau format match avec to-string
+                // Exclusion clause detection
+                // 1. Old format !in
+                // 2. Old format simple match
+                // 3. New format match with to-string
                 const isExcludeFilter = (Array.isArray(last) && last[0] === '!in' && Array.isArray(last[1]) && last[1][1] === 'id') ||
                                         (Array.isArray(last) && last[0] === 'match' && Array.isArray(last[1]) && last[1][1] === 'id') ||
                                         (Array.isArray(last) && last[0] === 'match' && Array.isArray(last[1]) && last[1][0] === 'to-string');
 
                 if (isExcludeFilter) {
-                    // On enlève juste le dernier élément qui correspond à notre filtre d'exclusion
+                    // We are just removing the last element that matches our exclusion filter
                     baseFilter = currentFilter.slice(0, -1);
 
-                    // Si le résultat est ['all', singleFilter], MapLibre l'accepte.
-                    // Mais si baseFilter devient ['all'], c'est invalide.
+                    // If the result is ['all', singleFilter], MapLibre accepts it.
+                    // But if baseFilter becomes ['all'], it is invalid.
                     if (baseFilter.length === 1) baseFilter = null;
                 }
             }
@@ -589,15 +588,15 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Ajoute une couche de points
-     * @param layerIdBase {string} - Base de l'ID de couche
-     * @param sourceId {string} - ID de la source
-     * @param rgbaStr {string} - Couleur RGBA
-     * @param strokeColor {string} - Couleur de contour
-     * @param fillOpacity {number} - Opacité de remplissage
-     * @param strokeOpacity {number} - Opacité de contour
-     * @param strokeWidth {number} - Largeur de contour
-     * @returns {string} - ID de la couche créée
+     * Add a layer of points
+     * @param layerIdBase {string} - Base layer ID
+     * @param sourceId {string} - Source ID
+     * @param rgbaStr {string} - RGBA color
+     * @param strokeColor {string} - Stroke color
+     * @param fillOpacity {number} - Fill opacity
+     * @param strokeOpacity {number} - Stroke opacity
+     * @param strokeWidth {number} - Stroke width
+     * @returns {string} - Created layer ID
      * @private
      */
     _addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailStrokeColor, sourceLayer) {
@@ -669,18 +668,18 @@ class MaplibreObjectsLayer {
 
 
     /**
-     * Ajoute une couche de lignes
-     * @param layerIdBase {string} - Base de l'ID de couche
-     * @param sourceId {string} - ID de la source
-     * @param strokeColor {string} - Couleur de ligne
-     * @param strokeWidth {number} - Largeur de ligne
-     * @param strokeOpacity {number} - Opacité de ligne
-     * @returns {string} - ID de la couche créée
+     * Add a layer of lines
+     * @param layerIdBase {string} - Base layer ID
+     * @param sourceId {string} - Source ID
+     * @param strokeColor {string} - Line color
+     * @param strokeWidth {number} - Line width
+     * @param strokeOpacity {number} - Line opacity
+     * @returns {string} - Created layer ID
      * @private
      */
     _addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor, sourceLayer) {
         const layerId = `${layerIdBase}-lines`;
-        // Augmentation de la largeur au hover (en pixels)
+        // Increase in width on hover (in pixels)
         const hoverExtra = 2;
         const hoveredWidth = strokeWidth + hoverExtra;
         const detailStyle = this.options.detailStyle || {};
@@ -732,10 +731,10 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Ajoute une couche de flèches le long des lignes (mode détail uniquement).
-     * @param {string} layerIdBase - Base de l'ID de couche
-     * @param {string} sourceId - ID de la source
-     * @param {string} strokeColor - Couleur des flèches
+     * Add an arrow layer along the lines (detail mode only).
+     * @param {string} layerIdBase - Base layer ID
+     * @param {string} sourceId - Source ID
+     * @param {string} strokeColor - Arrow color
      * @private
      */
     _addLineArrowLayer(layerIdBase, sourceId, strokeColor) {
@@ -783,9 +782,9 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Ajoute des marqueurs DOM vert (départ) et rouge (arrivée) aux extrémités des lignes.
-     * Utilisé en mode détail uniquement.
-     * @param {Object} geojson - Données GeoJSON (Feature ou FeatureCollection)
+     * Add green (start) and red (end) DOM markers to the ends of the lines.
+     * Used in detail mode only.
+     * @param {Object} geojson - GeoJSON data (Feature or FeatureCollection)
      * @private
      */
     _addLineEndpointMarkers(geojson) {
@@ -815,9 +814,9 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Crée un marqueur image de carte standard (pin) à une position donnée.
-     * @param {Array} lngLat - Coordonnées [lng, lat]
-     * @param {string} color - Couleur CSS du marqueur
+     * Creates a standard map image marker (pin) at a given position.
+     * @param {Array} lngLat - [lng, lat] coordinates
+     * @param {string} color - CSS color of the marker
      * @private
      */
     _createEndpointMarker(lngLat, color) {
@@ -836,22 +835,22 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Ajoute les couches de polygones (remplissage + contour)
-     * @param layerIdBase {string} - Base de l'ID de couche
-     * @param sourceId {string} - ID de la source
-     * @param rgbaStr {string} - Couleur RGBA
-     * @param strokeColor {string} - Couleur de contour
-     * @param fillOpacity {number} - Opacité de remplissage
-     * @param strokeWidth {number} - Largeur de contour
-     * @param strokeOpacity {number} - Opacité de contour
-     * @returns {Array<string>} - IDs des couches créées
+     * Add polygon layers (fill + outline)
+     * @param layerIdBase {string} - Layer ID base
+     * @param sourceId {string} - Source ID
+     * @param rgbaStr {string} - RGBA color
+     * @param strokeColor {string} - Outline color
+     * @param fillOpacity {number} - Fill opacity
+     * @param strokeWidth {number} - Outline width
+     * @param strokeOpacity {number} - Outline opacity
+     * @returns {Array<string>} - Created layer IDs
      * @private
      */
     _addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity, detailRgbaStr, detailStrokeColor, sourceLayer) {
         const fillLayerId = `${layerIdBase}-polygon-fill`;
         const strokeLayerId = `${layerIdBase}-polygon-stroke`;
 
-        // Augmentations visuelles au survol
+        // Visualizations on hover
         const hoveredStrokeWidth = strokeWidth + 2;
         const hoveredFillOpacity = Math.min((fillOpacity ?? 0.7) + 0.15, 1);
         const detailStyle = this.options.detailStyle || {};
@@ -859,7 +858,7 @@ class MaplibreObjectsLayer {
         const detailStrokeWidth = detailStyle.weight ?? strokeWidth;
         const detailStrokeOpacity = detailStyle.opacity ?? strokeOpacity;
 
-        // Couche de remplissage
+        // Fill layer
         const fillDef = {
             id: fillLayerId,
             type: 'fill',
@@ -892,7 +891,7 @@ class MaplibreObjectsLayer {
         });
         this._map.addLayer(fillDef);
 
-        // Couche de contour
+        // Outline layer
         const strokeDef = {
             id: strokeLayerId,
             type: 'line',
@@ -939,9 +938,9 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Met en surbrillance un objet
-     * @param primaryKey {string|number} - Clé primaire
-     * @param on {boolean} - Activer/désactiver
+     * Highlights an object
+     * @param primaryKey {string|number} - Primary key
+     * @param on {boolean} - Enable/disable
      */
     highlight(primaryKey, on = true) {
         if (this.options.readonly) {
@@ -976,9 +975,9 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Sélectionne un objet
-     * @param primaryKey {string|number} - Clé primaire
-     * @param on {boolean} - Activer/désactiver
+     * Select an object
+     * @param primaryKey {string|number} - Primary key
+     * @param on {boolean} - Enable/disable
      */
     select(primaryKey, on = true) {
         if (this.options.readonly) {
@@ -1015,14 +1014,14 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Met à jour les objets affichés
-     * @param primaryKeys {Array<string|number>} - Clés primaires à afficher
+     * Updates displayed objects
+     * @param primaryKeys {Array<string|number>} - Primary keys to display
      */
     updateFromPks(primaryKeys) {
-        // Mode MVT : utiliser des filtres sur les layers
+        // MVT Mode: use filters on layers
         if (this._isMVT) {
             const layersBySource = Object.values(this._current_objects).flat();
-            // Convertir les PKs en nombres pour correspondre au type des propriétés MVT
+            // Convert PKs to numbers to match the MVT property type
             const numericPks = primaryKeys.map(pk => Number(pk));
             const pkFilter = numericPks.length > 0
                 ? ['in', ['get', 'id'], ['literal', numericPks]]
@@ -1030,7 +1029,7 @@ class MaplibreObjectsLayer {
 
             for (const layerId of layersBySource) {
                 if (!this._map.getLayer(layerId)) continue;
-                // Récupérer le filtre géométrique de base (stocké lors de la création)
+                // Retrieve the base geometric filter (stored during creation)
                 const baseGeomFilter = this._mvtBaseFilters && this._mvtBaseFilters[layerId];
                 const newFilter = baseGeomFilter
                     ? ['all', baseGeomFilter, pkFilter]
@@ -1049,7 +1048,7 @@ class MaplibreObjectsLayer {
         const layersBySource = Object.values(this._current_objects).flat();
 
         if (layersBySource.length === 0) {
-            console.error("Aucun layer trouvé dans _current_objects");
+            console.error("No layer found in _current_objects");
             return;
         }
 
@@ -1071,13 +1070,13 @@ class MaplibreObjectsLayer {
         }
 
         if (!sourceId || !fullFeatureCollection) {
-            console.warn('Aucune source valide trouvée');
+            console.warn('No valid source found');
             return;
         }
 
         const source = this._map.getSource(sourceId);
 
-        // Sauvegarder les features
+        // Save features
         fullFeatureCollection.features.forEach(feature => {
             const featureId = feature.properties?.id;
             if (featureId && !this._track_objects[featureId]) {
@@ -1085,12 +1084,12 @@ class MaplibreObjectsLayer {
             }
         });
 
-        // Filtrer les features à afficher
+        // Filter features to display
         const featuresToShow = primaryKeys
             .map(pk => this._track_objects[pk])
             .filter(feature => feature);
 
-        // Mettre à jour la source
+        // Update source
         source.setData({
             type: 'FeatureCollection',
             features: featuresToShow
@@ -1098,15 +1097,15 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Déplace la vue vers un objet
-     * @param pk {string|number} - Clé primaire
+     * Move the view to an object
+     * @param pk {string|number} - Primary key
      */
     jumpTo(pk) {
         let feature = null;
         const layersBySource = Object.values(this._current_objects).flat();
 
         if (this._isMVT) {
-            // En mode MVT, utiliser querySourceFeatures pour trouver la feature
+            // In MVT mode, use querySourceFeatures to find the feature
             for (const layerId of layersBySource) {
                 const layer = this._map.getLayer(layerId);
                 if (!layer) continue;
@@ -1137,7 +1136,7 @@ class MaplibreObjectsLayer {
         }
 
         if (!feature) {
-            console.warn(`Feature avec l'id ${pk} non trouvée`);
+            console.warn(`Feature with id ${pk} not found`);
             return;
         }
 
@@ -1148,8 +1147,8 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Récupère un objet par sa clé
-     * @param primaryKey {string|number} - Clé primaire
+     * Retrieves an object by its key
+     * @param primaryKey {string|number} - Primary key
      * @returns {Object}
      */
     getLayer(primaryKey) {
@@ -1157,7 +1156,7 @@ class MaplibreObjectsLayer {
     }
 
     /**
-     * Récupère la couche des limites
+     * Get the boundaries layer
      * @returns {*}
      */
     getBoundsLayer() {

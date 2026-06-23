@@ -12,8 +12,9 @@ from django_filters import (
     ModelMultipleChoiceFilter,
     NumberFilter,
 )
-from django_filters.filterset import get_model_field, remote_queryset
+from django_filters.filterset import remote_queryset
 from django_filters.rest_framework import FilterSet
+from django_filters.utils import get_model_field
 
 from mapentity.settings import API_SRID, app_settings
 from mapentity.widgets import HiddenGeometryWidget

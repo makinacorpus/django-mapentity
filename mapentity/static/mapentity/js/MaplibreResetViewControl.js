@@ -1,7 +1,7 @@
 class MaplibreResetViewControl {
     /**
-     * Contrôle pour réinitialiser la vue de la carte à ses limites initiales.
-     * @param {Object} bounds - Les limites de la carte sous forme de [SW, NE] (sud-ouest, nord-est).
+     * Control to reset the map view to its initial bounds.
+     * @param {Object} bounds - The map bounds as [SW, NE] (southwest, northeast).
      */
     constructor(bounds) {
         this.bounds = bounds;
@@ -10,17 +10,16 @@ class MaplibreResetViewControl {
     }
 
     /**
-     * Ajoute le contrôle à la carte.
-     * @param map {maplibregl.Map} - L'instance de la carte Maplibre à laquelle ajouter le contrôle.
-     * @returns {null} - Retourne le conteneur principal du contrôle.
+     * Adds the control to the map.
+     * @param map {maplibregl.Map} - The Maplibre map instance to which the control will be added.
+     * @returns {null} - Returns the main container of the control.
      */
     onAdd(map) {
         this.map = map;
-        // Créer le conteneur principal
         this.container = document.createElement('div');
         this.container.className = 'maplibregl-ctrl maplibregl-ctrl-group maplibregl-resetview';
 
-        // Bouton pour réinitialiser la carte
+        // Button to reset the map view
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
         button.setAttribute('title', gettext('Reset view'));
@@ -40,7 +39,7 @@ class MaplibreResetViewControl {
     }
 
     /**
-     * Réinitialise la vue de la carte aux limites initiales.
+     * Reset the map view to the initial bounds.
      */
     reset() {
         if (!this.bounds) {
@@ -58,8 +57,8 @@ class MaplibreResetViewControl {
     }
 
     /**
-     * Récupère les limites de la carte.
-     * @returns {Object} - Les limites de la carte sous forme de [SW, NE] (sud-ouest, nord-est).
+     * Retrieves the map bounds.
+     * @returns {Object} - The map bounds in the form of [SW, NE] (southwest, northeast).
      */
     getBounds() {
         return this.bounds;

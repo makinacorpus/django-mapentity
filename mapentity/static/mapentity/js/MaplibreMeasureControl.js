@@ -1,12 +1,12 @@
 class MaplibreMeasureControl {
     /**
-     * Contrôle de mesure pour MapLibre GL JS avec affichage en temps réel.
+     * Measurement control for MapLibre GL JS with real-time display.
      */
     constructor() {
         this._map = null;
         this._container = null;
         this._drawing = false;
-        this._measureCompleted = false; // Nouveau: indique si une mesure est terminée
+        this._measureCompleted = false; // New: indicates if a measurement is complete
         this._geojson = {
             type: 'FeatureCollection',
             features: []
@@ -18,7 +18,7 @@ class MaplibreMeasureControl {
                 coordinates: []
             }
         };
-        // Nouvelle ligne pour l'affichage en temps réel
+        // New line for real-time display
         this._liveLinestring = {
             type: 'Feature',
             geometry: {
@@ -32,23 +32,23 @@ class MaplibreMeasureControl {
         this._finalPopup = null;
         this._lastClickTime = 0;
         this._lastClickPoint = null;
-        this._doubleClickThreshold = 500; // 500ms pour détecter le double-clic
-        this._completedLines = []; // Nouveau: stocke les lignes terminées
+        this._doubleClickThreshold = 500; // 500ms to detect the double-click
+        this._completedLines = []; // New: stores completed lines
     }
 
     /**
-     * Ajoute le contrôle de mesure à la carte MapLibre.
-     * @param map {maplibregl.Map} - L'instance de la carte MapLibre à laquelle ajouter le contrôle.
-     * @returns {HTMLElement} - Retourne le conteneur du contrôle de mesure.
+     * Add the measurement control to the MapLibre map.
+     * @param map {maplibregl.Map} - The MapLibre map instance to which the control is added.
+     * @returns {HTMLElement} - Returns the measurement control container.
      */
     onAdd(map) {
         this._map = map;
 
-        // Création du conteneur
+        // Container creation
         this._container = document.createElement('div');
         this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
 
-        // Création du bouton
+        // Button creation
         this._button = document.createElement('button');
         this._button.setAttribute('type', 'button');
         this._button.setAttribute('title', gettext('Measure a distance'));
@@ -83,9 +83,9 @@ class MaplibreMeasureControl {
         const onClick = (e) => this._onClick(e);
         const onMouseMove = (e) => this._onMouseMove(e);
 
-        // Toggle dessin
+        // Toggle draw
         this._button.onclick = () => {
-            // Si une mesure est terminée, on remet tout à zéro
+            // If a measurement is finished, we reset everything to zero
             if (this._measureCompleted) {
                 this._resetAll();
                 return;
@@ -98,16 +98,16 @@ class MaplibreMeasureControl {
                 this._map.on('click', onClick);
                 this._map.on('mousemove', onMouseMove);
 
-                // Active le style visuel
+                // Activate visual style
                 this._button.classList.add('measure-control-btn-active');
-                this._button.setAttribute('title', 'Arrêter la mesure');
+                this._button.setAttribute('title', gettext('Stop measurement'));
             } else {
                 this._map.getCanvas().style.cursor = '';
                 this._map.off('click', onClick);
                 this._map.off('mousemove', onMouseMove);
                 this._finishMeasure();
 
-                // Retire le style actif
+                // remove active style
                 this._button.classList.remove('measure-control-btn-active');
                 this._button.setAttribute('title', gettext('Measure a distance'));
             }
@@ -145,7 +145,7 @@ class MaplibreMeasureControl {
                 filter: ['in', '$type', 'LineString']
             });
 
-            // Nouvelle couche pour la ligne en temps réel
+            // New layer for the real-time line
             this._map.addLayer({
                 id: 'measure-live-line',
                 type: 'line',
@@ -153,7 +153,7 @@ class MaplibreMeasureControl {
                 filter: ['==', ['get', 'live'], true]
             });
 
-            // Couche pour les lignes terminées
+            // Layer for completed lines
             this._map.addLayer({
                 id: 'measure-completed-lines',
                 type: 'line',
@@ -166,12 +166,12 @@ class MaplibreMeasureControl {
     }
 
     /**
-     * Gère le clic sur la carte pour ajouter des points de mesure.
-     * @param e {Object} - L'événement de clic contenant les coordonnées du point cliqué.
+     * Handles map click to add measurement points.
+     * @param e {Object} - The click event containing the coordinates of the clicked point.
      * @private
      */
     _onClick(e) {
-        // Si une mesure est terminée, on ignore les clics
+        // If a measurement is complete, clicks are ignored
         if (this._measureCompleted) {
             return;
         }
@@ -179,21 +179,21 @@ class MaplibreMeasureControl {
         const currentTime = Date.now();
         const clickedCoords = [e.lngLat.lng, e.lngLat.lat];
 
-        // Vérification du double-clic sur le dernier point
+        // Double-click verification on the last point
         if (this._lastClickPoint &&
             currentTime - this._lastClickTime < this._doubleClickThreshold &&
-            this._getDistance(clickedCoords, this._lastClickPoint) < 0.01) { // Distance très petite pour considérer comme même point
+            this._getDistance(clickedCoords, this._lastClickPoint) < 0.01) { // Very small distance to consider as the same point
 
             this._completeMeasure(clickedCoords);
             return;
         }
 
-        // Supprime la ligne live et la ligne principale existante
+        // Delete the existing live and main lines
         this._geojson.features = this._geojson.features.filter(
             feature => feature.geometry.type === 'Point' || feature.properties?.completed
         );
 
-        // Ajoute le nouveau point
+        // Add the new point
         const point = {
             type: 'Feature',
             geometry: {
@@ -206,20 +206,20 @@ class MaplibreMeasureControl {
         };
         this._geojson.features.push(point);
 
-        // Met à jour la ligne principale si on a des points
+        // Updates the main line if there are points
         this._updateMainLine();
         this._map.getSource('geojson').setData(this._geojson);
 
-        // Sauvegarde pour la détection du double-clic
+        // Backup for double-click detection
         this._lastClickTime = currentTime;
         this._lastClickPoint = clickedCoords;
     }
 
     /**
-     * Calcule la distance entre deux coordonnées.
-     * @param coord1 {Array} - Première coordonnée [lng, lat]
-     * @param coord2 {Array} - Deuxième coordonnée [lng, lat]
-     * @returns {number} - Distance en kilomètres
+     * Calculate the distance between two coordinates.
+     * @param coord1 {Array} - First coordinate [lng, lat]
+     * @param coord2 {Array} - Second coordinate [lng, lat]
+     * @returns {number} - Distance in kilometers
      * @private
      */
     _getDistance(coord1, coord2) {
@@ -234,15 +234,15 @@ class MaplibreMeasureControl {
     }
 
     /**
-     * Termine la mesure avec un double-clic.
-     * @param coords {Array} - Coordonnées du point final
+     * Terminate the measurement with a double-click.
+     * @param coords {Array} - Coordinates of the endpoint
      * @private
      */
     _completeMeasure(coords) {
-        // Cache la popup live
+        // Hide live popup
         this._livePopup.remove();
 
-        // Calcule la distance finale
+        // Calculate the final distance
         const points = this._geojson.features.filter(
             feature => feature.geometry.type === 'Point' && !feature.properties?.completed
         );
@@ -258,7 +258,7 @@ class MaplibreMeasureControl {
             };
             finalDistance = turf.length(mainLine);
 
-            // Sauvegarde la ligne terminée
+            // Save the completed line
             const completedLine = {
                 type: 'Feature',
                 geometry: {
@@ -275,42 +275,42 @@ class MaplibreMeasureControl {
             this._completedLines.push(completedLine);
         }
 
-        // Affiche la popup finale à côté du dernier point
+        // Display the final popup next to the last point
         const formattedMessage = `Distance finale: ${finalDistance.toLocaleString()} km<br><small>Cliquer sur le bouton pour recommencer</small>`;
         this._finalPopup
             .setLngLat(coords)
             .setHTML(formattedMessage)
             .addTo(this._map);
 
-        // Marque la mesure comme terminée
+        // Mark the measurement as complete
         this._measureCompleted = true;
         this._drawing = false;
 
-        // Désactive les événements
+        // Disable events
         this._map.getCanvas().style.cursor = '';
         this._map.off('click', this._onClick);
         this._map.off('mousemove', this._onMouseMove);
 
-        // Met à jour l'affichage
+        // Updates the display
         this._updateCompletedDisplay();
 
-        // Change le style du bouton pour indiquer qu'on peut recommencer
+        // Change the button's style to indicate that it can be restarted
         this._button.classList.remove('measure-control-btn-active');
         this._button.classList.add('measure-control-btn-reset');
-        this._button.setAttribute('title', 'Supprimer tout et recommencer');
+        this._button.setAttribute('title', gettext('Delete everything and start over'));
     }
 
     /**
-     * Met à jour l'affichage avec les lignes terminées.
+     * Updates the display with completed lines.
      * @private
      */
     _updateCompletedDisplay() {
-        // Supprime les éléments temporaires de dessin
+        // Remove temporary drawing elements
         this._geojson.features = this._geojson.features.filter(
             feature => feature.properties?.completed
         );
 
-        // Ajoute toutes les lignes terminées
+        // Add all finished lines
         this._completedLines.forEach(line => {
             this._geojson.features.push(line);
         });
@@ -319,11 +319,11 @@ class MaplibreMeasureControl {
     }
 
     /**
-     * Remet tout à zéro pour recommencer.
+     * Reset everything to start over.
      * @private
      */
     _resetAll() {
-        // Réinitialise tous les états
+        // Reset all states
         this._measureCompleted = false;
         this._drawing = false;
         this._completedLines = [];
@@ -334,16 +334,16 @@ class MaplibreMeasureControl {
         this._lastClickPoint = null;
         this._lastClickTime = 0;
 
-        // Met à jour l'affichage
+        // Updates the display
         if (this._map.getSource('geojson')) {
             this._map.getSource('geojson').setData(this._geojson);
         }
 
-        // Cache les popups
+        // Hide popups
         this._livePopup.remove();
         this._finalPopup.remove();
 
-        // Recrée le livePopup si besoin
+        // Recreate the livePopup if needed
         this._livePopup = new maplibregl.Popup({
             closeButton: false,
             closeOnClick: false,
@@ -352,14 +352,14 @@ class MaplibreMeasureControl {
             offset: 10
         }).addTo(this._map);
 
-        // Remet le bouton dans son état initial
+        // Return the button to its initial state
         this._button.classList.remove('measure-control-btn-active', 'measure-control-btn-reset');
         this._button.setAttribute('title', gettext('Measure a distance'));
         this._map.getCanvas().style.cursor = '';
     }
 
     /**
-     * Met à jour la ligne principale entre les points cliqués.
+     * Updates the main line between the clicked points.
      * @private
      */
     _updateMainLine() {
@@ -379,8 +379,8 @@ class MaplibreMeasureControl {
     }
 
     /**
-     * Gère le mouvement de la souris sur la carte pendant le dessin.
-     * @param e {Object} - L'événement de mouvement de la souris contenant les coordonnées.
+     * Manages the mouse movement on the map during drawing.
+     * @param e {Object} - The mouse movement event containing the coordinates.
      * @private
      */
     _onMouseMove(e) {
@@ -388,13 +388,13 @@ class MaplibreMeasureControl {
             this._map.getCanvas().style.cursor = 'crosshair';
             this._currentMousePosition = [e.lngLat.lng, e.lngLat.lat];
 
-            // Met à jour la ligne live
+            // Updates the live line
             this._updateLiveLine();
         }
     }
 
     /**
-     * Met à jour la ligne live qui suit la souris.
+     * Updates the live line that follows the mouse.
      * @private
      */
     _updateLiveLine() {
@@ -407,12 +407,12 @@ class MaplibreMeasureControl {
         );
 
         if (points.length > 0) {
-            // Supprime les anciennes lignes (principale et live) mais garde les lignes terminées
+            // Deletes old lines (main and live) but keeps completed lines
             this._geojson.features = this._geojson.features.filter(
                 feature => feature.geometry.type === 'Point' || feature.properties?.completed
             );
 
-            // Crée la ligne principale entre les points cliqués
+            // Creates the main line between the clicked points
             if (points.length > 1) {
                 const mainCoordinates = points.map(point => point.geometry.coordinates);
                 const mainLine = {
@@ -428,7 +428,7 @@ class MaplibreMeasureControl {
                 this._geojson.features.push(mainLine);
             }
 
-            // Crée la ligne live du dernier point à la souris
+            // Create the live line from the last point to the mouse
             const lastPoint = points[points.length - 1];
             const liveCoordinates = [
                 lastPoint.geometry.coordinates,
@@ -439,7 +439,7 @@ class MaplibreMeasureControl {
             this._liveLinestring.properties = { live: true };
             this._geojson.features.push(this._liveLinestring);
 
-            // Calcule la distance totale (points cliqués + ligne live)
+            // Calculate the total distance (clicked points + live line)
             let totalDistance = 0;
 
             if (points.length > 1) {
@@ -453,22 +453,22 @@ class MaplibreMeasureControl {
                 totalDistance += turf.length(mainLine);
             }
 
-            // Ajoute la distance de la ligne live
+            // Add the live line distance
             const liveDistance = turf.length(this._liveLinestring);
             totalDistance += liveDistance;
 
             this._updateLiveDistance(totalDistance, true);
             this._map.getSource('geojson').setData(this._geojson);
 
-            // Met à jour la position de la popup live
+            // Updates the live popup position
             this._livePopup.setLngLat(this._currentMousePosition);
         }
     }
 
     /**
-     * Met à jour l'affichage de la distance en temps réel.
-     * @param distance {number} - La distance totale mesurée en kilomètres.
-     * @param isLive {boolean} - Indique si c'est un affichage en temps réel.
+     * Updates the real-time distance display.
+     * @param distance {number} - The total distance measured in kilometers.
+     * @param isLive {boolean} - Indicates if it is a real-time display.
      * @private
      */
     _updateLiveDistance(distance, isLive = false) {
@@ -481,28 +481,28 @@ class MaplibreMeasureControl {
         let message = '';
 
         if (distance > 0) {
-            formattedDistance = `Distance totale: ${distance.toLocaleString()} km`;
+            formattedDistance = `${gettext("Total distance:")} ${distance.toLocaleString()} km`;
         }
 
         if (pointCount === 0) {
-            message = 'Cliquer pour commencer le dessin de la ligne';
+            message = gettext('Click to start drawing the line');
         } else if (pointCount === 1) {
-            message = formattedDistance + '<br>Cliquer pour continuer le dessin de la ligne';
+            message = formattedDistance + '<br>' + gettext('Click to continue drawing the line');
         } else if (pointCount === 2) {
-            message = formattedDistance + '<br>Cliquer pour continuer le dessin de la ligne';
+            message = formattedDistance + '<br>' + gettext('Click to continue drawing the line');
         } else {
-            message = formattedDistance + '<br>Double-cliquer sur le dernier point pour terminer la ligne';
+            message = formattedDistance + '<br>' + gettext('Double-click the last point to end the line');
         }
 
         this._livePopup.setHTML(message);
     }
 
     /**
-     * Termine la mesure en réinitialisant les données temporaires.
+     * End the measurement by resetting the temporary data.
      * @private
      */
     _finishMeasure() {
-        // Ne remet à zéro que les données temporaires, pas les lignes terminées
+        // Only resets temporary data, not completed lines
         this._geojson.features = this._geojson.features.filter(
             feature => feature.properties?.completed
         );
@@ -517,7 +517,7 @@ class MaplibreMeasureControl {
             this._map.getSource('geojson').setData(this._geojson);
         }
 
-        // Cache seulement la popup live
+        // Cache only the live popup
         this._livePopup.remove();
     }
 }

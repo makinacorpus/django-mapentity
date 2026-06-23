@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 13:35+0000\n"
+"POT-Creation-Date: 2026-06-23 14:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,37 @@ msgstr ""
 msgid "Upload a local file (GPX, KML, GeoJSON)"
 msgstr ""
 
+msgid "Click to start drawing the line"
+msgstr ""
+
+msgid "Click to continue drawing the line"
+msgstr ""
+
+msgid "Click on the last point to finish the line"
+msgstr ""
+
+msgid "Click and drag to draw the rectangle"
+msgstr ""
+
+msgid "Click to finish the rectangle"
+msgstr ""
+
+msgid "Click to start drawing the shape"
+msgstr ""
+
+msgid "Click to continue drawing the shape"
+msgstr ""
+
+msgid "Click on the first point to close the shape"
+msgstr ""
+
 msgid "Layer controller"
+msgstr ""
+
+msgid "Overlays"
+msgstr ""
+
+msgid "Objects"
 msgstr ""
 
 msgid "Toggle attribution"
@@ -69,10 +99,19 @@ msgstr ""
 msgid "Zoom out"
 msgstr ""
 
-msgid "Objects"
+msgid "Measure a distance"
 msgstr ""
 
-msgid "Measure a distance"
+msgid "Stop measurement"
+msgstr ""
+
+msgid "Delete everything and start over"
+msgstr ""
+
+msgid "Total distance:"
+msgstr ""
+
+msgid "Double-click the last point to end the line"
 msgstr ""
 
 msgid "Data unreachable"
