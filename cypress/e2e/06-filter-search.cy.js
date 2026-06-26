@@ -121,10 +121,10 @@ describe('DummyModel Filter and Search', () => {
 
         // Open Select2 AJAX dropdown
         cy.get('#id_road').parent().find('.select2').click()
-        cy.get('[data-select2-id="38"] .select2-selection--multiple').first().type('Road 17')
+        cy.get('[data-select2-id="38"] .select2-selection--multiple').first().type('Road 0')
 
         // Select the AJAX-loaded result
-        cy.contains('.select2-results__option', 'Road 17').should('be.visible').click();
+        cy.contains('.select2-results__option', 'Road 0').should('be.visible').click();
 
         cy.get('#filter').click();
         cy.get('#objects-list_processing', { timeout: 10000 }).should('not.be.visible');
