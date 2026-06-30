@@ -8,10 +8,15 @@ from django.contrib.contenttypes.fields import (
     GenericRelation,
 )
 from django.contrib.gis.db.models import GeometryField
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.db.models.fields.files import FileField
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import last_modified as cache_last_modified
+from rest_framework.decorators import action
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
 
 from ..filters import MapEntityFilterSet
 from ..forms import MapEntityForm
@@ -192,3 +197,56 @@ class MultiObjectActionMixin:
             return HttpResponseRedirect(self.get_success_url())
 
         return super().get(request, *args, **kwargs)
+
+
+class AutocompleteMixin:
+    autocomplete_search_fields = None
+    serializer_autocomplete_class = None
+
+    def _get_filters(self, q):
+        filters = Q()
+        for field in self.autocomplete_search_fields:
+            filters |= Q(**{f"{field}__icontains": q})
+        return filters
+
+    def paginate_autocomplete(self, request, queryset):
+        try:
+            page_number = int(request.query_params.get("page", 1))
+        except ValueError:
+            # Handle invalid page parameter by defaulting to page 1
+            page_number = 1
+
+        try:
+            page_size = int(request.query_params.get("page_size", 10))
+        except ValueError:
+            # Handle invalid page_size parameter by defaulting to 10
+            page_size = 10
+
+        paginator = Paginator(queryset, page_size)
+        paginated_qs = paginator.get_page(page_number)
+        return paginated_qs, paginated_qs.has_next()
+
+    @action(detail=False, renderer_classes=[JSONRenderer], pagination_class=None)
+    def autocomplete(self, request, *args, **kwargs):
+        qs = self.get_queryset_autocomplete()
+        identifier = self.request.query_params.get(
+            "id"
+        )  # filter with id parameter is used to retrieve a known value
+        if identifier:
+            qs = qs.filter(id=identifier)
+            instance = qs.first()
+            if instance is None:
+                return Response({})
+            serializer = self.serializer_autocomplete_class(instance)
+            data = serializer.data
+
+        else:
+            q = self.request.query_params.get("q")
+            qs, has_more = self.paginate_autocomplete(
+                request, qs.filter(self._get_filters(q)) if q else qs
+            )
+
+            serializer = self.serializer_autocomplete_class(qs, many=True)
+            data = {"results": serializer.data, "pagination": {"more": has_more}}
+
+        return Response(data)

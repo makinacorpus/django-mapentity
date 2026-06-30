@@ -64,8 +64,8 @@ class DummyModelFactory(factory.django.DjangoModelFactory):
 
     @factory.lazy_attribute
     def geom(self):
-        x = random.randint(-18000, 18000)
-        y = random.randint(-8000, 8000)
+        x = random.randint(-150, 500)
+        y = random.randint(4100, 5000)
         return Point(x / 100, y / 100, srid=4326)
 
     @factory.post_generation
