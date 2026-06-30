@@ -1,13 +1,22 @@
 CHANGELOG
 =========
 
-8.17.1+dev (XX)
+8.17.2+dev     (XXXX-XX-XX)
+-----------------------
+
+**Bug fixes**
+
+- Fix multi-select filter restoration
+
+
+8.17.2     (2026-06-10)
 -----------------------
 
 **Bug fixes**
 
 - Reduce the size of the help text
-- Fix multi-select filter restoration
+- Enable right click on pop-up 'detail page' button 
+
 
 8.17.1     (2026-02-17)
 -----------------------
