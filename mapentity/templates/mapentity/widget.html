@@ -26,6 +26,9 @@
         const options = {
             modifiable: '{{ modifiable|yesno:"true,false" }}',
             geomType: {{ geom_type_json|safe }},
+            {% if allowed_types_json %}
+            allowedTypes: {{ allowed_types_json|safe }},
+            {% endif %}
         };
         {% if custom_icon %}
         options.customIcon = `{{ custom_icon|safe }}`;

@@ -7,23 +7,46 @@ class MaplibreGeometryField {
         this.options.modifiable = this.options.modifiable === true || this.options.modifiable === 'true';
 
         // Detect geometry types
+        const allowedTypesOption = this.options.allowedTypes;
         const geomTypeOption = this.options.geomType;
         let geomTypes = [];
-        if (Array.isArray(geomTypeOption)) {
-            geomTypes = geomTypeOption.map(t => t.toLowerCase());
-        } else if (typeof geomTypeOption === 'string') {
-            try {
-                const parsed = JSON.parse(geomTypeOption);
-                if (Array.isArray(parsed)) {
-                    geomTypes = parsed.map(t => t.toLowerCase());
-                } else {
-                    geomTypes = [geomTypeOption.toLowerCase()];
+
+        if (allowedTypesOption) {
+            if (Array.isArray(allowedTypesOption)) {
+                geomTypes = allowedTypesOption.map(t => t.toLowerCase());
+            } else if (typeof allowedTypesOption === 'string') {
+                try {
+                    const parsed = JSON.parse(allowedTypesOption);
+                    if (Array.isArray(parsed)) {
+                        geomTypes = parsed.map(t => t.toLowerCase());
+                    } else {
+                        geomTypes = [allowedTypesOption.toLowerCase()];
+                    }
+                } catch (e) {
+                    if (allowedTypesOption.includes(',')) {
+                        geomTypes = allowedTypesOption.split(',').map(t => t.trim().toLowerCase());
+                    } else {
+                        geomTypes = [allowedTypesOption.toLowerCase()];
+                    }
                 }
-            } catch (e) {
-                if (geomTypeOption.includes(',')) {
-                    geomTypes = geomTypeOption.split(',').map(t => t.trim().toLowerCase());
-                } else {
-                    geomTypes = [geomTypeOption.toLowerCase()];
+            }
+        } else if (geomTypeOption) {
+            if (Array.isArray(geomTypeOption)) {
+                geomTypes = geomTypeOption.map(t => t.toLowerCase());
+            } else if (typeof geomTypeOption === 'string') {
+                try {
+                    const parsed = JSON.parse(geomTypeOption);
+                    if (Array.isArray(parsed)) {
+                        geomTypes = parsed.map(t => t.toLowerCase());
+                    } else {
+                        geomTypes = [geomTypeOption.toLowerCase()];
+                    }
+                } catch (e) {
+                    if (geomTypeOption.includes(',')) {
+                        geomTypes = geomTypeOption.split(',').map(t => t.trim().toLowerCase());
+                    } else {
+                        geomTypes = [geomTypeOption.toLowerCase()];
+                    }
                 }
             }
         }
@@ -208,7 +231,13 @@ class MaplibreGeometryField {
                 normalizedData = this.dataManager.normalizeToMultiPoint(geometries);
             } else {
                 // Generic GeometryCollection or unhandled case
-                normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
+                // If there is only a single geometry, serialize it directly to match simple model fields
+                const isExplicitCollection = this.options.geomType === 'GEOMETRYCOLLECTION' || this.options.geomType === 'geometrycollection';
+                if (geometries.length === 1 && !isExplicitCollection) {
+                    normalizedData = geometries[0];
+                } else {
+                    normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
+                }
             }
         } else {
             // Simple specific mode: normalize by type

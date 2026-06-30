@@ -78,8 +78,9 @@ class MapWidgetTestCase(TestCase):
     def test_get_attrs_with_geom_type_list(self):
         widget = MapWidget(attrs={"geom_type": ["POINT", "LINESTRING"]})
         attrs = widget._get_attrs("myfield")
-        self.assertEqual(attrs["geom_type"], ["POINT", "LINESTRING"])
-        self.assertEqual(attrs["geom_type_json"], '["POINT", "LINESTRING"]')
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
+        self.assertEqual(attrs["allowed_types"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["allowed_types_json"], '["POINT", "LINESTRING"]')
 
     def test_geom_type_constructor_param(self):
         widget = MapWidget(geom_type="LINESTRING")
@@ -87,10 +88,20 @@ class MapWidgetTestCase(TestCase):
         self.assertEqual(attrs["geom_type"], "LINESTRING")
 
     def test_geom_type_list_constructor_param(self):
+        """Passing geom_type as a list/tuple should convert to GEOMETRY and set allowed_types for backward compatibility."""
         widget = MapWidget(geom_type=["point", "Linestring"])
         attrs = widget._get_attrs("myfield")
-        self.assertEqual(attrs["geom_type"], ["POINT", "LINESTRING"])
-        self.assertEqual(attrs["geom_type_json"], '["POINT", "LINESTRING"]')
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
+        self.assertEqual(attrs["allowed_types"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["allowed_types_json"], '["POINT", "LINESTRING"]')
+
+    def test_allowed_types_constructor_param(self):
+        """Passing allowed_types should restrict drawing controls while keeping geom_type standard."""
+        widget = MapWidget(geom_type="GEOMETRY", allowed_types=["point", "Linestring"])
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
+        self.assertEqual(attrs["allowed_types"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["allowed_types_json"], '["POINT", "LINESTRING"]')
 
     def test_geom_type_constructor_not_overridden_by_form(self):
         """geom_type passed to constructor should not be overridden by setdefault in forms."""
