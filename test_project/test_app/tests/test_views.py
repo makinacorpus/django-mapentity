@@ -85,7 +85,7 @@ class DummyModelFunctionalTest(MapEntityTest):
             f'        <p class="m-0 p-1">\n'
             f"            a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object…<br>public: no<br>{self.obj.tags.first().label}<br>a dummy model<br>\n"
             f"        </p>\n    \n"
-            f'    <button id="detail-btn" class="btn btn-sm btn-info mt-2" onclick="window.location.href=\'/dummymodel/{pk}/\'">Detail sheet</button>\n'
+            f'    <a id="detail-btn" href="/dummymodel/{pk}/" class="btn btn-sm btn-info mt-2">Detail sheet</a>\n'
             f"</div>"
         )
 
