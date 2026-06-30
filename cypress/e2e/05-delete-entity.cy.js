@@ -4,12 +4,13 @@ describe('DummyModel Delete', () => {
     beforeEach(() => {
         cy.login()
         cy.mockTiles()
+        cy.intercept('GET', '**/api/dummymodel/drf/dummymodels.datatables*bbox=*').as('getDatatables')
     })
 
     it('should delete a single entity', () => {
         // Go to list view
         cy.visit('/dummymodel/list/')
-        cy.get('table', {timeout: 10000}).should('exist')
+        cy.wait('@getDatatables')
 
         // Count total entities
         cy.get('table tbody tr').then($rows => {
@@ -41,7 +42,7 @@ describe('DummyModel Delete', () => {
     it('should delete multiple entities via list actions', () => {
         // Go to list view
         cy.visit('/dummymodel/list/')
-        cy.get('table', {timeout: 10000}).should('exist')
+        cy.wait('@getDatatables')
 
         // Count total entities
         cy.get('table tbody tr').then($rows => {
@@ -50,7 +51,8 @@ describe('DummyModel Delete', () => {
 
             // Only delete if we have more than 10 entities to ensure some remain
             if (totalCount > 10) {
-                cy.get(".dt-select-checkbox").first().click();
+                cy.get("table tbody .dt-select-checkbox").eq(0).click();
+                cy.get("table tbody .dt-select-checkbox").eq(1).click();
                 cy.get("#btn-batch-editing").first().click();
                 cy.get("#btn-delete").first().click();
 
