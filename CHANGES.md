@@ -4,6 +4,10 @@ CHANGELOG
 8.17.2+dev     (XXXX-XX-XX)
 -----------------------
 
+**Bug fixes**
+
+- Fix multi-select filter restoration
+
 
 8.17.2     (2026-06-10)
 -----------------------
