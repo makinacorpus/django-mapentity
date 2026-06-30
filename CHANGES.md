@@ -1,12 +1,64 @@
 CHANGELOG
 =========
 
-8.16.1+dev (XXXX-XX-XX)
+9.0.0      (XXXX-XX-XX)
 -----------------------
 
-**Maintenance**
+**Breaking changes**
 
-- Change chosen to select2 library. Use dango-autocomplete-light to let users to customize static select or multiselect to API dynamic if required. (perfs issues)
+- Move from Leaflet to Maplibre GL JS.
+- Please remake your custom LEAFLET_CONFIG to MAPLIBRE_CONFIG_OVERRIDES. Please take a look at the documentation. Base layers and overlays are now configured in the database (auto migration from LEAFLET_CONFIG)
+
+**Improvements**
+
+- Use django-vectortiles to replace GeoJSON with vector tiles and improve performances.
+- User django-mapbox-baselayer to handle and manage base and overlays layers in the database. (Take a look at documentation to manage layers)
+
+
+8.17.3     (2026-06-30)
+-----------------------
+
+**Bug fixes**
+
+- Fix multi-select filter restoration
+
+**Improvements**
+
+- Fix referrer to handle OSM tiles good permissions
+
+
+8.17.2     (2026-06-10)
+-----------------------
+
+**Bug fixes**
+
+- Reduce the size of the help text
+- Enable right click on pop-up 'detail page' button 
+
+
+8.17.1     (2026-02-17)
+-----------------------
+
+**Bug fixes**
+
+- Fix the appearance of the Select2 fields
+
+
+8.17.0     (2026-02-11)
+-----------------------
+
+**Breaking changes**
+
+- Move from chozen js to django-autocomplete-light (with select2.js). Please if use custom code related to chozen, update it in your project.
+
+
+**Improvements**
+
+- Use dango-autocomplete-light to let users to customize static select or multiselect to API dynamic if required. (perfs issues)
+
+
+8.16.2     (2026-01-13)
+-----------------------
 
 **Improvements**
 
