@@ -7,10 +7,42 @@ class MaplibreGeometryField {
         this.options.modifiable = this.options.modifiable === true || this.options.modifiable === 'true';
 
         // Detect geometry types
-        const geomType = (this.options.geomType || '').toLowerCase();
+        const geomTypeOption = this.options.geomType;
+        let geomTypes = [];
+        if (Array.isArray(geomTypeOption)) {
+            geomTypes = geomTypeOption.map(t => t.toLowerCase());
+        } else if (typeof geomTypeOption === 'string') {
+            try {
+                const parsed = JSON.parse(geomTypeOption);
+                if (Array.isArray(parsed)) {
+                    geomTypes = parsed.map(t => t.toLowerCase());
+                } else {
+                    geomTypes = [geomTypeOption.toLowerCase()];
+                }
+            } catch (e) {
+                if (geomTypeOption.includes(',')) {
+                    geomTypes = geomTypeOption.split(',').map(t => t.trim().toLowerCase());
+                } else {
+                    geomTypes = [geomTypeOption.toLowerCase()];
+                }
+            }
+        }
+
+        // Store the normalized list of geometry types
+        this.options.geomTypes = geomTypes;
+
+        // If it's a single geometry type, fallback to standard detection on that type
+        // Otherwise, if it has multiple types, it is treated as a GeometryCollection
+        let geomType = '';
+        if (geomTypes.length === 1) {
+            geomType = geomTypes[0];
+        } else if (geomTypes.length > 1) {
+            geomType = 'geometrycollection';
+        }
+
         this.options.isGeneric = geomType === 'geometry';
         this.options.isGeometryCollection = /geometrycollection$/.test(geomType);
-        this.options.isCollection = /(^multi|collection$)/.test(geomType);
+        this.options.isCollection = /(^multi|collection$)/.test(geomType) || geomTypes.length > 1;
         this.options.isLineString = /linestring$/.test(geomType);
         this.options.isPolygon = /polygon$/.test(geomType);
         this.options.isPoint = /point$/.test(geomType);

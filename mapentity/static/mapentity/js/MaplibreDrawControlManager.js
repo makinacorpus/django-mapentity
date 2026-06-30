@@ -254,6 +254,26 @@ class MaplibreDrawControlManager {
      * @private
      */
     _getShapesForField(opts) {
+        if (opts.geomTypes && opts.geomTypes.length > 0) {
+            const shapes = [];
+            opts.geomTypes.forEach(gt => {
+                if (gt.includes('point') && !shapes.includes('marker')) {
+                    shapes.push('marker');
+                }
+                if (gt.includes('linestring') && !shapes.includes('line')) {
+                    shapes.push('line');
+                }
+                if (gt.includes('polygon') && !shapes.includes('polygon')) {
+                    shapes.push('polygon');
+                }
+                if (gt.includes('geometry') || gt.includes('geometrycollection')) {
+                    ['marker', 'line', 'polygon', 'rectangle'].forEach(s => {
+                        if (!shapes.includes(s)) shapes.push(s);
+                    });
+                }
+            });
+            return shapes;
+        }
         const isGenericOrCollection = opts.isGeneric || opts.isGeometryCollection;
         if (isGenericOrCollection) return ['marker', 'line', 'polygon', 'rectangle'];
         const shapes = [];
@@ -415,11 +435,27 @@ class MaplibreDrawControlManager {
      * @private
      */
     _applyCustomIconForShape(opts) {
-        const isGenericOrCollection = opts.isGeneric || opts.isGeometryCollection;
-        const shapeNames = [];
-        if (opts.isPoint || opts.isMultiPoint || isGenericOrCollection) shapeNames.push('marker');
-        if (opts.isLineString || opts.isMultiLineString || isGenericOrCollection) shapeNames.push('line');
-        if (opts.isPolygon || opts.isMultiPolygon || isGenericOrCollection) shapeNames.push('polygon', 'rectangle');
+        let shapeNames = [];
+        if (opts.geomTypes && opts.geomTypes.length > 0) {
+            opts.geomTypes.forEach(gt => {
+                if (gt.includes('point') && !shapeNames.includes('marker')) shapeNames.push('marker');
+                if (gt.includes('linestring') && !shapeNames.includes('line')) shapeNames.push('line');
+                if (gt.includes('polygon')) {
+                    if (!shapeNames.includes('polygon')) shapeNames.push('polygon');
+                    if (!shapeNames.includes('rectangle')) shapeNames.push('rectangle');
+                }
+                if (gt.includes('geometry') || gt.includes('geometrycollection')) {
+                    ['marker', 'line', 'polygon', 'rectangle'].forEach(s => {
+                        if (!shapeNames.includes(s)) shapeNames.push(s);
+                    });
+                }
+            });
+        } else {
+            const isGenericOrCollection = opts.isGeneric || opts.isGeometryCollection;
+            if (opts.isPoint || opts.isMultiPoint || isGenericOrCollection) shapeNames.push('marker');
+            if (opts.isLineString || opts.isMultiLineString || isGenericOrCollection) shapeNames.push('line');
+            if (opts.isPolygon || opts.isMultiPolygon || isGenericOrCollection) shapeNames.push('polygon', 'rectangle');
+        }
 
         const container = this.map.getContainer();
         const drawButtons = container.querySelectorAll('.maplibregl-ctrl-top-right .geoman-draw-section button');

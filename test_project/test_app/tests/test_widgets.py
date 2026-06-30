@@ -75,10 +75,22 @@ class MapWidgetTestCase(TestCase):
         attrs = widget._get_attrs("myfield")
         self.assertEqual(attrs["geom_type"], "POINT")
 
+    def test_get_attrs_with_geom_type_list(self):
+        widget = MapWidget(attrs={"geom_type": ["POINT", "LINESTRING"]})
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["geom_type"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["geom_type_json"], '["POINT", "LINESTRING"]')
+
     def test_geom_type_constructor_param(self):
         widget = MapWidget(geom_type="LINESTRING")
         attrs = widget._get_attrs("myfield")
         self.assertEqual(attrs["geom_type"], "LINESTRING")
+
+    def test_geom_type_list_constructor_param(self):
+        widget = MapWidget(geom_type=["point", "Linestring"])
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["geom_type"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["geom_type_json"], '["POINT", "LINESTRING"]')
 
     def test_geom_type_constructor_not_overridden_by_form(self):
         """geom_type passed to constructor should not be overridden by setdefault in forms."""

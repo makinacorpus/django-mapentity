@@ -38,11 +38,13 @@ class MapWidget(BaseGeometryWidget):
 
     Options (passed via ``attrs`` or as named parameters) :
 
-    ``geom_type`` (str)
+    ``geom_type`` (str or list/tuple of str)
         OGC geometry type (``"POINT"``, ``"LINESTRING"``, ``"POLYGON"``,
         ``"MULTIPOINT"``, ``"MULTILINESTRING"``, ``"MULTIPOLYGON"``,
-        ``"GEOMETRYCOLLECTION"``, ``"GEOMETRY"``).  Determines the available
-        drawing tools.  Default is ``"GEOMETRY"`` (all tools).
+        ``"GEOMETRYCOLLECTION"``, ``"GEOMETRY"``) or a list/tuple of these types.
+        Determines the available drawing tools. For list/tuple, it restricts
+        available controls on generic fields (e.g. `['POINT', 'LINESTRING']`).
+        Default is ``"GEOMETRY"`` (all tools).
 
     ``modifiable`` (bool)
         If ``True`` (default), the user can draw and modify the geometry.
@@ -101,7 +103,7 @@ class MapWidget(BaseGeometryWidget):
                 fields = ("name", "geom", "parking")
                 widgets = {
                     "geom": MapWidget(
-                        geom_type="LINESTRING",
+                        geom_type=["POINT", "LINESTRING"],
                         attrs={
                             "snapping_config": {
                                 "enabled": True,
@@ -152,9 +154,11 @@ class MapWidget(BaseGeometryWidget):
         Prepare required attributes for the template.
         """
         # Retrieve parameters from the Field initialization
-        self.geom_type = self.attrs.get(
-            "geom_type", getattr(self, "geom_type", "GEOMETRY")
-        )
+        geom_type = self.attrs.get("geom_type", getattr(self, "geom_type", "GEOMETRY"))
+        if isinstance(geom_type, (list, tuple)):
+            self.geom_type = [gt.upper() for gt in geom_type]
+        else:
+            self.geom_type = geom_type.upper()
         attrs = attrs or {}
         # Generate IDs for HTML and JavaScript elements
         map_id_css = slugify(attrs.get("id", name))
@@ -166,6 +170,7 @@ class MapWidget(BaseGeometryWidget):
                 "id_map": map_id_css + "_map",
                 "modifiable": self.modifiable,
                 "geom_type": self.geom_type,
+                "geom_type_json": json.dumps(self.geom_type),
             }
         )
         # Propagate target_map and custom_icon from self.attrs to the template context
