@@ -8,6 +8,10 @@ CHANGELOG
 
 - Fix multi-select filter restoration
 
+**Improvements**
+
+- Fix referrer to handle OSM tiles good permissions
+
 
 8.17.2     (2026-06-10)
 -----------------------
