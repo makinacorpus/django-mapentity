@@ -33,12 +33,7 @@ describe('DummyModel Filter and Search', () => {
         cy.wait('@testSearchRequest');
 
         // Check updated row count
-        cy.get('table tbody tr')
-          .its('length')
-          .then((newRowCount) => {
-            cy.log(`Row count after search: ${newRowCount}`);
-            expect(newRowCount, 'row count should change after searching').to.not.equal(initialRowCount);
-          });
+        cy.get('table tbody tr').should('not.have.length', initialRowCount);
       });
   });
 
@@ -73,12 +68,7 @@ describe('DummyModel Filter and Search', () => {
         cy.wait('@dummymodelsRequest');
 
         // Check row count
-        cy.get('table tbody tr')
-          .its('length')
-          .then((newRowCount) => {
-            cy.log(`Row count after filtering: ${newRowCount}`);
-            expect(newRowCount, 'row count should change after applying filter').to.not.equal(initialRowCount);
-          });
+        cy.get('table tbody tr').should('not.have.length', initialRowCount);
       });
   });
 
@@ -100,12 +90,7 @@ describe('DummyModel Filter and Search', () => {
         cy.get('#filter').click();
         cy.wait('@dummymodelsRequest');
 
-        cy.get('table tbody tr')
-          .its('length')
-          .then((newRowCount) => {
-            cy.log(`Row count after Select2 filtering: ${newRowCount}`);
-            expect(newRowCount, 'row count should change after applying Select2 filter').to.not.equal(initialRowCount);
-          });
+        cy.get('table tbody tr').should('not.have.length', initialRowCount);
       });
   });
 
@@ -135,12 +120,7 @@ describe('DummyModel Filter and Search', () => {
         cy.get('#filter').click();
         cy.wait('@complexmodelsRequest');
 
-        cy.get('table tbody tr')
-          .its('length')
-          .then((newRowCount) => {
-            cy.log(`Row count after Select2 AJAX filtering: ${newRowCount}`);
-            expect(newRowCount, 'row count should change after applying AJAX filter').to.not.equal(initialRowCount);
-          });
+        cy.get('table tbody tr').should('not.have.length', initialRowCount);
       });
   });
 
@@ -164,12 +144,7 @@ describe('DummyModel Filter and Search', () => {
         cy.get('#id_name').should('have.value', '');
         cy.wait('@dummymodelsRequest');
 
-        cy.get('table tbody tr')
-          .its('length')
-          .then((newRowCount) => {
-            cy.log(`Row count after reset: ${newRowCount}`);
-            expect(newRowCount, 'row count should reset after clearing filters').to.be.at.least(initialRowCount);
-          });
+        cy.get('table tbody tr').should('have.length.at.least', initialRowCount);
       });
   });
 
