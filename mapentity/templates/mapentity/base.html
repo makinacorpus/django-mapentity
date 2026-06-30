@@ -9,6 +9,7 @@
         <title>{% block title %}{{ TITLE }}{% endblock title %}</title>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta charset="UTF-8">
+        <meta name="referrer" content="strict-origin-when-cross-origin">
         <link rel="icon" type="image/png" href="{% media_static_fallback 'upload/favicon.png' 'images/favicon.png' %}"/>
 
         {% compress css %}
