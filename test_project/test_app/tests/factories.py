@@ -27,7 +27,7 @@ class CityFactory(factory.django.DjangoModelFactory):
     @factory.lazy_attribute
     def geom(self):
         points = [
-            (random.uniform(-180, 180), random.uniform(-80, 80)) for _ in range(3)
+            (random.uniform(-1.5, 5.0), random.uniform(41.0, 50.0)) for _ in range(3)
         ]
         points.append(points[0])
         return Polygon(points, srid=4326)
@@ -42,7 +42,7 @@ class RoadFactory(factory.django.DjangoModelFactory):
     @factory.lazy_attribute
     def geom(self):
         points = [
-            (random.uniform(-180, 180), random.uniform(-80, 80)) for _ in range(2)
+            (random.uniform(-1.5, 5.0), random.uniform(41.0, 50.0)) for _ in range(2)
         ]
         return LineString(points, srid=4326)
 
@@ -96,8 +96,8 @@ class ComplexModelFactory(factory.django.DjangoModelFactory):
 
     @factory.lazy_attribute
     def geom(self):
-        x = random.randint(-18000, 18000)
-        y = random.randint(-8000, 8000)
+        x = random.randint(-150, 500)
+        y = random.randint(4100, 5000)
         return Point(x / 100, y / 100, srid=4326)
 
     @factory.post_generation

@@ -1,6 +1,7 @@
 from mapentity import views as mapentity_views
 
 from . import filters, models, serializers
+from .forms import AllowedTypesModelForm
 
 
 # single point model
@@ -259,3 +260,39 @@ class GeometryCollectionModelViewSet(mapentity_views.MapEntityViewSet):
     serializer_class = serializers.GeometryCollectionModelSerializer
     geojson_serializer_class = serializers.GeometryCollectionModelGeojsonSerializer
     filterset_class = filters.GeometryCollectionModelFilterSet
+
+
+# allowed types model
+
+
+class AllowedTypesModelList(mapentity_views.MapEntityList):
+    model = models.AllowedTypesModel
+    searchable_columns = ["id", "name"]
+    filterset_class = filters.AllowedTypesModelFilterSet
+
+
+class AllowedTypesModelDetail(
+    mapentity_views.LastModifiedMixin, mapentity_views.MapEntityDetail
+):
+    model = models.AllowedTypesModel
+
+
+class AllowedTypesModelCreate(mapentity_views.MapEntityCreate):
+    model = models.AllowedTypesModel
+    form_class = AllowedTypesModelForm
+
+
+class AllowedTypesModelUpdate(mapentity_views.MapEntityUpdate):
+    model = models.AllowedTypesModel
+    form_class = AllowedTypesModelForm
+
+
+class AllowedTypesModelDelete(mapentity_views.MapEntityDelete):
+    model = models.AllowedTypesModel
+
+
+class AllowedTypesModelViewSet(mapentity_views.MapEntityViewSet):
+    model = models.AllowedTypesModel
+    serializer_class = serializers.AllowedTypesModelSerializer
+    geojson_serializer_class = serializers.AllowedTypesModelGeojsonSerializer
+    filterset_class = filters.AllowedTypesModelFilterSet

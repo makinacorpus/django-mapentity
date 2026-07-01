@@ -41,8 +41,13 @@ class MapWidget(BaseGeometryWidget):
     ``geom_type`` (str)
         OGC geometry type (``"POINT"``, ``"LINESTRING"``, ``"POLYGON"``,
         ``"MULTIPOINT"``, ``"MULTILINESTRING"``, ``"MULTIPOLYGON"``,
-        ``"GEOMETRYCOLLECTION"``, ``"GEOMETRY"``).  Determines the available
-        drawing tools.  Default is ``"GEOMETRY"`` (all tools).
+        ``"GEOMETRYCOLLECTION"``, ``"GEOMETRY"``).
+        Determines the default geometry type. Default is ``"GEOMETRY"``.
+
+    ``allowed_types`` (list/tuple of str)
+        List of OGC geometry types (e.g. ``["POINT", "LINESTRING"]``) that
+        are allowed for drawing. Used to restrict available drawing controls on
+        generic geometry fields (such as fields with type ``"GEOMETRY"``).
 
     ``modifiable`` (bool)
         If ``True`` (default), the user can draw and modify the geometry.
@@ -86,9 +91,9 @@ class MapWidget(BaseGeometryWidget):
         ``snap_distance`` (default: 18) controls the radius in pixels within which
         snapping is triggered.
 
-    ``display_raw`` (bool)
-        If ``True``, displays the raw geometry textarea in addition to the
-        map.  ``False`` by default.
+        ``display_raw`` (bool)
+            If ``True``, displays the raw geometry textarea in addition to the
+            map.  ``False`` by default.
 
     Example usage in a form ::
 
@@ -101,7 +106,8 @@ class MapWidget(BaseGeometryWidget):
                 fields = ("name", "geom", "parking")
                 widgets = {
                     "geom": MapWidget(
-                        geom_type="LINESTRING",
+                        geom_type="GEOMETRY",
+                        allowed_types=["POINT", "LINESTRING"],
                         attrs={
                             "snapping_config": {
                                 "enabled": True,
@@ -124,7 +130,24 @@ class MapWidget(BaseGeometryWidget):
     display_raw = False
     modifiable = True
 
-    def __init__(self, attrs=None, geom_type=None):
+    def __init__(self, attrs=None, geom_type=None, allowed_types=None):
+        self.allowed_types = allowed_types
+        if attrs and "allowed_types" in attrs:
+            self.allowed_types = attrs["allowed_types"]
+
+        # Support backward compatibility for geom_type passed as list/tuple
+        if isinstance(geom_type, (list, tuple)):
+            self.allowed_types = geom_type
+            geom_type = "GEOMETRY"
+
+        if attrs and isinstance(attrs.get("geom_type"), (list, tuple)):
+            self.allowed_types = attrs["geom_type"]
+            attrs = attrs.copy()
+            attrs["geom_type"] = "GEOMETRY"
+
+        self.custom_geom_type = geom_type
+        if attrs and "geom_type" in attrs:
+            self.custom_geom_type = attrs["geom_type"]
         if geom_type:
             attrs = attrs or {}
             attrs["geom_type"] = geom_type
@@ -152,9 +175,21 @@ class MapWidget(BaseGeometryWidget):
         Prepare required attributes for the template.
         """
         # Retrieve parameters from the Field initialization
-        self.geom_type = self.attrs.get(
-            "geom_type", getattr(self, "geom_type", "GEOMETRY")
+        geom_type = self.attrs.get("geom_type", getattr(self, "geom_type", "GEOMETRY"))
+        if isinstance(geom_type, (list, tuple)):
+            self.geom_type = "GEOMETRY"
+            self.allowed_types = [gt.upper() for gt in geom_type]
+        else:
+            self.geom_type = geom_type.upper()
+
+        allowed_types = self.attrs.get(
+            "allowed_types", getattr(self, "allowed_types", None)
         )
+        if allowed_types:
+            self.allowed_types = [t.upper() for t in allowed_types]
+        else:
+            self.allowed_types = None
+
         attrs = attrs or {}
         # Generate IDs for HTML and JavaScript elements
         map_id_css = slugify(attrs.get("id", name))
@@ -166,8 +201,13 @@ class MapWidget(BaseGeometryWidget):
                 "id_map": map_id_css + "_map",
                 "modifiable": self.modifiable,
                 "geom_type": self.geom_type,
+                "geom_type_json": json.dumps(self.geom_type),
             }
         )
+        if self.allowed_types:
+            attrs["allowed_types"] = self.allowed_types
+            attrs["allowed_types_json"] = json.dumps(self.allowed_types)
+
         # Propagate target_map and custom_icon from self.attrs to the template context
         if self.attrs.get("target_map"):
             attrs["target_map"] = self.attrs["target_map"]

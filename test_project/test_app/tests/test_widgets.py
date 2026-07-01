@@ -1,7 +1,14 @@
+from unittest.mock import mock_open, patch
+
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 
-from mapentity.widgets import HiddenGeometryWidget, MapWidget, SelectMultipleWithPop
+from mapentity.widgets import (
+    HiddenGeometryWidget,
+    MapWidget,
+    SelectMultipleWithPop,
+    _resolve_custom_icon,
+)
 
 
 class HiddenGeometryWidgetTestCase(TestCase):
@@ -75,10 +82,33 @@ class MapWidgetTestCase(TestCase):
         attrs = widget._get_attrs("myfield")
         self.assertEqual(attrs["geom_type"], "POINT")
 
+    def test_get_attrs_with_geom_type_list(self):
+        widget = MapWidget(attrs={"geom_type": ["POINT", "LINESTRING"]})
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
+        self.assertEqual(attrs["allowed_types"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["allowed_types_json"], '["POINT", "LINESTRING"]')
+
     def test_geom_type_constructor_param(self):
         widget = MapWidget(geom_type="LINESTRING")
         attrs = widget._get_attrs("myfield")
         self.assertEqual(attrs["geom_type"], "LINESTRING")
+
+    def test_geom_type_list_constructor_param(self):
+        """Passing geom_type as a list/tuple should convert to GEOMETRY and set allowed_types for backward compatibility."""
+        widget = MapWidget(geom_type=["point", "Linestring"])
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
+        self.assertEqual(attrs["allowed_types"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["allowed_types_json"], '["POINT", "LINESTRING"]')
+
+    def test_allowed_types_constructor_param(self):
+        """Passing allowed_types should restrict drawing controls while keeping geom_type standard."""
+        widget = MapWidget(geom_type="GEOMETRY", allowed_types=["point", "Linestring"])
+        attrs = widget._get_attrs("myfield")
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
+        self.assertEqual(attrs["allowed_types"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["allowed_types_json"], '["POINT", "LINESTRING"]')
 
     def test_geom_type_constructor_not_overridden_by_form(self):
         """geom_type passed to constructor should not be overridden by setdefault in forms."""
@@ -185,3 +215,72 @@ class SelectMultipleWithPopTestCase(TestCase):
         self.assertIn('id="add_id_select-multiple"', output)
         self.assertIn('onclick="return showAddAnotherPopup(this);"', output)
         self.assertIn('<i class="bi bi-plus"></i>', output)
+
+
+class CustomIconResolutionTestCase(TestCase):
+    def test_resolve_custom_icon_empty(self):
+        self.assertEqual(_resolve_custom_icon(""), "")
+        self.assertIsNone(_resolve_custom_icon(None))
+
+    def test_resolve_custom_icon_html_svg(self):
+        html_svg = '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" /></svg>'
+        self.assertEqual(_resolve_custom_icon(html_svg), html_svg)
+
+    @patch("mapentity.widgets.finders.find")
+    def test_resolve_custom_icon_static_path_found(self, mock_find):
+        mock_find.return_value = "/path/to/static/icon.svg"
+        with patch("builtins.open", mock_open(read_data=b"<svg>content</svg>")):
+            result = _resolve_custom_icon("icon.svg")
+            self.assertEqual(result, "<svg>content</svg>")
+        mock_find.assert_called_once_with("icon.svg")
+
+    @patch("mapentity.widgets.finders.find")
+    def test_resolve_custom_icon_static_path_not_found(self, mock_find):
+        mock_find.return_value = None
+        result = _resolve_custom_icon("icon.svg")
+        self.assertEqual(result, "icon.svg")
+
+
+class MapWidgetFormTestCase(TestCase):
+    def test_form_with_geom_type_list(self):
+        from mapentity.forms import MapEntityForm
+        from test_project.test_app.models import DummyModel
+
+        class DummyModelGeomTypeListForm(MapEntityForm):
+            class Meta:
+                model = DummyModel
+                fields = ("name", "geom")
+                widgets = {
+                    "geom": MapWidget(
+                        geom_type=["POINT", "LINESTRING"],
+                    )
+                }
+
+        form = DummyModelGeomTypeListForm()
+        widget = form.fields["geom"].widget
+        attrs = widget._get_attrs("geom")
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
+        self.assertEqual(attrs["allowed_types"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["allowed_types_json"], '["POINT", "LINESTRING"]')
+
+    def test_form_with_allowed_types(self):
+        from mapentity.forms import MapEntityForm
+        from test_project.test_app.models import DummyModel
+
+        class DummyModelAllowedTypesForm(MapEntityForm):
+            class Meta:
+                model = DummyModel
+                fields = ("name", "geom")
+                widgets = {
+                    "geom": MapWidget(
+                        geom_type="GEOMETRY",
+                        allowed_types=["POINT", "LINESTRING"],
+                    )
+                }
+
+        form = DummyModelAllowedTypesForm()
+        widget = form.fields["geom"].widget
+        attrs = widget._get_attrs("geom")
+        self.assertEqual(attrs["geom_type"], "GEOMETRY")
+        self.assertEqual(attrs["allowed_types"], ["POINT", "LINESTRING"])
+        self.assertEqual(attrs["allowed_types_json"], '["POINT", "LINESTRING"]')

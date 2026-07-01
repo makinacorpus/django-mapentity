@@ -7,7 +7,70 @@ class MaplibreGeometryField {
         this.options.modifiable = this.options.modifiable === true || this.options.modifiable === 'true';
 
         // Detect geometry types
-        const geomType = (this.options.geomType || '').toLowerCase();
+        const allowedTypesOption = this.options.allowedTypes;
+        const geomTypeOption = this.options.geomType;
+        let geomTypes = [];
+
+        if (allowedTypesOption) {
+            if (Array.isArray(allowedTypesOption)) {
+                geomTypes = allowedTypesOption.map(t => t.toLowerCase());
+            } else if (typeof allowedTypesOption === 'string') {
+                try {
+                    const parsed = JSON.parse(allowedTypesOption);
+                    if (Array.isArray(parsed)) {
+                        geomTypes = parsed.map(t => t.toLowerCase());
+                    } else {
+                        geomTypes = [allowedTypesOption.toLowerCase()];
+                    }
+                } catch (e) {
+                    if (allowedTypesOption.includes(',')) {
+                        geomTypes = allowedTypesOption.split(',').map(t => t.trim().toLowerCase());
+                    } else {
+                        geomTypes = [allowedTypesOption.toLowerCase()];
+                    }
+                }
+            }
+        } else if (geomTypeOption) {
+            if (Array.isArray(geomTypeOption)) {
+                geomTypes = geomTypeOption.map(t => t.toLowerCase());
+            } else if (typeof geomTypeOption === 'string') {
+                try {
+                    const parsed = JSON.parse(geomTypeOption);
+                    if (Array.isArray(parsed)) {
+                        geomTypes = parsed.map(t => t.toLowerCase());
+                    } else {
+                        geomTypes = [geomTypeOption.toLowerCase()];
+                    }
+                } catch (e) {
+                    if (geomTypeOption.includes(',')) {
+                        geomTypes = geomTypeOption.split(',').map(t => t.trim().toLowerCase());
+                    } else {
+                        geomTypes = [geomTypeOption.toLowerCase()];
+                    }
+                }
+            }
+        }
+
+        // Store the normalized list of geometry types
+        this.options.geomTypes = geomTypes;
+
+        // Detect if the underlying field is a collection/multi geometry type
+        const backendGeomType = (this.options.geomType || 'geometry').toLowerCase();
+        const isCollectionField = /(^multi|collection$)/.test(backendGeomType);
+
+        let geomType = '';
+        if (isCollectionField) {
+            geomType = backendGeomType;
+        } else {
+            if (geomTypes.length === 1) {
+                geomType = geomTypes[0];
+            } else if (geomTypes.length > 1) {
+                geomType = 'geometry';
+            } else {
+                geomType = backendGeomType;
+            }
+        }
+
         this.options.isGeneric = geomType === 'geometry';
         this.options.isGeometryCollection = /geometrycollection$/.test(geomType);
         this.options.isCollection = /(^multi|collection$)/.test(geomType);
@@ -176,7 +239,13 @@ class MaplibreGeometryField {
                 normalizedData = this.dataManager.normalizeToMultiPoint(geometries);
             } else {
                 // Generic GeometryCollection or unhandled case
-                normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
+                // If there is only a single geometry, serialize it directly to match simple model fields
+                const isExplicitCollection = this.options.geomType === 'GEOMETRYCOLLECTION' || this.options.geomType === 'geometrycollection';
+                if (geometries.length === 1 && !isExplicitCollection) {
+                    normalizedData = geometries[0];
+                } else {
+                    normalizedData = this.dataManager.normalizeToGeometryCollection(geometries);
+                }
             }
         } else {
             // Simple specific mode: normalize by type
@@ -843,6 +912,30 @@ class MaplibreGeometryField {
      * @private
      */
     _getAcceptedShapes() {
+        if (this.options.geomTypes && this.options.geomTypes.length > 0) {
+            const shapes = [];
+            this.options.geomTypes.forEach(gt => {
+                if (gt.includes('point') && !shapes.includes('marker')) {
+                    shapes.push('marker');
+                }
+                if (gt.includes('linestring') && !shapes.includes('line')) {
+                    shapes.push('line');
+                }
+                if (gt.includes('polygon') && !shapes.includes('polygon')) {
+                    shapes.push('polygon');
+                }
+                if (gt.includes('geometry') || gt.includes('geometrycollection')) {
+                    ['marker', 'line', 'polygon', 'rectangle'].forEach(s => {
+                        if (!shapes.includes(s)) shapes.push(s);
+                    });
+                }
+            });
+            // Also allow rectangle if polygon is allowed
+            if (shapes.includes('polygon') && !shapes.includes('rectangle')) {
+                shapes.push('rectangle');
+            }
+            return shapes;
+        }
         if (this.options.isGeneric || this.options.isGeometryCollection) {
             return ['marker', 'line', 'polygon', 'rectangle'];
         }

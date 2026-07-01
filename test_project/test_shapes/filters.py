@@ -1,6 +1,7 @@
 from mapentity.filters import MapEntityFilterSet
 
 from .models import (
+    AllowedTypesModel,
     GeometryCollectionModel,
     GeometryModel,
     MultiLineStringModel,
@@ -57,4 +58,10 @@ class GeometryModelFilterSet(MapEntityFilterSet):
 class GeometryCollectionModelFilterSet(MapEntityFilterSet):
     class Meta:
         model = GeometryCollectionModel
+        fields = ("id", "name")
+
+
+class AllowedTypesModelFilterSet(MapEntityFilterSet):
+    class Meta:
+        model = AllowedTypesModel
         fields = ("id", "name")

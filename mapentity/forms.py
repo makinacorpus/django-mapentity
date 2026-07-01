@@ -168,11 +168,20 @@ class MapEntityForm(TranslatedModelForm):
                     if isinstance(modelfield, GeometryField) and isinstance(
                         formfield.widget, MapWidget
                     ):
-                        # BaseGeometryWidget sets geom_type="GEOMETRY" by default in attrs.
-                        # Only override if it's still the default (not explicitly set by user).
-                        current_geom_type = formfield.widget.attrs.get("geom_type")
-                        if current_geom_type is None or current_geom_type == "GEOMETRY":
-                            formfield.widget.attrs["geom_type"] = formfield.geom_type
+                        custom_geom_type = getattr(
+                            formfield.widget, "custom_geom_type", None
+                        )
+                        if custom_geom_type is not None:
+                            formfield.widget.attrs["geom_type"] = custom_geom_type
+                        else:
+                            current_geom_type = formfield.widget.attrs.get("geom_type")
+                            if (
+                                current_geom_type is None
+                                or current_geom_type == "GEOMETRY"
+                            ):
+                                formfield.widget.attrs["geom_type"] = (
+                                    formfield.geom_type
+                                )
                         formfield.widget.attrs.setdefault(
                             "field_label", str(modelfield.verbose_name)
                         )

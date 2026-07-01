@@ -50,6 +50,21 @@ All options are passed via the ``attrs`` dict or as named constructor parameters
     When used inside a ``MapEntityForm``, the ``geom_type`` is automatically
     inferred from the model field unless explicitly overridden.
 
+``allowed_types`` *(list of str)*
+    List of OGC geometry types allowed for drawing. Determines and restricts
+    which drawing controls are available on a generic geometry field (such as a
+    field with type ``"GEOMETRY"``).
+
+    Accepted values in the list: ``"POINT"``, ``"LINESTRING"``, ``"POLYGON"``.
+
+    Example::
+
+        # Constructor parameter
+        MapWidget(geom_type="GEOMETRY", allowed_types=["POINT", "LINESTRING"])
+
+        # Via attrs
+        MapWidget(geom_type="GEOMETRY", attrs={"allowed_types": ["POINT", "LINESTRING"]})
+
 ``modifiable`` *(bool)*
     Whether the user can draw and edit the geometry. Default: ``True``.
 

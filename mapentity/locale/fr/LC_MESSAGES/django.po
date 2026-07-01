@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-30 14:41+0000\n"
+"POT-Creation-Date: 2026-07-01 08:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,9 +83,6 @@ msgstr "BOUNDS doit être une liste ou un tuple de deux paires de coordonnées [
 
 msgid "Each point in BOUNDS must be a list or tuple with two floats (lon, lat)."
 msgstr "Chaque point dans BOUNDS doit être une liste ou un tuple contenant deux nombres flottants (lon, lat)."
-
-msgid "Background"
-msgstr "Fond de carte"
 
 msgid "Permission denied"
 msgstr "Permission refusée"
@@ -308,6 +305,10 @@ msgstr "Créé"
 
 msgid "Your form contains errors"
 msgstr "Le formulaire contient des erreurs"
+
+#, python-format
+msgid "Error in geometry field '%(field)s': %(error)s"
+msgstr "Erreur dans le champ géométrique '%(field)s' : %(error)s"
 
 msgid "Duplication is not available for this object"
 msgstr "La duplication n'est pas disponible pour cet objet."
