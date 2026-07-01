@@ -54,18 +54,26 @@ class MaplibreGeometryField {
         // Store the normalized list of geometry types
         this.options.geomTypes = geomTypes;
 
-        // If it's a single geometry type, fallback to standard detection on that type
-        // Otherwise, if it has multiple types, it is treated as a GeometryCollection
+        // Detect if the underlying field is a collection/multi geometry type
+        const backendGeomType = (this.options.geomType || 'geometry').toLowerCase();
+        const isCollectionField = /(^multi|collection$)/.test(backendGeomType);
+
         let geomType = '';
-        if (geomTypes.length === 1) {
-            geomType = geomTypes[0];
-        } else if (geomTypes.length > 1) {
-            geomType = 'geometrycollection';
+        if (isCollectionField) {
+            geomType = backendGeomType;
+        } else {
+            if (geomTypes.length === 1) {
+                geomType = geomTypes[0];
+            } else if (geomTypes.length > 1) {
+                geomType = 'geometry';
+            } else {
+                geomType = backendGeomType;
+            }
         }
 
         this.options.isGeneric = geomType === 'geometry';
         this.options.isGeometryCollection = /geometrycollection$/.test(geomType);
-        this.options.isCollection = /(^multi|collection$)/.test(geomType) || geomTypes.length > 1;
+        this.options.isCollection = /(^multi|collection$)/.test(geomType);
         this.options.isLineString = /linestring$/.test(geomType);
         this.options.isPolygon = /polygon$/.test(geomType);
         this.options.isPoint = /point$/.test(geomType);
@@ -904,6 +912,30 @@ class MaplibreGeometryField {
      * @private
      */
     _getAcceptedShapes() {
+        if (this.options.geomTypes && this.options.geomTypes.length > 0) {
+            const shapes = [];
+            this.options.geomTypes.forEach(gt => {
+                if (gt.includes('point') && !shapes.includes('marker')) {
+                    shapes.push('marker');
+                }
+                if (gt.includes('linestring') && !shapes.includes('line')) {
+                    shapes.push('line');
+                }
+                if (gt.includes('polygon') && !shapes.includes('polygon')) {
+                    shapes.push('polygon');
+                }
+                if (gt.includes('geometry') || gt.includes('geometrycollection')) {
+                    ['marker', 'line', 'polygon', 'rectangle'].forEach(s => {
+                        if (!shapes.includes(s)) shapes.push(s);
+                    });
+                }
+            });
+            // Also allow rectangle if polygon is allowed
+            if (shapes.includes('polygon') && !shapes.includes('rectangle')) {
+                shapes.push('rectangle');
+            }
+            return shapes;
+        }
         if (this.options.isGeneric || this.options.isGeometryCollection) {
             return ['marker', 'line', 'polygon', 'rectangle'];
         }

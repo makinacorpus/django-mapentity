@@ -99,3 +99,15 @@ class GeometryCollectionModelGeojsonSerializer(MapentityGeojsonModelSerializer):
     class Meta(MapentityGeojsonModelSerializer.Meta):
         model = models.GeometryCollectionModel
         fields = "__all__"
+
+
+class AllowedTypesModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.AllowedTypesModel
+        fields = "__all__"
+
+
+class AllowedTypesModelGeojsonSerializer(MapentityGeojsonModelSerializer):
+    class Meta(MapentityGeojsonModelSerializer.Meta):
+        model = models.AllowedTypesModel
+        fields = "__all__"

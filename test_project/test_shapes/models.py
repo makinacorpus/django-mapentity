@@ -98,3 +98,15 @@ class GeometryCollectionModel(MapEntityMixin, models.Model):
     class Meta:
         verbose_name = _("GeometryCollection Model")
         verbose_name_plural = _("GeometryCollection Models")
+
+
+class AllowedTypesModel(MapEntityMixin, models.Model):
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
+    geom = models.GeometryField(srid=4326)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("AllowedTypes Model")
+        verbose_name_plural = _("AllowedTypes Models")

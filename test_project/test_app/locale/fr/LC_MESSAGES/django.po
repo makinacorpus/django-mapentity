@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-05 16:55+0000\n"
+"POT-Creation-Date: 2026-07-01 08:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,6 +21,9 @@ msgstr ""
 msgid "Test App"
 msgstr "App de test"
 
+msgid "Roads"
+msgstr "Routes"
+
 msgid "Name"
 msgstr "Nom"
 
@@ -32,9 +35,6 @@ msgstr "Coins à champignons"
 
 msgid "Road"
 msgstr "Route"
-
-msgid "Roads"
-msgstr "Routes"
 
 msgid "Short description"
 msgstr "Description courte"
@@ -56,6 +56,12 @@ msgstr "Modèle caché"
 
 msgid "Hidden Models"
 msgstr "Modèles cachés"
+
+msgid "Multi Geom Model"
+msgstr "Modèle multi geom"
+
+msgid "Multi Geom Models"
+msgstr "Modèles multi geom"
 
 msgid "Complex Model"
 msgstr "Modèle complexe"
