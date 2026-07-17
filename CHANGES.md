@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+9.0.1      (2026-07-17)
+-----------------------
+
+**Bug fixes**
+
+- Compatibility with django-mapbox-baselayer >=1.5.2
+
+
 9.0.0      (2026-07-01)
 -----------------------
 
