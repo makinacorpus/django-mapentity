@@ -27,6 +27,15 @@ class MockManager:
         self._created.append(kwargs)
         return obj
 
+    def get_or_create(self, name=None, is_overlay=False, defaults=None):
+        if self._exists:
+            return mock.MagicMock(), False
+        options = defaults.copy()
+        options["name"] = name
+        options["is_overlay"] = is_overlay
+        obj = self.create(**options)
+        return obj, True
+
 
 class MockBaseLayerTile:
     def __init__(self):
@@ -43,7 +52,7 @@ class MigrateTilesTestCase(TestCase):
         sender = mock.MagicMock()
 
         def get_model(name):
-            if name == "mapbox_baselayer.BaseLayer":
+            if name == "mapbox_baselayer.MapBaseLayer":
                 return bl
             elif name == "mapbox_baselayer.BaseLayerTile":
                 return blt
@@ -133,6 +142,92 @@ class MigrateTilesTestCase(TestCase):
         sender, bl, blt = self._make_sender(base_layer_exists=True)
         migrate_tiles(sender)
         self.assertEqual(len(bl.objects._created), 0)
+
+    @override_settings(
+        LEAFLET_CONFIG={"TILES": [("OSM", "https://tile.osm.org/{z}/{x}/{y}.png")]}
+    )
+    def test_apps_from_kwargs(self, mock_logger):
+        """Should use apps from kwargs if provided"""
+        bl = MockBaseLayer()
+        blt = MockBaseLayerTile()
+        apps = mock.MagicMock()
+
+        def get_model(name):
+            if name == "mapbox_baselayer.MapBaseLayer":
+                return bl
+            elif name == "mapbox_baselayer.BaseLayerTile":
+                return blt
+            raise LookupError(name)
+
+        apps.get_model = get_model
+        sender = mock.MagicMock()
+        del sender.apps  # Ensure sender.apps is not used
+
+        migrate_tiles(sender, apps=apps)
+        self.assertEqual(len(bl.objects._created), 1)
+
+    @override_settings(
+        LEAFLET_CONFIG={"TILES": [("OSM", "https://tile.osm.org/{z}/{x}/{y}.png")]}
+    )
+    def test_apps_from_sender(self, mock_logger):
+        """Should use apps from sender if not in kwargs"""
+        sender, bl, blt = self._make_sender()
+        migrate_tiles(sender)
+        self.assertEqual(len(bl.objects._created), 1)
+
+    @override_settings(
+        LEAFLET_CONFIG={"TILES": [("OSM", "https://tile.osm.org/{z}/{x}/{y}.png")]}
+    )
+    def test_apps_fallback_to_global(self, mock_logger):
+        """Should fallback to global apps if not in kwargs or sender"""
+        sender = mock.MagicMock()
+        del sender.apps
+
+        with mock.patch("django.apps.apps.get_model") as mock_get_model:
+            mock_MapBaseLayer = mock.MagicMock()
+            mock_BaseLayerTile = mock.MagicMock()
+
+            def get_model_side_effect(name):
+                if name == "mapbox_baselayer.MapBaseLayer":
+                    return mock_MapBaseLayer
+                if name == "mapbox_baselayer.BaseLayerTile":
+                    return mock_BaseLayerTile
+                return mock.MagicMock()
+
+            mock_get_model.side_effect = get_model_side_effect
+            mock_MapBaseLayer.objects.get_or_create.return_value = (
+                mock.MagicMock(),
+                True,
+            )
+
+            migrate_tiles(sender)
+
+            self.assertTrue(mock_get_model.called)
+            mock_get_model.assert_any_call("mapbox_baselayer.MapBaseLayer")
+            mock_get_model.assert_any_call("mapbox_baselayer.BaseLayerTile")
+
+    @override_settings(
+        LEAFLET_CONFIG={"TILES": [("OSM", "//tile.osm.org/{z}/{x}/{y}.png")]}
+    )
+    def test_url_with_no_scheme(self, mock_logger):
+        """Should add https: to URLs starting with //"""
+        sender, bl, blt = self._make_sender()
+        migrate_tiles(sender)
+        self.assertEqual(
+            blt.objects._created[0]["url"], "https://tile.osm.org/{z}/{x}/{y}.png"
+        )
+
+    @override_settings(
+        LEAFLET_CONFIG={
+            "OVERLAYS": [("Overlay", "https://tile.osm.org/{z}/{x}/{y}.png")]
+        }
+    )
+    def test_overlay_creation(self, mock_logger):
+        """Should create overlay layers from OVERLAYS setting"""
+        sender, bl, blt = self._make_sender()
+        migrate_tiles(sender)
+        self.assertEqual(len(bl.objects._created), 1)
+        self.assertTrue(bl.objects._created[0]["is_overlay"])
 
     @override_settings(
         LEAFLET_CONFIG={
