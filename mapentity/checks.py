@@ -9,9 +9,9 @@ def check_old_config(app_configs, **kwargs):
         if old_leaflet_config:
             return [
                 Warning(
-                    """Warning: LEAFLET_CONFIG is defined in settings."""
-                    """If you want to use newest MapEntity version, please make sure to report your LEAFLET_CONFIG to new MAPLIBRE_CONFIG."""
-                    """TILES and OVERLAYS will be migrate automatically in new database section""",
+                    "LEAFLET_CONFIG is defined in settings. "
+                    "To use the latest MapEntity version, please port your LEAFLET_CONFIG to the new MAPLIBRE_CONFIG. "
+                    "TILES and OVERLAYS will be migrated automatically to the database.",
                     id="mapentity.W001",
                 )
             ]
