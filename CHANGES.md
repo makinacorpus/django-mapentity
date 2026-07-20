@@ -6,8 +6,8 @@ CHANGELOG
 
 **Improvements**
 
-- Only report LEAFLET_CONFIG deprecation if settings not empty.
-- Migrate LEAFLET_CONFIG overlays, and manage case where database is not empty.
+- Only report LEAFLET_CONFIG deprecation if settings are not empty.
+- Migrate LEAFLET_CONFIG overlays and handle the case where the database is not empty.
 
 
 
