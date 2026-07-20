@@ -1,14 +1,13 @@
 CHANGELOG
 =========
 
-9.0.1+dev  (2026-07-20)
+9.0.2      (2026-07-20)
 -----------------------
 
 **Improvements**
 
 - Only report LEAFLET_CONFIG deprecation if settings are not empty.
 - Migrate LEAFLET_CONFIG overlays and handle the case where the database is not empty.
-
 
 
 9.0.1      (2026-07-17)
