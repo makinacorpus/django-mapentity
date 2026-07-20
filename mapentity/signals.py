@@ -10,8 +10,8 @@ def migrate_tiles(sender, **kwargs):
     BaseLayerTile = sender.apps.get_model("mapbox_baselayer.BaseLayerTile")
 
     def _create_layers(tiles, overlay=False):
+        created_count = 0
         for idx, element in enumerate(tiles):
-            created_count = 0
             name = element[0]
             url = element[1]
             options = {
