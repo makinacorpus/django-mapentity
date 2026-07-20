@@ -6,8 +6,16 @@ logger = logging.getLogger(__name__)
 
 
 def migrate_tiles(sender, **kwargs):
-    BaseLayer = sender.apps.get_model("mapbox_baselayer.MapBaseLayer")
-    BaseLayerTile = sender.apps.get_model("mapbox_baselayer.BaseLayerTile")
+    apps = kwargs.get("apps")
+    if apps is None:
+        if hasattr(sender, "apps"):
+            apps = sender.apps
+        else:
+            from django.apps import apps as global_apps
+
+            apps = global_apps
+    MapBaseLayer = apps.get_model("mapbox_baselayer.MapBaseLayer")
+    BaseLayerTile = apps.get_model("mapbox_baselayer.BaseLayerTile")
 
     def _create_layers(tiles, overlay=False):
         created_count = 0
@@ -33,7 +41,7 @@ def migrate_tiles(sender, **kwargs):
                     options["attribution"] = element[2]
 
             name = options.pop("name")
-            b, created = BaseLayer.objects.get_or_create(
+            b, created = MapBaseLayer.objects.get_or_create(
                 name=name, is_overlay=overlay, defaults=options
             )
             if created:
@@ -61,10 +69,11 @@ def migrate_tiles(sender, **kwargs):
                     "Created %s base layers from LEAFLET_CONFIG TILES.", created_count
                 )
 
-    if not BaseLayer.objects.exists():
-        if hasattr(settings, "LEAFLET_CONFIG"):
-            # migrate tiles from old LEAFLET_CONFIG setting
-            tiles = settings.LEAFLET_CONFIG.get("TILES", [])
-            overlays = settings.LEAFLET_CONFIG.get("OVERLAYS", [])
-            _create_layers(tiles, overlay=False)
+    if hasattr(settings, "LEAFLET_CONFIG"):
+        # migrate tiles from old LEAFLET_CONFIG setting
+        base_tiles = settings.LEAFLET_CONFIG.get("TILES", [])
+        overlays = settings.LEAFLET_CONFIG.get("OVERLAYS", [])
+        if base_tiles:
+            _create_layers(base_tiles, overlay=False)
+        if overlays:
             _create_layers(overlays, overlay=True)

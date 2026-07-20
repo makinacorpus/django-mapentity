@@ -27,6 +27,15 @@ class MockManager:
         self._created.append(kwargs)
         return obj
 
+    def get_or_create(self, name=None, is_overlay=False, defaults=None):
+        if self._exists:
+            return mock.MagicMock(), False
+        options = defaults.copy()
+        options["name"] = name
+        options["is_overlay"] = is_overlay
+        obj = self.create(**options)
+        return obj, True
+
 
 class MockBaseLayerTile:
     def __init__(self):
@@ -43,7 +52,7 @@ class MigrateTilesTestCase(TestCase):
         sender = mock.MagicMock()
 
         def get_model(name):
-            if name == "mapbox_baselayer.BaseLayer":
+            if name == "mapbox_baselayer.MapBaseLayer":
                 return bl
             elif name == "mapbox_baselayer.BaseLayerTile":
                 return blt
