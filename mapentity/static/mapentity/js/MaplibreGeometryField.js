@@ -83,9 +83,25 @@ class MaplibreGeometryField {
         this.options.isMultiLineString = /^multilinestring$/.test(geomType);
         this.options.isMultiPoint = /^multipoint$/.test(geomType);
 
+        // Densified coordinates of external layer features available for snapping, refreshed on
+        // each mouse move event while drawing. Used to resolve which feature a snapped vertex
+        // belongs to (see MaplibreFieldStore._serialize and enableExternalLayerSnapping).
+        // TODO: handle several layers
+        this.densifiedCoordsOfSnappingLayers = [];
+        this.setDensifiedCoordsOfSnappingLayers = (newDensifiedCoords) => {
+            this.densifiedCoordsOfSnappingLayers = newDensifiedCoords;
+        }
+        this.getDensifiedCoordsOfSnappingLayers = () => {
+            return this.densifiedCoordsOfSnappingLayers;
+        }
+
         // Initialize the components
         this.dataManager = new GeometryDataManager(this.options);
-        this.fieldStore = new MaplibreFieldStore(this.fieldId, this.options);
+        this.fieldStore = new MaplibreFieldStore(
+            this.fieldId,
+            this.getDensifiedCoordsOfSnappingLayers,
+            this.options
+        );
 
         this.livePopup = null;
         this.isDrawingLine = false;
@@ -1517,11 +1533,16 @@ Called on each render frame to track real-time dragging.
                 resolvedGeoman.options.enableMode("helper", "snapping");
             }
 
-            enableExternalLayerSnapping(map, resolvedGeoman, {
-                layerIds: layerIds,
-                snapRadius: snapDistance * 2,
-                densifyGapPx: 4,
-            });
+            enableExternalLayerSnapping(
+                map,
+                resolvedGeoman,
+                this.setDensifiedCoordsOfSnappingLayers,
+                {
+                    layerIds: layerIds,
+                    snapRadius: snapDistance * 2,
+                    densifyGapPx: 4,
+                }
+            );
         });
     }
 }
