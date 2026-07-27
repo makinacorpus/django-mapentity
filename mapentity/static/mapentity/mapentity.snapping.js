@@ -100,7 +100,7 @@ function extractAndDensifyCoords(map, geometry, gapPx) {
  *
  * @param {maplibregl.Map} map        - The MapLibre map instance
  * @param {Object} geoman             - The Geoman instance (window.gm or equivalent)
- * @param {Function} densifiedCoordsSetter   - Callback storing densified coords per feature id
+ * @param {Function} densifiedCoordsSetter   - Callback storing densified coords per feature layer and id
  * @param {Object} options
  * @param {string[]} options.layerIds   - MapLibre layer IDs to query for snap targets
  * @param {number}  options.snapRadius  - Query bbox half-size in pixels (default: 50)
@@ -143,15 +143,15 @@ function enableExternalLayerSnapping(map, geoman, densifiedCoordsSetter, options
         }
 
         const allCoords = [];
-        const coordsByFeatureId = {};
+        const coordsByLayer = Object.fromEntries(layerIds.map(id => [id, {}]));
         features.forEach(function(feature) {
             if (feature.geometry) {
                 const coords = extractAndDensifyCoords(map, feature.geometry, densifyGapPx);
                 coords.forEach(c => allCoords.push(c));
-                coordsByFeatureId[feature.properties.id] = coords;
+                coordsByLayer[feature.layer.id][feature.properties.id] = coords;
             }
         });
-        densifiedCoordsSetter(coordsByFeatureId);
+        densifiedCoordsSetter(coordsByLayer);
 
         if (allCoords.length > 0) {
             helper.setCustomSnappingCoordinates(SNAP_KEY, allCoords);
