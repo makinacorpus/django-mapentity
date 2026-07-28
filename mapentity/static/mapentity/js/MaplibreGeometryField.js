@@ -86,7 +86,7 @@ class MaplibreGeometryField {
         // Densified coordinates of external layer features available for snapping, refreshed on
         // each mouse move event while drawing. Used to resolve which feature a snapped vertex
         // belongs to (see MaplibreFieldStore._serialize and enableExternalLayerSnapping).
-        this.densifiedCoordsOfSnappingLayers = [];
+        this.densifiedCoordsOfSnappingLayers = {};
         this.setDensifiedCoordsOfSnappingLayers = (newDensifiedCoords) => {
             this.densifiedCoordsOfSnappingLayers = newDensifiedCoords;
         }
