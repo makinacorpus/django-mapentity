@@ -1,7 +1,8 @@
 class MaplibreFieldStore {
-    constructor(fieldId, options = {}) {
+    constructor(fieldId, densifiedCoordsGetter, options = {}) {
         this.fieldId = fieldId;
         this.formField = document.getElementById(fieldId);
+        this.densifiedCoordsGetter = densifiedCoordsGetter;
         this.options = { ...options };
     }
 
@@ -96,6 +97,31 @@ class MaplibreFieldStore {
                         coordinates: data.coordinates[0]
                     });
                 }
+            }
+            // For a single point, also report the external layer feature it snapped to, if any
+            if (data.type === 'Point') {
+                const [lng, lat] = data.coordinates;
+                let snapTargetLayer = null;
+                let snapTargetId = null;
+                const externalLayersCoords = this.densifiedCoordsGetter();
+                // Match vertex coordinates against densified coords of external layers to find
+                // the snap target's layer and feature id, if the point was snapped.
+                snapSearchBlock:
+                for (const [layerId, featuresCoords] of Object.entries(externalLayersCoords)) {
+                    for (const [featureId, coords] of Object.entries(featuresCoords)) {
+                        if (coords.some(([ptLng, ptLat]) => ptLng === lng && ptLat === lat)) {
+                            snapTargetLayer = layerId;
+                            snapTargetId = featureId;
+                            break snapSearchBlock;
+                        }
+                    }
+                }
+                return JSON.stringify({
+                    type: 'Point',
+                    coordinates: data.coordinates,
+                    snapLayer: snapTargetLayer,
+                    snapFeature: snapTargetId,
+                });
             }
             return JSON.stringify(data);
         }

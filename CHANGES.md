@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+9.0.3      (2026-07-30)
+-----------------------
+
+**Improvements**
+
+- Add snap target's layer and feature ids for point geometries
+
+
 9.0.2      (2026-07-20)
 -----------------------
 
