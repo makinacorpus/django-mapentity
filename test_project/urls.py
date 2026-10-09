@@ -21,6 +21,7 @@ urlpatterns = [
         name="home",
     ),
     path("", include("test_project.test_app.urls")),
+    path("", include("test_project.test_shapes.urls")),
     path("", include("mapentity.urls")),
     path("tinymce/", include("tinymce.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
@@ -32,6 +33,7 @@ urlpatterns = [
         name="logout",
     ),
     path("paperclip/", include("paperclip.urls")),
+    path("mapbox/", include("mapbox_baselayer.urls")),
     path("admin/", admin.site.urls),
     path(
         "test/document/dummymodel-<int:pk>.odt",
@@ -50,8 +52,11 @@ urlpatterns = [
             "document_root": settings.MEDIA_ROOT,
         },
     ),
-    path("__debug__/", include("debug_toolbar.urls")),
 ]
+
+# Add debug toolbar URLs only if not running E2E tests
+if "debug_toolbar" in settings.INSTALLED_APPS:
+    urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
 
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

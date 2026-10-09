@@ -1,5 +1,15 @@
+from django.contrib.gis.forms import LineStringField
+
 from mapentity.forms import MapEntityForm
-from test_project.test_app.models import DummyModel, MushroomSpot, Road
+from mapentity.widgets import MapWidget
+
+from .models import (
+    City,
+    DummyModel,
+    MultiGeomModel,
+    MushroomSpot,
+    Road,
+)
 
 
 class DummyModelForm(MapEntityForm):
@@ -11,7 +21,19 @@ class DummyModelForm(MapEntityForm):
 class RoadForm(MapEntityForm):
     class Meta:
         model = Road
-        fields = ("name", "geom")
+        fields = ("name", "geom", "tag")
+        widgets = {
+            "geom": MapWidget(
+                geom_type="LINESTRING",
+                attrs={
+                    "snapping_config": {
+                        "enabled": True,
+                        "layers": ["test_app.Road"],
+                        "snap_distance": 20,
+                    },
+                },
+            ),
+        }
 
 
 class MushroomSpotForm(MapEntityForm):
@@ -20,3 +42,32 @@ class MushroomSpotForm(MapEntityForm):
     class Meta:
         model = MushroomSpot
         fields = "__all__"
+
+
+class CityForm(MapEntityForm):
+    class Meta:
+        model = City
+        fields = ("name", "geom")
+
+
+class MultiGeomForm(MapEntityForm):
+    geom = LineStringField()
+    geomfields = ["geom", "parking", "points"]
+
+    class Meta:
+        model = MultiGeomModel
+        fields = ("name", "geom", "parking", "points")
+        widgets = {
+            "parking": MapWidget(
+                attrs={
+                    "target_map": "geom",
+                    "custom_icon": "parking.svg",
+                }
+            ),
+            "points": MapWidget(
+                attrs={
+                    "target_map": "geom",
+                    "custom_icon": "points.svg",
+                }
+            ),
+        }

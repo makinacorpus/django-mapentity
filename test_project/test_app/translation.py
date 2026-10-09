@@ -1,6 +1,6 @@
 from modeltranslation.translator import TranslationOptions, translator
 
-from test_project.test_app.models import DummyModel, Road
+from .models import ComplexModel, DummyModel, Road
 
 
 class DummyModelTO(TranslationOptions):
@@ -11,5 +11,18 @@ class RoadModelTO(TranslationOptions):
     fields = ("name",)
 
 
+class MushroomSpotTO(TranslationOptions):
+    fields = ("name",)
+
+
+class CityTO(TranslationOptions):
+    fields = ("name",)
+
+
+class ComplexModelModelTO(TranslationOptions):
+    fields = ("name", "public")
+
+
 translator.register(DummyModel, DummyModelTO)
 translator.register(Road, RoadModelTO)
+translator.register(ComplexModel, ComplexModelModelTO)

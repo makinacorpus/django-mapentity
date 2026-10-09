@@ -1,0 +1,215 @@
+document.addEventListener('DOMContentLoaded', function() {
+    // Event listener for the list view
+    window.addEventListener('entity:view:list', function(e) {
+        const { objectsLayer, modelname } = e.detail;
+        // Unique selector defined globally
+        const selectorOnce = (() => {
+            let current = { 'pk': null, 'row': null };
+
+            const toggleSelectRow = (prevRow, nextRow) => {
+                const animateRow = (row, adding) => {
+                    if (!row) {
+                        return;
+                    }
+                    row.classList.toggle('success', adding);
+                };
+
+                animateRow(prevRow, false);
+                animateRow(nextRow, true);
+            };
+
+            const toggleSelectObject = (pk, on = true) => {
+                objectsLayer.select(pk, on);
+            };
+
+            return {
+                select: (pk, row) => {
+                    if (pk === current.pk) {
+                        pk = null;
+                        row = null;
+                    }
+
+                    const prev = current;
+                    current = { pk, row };
+
+                    toggleSelectRow(prev.row, row);
+
+                    if (prev.pk && prev.row) {
+                        toggleSelectObject(prev.pk, false);
+                    }
+                    if (row && pk) {
+                        toggleSelectObject(pk, true);
+                    }
+                }
+            };
+        })();
+
+
+        // Initialization of the DataTable
+        const canSelect = !!window.USER_CAN_SELECT;
+
+        const mainDatatable = new DataTable('#objects-list', {
+            processing: true,
+            serverSide: true,
+            searching: true,
+            columnDefs: [
+                {
+                data: null,
+                defaultContent: '',
+                orderable: false,
+                searchable: false,
+                render: canSelect ? DataTable.render.select() : null,
+                visible: canSelect,
+                targets: 0
+                },
+                { visible: false, targets: [1] }
+            ],
+            ajax: {
+                url: `/api/${modelname}/drf/${modelname}s.datatables`
+            },
+            responsive: true,
+            pageLength: 7,
+            scrollY: '100vh',
+            scrollCollapse: true,
+            info: false, // hide "showing 1 to n of m entries"
+            lengthChange: false,
+            dom: 'T<"clear">rtp',
+            language: {
+                searchPlaceholder: tr("Search"),
+                paginate: {
+                    first: "<<",
+                    last: ">>",
+                    next: ">",
+                    previous: "<"
+                },
+            },
+            layout: {
+                bottomEnd: 'inputPaging'
+            },
+            createdRow: function (row, data, index) {
+                const pk = data.id;
+
+                row.addEventListener('mouseenter', () => {
+                    objectsLayer.highlight(pk);
+                });
+                row.addEventListener('mouseleave', () => {
+                    objectsLayer.highlight(pk, false);
+                });
+                row.addEventListener('dblclick', () => {
+                    objectsLayer.jumpTo(pk);
+                });
+            },
+            select: canSelect ? {
+                style: 'multi',
+                selector: 'td:first-child'
+            } : false,
+            order: [[1, 'asc']]
+        });
+
+        window.MapEntity.dt = mainDatatable;
+
+        var paging = document.getElementsByClassName('dt-paging')[0];
+        paging.classList.add('d-flex', 'flex-row-reverse');
+        document.getElementById('list-download-toolbar').appendChild(paging);
+
+        // custom search field
+        const searchInput = document.getElementById('object-list-search');
+
+        searchInput.addEventListener('input', function () {
+            mainDatatable.search(this.value).draw();
+        });
+
+       window.addEventListener('resize', function (e) {
+             expandDatatableHeight();
+       });
+
+       // show tooltips on left menu
+        $('#entitylist .nav-link').tooltip({ placement: 'right', boundary: 'window' });
+
+        // trigger a call to the format url
+        document.querySelectorAll('#list-download-toolbar button').forEach(button => {
+            button.addEventListener('click', function () {
+                const can_export = document.querySelectorAll('#list-download-toolbar .btn-group.disabled').length === 0;
+                const format = this.getAttribute('name');
+                const formatUrl = window.SETTINGS.urls.format_list.replace(new RegExp('modelname', 'g'), modelname);
+                const mainfilter = document.getElementById('mainfilter');
+                const serializedData = new URLSearchParams(new FormData(mainfilter)).toString();
+                const url = `${formatUrl}?${serializedData}&format=${format}`;
+
+                if(can_export){
+                    document.location = url;
+                }
+                return false;
+            });
+        });
+
+        const filterLabel = document.querySelector('#object-list_filter label');
+        if(filterLabel){
+            // Parcourir les noeuds enfants et supprimer les noeuds textuels
+            Array.from(filterLabel.childNodes).forEach(node => {
+                if(node.nodeType === Node.TEXT_NODE) {
+                    node.remove();
+                }
+            });
+        }
+
+        // Adjust vertically
+        expandDatatableHeight();
+
+        // batch edition
+        document.getElementById("btn-batch-editing").addEventListener("click", () => {
+            makeButtonDisabled("btn-delete", "tooltip-delete");
+            makeButtonDisabled("btn-edit", "tooltip-edit");
+        });
+
+        function makeButtonDisabled(btnID, tooltipID) {
+            const btn = document.getElementById(btnID);
+            const tooltip = document.getElementById(tooltipID);
+
+            const checkedCount = document.querySelectorAll(".dt-select-checkbox:checked").length;
+
+            if (checkedCount === 0) {
+                btn.setAttribute("disabled", "true");
+                tooltip.setAttribute("title", "At least one item must be selected");
+            } else {
+                btn.removeAttribute("disabled");
+                tooltip.removeAttribute("title");
+            }
+        }
+
+        // delete / edit buttons
+        document.querySelectorAll("#btn-delete, #btn-edit").forEach(btn => {
+            btn.addEventListener("click", async (event) => {
+                const selectedPks = await getSelectedPks();
+                const url = new URL(btn.dataset.url, window.location.origin);
+                url.searchParams.set("pks", selectedPks);
+                window.location.href = url;
+            });
+        });
+
+        async function getSelectedPks() {
+            let pksList = [];
+
+            const anyChecked = document.querySelector(".dt-scroll-headInner .dt-select-checkbox:checked");
+
+            if (anyChecked) {
+                const form = document.getElementById("mainfilter");
+                const url = form.action.replace(".datatables", "/filter_infos.json");
+                const params = new URLSearchParams(new FormData(form)).toString();
+
+                const response = await fetch(url + "?" + params);
+                const data = await response.json();
+                pksList = data.pk_list;
+            } else {
+                pksList = window.MapEntity.dt
+                    .rows({ selected: true })
+                    .data()
+                    .pluck("id")
+                    .toArray();
+            }
+
+            return pksList.join(",");
+        }
+    });
+
+});

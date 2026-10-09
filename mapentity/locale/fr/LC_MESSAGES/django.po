@@ -7,19 +7,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-23 09:53+0000\n"
-"PO-Revision-Date: 2025-10-24 15:28+0000\n"
-"Last-Translator: J-E Castagnede <jean-etienne.castagnede@makina-corpus.com>\n"
-"Language-Team: French <https://weblate.makina-corpus.net/projects/django-mapentity/mapentity/fr/>\n"
-"Language: fr\n"
+"POT-Creation-Date: 2026-07-01 08:51+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 5.13.3\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 
-msgid ""
-"Access to the requested resource is restricted. You have been redirected."
+msgid "Access to the requested resource is restricted. You have been redirected."
 msgstr "L'accès à la ressource demandée est restreint. Vous avez été redirigé."
 
 #, python-format
@@ -44,6 +42,21 @@ msgstr "Soumettre le fichier"
 msgid "Update attachment"
 msgstr "Modifier le fichier"
 
+msgid "Save"
+msgstr "Sauvegarder"
+
+msgid "Do nothing"
+msgstr "Ne rien faire"
+
+msgid "Yes"
+msgstr "Oui"
+
+msgid "No"
+msgstr "Non"
+
+msgid "Null value"
+msgstr "Valeur nulle"
+
 msgid "object"
 msgstr "objet"
 
@@ -64,6 +77,12 @@ msgstr "non"
 
 msgid "yes"
 msgstr "oui"
+
+msgid "BOUNDS must be a list or tuple of two [lon, lat] coordinate pairs."
+msgstr "BOUNDS doit être une liste ou un tuple de deux paires de coordonnées [lon, lat]."
+
+msgid "Each point in BOUNDS must be a list or tuple with two floats (lon, lat)."
+msgstr "Chaque point dans BOUNDS doit être une liste ou un tuple contenant deux nombres flottants (lon, lat)."
 
 msgid "Permission denied"
 msgstr "Permission refusée"
@@ -101,26 +120,8 @@ msgstr "Filtrer"
 msgid "Loading"
 msgstr "Chargement"
 
-msgid "Measure distances"
-msgstr "Mesurer les distances"
-
-msgid "Save map as image"
-msgstr "Sauvegarder l'image"
-
-msgid "Load local file (GPX, KML, GeoJSON)"
-msgstr "Charger un fichier local (GPX, KML, GeoJSON)"
-
-msgid "Map geometry is unsaved"
-msgstr "La géométrie n'a pas été sauvegardée"
-
-msgid "Objects"
-msgstr "Objets"
-
 msgid "Search"
 msgstr "Rechercher"
-
-msgid "results"
-msgstr "résultats"
 
 msgid "Current criteria"
 msgstr "Critères choisis"
@@ -136,7 +137,7 @@ msgid "Yes, delete"
 msgstr "Oui, supprimer"
 
 msgid "No, back to edit view"
-msgstr "Non, retour à la vue de modification"
+msgstr "Non, retour à la vue d'édition"
 
 msgid "Properties"
 msgstr "Propriétés"
@@ -189,14 +190,45 @@ msgstr "Historique complet"
 msgid "Map"
 msgstr "Carte"
 
+msgid "Access to the requested resource is restricted"
+msgstr "L'accès à la ressource demandée est restreint"
+
 msgid "CSV"
 msgstr "CSV"
 
 msgid "Shapefile"
-msgstr "Fichier shape"
+msgstr "Shapefile"
 
 msgid "GPX"
 msgstr "GPX"
+
+msgid "Warning!"
+msgstr "Attention !"
+
+#, python-format
+msgid "Do you really wish to delete <span class=\"badge badge-danger\">this object</span>?"
+msgid_plural "Do you really wish to delete <span class=\"badge badge-danger\">these %(counter)s objects</span>?"
+msgstr[0] "Voulez-vous vraiment supprimer cet <span class=\"badge badge-danger\">objet</span> ?"
+msgstr[1] "Voulez-vous vraiment supprimer ces<span class=\"badge badge-danger\">%(counter)s objets</span> ?"
+
+msgid "No, back to list view"
+msgstr "Non, retour à la vue liste"
+
+#, python-format
+msgid "Select values for the selected %(model_name_plural)s"
+msgstr "Choisissez les valeurs pour les %(model_name_plural)s sélectionnés"
+
+msgid "Confirm modification"
+msgstr "Confirmer la modification"
+
+#, python-format
+msgid "Do you want to apply the following modifications on this <span class=\"badge badge-danger\">selected object</span>?"
+msgid_plural "Do you want to apply the following modifications on these <span class=\"badge badge-danger\">%(counter)s selected objects</span>?"
+msgstr[0] "Voulez-vous appliquer les modifications suivantes sur cet <span class=\"badge badge-danger\">objet sélectionné</span> ?"
+msgstr[1] "Voulez-vous appliquer les modifications suivantes sur les <span class=\"badge badge-danger\">%(counter)s objets sélectionnés</span> ?"
+
+msgid "Confirm"
+msgstr "Confirmer"
 
 msgid "Last author"
 msgstr "Dernier auteur"
@@ -206,6 +238,9 @@ msgstr "Créateur"
 
 msgid "Authors"
 msgstr "Auteurs"
+
+msgid "Objects"
+msgstr "Objets"
 
 msgid "Login"
 msgstr "Connexion"
@@ -244,7 +279,26 @@ msgid "just a few seconds ago"
 msgstr "quelques secondes"
 
 msgid "Invalid geometry value."
-msgstr "Géométrie invalide."
+msgstr "Géométrie invalide"
+
+msgid "Detail sheet"
+msgstr "Fiche détail"
+
+#, python-format
+msgid "Delete selected %(model)s"
+msgstr "Supprimer les %(model)s éléments sélectionnés"
+
+#, python-format
+msgid "%(count)d items deleted"
+msgstr "%(count)d éléments supprimés"
+
+#, python-format
+msgid "Update selected %(model)s"
+msgstr "Modifier les %(model)s sélectionnés"
+
+#, python-format
+msgid "%(count)d items updated"
+msgstr "%(count)d éléments modifiés"
 
 msgid "Created"
 msgstr "Créé"
@@ -252,8 +306,12 @@ msgstr "Créé"
 msgid "Your form contains errors"
 msgstr "Le formulaire contient des erreurs"
 
+#, python-format
+msgid "Error in geometry field '%(field)s': %(error)s"
+msgstr "Erreur dans le champ géométrique '%(field)s' : %(error)s"
+
 msgid "Duplication is not available for this object"
-msgstr "La duplication n'est pas disponible pour cet objet"
+msgstr "La duplication n'est pas disponible pour cet objet."
 
 msgid "has been duplicated successfully"
 msgstr "a été dupliqué avec succès"
@@ -266,7 +324,10 @@ msgstr "Pas de carte disponible pour cet objet."
 
 #, python-format
 msgid "Edit %s"
-msgstr "Modifier %s"
+msgstr "Éditer %s"
 
 msgid "Saved"
 msgstr "Sauvegardé"
+
+msgid "At least one object must be selected"
+msgstr "AU moins un objet doit être sélectionné"

@@ -1,3 +1,4 @@
+import json
 import os
 from unittest import mock
 
@@ -6,11 +7,14 @@ import factory
 from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils.encoding import force_str
+from django.utils.translation import get_language
 from faker import Faker
 from faker.providers import geo
 from freezegun import freeze_time
@@ -18,12 +22,19 @@ from freezegun import freeze_time
 from mapentity.models import LogEntry
 from mapentity.registry import app_settings
 from mapentity.tests import MapEntityLiveTest, MapEntityTest
-from mapentity.tests.factories import AttachmentFactory, SuperUserFactory
+from mapentity.tests.factories import AttachmentFactory, SuperUserFactory, UserFactory
 from mapentity.views import Convert, JSSettings, ServeAttachment
 
-from ..models import City, DummyModel, FileType
-from ..views import DummyDetail, DummyList, DummyModelFilter, RoadList
-from .factories import DummyModelFactory
+from ..models import City, ComplexModel, DummyModel, FileType
+from ..views import (
+    ComplexModelMultiDelete,
+    ComplexModelMultiUpdate,
+    DummyDetail,
+    DummyList,
+    DummyModelFilter,
+    RoadList,
+)
+from .factories import ComplexModelFactory, DummyModelFactory, RoadFactory
 
 fake = Faker("en_US")
 fake.add_provider(geo)
@@ -49,22 +60,34 @@ class DummyModelFunctionalTest(MapEntityTest):
         return {"coordinates": [self.obj.geom.x, self.obj.geom.y], "type": "Point"}
 
     def get_expected_geojson_attrs(self):
-        return {"id": 1, "name": "a dummy model"}
+        return {"id": self.obj.pk, "name": "a dummy model"}
 
     def get_expected_datatables_attrs(self):
         return {
             "date_update": "17/03/2020 00:00:00",
             "description": "",
             "geom": self.obj.geom.ewkt,
-            "id": 1,
-            "name": '<a href="/dummymodel/1/">a dummy model</a>',
+            "id": self.obj.pk,
+            "name": f'<a href="/dummymodel/{self.obj.pk}/">a dummy model</a>',
             "name_en": "a dummy model",
             "name_fr": "",
             "name_zh_hant": "",
             "public": '<i class="bi bi-x-circle text-danger"></i>',
-            "short_description": "",
-            "tags": [self.obj.tags.first().pk],
+            "short_description": "a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object to make tests",
+            "tags": ", ".join([str(tag) for tag in self.obj.tags.all()]),
         }
+
+    def get_expected_popup_content(self):
+        pk = self.obj.pk
+        return (
+            f'<div class="d-flex flex-column justify-content-center">\n'
+            f'    <p class="text-center m-0 p-1"><strong>a dummy model ({pk})</strong></p>\n    \n'
+            f'        <p class="m-0 p-1">\n'
+            f"            a dummy model with a dummy name, a dummy geom, dummy tags, dummy makinins. It is the perfect object…<br>public: no<br>{self.obj.tags.first().label}<br>a dummy model<br>\n"
+            f"        </p>\n    \n"
+            f'    <a id="detail-btn" href="/dummymodel/{pk}/" class="btn btn-sm btn-info mt-2">Detail sheet</a>\n'
+            f"</div>"
+        )
 
     def get_good_data(self):
         return {"geom": '{"type": "Point", "coordinates":[0, 0]}'}
@@ -279,21 +302,31 @@ class AttachmentTest(BaseTest):
 
 
 class SettingsViewTest(BaseTest):
-    def test_js_settings_urls(self):
+    def _get_context(self):
         view = JSSettings()
         view.request = RequestFactory().get("/fake-path")
-        context = view.get_context_data()
+        return view.get_context_data()
+
+    def test_js_settings_urls(self):
+        context = self._get_context()
         self.assertDictEqual(
             context["urls"],
             {
                 "layer": "/api/modelname/drf/modelnames.geojson",
+                "mvt": "/api/modelname/drf/modelnames/mvt/{z}/{x}/{y}",
+                "tilejson": "/api/modelname/drf/modelnames/tilejson",
                 "screenshot": "/map_screenshot/",
                 "detail": "/modelname/0/",
+                "popup": "/api/modelname/drf/modelnames/0/popup-content",
                 "format_list": "/modelname/list/export/",
                 "static": "/static/",
                 "root": "/",
             },
         )
+
+    def test_js_settings_no_snapping_configs_in_context(self):
+        context = self._get_context()
+        self.assertNotIn("snappingConfigs", context)
 
 
 class ListViewTest(BaseTest):
@@ -337,7 +370,7 @@ class ListViewTest(BaseTest):
         request.session = {}
         view = DummyList.as_view()
         response = view(request)
-        self.assertNotContains(response, '<input type="text" name="name"')
+        self.assertNotContains(response, '<input type="text" name="Name"')
         self.assertContains(response, '<input type="hidden" name="bbox"')
 
     def test_list_view_overrides_minimal_generic_filter(self):
@@ -362,26 +395,26 @@ class MapEntityLayerViewTest(BaseTest):
 
     def test_geojson_layer_returns_all_by_default(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_list_url())
+        response = self.client.get(DummyModel.get_geojson_list_url())
         self.assertEqual(len(response.json()["features"]), 31)
 
     def test_geojson_layer_can_be_filtered(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_list_url() + "?name=toto")
+        response = self.client.get(DummyModel.get_geojson_list_url() + "?name=toto")
         self.assertEqual(len(response.json()["features"]), 1)
 
     def test_geojson_layer_with_parameters_is_not_cached(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_list_url() + "?name=toto")
+        response = self.client.get(DummyModel.get_geojson_list_url() + "?name=toto")
         self.assertEqual(len(response.json()["features"]), 1)
-        response = self.client.get(DummyModel.get_layer_list_url())
+        response = self.client.get(DummyModel.get_geojson_list_url())
         self.assertEqual(len(response.json()["features"]), 31)
 
     def test_geojson_layer_with_parameters_does_not_use_cache(self):
         self.login()
-        response = self.client.get(DummyModel.get_layer_list_url())
+        response = self.client.get(DummyModel.get_geojson_list_url())
         self.assertEqual(len(response.json()["features"]), 31)
-        response = self.client.get(DummyModel.get_layer_list_url() + "?name=toto")
+        response = self.client.get(DummyModel.get_geojson_list_url() + "?name=toto")
         self.assertEqual(len(response.json()["features"]), 1)
 
 
@@ -465,6 +498,229 @@ class DetailViewTest(BaseTest):
         self.assertContains(response, "<h3>Fragment dummymodel</h3>")
 
 
+class MultiDeleteViewTest(BaseTest):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = SuperUserFactory.create()
+        cls.model = ComplexModel
+
+        cls.geopoint1 = ComplexModelFactory.create(name="geopoint1")
+        cls.geopoint2 = ComplexModelFactory.create(name="geopoint2")
+        cls.geopoint3 = ComplexModelFactory.create(name="geopoint3")
+
+    def test_mapentity_template(self):
+        multideleteview = ComplexModelMultiDelete()
+        multideleteview.object_list = ComplexModel.objects.none()
+        self.assertEqual(
+            multideleteview.get_template_names()[-1],
+            "mapentity/mapentity_multi_delete_confirmation.html",
+        )
+
+    def test_mapentity_title(self):
+        multideleteview = ComplexModelMultiDelete()
+        multideleteview.object_list = ComplexModel.objects.none()
+        self.assertEqual(multideleteview.get_title(), "Delete selected complexmodel")
+
+    def test_multi_delete_should_have_number_of_selected_objects_in_context(self):
+        view = ComplexModelMultiDelete()
+        view.object_list = []
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
+        view.request.user = self.user
+        context = view.get_context_data()
+        self.assertEqual(context["nb_objects"], 2)
+
+    def test_multi_delete_should_have_selected_objects_in_queryset(self):
+        view = ComplexModelMultiDelete()
+        view.object_list = []
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
+        view.request.user = self.user
+        queryset = view.get_queryset()
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0], self.geopoint1)
+        self.assertEqual(queryset[1], self.geopoint2)
+
+    def test_multi_delete_post(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.model.get_multi_delete_url()
+            + f"?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+        self.assertEqual(ComplexModel.objects.all().count(), 1)
+
+
+class MultiUpdateViewTest(BaseTest):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = SuperUserFactory()
+        cls.model = ComplexModel
+
+        cls.geopoint1 = ComplexModelFactory.create(name="geopoint1")
+        cls.geopoint2 = ComplexModelFactory.create(name="geopoint2")
+        cls.geopoint3 = ComplexModelFactory.create(name="geopoint3")
+
+    def test_mapentity_template(self):
+        multiupdateview = ComplexModelMultiUpdate()
+        multiupdateview.object_list = ComplexModel.objects.none()
+        self.assertEqual(
+            multiupdateview.get_template_names()[-1],
+            "mapentity/mapentity_multi_update_form.html",
+        )
+
+    def test_mapentity_title(self):
+        multiupdateview = ComplexModelMultiUpdate()
+        multiupdateview.object_list = ComplexModel.objects.none()
+        self.assertEqual(multiupdateview.get_title(), "Update selected complexmodel")
+
+    def test_multi_update_should_have_number_of_selected_objects_in_context(self):
+        view = ComplexModelMultiUpdate()
+        view.object_list = []
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
+        view.request.user = self.user
+        context = view.get_context_data()
+        self.assertEqual(context["nb_objects"], 2)
+
+    def test_multi_update_should_have_selected_objects_in_queryset(self):
+        view = ComplexModelMultiUpdate()
+        view.object_list = []
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
+        view.request.user = self.user
+        queryset = view.get_queryset()
+        self.assertEqual(queryset.count(), 2)
+        self.assertEqual(queryset[0], self.geopoint1)
+        self.assertEqual(queryset[1], self.geopoint2)
+
+    def test_multi_update_editable_fields(self):
+        view = ComplexModelMultiUpdate()
+        view.object_list = []
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
+        view.request.user = self.user
+        editable_fields = view.get_editable_fields()
+        self.assertEqual(
+            editable_fields,
+            [
+                "public",
+                "public_en",
+                "public_fr",
+                "public_zh_hant",
+                "located_in",
+                "road",
+            ],
+        )
+
+    def test_multi_update_form_fields(self):
+        view = ComplexModelMultiUpdate()
+        view.object_list = []
+        view.request = RequestFactory().get(
+            f"/fake-path/?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}"
+        )
+        view.request.user = self.user
+        form = view.get_form()
+
+        # check translated fields
+        self.assertEqual(
+            list(form.fields.keys()),
+            ["public_en", "public_fr", "public_zh_hant", "located_in", "road"],
+        )
+
+        # check choices depends on the type on the field
+        self.assertEqual(
+            form.fields["public_en"].widget.choices,
+            [("nothing", "Do nothing"), ("true", "Yes"), ("false", "No")],
+        )
+        self.assertIn(
+            ("nothing", "Do nothing"), form.fields["located_in"].widget.choices
+        )
+        self.assertIn(("", "Null value"), form.fields["located_in"].widget.choices)
+        self.assertIn(("nothing", "Do nothing"), form.fields["road"].widget.choices)
+        self.assertNotIn(("", "Null value"), form.fields["road"].widget.choices)
+
+    def test_multi_update_post_do_nothing(self):
+        self.client.force_login(self.user)
+        data = {
+            "public_en": "nothing",
+            "public_fr": "nothing",
+            "public_zh_hant": "nothing",
+            "located_in": "nothing",
+            "road": "nothing",
+        }
+        response = self.client.post(
+            self.model.get_multi_update_url()
+            + f"?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}",
+            data=data,
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        for i, geopoint in enumerate([self.geopoint1, self.geopoint2, self.geopoint3]):
+            db_geopoint = ComplexModel.objects.get(pk=geopoint.pk)
+            self.assertEqual(db_geopoint.public_en, geopoint.public_en)
+            self.assertEqual(db_geopoint.public_fr, geopoint.public_fr)
+            self.assertEqual(db_geopoint.public_zh_hant, geopoint.public_zh_hant)
+            self.assertEqual(db_geopoint.located_in, geopoint.located_in)
+            self.assertEqual(db_geopoint.road, geopoint.road)
+
+    def test_multi_update_post_boolean(self):
+        self.client.force_login(self.user)
+        data = {
+            "public_en": "true",
+            "public_fr": "false",
+            "public_zh_hant": "nothing",
+            "located_in": "nothing",
+            "road": "nothing",
+        }
+        response = self.client.post(
+            self.model.get_multi_update_url()
+            + f"?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}",
+            data=data,
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+        db_geopoint1 = ComplexModel.objects.get(pk=self.geopoint1.pk)
+        self.assertEqual(db_geopoint1.public_en, True)
+        self.assertEqual(db_geopoint1.public_fr, False)
+
+        db_geopoint2 = ComplexModel.objects.get(pk=self.geopoint2.pk)
+        self.assertEqual(db_geopoint2.public_en, True)
+        self.assertEqual(db_geopoint2.public_fr, False)
+
+    def test_multi_update_post_foreign_key(self):
+        self.client.force_login(self.user)
+        selected_road = self.geopoint1.road
+        data = {
+            "public_en": "nothing",
+            "public_fr": "nothing",
+            "public_zh_hant": "nothing",
+            "located_in": "",
+            "road": selected_road.pk,
+        }
+        response = self.client.post(
+            self.model.get_multi_update_url()
+            + f"?pks={self.geopoint1.pk}%2C{self.geopoint2.pk}",
+            data=data,
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+        db_geopoint1 = ComplexModel.objects.get(pk=self.geopoint1.pk)
+        self.assertEqual(db_geopoint1.located_in, None)
+        self.assertEqual(db_geopoint1.road, selected_road)
+
+        db_geopoint2 = ComplexModel.objects.get(pk=self.geopoint2.pk)
+        self.assertEqual(db_geopoint2.located_in, None)
+        self.assertEqual(db_geopoint2.road, selected_road)
+
+
 class ViewPermissionsTest(BaseTest):
     def setUp(self):
         self.login()
@@ -533,19 +789,20 @@ class LogViewTest(BaseTest):
 
 
 class LogoutViewTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = SuperUserFactory()
+    def setUp(self):
+        self.user = User.objects.create_superuser(
+            self.__class__.__name__ + "User", "email@corp.com", "booh"
+        )
 
     def test_logout_post(self):
         self.client.force_login(user=self.user)
-
         response = self.client.get("/dummymodel/list/")
         parsed = BeautifulSoup(response.content, features="html.parser")
         logout_tag = parsed.find("form", {"action": "/logout/", "method": "post"})
-
         self.assertTrue(logout_tag)
+
         self.assertTrue(logout_tag.find("input", {"name": "csrfmiddlewaretoken"}))
+
         self.assertTrue(logout_tag.find("button", {"type": "submit"}))
 
 
@@ -556,22 +813,28 @@ class LogViewMapentityTest(MapEntityTest):
     get_expected_geojson_attrs = None
 
     def get_expected_datatables_attrs(self):
+        content_type = ContentType.objects.get_for_model(DummyModel)
+        # self.obj is set by parent to modelfactory.create() which is a DummyModel
+        # The LogEntry was created in the overridden test method before super() call
+        log_entry = LogEntry.objects.latest("pk")
+        dummy_pk = log_entry.object_id
         data = {
             "action_flag": "Addition",
             "action_time": "10/06/2022 12:40:10",
             "change_message": "",
-            "content_type": 13,
-            "id": 1,
-            "object": '<a data-pk="1" href="/dummymodel/1/" >Test_App | Dummy '
+            "content_type": str(content_type),
+            "id": log_entry.pk,
+            "name": f'<a href="/logentry/{log_entry.pk}/">{log_entry.pk}</a>',
+            "object": f'<a data-pk="{dummy_pk}" href="/dummymodel/{dummy_pk}/" >Test App | Dummy '
             "Model <class 'object'></a>",
-            "object_id": "1",
+            "object_id": str(dummy_pk),
             "object_repr": "<class 'object'>",
             "user": User.objects.first().username,
         }
 
         if django.__version__ < "5.0":
             data["object"] = (
-                '<a data-pk="1" href="/dummymodel/1/" >test_app | Dummy '
+                f'<a data-pk="{dummy_pk}" href="/dummymodel/{dummy_pk}/" >test_app | Dummy '
                 "Model <class 'object'></a>"
             )
         return data
@@ -634,6 +897,9 @@ class LogViewMapentityTest(MapEntityTest):
     def test_no_html_in_csv(self):
         pass
 
+    def test_api_popup_content(self):
+        pass
+
 
 class LogViewMapentityTestlLiveTest(MapEntityLiveTest):
     userfactory = SuperUserFactory
@@ -663,3 +929,115 @@ class FilterViewTest(BaseTest):
         response = self.client.get(City.get_filter_url())
         self.assertContains(response, '<input type="text" name="name"')
         self.assertContains(response, '<input type="hidden" name="bbox"')
+
+
+class MapScreenshotTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory.create()
+
+        cls.context = {
+            "mapview": {"lat": 42.771211138625894, "lng": 1.336212158203125, "zoom": 9},
+            "maplayers": ["OSM", "Cadastre", "Signalétiques", "POI", "▣ Tronçons"],
+            "filter": "",
+            "sortcolumns": {},
+            "fullurl": "https://test.fr/path/list/",
+            "url": "/path/list/",
+            "selector": "#map",
+            "viewport": {"width": 1854, "height": 481},
+            "timestamp": 1762525783907,
+        }
+
+    @mock.patch("mapentity.helpers.requests.get")
+    def test_map_screenshot_success(self, mock_capture):
+        self.client.force_login(self.user)
+
+        mock_capture.return_value.content = b"fake_png_data"
+        mock_capture.return_value.status_code = 200
+
+        data = {"printcontext": json.dumps(self.context)}
+
+        response = self.client.post(reverse("mapentity:map_screenshot"), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "image/png")
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertEqual(response.content, b"fake_png_data")
+
+        args, kwargs = mock_capture.call_args
+        called_url = args[0]
+
+        # check mapentity url
+        self.assertTrue(called_url.startswith("http"))
+        self.assertIn(f"lang%3D{get_language()}", called_url)
+        self.assertIn("auth_token", called_url)
+        self.assertIn("context", called_url)
+
+        # check screamshotter url
+        self.assertIn("width=1854", called_url)
+        self.assertIn("height=481", called_url)
+        self.assertIn("selector=%23map", called_url)
+
+    def test_map_screenshot_invalid_json_context(self):
+        self.client.force_login(self.user)
+
+        data = {"printcontext": "json_error"}
+
+        with self.assertLogs(level="INFO") as cm:
+            response = self.client.post(reverse("mapentity:map_screenshot"), data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "ERROR:mapentity.views.base:Expecting value: line 1 column 1 (char 0)",
+            cm.output[0],
+        )
+
+    def test_map_screenshot_invalid_length_context(self):
+        self.client.force_login(self.user)
+
+        data = {"printcontext": "{" + "test" * 1000 + "}"}
+
+        with self.assertLogs(level="INFO") as cm:
+            response = self.client.post(reverse("mapentity:map_screenshot"), data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "ERROR:mapentity.views.base:Print context is way too big", cm.output[0]
+        )
+
+
+class AutocompleteTest(TestCase):
+    factory_class = RoadFactory
+
+    def test_autocomplete_is_limit_by_10(self):
+        self.factory_class.create_batch(15, name="Cahors")
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"q": "Cahors"})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertEqual(len(response.json()["results"]), 10)
+
+    def test_autocomplete_has_default_values(self):
+        self.factory_class.create_batch(15)
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"q": ""})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertEqual(len(response.json()["results"]), 10)
+
+    def test_autocomplete_by_id_exists(self):
+        instance = self.factory_class()
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"id": instance.pk})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertEqual(response.json()["id"], instance.pk)
+
+    def test_autocomplete_by_id_not_exists(self):
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"id": "999999"})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertDictEqual(response.json(), {})
+
+    def test_autocomplete_by_filtering(self):
+        self.factory_class(name="Cahors")
+        self.factory_class(name="Toulouse")
+        url = reverse("test_app:road-drf-autocomplete")
+        response = self.client.get(url, data={"q": "Cah"})
+        self.assertEqual(response.status_code, 200, response.json())
+        self.assertEqual(len(response.json()["results"]), 1)

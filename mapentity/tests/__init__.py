@@ -57,6 +57,9 @@ class MapEntityTest(TestCase):
     def get_expected_datatables_attrs(self):
         return {}
 
+    def get_expected_popup_content(self):
+        return ""
+
     def setUp(self):
         if self.user:
             self.client.force_login(user=self.user)
@@ -94,7 +97,7 @@ class MapEntityTest(TestCase):
         # Make sure database is not empty for this model
         self.modelfactory.create_batch(30)
 
-        response = self.client.get(self.model.get_layer_list_url())
+        response = self.client.get(self.model.get_geojson_list_url())
         self.assertEqual(response.status_code, 200)
         response = self.client.get(self.model.get_datatablelist_url())
         self.assertEqual(response.status_code, 200)
@@ -236,9 +239,9 @@ class MapEntityTest(TestCase):
         if self.user.has_perm(
             f"{self.model._meta.app_label}.change_geom_{self.model._meta.model_name}"
         ):
-            self.assertIn(b".modifiable = true;", response.content)
+            self.assertIn(b"modifiable: 'true'", response.content)
         else:
-            self.assertIn(b".modifiable = false;", response.content)
+            self.assertIn(b"modifiable: 'false'", response.content)
 
     def test_duplicate(self):
         if self.model is None or not self.model.can_duplicate:
@@ -305,7 +308,7 @@ class MapEntityTest(TestCase):
         response = self.client.get(obj.get_list_url())
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(obj.get_layer_list_url())
+        response = self.client.get(obj.get_geojson_list_url())
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(
@@ -316,7 +319,7 @@ class MapEntityTest(TestCase):
         response = self.client.get(obj.get_detail_url())
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(obj.get_layer_detail_url())
+        response = self.client.get(obj.get_geojson_detail_url())
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(obj.get_update_url())
@@ -343,6 +346,40 @@ class MapEntityTest(TestCase):
         self.assertEqual(response.status_code, 302)
         response = self.client.get(obj.get_update_url())
         self.assertEqual(response.status_code, 302)
+
+    def test_multi_delete_view(self):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        """If pks parameter isn't specify the user is redirected to list view"""
+        response = self.client.get(self.model.get_multi_delete_url())
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        """If pks parameter is empty the user is redirected to list view"""
+        response = self.client.get(self.model.get_multi_delete_url() + "?pks=")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        response = self.client.get(self.model.get_multi_update_url() + "?pks=1%2C2")
+        self.assertEqual(response.status_code, 200)
+
+    def test_multi_update_view(self):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        """If pks parameter isn't specify the user is redirected to list view"""
+        response = self.client.get(self.model.get_multi_update_url())
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        """If pks parameter is empty the user is redirected to list view"""
+        response = self.client.get(self.model.get_multi_update_url() + "?pks=")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.model.get_list_url())
+
+        response = self.client.get(self.model.get_multi_update_url() + "?pks=1%2C2")
+        self.assertEqual(response.status_code, 200)
 
     def test_formfilter_in_list_context(self):
         if self.model is None:
@@ -444,6 +481,17 @@ class MapEntityTest(TestCase):
             },
         )
 
+    def test_api_popup_content(self):
+        if self.model is None:
+            return  # Abstract test should not run
+
+        self.obj = self.modelfactory.create()
+        popup_url = self.obj.get_popup_url()
+        response = self.client.get(popup_url)
+        self.assertEqual(response.status_code, 200, f"{popup_url} not found")
+        content_json = response.json()
+        self.assertEqual(content_json, self.get_expected_popup_content())
+
 
 class MapEntityLiveTest(LiveServerTestCase):
     model = None
@@ -483,7 +531,7 @@ class MapEntityLiveTest(LiveServerTestCase):
         latest_updated.return_value = now()
 
         latest = self.model.latest_updated()
-        geojson_layer_url = self.url_for(self.model.get_layer_list_url())
+        geojson_layer_url = self.url_for(self.model.get_geojson_list_url())
 
         response_1 = self.client.get(geojson_layer_url, allow_redirects=False)
         self.assertEqual(response_1.status_code, 200)

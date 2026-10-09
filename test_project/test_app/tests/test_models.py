@@ -88,3 +88,12 @@ class MapEntityDuplicateMixinTest(TestCase):
         dm = DummyModelFactory.create()
         mk = ManikinModel.objects.create(dummy=dm)
         self.assertIsNone(ManikinModel.get_duplicate_url(mk))
+
+
+class SnappingConfigTest(TestCase):
+    def test_road_model_has_no_snapping_config(self):
+        """snapping_config is now defined on the MapWidget, not the model."""
+        self.assertIsNone(getattr(Road, "snapping_config", None))
+
+    def test_dummy_model_has_no_snapping_config(self):
+        self.assertIsNone(getattr(DummyModel, "snapping_config", None))

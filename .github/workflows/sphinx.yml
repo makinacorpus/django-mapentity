@@ -3,7 +3,7 @@ name: Documentation
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'docs/**'
   pull_request:
@@ -22,7 +22,7 @@ jobs:
       env:
         LANG: C.UTF-8
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Build documentation
         run: |
           cd docs/

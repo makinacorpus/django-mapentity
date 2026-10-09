@@ -1,3 +1,5 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import gettext_lazy as _
@@ -6,6 +8,8 @@ from paperclip.models import FileType as BaseFileType
 from paperclip.models import License as BaseLicense
 
 from mapentity.models import MapEntityMixin
+
+from .managers import MushroomSpotManager
 
 
 class FileType(BaseFileType):
@@ -28,30 +32,25 @@ class Tag(models.Model):
 
 
 class MushroomSpot(MapEntityMixin, models.Model):
-    name = models.CharField(max_length=100, default="Empty")
+    name = models.CharField(max_length=100, default="Empty", verbose_name=_("Name"))
     serialized = models.CharField(max_length=200, null=True, default=None)
     number = models.IntegerField(null=True, default=42)
     size = models.FloatField(null=True, default=3.14159)
     boolean = models.BooleanField(default=True)
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, blank=True)
+    objects = MushroomSpotManager()
+
+    def get_display_label(self):
+        return self.name
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._geom = None
+        if not hasattr(self, "geom"):
+            self.geom = GEOSGeometry(self.serialized) if self.serialized else None
 
-    """geom as python attribute"""
-
-    @property
-    def geom(self):
-        if self._geom is not None:
-            return self._geom
-        if self.serialized is None:
-            return None
-        return GEOSGeometry(self.serialized)
-
-    @geom.setter  # NOQA
-    def geom(self, value):
-        self._geom = value
+    class Meta:
+        verbose_name = _("Mushroom Spot")
+        verbose_name_plural = _("Mushroom Spots")
 
 
 class WeatherStation(models.Model):
@@ -63,17 +62,30 @@ class WeatherStation(models.Model):
 class Road(MapEntityMixin, models.Model):
     """Linestring Mapentity model"""
 
-    name = models.CharField(max_length=100, default="Empty")
+    name = models.CharField(max_length=100, default="Empty", verbose_name=_("Name"))
     geom = models.LineStringField(null=True, default=None, srid=2154)
+    tag = models.ForeignKey(
+        Tag, null=True, default=None, on_delete=models.SET_NULL, blank=True
+    )
     can_duplicate = False
+    created_at = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True, db_index=True)
 
-    @property
-    def name_display(self):
-        return f'<a href="{self.get_detail_url()}">{self.name}</a>'
+    def get_display_label(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Road")
+        verbose_name_plural = _("Roads")
 
 
 class DummyModel(MapEntityMixin, models.Model):
-    name = models.CharField(blank=True, default="", max_length=128)
+    name = models.CharField(
+        blank=True, default="", max_length=128, verbose_name=_("Name")
+    )
     short_description = models.TextField(
         blank=True, default="", help_text=_("Short description")
     )
@@ -89,11 +101,12 @@ class DummyModel(MapEntityMixin, models.Model):
     def is_public(self):
         return self.public
 
-    def name_display(self):
-        return f'<a href="{self.get_detail_url()}">{self.name or self.id}</a>'
+    def get_display_label(self):
+        return f"{self.name or self.id}"
 
     class Meta:
         verbose_name = _("Dummy Model")
+        verbose_name_plural = _("Dummy Models")
 
 
 class DollModel(MapEntityMixin, models.Model):
@@ -119,24 +132,81 @@ class ManikinModel(MapEntityMixin, models.Model):
 
 class City(MapEntityMixin, models.Model):
     geom = models.PolygonField(null=True, default=None, srid=2154)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
 
     def __str__(self):
         return self.name
 
-
-class Supermarket(MapEntityMixin, models.Model):
-    """Linestring Mapentity model"""
-
-    geom = models.PolygonField(null=True, default=None, srid=2154)
-    parking = models.PointField(null=True, default=None, srid=2154)
-    tag = models.ForeignKey(Tag, null=True, default=None, on_delete=models.SET_NULL)
+    class Meta:
+        verbose_name = _("City")
+        verbose_name_plural = _("Cities")
 
 
 class Sector(MapEntityMixin, models.Model):
     code = models.CharField(primary_key=True, max_length=6)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
     skip_attachments = True
 
     def __str__(self):
         return self.name
+
+
+class HiddenModel(MapEntityMixin, models.Model):
+    """A MapEntity model with menu=False for testing hidden menu functionality"""
+
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
+    geom = models.PolygonField(null=True, default=None, srid=2154)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Hidden Model")
+        verbose_name_plural = _("Hidden Models")
+
+
+class MultiGeomModel(MapEntityMixin, models.Model):
+    """Model with three geometry fields sharing the same map"""
+
+    name = models.CharField(max_length=100, verbose_name=_("Name"))
+    geom = models.GeometryField(srid=2154)
+    parking = models.PointField(null=True, default=None, blank=True, srid=2154)
+    points = models.MultiPointField(null=True, default=None, blank=True, srid=2154)
+    date_update = models.DateTimeField(auto_now=True, db_index=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_display_label(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Multi Geom Model")
+        verbose_name_plural = _("Multi Geom Models")
+
+
+class ComplexModel(MapEntityMixin, models.Model):
+    public = models.BooleanField(default=False)
+    geom = models.PointField(null=True, default=None)
+    located_in = models.ForeignKey(
+        City, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    road = models.ForeignKey(Road, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, verbose_name=_("Name"))
+    dummy_model = models.OneToOneField(DummyModel, null=True, on_delete=models.CASCADE)
+    internal_reference = models.CharField(max_length=20, editable=False)
+    content_type = models.ForeignKey(
+        ContentType, blank=True, null=True, on_delete=models.SET_NULL
+    )
+    object_id = models.PositiveIntegerField(blank=True, null=True)
+    related_object = GenericForeignKey("content_type", "object_id")
+    tags = models.ManyToManyField(Tag, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True, db_index=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Complex Model")
+        verbose_name_plural = _("Complex Models")

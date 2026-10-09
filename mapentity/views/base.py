@@ -13,16 +13,19 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import get_language
 from django.views import View, static
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.views.generic.base import TemplateView
+from mapbox_baselayer.utils import get_map_base_layers
 from paperclip.settings import get_attachment_model, get_attachment_permission
 
 from mapentity import models as mapentity_models
 
 from ..decorators import view_permission_required
 from ..helpers import capture_image
+from ..registry import registry
 from ..settings import app_settings
 from ..tokens import TokenManager
 from .mixins import FilterListMixin, JSONResponseMixin, ModelViewMixin
@@ -79,6 +82,7 @@ class ServeAttachment(View):
         return response
 
 
+# API settings
 class JSSettings(JSONResponseMixin, TemplateView):
     """
     Javascript settings, in JSON format.
@@ -86,12 +90,15 @@ class JSSettings(JSONResponseMixin, TemplateView):
     for mapentity.
     """
 
+    # context data
     def get_context_data(self):
         dictsettings = {}
         dictsettings["debug"] = settings.DEBUG
         dictsettings["map"] = dict(
-            extent=getattr(settings, "LEAFLET_CONFIG", {}).get("SPATIAL_EXTENT"),
+            maplibreConfig=app_settings["MAPLIBRE_CONFIG"],
+            # extent=getattr(settings, 'LEAFLET_CONFIG', {}).get('SPATIAL_EXTENT'),
             styles=app_settings["MAP_STYLES"],
+            baseLayers=get_map_base_layers(self.request),
         )
 
         # URLs
@@ -112,7 +119,10 @@ class JSSettings(JSONResponseMixin, TemplateView):
 
         dictsettings["urls"]["static"] = settings.STATIC_URL
         dictsettings["urls"]["layer"] = options.model.get_layer_url()
+        dictsettings["urls"]["mvt"] = options.model.get_mvt_url()
+        dictsettings["urls"]["tilejson"] = options.model.get_tilejson_url()
         dictsettings["urls"]["detail"] = f"{root_url}modelname/0/"
+        dictsettings["urls"]["popup"] = "/api/modelname/drf/modelnames/0/popup-content"
         dictsettings["urls"]["format_list"] = (
             f"{root_url}{options._url_path(mapentity_models.ENTITY_FORMAT_LIST)[1:-1]}"
         )
@@ -134,6 +144,28 @@ class JSSettings(JSONResponseMixin, TemplateView):
         # MAX_CHARACTERS paramters is deprecated : to remove
         dictsettings["maxCharacters"] = app_settings["MAX_CHARACTERS"]
         dictsettings["maxCharactersByField"] = app_settings["MAX_CHARACTERS_BY_FIELD"]
+
+        # Layers
+        registered_models = [
+            (model, options)
+            for model, options in registry.registry.items()
+            if model._meta.app_label != "mapentity" and options.layer
+        ]
+
+        dictsettings["layers"] = [
+            {
+                "name": model._meta.verbose_name,
+                "id": model._meta.model_name,
+                "url": model.get_geojson_list_url(),
+                "mvtUrl": model.get_mvt_url(),
+                "tilejsonUrl": model.get_tilejson_url(),
+                "category": getattr(
+                    model._meta.app_config, "verbose_name", model._meta.app_label
+                ),
+            }
+            for model, options in registered_models
+        ]
+
         return dictsettings
 
 
@@ -189,9 +221,7 @@ def map_screenshot(request):
         context["print"] = True
         printcontext = json.dumps(context)
         contextencoded = quote(printcontext)
-        map_url += (
-            f"?auth_token={TokenManager.generate_token()}&context={contextencoded}"
-        )
+        map_url += f"?lang={get_language()}&auth_token={TokenManager.generate_token()}&context={contextencoded}"
 
         msg = f"Capture {map_url}"
         logger.debug(msg)

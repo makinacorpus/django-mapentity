@@ -6,6 +6,8 @@
 ![Python Version](https://img.shields.io/badge/python-%3E%3D%203.9-blue.svg)
 ![Django Version](https://img.shields.io/badge/django-%3E%3D%204.2-green.svg)
 [![Weblate](https://img.shields.io/badge/i18n-contribute-blue.svg)](https://weblate.makina-corpus.net/projects/django-mapentity/)
+[![E2E](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/sjit2h&style=flat&logo=cypress)](https://cloud.cypress.io/projects/sjit2h/runs)
+
 
 Mapentity is a CRUD framework for geospatial entities built with Django. It provides interface to manage geographic entities over leaflet maps.
 It uses Bootstrap and leaflet.

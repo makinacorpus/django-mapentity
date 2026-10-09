@@ -1,15 +1,18 @@
 import math
 import os
 
+import mercantile
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 from django.contrib.admin.models import LogEntry as BaseLogEntry
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.geos import Polygon
 from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.db import models, transaction
+from django.db.models import Count, Max
 from django.db.utils import OperationalError
 from django.urls import NoReverseMatch, reverse
 from django.utils.formats import localize
@@ -40,7 +43,9 @@ ENTITY_DOCUMENT = "document"
 ENTITY_MARKUP = "markup"
 ENTITY_DUPLICATE = "duplicate"
 ENTITY_CREATE = "add"
+ENTITY_MULTI_UPDATE = "multi_update"
 ENTITY_UPDATE = "update"
+ENTITY_MULTI_DELETE = "multi_delete"
 ENTITY_DELETE = "delete"
 ENTITY_UPDATE_GEOM = "update_geom"
 
@@ -56,7 +61,9 @@ ENTITY_KINDS = (
     ENTITY_CREATE,
     ENTITY_DUPLICATE,
     ENTITY_UPDATE,
+    ENTITY_MULTI_UPDATE,
     ENTITY_DELETE,
+    ENTITY_MULTI_DELETE,
     ENTITY_UPDATE_GEOM,
 )
 
@@ -160,7 +167,7 @@ class DuplicateMixin:
 
 class BaseMapEntityMixin(DuplicateMixin, models.Model):
     _entity = None
-    capture_map_image_waitfor = ".leaflet-tile-loaded"
+    capture_map_image_waitfor = ".maplibre-tile-loaded"  # faire attention à ceci au moment de mettre en place le control de capture
 
     class Meta:
         abstract = True
@@ -175,7 +182,9 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
             ENTITY_DUPLICATE: ENTITY_PERMISSION_CREATE,
             ENTITY_UPDATE: ENTITY_PERMISSION_UPDATE,
             ENTITY_UPDATE_GEOM: ENTITY_PERMISSION_UPDATE_GEOM,
+            ENTITY_MULTI_UPDATE: ENTITY_PERMISSION_UPDATE,
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
+            ENTITY_MULTI_DELETE: ENTITY_PERMISSION_DELETE,
             ENTITY_DETAIL: ENTITY_PERMISSION_READ,
             ENTITY_LIST: ENTITY_PERMISSION_READ,
             ENTITY_FILTER: ENTITY_PERMISSION_READ,
@@ -204,12 +213,33 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         return f"{appname}.{auth.get_permission_codename(perm, opts)}"
 
     @classmethod
-    def latest_updated(cls):
+    def latest_updated_with_count(cls, **kwargs):
         try:
-            fname = app_settings["DATE_UPDATE_FIELD_NAME"]
-            return cls.objects.only(fname).latest(fname).get_date_update()
+            qs = cls.objects.all()
+            z, x, y = kwargs.get("z"), kwargs.get("x"), kwargs.get("y")
+            if z is not None and x is not None and y is not None:
+                extent = Polygon.from_bbox(mercantile.xy_bounds(int(x), int(y), int(z)))
+                extent.srid = 3857
+
+                # Get the SRID of the geometry field to transform extent to the correct SRID
+                geom_field = app_settings["GEOM_FIELD_NAME"]
+                geom_field_obj = cls._meta.get_field(geom_field)
+                target_srid = getattr(geom_field_obj, "srid", 4326) or 4326
+                extent.transform(target_srid)
+                qs = qs.filter(**{f"{geom_field}__intersects": extent})
+
+            # Aggregate Max date and Count in one query
+
+            date_field = app_settings["DATE_UPDATE_FIELD_NAME"]
+            agg = qs.aggregate(latest=Max(date_field), count=Count("pk"))
+            return agg["latest"], agg["count"]
         except (cls.DoesNotExist, FieldError):
-            return None
+            return None, 0
+
+    @classmethod
+    def latest_updated(cls, **kwargs):
+        latest, count = cls.latest_updated_with_count(**kwargs)
+        return latest
 
     def get_date_update(self):
         try:
@@ -240,7 +270,27 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         )
 
     @classmethod
-    def get_layer_list_url(cls):
+    def get_mvt_url(cls):
+        return (
+            "/api/"
+            + cls._meta.model_name.lower()
+            + "/drf/"
+            + cls._meta.model_name.lower()
+            + "s/mvt/{z}/{x}/{y}"
+        )
+
+    @classmethod
+    def get_tilejson_url(cls):
+        return (
+            "/api/"
+            + cls._meta.model_name.lower()
+            + "/drf/"
+            + cls._meta.model_name.lower()
+            + "s/tilejson"
+        )
+
+    @classmethod
+    def get_geojson_list_url(cls):
         return reverse(
             f"{cls._meta.app_label.lower()}:{cls._meta.model_name.lower()}-drf-list",
             kwargs={"format": "geojson"},
@@ -261,7 +311,7 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def get_filter_url(cls):
         return reverse(cls._entity.url_name(ENTITY_FILTER))
 
-    def get_layer_detail_url(self):
+    def get_geojson_detail_url(self):
         return reverse(
             f"{self._meta.app_label.lower()}:{self._meta.model_name.lower()}-drf-detail",
             kwargs={"format": "geojson", "pk": self.pk},
@@ -282,6 +332,12 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def get_detail_url(self):
         return reverse(self._entity.url_name(ENTITY_DETAIL), args=[str(self.pk)])
 
+    def get_popup_url(self):
+        return reverse(
+            f"{self._meta.app_label.lower()}:{self._meta.model_name.lower()}-drf-popup-content",
+            kwargs={"pk": self.pk},
+        )
+
     @property
     def map_image_url(self):
         return self.get_map_image_url()
@@ -295,9 +351,18 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
     def get_update_url(self):
         return reverse(self._entity.url_name(ENTITY_UPDATE), args=[str(self.pk)])
 
+    @classmethod
+    def get_multi_update_url(self):
+        return reverse(self._entity.url_name(ENTITY_MULTI_UPDATE))
+
     def get_delete_url(self):
         return reverse(self._entity.url_name(ENTITY_DELETE), args=[str(self.pk)])
 
+    @classmethod
+    def get_multi_delete_url(self):
+        return reverse(self._entity.url_name(ENTITY_MULTI_DELETE))
+
+    # map image
     def get_map_image_extent(self, srid=API_SRID):
         fieldname = app_settings["GEOM_FIELD_NAME"]
         obj = getattr(self, fieldname)
@@ -396,6 +461,34 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
         """Get full path to map image in storage."""
         return default_storage.path(self.get_map_image_path())
 
+    def get_display_label(self):
+        """Get a string label to display the object in links."""
+        return str(self)
+
+    @property
+    def name_display(self):
+        return f'<a href="{self.get_detail_url()}">{self.get_display_label()}</a>'
+
+    @classmethod
+    def geom_fields(cls):
+        """return all field name sublassed from GeometryField or GeneratedField with OutputField subclassed from GeometryField"""
+        return [
+            field.name
+            for field in cls._meta.get_fields()
+            if hasattr(field, "geom_type")
+            or (
+                hasattr(field, "output_field")
+                and hasattr(field.output_field, "geom_type")
+            )
+        ]
+
+    main_geom_field = app_settings["GEOM_FIELD_NAME"]
+
+    @classmethod
+    def get_main_geom(self):
+        """Get main geometry field."""
+        return self.main_geom_field
+
 
 class MapEntityMixin(BaseMapEntityMixin):
     attachments = GenericRelation(settings.PAPERCLIP_ATTACHMENT_MODEL)
@@ -416,6 +509,9 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
 
     def __str__(self):
         return f"{self.action_time} - {self.user} - {self.object_display} - {self.action_flag_display}"
+
+    def get_display_label(self):
+        return str(self.pk)
 
     @property
     def action_flag_display(self):
@@ -445,10 +541,18 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
         return self.action_time
 
     @classmethod
-    def latest_updated(cls):
+    def latest_updated_with_count(cls, **kwargs):
         try:
-            return (
-                cls.objects.only("action_time").latest("action_time").get_date_update()
+            from django.db.models import Count, Max
+
+            agg = cls.objects.only("action_time").aggregate(
+                latest=Max("action_time"), count=Count("pk")
             )
+            return agg["latest"], agg["count"]
         except (cls.DoesNotExist, FieldError):
-            return None
+            return None, 0
+
+    @classmethod
+    def latest_updated(cls, **kwargs):
+        latest, count = cls.latest_updated_with_count(**kwargs)
+        return latest

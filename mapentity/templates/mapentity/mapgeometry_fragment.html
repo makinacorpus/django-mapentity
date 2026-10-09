@@ -1,8 +1,11 @@
-{% load i18n static mapentity_tags leaflet_tags %}
+{% load i18n static mapentity_tags %}
 
 <div id="{{ mapname }}"
      data-fitmaxzoom="{{ MAP_FIT_MAX_ZOOM }}"
      data-mapextent="{{ object|latlngbounds }}"
-     data-readonly="{% if readonly %}readonly{% endif %}" data-feature-url="{{ object.get_layer_detail_url }}">
+     data-readonly="{% if readonly %}readonly{% endif %}" data-feature-url="{{ object.get_geojson_detail_url }}"
+     data-map-id="{{ mapname }}">
 </div>
-{% leaflet_map mapname fitextent=False creatediv=False %}
+{% if extra_geometries_json %}
+<script id="{{ mapname }}-extra-geometries" type="application/json">{{ extra_geometries_json|safe }}</script>
+{% endif %}

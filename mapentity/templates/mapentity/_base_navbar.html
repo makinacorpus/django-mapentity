@@ -1,8 +1,11 @@
 {% load static i18n mapentity_tags %}
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand mr-0" href="#" title="{{ TITLE }} {{ VERSION }}">
-        {% block logo_header %}<img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;" alt="logo">{% endblock %} <span class="d-none d-sm-inline"></span>
+    <a class="navbar-brand mr-0" href="#">
+        {% block logo_header %}
+            <img src="{% static 'images/logo-header.png' %}" style="max-width: 30px; max-height: 30px;" alt="logo">
+        {% endblock %}
+        <span class="d-none d-sm-inline"></span>
     </a>
 
     {% if request.user.is_authenticated %}
@@ -17,7 +20,7 @@
                     {% if entity.menu %}
                         <li class="dropdown-item d-flex">
                             <a href="{% url entity.url_list %}">
-                                <img src="{% static entity.icon_small %}" /> {{ entity.label }}</a>
+                                <img src="{% static entity.icon_small %}" alt="" /> {{ entity.label }}</a>
                             &nbsp;&nbsp;
                             <a title="{% trans 'Add' %}" href="{% url entity.url_add %}" class="btn btn-success btn-sm ml-auto">
                                 <i class="bi bi-plus"></i>
@@ -31,7 +34,7 @@
     </ul>
     {% endif %}
 
- <span class="navbar-text mr-auto">{% block title_header %}{{ TITLE }}{% endblock %}</span>
+    <span class="navbar-text mr-auto">{% block title_header %}{{ TITLE }}{% endblock %}</span>
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,12 +97,13 @@
                         </h6>
                         {% get_current_language as LANGUAGE_CODE %}
                         {% get_available_languages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
                         <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
                             <input name="next" type="hidden" value="{{ redirect_to }}">
-                            {% for language in LANGUAGES %}
-                            <button class="dropdown-item" type="submit" name="language" value="{{ language.0 }}" title="{{ language.0 }}"
-                                    class="btn btn-light m-0 language-menu-item {% if language.0 == LANGUAGE_CODE %}active{% endif %}">
-                                {{ language.1|title }}
+                            {% for language in languages %}
+                            <button class="dropdown-item" type="submit" name="language" value="{{ language.code }}" title="{{ language.code }}"
+                                    class="btn btn-light m-0 language-menu-item {% if language.code == LANGUAGE_CODE %}active{% endif %}">
+                                {{ language.name_local|title }}
                             </button>
                             {% endfor %}
                         </form>

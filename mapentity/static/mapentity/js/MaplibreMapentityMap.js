@@ -1,0 +1,748 @@
+document.addEventListener('DOMContentLoaded', function() {
+
+    window.addEventListener('entity:map:ready', function(e) {
+        const { map, objectsLayer, context, TILES, bounds, mapentityContext, layerManager, layerUrl, mvtUrl, tilejsonUrl } = e.detail;
+
+        // Initialize objectsLayer immediately to catch events early
+        objectsLayer.initialize(map.getMap());
+
+        // Initialize additional layers
+        window.SETTINGS.layers.forEach((model) => {
+            const nameHTML = model.name;
+            const modelname = model.id;
+            const category = model.category;
+            const layerUrl = model.url;
+            const modelTilejsonUrl = model.tilejsonUrl;
+
+            let style = window.SETTINGS.map.styles[modelname] ?? window.SETTINGS.map.styles['others'];
+            let primaryKey = generateUniqueId();
+
+            const current_modelname = document.body.getAttribute('data-modelname');
+
+            if (modelname !== current_modelname) {  // current model is already initialized as objectsLayer on "Objects" section
+                const additionalObjectsLayer = new MaplibreObjectsLayer(null, {
+                    style,
+                    modelname: modelname,
+                    readonly: true,
+                    nameHTML: nameHTML,
+                    category: category,
+                    primaryKey: primaryKey,
+                    dataUrl: layerUrl,
+                    tilejsonUrl: modelTilejsonUrl,
+                    isLazy: true,
+                    displayPopup: true,
+                });
+
+                additionalObjectsLayer.initialize(map.getMap());
+                additionalObjectsLayer.registerLazyLayer(modelname, category, nameHTML, primaryKey, layerUrl);
+            }
+        });
+
+        map.getMap().on('load', async function() {
+
+            // Loading base layers first from settings
+            const baseLayersData = window.SETTINGS.map?.baseLayers || {};
+            const { base_layers, overlay_layers } = baseLayersData;
+
+            if (base_layers) {
+                for (const layer of base_layers) {
+                    await layerManager.addLayerFromUrl(layer.name, {
+                        id: 'mapbox-base-' + layer.slug,
+                        url: layer.url,
+                        isBaseLayer: true,
+                        attribution: layer.attribution || ''
+                    });
+                }
+            }
+
+            if (overlay_layers) {
+                for (const layer of overlay_layers) {
+                    await layerManager.addLayerFromUrl(layer.name, {
+                        id: 'mapbox-overlay-' + layer.slug,
+                        url: layer.url,
+                        isBaseLayer: false,
+                        attribution: layer.attribution || ''
+                    });
+                }
+            }
+
+            map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
+
+            const mergedData = Object.assign({}, context, {
+                map,
+                objectsLayer,
+                bounds,
+                layerUrl,
+                mvtUrl,
+                tilejsonUrl,
+                layerManager,
+                context,
+            });
+
+            // Expose the instance
+            window.MapEntity.currentMap = { map, objectsLayer, context: mergedData, mapentityContext };
+
+            // Resizable Panel Management
+            const resizableElements = document.querySelectorAll("#panelleft, .details-panel");
+            resizableElements.forEach(function(element) {
+                const resizableOptions = {
+                    handleSelector: ".splitter",
+                    resizeHeight: false,
+                    onDragEnd: function(e, el, opt) {
+                        if (map && map.getMap()) {
+                            map.getMap().resize();
+                        }
+                    }
+                };
+                window.jQuery(element).resizable(resizableOptions);
+            });
+
+            // Context backup
+            const saveContext = () => {
+                // We only save if we have already finished restoring, to avoid overwriting
+                // with an empty context during asynchronous loading
+                if (!layerManager || !layerManager.restoredContext) return;
+
+                mapentityContext.saveFullContext(map.getMap(), {
+                    prefix: context.viewname,
+                    filter: 'mainfilter',
+                    datatable: window.MapEntity.dt,
+                    objectsname: context.modelname,
+                });
+            };
+
+            map.getMap().on('moveend', saveContext);
+            map.getMap().on('zoomend', saveContext);
+            map.getMap().on('layerManager:baseLayerAdded', saveContext);
+            map.getMap().on('layerManager:overlayAdded', saveContext);
+            map.getMap().on('layerManager:lazyOverlayAdded', saveContext);
+            window.addEventListener('visibilitychange', saveContext);
+
+            window.dispatchEvent(new CustomEvent('entity:view:' + context.viewname, { detail: mergedData }));
+            window.dispatchEvent(new CustomEvent('entity:map:' + context.viewname, { detail: mergedData }));
+            window.dispatchEvent(new CustomEvent('entity:map'));
+        });
+    });
+
+    /**
+     * Extracts all coordinates [lng, lat] from a GeoJSON geometry.
+     */
+    function _extractAllCoords(geom) {
+        const coords = [];
+        if (!geom) return coords;
+        switch (geom.type) {
+            case 'Point':
+                coords.push(geom.coordinates);
+                break;
+            case 'MultiPoint':
+            case 'LineString':
+                geom.coordinates.forEach(c => coords.push(c));
+                break;
+            case 'MultiLineString':
+            case 'Polygon':
+                geom.coordinates.forEach(ring => ring.forEach(c => coords.push(c)));
+                break;
+            case 'MultiPolygon':
+                geom.coordinates.forEach(poly => poly.forEach(ring => ring.forEach(c => coords.push(c))));
+                break;
+            case 'GeometryCollection':
+                (geom.geometries || []).forEach(g => _extractAllCoords(g).forEach(c => coords.push(c)));
+                break;
+        }
+        return coords;
+    }
+
+    /**
+     * Displays secondary (extra) geometries on the map.
+     * @returns {Object} - { layerIds: string[], markers: maplibregl.Marker[] }
+     */
+    function _renderExtraGeometries(mapInstance, extraGeometries) {
+        const result = { layerIds: [], markers: [] };
+        if (!extraGeometries || extraGeometries.length === 0) return result;
+        extraGeometries.forEach(extra => {
+            if (!extra.geojson) return;
+            const geom = extra.geojson;
+            const customIcon = extra.custom_icon;
+
+            const points = [];
+            if (geom.type === 'Point') {
+                points.push(geom.coordinates);
+            } else if (geom.type === 'MultiPoint') {
+                geom.coordinates.forEach(c => points.push(c));
+            } else if (geom.type === 'LineString' || geom.type === 'MultiLineString') {
+                const sourceId = 'extra-geom-' + extra.field;
+                const layerId = 'extra-line-' + extra.field;
+                mapInstance.addSource(sourceId, {
+                    type: 'geojson',
+                    data: { type: 'Feature', geometry: geom, properties: {} }
+                });
+                mapInstance.addLayer({
+                    id: layerId,
+                    type: 'line',
+                    source: sourceId,
+                    paint: { 'line-color': '#999', 'line-width': 3, 'line-dasharray': [2, 2] }
+                });
+                result.layerIds.push(layerId);
+                return;
+            } else if (geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
+                const sourceId = 'extra-geom-' + extra.field;
+                const fillLayerId = 'extra-fill-' + extra.field;
+                const lineLayerId = 'extra-line-' + extra.field;
+                mapInstance.addSource(sourceId, {
+                    type: 'geojson',
+                    data: { type: 'Feature', geometry: geom, properties: {} }
+                });
+                mapInstance.addLayer({
+                    id: fillLayerId,
+                    type: 'fill',
+                    source: sourceId,
+                    paint: { 'fill-color': '#999', 'fill-opacity': 0.3 }
+                });
+                mapInstance.addLayer({
+                    id: lineLayerId,
+                    type: 'line',
+                    source: sourceId,
+                    paint: { 'line-color': '#999', 'line-width': 2 }
+                });
+                result.layerIds.push(fillLayerId, lineLayerId);
+                return;
+            }
+
+            points.forEach(coords => {
+                let marker;
+                if (customIcon) {
+                    const el = document.createElement('div');
+                    el.innerHTML = customIcon;
+                    el.style.pointerEvents = 'none';
+                    marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+                        .setLngLat(coords)
+                        .addTo(mapInstance);
+                } else {
+                    marker = new maplibregl.Marker()
+                        .setLngLat(coords)
+                        .addTo(mapInstance);
+                }
+                result.markers.push(marker);
+            });
+        });
+        return result;
+    }
+
+    /**
+     * Calculate the combined bounding box of the main geometry + extra geometries
+     * and center the map on it.
+     */
+    function _fitBoundsAllGeometries(mapInstance, objectsLayer, pkVal, extraGeometries) {
+        const allCoords = [];
+
+        // 1. Main geometry coordinates (from objectsLayer)
+        if (pkVal) {
+            const layersBySource = Object.values(objectsLayer._current_objects).flat();
+            for (const layerId of layersBySource) {
+                const layer = mapInstance.getLayer(layerId);
+                if (!layer) continue;
+                const source = mapInstance.getSource(layer.source);
+                if (source && source._data) {
+                    const features = source._data.geojson ? source._data.geojson.features : (source._data.features || []);
+                    const feature = features.find(f => f.properties?.id === pkVal || f.id === pkVal);
+                    if (feature && feature.geometry) {
+                        _extractAllCoords(feature.geometry).forEach(c => allCoords.push(c));
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 2. Coordinates of secondary geometries
+        if (extraGeometries && extraGeometries.length > 0) {
+            extraGeometries.forEach(extra => {
+                if (extra.geojson) {
+                    _extractAllCoords(extra.geojson).forEach(c => allCoords.push(c));
+                }
+            });
+        }
+
+        // 3. Calculate and apply the bounding box
+        if (allCoords.length === 0) return;
+
+        let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+        allCoords.forEach(c => {
+            if (c[0] < minLng) minLng = c[0];
+            if (c[1] < minLat) minLat = c[1];
+            if (c[0] > maxLng) maxLng = c[0];
+            if (c[1] > maxLat) maxLat = c[1];
+        });
+
+        mapInstance.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
+            padding: 50,
+            maxZoom: 16,
+            duration: 0,
+            animate: false
+        });
+    }
+
+    /**
+     * Adds green (start) and red (end) markers to the ends of the lines
+     * for the selected object in detail view.
+     * @returns {Object} - { layerIds: string[], markers: maplibregl.Marker[] }
+     */
+    function _addDetailLineEndpointMarkers(mapInstance, objectsLayer, pkVal) {
+        const result = { layerIds: [], markers: [] };
+        // Find the feature of the selected object in the sources
+        const layersBySource = Object.values(objectsLayer._current_objects).flat();
+        for (const layerId of layersBySource) {
+            const layer = mapInstance.getLayer(layerId);
+            if (!layer) continue;
+            const source = mapInstance.getSource(layer.source);
+            if (!source || !source._data) continue;
+            const data = source._data;
+            const features = data.geojson ? data.geojson.features : (data.features || (data.type === 'Feature' ? [data] : []));
+            const feature = features.find(f => f.properties?.id === pkVal || f.id === pkVal);
+            if (feature && feature.geometry) {
+                const geom = feature.geometry;
+                let startCoord = null;
+                let endCoord = null;
+
+                if (geom.type === 'LineString' && geom.coordinates.length >= 2) {
+                    startCoord = geom.coordinates[0];
+                    endCoord = geom.coordinates[geom.coordinates.length - 1];
+                } else if (geom.type === 'MultiLineString' && geom.coordinates.length > 0) {
+                    const firstLine = geom.coordinates[0];
+                    const lastLine = geom.coordinates[geom.coordinates.length - 1];
+                    if (firstLine && firstLine.length > 0) startCoord = firstLine[0];
+                    if (lastLine && lastLine.length > 0) endCoord = lastLine[lastLine.length - 1];
+                }
+
+                if (startCoord) result.markers.push(_createEndpointMarker(mapInstance, startCoord, '#28a745'));
+                if (endCoord) result.markers.push(_createEndpointMarker(mapInstance, endCoord, '#dc3545'));
+
+                // Style line with repeated arrows
+                if (geom.type === 'LineString' || geom.type === 'MultiLineString') {
+                    const sourceId = 'detail-line-arrows-' + pkVal;
+                    mapInstance.addSource(sourceId, {
+                        type: 'geojson',
+                        data: { type: 'Feature', geometry: geom, properties: {} }
+                    });
+                    const {arrowSize, arrowColor, arrowOpacity, arrowSpacing } = window.SETTINGS.map.styles.detail;
+
+                    const addArrowLayer = () => {
+                        if (mapInstance.getLayer('detail-line-arrows-' + pkVal)) return;
+                        mapInstance.addLayer({
+                            id: 'detail-line-arrows-' + pkVal,
+                            type: 'symbol',
+                            source: sourceId,
+                            layout: {
+                                'symbol-placement': 'line',
+                                'symbol-spacing': arrowSpacing,
+                                'icon-image': 'arrow-icon',
+                                'icon-size': arrowSize,
+                                'icon-ignore-placement': true,
+                                'icon-allow-overlap': true,
+                                'icon-rotation-alignment': 'map',
+                            },
+                            paint: {
+                                'icon-opacity': arrowOpacity,
+                            }
+                        });
+                    };
+
+                    if (mapInstance.hasImage('arrow-icon')) {
+                        addArrowLayer();
+                    } else {
+                        const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
+                        fetch(markersBase + 'arrow.svg')
+                            .then(r => r.text())
+                            .then(svg => {
+                                const coloredSvg = svg.replace('__COLOR__', arrowColor);
+                                const blob = new Blob([coloredSvg], { type: 'image/svg+xml' });
+                                const url = URL.createObjectURL(blob);
+                                const img = new Image(20, 20);
+                                img.onload = function() {
+                                    if (!mapInstance.hasImage('arrow-icon')) {
+                                        mapInstance.addImage('arrow-icon', img, { sdf: false });
+                                    }
+                                    URL.revokeObjectURL(url);
+                                    addArrowLayer();
+                                };
+                                img.src = url;
+                            });
+                    }
+                }
+
+
+                return result;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Creates a standard map image marker (pin) at a given position.
+     * @returns {maplibregl.Marker} - The created marker (added to the map asynchronously)
+     */
+    function _createEndpointMarker(mapInstance, lngLat, color) {
+        const el = document.createElement('div');
+        el.style.pointerEvents = 'none';
+
+        const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+            .setLngLat(lngLat)
+            .addTo(mapInstance);
+
+        const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
+        fetch(markersBase + 'pin.svg')
+            .then(r => r.text())
+            .then(svg => {
+                el.innerHTML = svg.replace('__COLOR__', color);
+            });
+
+        return marker;
+    }
+
+    /**
+     * Add green (start) and red (end) markers to the ends of the lines
+     * from GeoJSON retrieved via fetch (for the detail view in MVT mode).
+     * @returns {Object} - { layerIds: string[], markers: maplibregl.Marker[] }
+     */
+    function _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal) {
+        const result = { layerIds: [], markers: [] };
+        let geom = null;
+        if (featureGeojson.type === 'Feature') {
+            geom = featureGeojson.geometry;
+        } else if (featureGeojson.type === 'FeatureCollection' && featureGeojson.features) {
+            const feature = featureGeojson.features.find(f => f.properties?.id === pkVal || f.id === pkVal);
+            if (feature) geom = feature.geometry;
+        } else if (featureGeojson.geometry) {
+            geom = featureGeojson.geometry;
+        }
+
+        if (!geom) return result;
+
+        let startCoord = null;
+        let endCoord = null;
+
+        if (geom.type === 'LineString' && geom.coordinates.length >= 2) {
+            startCoord = geom.coordinates[0];
+            endCoord = geom.coordinates[geom.coordinates.length - 1];
+        } else if (geom.type === 'MultiLineString' && geom.coordinates.length > 0) {
+            const firstLine = geom.coordinates[0];
+            const lastLine = geom.coordinates[geom.coordinates.length - 1];
+            if (firstLine.length >= 2) startCoord = firstLine[0];
+            if (lastLine.length >= 2) endCoord = lastLine[lastLine.length - 1];
+        }
+
+        if (startCoord) result.markers.push(_createEndpointMarker(mapInstance, startCoord, '#28a745'));
+        if (endCoord) result.markers.push(_createEndpointMarker(mapInstance, endCoord, '#dc3545'));
+
+        // Style line with repeated arrows
+        if (geom.type === 'LineString' || geom.type === 'MultiLineString') {
+            const arrowLayerId = 'detail-line-arrows-' + pkVal;
+            result.layerIds.push(arrowLayerId);
+            const sourceId = 'detail-line-arrows-' + pkVal;
+            mapInstance.addSource(sourceId, {
+                type: 'geojson',
+                data: { type: 'Feature', geometry: geom, properties: {} }
+            });
+            const {arrowSize, arrowColor, arrowOpacity, arrowSpacing } = window.SETTINGS.map.styles.detail;
+
+            const addArrowLayer = () => {
+                if (mapInstance.getLayer('detail-line-arrows-' + pkVal)) return;
+                mapInstance.addLayer({
+                    id: 'detail-line-arrows-' + pkVal,
+                    type: 'symbol',
+                    source: sourceId,
+                    layout: {
+                        'symbol-placement': 'line',
+                        'symbol-spacing': arrowSpacing,
+                        'icon-image': 'arrow-icon',
+                        'icon-size': arrowSize,
+                        'icon-ignore-placement': true,
+                        'icon-allow-overlap': true,
+                        'icon-rotation-alignment': 'map',
+                    },
+                    paint: {
+                        'icon-opacity': arrowOpacity,
+                    }
+                });
+            };
+
+            if (mapInstance.hasImage('arrow-icon')) {
+                addArrowLayer();
+            } else {
+                const markersBase = (window.SETTINGS ? window.SETTINGS.urls.static : '/static/') + 'mapentity/markers/';
+                fetch(markersBase + 'arrow.svg')
+                    .then(r => r.text())
+                    .then(svg => {
+                        const coloredSvg = svg.replace('__COLOR__', arrowColor);
+                        const blob = new Blob([coloredSvg], { type: 'image/svg+xml' });
+                        const url = URL.createObjectURL(blob);
+                        const img = new Image(20, 20);
+                        img.onload = function() {
+                            if (!mapInstance.hasImage('arrow-icon')) {
+                                mapInstance.addImage('arrow-icon', img, { sdf: false });
+                            }
+                            URL.revokeObjectURL(url);
+                            addArrowLayer();
+                        };
+                        img.src = url;
+                    });
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Calculate the bounding box from a GeoJSON retrieved via fetch + extra geometries
+     * and center the map on it (for the detail view in MVT mode).
+     */
+    function _fitBoundsFromGeojson(mapInstance, featureGeojson, extraGeometries) {
+        const allCoords = [];
+
+        // 1. Main Geometry Coordinates
+        let geom = null;
+        if (featureGeojson.type === 'Feature') {
+            geom = featureGeojson.geometry;
+        } else if (featureGeojson.type === 'FeatureCollection' && featureGeojson.features) {
+            featureGeojson.features.forEach(f => {
+                if (f.geometry) _extractAllCoords(f.geometry).forEach(c => allCoords.push(c));
+            });
+        } else if (featureGeojson.geometry) {
+            geom = featureGeojson.geometry;
+        }
+        if (geom) {
+            _extractAllCoords(geom).forEach(c => allCoords.push(c));
+        }
+
+        // 2. Secondary geometry coordinates
+        if (extraGeometries && extraGeometries.length > 0) {
+            extraGeometries.forEach(extra => {
+                if (extra.geojson) {
+                    _extractAllCoords(extra.geojson).forEach(c => allCoords.push(c));
+                }
+            });
+        }
+
+        // 3. Calculate and apply the bounding box
+        if (allCoords.length === 0) return;
+
+        let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+        allCoords.forEach(c => {
+            if (c[0] < minLng) minLng = c[0];
+            if (c[1] < minLat) minLat = c[1];
+            if (c[0] > maxLng) maxLng = c[0];
+            if (c[1] > maxLat) maxLat = c[1];
+        });
+
+        mapInstance.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
+            padding: 50,
+            maxZoom: 16,
+            duration: 0,
+            animate: false
+        });
+    }
+
+    // Earphone for detailed view
+    window.addEventListener('entity:map:detail', function(e) {
+        const { map, objectsLayer, modelname, bounds, layerUrl, tilejsonUrl, layerManager, context } = e.detail;
+        const mapentityContext = window.MapEntity.currentMap.mapentityContext;
+
+        // Context restoration (view and layers)
+        const mapViewContext = getURLParameter("context");
+        if (mapViewContext) {
+            // Unification: store the URL context in localStorage, then restore normally
+            mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: 'detail' });
+        }
+        mapentityContext.restoreFullContext(map.getMap(), null, {
+            prefix: 'detail',
+            objectsname: modelname,
+        });
+
+        // Collect secondary geometries for the global fitBounds
+        const detailMapEl = document.getElementById('detailmap');
+        const extraGeometriesScript = document.getElementById('detailmap-extra-geometries');
+        let parsedExtraGeometries = [];
+        if (extraGeometriesScript) {
+            try {
+                parsedExtraGeometries = JSON.parse(extraGeometriesScript.textContent);
+            } catch (e) {
+                console.warn('MaplibreMapentityMap: failed to parse extra geometries', e);
+            }
+        }
+
+        if (tilejsonUrl) {
+            if (mapViewContext && mapViewContext.print) {
+                const specified = window.SETTINGS.map.styles.print[modelname];
+                if (specified) {
+                    objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
+                }
+            }
+
+            // Load the layer via TileJSON (MVT)
+            objectsLayer.loadMVT(tilejsonUrl);
+
+            const pk = document.body.getAttribute('data-pk');
+            let pkVal = pk;
+            if (pk && /^\d+$/.test(pk)) {
+                pkVal = parseInt(pk, 10);
+            }
+
+            if (pkVal) {
+                // Wait for MVT tiles to render before selecting
+                // setFeatureState only works if the feature is present in a rendered tile
+                const mapInstance_ = map.getMap();
+                const trySelect = () => {
+                    objectsLayer.select(pkVal);
+                };
+                // idle' triggers when all sources and tiles are loaded and rendered
+                mapInstance_.once('idle', trySelect);
+            }
+
+            // Retrieve the geometry of the current object via the feature URL for fitBounds and markers
+            const featureUrl = detailMapEl ? detailMapEl.getAttribute('data-feature-url') : null;
+            const mapInstance = map.getMap();
+
+            // Utility function to save extra layers/markers in the current object's group
+            const _registerExtrasInGroup = (extraResult, endpointResult) => {
+                const groupKey = objectsLayer.primaryKey;
+                const allExtraLayerIds = [
+                    ...(extraResult ? extraResult.layerIds : []),
+                    ...(endpointResult ? endpointResult.layerIds : []),
+                ];
+                const allExtraMarkers = [
+                    ...(extraResult ? extraResult.markers : []),
+                    ...(endpointResult ? endpointResult.markers : []),
+                ];
+                if (allExtraLayerIds.length > 0 || allExtraMarkers.length > 0) {
+                    layerManager.addToGroup(groupKey, allExtraLayerIds, allExtraMarkers);
+                }
+            };
+
+            if (featureUrl && pkVal) {
+                fetch(featureUrl)
+                    .then(response => response.json())
+                    .then(featureGeojson => {
+                        // Display secondary geometries
+                        const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+
+                        // Add green/red markers to the ends of the lines
+                        const endpointResult = _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal);
+
+                        // Save layers/markers extracted to the current object group
+                        _registerExtrasInGroup(extraResult, endpointResult);
+
+                        // Center the map on the bounding box of ALL geometries
+                        _fitBoundsFromGeojson(mapInstance, featureGeojson, parsedExtraGeometries);
+                    })
+                    .catch(err => {
+                        console.warn('MaplibreMapentityMap: failed to fetch feature geojson', err);
+                        const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+                        _registerExtrasInGroup(extraResult, null);
+                    });
+            } else {
+                const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+                _registerExtrasInGroup(extraResult, null);
+            }
+        } else {
+            // No tilejsonUrl, display extra geometries anyway
+            const mapInstance = map.getMap();
+            const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+            const groupKey = objectsLayer.primaryKey;
+            if (extraResult.layerIds.length > 0 || extraResult.markers.length > 0) {
+                layerManager.addToGroup(groupKey, extraResult.layerIds, extraResult.markers);
+            }
+        }
+
+        // Controls
+        const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
+            () => {
+                const context = mapentityContext.getFullContext(map.getMap());
+                context['selector'] = '#detailmap';
+                return JSON.stringify(context);
+            });
+        map.getMap().addControl(screenshotControl, 'top-left');
+
+        map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
+
+        // Save context
+        const saveContext = () => {
+            if (!layerManager || !layerManager.restoredContext) return;
+            mapentityContext.saveFullContext(map.getMap(), {prefix: 'detail'});
+        };
+        map.getMap().on('moveend', saveContext);
+        map.getMap().on('zoomend', saveContext);
+        map.getMap().on('layerManager:baseLayerAdded', saveContext);
+        map.getMap().on('layerManager:overlayAdded', saveContext);
+        map.getMap().on('layerManager:lazyOverlayAdded', saveContext);
+        window.addEventListener('visibilitychange', saveContext);
+    });
+
+    // Listener for the list view
+    window.addEventListener('entity:map:list', function(e) {
+        const { map, objectsLayer, modelname, bounds, layerUrl, mvtUrl, tilejsonUrl, layerManager, context } = e.detail;
+
+        const mapentityContext = window.MapEntity.currentMap.mapentityContext;
+
+        // Load objects from the backend via TileJSON
+        objectsLayer.loadMVT(tilejsonUrl);
+
+        // Controls
+        const screenshotControl = new MaplibreScreenshotController(window.SETTINGS.urls.screenshot,
+            () => {
+                const context = mapentityContext.getFullContext(map.getMap(), {
+                    filter: 'mainfilter',
+                    datatable: window.MapEntity.dt,
+                    objectsname: modelname,
+                    prefix: 'list',
+                });
+                context['selector'] = '#mainmap';
+                return JSON.stringify(context);
+            });
+        map.getMap().addControl(screenshotControl, 'top-left');
+
+        const fileLayerLoadControl = new MaplibreFileLayerControl({
+            layerOptions: {
+                style: window.SETTINGS.map.styles.filelayer,
+            }
+        });
+        map.getMap().addControl(fileLayerLoadControl, 'top-left');
+
+        map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
+
+        map.getMap().addControl(
+            new maplibregl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: false,
+        }), position='bottom-right'
+        );
+        window.map = map;
+
+        // History and filter management
+        const history = window.MapEntity.currentHistory;
+
+        const togglableFilter = new MaplibreMapentityTogglableFilter();
+        window.MapEntity.togglableFilter = togglableFilter;
+
+        const mainDatatable = window.MapEntity.dt;
+
+        const mapsync = new MaplibreMapListSync(mainDatatable, map.getMap(),
+            objectsLayer, togglableFilter, history);
+        window.MapEntity.mapsync = mapsync;
+
+        togglableFilter.button.addEventListener('click', function (e) {
+            togglableFilter.load_filter_form(mapsync);
+        });
+        const mapViewContext = getURLParameter("context");
+        if (mapViewContext) {
+            // Unification : stocker le contexte URL dans le localStorage, puis restaurer normalement
+            mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: 'list' });
+        }
+        mapentityContext.restoreFullContext(map.getMap(), null, {
+            prefix: context.viewname,
+            filter: 'mainfilter',
+            datatable: window.MapEntity.dt,
+            objectsname: context.modelname,
+            load_filter_form: window.MapEntity.togglableFilter.load_filter_form.bind(togglableFilter, mapsync)
+        });
+    });
+});

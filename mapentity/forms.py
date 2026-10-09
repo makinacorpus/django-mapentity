@@ -4,11 +4,14 @@ from warnings import warn
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Button, Div, Layout, Submit
+from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib.gis.db.models.fields import GeometryField
 from django.core.exceptions import FieldDoesNotExist
+from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django_filters.filterset import remote_queryset
 from modeltranslation.utils import build_localized_fieldname
 from paperclip.forms import AttachmentForm as BaseAttachmentForm
 from tinymce.widgets import TinyMCE
@@ -99,7 +102,13 @@ class MapEntityForm(TranslatedModelForm):
     leftpanel_scrollable = True
     hidden_fields = []
 
+    default_widgets = {
+        models.ForeignKey: autocomplete.ListSelect2,
+        models.ManyToManyField: autocomplete.Select2Multiple,
+    }
+
     def __init__(self, *args, **kwargs):
+        model = getattr(self._meta, "model", None)
         if self.geomfields is None:
             self.geomfields = ["geom"]
         self.user = kwargs.pop("user", None)
@@ -131,10 +140,8 @@ class MapEntityForm(TranslatedModelForm):
             # Custom code because formfield_callback does not work with inherited forms
             if formfield:
                 # set max character limit :
-                if self._meta.model._meta.db_table in max_characters_by_field_config:
-                    for conf in max_characters_by_field_config[
-                        self._meta.model._meta.db_table
-                    ]:
+                if model._meta.db_table in max_characters_by_field_config:
+                    for conf in max_characters_by_field_config[model._meta.db_table]:
                         if fieldname == conf["field"]:
                             textfield_help_text = _(
                                 "%(max)s characters maximum recommended"
@@ -142,11 +149,12 @@ class MapEntityForm(TranslatedModelForm):
 
                 # Assign map widget to all geometry fields
                 try:
-                    formmodel = self._meta.model
-                    modelfield = formmodel._meta.get_field(fieldname)
+                    modelfield = model._meta.get_field(fieldname)
                     needs_replace_widget = isinstance(
                         modelfield, GeometryField
-                    ) and not isinstance(formfield.widget, MapWidget)
+                    ) and not isinstance(
+                        formfield.widget, MapWidget
+                    )  # faire gaffe à la refactorisation, garder le nom MapWidget
                     if needs_replace_widget:
                         formfield.widget = MapWidget()
                         if self.instance.pk and self.user:
@@ -156,7 +164,27 @@ class MapEntityForm(TranslatedModelForm):
                                 )
                             ):
                                 formfield.widget.modifiable = False
-                        formfield.widget.attrs["geom_type"] = formfield.geom_type
+                    # For all MapWidgets: inject geom_type and field_label
+                    if isinstance(modelfield, GeometryField) and isinstance(
+                        formfield.widget, MapWidget
+                    ):
+                        custom_geom_type = getattr(
+                            formfield.widget, "custom_geom_type", None
+                        )
+                        if custom_geom_type is not None:
+                            formfield.widget.attrs["geom_type"] = custom_geom_type
+                        else:
+                            current_geom_type = formfield.widget.attrs.get("geom_type")
+                            if (
+                                current_geom_type is None
+                                or current_geom_type == "GEOMETRY"
+                            ):
+                                formfield.widget.attrs["geom_type"] = (
+                                    formfield.geom_type
+                                )
+                        formfield.widget.attrs.setdefault(
+                            "field_label", str(modelfield.verbose_name)
+                        )
                 except FieldDoesNotExist:
                     pass
 
@@ -169,6 +197,38 @@ class MapEntityForm(TranslatedModelForm):
                         formfield.help_text += f", {textfield_help_text}"
                     else:
                         formfield.help_text = textfield_help_text
+
+        def _build_select2_attrs(form_field):
+            attrs = getattr(form_field.widget, "attrs", {}).copy()
+            attrs.setdefault("data-theme", "bootstrap4")
+            attrs.setdefault("data-width", "100%")
+            attrs["data-allow-clear"] = "true"
+            return attrs
+
+        for name, form_field in list(self.fields.items()):
+            try:
+                model_field = model._meta.get_field(name)
+            except Exception:
+                model_field = None
+
+            # mapping champs relationnels (FK, M2M)
+            for mtype, widget_cls in self.default_widgets.items():
+                if isinstance(model_field, mtype):
+                    attrs = _build_select2_attrs(form_field)
+                    form_field.widget = widget_cls(attrs=attrs)
+                    form_field.queryset = remote_queryset(model_field)
+                    break
+
+            # manage extra fields that are not in the model
+            if model_field is None:
+                if isinstance(form_field, forms.ModelMultipleChoiceField):
+                    attrs = _build_select2_attrs(form_field)
+                    form_field.widget = autocomplete.Select2Multiple(attrs=attrs)
+                    form_field.queryset = form_field.queryset
+                elif isinstance(form_field, forms.MultipleChoiceField):
+                    attrs = _build_select2_attrs(form_field)
+                    form_field.widget = autocomplete.Select2Multiple(attrs=attrs)
+                    form_field.choices = form_field.choices
 
         if self.instance.pk and self.user:
             if not self.user.has_perm(
@@ -209,10 +269,28 @@ class MapEntityForm(TranslatedModelForm):
         # Check if fieldslayout is defined, otherwise use Meta.fields
         fieldslayout = self.fieldslayout
         if not fieldslayout:
-            # Remove geomfields from left part
-            fieldslayout = [fl for fl in self.orig_fields if fl not in self.geomfields]
+            # Collect all translated field names (e.g. name_fr, name_en)
+            translated_names = set()
+            for x, names in getattr(self, "_translated", {}).items():
+                translated_names.update(names)
+            # Remove geomfields and translated variants from left part
+            fieldslayout = [
+                fl
+                for fl in self.orig_fields
+                if fl not in self.geomfields and fl not in translated_names
+            ]
         # Replace native fields in Crispy layout by translated fields
         fieldslayout = self.__replace_translatable_fields(fieldslayout)
+
+        # Separate primary geomfields from secondary ones (those with target_map)
+        primary_geomfields = []
+        secondary_geomfields = []
+        for gf in self.geomfields:
+            widget = self.fields[gf].widget if gf in self.fields else None
+            if widget and getattr(widget, "attrs", {}).get("target_map"):
+                secondary_geomfields.append(gf)
+            else:
+                primary_geomfields.append(gf)
 
         has_geomfield = len(self.geomfields) > 0
         leftpanel_css = "col-12"
@@ -221,8 +299,20 @@ class MapEntityForm(TranslatedModelForm):
         if self.leftpanel_scrollable:
             leftpanel_css += " scrollable"
 
+        # Secondary geomfields are rendered as raw HTML (not crispyfied)
+        # and placed hidden in the left panel
+        secondary_fields_html = ""
+        for gf in secondary_geomfields:
+            secondary_fields_html += (
+                f'<div style="display:none;">{{{{ form.{gf} }}}}</div>'
+            )
+
+        leftpanel_contents = list(fieldslayout)
+        if secondary_fields_html:
+            leftpanel_contents.append(HTML(secondary_fields_html))
+
         leftpanel = Div(
-            *fieldslayout,
+            *leftpanel_contents,
             css_class=leftpanel_css,
             css_id="modelfields",
         )
@@ -231,14 +321,14 @@ class MapEntityForm(TranslatedModelForm):
         if has_geomfield:
             rightpanel = (
                 Div(
-                    *self.geomfields,
+                    *primary_geomfields,
                     css_class="col-12 col-sm-6 col-lg-7",
                     css_id="geomfield",
                 ),
             )
 
         # Create form actions
-        # crispy_form bootstrap4 template is overriden
+        # crispy_form bootstrap4 template is overridden
         # because of label and field classes added but not wanted here
         formactions = FormActions(
             *actions,
@@ -357,3 +447,95 @@ class AttachmentForm(BaseAttachmentForm):
         self.helper.layout.fields.append(
             FormActions(*form_actions, css_class="form-actions")
         )
+
+
+class BaseMultiUpdateForm(forms.Form):
+    """
+    Create a form using the Boolean and ForeignKey fields of a model to update multiple instances at once.
+    """
+
+    class Meta:
+        model = None
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Setup crispy form
+        self.helper = FormHelper()
+        self.helper.form_id = "multi-update-form"
+        self.helper.form_class = "form-horizontal"
+        self.helper.label_class = "col-12 col-sm-4"  # largeur colonne labels
+        self.helper.field_class = "col-12 col-sm-8"  # largeur colonne champs
+        self.helper.form_method = "post"
+        self.helper.form_action = ""
+        self.helper.add_input(
+            Button("cancel", _("Cancel"), css_class="btn btn-light ml-auto mr-2"),
+        )
+        self.helper.add_input(
+            Submit(
+                "save",
+                _("Save"),
+                css_class="btn btn-success",
+                data_toggle="modal",
+                data_target="#confirmation-modal",
+            )
+        )
+
+        # create fields with correct choices
+        model = self.Meta.model
+        fields = self.Meta.fields
+
+        for field_name in fields:
+            field = model._meta.get_field(field_name)
+
+            if isinstance(field, models.BooleanField):
+                self.fields[field_name] = forms.ChoiceField(
+                    label=field.verbose_name,
+                    choices=[
+                        ("nothing", _("Do nothing")),
+                        ("true", _("Yes")),
+                        ("false", _("No")),
+                    ],
+                    required=False,
+                )
+                self.fields[field_name].initial = "nothing"
+            elif isinstance(field, models.ForeignKey):
+                null_label = _("Null value")
+                queryset = field.related_model.objects.all()
+                choices = [(obj.pk, str(obj)) for obj in queryset]
+
+                if field.blank and field.null:
+                    choices.insert(0, ("", null_label))
+
+                choices.insert(0, ("nothing", _("Do nothing")))
+
+                self.fields[field_name] = forms.ChoiceField(
+                    label=field.verbose_name,
+                    choices=choices,
+                    required=False,
+                )
+                self.fields[field_name].initial = "nothing"
+
+        # delete translated fields without language specification
+        try:
+            translated_options = translator.get_options_for_model(model)
+            translated_fields = list(translated_options.fields)
+        except NotRegistered:
+            translated_fields = list()
+
+        for field in list(self.fields.keys()):
+            if field in translated_fields:
+                self.fields.pop(field, None)
+
+    def clean(self):
+        data = super().clean()
+        cleaned_data = {}
+
+        for name, value in data.items():
+            if value != "nothing":
+                cleaned_data[name] = (
+                    value == "true" if value in ("true", "false") else value
+                )
+
+        return cleaned_data

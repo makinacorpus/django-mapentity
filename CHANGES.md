@@ -1,16 +1,149 @@
 CHANGELOG
 =========
 
-8.14.4+dev (XXXX-XX-XX)
+9.0.3+dev      (XXXX-XX-XX)
+---------------------------
+
+
+
+9.0.3      (2026-07-30)
 -----------------------
 
 **Improvements**
 
-- Better language and translation management even if language is valid but not supported by django
+- Add snap target's layer and feature ids for point geometries
+
+
+9.0.2      (2026-07-20)
+-----------------------
+
+**Improvements**
+
+- Only report LEAFLET_CONFIG deprecation if settings are not empty.
+- Migrate LEAFLET_CONFIG overlays and handle the case where the database is not empty.
+
+
+9.0.1      (2026-07-17)
+-----------------------
 
 **Bug fixes**
 
-- In some cases default settings values can't be overridden.
+- Compatibility with django-mapbox-baselayer >=1.5.2
+
+
+9.0.0      (2026-07-01)
+-----------------------
+
+**Breaking changes**
+
+- Move from Leaflet to Maplibre GL JS.
+- Please remake your custom LEAFLET_CONFIG to MAPLIBRE_CONFIG_OVERRIDES. Please take a look at the documentation. Base layers and overlays are now configured in the database (auto migration from LEAFLET_CONFIG)
+
+**Improvements**
+
+- Use django-vectortiles to replace GeoJSON with vector tiles and improve performances.
+- User django-mapbox-baselayer to handle and manage base and overlays layers in the database. (Take a look at documentation to manage layers)
+
+
+8.17.3     (2026-06-30)
+-----------------------
+
+**Bug fixes**
+
+- Fix multi-select filter restoration
+
+**Improvements**
+
+- Fix referrer to handle OSM tiles good permissions
+
+
+8.17.2     (2026-06-10)
+-----------------------
+
+**Bug fixes**
+
+- Reduce the size of the help text
+- Enable right click on pop-up 'detail page' button 
+
+
+8.17.1     (2026-02-17)
+-----------------------
+
+**Bug fixes**
+
+- Fix the appearance of the Select2 fields
+
+
+8.17.0     (2026-02-11)
+-----------------------
+
+**Breaking changes**
+
+- Move from chozen js to django-autocomplete-light (with select2.js). Please if use custom code related to chozen, update it in your project.
+
+
+**Improvements**
+
+- Use dango-autocomplete-light to let users to customize static select or multiselect to API dynamic if required. (perfs issues)
+
+
+8.16.2     (2026-01-13)
+-----------------------
+
+**Improvements**
+
+- Related fields in lists are now displayed by their string object representation (be mindful of performance)
+- Improve responsiveness for multi-update forms
+
+
+8.16.1     (2026-01-08)
+-----------------------
+
+**Bug fixes**
+
+- Fix batch deletion
+
+
+8.16.0     (2025-12-24)
+-----------------------
+
+**New feature**
+
+- Add bulk deletion/edition on list views
+
+**Bug fixes**
+
+- Fix translated fields duplicated in MapentityForm when no layout is provided
+
+
+8.15.1 (2025-11-14)
+-----------------------
+
+**Bug fixes**
+
+- Fix missing translation for popups
+
+
+8.15.0     (2025-11-13)
+-----------------------
+
+**Improvements**
+
+- Add popup on marker with configurable information
+
+**Bug fixes**
+
+- Fix filter context restoration
+- Fix layer restoration in screenshot
+
+
+
+8.14.5     (2025-10-30)
+-----------------------
+
+**Bug fixes**
+
+- Cache decorators can now be used with views with extra kwargs parameters
 
 
 8.14.4     (2025-09-25)
@@ -46,7 +179,7 @@ CHANGELOG
 
 **Warning**
 
-- Some components have been changed. User menu items, actions buttons in list, actions and download buttons in details views. Please test and update your templates before upgrading.
+- Some component has been changed. User menu items, actions buttons in list, actions and download buttons in details views. Please test and update your templates before upgrading.
 
 **Improvements**
 

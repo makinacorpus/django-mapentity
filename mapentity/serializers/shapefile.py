@@ -78,7 +78,7 @@ class ZipShapeSerializer(Serializer):
         buffr.close()
 
     def _create_shape(self, shape_directory, queryset, model, columns):
-        """Split a shapes into one or more shapes (one for point and one for linestring)"""
+        """Split a test_shapes into one or more test_shapes (one for point and one for linestring)"""
         geo_field = geo_field_from_model(model, app_settings["GEOM_FIELD_NAME"])
         get_geom, geom_type, srid = info_from_geo_field(geo_field)
         if geom_type.upper() in (
@@ -141,18 +141,28 @@ class ZipShapeSerializer(Serializer):
                 subpoints, sublines, subpolygons, pp, ll, yy = self.split_bygeom(
                     geom, geom_getter=lambda geom: geom
                 )
-                if subpoints:
-                    clone = iterable.get(id=x.pk)
-                    clone.geom = MultiPoint(subpoints, srid=geom.srid)
-                    multipoints.append(clone)
-                if sublines:
-                    clone = iterable.get(id=x.pk)
-                    clone.geom = MultiLineString(sublines, srid=geom.srid)
-                    multilinestrings.append(clone)
-                if subpolygons:
-                    clone = iterable.get(id=x.pk)
-                    clone.geom = MultiPolygon(subpolygons, srid=geom.srid)
-                    multipolygons.append(clone)
+                if hasattr(x, "pk"):
+                    # Top-level call: x is a Django model instance, clone it
+                    if subpoints:
+                        clone = iterable.get(id=x.pk)
+                        clone.geom = MultiPoint(subpoints, srid=geom.srid)
+                        multipoints.append(clone)
+                    if sublines:
+                        clone = iterable.get(id=x.pk)
+                        clone.geom = MultiLineString(sublines, srid=geom.srid)
+                        multilinestrings.append(clone)
+                    if subpolygons:
+                        clone = iterable.get(id=x.pk)
+                        clone.geom = MultiPolygon(subpolygons, srid=geom.srid)
+                        multipolygons.append(clone)
+                else:
+                    # Recursive call: x is a geometry, flatten sub-geometries directly
+                    points.extend(subpoints)
+                    linestrings.extend(sublines)
+                    polygons.extend(subpolygons)
+                    multipoints.extend(pp)
+                    multilinestrings.extend(ll)
+                    multipolygons.extend(yy)
             elif isinstance(geom, Point):
                 points.append(x)
             elif isinstance(geom, LineString):
@@ -278,7 +288,7 @@ def create_shape_format_layer(directory, headers, geom_type, srid, srid_out=None
 
 
 def geo_field_from_model(model, default_geo_field_name=None):
-    """Look for a geo field - taken from shapes"""
+    """Look for a geo field - taken from test_shapes"""
     try:
         # If the class defines a geomfield property, use it !
         return model.geomfield

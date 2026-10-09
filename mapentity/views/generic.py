@@ -1,26 +1,33 @@
+import inspect
 import json
 import logging
 import os
+import re
 from datetime import datetime
+from importlib import import_module
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
+from django.db import models
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from django.template.exceptions import TemplateDoesNotExist
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
+from django.utils.html import escape
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views import static
 from django.views.generic import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
 from django.views.generic.list import ListView
 from django_filters.views import FilterView
 from django_weasyprint import WeasyTemplateResponseMixin
@@ -31,7 +38,7 @@ from mapentity.tokens import TokenManager
 from .. import models as mapentity_models
 from .. import serializers as mapentity_serializers
 from ..decorators import save_history, view_permission_required
-from ..forms import AttachmentForm
+from ..forms import AttachmentForm, BaseMultiUpdateForm
 from ..helpers import (
     convertit_url,
     download_content,
@@ -43,7 +50,12 @@ from ..helpers import (
 from ..models import ADDITION, CHANGE, DELETION, LogEntry
 from ..settings import app_settings
 from .base import BaseListView, history_delete
-from .mixins import FilterListMixin, FormViewMixin, ModelViewMixin
+from .mixins import (
+    FilterListMixin,
+    FormViewMixin,
+    ModelViewMixin,
+    MultiObjectActionMixin,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +103,12 @@ class MapEntityList(BaseListView, ListView):
         perm_create = model.get_permission_codename(mapentity_models.ENTITY_CREATE)
         can_add = user_has_perm(self.request.user, perm_create)
         context["can_add"] = can_add
+        perm_update = model.get_permission_codename(mapentity_models.ENTITY_UPDATE)
+        can_edit = user_has_perm(self.request.user, perm_update)
+        context["can_edit"] = can_edit
+        perm_delete = model.get_permission_codename(mapentity_models.ENTITY_DELETE)
+        can_delete = user_has_perm(self.request.user, perm_delete)
+        context["can_delete"] = can_delete
         perm_export = model.get_permission_codename(mapentity_models.ENTITY_FORMAT_LIST)
         can_export = user_has_perm(self.request.user, perm_export)
         context["can_export"] = can_export
@@ -102,11 +120,7 @@ class MapEntityList(BaseListView, ListView):
 
 
 class MapEntityFormat(BaseListView, ListView):
-    """
-
-    Export the list to a particular format.
-
-    """
+    """Export the list to a particular format."""
 
     DEFAULT_FORMAT = "csv"
 
@@ -328,9 +342,7 @@ else:
 
 
 class Convert(View):
-    """
-    A proxy view to conversion server.
-    """
+    """A proxy view to conversion server."""
 
     format = "pdf"
     http_method_names = ["get"]
@@ -407,6 +419,133 @@ class DocumentConvert(Convert, DetailView):
 """
 
 
+class MapEntityMultiDelete(ModelViewMixin, MultiObjectActionMixin, ListView):
+    def get_pks(self):
+        pks = self.request.GET.get("pks", None)
+        if pks:
+            return pks.split(",")
+        return None
+
+    def get_queryset(self):
+        return self.model.objects.filter(pk__in=self.get_pks())
+
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_MULTI_DELETE
+
+    def get_template_names(self):
+        return ["mapentity/mapentity_multi_delete_confirmation.html"]
+
+    def get_title(self):
+        return _("Delete selected %(model)s") % {"model": self.model._meta.model_name}
+
+    def get_success_url(self):
+        return self.get_model().get_list_url()
+
+    def post(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        queryset.delete()
+        messages.success(
+            self.request,
+            _("%(count)d items deleted") % {"count": self.get_queryset().count()},
+        )
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context["nb_objects"] = self.get_queryset().count()
+        return context
+
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+
+class MapEntityMultiUpdate(ModelViewMixin, MultiObjectActionMixin, FormMixin, ListView):
+    def get_pks(self):
+        pks = self.request.GET.get("pks", None)
+        if pks:
+            return pks.split(",")
+        return None
+
+    def get_queryset(self):
+        return self.model.objects.filter(pk__in=self.get_pks())
+
+    @classmethod
+    def get_entity_kind(cls):
+        return mapentity_models.ENTITY_MULTI_UPDATE
+
+    def get_template_names(self):
+        return ["mapentity/mapentity_multi_update_form.html"]
+
+    def get_title(self):
+        return _("Update selected %(model)s") % {"model": self.model._meta.model_name}
+
+    def get_success_url(self):
+        return self.get_model().get_list_url()
+
+    def post(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        form = self.get_form(data=request.POST)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        queryset = self.get_queryset()
+
+        cleaned_data = form.cleaned_data
+
+        modified_rows = queryset.update(**cleaned_data)
+        messages.success(
+            self.request, _("%(count)d items updated") % {"count": modified_rows}
+        )
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form"] = self.get_form()
+        context["nb_objects"] = self.get_queryset().count()
+        context["model_name_plural"] = self.model._meta.verbose_name_plural.lower()
+
+        return context
+
+    def get_editable_fields(self):
+        ALLOWED_FIELD_TYPES = (models.BooleanField, models.ForeignKey)
+
+        editable_fields = []
+        for field in self.model._meta.fields:
+            is_valid_type = isinstance(field, ALLOWED_FIELD_TYPES)
+            is_editable = getattr(field, "editable", False)
+            is_not_unique = not getattr(
+                field, "unique", False
+            )  # do not add one to one relation fields
+            is_not_content_type = (
+                getattr(field, "related_model", None) != ContentType
+            )  # do not add genericforeignkey
+
+            if is_valid_type and is_editable and is_not_unique and is_not_content_type:
+                editable_fields.append(field.name)
+
+        return editable_fields
+
+    def get_form(self, data=None):
+        _model = self.model
+
+        class MultiUpdateForm(BaseMultiUpdateForm):
+            class Meta:
+                model = _model
+                fields = self.get_editable_fields()
+
+        form = MultiUpdateForm(data=data)
+        return form
+
+    @view_permission_required(login_url=mapentity_models.ENTITY_LIST)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+
 class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
     @classmethod
     def get_entity_kind(cls):
@@ -436,6 +575,15 @@ class MapEntityCreate(ModelViewMixin, FormViewMixin, CreateView):
 
     def form_invalid(self, form):
         messages.error(self.request, _("Your form contains errors"))
+        if any(form.errors.get(field) for field in form.geomfields):
+            for field in form.geomfields:
+                if field in form.errors:
+                    messages.error(
+                        self.request,
+                        _("Error in geometry field '%(field)s': %(error)s")
+                        % {"field": field, "error": escape(form.errors[field])},
+                    )
+
         return super().form_invalid(form)
 
 
@@ -496,6 +644,88 @@ class MapEntityDetail(ModelViewMixin, DetailView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
+    def _find_form_class(self):
+        """Find the MapEntityForm class for this model by scanning the app's views module."""
+        model = self.get_model()
+        try:
+            views_module_name = re.sub(r"models.*", "views", model.__module__)
+            views_module = import_module(views_module_name)
+        except (ImportError, AttributeError):
+            return None
+
+        for name, view in inspect.getmembers(views_module):
+            if inspect.isclass(view) and issubclass(view, MapEntityCreate):
+                try:
+                    view_model = view.model or (view.queryset and view.queryset.model)
+                except AttributeError:
+                    continue
+                if (
+                    view_model is model
+                    and hasattr(view, "form_class")
+                    and view.form_class
+                ):
+                    return view.form_class
+        return None
+
+    def _get_extra_geometries(self):
+        """
+        Extract secondary geometry fields (with custom_icon) from the form class.
+        Returns a list of dicts: [{"field": "parking", "custom_icon": "<svg...>", "geojson": {...}}, ...]
+        """
+        form_class = self._find_form_class()
+        if not form_class:
+            return []
+
+        # Get geomfields from form class
+        geomfields = getattr(form_class, "geomfields", None)
+        if not geomfields or len(geomfields) <= 1:
+            return []
+
+        # The primary geom field is the first one (or "geom")
+        primary_field = geomfields[0] if geomfields else "geom"
+
+        # Get custom_icon info from widget attrs in Meta.widgets
+        meta = getattr(form_class, "Meta", None)
+        widgets = getattr(meta, "widgets", {}) if meta else {}
+
+        extra_geoms = []
+        obj = self.object
+        for field_name in geomfields:
+            if field_name == primary_field:
+                continue
+
+            # Check if this field has a custom_icon widget
+            widget = widgets.get(field_name)
+            custom_icon = None
+            if widget and hasattr(widget, "attrs"):
+                from ..widgets import _resolve_custom_icon
+
+                custom_icon = _resolve_custom_icon(widget.attrs.get("custom_icon"))
+
+            # Get the geometry value from the object
+            geom_value = getattr(obj, field_name, None)
+            if geom_value is None:
+                continue
+
+            # Convert to GeoJSON in API_SRID (4326)
+            from ..settings import API_SRID
+
+            if isinstance(geom_value, GEOSGeometry):
+                geom_value.transform(API_SRID)
+                geojson = json.loads(geom_value.geojson)
+            else:
+                continue
+
+            extra_geoms.append(
+                {
+                    "field": field_name,
+                    "custom_icon": custom_icon or "",
+                    "geojson": geojson,
+                }
+            )
+
+        return extra_geoms
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         logentries_max = app_settings["ACTION_HISTORY_LENGTH"]
@@ -521,10 +751,21 @@ class MapEntityDetail(ModelViewMixin, DetailView):
         context["template_attributes"] = self.template_attributes
         context["mapentity_weasyprint"] = app_settings["MAPENTITY_WEASYPRINT"]
         if "context" in self.request.GET:
-            mapcontext = json.loads(self.request.GET["context"])
+            mapcontext = json.loads(
+                self.request.GET["context"]
+            )  # se souvenir de ceci , cela pourrait bien posé problème car ces derniers n'existerait sürement plus à l'heure actuelle
             if "mapsize" in mapcontext:
                 context["mapwidth"] = int(mapcontext["mapsize"]["width"])
                 context["mapheight"] = int(mapcontext["mapsize"]["height"])
+
+        # Extra geometries for multi-geom models (secondary fields with custom_icon)
+        try:
+            extra_geometries = self._get_extra_geometries()
+        except Exception:
+            extra_geometries = []
+        context["extra_geometries_json"] = (
+            json.dumps(extra_geometries) if extra_geometries else ""
+        )
 
         return context
 

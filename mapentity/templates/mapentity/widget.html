@@ -1,0 +1,200 @@
+{% load i18n static %}
+{% if not target_map %}
+<style>
+    {% block map_css %}
+    #{{ id_map }} {
+        width: 100%;
+        height: 100%;
+    }
+    {% if not display_raw %}
+    #{{ id }} {
+        display: none;
+    }
+    {% endif %}
+    {% endblock map_css %}
+</style>
+
+{% block map %}
+
+<div id="{{ id_map }}" class="maplibre-map"></div>
+
+{% endblock map %}
+{% endif %}
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const fieldId = '{{ id }}';
+        const options = {
+            modifiable: '{{ modifiable|yesno:"true,false" }}',
+            geomType: {{ geom_type_json|safe }},
+            {% if allowed_types_json %}
+            allowedTypes: {{ allowed_types_json|safe }},
+            {% endif %}
+        };
+        {% if custom_icon %}
+        options.customIcon = `{{ custom_icon|safe }}`;
+        {% endif %}
+        {% if field_label %}
+        options.fieldLabel = `{{ field_label|escapejs }}`;
+        {% endif %}
+        {% if snapping_config %}
+        options.snappingConfig = JSON.parse('{{ snapping_config|escapejs }}');
+        {% endif %}
+
+        const targetMapId = '{{ target_map|default:"" }}';
+
+        if (targetMapId) {
+            // Se branche sur une carte existante définie par target_map
+            window.addEventListener('map:init', function (e) {
+                if (e.detail.fieldId === 'id_' + targetMapId) {
+                    const sharedMap = e.detail.map;
+                    new MaplibreGeometryField(sharedMap, fieldId, options);
+                }
+            });
+        } else {
+            // Ce champ est responsable de créer la carte
+            const mapId = '{{ id_map }}';
+            const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES, MAX_ZOOM } = window.SETTINGS.map.maplibreConfig;
+            const bounds = [BOUNDS[0], BOUNDS[1]];
+
+            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
+            // Créer un layerManager dédié au widget (pas le singleton de la carte principale)
+            const layerManager = Object.create(MaplibreLayerManager.prototype);
+            layerManager.layers = {
+                baseLayers: {},
+                overlays: {},
+                lazyOverlays: {},
+                layerGroups: {}
+            };
+            layerManager.restoredContext = null;
+            layerManager._map = null;
+            layerManager._eventListeners = [];
+
+            map.getMap().on('load', async function () {
+                window.mapentity_map = map.getMap();
+                layerManager.initialize(map.getMap());
+
+                // Chargement des base layers en premier depuis les settings
+                const baseLayersData = window.SETTINGS.map?.baseLayers || {};
+                const { base_layers, overlay_layers } = baseLayersData;
+
+                if (base_layers) {
+                    for (const layer of base_layers) {
+                        await layerManager.addLayerFromUrl(layer.name, {
+                            id: 'mapbox-base-' + layer.slug,
+                            url: layer.url,
+                            isBaseLayer: true,
+                            attribution: layer.attribution || ''
+                        });
+                    }
+                }
+                if (overlay_layers) {
+                    for (const layer of overlay_layers) {
+                        await layerManager.addLayerFromUrl(layer.name, {
+                            id: 'mapbox-overlay-' + layer.slug,
+                            url: layer.url,
+                            isBaseLayer: false,
+                            attribution: layer.attribution || ''
+                        });
+                    }
+                }
+
+                // Ajout de la couche d’objets contextuels
+                const modelname = document.body.getAttribute('data-modelname');
+                const objects_verbose_name = document.body.getAttribute('data-objectsname');
+                const layerUrl = window.SETTINGS.urls.layer.replace(/modelname/g, modelname);
+                const tilejsonUrl = window.SETTINGS.urls.tilejson ? window.SETTINGS.urls.tilejson.replace(/modelname/g, modelname) : undefined;
+                const style = window.SETTINGS.map.styles.others;
+                const objectsLayer = new MaplibreObjectsLayer(null, {
+                    style: typeof style === "function" ? {} : style,
+                    modelname: modelname,
+                    readonly: true,
+                    nameHTML: '<span style="color:' + style['color'] + ';">&#x25A3;</span>&nbsp;' + objects_verbose_name,
+                    category: '{% trans "Objects" %}',
+                    dataUrl: layerUrl,
+                    tilejsonUrl: tilejsonUrl,
+                    primaryKey: generateUniqueId(),
+                    isLazy: false,
+                });
+                // Override the singleton layerManager for this objectsLayer
+                objectsLayer.layerManager = layerManager;
+                objectsLayer.initialize(map.getMap());
+
+                // Initialize additional layers
+                window.SETTINGS.layers.forEach((model) => {
+                    const nameHTML = model.name;
+                    const additionalModelname = model.id;
+                    const category = model.category;
+                    const additionalLayerUrl = model.url;
+                    const additionalTilejsonUrl = model.tilejsonUrl;
+
+                    let additionalStyle = window.SETTINGS.map.styles[additionalModelname] ?? window.SETTINGS.map.styles['others'];
+                    let primaryKey = generateUniqueId();
+
+                    if (additionalModelname !== modelname) {
+                        const additionalObjectsLayer = new MaplibreObjectsLayer(null, {
+                            style: additionalStyle,
+                            modelname: additionalModelname,
+                            readonly: true,
+                            nameHTML: nameHTML,
+                            category: category,
+                            primaryKey: primaryKey,
+                            dataUrl: additionalLayerUrl,
+                            tilejsonUrl: additionalTilejsonUrl,
+                            isLazy: true,
+                            displayPopup: true,
+                        });
+
+                        additionalObjectsLayer.layerManager = layerManager;
+                        additionalObjectsLayer.initialize(map.getMap());
+                        additionalObjectsLayer.registerLazyLayer(additionalModelname, category, nameHTML, primaryKey, additionalLayerUrl);
+                    }
+                });
+
+                // Initialisation du champ de géométrie
+                new MaplibreGeometryField(map.getMap(), fieldId, options);
+
+                // Notifier les autres champs géométriques de cette carte
+                window.dispatchEvent(new CustomEvent('map:init', {
+                    detail: {
+                        map: map.getMap(),
+                        fieldId: fieldId,
+                        options: options,
+                    }
+                }));
+
+                const layerControl = new MaplibreLayerControl(layerManager);
+                map.getMap().addControl(layerControl, 'top-right');
+
+                // Restauration du contexte pour le widget
+                const mapentityContext = new MaplibreMapentityContext(bounds, layerManager);
+                const mapViewContext = getURLParameter("context");
+                if (mapViewContext) {
+                    layerManager.restoredContext = { restoredFromUrl: true };
+                }
+                mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
+                    prefix: 'widget-' + fieldId,
+                });
+
+                map.getMap().addControl(new MaplibreFileLayerControl({
+                    layerOptions: {
+                        style: window.SETTINGS.map.styles.filelayer,
+                    }
+                }), 'top-left');
+                map.getMap().addControl(new MaplibreResetViewControl(bounds), 'top-left');
+
+                // chargement des couches
+                if (tilejsonUrl) {
+                    objectsLayer.loadMVT(tilejsonUrl);
+                } else {
+                    objectsLayer.load(layerUrl);
+                }
+
+
+            });
+
+        }
+    });
+</script>
+
+{% if display_raw %}<p>Geometry:</p>{% endif %}
+<textarea id="{{ id }}" class="required" cols="150" rows="10" name="{{ name }}" style="display: none;">{{ serialized }}</textarea>

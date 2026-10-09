@@ -37,7 +37,7 @@ class ValueListTest(TestCase):
             out,
             f"""
                              <ul><li class="hoverable" data-modelname="dummymodel" data-pk="{obj.pk}">
-                             <a href="/dummymodel/1/">blah</a></li></ul>""",
+                             <a href="/dummymodel/{obj.pk}/">blah</a></li></ul>""",
         )
 
     def test_can_specify_an_enumeration4(self):
@@ -99,7 +99,7 @@ class ValueTableTest(TestCase):
         self.assertHTMLEqual(
             out,
             f"""
-                             <table class="table"><thead><tr><th class="name">name</th></tr>
+                             <table class="table"><thead><tr><th class="name">Name</th></tr>
                              </thead><tbody><tr class="hoverable" data-modelname="dummymodel"
                               data-pk="{dummy.pk}"><td><a href="/dummymodel/{dummy.pk}/">
                               foo</a></td></tr></tbody></table>""",

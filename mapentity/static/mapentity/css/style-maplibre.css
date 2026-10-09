@@ -1,0 +1,102 @@
+/* Layer Switcher Styles */
+.layer-switcher-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 255px;
+    padding: 10px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+    z-index: 9999999 !important;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+/* Style pour les labels */
+.layer-switcher-menu label {
+    display: block;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+.layer-switcher-btn {
+    background: white;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.layer-entry {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Responsive: petits écrans */
+@media screen and (max-width: 768px) {
+    .layer-switcher-menu {
+        max-height: 70vh;
+        font-size: 16px;
+        padding: 12px;
+    }
+}
+
+/* Mesure controller */
+
+.measure-control-btn {
+    background: white;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.measure-control-btn img {
+    vertical-align: middle;
+}
+
+.custom-popup .maplibregl-popup-content {
+    background: rgba(255, 255, 255, 0.9); /* Fond blanc semi-transparent */
+    color: black;                         /* Texte noir */
+    font-weight: bold;                    /* Gras */
+    font-size: 14px;                      /* Taille du texte ajustée */
+    padding: 6px 10px;                    /* Espacement interne */
+    border-radius: 6px;                   /* Coins arrondis */
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.6); /* Légère ombre */
+    /*text-align: center;                   !* Centrage du texte *!*/
+    white-space: nowrap;                 /* Empêche les retours à la ligne */
+    border: 2px solid rgba(0, 0, 0, 0.3); /* Contour fin */
+    margin-left: 8px; /* Décalage pour éviter le chevauchement */
+}
+
+/* Supprimer le petit triangle du popup */
+.custom-popup .maplibregl-popup-tip {
+    display: none !important;
+}
+
+
+.custom-popup .maplibregl-popup-tip {
+    border-top-color: rgba(255, 255, 255, 0.9); /* Pointe assortie au fond */
+}
+
+
+.measure-control-btn-active {
+    background-color: #007cbf;
+    border: 1px solid #005a94;
+    box-shadow: 0 0 0 2px rgba(0, 123, 191, 0.4);
+}
+
+/* Custom tooltip */
+.custom-tooltip {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 9999;
+    white-space: nowrap;
+    pointer-events: none;
+}

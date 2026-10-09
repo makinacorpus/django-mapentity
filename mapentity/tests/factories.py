@@ -18,7 +18,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = get_user_model()
 
-    username = factory.Faker("user_name")
+    username = factory.Sequence("geotrek_user{0}".format)
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
     email = factory.Faker("email")
