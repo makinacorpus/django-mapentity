@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+8.17.4     (2026-10-19)
+-----------------------
+
+**Bug fixes**
+
+- Fix override queryset in MapentityForm
+
+
 8.17.3     (2026-06-30)
 -----------------------
 
