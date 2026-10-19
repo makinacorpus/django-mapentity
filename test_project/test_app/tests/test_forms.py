@@ -124,6 +124,7 @@ class MapEntityFormTest(TestCase):
         self.assertTrue(
             isinstance(form.fields["located_in"].widget, autocomplete.ListSelect2)
         )
+
         self.assertCountEqual(
             form.fields["located_in"].queryset,
             [self.city_a],
