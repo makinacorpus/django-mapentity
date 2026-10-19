@@ -223,6 +223,7 @@ class MapEntityForm(TranslatedModelForm):
                         form_field.queryset = form_field.queryset
                     else:
                         form_field.queryset = remote_queryset(model_field)
+                    break
 
             # manage extra fields that are not in the model
             if model_field is None:

@@ -9,7 +9,7 @@ from mapentity.settings import app_settings
 from ..models import City, ComplexModel, DummyModel, ManikinModel, Tag
 
 
-class CustomQuerysetGeopointForm(MapEntityForm):
+class CustomQuerysetComplexModelForm(MapEntityForm):
     located_in = forms.ModelChoiceField(
         queryset=City.objects.filter(name__startswith="A"),
         required=False,
@@ -60,7 +60,7 @@ class ComplexmodelForm(MapEntityForm):
 class MapEntityFormTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.sample_o
+        cls.sample_object = DummyModel.objects.create()
         cls.city_a = City.objects.create(name="Angers")
         cls.city_b = City.objects.create(name="Bordeaux")
         cls.tag_t = Tag.objects.create(label="Tag1")
@@ -108,7 +108,7 @@ class MapEntityFormTest(TestCase):
 
     def test_default_fk_and_m2m_querysets(self):
         # Test that undeclared FK and M2M fields use remote_queryset by default
-        form = ComplexModelForm()
+        form = ComplexmodelForm()
         self.assertCountEqual(
             form.fields["located_in"].queryset,
             [self.city_a, self.city_b],
@@ -120,11 +120,10 @@ class MapEntityFormTest(TestCase):
 
     def test_declared_fk_and_m2m_querysets_not_overridden(self):
         # Test that custom querysets on declared FK and M2M fields are preserved
-        form = CustomQuerysetGeopointForm()
+        form = CustomQuerysetComplexModelForm()
         self.assertTrue(
             isinstance(form.fields["located_in"].widget, autocomplete.ListSelect2)
         )
-
         self.assertCountEqual(
             form.fields["located_in"].queryset,
             [self.city_a],
