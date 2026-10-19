@@ -196,7 +196,13 @@ class MapEntityForm(TranslatedModelForm):
                 if isinstance(model_field, mtype):
                     attrs = _build_select2_attrs(form_field)
                     form_field.widget = widget_cls(attrs=attrs)
-                    form_field.queryset = remote_queryset(model_field)
+                    if (
+                        name in self.declared_fields
+                        and getattr(form_field, "queryset", None) is not None
+                    ):
+                        form_field.queryset = form_field.queryset
+                    else:
+                        form_field.queryset = remote_queryset(model_field)
                     break
 
             # manage extra fields that are not in the model
