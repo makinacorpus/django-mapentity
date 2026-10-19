@@ -1,9 +1,12 @@
 CHANGELOG
 =========
 
-9.0.3+dev      (XXXX-XX-XX)
+9.0.4          (2026-10-19)
 ---------------------------
 
+**Bug fixes**
+
+- Fix override queryset in MapentityForm
 
 
 9.0.3      (2026-07-30)
