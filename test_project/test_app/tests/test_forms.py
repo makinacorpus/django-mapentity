@@ -122,6 +122,7 @@ class MapEntityFormTest(TestCase):
     def test_declared_fk_and_m2m_querysets_not_overridden(self):
         # Test that custom querysets on declared FK and M2M fields are preserved
         form = CustomQuerysetGeopointForm()
+
         self.assertTrue(
             isinstance(form.fields["located_in"].widget, autocomplete.ListSelect2)
         )
