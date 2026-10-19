@@ -6,7 +6,7 @@ from django.test.utils import override_settings
 from mapentity.forms import BaseMultiUpdateForm, MapEntityForm
 from mapentity.settings import app_settings
 
-from ..models import DummyModel, GeoPoint, ManikinModel
+from ..models import City, DummyModel, GeoPoint, ManikinModel, Tag
 
 
 class DummyForm(MapEntityForm):
@@ -37,10 +37,34 @@ class GeopointForm(MapEntityForm):
         ]
 
 
+class CustomQuerysetGeopointForm(MapEntityForm):
+    located_in = forms.ModelChoiceField(
+        queryset=City.objects.filter(name__startswith="A"),
+        required=False,
+    )
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.filter(label__startswith="T"),
+        required=False,
+    )
+
+    class Meta:
+        model = GeoPoint
+        fields = [
+            "located_in",
+            "road",
+            "name",
+            "tags",
+        ]
+
+
 class MapEntityFormTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.sample_object = DummyModel.objects.create()
+        cls.city_a = City.objects.create(name="Angers")
+        cls.city_b = City.objects.create(name="Bordeaux")
+        cls.tag_t = Tag.objects.create(label="Tag1")
+        cls.tag_o = Tag.objects.create(label="Other")
 
     def test_can_delete_actions(self):
         delete_url = self.sample_object.get_delete_url()
@@ -81,6 +105,36 @@ class MapEntityFormTest(TestCase):
         self.assertIn("road", form.fields)
         self.assertTrue(
             isinstance(form.fields["road"].widget, autocomplete.ListSelect2)
+        )
+
+    def test_default_fk_and_m2m_querysets(self):
+        # Test that undeclared FK and M2M fields use remote_queryset by default
+        form = GeopointForm()
+        self.assertCountEqual(
+            form.fields["located_in"].queryset,
+            [self.city_a, self.city_b],
+        )
+        self.assertCountEqual(
+            form.fields["tags"].queryset,
+            [self.tag_t, self.tag_o],
+        )
+
+    def test_declared_fk_and_m2m_querysets_not_overridden(self):
+        # Test that custom querysets on declared FK and M2M fields are preserved
+        form = CustomQuerysetGeopointForm()
+        self.assertTrue(
+            isinstance(form.fields["located_in"].widget, autocomplete.ListSelect2)
+        )
+        self.assertCountEqual(
+            form.fields["located_in"].queryset,
+            [self.city_a],
+        )
+        self.assertTrue(
+            isinstance(form.fields["tags"].widget, autocomplete.Select2Multiple)
+        )
+        self.assertCountEqual(
+            form.fields["tags"].queryset,
+            [self.tag_t],
         )
 
     def test_ModelMultipleChoiceField_widget(self):
