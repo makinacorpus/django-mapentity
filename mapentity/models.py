@@ -65,7 +65,7 @@ ENTITY_KINDS = (
 )
 
 ENTITY_PERMISSION_CREATE = "add"
-ENTITY_PERMISSION_READ = "read"
+ENTITY_PERMISSION_VIEW = "view"
 ENTITY_PERMISSION_UPDATE = "change"
 ENTITY_PERMISSION_DELETE = "delete"
 ENTITY_PERMISSION_EXPORT = "export"
@@ -73,7 +73,7 @@ ENTITY_PERMISSION_UPDATE_GEOM = "change_geom"
 
 ENTITY_PERMISSIONS = (
     ENTITY_PERMISSION_CREATE,
-    ENTITY_PERMISSION_READ,
+    ENTITY_PERMISSION_VIEW,
     ENTITY_PERMISSION_UPDATE,
     ENTITY_PERMISSION_UPDATE_GEOM,
     ENTITY_PERMISSION_DELETE,
@@ -83,9 +83,9 @@ ENTITY_PERMISSIONS = (
 
 class MapEntityRestPermissions(rest_permissions.DjangoModelPermissions):
     perms_map = {
-        "GET": ["%(app_label)s.read_%(model_name)s"],
-        "OPTIONS": ["%(app_label)s.read_%(model_name)s"],
-        "HEAD": ["%(app_label)s.read_%(model_name)s"],
+        "GET": ["%(app_label)s.view_%(model_name)s"],
+        "OPTIONS": ["%(app_label)s.view_%(model_name)s"],
+        "HEAD": ["%(app_label)s.view_%(model_name)s"],
         "POST": ["%(app_label)s.add_%(model_name)s"],
         "PUT": ["%(app_label)s.change_%(model_name)s"],
         "PATCH": ["%(app_label)s.change_%(model_name)s"],
@@ -182,11 +182,11 @@ class BaseMapEntityMixin(DuplicateMixin, models.Model):
             ENTITY_MULTI_UPDATE: ENTITY_PERMISSION_UPDATE,
             ENTITY_DELETE: ENTITY_PERMISSION_DELETE,
             ENTITY_MULTI_DELETE: ENTITY_PERMISSION_DELETE,
-            ENTITY_DETAIL: ENTITY_PERMISSION_READ,
-            ENTITY_LIST: ENTITY_PERMISSION_READ,
-            ENTITY_FILTER: ENTITY_PERMISSION_READ,
-            ENTITY_VIEWSET: ENTITY_PERMISSION_READ,
-            ENTITY_MARKUP: ENTITY_PERMISSION_READ,
+            ENTITY_DETAIL: ENTITY_PERMISSION_VIEW,
+            ENTITY_LIST: ENTITY_PERMISSION_VIEW,
+            ENTITY_FILTER: ENTITY_PERMISSION_VIEW,
+            ENTITY_VIEWSET: ENTITY_PERMISSION_VIEW,
+            ENTITY_MARKUP: ENTITY_PERMISSION_VIEW,
             ENTITY_FORMAT_LIST: ENTITY_PERMISSION_EXPORT,
             ENTITY_MAPIMAGE: ENTITY_PERMISSION_EXPORT,
             ENTITY_DOCUMENT: ENTITY_PERMISSION_EXPORT,
@@ -432,7 +432,6 @@ class LogEntry(BaseMapEntityMixin, BaseLogEntry):
     class Meta:
         proxy = True
         app_label = "mapentity"
-        permissions = (("read_logentry", "Can read log entries"),)
 
     def __str__(self):
         return f"{self.action_time} - {self.user} - {self.object_display} - {self.action_flag_display}"

@@ -65,7 +65,7 @@ class EntityAttachmentTestCase(TestCase):
     def test_list_attachments_in_details(self):
         self.createAttachment(self.object)
         self.user.user_permissions.add(
-            Permission.objects.get(codename="read_dummymodel")
+            Permission.objects.get(codename="view_dummymodel")
         )
         self.user.user_permissions.add(
             Permission.objects.get(codename="read_attachment")

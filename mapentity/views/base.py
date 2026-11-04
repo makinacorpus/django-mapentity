@@ -57,7 +57,7 @@ class ServeAttachment(View):
             if not request.user.has_perm(get_attachment_permission("read_attachment")):
                 raise PermissionDenied
             if not request.user.has_perm(
-                f"{obj._meta.app_label}.read_{obj._meta.model_name}"
+                f"{obj._meta.app_label}.view_{obj._meta.model_name}"
             ):
                 raise PermissionDenied
 

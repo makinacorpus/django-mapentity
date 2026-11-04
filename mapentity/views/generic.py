@@ -209,7 +209,7 @@ class MapEntityMapImage(ModelViewMixin, DetailView):
             if not self.request.user.is_authenticated:
                 raise PermissionDenied
             if not self.request.user.has_perm(
-                f"{obj._meta.app_label}.read_{obj._meta.model_name}"
+                f"{obj._meta.app_label}.view_{obj._meta.model_name}"
             ):
                 raise PermissionDenied
         obj.prepare_map_image(self.request.build_absolute_uri("/"))

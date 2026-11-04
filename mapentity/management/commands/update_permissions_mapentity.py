@@ -8,7 +8,11 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
-from mapentity.registry import create_mapentity_model_permissions, registry
+from mapentity.registry import (
+    create_mapentity_model_permissions,
+    migrate_permissions_to_view,
+    registry,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +37,9 @@ class Command(BaseCommand):
         for model in registry.registry.keys():
             if not model._meta.abstract:
                 create_mapentity_model_permissions(model)
+
+        logger.info("Migrate legacy read permissions")
+        migrate_permissions_to_view(options.get("database", "default"))
 
         logger.info("Done.")
 
