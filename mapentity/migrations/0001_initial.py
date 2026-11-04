@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             options={
                 "proxy": True,
             },
-            bases=(mapentity.models.MapEntityMixin, "admin.logentry"),
+            bases=(mapentity.models.BaseMapEntityMixin, "admin.logentry"),
             managers=[
                 ("objects", django.contrib.admin.models.LogEntryManager()),
             ],

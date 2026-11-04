@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+8.17.5+dev (XXXX-XX-XX)
+-----------------------
+
+**Breaking changes**
+
+- Use standard Django `view_<model>` model permission instead of custom `read_<model>`. Provide a data migration to reassign permissions for users and groups and delete legacy `read_<model>` permissions.
+
+
 8.17.4     (2026-10-19)
 -----------------------
 

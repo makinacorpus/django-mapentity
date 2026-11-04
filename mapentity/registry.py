@@ -318,3 +318,116 @@ def create_mapentity_model_permissions(model):
 
         except Exception:
             pass
+
+
+def migrate_permissions_to_view(db_alias=DEFAULT_DB_ALIAS):
+    """
+    Replace legacy read_<model> permissions with standard view_<model> permissions
+    for all MapEntity models, reassign them on groups and users, and delete the legacy permissions.
+    """
+    from django.apps import apps as global_apps
+
+    perms_manager = Permission.objects.using(db_alias)
+    ct_manager = ContentType.objects.using(db_alias)
+
+    target_models = set()
+    for model in global_apps.get_models():
+        if issubclass(
+            model,
+            (mapentity_models.MapEntityMixin, mapentity_models.BaseMapEntityMixin),
+        ):
+            target_models.add(model)
+
+    try:
+        from importlib import import_module
+
+        from django.conf import settings
+
+        if hasattr(settings, "ROOT_URLCONF") and settings.ROOT_URLCONF:
+            import_module(settings.ROOT_URLCONF)
+            for model in registry.registry.keys():
+                target_models.add(model)
+    except Exception:
+        pass
+
+    for model in target_models:
+        model_name = model._meta.model_name
+        app_label = model._meta.app_label
+
+        content_types = set(ct_manager.filter(app_label=app_label, model=model_name))
+        if (
+            model._meta.proxy
+            and hasattr(model._meta, "proxy_for_model")
+            and model._meta.proxy_for_model
+        ):
+            concrete_opts = model._meta.proxy_for_model._meta
+            for ct in ct_manager.filter(
+                app_label=concrete_opts.app_label, model=concrete_opts.model_name
+            ):
+                content_types.add(ct)
+
+        for ct in content_types:
+            read_codename = f"read_{model_name}"
+            read_perm = perms_manager.filter(
+                content_type=ct, codename=read_codename
+            ).first()
+            if not read_perm:
+                continue
+
+            view_codename = f"view_{model_name}"
+            view_perm, _ = perms_manager.get_or_create(
+                content_type=ct,
+                codename=view_codename,
+                defaults={"name": f"Can view {model._meta.verbose_name_raw}"[:255]},
+            )
+
+            for group in read_perm.group_set.using(db_alias).all():
+                group.permissions.add(view_perm)
+
+            for user in read_perm.user_set.using(db_alias).all():
+                user.user_permissions.add(view_perm)
+
+            read_perm.delete()
+
+    registered_models = registry.registry.keys()
+    for perm in perms_manager.filter(codename__startswith="read_"):
+        ct = perm.content_type
+        if perm.codename != f"read_{ct.model}":
+            continue
+        model = ct.model_class()
+        is_mapentity = (
+            (
+                model
+                and issubclass(
+                    model,
+                    (
+                        mapentity_models.MapEntityMixin,
+                        mapentity_models.BaseMapEntityMixin,
+                    ),
+                )
+            )
+            or (model and model in registered_models)
+            or (ct.app_label == "mapentity" and ct.model == "logentry")
+        )
+        if not is_mapentity:
+            continue
+
+        view_codename = f"view_{ct.model}"
+        name = (
+            f"Can view {model._meta.verbose_name_raw}"
+            if model
+            else f"Can view {ct.model}"
+        )
+        view_perm, _ = perms_manager.get_or_create(
+            content_type=ct,
+            codename=view_codename,
+            defaults={"name": name[:255]},
+        )
+
+        for group in perm.group_set.using(db_alias).all():
+            group.permissions.add(view_perm)
+
+        for user in perm.user_set.using(db_alias).all():
+            user.user_permissions.add(view_perm)
+
+        perm.delete()

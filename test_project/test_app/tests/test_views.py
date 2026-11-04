@@ -216,7 +216,7 @@ class AttachmentTest(BaseTest):
         self.login()
         perm1 = Permission.objects.get(codename="read_attachment")
         self.user.user_permissions.add(perm1)
-        perm2 = Permission.objects.get(codename="read_dummymodel")
+        perm2 = Permission.objects.get(codename="view_dummymodel")
         self.user.user_permissions.add(perm2)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -701,7 +701,7 @@ class ViewPermissionsTest(BaseTest):
 
     def test_views_name_depend_on_model(self):
         view = DummyList()
-        self.assertEqual(view.get_view_perm(), "test_app.read_dummymodel")
+        self.assertEqual(view.get_view_perm(), "test_app.view_dummymodel")
 
     def test_unauthorized_list_view_redirects_to_login(self):
         response = self.client.get("/dummymodel/list/")
