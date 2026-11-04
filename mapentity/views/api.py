@@ -55,7 +55,7 @@ class MapEntityViewSet(BaseTileJSONView, BaseVectorTileView, viewsets.ModelViewS
 
     def get_view_perm(self):
         """use by view_permission_required decorator"""
-        return self.model.get_permission_codename("layer")
+        return self.model.get_permission_codename(self.get_entity_kind())
 
     def get_serializer_class(self):
         """Use specific Serializer for GeoJSON"""

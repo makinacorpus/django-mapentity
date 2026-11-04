@@ -496,7 +496,7 @@ class FormModifiablePermissionTest(TestCase):
         cls.user = User.objects.create_user("nogeomperm", "ng@test.com", "password")
         # Give basic read/change permissions but NOT update_geom
         ct = ContentType.objects.get_for_model(DummyModel)
-        for codename in ["read_dummymodel", "change_dummymodel"]:
+        for codename in ["view_dummymodel", "change_dummymodel"]:
             perm, _ = Permission.objects.get_or_create(
                 codename=codename, content_type=ct, defaults={"name": codename}
             )
