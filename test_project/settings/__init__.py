@@ -54,9 +54,12 @@ INSTALLED_APPS = (
     "tinymce",
     "mapbox_baselayer",
     "mapentity",  # Make sure mapentity settings are loaded before leaflet ones
+    "leaflet",
+    "reversion",
     "test_project.test_app",
     "test_project.test_shapes",
     "modeltranslation",
+    "test_project.test_app",
 )
 
 MIDDLEWARE = (

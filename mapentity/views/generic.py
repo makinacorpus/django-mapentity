@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.db.models.fields import GeometryField
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
@@ -56,6 +56,7 @@ from .mixins import (
     ModelViewMixin,
     MultiObjectActionMixin,
 )
+from ..templatetags.mapentity_tags import field_verbose_name
 
 logger = logging.getLogger(__name__)
 
@@ -728,6 +729,78 @@ class MapEntityDetail(ModelViewMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Récupère toutes les versions enregistrées pour cette instance, de la plus récente à la plus ancienne
+        from reversion.models import Version
+
+        # Mapping des champs : nom -> instance du champ
+        model_fields = {
+            f.name: f for f in self.object._meta.get_fields() if hasattr(f, "editable")
+        }
+
+        # Champs éditables uniquement
+        editable_field_names = {name for name, f in model_fields.items() if f.editable}
+        versions = (
+            Version.objects.get_for_object(self.object)
+            .select_related("revision__user")
+            .order_by("-revision__date_created")
+        )
+        history = []
+
+        history = []
+        for i, current in enumerate(versions):
+            previous = versions[i + 1] if (i + 1) < len(versions) else None
+
+            if getattr(current, "is_deleted", False):
+                action = "Suppression"
+            elif previous is None:
+                action = "Création"
+            else:
+                action = "Modification"
+
+            current_data = current.field_dict
+            prev_data = previous.field_dict if previous else {}
+
+            diffs = []
+            if action == "Modification":
+                for field_name, new_val in current_data.items():
+                    if field_name not in editable_field_names:
+                        continue
+
+                    old_val = prev_data.get(field_name)
+                    if old_val != new_val:
+                        field_obj = model_fields.get(field_name)
+
+                        # Détection du champ traduit par modeltranslation
+                        lang = getattr(field_obj, "language", None)
+                        orig_field = getattr(field_obj, "original_field", None)
+
+                        if orig_field and lang:
+                            label = f"{orig_field.verbose_name} [{lang}]"
+                        elif field_obj:
+                            label = field_obj.verbose_name
+                        else:
+                            label = field_name
+
+                        diffs.append(
+                            {
+                                "field": label,
+                                "is_geom": isinstance(field_obj, GeometryField),
+                                "old": old_val,
+                                "new": new_val,
+                            }
+                        )
+
+            history.append(
+                {
+                    "date": current.revision.date_created,
+                    "user": current.revision.user,
+                    "action": action,
+                    "diffs": diffs,
+                }
+            )
+            #raise Exception(history)
+        context["history"] = history
+
         logentries_max = app_settings["ACTION_HISTORY_LENGTH"]
         logentries = LogEntry.objects.filter(
             content_type_id=self.object.get_content_type_id(), object_id=self.object.pk
@@ -785,8 +858,9 @@ class MapEntityFilter(ModelViewMixin, FilterListMixin, FilterView):
     def get_filterset_class(self):
         return self.get_full_filterset()
 
+from reversion.views import RevisionMixin
 
-class MapEntityUpdate(ModelViewMixin, FormViewMixin, UpdateView):
+class MapEntityUpdate(ModelViewMixin, FormViewMixin, RevisionMixin, UpdateView):
     @classmethod
     def get_entity_kind(cls):
         return mapentity_models.ENTITY_UPDATE

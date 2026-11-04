@@ -33,6 +33,7 @@ setup(
         'django-mapbox-baselayer>=1.5.2',
         'django-modeltranslation',
         'django-tinymce>=3',
+        'django-reversion',
         'django-weasyprint',
         'djangorestframework',
         'djangorestframework-gis',
