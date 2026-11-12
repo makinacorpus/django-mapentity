@@ -28,6 +28,14 @@ It uses Bootstrap and leaflet.
 
 [![makinacom](https://github.com/makinacorpus.png)](https://www.makina-corpus.com)
 
+## Thanks to all contributors ❤
+
+<a href="https://github.com/makinacorpus/django-mapentity/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=makinacorpus/django-mapentity" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
+
 ## LICENCE
 
 - BSD New
