@@ -42,7 +42,7 @@ describe('DummyModel Filter and Search', () => {
     cy.get('table tbody tr').should('have.length.greaterThan', 1);
 
     cy.get('#filters-btn').click();
-    cy.get('#mainfilter').should('be.visible');
+    cy.get('#mainfilter.filter-form-loaded').should('be.visible');
   });
 
   // --- Filter by text input ---
@@ -54,9 +54,11 @@ describe('DummyModel Filter and Search', () => {
       .then((initialRowCount) => {
         cy.log(`Initial row count: ${initialRowCount}`);
 
+        cy.get('#filters-btn').should('have.class', 'btn-info').and('not.have.class', 'btn-warning');
+
         // Open filters
         cy.get('#filters-btn').click();
-        cy.get('#mainfilter').should('be.visible');
+        cy.get('#mainfilter.filter-form-loaded').should('be.visible');
 
         // Type into name filter
         cy.get('#id_name').first().type('test', { delay: 0 });
@@ -66,6 +68,9 @@ describe('DummyModel Filter and Search', () => {
 
         // Wait for table update
         cy.wait('@dummymodelsRequest');
+
+        // Filter button should change color to indicate active filter
+        cy.get('#filters-btn').should('have.class', 'btn-warning').and('not.have.class', 'btn-info');
 
         // Check row count
         cy.get('table tbody tr').should('not.have.length', initialRowCount);
@@ -82,21 +87,27 @@ describe('DummyModel Filter and Search', () => {
         cy.log(`Initial row count: ${initialRowCount}`);
 
         cy.get('#filters-btn').click();
-        cy.get('#mainfilter').should('be.visible');
+        cy.get('#mainfilter.filter-form-loaded').should('be.visible');
 
         // Select multiple tags
         cy.get('#id_tags').select(['Tag 1'], { force: true });
 
+        cy.get('#filters-btn').should('have.class', 'btn-warning').and('not.have.class', 'btn-info');
+
         cy.get('#filter').click();
         cy.wait('@dummymodelsRequest');
 
+        cy.get('#filters-btn').should('have.class', 'btn-warning').and('not.have.class', 'btn-info');
         cy.get('table tbody tr').should('not.have.length', initialRowCount);
       });
   });
 
   // --- Filter by Select2 AJAX search ---
   it('should filter results using a Select2 AJAX filter', { retries: 1 }, () => {
+    cy.intercept('GET', '**/complexmodel/filter/').as('complexmodelFilter');
     cy.intercept('GET', '**/api/complexmodel/drf/complexmodels.datatables*bbox=*').as('complexmodelsRequest');
+    cy.intercept('GET', '**/api/road/drf/roads/autocomplete*').as('roadAutocomplete');
+
     cy.visit('/complexmodel/list/');
     cy.wait('@complexmodelsRequest');
 
@@ -108,18 +119,23 @@ describe('DummyModel Filter and Search', () => {
         cy.log(`Initial row count: ${initialRowCount}`);
 
         cy.get('#filters-btn').click();
-        cy.get('#mainfilter').should('be.visible');
+        cy.wait('@complexmodelFilter');
+        cy.get('#mainfilter.filter-form-loaded').should('be.visible');
 
-        // Open Select2 AJAX dropdown
-        cy.get('#id_road').parent().find('.select2').click()
-        cy.get('#id_road').parent().find('.select2-search__field').first().type('Road 0', { delay: 0 })
+        // Open Select2 AJAX dropdown and search
+        cy.get('#id_road').parent().find('.select2').click();
+        cy.get('.select2-container--open .select2-search__field').type('Road 0', { delay: 0 });
+        cy.wait('@roadAutocomplete');
 
         // Select the AJAX-loaded result
         cy.contains('.select2-results__option', 'Road 0').should('be.visible').click();
 
+        cy.get('#filters-btn').should('have.class', 'btn-warning').and('not.have.class', 'btn-info');
+
         cy.get('#filter').click();
         cy.wait('@complexmodelsRequest');
 
+        cy.get('#filters-btn').should('have.class', 'btn-warning').and('not.have.class', 'btn-info');
         cy.get('table tbody tr').should('not.have.length', initialRowCount);
       });
   });
@@ -134,9 +150,12 @@ describe('DummyModel Filter and Search', () => {
         cy.log(`Initial row count: ${initialRowCount}`);
 
         cy.get('#filters-btn').click();
-        cy.get('#mainfilter').should('be.visible');
+        cy.get('#mainfilter.filter-form-loaded').should('be.visible');
 
         cy.get('#id_name').first().type('test', { delay: 0 });
+        cy.get('#filter').click();
+        cy.wait('@dummymodelsRequest');
+        cy.get('#filters-btn').should('have.class', 'btn-warning').and('not.have.class', 'btn-info');
 
         // Reset filters
         cy.get('#reset').click();
@@ -144,6 +163,7 @@ describe('DummyModel Filter and Search', () => {
         cy.get('#id_name').should('have.value', '');
         cy.wait('@dummymodelsRequest');
 
+        cy.get('#filters-btn').should('have.class', 'btn-info').and('not.have.class', 'btn-warning');
         cy.get('table tbody tr').should('have.length.at.least', initialRowCount);
       });
   });

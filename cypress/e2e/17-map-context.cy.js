@@ -259,12 +259,12 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
 
             // Activate filters
             cy.get('#filters-btn').click()
-            cy.get('#mainfilter').should('be.visible')
+            cy.get('#mainfilter.filter-form-loaded').should('be.visible')
 
             cy.get('#id_name').first().type('geo point')
 
             cy.get('#id_road').parent().find('.select2').click()
-            cy.get('[data-select2-id="38"] .select2-selection--multiple').first().type('Road 0')
+            cy.get('#id_road').parent().find('.select2-search__field').first().type('Road 0')
             cy.contains('.select2-results__option', 'Road 0').should('be.visible').click()
 
             cy.get('#id_located_in').select(['City 1', 'City 3'], { force: true })
@@ -287,7 +287,7 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
 
             // Open filters
             cy.get('#filters-btn').click()
-            cy.get('#mainfilter').should('be.visible')
+            cy.get('#mainfilter.filter-form-loaded').should('be.visible')
 
             cy.get('#id_name').first().should('have.value', 'geo point')
             cy.get('#id_road').parent().find('.select2-selection__choice').should('contain.text', 'Road')
