@@ -698,11 +698,24 @@ class MaplibreObjectsLayer {
      */
     _addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailStrokeColor, sourceLayer) {
         const layerId = `${layerIdBase}-points`;
-        const hoveredStrokeWidth = strokeWidth + 2;
+        const style = this.options.style || {};
         const detailStyle = this.options.detailStyle || {};
-        const detailStrokeWidth = detailStyle.weight ?? strokeWidth;
-        const detailFillOpacity = detailStyle.fillOpacity ?? fillOpacity;
-        const detailStrokeOpacity = detailStyle.opacity ?? strokeOpacity;
+
+        const pointRadius = style.pointRadius ?? style.radius ?? 8;
+        const hoveredPointRadius = style.hoveredPointRadius ?? (pointRadius + 2);
+        const detailPointRadius = detailStyle.pointRadius ?? detailStyle.radius ?? pointRadius;
+
+        const pointStrokeWidth = style.pointWeight ?? 2;
+        const hoveredPointStrokeWidth = pointStrokeWidth + 1;
+        const detailPointStrokeWidth = detailStyle.pointWeight ?? pointStrokeWidth;
+
+        const pointFillOpacity = style.pointFillOpacity ?? 0.3;
+        const hoveredPointFillOpacity = style.pointHoverFillOpacity ?? 0.5;
+        const detailPointFillOpacity = detailStyle.pointFillOpacity ?? 0.4;
+
+        const pointStrokeOpacity = style.pointOpacity ?? style.pointStrokeOpacity ?? 1.0;
+        const detailPointStrokeOpacity = detailStyle.pointOpacity ?? detailStyle.pointStrokeOpacity ?? 1.0;
+
         const layerDef = {
             id: layerId,
             type: 'circle',
@@ -725,9 +738,11 @@ class MaplibreObjectsLayer {
                 ],
                 'circle-opacity': [
                     'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    hoveredPointFillOpacity,
                     ['boolean', ['feature-state', 'selected'], false],
-                    detailFillOpacity,
-                    fillOpacity
+                    detailPointFillOpacity,
+                    pointFillOpacity
                 ],
                 'circle-stroke-color': [
                     'case',
@@ -739,23 +754,27 @@ class MaplibreObjectsLayer {
                 ],
                 'circle-stroke-opacity': [
                     'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    1.0,
                     ['boolean', ['feature-state', 'selected'], false],
-                    detailStrokeOpacity,
-                    strokeOpacity
+                    detailPointStrokeOpacity,
+                    pointStrokeOpacity
                 ],
                 'circle-stroke-width': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
-                    hoveredStrokeWidth,
+                    hoveredPointStrokeWidth,
                     ['boolean', ['feature-state', 'selected'], false],
-                    detailStrokeWidth,
-                    strokeWidth
+                    detailPointStrokeWidth,
+                    pointStrokeWidth
                 ],
                 'circle-radius': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
-                    10,
-                    8
+                    hoveredPointRadius,
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailPointRadius,
+                    pointRadius
                 ]
             }
         });
@@ -1130,6 +1149,12 @@ class MaplibreObjectsLayer {
             ['==', ['geometry-type'], 'Point'],
             ['==', ['geometry-type'], 'MultiPoint']
         ];
+        const style = this.options.style || {};
+        const pointStrokeWidth = style.pointWeight ?? 2;
+        const hoveredPointStrokeWidth = pointStrokeWidth + 1;
+        const hoveredPointRadius = (style.pointRadius ?? style.radius ?? 8) + 2;
+        const hoveredPointFillOpacity = style.pointHoverFillOpacity ?? 0.5;
+
         if (!this._map.getLayer(pointId)) {
             const def = {
                 id: pointId,
@@ -1138,11 +1163,11 @@ class MaplibreObjectsLayer {
                 filter: this._buildFilter(['all', pointGeomFilter, ['==', ['id'], '']]),
                 paint: {
                     'circle-color': '#FF0000',
-                    'circle-opacity': 1.0,
+                    'circle-opacity': hoveredPointFillOpacity,
                     'circle-stroke-color': '#FF0000',
                     'circle-stroke-opacity': 1.0,
-                    'circle-stroke-width': hoveredStrokeWidth,
-                    'circle-radius': 10,
+                    'circle-stroke-width': hoveredPointStrokeWidth,
+                    'circle-radius': hoveredPointRadius,
                 }
             };
             if (sourceLayer) def['source-layer'] = sourceLayer;
