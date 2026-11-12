@@ -32,6 +32,19 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   if (err.message.includes('maplibregl is not defined')) {
     return false
   }
+  // Ignore debug toolbar shadowRoot errors
+  if (err.message.includes('shadowRoot')) {
+    return false
+  }
   // Let other errors fail the test
   return true
+})
+
+// Hide Django Debug Toolbar if present to avoid it covering UI elements
+Cypress.on('window:load', (win) => {
+  if (win.document && win.document.head) {
+    const style = win.document.createElement('style');
+    style.innerHTML = '#djDebug, #djDebugToolbar, #djDebugToolbarHandle, #djDebugRoot, dj-debug-root { display: none !important; pointer-events: none !important; }';
+    win.document.head.appendChild(style);
+  }
 })
