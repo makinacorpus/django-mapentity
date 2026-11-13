@@ -33,6 +33,15 @@ document.addEventListener('DOMContentLoaded', function() {
         history.render();
     }
 
+    // Activate detail tab from URL query parameter (e.g. ?tab=attachments)
+    const tabParam = new URLSearchParams(window.location.search).get('tab');
+    if (tabParam) {
+        const tabLink = document.querySelector(`.details-panel .nav-tabs a[href="#${CSS.escape(tabParam)}"]`);
+        if (tabLink && window.jQuery) {
+            window.jQuery(tabLink).tab('show');
+        }
+    }
+
     // Make success/information messages disappear after a delay
     const alertBox = document.querySelector('#alert-box');
     if (alertBox) {
