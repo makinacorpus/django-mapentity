@@ -743,6 +743,9 @@ document.addEventListener('DOMContentLoaded', function() {
             datatable: window.MapEntity.dt,
             objectsname: context.modelname,
             load_filter_form: window.MapEntity.togglableFilter.load_filter_form.bind(togglableFilter, mapsync)
+        }).then(() => {
+            mapsync._formSetBounds();
+            mapsync._reloadList(true);
         });
     });
 });

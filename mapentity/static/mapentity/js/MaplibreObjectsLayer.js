@@ -18,6 +18,11 @@ class MaplibreObjectsLayer {
         this.loading = false; // Loading state
         this.primaryKey = this.options.primaryKey;
         this.excludedIds = new Set(); // IDs to exclude from display (e.g., currently being edited)
+        this._highlightLayers = [];
+        this._hoveredMapPk = null;
+        this._currentHighlightedPk = null;
+        this._listenedLayers = new Set();
+        this._canvasMouseLeaveSetup = false;
 
         // Get layer manager
         this.layerManager = MaplibreLayerManager.getInstance();
@@ -60,20 +65,53 @@ class MaplibreObjectsLayer {
     }
 
     /**
+     * Get all managed layer IDs (base layers + highlight layers)
+     * @returns {Array<string>}
+     * @private
+     */
+    _getAllManagedLayerIds() {
+        const baseLayerIds = Object.values(this._current_objects).flat();
+        const hlIds = (this._highlightLayers || []).map(hl => hl.layerId);
+        return [...baseLayerIds, ...hlIds];
+    }
+
+    /**
      * Initialize events listener of the map for specific layers
      */
     setupLayerEvents() {
-        const layersNames = this._current_objects[this.primaryKey];
+        const layersNames = this._getAllManagedLayerIds();
 
-        if (!layersNames) return;
+        if (!layersNames || layersNames.length === 0) return;
+
+        if (!this._listenedLayers) {
+            this._listenedLayers = new Set();
+        }
 
         for (const layer of layersNames){
+            if (!this._map.getLayer(layer)) continue;
+            if (this._listenedLayers.has(layer)) continue;
+            this._listenedLayers.add(layer);
+
             const onClick = (e) => this._onClick(e);
             const onMouseMove = (e) => this._onMouseMove(e);
             const onMouseLeave = (e) => this._onMouseLeave(e);
             this._map.on('click', layer, onClick);
             this._map.on('mousemove', layer, onMouseMove);
             this._map.on('mouseleave', layer, onMouseLeave);
+        }
+
+        if (!this._canvasMouseLeaveSetup && this._map) {
+            this._canvasMouseLeaveSetup = true;
+            this._map.getCanvas().addEventListener('mouseleave', () => {
+                if (this._hoveredMapPk != null) {
+                    this.highlight(this._hoveredMapPk, false);
+                    this._hoveredMapPk = null;
+                }
+                if (this.currentTooltip) {
+                    this.currentTooltip.remove();
+                    this.currentTooltip = null;
+                }
+            });
         }
     }
 
@@ -141,36 +179,62 @@ class MaplibreObjectsLayer {
      * @private
      */
     _onMouseMove(e) {
-        if(!this.currentTooltip) {
-            const feature = e.features[0];
-            if (feature) {
-                // Change the cursor style as a UI indicator.
-                this._map.getCanvas().style.cursor = 'pointer';
+        const feature = e.features && e.features[0];
+        if (!feature) return;
 
-                if(this.options.readonly){
-                    return;
-                }
+        this._map.getCanvas().style.cursor = 'pointer';
 
-                // Don't show tooltip for current object
-                const currentPk = document.body.dataset.pk;
-                if (currentPk) {
-                    const currentPkStr = String(currentPk);
-                    const featureIdStr = feature.id != null ? String(feature.id) : null;
-                    const featurePropIdStr = feature.properties && feature.properties.id != null
-                        ? String(feature.properties.id)
-                        : null;
+        if (this.options.readonly) {
+            return;
+        }
 
-                    if ((featureIdStr && featureIdStr === currentPkStr) ||
-                        (featurePropIdStr && featurePropIdStr === currentPkStr)) {
-                        return;
-                    }
-                }
+        // Don't show tooltip or hover for current object in detail view
+        const currentPk = document.body.dataset.pk;
+        if (currentPk) {
+            const currentPkStr = String(currentPk);
+            const featureIdStr = feature.id != null ? String(feature.id) : null;
+            const featurePropIdStr = feature.properties && feature.properties.id != null
+                ? String(feature.properties.id)
+                : null;
 
-                const name = feature.properties?.name;
-                if (!name || String(name).trim() === '') {
-                    // No tooltip if the name is missing, empty, or null
-                    return;
-                }
+            if ((featureIdStr && featureIdStr === currentPkStr) ||
+                (featurePropIdStr && featurePropIdStr === currentPkStr)) {
+                return;
+            }
+        }
+
+        const featurePk = feature.id != null ? feature.id : (feature.properties && feature.properties.id);
+
+        if (featurePk != null && this._hoveredMapPk !== featurePk) {
+            if (this._hoveredMapPk != null) {
+                this.highlight(this._hoveredMapPk, false);
+            }
+            this._hoveredMapPk = featurePk;
+            this.highlight(featurePk, true);
+
+            if (this.currentTooltip) {
+                this.currentTooltip.remove();
+                this.currentTooltip = null;
+            }
+
+            const name = feature.properties?.name;
+            if (name && String(name).trim() !== '') {
+                const coordinates = e.lngLat;
+                const descriptionContent = String(name).trim();
+                const description = `<div class="popup-content">${descriptionContent}</div>`;
+
+                this.currentTooltip = new maplibregl.Popup({
+                    closeButton: false,
+                    closeOnClick: false,
+                    className: 'custom-popup',
+                    anchor: 'left',
+                    offset: 10,
+                });
+                this.currentTooltip.setLngLat(coordinates).setHTML(description).addTo(this._map);
+            }
+        } else if (!this.currentTooltip) {
+            const name = feature.properties?.name;
+            if (name && String(name).trim() !== '') {
                 const coordinates = e.lngLat;
                 const descriptionContent = String(name).trim();
                 const description = `<div class="popup-content">${descriptionContent}</div>`;
@@ -194,8 +258,19 @@ class MaplibreObjectsLayer {
      * @private
      */
     _onMouseLeave(e) {
+        if (e && e.point) {
+            const allLayers = this._getAllManagedLayerIds().filter(id => this._map.getLayer(id));
+            const features = this._map.queryRenderedFeatures(e.point, { layers: allLayers });
+            if (features.length > 0) {
+                return;
+            }
+        }
         this._map.getCanvas().style.cursor = '';
-        if(this.currentTooltip){
+        if (this._hoveredMapPk != null) {
+            this.highlight(this._hoveredMapPk, false);
+            this._hoveredMapPk = null;
+        }
+        if (this.currentTooltip) {
             this.currentTooltip.remove();
             this.currentTooltip = null;
         }
@@ -364,6 +439,9 @@ class MaplibreObjectsLayer {
         // Save layers
         this._current_objects[primaryKey] = layerIds;
 
+        // Add highlight layers
+        this._addHighlightLayers(layerIdBase, sourceId, strokeWidth, fillOpacity, strokeOpacity, sourceLayer);
+
         // Store basic geometric filters for each MVT layer
         // to be able to reuse them during filtering by PKs
         this._mvtBaseFilters = {};
@@ -487,6 +565,9 @@ class MaplibreObjectsLayer {
         // Save layers
         this._current_objects[primaryKey] = layerIds;
 
+        // Add highlight layers
+        this._addHighlightLayers(layerIdBase, sourceId, strokeWidth, fillOpacity, strokeOpacity);
+
         // Register with the layer manager (only if not already lazy)
         if(this.isLoaded && !this.isLazy) {
             this.layerManager.registerOverlay(this.options.category, primaryKey, layerIds, this.options.nameHTML);
@@ -585,6 +666,22 @@ class MaplibreObjectsLayer {
                 console.warn(`Could not update filter on layer ${layerId}`, e);
             }
         });
+
+        // Update highlight layers with exclusion filters
+        if (this._highlightLayers) {
+            for (const hl of this._highlightLayers) {
+                if (!this._map.getLayer(hl.layerId)) continue;
+                if (this._currentHighlightedPk != null && !this.excludedIds.has(String(this._currentHighlightedPk)) && !this.excludedIds.has(Number(this._currentHighlightedPk))) {
+                    const idFilter = this._buildIdFilter(this._currentHighlightedPk);
+                    this._map.setFilter(hl.layerId, this._buildFilter(['all', hl.baseGeomFilter, idFilter]));
+                } else {
+                    this._map.setFilter(hl.layerId, this._buildFilter(['all', hl.baseGeomFilter, ['==', ['id'], '']]));
+                }
+            }
+        }
+        if (this._currentHighlightedPk != null && (this.excludedIds.has(String(this._currentHighlightedPk)) || this.excludedIds.has(Number(this._currentHighlightedPk)))) {
+            this.highlight(this._currentHighlightedPk, false);
+        }
     }
 
     /**
@@ -601,11 +698,24 @@ class MaplibreObjectsLayer {
      */
     _addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailStrokeColor, sourceLayer) {
         const layerId = `${layerIdBase}-points`;
-        const hoveredStrokeWidth = strokeWidth + 2;
+        const style = this.options.style || {};
         const detailStyle = this.options.detailStyle || {};
-        const detailStrokeWidth = detailStyle.weight ?? strokeWidth;
-        const detailFillOpacity = detailStyle.fillOpacity ?? fillOpacity;
-        const detailStrokeOpacity = detailStyle.opacity ?? strokeOpacity;
+
+        const pointRadius = style.pointRadius ?? style.radius ?? 8;
+        const hoveredPointRadius = style.hoveredPointRadius ?? (pointRadius + 2);
+        const detailPointRadius = detailStyle.pointRadius ?? detailStyle.radius ?? pointRadius;
+
+        const pointStrokeWidth = style.pointWeight ?? 2;
+        const hoveredPointStrokeWidth = pointStrokeWidth + 1;
+        const detailPointStrokeWidth = detailStyle.pointWeight ?? pointStrokeWidth;
+
+        const pointFillOpacity = style.pointFillOpacity ?? 0.3;
+        const hoveredPointFillOpacity = style.pointHoverFillOpacity ?? 0.5;
+        const detailPointFillOpacity = detailStyle.pointFillOpacity ?? 0.4;
+
+        const pointStrokeOpacity = style.pointOpacity ?? style.pointStrokeOpacity ?? 1.0;
+        const detailPointStrokeOpacity = detailStyle.pointOpacity ?? detailStyle.pointStrokeOpacity ?? 1.0;
+
         const layerDef = {
             id: layerId,
             type: 'circle',
@@ -628,9 +738,11 @@ class MaplibreObjectsLayer {
                 ],
                 'circle-opacity': [
                     'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    hoveredPointFillOpacity,
                     ['boolean', ['feature-state', 'selected'], false],
-                    detailFillOpacity,
-                    fillOpacity
+                    detailPointFillOpacity,
+                    pointFillOpacity
                 ],
                 'circle-stroke-color': [
                     'case',
@@ -642,23 +754,27 @@ class MaplibreObjectsLayer {
                 ],
                 'circle-stroke-opacity': [
                     'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    1.0,
                     ['boolean', ['feature-state', 'selected'], false],
-                    detailStrokeOpacity,
-                    strokeOpacity
+                    detailPointStrokeOpacity,
+                    pointStrokeOpacity
                 ],
                 'circle-stroke-width': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
-                    hoveredStrokeWidth,
+                    hoveredPointStrokeWidth,
                     ['boolean', ['feature-state', 'selected'], false],
-                    detailStrokeWidth,
-                    strokeWidth
+                    detailPointStrokeWidth,
+                    pointStrokeWidth
                 ],
                 'circle-radius': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
-                    10,
-                    8
+                    hoveredPointRadius,
+                    ['boolean', ['feature-state', 'selected'], false],
+                    detailPointRadius,
+                    pointRadius
                 ]
             }
         });
@@ -938,6 +1054,129 @@ class MaplibreObjectsLayer {
     }
 
     /**
+     * Add highlight overlay layers for bringing hovered features to top
+     * @param layerIdBase {string} - Base layer ID
+     * @param sourceId {string} - Source ID
+     * @param strokeWidth {number} - Default stroke width
+     * @param fillOpacity {number} - Default fill opacity
+     * @param strokeOpacity {number} - Default stroke opacity
+     * @param sourceLayer {string} - Source layer name (for vector tiles)
+     * @private
+     */
+    _addHighlightLayers(layerIdBase, sourceId, strokeWidth = 5, fillOpacity = 0.7, strokeOpacity = 1.0, sourceLayer = undefined) {
+        if (!this._highlightLayers) {
+            this._highlightLayers = [];
+        }
+
+        const hoveredStrokeWidth = strokeWidth + 2;
+        const hoveredFillOpacity = Math.min((fillOpacity ?? 0.7) + 0.15, 1);
+
+        // 1. Polygon Fill Highlight Layer
+        const polyFillId = `${layerIdBase}-highlight-polygon-fill`;
+        const polyGeomFilter = ['any',
+            ['==', ['geometry-type'], 'Polygon'],
+            ['==', ['geometry-type'], 'MultiPolygon']
+        ];
+        if (!this._map.getLayer(polyFillId)) {
+            const def = {
+                id: polyFillId,
+                type: 'fill',
+                source: sourceId,
+                filter: this._buildFilter(['all', polyGeomFilter, ['==', ['id'], '']]),
+                paint: {
+                    'fill-color': '#FF0000',
+                    'fill-opacity': hoveredFillOpacity,
+                }
+            };
+            if (sourceLayer) def['source-layer'] = sourceLayer;
+            this._map.addLayer(def);
+            this._highlightLayers.push({ layerId: polyFillId, baseGeomFilter: polyGeomFilter });
+        }
+
+        // 2. Polygon Stroke Highlight Layer
+        const polyStrokeId = `${layerIdBase}-highlight-polygon-stroke`;
+        if (!this._map.getLayer(polyStrokeId)) {
+            const def = {
+                id: polyStrokeId,
+                type: 'line',
+                source: sourceId,
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                filter: this._buildFilter(['all', polyGeomFilter, ['==', ['id'], '']]),
+                paint: {
+                    'line-color': '#FF0000',
+                    'line-width': hoveredStrokeWidth,
+                    'line-opacity': strokeOpacity,
+                }
+            };
+            if (sourceLayer) def['source-layer'] = sourceLayer;
+            this._map.addLayer(def);
+            this._highlightLayers.push({ layerId: polyStrokeId, baseGeomFilter: polyGeomFilter });
+        }
+
+        // 3. Line Highlight Layer
+        const lineId = `${layerIdBase}-highlight-lines`;
+        const lineGeomFilter = ['any',
+            ['==', ['geometry-type'], 'LineString'],
+            ['==', ['geometry-type'], 'MultiLineString']
+        ];
+        if (!this._map.getLayer(lineId)) {
+            const def = {
+                id: lineId,
+                type: 'line',
+                source: sourceId,
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                filter: this._buildFilter(['all', lineGeomFilter, ['==', ['id'], '']]),
+                paint: {
+                    'line-color': '#FF0000',
+                    'line-width': hoveredStrokeWidth,
+                    'line-opacity': strokeOpacity,
+                }
+            };
+            if (sourceLayer) def['source-layer'] = sourceLayer;
+            this._map.addLayer(def);
+            this._highlightLayers.push({ layerId: lineId, baseGeomFilter: lineGeomFilter });
+        }
+
+        // 4. Points Highlight Layer
+        const pointId = `${layerIdBase}-highlight-points`;
+        const pointGeomFilter = ['any',
+            ['==', ['geometry-type'], 'Point'],
+            ['==', ['geometry-type'], 'MultiPoint']
+        ];
+        const style = this.options.style || {};
+        const pointStrokeWidth = style.pointWeight ?? 2;
+        const hoveredPointStrokeWidth = pointStrokeWidth + 1;
+        const hoveredPointRadius = (style.pointRadius ?? style.radius ?? 8) + 2;
+        const hoveredPointFillOpacity = style.pointHoverFillOpacity ?? 0.5;
+
+        if (!this._map.getLayer(pointId)) {
+            const def = {
+                id: pointId,
+                type: 'circle',
+                source: sourceId,
+                filter: this._buildFilter(['all', pointGeomFilter, ['==', ['id'], '']]),
+                paint: {
+                    'circle-color': '#FF0000',
+                    'circle-opacity': hoveredPointFillOpacity,
+                    'circle-stroke-color': '#FF0000',
+                    'circle-stroke-opacity': 1.0,
+                    'circle-stroke-width': hoveredPointStrokeWidth,
+                    'circle-radius': hoveredPointRadius,
+                }
+            };
+            if (sourceLayer) def['source-layer'] = sourceLayer;
+            this._map.addLayer(def);
+            this._highlightLayers.push({ layerId: pointId, baseGeomFilter: pointGeomFilter });
+        }
+    }
+
+    /**
      * Highlights an object
      * @param primaryKey {string|number} - Primary key
      * @param on {boolean} - Enable/disable
@@ -947,6 +1186,31 @@ class MaplibreObjectsLayer {
             return;
         }
 
+        if (primaryKey == null) {
+            return;
+        }
+
+        if (on) {
+            if (this._currentHighlightedPk != null && this._currentHighlightedPk !== primaryKey) {
+                this._setHighlightState(this._currentHighlightedPk, false);
+            }
+            this._currentHighlightedPk = primaryKey;
+            this._setHighlightState(primaryKey, true);
+        } else {
+            this._setHighlightState(primaryKey, false);
+            if (this._currentHighlightedPk === primaryKey) {
+                this._currentHighlightedPk = null;
+            }
+        }
+    }
+
+    /**
+     * Sets highlight state and updates overlay layers
+     * @param primaryKey {string|number} - Primary key
+     * @param on {boolean} - Enable/disable
+     * @private
+     */
+    _setHighlightState(primaryKey, on) {
         const layersBySource = Object.values(this._current_objects).flat();
         for (const layerId of layersBySource) {
             const layer = this._map.getLayer(layerId);
@@ -955,23 +1219,97 @@ class MaplibreObjectsLayer {
             const sourceId = layer.source;
 
             if (this._isMVT) {
-                const featureState = { source: sourceId, sourceLayer: this._mvtSourceLayer, id: primaryKey };
-                this._map.setFeatureState(featureState, { hover: on });
+                const numPk = Number(primaryKey);
+                const pkToUse = !isNaN(numPk) ? numPk : primaryKey;
+                try {
+                    this._map.setFeatureState(
+                        { source: sourceId, sourceLayer: this._mvtSourceLayer, id: pkToUse },
+                        { hover: on }
+                    );
+                } catch (e) {}
             } else {
                 const source = this._map.getSource(sourceId);
                 if (!source || !source._data) continue;
 
                 const features = source._data.features || (source._data.geojson && source._data.geojson.features) || [];
                 for (const feature of features) {
-                    if (!feature.id) continue;
-                    const isMatch = feature.id === primaryKey;
-                    this._map.setFeatureState(
-                        { source: sourceId, id: feature.id },
-                        { hover: isMatch && on }
-                    );
+                    if (feature.id == null) continue;
+                    const isMatch = String(feature.id) === String(primaryKey);
+                    if (isMatch) {
+                        try {
+                            this._map.setFeatureState(
+                                { source: sourceId, id: feature.id },
+                                { hover: on }
+                            );
+                        } catch (e) {}
+                    }
                 }
             }
         }
+
+        // Update highlight overlay layers
+        const highlightLayers = this._highlightLayers || [];
+        for (const hl of highlightLayers) {
+            if (!this._map.getLayer(hl.layerId)) continue;
+
+            if (on && primaryKey != null) {
+                const idFilter = this._buildIdFilter(primaryKey);
+                const combinedFilter = this._buildFilter(['all', hl.baseGeomFilter, idFilter]);
+                this._map.setFilter(hl.layerId, combinedFilter);
+                try {
+                    this._map.moveLayer(hl.layerId);
+                } catch (e) {}
+            } else {
+                const emptyFilter = this._buildFilter(['all', hl.baseGeomFilter, ['==', ['id'], '']]);
+                this._map.setFilter(hl.layerId, emptyFilter);
+            }
+        }
+
+        if (on) {
+            // Keep measurement layers on top
+            ['measure-points', 'measure-lines', 'measure-live-line', 'measure-completed-lines'].forEach(layer => {
+                if (this._map.getLayer(layer)) {
+                    try {
+                        this._map.moveLayer(layer);
+                    } catch (e) {}
+                }
+            });
+
+            // Keep Geoman layers on top
+            if (this._map.getStyle()) {
+                const styleLayers = this._map.getStyle().layers || [];
+                styleLayers.forEach(layer => {
+                    if (layer.id.startsWith('gm-') || layer.id.startsWith('geoman-')) {
+                        try {
+                            this._map.moveLayer(layer.id);
+                        } catch (e) {}
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Builds a filter expression matching a specific feature ID
+     * @param primaryKey {string|number}
+     * @returns {Array}
+     * @private
+     */
+    _buildIdFilter(primaryKey) {
+        if (primaryKey == null || primaryKey === '') {
+            return ['==', ['id'], ''];
+        }
+        const idStr = String(primaryKey);
+        const idNum = Number(primaryKey);
+        const conditions = [
+            ['==', ['to-string', ['id']], idStr],
+            ['==', ['to-string', ['get', 'id']], idStr]
+        ];
+        if (!isNaN(idNum)) {
+            conditions.push(['==', ['id'], idNum]);
+            conditions.push(['==', ['get', 'id'], idNum]);
+        }
+        return ['any', ...conditions];
     }
 
     /**
@@ -1018,6 +1356,13 @@ class MaplibreObjectsLayer {
      * @param primaryKeys {Array<string|number>} - Primary keys to display
      */
     updateFromPks(primaryKeys) {
+        if (this._currentHighlightedPk != null) {
+            const strPks = (primaryKeys || []).map(String);
+            if (!strPks.includes(String(this._currentHighlightedPk))) {
+                this.highlight(this._currentHighlightedPk, false);
+            }
+        }
+
         // MVT Mode: use filters on layers
         if (this._isMVT) {
             const layersBySource = Object.values(this._current_objects).flat();
