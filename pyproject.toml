@@ -59,7 +59,7 @@ dev = [
     "ruff",
     "freezegun",
     "factory_boy",
-    "coverage",
+    "coverage[toml]",
     "tblib",
     "django-vectortiles[python]",
 ]
