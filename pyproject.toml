@@ -1,0 +1,166 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mapentity"
+dynamic = ["version"]
+description = "Generic CRUD with maps for django"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [
+    {name = "Makina Corpus", email = "geobi@makina-corpus.com"},
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Topic :: Utilities",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "BeautifulSoup4",
+    "cairocffi",
+    "Django",
+    "tzdata",
+    "django-appypod",
+    "django-autocomplete-light",
+    "django-compressor",
+    "django-crispy-forms>=2.0",
+    "crispy-bootstrap4",
+    "django-embed-video",
+    "django-filter",
+    "django-mapbox-baselayer>=1.5.2",
+    "django-modeltranslation",
+    "django-tinymce>=3",
+    "django-weasyprint",
+    "djangorestframework",
+    "djangorestframework-gis",
+    "djangorestframework-datatables",
+    "easy-thumbnails",
+    "django-vectortiles",
+    "fiona",
+    "mercantile",
+    "gpxpy",
+    "lxml",
+    "paperclip",
+    "requests",
+    "weasyprint",
+]
+
+[project.optional-dependencies]
+dev = [
+    "django-debug-toolbar",
+    "ruff",
+    "freezegun",
+    "factory_boy",
+    "coverage",
+    "tblib",
+    "django-vectortiles[python]",
+]
+
+[project.urls]
+Homepage = "https://github.com/makinacorpus/django-mapentity"
+Download = "https://pypi.python.org/pypi/mapentity/"
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mapentity*"]
+
+[tool.setuptools.package-data]
+mapentity = [
+    "VERSION",
+    "locale/**",
+    "templates/**",
+    "static/**",
+]
+
+[tool.setuptools.dynamic]
+version = {file = "mapentity/VERSION"}
+
+[tool.coverage.run]
+source = [
+    "mapentity",
+]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "*/settings/*",
+    "*/management/commands/*",
+    "test_project/*",
+]
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+    "**/settings/demo*",
+    "**/settings/e2e*",
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Assume Python 3.10
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["G", "INT", "E4", "E7", "E9", "F", "DJ", "LOG", "UP", "I", "T10", "EM", "T201"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
