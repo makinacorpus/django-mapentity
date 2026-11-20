@@ -42,6 +42,11 @@
     -webkit-user-drag: none;
 }
 
+.maplibregl-ctrl-group button:disabled {
+    background-color: #f4f4f4;
+    cursor: not-allowed;
+}
+
 .maplibregl-canvas-container {
     isolation: isolate;
 }

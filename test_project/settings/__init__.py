@@ -179,6 +179,7 @@ if os.path.exists("/usr/lib/x86_64-linux-gnu/mod_spatialite.so"):
 MAPLIBRE_CONFIG_OVERRIDES = {
     "DEFAULT_CENTER": [1.3952, 43.5963],  # Toulouse, France
     "DEFAULT_ZOOM": 5,
+    "MIN_ZOOM": 5,
     "SCALE": "metric",
     "BOUNDS": [[-5.5, 40.120372], [10, 52]],
 }

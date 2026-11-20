@@ -115,4 +115,23 @@ describe('DummyModel List View', () => {
             }
         })
     })
+
+    it('should disable zoom-out at min zoom and zoom-in at max zoom', () => {
+        cy.get('.maplibregl-ctrl-zoom-in', {timeout: 15000}).should('exist')
+        cy.get('.maplibregl-ctrl-zoom-out', {timeout: 15000}).should('exist')
+
+        cy.window().then((win) => {
+            const map = win.MapEntity.currentMap.map.getMap()
+            map.setZoom(map.getMinZoom())
+        })
+        cy.get('.maplibregl-ctrl-zoom-out').should('be.disabled').and('have.attr', 'aria-disabled', 'true')
+        cy.get('.maplibregl-ctrl-zoom-in').should('not.be.disabled')
+
+        cy.window().then((win) => {
+            const map = win.MapEntity.currentMap.map.getMap()
+            map.setZoom(map.getMaxZoom())
+        })
+        cy.get('.maplibregl-ctrl-zoom-in').should('be.disabled').and('have.attr', 'aria-disabled', 'true')
+        cy.get('.maplibregl-ctrl-zoom-out').should('not.be.disabled')
+    })
 })

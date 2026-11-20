@@ -53,10 +53,10 @@
         } else {
             // Ce champ est responsable de créer la carte
             const mapId = '{{ id_map }}';
-            const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES, MAX_ZOOM } = window.SETTINGS.map.maplibreConfig;
+            const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES, MAX_ZOOM, MIN_ZOOM } = window.SETTINGS.map.maplibreConfig;
             const bounds = [BOUNDS[0], BOUNDS[1]];
 
-            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
+            const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE, MIN_ZOOM);
             // Créer un layerManager dédié au widget (pas le singleton de la carte principale)
             const layerManager = Object.create(MaplibreLayerManager.prototype);
             layerManager.layers = {

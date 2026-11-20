@@ -38,6 +38,7 @@ _DEFAULT_MAPLIBRE_CONFIG = {
     "DEFAULT_ZOOM": 5,
     "SCALE": "metric",
     "MAX_ZOOM": 22,
+    "MIN_ZOOM": 1,
 }
 
 # Merge sécurisé : MAPLIBRE_CONFIG_OVERRIDES
@@ -87,6 +88,11 @@ elif SCALE not in ("metric", "imperial", None, False):
 MAX_ZOOM = MAPLIBRE_CONFIG.get("MAX_ZOOM")
 if not (isinstance(MAX_ZOOM, int) and (1 <= MAX_ZOOM <= 24)):
     msg = "MAPLIBRE_CONFIG['MAX_ZOOM'] must be an int between 1 and 24."
+    raise ImproperlyConfigured(msg)
+
+MIN_ZOOM = MAPLIBRE_CONFIG.get("MIN_ZOOM")
+if not (isinstance(MIN_ZOOM, int) and (1 <= MIN_ZOOM <= 24)):
+    msg = "MAPLIBRE_CONFIG['MIN_ZOOM'] must be an int between 1 and 24."
     raise ImproperlyConfigured(msg)
 
 # App settings généraux

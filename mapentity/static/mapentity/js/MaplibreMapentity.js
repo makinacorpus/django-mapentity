@@ -94,10 +94,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // card initialization
 
-    const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES, MAX_ZOOM } = window.SETTINGS.map.maplibreConfig;
+    const { BOUNDS, DEFAULT_CENTER, DEFAULT_ZOOM, SCALE, TILES, MAX_ZOOM, MIN_ZOOM } = window.SETTINGS.map.maplibreConfig;
     const bounds = [BOUNDS[0], BOUNDS[1]];
 
-    const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE);
+    const map = new MaplibreMap(mapId, DEFAULT_CENTER, DEFAULT_ZOOM, MAX_ZOOM, bounds, SCALE, MIN_ZOOM);
     window.map = map;
     const modelname = context.modelname;
     const objects_verbose_name = document.body.getAttribute('data-objectsname');

@@ -328,6 +328,12 @@ class SettingsViewTest(BaseTest):
         context = self._get_context()
         self.assertNotIn("snappingConfigs", context)
 
+    def test_js_settings_maplibre_config_zoom(self):
+        context = self._get_context()
+        maplibre_config = context["map"]["maplibreConfig"]
+        self.assertEqual(maplibre_config["MAX_ZOOM"], 22)
+        self.assertEqual(maplibre_config["MIN_ZOOM"], 1)
+
 
 class ListViewTest(BaseTest):
     def setUp(self):
