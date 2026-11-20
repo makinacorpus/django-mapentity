@@ -113,4 +113,36 @@ describe('Layer Switcher - Base Layer and Overlay', () => {
             expect(hasOverlaySource, 'overlay source added to map').to.be.true
         })
     })
+
+    it('should keep layer switcher menu above point markers with custom z-index', () => {
+        cy.get('.layer-switcher-btn', {timeout: 10000}).click()
+        cy.get('.layer-switcher-menu', {timeout: 5000}).should('be.visible')
+
+        cy.window().then((win) => {
+            const doc = win.document
+            const canvasContainer = doc.querySelector('.maplibregl-canvas-container')
+            const menu = doc.querySelector('.layer-switcher-menu')
+            expect(win.getComputedStyle(canvasContainer).isolation).to.equal('isolate')
+
+            const marker = doc.createElement('div')
+            marker.className = 'maplibregl-marker'
+            marker.style.zIndex = '9999'
+            marker.style.width = '40px'
+            marker.style.height = '40px'
+            marker.style.pointerEvents = 'auto'
+
+            const mapRect = doc.querySelector('.maplibregl-map').getBoundingClientRect()
+            const menuRect = menu.getBoundingClientRect()
+            marker.style.left = `${menuRect.left - mapRect.left + 10}px`
+            marker.style.top = `${menuRect.top - mapRect.top + 10}px`
+            canvasContainer.appendChild(marker)
+
+            try {
+                const topEl = doc.elementFromPoint(menuRect.left + 20, menuRect.top + 20)
+                expect(menu.contains(topEl), 'layer switcher menu stays on top of marker').to.be.true
+            } finally {
+                marker.remove()
+            }
+        })
+    })
 })

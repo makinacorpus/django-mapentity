@@ -42,6 +42,10 @@
     -webkit-user-drag: none;
 }
 
+.maplibregl-canvas-container {
+    isolation: isolate;
+}
+
 .maplibregl-ctrl-top-right,
 .maplibregl-ctrl-top-left {
     z-index: 1000;

@@ -2,7 +2,7 @@
 
 {% block mainfilter %}
 <form id="mainfilter" action="{{ model.get_datatablelist_url }}" filter-url="{{ model.get_filter_url }}">
-    {{ filter.form.media }}
+    {{ filter_media|default:filter.form.media }}
     <div class="left form-group">
         {{ filter.form.as_p }}
     </div>

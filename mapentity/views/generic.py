@@ -7,6 +7,7 @@ from datetime import datetime
 from importlib import import_module
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
+from dal import autocomplete
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -95,6 +96,9 @@ class MapEntityList(BaseListView, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["filter"] = self._filterform  # From FilterListMixin
+        context["filter_media"] = (
+            autocomplete.Select2Multiple().media + self._filterform.form.media
+        )
         context["columns"] = self.get_columns()  # From BaseListView
         context["unorderable_columns"] = self.unorderable_columns  # From BaseListView
         context["searchable_columns"] = self.searchable_columns  # From BaseListView
