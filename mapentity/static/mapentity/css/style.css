@@ -283,6 +283,11 @@ tr.selected-row td {
     text-align: center;
     z-index: 999;
     width: 100%;
+    pointer-events: none;
+}
+
+#maphead > * {
+    pointer-events: auto;
 }
 
 /***** Entity List ******/

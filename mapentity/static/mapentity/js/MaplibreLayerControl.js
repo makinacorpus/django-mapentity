@@ -58,6 +58,7 @@ class MaplibreLayerControl {
         img.alt = 'Layers';
         img.style.width = '25px';
         img.style.height = '25px';
+        img.draggable = false;
 
         button.appendChild(img);
         container.appendChild(button);
