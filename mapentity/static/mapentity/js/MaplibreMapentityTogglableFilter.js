@@ -68,9 +68,15 @@ class MaplibreMapentityTogglableFilter {
      * Attach events to filter form fields
      */
     attachFieldEvents() {
-        document.querySelectorAll('#mainfilter select, #mainfilter input').forEach(element => {
-            element.addEventListener('change', () => this.setfield(element));
-        });
+        if (typeof $ !== 'undefined') {
+            $('#mainfilter').find('select, input').on('change', (e) => {
+                this.setfield(e.currentTarget);
+            });
+        } else {
+            document.querySelectorAll('#mainfilter select, #mainfilter input').forEach(element => {
+                element.addEventListener('change', () => this.setfield(element));
+            });
+        }
     }
 
     /**
@@ -81,9 +87,18 @@ class MaplibreMapentityTogglableFilter {
         try {
             if (this.popover && this.popover.length > 0) {
                 const popoverData = this.popover.data('bs.popover');
-                if (popoverData && popoverData.tip) {
-                    return $(popoverData.tip);
+                if (popoverData) {
+                    if (popoverData.tip) {
+                        return $(popoverData.tip);
+                    }
+                    if (typeof popoverData.getTipElement === 'function') {
+                        return $(popoverData.getTipElement());
+                    }
                 }
+            }
+            const domTip = document.querySelector('.popover');
+            if (domTip) {
+                return $(domTip);
             }
         } catch (error) {
             console.error('Error getting popover tip:', error);
@@ -109,6 +124,24 @@ class MaplibreMapentityTogglableFilter {
             return;
         }
 
+        const sync = mapsync || window.MapEntity?.mapsync;
+
+        // Save current values from mainfilter before replacing it
+        const currentFormData = new FormData(mainfilter);
+        const currentValues = {};
+        for (const [key, value] of currentFormData.entries()) {
+            if (value !== '') {
+                if (currentValues[key] !== undefined) {
+                    if (!Array.isArray(currentValues[key])) {
+                        currentValues[key] = [currentValues[key]];
+                    }
+                    currentValues[key].push(value);
+                } else {
+                    currentValues[key] = value;
+                }
+            }
+        }
+
         try {
             const response = await fetch(filterUrl);
             if (!response.ok) {
@@ -129,12 +162,38 @@ class MaplibreMapentityTogglableFilter {
                 throw new Error('New main filter not found after replacement');
             }
 
-            if (mapsync?.options?.filter) {
-                mapsync.options.filter.form = newMainFilter;
+            newMainFilter.classList.add('filter-form-loaded');
+
+            // Update mapsync elements and bounds on the new form
+            if (sync) {
+                sync.updateFilterElements(newMainFilter);
             }
 
-            // Attach events to buttons
-            this._attachFormEvents(mapsync, newMainFilter);
+            // Restore previous values into newMainFilter
+            for (const [key, val] of Object.entries(currentValues)) {
+                if (key === 'bbox') {
+                    const bboxInput = newMainFilter.querySelector('#id_bbox');
+                    if (bboxInput && !bboxInput.value) {
+                        bboxInput.value = val;
+                    }
+                    continue;
+                }
+                const input = newMainFilter.querySelector(`[name="${key}"]`);
+                if (!input) continue;
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = val === 'true' || val === 'on' || val === true;
+                } else if (input.tagName === 'SELECT') {
+                    const values = Array.isArray(val) ? val : [val];
+                    Array.from(input.options).forEach(opt => {
+                        opt.selected = values.includes(opt.value);
+                    });
+                } else {
+                    input.value = val;
+                }
+            }
+
+            // Attach events to buttons and fields
+            this._attachFormEvents(sync, newMainFilter);
 
             // Managing Multiple Selects with Chosen
             this._setupSelects(newMainFilter);
@@ -151,8 +210,29 @@ class MaplibreMapentityTogglableFilter {
                 await callback.apply();
             }
 
-            // Force Select2 initialization on autocomplete fields
-            $('#mainfilter select').select2({allowClear: true, theme: 'bootstrap4'});
+            // Force Select2 initialization on non-autocomplete fields
+            $('#mainfilter select:not([data-autocomplete-light-function])').select2({allowClear: true, theme: 'bootstrap4'});
+
+            // Initialize DAL autocomplete fields if present
+            if (window.__dal__initialize) {
+                $('#mainfilter [data-autocomplete-light-function]').each(function() {
+                    window.__dal__initialize(this);
+                });
+            }
+
+            // Re-populate this.fields for criteria info and badge
+            newMainFilter.querySelectorAll('select, input').forEach(element => {
+                this.setfield(element);
+            });
+
+            // Adjust popover width based on the newly loaded full form
+            const tip = this.tip();
+            if (tip && tip.length > 0) {
+                const formWidth = $(newMainFilter).outerWidth();
+                if (formWidth > 0) {
+                    tip.width(formWidth);
+                }
+            }
 
         } catch (error) {
             console.error('Error loading filter form:', error);
@@ -178,9 +258,15 @@ class MaplibreMapentityTogglableFilter {
             resetBtn.addEventListener('click', (e) => mapsync._onFormReset(e));
         }
 
-        newMainFilter.querySelectorAll('select, input').forEach(element => {
-            element.addEventListener('change', () => this.setfield(element));
-        });
+        if (typeof $ !== 'undefined') {
+            $(newMainFilter).find('select, input').on('change', (e) => {
+                this.setfield(e.currentTarget);
+            });
+        } else {
+            newMainFilter.querySelectorAll('select, input').forEach(element => {
+                element.addEventListener('change', () => this.setfield(element));
+            });
+        }
     }
 
     /**
@@ -427,7 +513,12 @@ class MaplibreMapentityTogglableFilter {
 
             if (!tip || tip.length === 0) return;
 
-            const isOutsideTip = tip.has(target).length === 0;
+            // Ignore clicks within select2 dropdowns or datepickers attached to body
+            if ($(target).closest('.select2-container, .select2-dropdown, .datepicker').length > 0) {
+                return;
+            }
+
+            const isOutsideTip = tip.has(target).length === 0 && !tip.is(target);
             const isOutsideButton = !this.button.contains(target);
 
             if (isOutsideTip && isOutsideButton) {
@@ -461,10 +552,9 @@ class MaplibreMapentityTogglableFilter {
         if ($field.is('input[type=hidden]')) {
             set = false;
         } else if ($field.is('select[multiple]')) {
-            set = val !== null && val.length > 0;
+            set = val !== null && val.length > 0 && !(val.length === 1 && val[0] === '');
         } else if ($field.is('select')) {
-            const firstOptionVal = $field.find('option').first().val();
-            set = val !== firstOptionVal;
+            set = val !== '' && val !== null;
         }
 
         // Determine the display value

@@ -38,6 +38,7 @@ class CityFactory(factory.django.DjangoModelFactory):
 
 class RoadFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: f"Road {n}")
+    name_fr = factory.Sequence(lambda n: f"Road {n}")
 
     @factory.lazy_attribute
     def geom(self):

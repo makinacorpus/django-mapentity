@@ -35,11 +35,13 @@ class MaplibreMapListSync {
         this.map.on('moveend', (e) => this._onMapViewChanged(e));
 
         if (this.options.filter) {
-            this.options.filter.submitbutton.addEventListener('click', (e) => this._onFormSubmit(e));
-            this.options.filter.resetbutton.addEventListener('click', (e) => this._onFormReset(e));
+            this.options.filter.submitbutton?.addEventListener('click', (e) => this._onFormSubmit(e));
+            this.options.filter.resetbutton?.addEventListener('click', (e) => this._onFormReset(e));
         }
 
         this.dt.onFilter = () => this._onListFilter();
+
+        this._formSetBounds();
     }
 
     /**
@@ -72,11 +74,10 @@ class MaplibreMapListSync {
      * @private
      */
     _onMapViewChanged(e) {
-        if (!this.map || !this.map.loaded()) {
-            setTimeout(() => this._onMapViewChanged(e), 20);
+        if (!this.map) {
             return;
         }
-        const mapViewChangedStatue = true
+        const mapViewChangedStatue = true;
         this._formSetBounds();
         this._reloadList(mapViewChangedStatue);
     }
@@ -87,8 +88,18 @@ class MaplibreMapListSync {
      * @private
      */
     _onFormSubmit(e) {
+        if (e) {
+            e.preventDefault();
+        }
+        const form = document.getElementById('mainfilter') || this.options.filter?.form;
+        if (form && this.togglableFilter) {
+            form.querySelectorAll('select, input').forEach(element => {
+                this.togglableFilter.setfield(element);
+            });
+            this.togglableFilter.setsubmit();
+        }
         this._formSetBounds();
-        this._reloadList(true);
+        this._reloadList();
     }
 
     /**
@@ -97,9 +108,14 @@ class MaplibreMapListSync {
      * @private
      */
     _onFormReset(e) {
-        this._formClear(this.options.filter.form);
-        this._reloadList();
+        const form = document.getElementById('mainfilter') || this.options.filter?.form;
+        this._formClear(form);
         this._formSetBounds();
+        this._reloadList();
+        if (this.togglableFilter) {
+            this.togglableFilter.fields = {};
+            this.togglableFilter.setsubmit();
+        }
     }
 
     /**
@@ -109,7 +125,11 @@ class MaplibreMapListSync {
      * @private
      */
     async _reloadList(mapViewChangedStatue = false) {
-        const formData = new FormData(this.options.filter.form);
+        const form = document.getElementById('mainfilter') || this.options.filter?.form;
+        if (!form) {
+            return;
+        }
+        const formData = new FormData(form);
         let filter = false;
 
         for (const [key, value] of formData.entries()) {
@@ -118,37 +138,60 @@ class MaplibreMapListSync {
             }
         }
 
-        if(!mapViewChangedStatue) {
+        if (this.togglableFilter?.button) {
             this.togglableFilter.button.classList.toggle('btn-info', !filter);
             this.togglableFilter.button.classList.toggle('btn-warning', filter);
         }
 
-
         // Update the DataTable URL with the form parameters
-        const url = `${this.options.filter.form.getAttribute('action')}?${new URLSearchParams(formData).toString()}`;
+        const url = `${form.getAttribute('action')}?${new URLSearchParams(formData).toString()}`;
         this.dt.ajax.url(url).load();
 
-        if (this._loading) {
-            return;
+        if (this._abortController) {
+            this._abortController.abort();
         }
-        this._loading = true;
+        this._abortController = new AbortController();
 
         try {
-            const response = await fetch(`${this.options.filter.form.getAttribute('action').replace('.datatables', '/filter_infos.json')}?${new URLSearchParams(formData)}`);
+            const filterInfosUrl = `${form.getAttribute('action').replace('.datatables', '/filter_infos.json')}?${new URLSearchParams(formData)}`;
+            const response = await fetch(filterInfosUrl, { signal: this._abortController.signal });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
 
-            document.getElementById('nbresults').textContent = data.count;
+            const countEl = document.getElementById('nbresults');
+            if (countEl) {
+                countEl.textContent = data.count;
+            }
 
             this.layer.updateFromPks(data.pk_list);
 
         } catch (error) {
-            console.error('Error:', error);
-        } finally {
-            this._loading = false;
+            if (error.name !== 'AbortError') {
+                console.error('Error fetching filter_infos:', error);
+            }
         }
+    }
+
+    /**
+     * Updates references to filter form elements when the form HTML is replaced
+     * @param form {HTMLFormElement} - The new main filter form element
+     */
+    updateFilterElements(form) {
+        const newForm = form || document.getElementById('mainfilter');
+        const submitBtn = document.getElementById('filter');
+        const resetBtn = document.getElementById('reset');
+        const bboxField = newForm ? newForm.querySelector('#id_bbox') : document.getElementById('id_bbox');
+
+        this.options.filter = {
+            form: newForm,
+            submitbutton: submitBtn,
+            resetbutton: resetBtn,
+            bboxfield: bboxField
+        };
+
+        this._formSetBounds();
     }
 
     /**
@@ -156,16 +199,20 @@ class MaplibreMapListSync {
      * @private
      */
     _formSetBounds() {
-        if (!this.options.filter) {
+        if (!this.map) {
             return;
         }
 
-        if (!this.map.loaded()) {
-            console.warn("Map view not set, cannot get bounds.");
+        const form = document.getElementById('mainfilter') || this.options.filter?.form;
+        const bboxField = form ? form.querySelector('#id_bbox') : document.getElementById('id_bbox');
+        if (!bboxField) {
             return;
         }
 
-        const bounds = this.map.getBounds(); // The bounds used must be the one studied on the map because it is dynamic.
+        const bounds = this.map.getBounds ? this.map.getBounds() : null;
+        if (!bounds) {
+            return;
+        }
 
         // Extract coordinates and clip them to valid values
         const min_lon = Math.max(bounds.getWest(), -180);
@@ -173,13 +220,19 @@ class MaplibreMapListSync {
         const max_lon = Math.min(bounds.getEast(), 180);
         const max_lat = Math.min(bounds.getNorth(), 90);
 
+        if (!Number.isFinite(min_lon) || !Number.isFinite(min_lat) || !Number.isFinite(max_lon) || !Number.isFinite(max_lat)) {
+            return;
+        }
+
         // Create a MaplibreRectangle from these coordinates
         const rect = new MaplibreRectangle([[min_lon, min_lat], [max_lon, max_lat]]);
 
-        // Check that bboxfield exists before accessing it
-        if (this.options.filter && this.options.filter.bboxfield) {
-            // Update the filter's bbox field with the rectangle's WKT
-            this.options.filter.bboxfield.value = rect.getWKT();
+        bboxField.value = rect.getWKT();
+        if (this.options.filter) {
+            this.options.filter.bboxfield = bboxField;
+            if (form) {
+                this.options.filter.form = form;
+            }
         }
     }
 
@@ -205,8 +258,14 @@ class MaplibreMapListSync {
 
         const selectElements = form.querySelectorAll('select');
         selectElements.forEach(select => {
+            Array.from(select.options).forEach(opt => {
+                opt.selected = false;
+            });
             select.value = '';
             select.dispatchEvent(new Event('change'));
+            if (typeof $ !== 'undefined') {
+                $(select).val(null).trigger('change');
+            }
         });
     }
 }
