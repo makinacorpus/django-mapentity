@@ -161,10 +161,16 @@ TEST = True
 # MAPENTITY_CONFIG = {
 #     'SENDFILE_HTTP_HEADER': 'X-Accel-Redirect',
 # }
-
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 PAPERCLIP_FILETYPE_MODEL = "test_app.FileType"
 PAPERCLIP_LICENSE_MODEL = "test_app.License"
 PAPERCLIP_ATTACHMENT_MODEL = "test_app.Attachment"
+
+THUMBNAIL_ALIASES = {
+    "": {
+        "thumbnail": {"size": (120, 120), "crop": False},
+    },
+}
 
 if os.path.exists("/usr/lib/x86_64-linux-gnu/mod_spatialite.so"):
     SPATIALITE_LIBRARY_PATH = "/usr/lib/x86_64-linux-gnu/mod_spatialite"
