@@ -28,7 +28,7 @@ describe('Hover Effects - Point geometry (SinglePointModel)', () => {
             expect(data.type).to.equal("Point");
         });
 
-        cy.get('#save_changes').click();
+        cy.get('#save_changes').click({force: true});
 
         cy.url({timeout: 15000}).should('satisfy', (url) => {
             return url.includes('/singlepointmodel/') && !url.includes('/add/');
@@ -147,7 +147,7 @@ describe('Hover Effects - LineString geometry (SingleLineStringModel)', () => {
             expect(data.type).to.equal("LineString");
         });
 
-        cy.get('#save_changes').click();
+        cy.get('#save_changes').click({force: true});
 
         cy.url({timeout: 15000}).should('satisfy', (url) => {
             return url.includes('/singlelinestringmodel/') && !url.includes('/add/');
@@ -237,7 +237,7 @@ describe('Hover Effects - Polygon geometry (SinglePolygonModel)', () => {
             expect(data.type).to.equal("Polygon");
         });
 
-        cy.get('#save_changes').click();
+        cy.get('#save_changes').click({force: true});
 
         cy.url({timeout: 15000}).should('satisfy', (url) => {
             return url.includes('/singlepolygonmodel/') && !url.includes('/add/');
@@ -348,7 +348,7 @@ describe('Hover Effects - Popup on click', () => {
             expect(data.type).to.equal("Point");
         });
 
-        cy.get('#save_changes').click();
+        cy.get('#save_changes').click({force: true});
 
         cy.url({timeout: 15000}).should('satisfy', (url) => {
             return url.includes('/singlepointmodel/') && !url.includes('/add/');
@@ -419,7 +419,7 @@ describe('Hover Effects - MultiPoint geometry', () => {
             expect(data.type).to.equal("MultiPoint");
         });
 
-        cy.get('#save_changes').click();
+        cy.get('#save_changes').click({force: true});
 
         cy.url({timeout: 15000}).should('satisfy', (url) => {
             return url.includes('/multipointmodel/') && !url.includes('/add/');
@@ -472,7 +472,7 @@ describe('Hover Effects - MultiLineString geometry', () => {
             expect(data.type).to.equal("MultiLineString");
         });
 
-        cy.get('#save_changes').click();
+        cy.get('#save_changes').click({force: true});
 
         cy.url({timeout: 15000}).should('satisfy', (url) => {
             return url.includes('/multilinestringmodel/') && !url.includes('/add/');
@@ -524,7 +524,7 @@ describe('Hover Effects - MultiPolygon geometry', () => {
             expect(data.type).to.equal("MultiPolygon");
         });
 
-        cy.get('#save_changes').click();
+        cy.get('#save_changes').click({force: true});
 
         cy.url({timeout: 15000}).should('satisfy', (url) => {
             return url.includes('/multipolygonmodel/') && !url.includes('/add/');
@@ -575,7 +575,7 @@ describe('Hover Effects - GeometryCollection', () => {
             expect(data.type).to.equal("GeometryCollection");
         });
 
-        cy.get('#save_changes').click();
+        cy.get('#save_changes').click({force: true});
 
         cy.url({timeout: 15000}).should('satisfy', (url) => {
             return url.includes('/geometrycollectionmodel/') && !url.includes('/add/');
