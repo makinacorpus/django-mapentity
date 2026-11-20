@@ -23,7 +23,7 @@ from mapentity.models import LogEntry
 from mapentity.registry import app_settings
 from mapentity.tests import MapEntityLiveTest, MapEntityTest
 from mapentity.tests.factories import AttachmentFactory, SuperUserFactory, UserFactory
-from mapentity.views import Convert, JSSettings, ServeAttachment
+from mapentity.views import Convert, JSSettings, MapEntityList, ServeAttachment
 
 from ..models import City, ComplexModel, DummyModel, FileType
 from ..views import (
@@ -381,6 +381,23 @@ class ListViewTest(BaseTest):
         response = view(request)
         self.assertContains(response, '<input type="text" name="name"')
         self.assertContains(response, '<input type="hidden" name="bbox"')
+        html = response.render().content.decode()
+        self.assertEqual(html.count("admin/js/vendor/select2/select2.full.js"), 1)
+        self.assertEqual(html.count("autocomplete_light/select2"), 2)  # .css and .js
+
+    def test_minimal_filter_list_view_includes_select2_and_dal_media(self):
+        class MinimalDummyList(MapEntityList):
+            model = DummyModel
+
+        request = RequestFactory().get("/fake-path")
+        request.user = self.user
+        request.session = {}
+        view = MinimalDummyList.as_view()
+        response = view(request)
+        self.assertContains(response, '<input type="hidden" name="bbox"')
+        self.assertContains(response, "admin/js/vendor/select2/select2.full.js")
+        self.assertContains(response, "autocomplete_light/autocomplete_light")
+        self.assertContains(response, "autocomplete_light/select2")
 
 
 class MapEntityLayerViewTest(BaseTest):
