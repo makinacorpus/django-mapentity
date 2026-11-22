@@ -22,6 +22,15 @@ RUN  /code/venv/bin/pip install --no-cache-dir pip setuptools wheel -U
 # Install dev requirements
 RUN /code/venv/bin/pip3 install --no-cache-dir -e .[dev] -U
 
+# Install Playwright Chromium browser and system dependencies
+ENV PLAYWRIGHT_BROWSERS_PATH=/code/ms-playwright
+USER root
+RUN /code/venv/bin/playwright install --with-deps chromium && \
+    chown -R django:django /code/ms-playwright && \
+    chmod -R a+rx /code/ms-playwright && \
+    apt-get clean all && rm -rf /var/lib/apt/lists/* && rm -rf /var/cache/apt/*
+USER django
+
 # Activate venv through entrypoint
 COPY --chown=django:django docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

@@ -11,11 +11,15 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import contextlib
 import os
 import sys
 from tempfile import TemporaryDirectory
 
 from django.contrib import messages
+
+with contextlib.suppress(ImportError):
+    import shapely.geometry  # noqa: F401
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -221,7 +225,60 @@ LOGOUT_REDIRECT_URL = "/login/"
 MODELTRANSLATION_LANGUAGES = ("en", "fr", "zh-hant")
 
 if "test" in sys.argv:
-    MEDIA_ROOT = TemporaryDirectory().name
+    PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+    _TEMP_MEDIA_DIR = TemporaryDirectory()
+    _TEMP_CACHE_DIR = TemporaryDirectory()
+    MEDIA_ROOT = _TEMP_MEDIA_DIR.name
+    CACHES["files"]["LOCATION"] = _TEMP_CACHE_DIR.name
+
+    def _init_worker_temp_dirs():
+        global _TEMP_MEDIA_DIR, _TEMP_CACHE_DIR, MEDIA_ROOT
+        from django.conf import settings as django_settings
+        from django.test.signals import setting_changed
+
+        _TEMP_MEDIA_DIR = TemporaryDirectory()
+        _TEMP_CACHE_DIR = TemporaryDirectory()
+        MEDIA_ROOT = _TEMP_MEDIA_DIR.name
+        CACHES["files"]["LOCATION"] = _TEMP_CACHE_DIR.name
+        if django_settings.configured:
+            django_settings.MEDIA_ROOT = MEDIA_ROOT
+            django_settings.CACHES["files"]["LOCATION"] = _TEMP_CACHE_DIR.name
+            setting_changed.send(
+                sender=django_settings._wrapped.__class__,
+                setting="MEDIA_ROOT",
+                value=MEDIA_ROOT,
+                enter=False,
+            )
+            setting_changed.send(
+                sender=django_settings._wrapped.__class__,
+                setting="CACHES",
+                value=django_settings.CACHES,
+                enter=False,
+            )
+
+    if hasattr(os, "register_at_fork"):
+        os.register_at_fork(after_in_child=_init_worker_temp_dirs)
+
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "null": {
+                "class": "logging.NullHandler",
+            },
+        },
+        "root": {
+            "handlers": ["null"],
+            "level": "CRITICAL",
+        },
+        "loggers": {
+            "django": {
+                "handlers": ["null"],
+                "level": "CRITICAL",
+                "propagate": True,
+            },
+        },
+    }
 
 
 POPUP_CONTENT = {

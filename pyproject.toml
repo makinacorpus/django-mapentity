@@ -62,6 +62,7 @@ dev = [
     "coverage[toml]",
     "tblib",
     "django-vectortiles[python]",
+    "playwright",
 ]
 
 [project.urls]

@@ -84,6 +84,11 @@ class Command(BaseCommand):
 
         self.stdout.write("Creating test data...")
 
+        TagFactory.reset_sequence(0)
+        CityFactory.reset_sequence(0)
+        RoadFactory.reset_sequence(0)
+        SectorFactory.reset_sequence(0)
+
         # Create tags first (they are referenced by other models)
         TagFactory.create_batch(options["tags"])
         self.stdout.write(self.style.SUCCESS(f"Created {options['tags']} tags"))
