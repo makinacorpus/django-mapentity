@@ -78,7 +78,7 @@ jobs:
 
     - name: Test with coverage
       run: |
-        coverage run --parallel-mode --concurrency=multiprocessing ./manage.py test --parallel -v 3
+        coverage run --parallel-mode --concurrency=multiprocessing ./manage.py test --exclude-tag=e2e --parallel -v 3
         coverage combine
         coverage xml -o coverage.xml
 
@@ -93,9 +93,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
-    env:
-      DJANGO_SETTINGS_MODULE: test_project.settings.e2e
 
     steps:
       - uses: actions/checkout@v7
@@ -118,74 +115,17 @@ jobs:
           pip3 install .[dev]
           pip3 install Django==5.2.* -U
 
+      - name: Install Playwright browsers
+        run: |
+          playwright install --with-deps chromium
+
       - name: Compile messages
         run: |
           ./manage.py compilemessages
 
-      - name: Run migrations
+      - name: Run Playwright E2E tests
         run: |
-          ./manage.py migrate
-          ./manage.py update_permissions_mapentity
-
-      - name: Create superuser and test data
-        run: |
-          ./manage.py install_layer osm --order=0
-          ./manage.py install_layer opentopomap --order=1
-          ./manage.py install_layer ign cadastre --order=0 --overlay
-          echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@test.com', 'admin')" | ./manage.py shell
-          ./manage.py create_test_data --dummies 20 --cities 5 --roads 10 --geopoints 10
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
-
-      - name: Install Cypress
-        run: |
-          npm ci
-
-      - name: Start Django server
-        run: |
-          ./manage.py runserver 8000 > server.log 2>&1 &
-          sleep 10
-
-      - name: Wait for server to be ready
-        run: |
-          for i in {1..30}; do
-            if curl -s http://localhost:8000/ > /dev/null; then
-              echo "Server is ready!"
-              exit 0
-            fi
-            echo "Waiting for server... ($i/30)"
-            sleep 2
-          done
-          echo "Server failed to start"
-          exit 1
-      - uses: browser-actions/setup-chrome@v2
-
-      - name: Run Cypress tests
-        run: |
-          npx cypress run --browser chrome --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
-        env:
-          CYPRESS_baseUrl: http://localhost:8000
-
-      - name: Upload Cypress screenshots
-        uses: actions/upload-artifact@v7
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
-
-      - name: Upload Cypress videos
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: cypress-videos
-          path: cypress/videos
-          if-no-files-found: ignore
+          ./manage.py test --tag=e2e -v 2
 
   publish:
     needs: [quality, test, e2e-tests]

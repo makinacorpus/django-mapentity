@@ -11,11 +11,15 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import contextlib
 import os
 import sys
 from tempfile import TemporaryDirectory
 
 from django.contrib import messages
+
+with contextlib.suppress(ImportError):
+    import shapely.geometry  # noqa: F401
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
