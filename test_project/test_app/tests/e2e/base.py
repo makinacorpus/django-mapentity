@@ -60,6 +60,16 @@ def _cleanup_playwright():
         _PLAYWRIGHT = None
 
 
+def _reset_playwright_in_child():
+    global _PLAYWRIGHT, _BROWSER
+    _PLAYWRIGHT = None
+    _BROWSER = None
+
+
+if hasattr(os, "register_at_fork"):
+    os.register_at_fork(after_in_child=_reset_playwright_in_child)
+
+
 atexit.register(_cleanup_playwright)
 
 
@@ -126,7 +136,7 @@ class SequentialLiveServerThread(LiveServerThread):
 class PlaywrightE2ETestCase(StaticLiveServerTestCase):
     server_thread_class = SequentialLiveServerThread
     reset_sequences = False
-    create_default_data = True
+    create_default_data = False
     install_layers = True
 
     @classmethod
@@ -212,21 +222,28 @@ class PlaywrightE2ETestCase(StaticLiveServerTestCase):
         outcome = getattr(self, "_outcome", None)
         if outcome is None:
             return False
-        if hasattr(outcome, "errors") and outcome.errors:
-            if any(exc_info is not None for _, exc_info in outcome.errors):
-                return True
+        if hasattr(outcome, "errors"):
+            return any(exc_info is not None for _, exc_info in outcome.errors)
         result = getattr(outcome, "result", None)
         if result is not None:
+            events = getattr(result, "events", None)
+            if events is not None:
+                test_index = getattr(result, "test_index", None)
+                return any(
+                    ev[0] in ("addFailure", "addError") and ev[1] == test_index
+                    for ev in events
+                )
             for collection in (
-                getattr(result, "failures", []),
-                getattr(result, "errors", []),
+                getattr(result, "failures", ()),
+                getattr(result, "errors", ()),
             ):
-                for test_case, _ in collection:
-                    if (
-                        test_case is self
-                        or getattr(test_case, "test_case", None) is self
-                    ):
-                        return True
+                if hasattr(collection, "__iter__"):
+                    for test_case, _ in collection:
+                        if (
+                            test_case is self
+                            or getattr(test_case, "test_case", None) is self
+                        ):
+                            return True
         return False
 
     def tearDown(self):
@@ -238,8 +255,6 @@ class PlaywrightE2ETestCase(StaticLiveServerTestCase):
                 deadline = time.monotonic() + 5.0
                 while self._in_flight_requests and time.monotonic() < deadline:
                     self.page.wait_for_timeout(50)
-                if not test_failed:
-                    self.page.goto("about:blank")
             except Exception:
                 pass
         if hasattr(self, "context") and self.context is not None:

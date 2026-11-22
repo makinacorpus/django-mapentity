@@ -2,6 +2,8 @@ from .base import PlaywrightE2ETestCase
 
 
 class DummyModelBatchUpdateE2ETest(PlaywrightE2ETestCase):
+    create_default_data = True
+
     def setUp(self):
         super().setUp()
         self.login()

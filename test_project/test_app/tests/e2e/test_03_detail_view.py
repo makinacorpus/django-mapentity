@@ -2,6 +2,8 @@ import re
 
 from playwright.sync_api import expect
 
+from test_project.test_app.tests.factories import DummyModelFactory
+
 from .base import PlaywrightE2ETestCase
 
 
@@ -10,7 +12,7 @@ class DummyModelDetailViewE2ETest(PlaywrightE2ETestCase):
         super().setUp()
         self.login()
         self.mock_tiles()
-        self.entity_id = self.dummies[0].pk
+        self.entity_id = DummyModelFactory.create().pk
 
     def test_should_display_detail_page(self):
         self.visit(f"/dummymodel/{self.entity_id}/")

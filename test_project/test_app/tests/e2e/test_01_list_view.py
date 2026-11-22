@@ -2,12 +2,15 @@ import re
 
 from playwright.sync_api import expect
 
+from test_project.test_app.tests.factories import DummyModelFactory
+
 from .base import PlaywrightE2ETestCase
 
 
 class DummyModelListViewE2ETest(PlaywrightE2ETestCase):
     def setUp(self):
         super().setUp()
+        DummyModelFactory.create()
         self.login()
         self.mock_tiles()
         self.visit("/dummymodel/list/")

@@ -1,11 +1,14 @@
 from playwright.sync_api import expect
 
+from test_project.test_app.tests.factories import DummyModelFactory
+
 from .base import PlaywrightE2ETestCase
 
 
 class ListViewExportsE2ETest(PlaywrightE2ETestCase):
     def setUp(self):
         super().setUp()
+        DummyModelFactory.create_batch(2)
         self.login()
         self.mock_tiles()
         self.visit("/dummymodel/list/")

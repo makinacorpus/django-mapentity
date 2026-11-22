@@ -125,7 +125,7 @@ jobs:
 
       - name: Run Playwright E2E tests
         run: |
-          ./manage.py test --tag=e2e -v 2
+          ./manage.py test --tag=e2e --parallel -v 2
 
       - name: Upload Playwright videos on failure
         uses: actions/upload-artifact@v7

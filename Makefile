@@ -64,8 +64,12 @@ PWDEBUG ?= 0
 E2E_DOCKER_ARGS = -e DJANGO_SETTINGS_MODULE=test_project.settings.e2e -e PLAYWRIGHT_BROWSER=$(BROWSER) -e PLAYWRIGHT_HEADLESS=$(HEADLESS) -e PLAYWRIGHT_SLOW_MO=$(SLOW_MO) -e PWDEBUG=$(PWDEBUG)
 ifneq ($(HEADLESS),true)
   E2E_DOCKER_ARGS += -e DISPLAY=$(DISPLAY) -v /tmp/.X11-unix:/tmp/.X11-unix:rw
+  PARALLEL ?= 1
 else ifeq ($(PWDEBUG),1)
   E2E_DOCKER_ARGS += -e DISPLAY=$(DISPLAY) -v /tmp/.X11-unix:/tmp/.X11-unix:rw
+  PARALLEL ?= 1
+else
+  PARALLEL ?= 4
 endif
 
 .PHONY: prepare_e2e serve_e2e test_e2e run_e2e codegen
@@ -87,7 +91,7 @@ serve_e2e: prepare_e2e
 
 test_e2e:
 	@$(PRINT_COLOR) "$(COLOR_SUCCESS) ### Start E2E tests (Playwright) ### $(COLOR_RESET)\n"
-	$(docker_compose) run $(E2E_DOCKER_ARGS) --rm web ./manage.py test $(or $(test_name),--tag=e2e) -v $(verbose_level)
+	$(docker_compose) run $(E2E_DOCKER_ARGS) --rm web ./manage.py test $(or $(test_name),--tag=e2e) --parallel=$(PARALLEL) -v $(verbose_level)
 
 run_e2e: test_e2e
 

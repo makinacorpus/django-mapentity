@@ -3,6 +3,8 @@ from urllib.parse import quote
 
 from playwright.sync_api import expect
 
+from test_project.test_app.tests.factories import DummyModelFactory
+
 from .base import PlaywrightE2ETestCase
 
 
@@ -119,6 +121,8 @@ class MapContextUrlRestorationE2ETest(_MapContextBaseMixin, PlaywrightE2ETestCas
 
 
 class MapContextListViewE2ETest(_MapContextBaseMixin, PlaywrightE2ETestCase):
+    create_default_data = True
+
     def setUp(self):
         super().setUp()
         self.login()
@@ -251,7 +255,7 @@ class MapContextDetailViewE2ETest(_MapContextBaseMixin, PlaywrightE2ETestCase):
         super().setUp()
         self.login()
         self.mock_tiles()
-        self.entity_id = self.dummies[0].pk
+        self.entity_id = DummyModelFactory.create().pk
 
     def test_should_have_the_first_base_layer_selected_and_objects_layer_checked_by_default(
         self,
