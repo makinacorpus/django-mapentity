@@ -33,6 +33,12 @@ from test_project.test_app.models import (
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
 FIXTURES_IMAGES_DIR = Path(__file__).parent / "fixtures" / "images"
+VIDEOS_DIR = Path(
+    os.environ.get(
+        "PLAYWRIGHT_VIDEO_DIR",
+        Path(settings.BASE_DIR) / "test-results" / "videos",
+    )
+)
 
 _PLAYWRIGHT = None
 _BROWSER = None
@@ -160,10 +166,22 @@ class PlaywrightE2ETestCase(StaticLiveServerTestCase):
 
         self.tile_requests = {"osm": [], "otm": [], "overlay": []}
         self._in_flight_requests = set()
-        self.context = self.browser.new_context(
-            viewport={"width": 1280, "height": 720},
-            ignore_https_errors=True,
+        record_video = os.environ.get(
+            "PLAYWRIGHT_RECORD_VIDEO", "true"
+        ).lower() not in (
+            "0",
+            "false",
+            "no",
         )
+        context_kwargs = {
+            "viewport": {"width": 1280, "height": 720},
+            "ignore_https_errors": True,
+        }
+        if record_video:
+            VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
+            context_kwargs["record_video_dir"] = str(VIDEOS_DIR)
+            context_kwargs["record_video_size"] = {"width": 1280, "height": 720}
+        self.context = self.browser.new_context(**context_kwargs)
 
         def _on_request(req):
             if req.url.startswith(self.live_server_url):
@@ -190,18 +208,55 @@ class PlaywrightE2ETestCase(StaticLiveServerTestCase):
         self.page = self.context.new_page()
         self.page.set_default_timeout(15000)
 
+    def _has_test_failed(self):
+        outcome = getattr(self, "_outcome", None)
+        if outcome is None:
+            return False
+        if hasattr(outcome, "errors") and outcome.errors:
+            if any(exc_info is not None for _, exc_info in outcome.errors):
+                return True
+        result = getattr(outcome, "result", None)
+        if result is not None:
+            for collection in (
+                getattr(result, "failures", []),
+                getattr(result, "errors", []),
+            ):
+                for test_case, _ in collection:
+                    if (
+                        test_case is self
+                        or getattr(test_case, "test_case", None) is self
+                    ):
+                        return True
+        return False
+
     def tearDown(self):
+        test_failed = self._has_test_failed()
+        video = None
         if hasattr(self, "page") and self.page is not None:
             try:
+                video = self.page.video
                 deadline = time.monotonic() + 5.0
                 while self._in_flight_requests and time.monotonic() < deadline:
                     self.page.wait_for_timeout(50)
-                self.page.goto("about:blank")
+                if not test_failed:
+                    self.page.goto("about:blank")
             except Exception:
                 pass
         if hasattr(self, "context") and self.context is not None:
             try:
                 self.context.close()
+            except Exception:
+                pass
+        if video is not None:
+            try:
+                if test_failed:
+                    VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
+                    target_path = (
+                        VIDEOS_DIR
+                        / f"{self.__class__.__name__}.{self._testMethodName}.webm"
+                    )
+                    video.save_as(str(target_path))
+                video.delete()
             except Exception:
                 pass
         with _DB_LOCK:

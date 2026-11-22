@@ -18,3 +18,4 @@ coverage.xml
 .auto-claude/
 
 /cache/
+/test-results/

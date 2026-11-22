@@ -127,6 +127,14 @@ jobs:
         run: |
           ./manage.py test --tag=e2e -v 2
 
+      - name: Upload Playwright videos on failure
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-videos
+          path: test-results/videos
+          if-no-files-found: ignore
+
   publish:
     needs: [quality, test, e2e-tests]
     runs-on: ubuntu-latest
