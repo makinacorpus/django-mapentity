@@ -222,6 +222,9 @@ class AutocompleteMixin:
             # Handle invalid page_size parameter by defaulting to 10
             page_size = 10
 
+        if not queryset.ordered:
+            # default ordering
+            queryset = queryset.order_by("pk")
         paginator = Paginator(queryset, page_size)
         paginated_qs = paginator.get_page(page_number)
         return paginated_qs, paginated_qs.has_next()
