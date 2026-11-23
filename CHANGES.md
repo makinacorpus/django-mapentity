@@ -4,6 +4,21 @@ CHANGELOG
 9.0.4+dev      (XXXX-XX-XX)
 ---------------------------
 
+**Bug fixes**
+
+- Fix hover on map and feature highlight on list
+- Fix feature highlight on detail map
+- Fix zoom control
+- Fix picto over map layer control
+- Fix layer control bouton surface
+- Fix filters
+
+**Improvements**
+
+- Better style for points (border circle and opacity)
+- Improve cache for MVT and decorators
+- Avoid logs console
+
 
 9.0.4          (2026-10-19)
 ---------------------------
