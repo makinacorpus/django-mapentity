@@ -269,6 +269,7 @@ class MaplibreMapentityContext {
         if (context.maplayers) {
             const layers = context.maplayers;
             const layerLabels = document.querySelectorAll('.layer-switcher-menu label');
+            const inputsToTrigger = [];
 
             layerLabels.forEach(label => {
                 const input = label.querySelector('input');
@@ -279,8 +280,12 @@ class MaplibreMapentityContext {
 
                 if (isRestored) {
                     input.checked = true;
-                    input.dispatchEvent(new Event("change"));
+                    inputsToTrigger.push(input);
                 }
+            });
+
+            inputsToTrigger.forEach(input => {
+                input.dispatchEvent(new Event("change"));
             });
         }
 

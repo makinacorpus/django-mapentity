@@ -100,6 +100,7 @@ class MaplibreMapListSync {
         }
         this._formSetBounds();
         this._reloadList();
+        this.map?.fire('mapentity:filterChanged');
     }
 
     /**
@@ -116,6 +117,7 @@ class MaplibreMapListSync {
             this.togglableFilter.fields = {};
             this.togglableFilter.setsubmit();
         }
+        this.map?.fire('mapentity:filterChanged');
     }
 
     /**
