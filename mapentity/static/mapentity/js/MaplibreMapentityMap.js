@@ -2,9 +2,78 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('entity:map:ready', function(e) {
         const { map, objectsLayer, context, TILES, bounds, mapentityContext, layerManager, layerUrl, mvtUrl, tilejsonUrl } = e.detail;
+        const mapInstance = map.getMap();
 
         // Initialize objectsLayer immediately to catch events early
-        objectsLayer.initialize(map.getMap());
+        objectsLayer.initialize(mapInstance);
+
+        // Prefetch base layers and overlays in parallel before/during map initialization
+        const baseLayersData = window.SETTINGS.map?.baseLayers || {};
+        const { base_layers = [], overlay_layers = [] } = baseLayersData;
+
+        const _prefetchLayerConfigs = (layers, isBaseLayer) => {
+            const prefix = isBaseLayer ? 'mapbox-base-' : 'mapbox-overlay-';
+            return (layers || []).map(layer => {
+                const config = {
+                    id: prefix + layer.slug,
+                    url: layer.url,
+                    isBaseLayer,
+                    attribution: layer.attribution || '',
+                };
+                const dataPromise = fetch(layer.url)
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        return res.json();
+                    })
+                    .catch(err => {
+                        console.error(`Unable to load layer from ${layer.url}:`, err);
+                        return null;
+                    });
+                return { name: layer.name, config, dataPromise };
+            });
+        };
+
+        const prefetchedBaseLayers = _prefetchLayerConfigs(base_layers, true);
+        const prefetchedOverlayLayers = _prefetchLayerConfigs(overlay_layers, false);
+
+        // On detail view, center on server-provided extent immediately and prefetch feature GeoJSON in parallel
+        let hasInitialDetailExtent = false;
+        let detailFeaturePromise = null;
+        if (context.viewname === 'detail') {
+            const detailMapEl = document.getElementById('detailmap');
+            const hasUrlContext = Boolean(getURLParameter('context'));
+            if (detailMapEl && !hasUrlContext) {
+                const rawExtent = detailMapEl.getAttribute('data-mapextent');
+                if (rawExtent && rawExtent !== 'null') {
+                    try {
+                        const parsedExtent = JSON.parse(rawExtent);
+                        // latlngbounds returns [[minLat, minLng], [maxLat, maxLng]]; MapLibre expects [[minLng, minLat], [maxLng, maxLat]]
+                        if (Array.isArray(parsedExtent) && parsedExtent.length === 2 &&
+                            Array.isArray(parsedExtent[0]) && Array.isArray(parsedExtent[1]) &&
+                            Number.isFinite(parsedExtent[0][0]) && Number.isFinite(parsedExtent[0][1]) &&
+                            Number.isFinite(parsedExtent[1][0]) && Number.isFinite(parsedExtent[1][1])) {
+                            mapInstance.fitBounds(
+                                [[parsedExtent[0][1], parsedExtent[0][0]], [parsedExtent[1][1], parsedExtent[1][0]]],
+                                { padding: 50, maxZoom: 16, duration: 0, animate: false }
+                            );
+                            hasInitialDetailExtent = true;
+                        }
+                    } catch (err) {
+                        console.warn('MaplibreMapentityMap: failed to parse data-mapextent', err);
+                    }
+                }
+            }
+            const featureUrl = detailMapEl ? detailMapEl.getAttribute('data-feature-url') : null;
+            const pk = document.body.getAttribute('data-pk');
+            if (featureUrl && pk) {
+                detailFeaturePromise = fetch(featureUrl).then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.json();
+                });
+            }
+        }
 
         // Initialize additional layers
         window.SETTINGS.layers.forEach((model) => {
@@ -33,40 +102,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     displayPopup: true,
                 });
 
-                additionalObjectsLayer.initialize(map.getMap());
+                additionalObjectsLayer.initialize(mapInstance);
                 additionalObjectsLayer.registerLazyLayer(modelname, category, nameHTML, primaryKey, layerUrl);
             }
         });
 
-        map.getMap().on('load', async function() {
+        mapInstance.on('load', async function() {
 
-            // Loading base layers first from settings
-            const baseLayersData = window.SETTINGS.map?.baseLayers || {};
-            const { base_layers, overlay_layers } = baseLayersData;
+            // Await prefetched base layers and overlays in parallel, then register in exact order
+            const [baseDataList, overlayDataList] = await Promise.all([
+                Promise.all(prefetchedBaseLayers.map(item => item.dataPromise)),
+                Promise.all(prefetchedOverlayLayers.map(item => item.dataPromise)),
+            ]);
 
-            if (base_layers) {
-                for (const layer of base_layers) {
-                    await layerManager.addLayerFromUrl(layer.name, {
-                        id: 'mapbox-base-' + layer.slug,
-                        url: layer.url,
-                        isBaseLayer: true,
-                        attribution: layer.attribution || ''
-                    });
-                }
-            }
+            prefetchedBaseLayers.forEach((item, idx) => {
+                layerManager.addLayerFromData(item.name, item.config, baseDataList[idx]);
+            });
+            prefetchedOverlayLayers.forEach((item, idx) => {
+                layerManager.addLayerFromData(item.name, item.config, overlayDataList[idx]);
+            });
 
-            if (overlay_layers) {
-                for (const layer of overlay_layers) {
-                    await layerManager.addLayerFromUrl(layer.name, {
-                        id: 'mapbox-overlay-' + layer.slug,
-                        url: layer.url,
-                        isBaseLayer: false,
-                        attribution: layer.attribution || ''
-                    });
-                }
-            }
-
-            map.getMap().addControl(new MaplibreLayerControl(layerManager), 'top-right');
+            mapInstance.addControl(new MaplibreLayerControl(layerManager), 'top-right');
 
             const mergedData = Object.assign({}, context, {
                 map,
@@ -77,6 +133,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 tilejsonUrl,
                 layerManager,
                 context,
+                hasInitialDetailExtent,
+                detailFeaturePromise,
             });
 
             // Expose the instance
@@ -540,13 +598,231 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    /**
+     * Collects GeoJSON geometry types recursively (including inside GeometryCollection).
+     * @param {Object} geom - GeoJSON geometry
+     * @param {Set<string>} foundTypes - Set to populate
+     */
+    function _collectGeometryTypes(geom, foundTypes) {
+        if (!geom || !geom.type) return;
+        if (geom.type === 'GeometryCollection') {
+            (geom.geometries || []).forEach(g => _collectGeometryTypes(g, foundTypes));
+        } else {
+            foundTypes.add(geom.type);
+        }
+    }
+
+    /**
+     * Renders dedicated foreground MapLibre layers (with contrasting halo) for the
+     * current object on the detail map using its fetched GeoJSON.
+     * @returns {{ layerIds: string[], markers: Array }}
+     */
+    function _renderDetailObjectLayer(mapInstance, featureGeojson, pkVal, objectsLayer) {
+        const result = { layerIds: [], markers: [] };
+        if (!featureGeojson) return result;
+
+        // Normalize GeoJSON and ensure feature id / properties.id are populated
+        let normalizedGeojson;
+        if (featureGeojson.type === 'Feature') {
+            normalizedGeojson = {
+                ...featureGeojson,
+                id: featureGeojson.id ?? pkVal,
+                properties: { ...(featureGeojson.properties || {}), id: featureGeojson.properties?.id ?? pkVal },
+            };
+        } else if (featureGeojson.type === 'FeatureCollection' && Array.isArray(featureGeojson.features)) {
+            normalizedGeojson = {
+                ...featureGeojson,
+                features: featureGeojson.features.map(f => ({
+                    ...f,
+                    id: f.id ?? pkVal,
+                    properties: { ...(f.properties || {}), id: f.properties?.id ?? pkVal },
+                })),
+            };
+        } else if (featureGeojson.type && featureGeojson.coordinates) {
+            normalizedGeojson = {
+                type: 'Feature',
+                id: pkVal,
+                geometry: featureGeojson,
+                properties: { id: pkVal },
+            };
+        } else {
+            return result;
+        }
+
+        const foundTypes = new Set();
+        if (normalizedGeojson.type === 'Feature') {
+            _collectGeometryTypes(normalizedGeojson.geometry, foundTypes);
+        } else if (normalizedGeojson.type === 'FeatureCollection') {
+            normalizedGeojson.features.forEach(f => _collectGeometryTypes(f.geometry, foundTypes));
+        }
+        if (foundTypes.size === 0) return result;
+
+        const sourceId = 'detail-object-' + pkVal;
+        if (!mapInstance.getSource(sourceId)) {
+            mapInstance.addSource(sourceId, {
+                type: 'geojson',
+                data: normalizedGeojson,
+            });
+        } else {
+            mapInstance.getSource(sourceId).setData(normalizedGeojson);
+        }
+
+        const style = objectsLayer.options.style || {};
+        const detailStyle = objectsLayer.options.detailStyle || {};
+        const isDetailColorExpression = Array.isArray(detailStyle.color);
+        const detailColor = isDetailColorExpression
+            ? (detailStyle.default_color || '#FF5E00')
+            : (detailStyle.color || '#FF5E00');
+        const detailRgba = parseColor(detailColor);
+        const detailRgbaStr = detailRgba
+            ? `rgba(${detailRgba[0]},${detailRgba[1]},${detailRgba[2]},${detailRgba[3]})`
+            : detailColor;
+
+        const haloColor = detailStyle.haloColor || '#ffffff';
+        const baseWeight = style.weight ?? 5;
+        const detailWidth = Math.max(detailStyle.weight ?? 5, baseWeight + 2);
+        const detailOpacity = detailStyle.opacity ?? 1.0;
+        const detailFillOpacity = detailStyle.fillOpacity ?? Math.min((style.fillOpacity ?? 0.5) + 0.15, 0.75);
+        const detailPointRadius = detailStyle.pointRadius ?? detailStyle.radius ?? ((style.pointRadius ?? style.radius ?? 8) + 4);
+        const detailPointStrokeWidth = detailStyle.pointWeight ?? Math.max((style.pointWeight ?? 2) + 1, 3);
+        const detailPointFillOpacity = detailStyle.pointFillOpacity ?? 0.75;
+
+        // Match visibility of the parent model layer if it was already toggled off
+        const existingLayerIds = Object.values(objectsLayer._current_objects || {}).flat();
+        const firstExistingLayer = existingLayerIds.find(id => mapInstance.getLayer(id));
+        const currentVisibility = firstExistingLayer
+            ? (mapInstance.getLayoutProperty(firstExistingLayer, 'visibility') || 'visible')
+            : 'visible';
+
+        const addLayerIfMissing = (layerDef) => {
+            if (!mapInstance.getLayer(layerDef.id)) {
+                mapInstance.addLayer(layerDef);
+            }
+            result.layerIds.push(layerDef.id);
+        };
+
+        if (foundTypes.has('Polygon') || foundTypes.has('MultiPolygon')) {
+            const polyFilter = ['any',
+                ['==', ['geometry-type'], 'Polygon'],
+                ['==', ['geometry-type'], 'MultiPolygon']
+            ];
+            addLayerIfMissing({
+                id: `${sourceId}-polygon-fill`,
+                type: 'fill',
+                source: sourceId,
+                filter: polyFilter,
+                layout: { visibility: currentVisibility },
+                paint: {
+                    'fill-color': detailRgbaStr,
+                    'fill-opacity': detailFillOpacity,
+                }
+            });
+            addLayerIfMissing({
+                id: `${sourceId}-polygon-halo`,
+                type: 'line',
+                source: sourceId,
+                filter: polyFilter,
+                layout: { 'line-join': 'round', 'line-cap': 'round', visibility: currentVisibility },
+                paint: {
+                    'line-color': haloColor,
+                    'line-width': detailWidth + 4,
+                    'line-opacity': 0.85,
+                }
+            });
+            addLayerIfMissing({
+                id: `${sourceId}-polygon-stroke`,
+                type: 'line',
+                source: sourceId,
+                filter: polyFilter,
+                layout: { 'line-join': 'round', 'line-cap': 'round', visibility: currentVisibility },
+                paint: {
+                    'line-color': detailColor,
+                    'line-width': detailWidth,
+                    'line-opacity': detailOpacity,
+                }
+            });
+        }
+
+        if (foundTypes.has('LineString') || foundTypes.has('MultiLineString')) {
+            const lineFilter = ['any',
+                ['==', ['geometry-type'], 'LineString'],
+                ['==', ['geometry-type'], 'MultiLineString']
+            ];
+            addLayerIfMissing({
+                id: `${sourceId}-line-halo`,
+                type: 'line',
+                source: sourceId,
+                filter: lineFilter,
+                layout: { 'line-join': 'round', 'line-cap': 'round', visibility: currentVisibility },
+                paint: {
+                    'line-color': haloColor,
+                    'line-width': detailWidth + 4,
+                    'line-opacity': 0.85,
+                }
+            });
+            addLayerIfMissing({
+                id: `${sourceId}-lines`,
+                type: 'line',
+                source: sourceId,
+                filter: lineFilter,
+                layout: { 'line-join': 'round', 'line-cap': 'round', visibility: currentVisibility },
+                paint: {
+                    'line-color': detailColor,
+                    'line-width': detailWidth,
+                    'line-opacity': detailOpacity,
+                }
+            });
+        }
+
+        if (foundTypes.has('Point') || foundTypes.has('MultiPoint')) {
+            const pointFilter = ['any',
+                ['==', ['geometry-type'], 'Point'],
+                ['==', ['geometry-type'], 'MultiPoint']
+            ];
+            addLayerIfMissing({
+                id: `${sourceId}-point-halo`,
+                type: 'circle',
+                source: sourceId,
+                filter: pointFilter,
+                layout: { visibility: currentVisibility },
+                paint: {
+                    'circle-radius': detailPointRadius + 4,
+                    'circle-color': haloColor,
+                    'circle-opacity': 0.9,
+                    'circle-stroke-width': 0,
+                }
+            });
+            addLayerIfMissing({
+                id: `${sourceId}-points`,
+                type: 'circle',
+                source: sourceId,
+                filter: pointFilter,
+                layout: { visibility: currentVisibility },
+                paint: {
+                    'circle-radius': detailPointRadius,
+                    'circle-color': detailRgbaStr,
+                    'circle-opacity': detailPointFillOpacity,
+                    'circle-stroke-color': detailColor,
+                    'circle-stroke-width': detailPointStrokeWidth,
+                    'circle-stroke-opacity': 1.0,
+                }
+            });
+        }
+
+        return result;
+    }
+
     // Earphone for detailed view
     window.addEventListener('entity:map:detail', function(e) {
-        const { map, objectsLayer, modelname, bounds, layerUrl, tilejsonUrl, layerManager, context } = e.detail;
+        const {
+            map, objectsLayer, modelname, bounds, layerUrl, tilejsonUrl, layerManager, context,
+            hasInitialDetailExtent, detailFeaturePromise
+        } = e.detail;
         const mapentityContext = window.MapEntity.currentMap.mapentityContext;
 
         // Context restoration (view and layers)
         const mapViewContext = getURLParameter("context");
+        const hasUrlContext = Boolean(mapViewContext);
         if (mapViewContext) {
             // Unification: store the URL context in localStorage, then restore normally
             mapentityContext.saveContextToLocalStorage(mapViewContext, { prefix: 'detail' });
@@ -554,6 +830,7 @@ document.addEventListener('DOMContentLoaded', function() {
         mapentityContext.restoreFullContext(map.getMap(), null, {
             prefix: 'detail',
             objectsname: modelname,
+            skipMapView: !hasUrlContext && Boolean(hasInitialDetailExtent),
         });
 
         // Collect secondary geometries for the global fitBounds
@@ -568,87 +845,94 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        if (mapViewContext && mapViewContext.print) {
+            const specified = window.SETTINGS.map.styles.print[modelname];
+            if (specified) {
+                objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
+            }
+        }
+
+        const pk = document.body.getAttribute('data-pk');
+        let pkVal = pk;
+        if (pk && /^\d+$/.test(pk)) {
+            pkVal = parseInt(pk, 10);
+        }
+
+        const mapInstance = map.getMap();
+        const featureUrl = detailMapEl ? detailMapEl.getAttribute('data-feature-url') : null;
+
         if (tilejsonUrl) {
-            if (mapViewContext && mapViewContext.print) {
-                const specified = window.SETTINGS.map.styles.print[modelname];
-                if (specified) {
-                    objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
-                }
-            }
-
-            // Load the layer via TileJSON (MVT)
-            objectsLayer.loadMVT(tilejsonUrl);
-
-            const pk = document.body.getAttribute('data-pk');
-            let pkVal = pk;
-            if (pk && /^\d+$/.test(pk)) {
-                pkVal = parseInt(pk, 10);
-            }
-
-            if (pkVal) {
-                // Wait for MVT tiles to render before selecting
-                // setFeatureState only works if the feature is present in a rendered tile
-                const mapInstance_ = map.getMap();
-                const trySelect = () => {
-                    objectsLayer.select(pkVal);
-                };
-                // idle' triggers when all sources and tiles are loaded and rendered
-                mapInstance_.once('idle', trySelect);
-            }
-
-            // Retrieve the geometry of the current object via the feature URL for fitBounds and markers
-            const featureUrl = detailMapEl ? detailMapEl.getAttribute('data-feature-url') : null;
-            const mapInstance = map.getMap();
-
-            // Utility function to save extra layers/markers in the current object's group
-            const _registerExtrasInGroup = (extraResult, endpointResult) => {
-                const groupKey = objectsLayer.primaryKey;
-                const allExtraLayerIds = [
-                    ...(extraResult ? extraResult.layerIds : []),
-                    ...(endpointResult ? endpointResult.layerIds : []),
-                ];
-                const allExtraMarkers = [
-                    ...(extraResult ? extraResult.markers : []),
-                    ...(endpointResult ? endpointResult.markers : []),
-                ];
-                if (allExtraLayerIds.length > 0 || allExtraMarkers.length > 0) {
-                    layerManager.addToGroup(groupKey, allExtraLayerIds, allExtraMarkers);
-                }
-            };
-
+            // Pre-exclude current object before loadMVT so MapLibre builds the initial filter in one pass
             if (featureUrl && pkVal) {
-                fetch(featureUrl)
-                    .then(response => response.json())
-                    .then(featureGeojson => {
-                        // Display secondary geometries
-                        const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
-
-                        // Add green/red markers to the ends of the lines
-                        const endpointResult = _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal);
-
-                        // Save layers/markers extracted to the current object group
-                        _registerExtrasInGroup(extraResult, endpointResult);
-
-                        // Center the map on the bounding box of ALL geometries
-                        _fitBoundsFromGeojson(mapInstance, featureGeojson, parsedExtraGeometries);
-                    })
-                    .catch(err => {
-                        console.warn('MaplibreMapentityMap: failed to fetch feature geojson', err);
-                        const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
-                        _registerExtrasInGroup(extraResult, null);
-                    });
-            } else {
-                const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
-                _registerExtrasInGroup(extraResult, null);
+                objectsLayer.excludedIds.add(pkVal);
             }
-        } else {
-            // No tilejsonUrl, display extra geometries anyway
-            const mapInstance = map.getMap();
-            const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+            // Load the layer via TileJSON (MVT) with other objects dimmed in detail view
+            objectsLayer.loadMVT(tilejsonUrl);
+        }
+
+        // Utility function to save extra/detail layers and markers in the current object's group
+        const _registerExtrasInGroup = (...results) => {
             const groupKey = objectsLayer.primaryKey;
-            if (extraResult.layerIds.length > 0 || extraResult.markers.length > 0) {
-                layerManager.addToGroup(groupKey, extraResult.layerIds, extraResult.markers);
+            const allExtraLayerIds = results.flatMap(r => (r && r.layerIds) ? r.layerIds : []);
+            const allExtraMarkers = results.flatMap(r => (r && r.markers) ? r.markers : []);
+            if (allExtraLayerIds.length > 0 || allExtraMarkers.length > 0) {
+                layerManager.addToGroup(groupKey, allExtraLayerIds, allExtraMarkers);
             }
+        };
+
+        // Reuse the prefetched feature GeoJSON if available, otherwise fetch it now
+        const featureRequest = detailFeaturePromise || (
+            (featureUrl && pkVal)
+                ? fetch(featureUrl).then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.json();
+                })
+                : null
+        );
+
+        if (featureRequest && pkVal) {
+            featureRequest
+                .then(featureGeojson => {
+                    // Display secondary geometries
+                    const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+
+                    // Render dedicated foreground layers for the current object
+                    const detailObjectResult = _renderDetailObjectLayer(mapInstance, featureGeojson, pkVal, objectsLayer);
+
+                    // If rendering dedicated foreground layers failed, restore the object in MVT and select it
+                    if (detailObjectResult.layerIds.length === 0 && tilejsonUrl) {
+                        objectsLayer.includeFeatures([pkVal]);
+                        objectsLayer.select(pkVal);
+                    }
+
+                    // Add green/red markers and directional arrows to the ends of the lines
+                    const endpointResult = _addDetailLineEndpointMarkersFromGeojson(mapInstance, featureGeojson, pkVal);
+
+                    // Save layers/markers to the current object group
+                    _registerExtrasInGroup(extraResult, detailObjectResult, endpointResult);
+
+                    // Refine bounds only if initial data-mapextent was unavailable or secondary geometries exist
+                    if (!hasInitialDetailExtent || parsedExtraGeometries.length > 0) {
+                        _fitBoundsFromGeojson(mapInstance, featureGeojson, parsedExtraGeometries);
+                    }
+                })
+                .catch(err => {
+                    console.warn('MaplibreMapentityMap: failed to fetch feature geojson', err);
+                    if (tilejsonUrl) {
+                        objectsLayer.includeFeatures([pkVal]);
+                        mapInstance.once('idle', () => objectsLayer.select(pkVal));
+                    }
+                    const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+                    _registerExtrasInGroup(extraResult);
+                });
+        } else {
+            if (tilejsonUrl && pkVal) {
+                mapInstance.once('idle', () => objectsLayer.select(pkVal));
+            }
+            const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
+            _registerExtrasInGroup(extraResult);
         }
 
         // Controls

@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         primaryKey: primaryKey,
         isLazy: false,
         displayPopup: true,
+        isDetailView: context.viewname === 'detail',
     });
 
     const mapReadyEvent = new CustomEvent('entity:map:ready', {
