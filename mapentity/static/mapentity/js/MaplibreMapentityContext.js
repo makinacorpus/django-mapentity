@@ -94,14 +94,22 @@ class MaplibreMapentityContext {
 
     /**
      * Load the complete map context from local storage.
-     * @param kwargs {Object} - An object containing optional parameters, such as 'prefix' for the storage key prefix.
+     * @param kwargs {Object} - An object containing optional parameters, such as 'prefix' or 'prefixes' for the storage key prefix(es).
      * @returns {any|null} - Returns the context loaded from local storage, or null if no context is found.
      */
     loadFullContext(kwargs = {}) {
-        const prefix = kwargs.prefix || '';
-        const context = localStorage.getItem(prefix + 'map-context');
-        if (context) {
-            return JSON.parse(context);
+        const prefixes = Array.isArray(kwargs.prefixes)
+            ? kwargs.prefixes
+            : [kwargs.prefix || ''];
+        for (const prefix of prefixes) {
+            const context = localStorage.getItem(prefix + 'map-context');
+            if (context) {
+                try {
+                    return JSON.parse(context);
+                } catch (e) {
+                    console.warn(`Failed to parse map context for prefix "${prefix}":`, e);
+                }
+            }
         }
         return null;
     }
@@ -271,12 +279,7 @@ class MaplibreMapentityContext {
 
                 if (isRestored) {
                     input.checked = true;
-                    if (input.type === 'radio') {
-                        const layerId = input.dataset.layerId;
-                        this.layerManager.toggleLayer(layerId, true);
-                    } else {
-                        input.dispatchEvent(new Event("change"));
-                    }
+                    input.dispatchEvent(new Event("change"));
                 }
             });
         }

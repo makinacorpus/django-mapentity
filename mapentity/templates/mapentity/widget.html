@@ -168,11 +168,15 @@
                 // Restauration du contexte pour le widget
                 const mapentityContext = new MaplibreMapentityContext(bounds, layerManager);
                 const mapViewContext = getURLParameter("context");
+                const hasUrlContext = Boolean(mapViewContext);
+                const initialGeomValue = document.getElementById(fieldId)?.value?.trim();
+                const hasInitialGeometry = Boolean(initialGeomValue && initialGeomValue !== 'null');
                 if (mapViewContext) {
                     layerManager.restoredContext = { restoredFromUrl: true };
                 }
                 mapentityContext.restoreFullContext(map.getMap(), mapViewContext, {
-                    prefix: 'widget-' + fieldId,
+                    prefixes: ['list', 'detail'],
+                    skipMapView: !hasUrlContext && hasInitialGeometry,
                 });
 
                 map.getMap().addControl(new MaplibreFileLayerControl({

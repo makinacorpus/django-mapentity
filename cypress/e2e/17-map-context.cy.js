@@ -429,4 +429,77 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
                 .should('be.checked')
         })
     })
+
+    describe('Form view (Add)', () => {
+        beforeEach(() => {
+            cy.login()
+            cy.mockTiles()
+            cy.clearLocalStorage()
+        })
+
+        it('should restore the list map position and layers on the add form', () => {
+            const targetLng = 3.0
+            const targetLat = 45.0
+            const targetZoom = 12
+
+            cy.visit('/dummymodel/list/')
+            waitForMapReady()
+
+            openLayerSwitcher()
+
+            // Wait for layers and switch base layer + overlay
+            cy.get('.layer-switcher-menu input[type="radio"]', {timeout: 10000})
+                .should('have.length.greaterThan', 1)
+            cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]', {timeout: 10000})
+                .should('have.length.greaterThan', 1)
+
+            cy.get('.layer-switcher-menu input[type="radio"]').eq(1).check({force: true})
+            cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').first()
+                .check({force: true})
+
+            // Wait for MapEntity.currentMap to be ready and move/zoom the list map
+            cy.window({timeout: 10000}).should((win) => {
+                expect(win.MapEntity?.currentMap?.map?.getMap()).to.exist
+                expect(win.MapEntity?.currentMap?.context?.layerManager?.restoredContext).to.exist
+            })
+
+            cy.window().then((win) => {
+                const map = win.MapEntity.currentMap.map.getMap()
+                map.jumpTo({center: [targetLng, targetLat], zoom: targetZoom})
+            })
+
+            // Wait for listmap-context to be saved with the new mapview
+            cy.window({timeout: 10000}).should((win) => {
+                const stored = JSON.parse(win.localStorage.getItem('listmap-context'))
+                expect(stored, 'listmap-context').to.exist
+                expect(stored.mapview.lng).to.be.closeTo(targetLng, 0.01)
+                expect(stored.mapview.lat).to.be.closeTo(targetLat, 0.01)
+                expect(stored.mapview.zoom).to.be.closeTo(targetZoom, 0.1)
+            })
+
+            // Click on the Add button from the list view
+            cy.get('a.btn-success[href*="/add/"]').click()
+            cy.url().should('include', '/dummymodel/add/')
+            waitForMapReady()
+
+            // Wait for the widget map to restore the list position
+            cy.window({timeout: 10000}).should((win) => {
+                expect(win.mapentity_map, 'widget map').to.exist
+                const center = win.mapentity_map.getCenter()
+                const zoom = win.mapentity_map.getZoom()
+                expect(center.lng).to.be.closeTo(targetLng, 0.01)
+                expect(center.lat).to.be.closeTo(targetLat, 0.01)
+                expect(zoom).to.be.closeTo(targetZoom, 0.1)
+            })
+
+            // Verify base layer and overlay from list are also restored
+            openLayerSwitcher()
+            cy.get('.layer-switcher-menu input[type="radio"]', {timeout: 10000})
+                .should('have.length.greaterThan', 1)
+            cy.get('.layer-switcher-menu input[type="radio"]').first().should('not.be.checked')
+            cy.get('.layer-switcher-menu input[type="radio"]').eq(1).should('be.checked')
+            cy.get('.layer-switcher-menu label[data-overlay-type="loaded"] input[type="checkbox"]').first()
+                .should('be.checked')
+        })
+    })
 })
