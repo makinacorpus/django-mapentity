@@ -174,7 +174,12 @@ document.addEventListener('DOMContentLoaded', function() {
             map.getMap().on('layerManager:baseLayerAdded', saveContext);
             map.getMap().on('layerManager:overlayAdded', saveContext);
             map.getMap().on('layerManager:lazyOverlayAdded', saveContext);
+            map.getMap().on('layerManager:baseLayerChanged', saveContext);
+            map.getMap().on('layerManager:overlayVisibilityChanged', saveContext);
+            map.getMap().on('layerManager:lazyLayerVisibilityChanged', saveContext);
+            map.getMap().on('mapentity:filterChanged', saveContext);
             window.addEventListener('visibilitychange', saveContext);
+            window.addEventListener('pagehide', saveContext);
 
             window.dispatchEvent(new CustomEvent('entity:view:' + context.viewname, { detail: mergedData }));
             window.dispatchEvent(new CustomEvent('entity:map:' + context.viewname, { detail: mergedData }));
@@ -956,7 +961,11 @@ document.addEventListener('DOMContentLoaded', function() {
         map.getMap().on('layerManager:baseLayerAdded', saveContext);
         map.getMap().on('layerManager:overlayAdded', saveContext);
         map.getMap().on('layerManager:lazyOverlayAdded', saveContext);
+        map.getMap().on('layerManager:baseLayerChanged', saveContext);
+        map.getMap().on('layerManager:overlayVisibilityChanged', saveContext);
+        map.getMap().on('layerManager:lazyLayerVisibilityChanged', saveContext);
         window.addEventListener('visibilitychange', saveContext);
+        window.addEventListener('pagehide', saveContext);
     });
 
     // Listener for the list view

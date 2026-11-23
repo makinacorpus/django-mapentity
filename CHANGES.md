@@ -12,6 +12,7 @@ CHANGELOG
 - Fix picto over map layer control
 - Fix layer control bouton surface
 - Fix filters
+- Fix restore form context from list, then detail if not present
 
 **Improvements**
 

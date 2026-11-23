@@ -162,6 +162,8 @@ class MaplibreLayerControl {
                             this._map.moveLayer(layer);
                         }
                     });
+
+                    this.layerManager._fireEvent('baseLayerChanged', { name, id });
                 }
             });
         });
@@ -207,7 +209,10 @@ class MaplibreLayerControl {
                 // By default, the "Objects" category (current model layer) is always checked
                 const isRestored = labelText && restoredLayers.includes(labelText);
                 const isObjectsCategory = category === gettext('Objects');
-                input.checked = isObjectsCategory || isRestored;
+                input.checked = overlay.isVisible !== undefined
+                    ? overlay.isVisible
+                    : (isObjectsCategory || isRestored);
+                overlay.isVisible = input.checked;
 
                 label.appendChild(input);
                 label.insertAdjacentHTML('beforeend', ` ${labelHTML || ''}`);
@@ -220,7 +225,12 @@ class MaplibreLayerControl {
                 }
 
                 input.addEventListener('change', () => {
+                    overlay.isVisible = input.checked;
                     this.layerManager.toggleLayer(primaryKey, input.checked);
+                    this.layerManager._fireEvent('overlayVisibilityChanged', {
+                        primaryKey,
+                        visible: input.checked,
+                    });
                 });
             }
         }
