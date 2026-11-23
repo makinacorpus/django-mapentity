@@ -529,7 +529,7 @@ describe('Map Context - Base layer, overlays and current object layer', () => {
                     })
 
                     // Click on the Add button from the list view
-                    cy.get('a.btn-success[href*="/add/"]').click()
+                    cy.get('#list-panel a.btn-success[href*="/add/"]').click()
                     cy.url().should('include', '/dummymodel/add/')
                     waitForMapReady()
 
