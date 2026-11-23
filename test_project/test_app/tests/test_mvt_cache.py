@@ -1,4 +1,5 @@
 import time
+from unittest import mock
 
 from django.contrib.gis.geos import Point
 from django.core.cache import caches
@@ -6,6 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from mapentity.settings import app_settings
+from test_project.test_app.models import DummyModel
 from test_project.test_app.tests.factories import DummyModelFactory
 
 
@@ -88,3 +90,21 @@ class MVTCacheTest(TestCase):
         # But here we check that they don't share the same cache content incorrectly.
         # We can check that updating an object in one tile doesn't affect the other tile's last-modified if it's cached.
         # But easiest is just to check they can have different content.
+
+    def test_mvt_request_avoids_duplicate_latest_updated_query(self):
+        """Ensure mvt_etag and view_cache_response_content only compute latest_updated_with_count once per request."""
+        DummyModelFactory.create(name="Inside", geom=Point(0, 0, srid=4326))
+        url = reverse(
+            "test_app:dummymodel-drf-mvt", kwargs={"z": 10, "x": 512, "y": 512}
+        )
+
+        original = DummyModel.latest_updated_with_count
+        with mock.patch.object(
+            DummyModel,
+            "latest_updated_with_count",
+            wraps=original,
+        ) as mocked_latest:
+            response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mocked_latest.call_count, 1)

@@ -243,8 +243,9 @@ def mvt_etag(request, *args, **kwargs):
     except Exception:
         return None
     max_updated, count = qs.model.latest_updated_with_count(z=z, x=x, y=y)
-    if not hasattr(request, "_mvt_latest_cache"):
-        request._mvt_latest_cache = {}
-    request._mvt_latest_cache[(qs.model, z, x, y)] = (max_updated, count)
+    raw_request = getattr(request, "_request", request)
+    if not hasattr(raw_request, "_mvt_latest_cache"):
+        raw_request._mvt_latest_cache = {}
+    raw_request._mvt_latest_cache[(qs.model, z, x, y)] = (max_updated, count)
     raw = f"{max_updated.timestamp() if max_updated else '0'}:{count}"
     return hashlib.md5(raw.encode()).hexdigest()
