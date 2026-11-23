@@ -18,6 +18,7 @@ _DEFAULT_MAP_STYLES = {
         "arrowSize": 0.3,
         "arrowOpacity": 1,
         "arrowSpacing": 6,
+        "othersOpacityFactor": 0.6,
     },
     "others": {"opacity": 0.9, "fillOpacity": 0.5, "color": "yellow"},
     "filelayer": {

@@ -126,9 +126,15 @@ def view_cache_response_content():
                 view_model = self.model
                 language = self.request.LANGUAGE_CODE
                 z, x, y = kwargs.get("z"), kwargs.get("x"), kwargs.get("y")
-                latest_saved, count = view_model.latest_updated_with_count(
-                    z=z, x=x, y=y
-                )
+                raw_request = getattr(self.request, "_request", self.request)
+                mvt_cache = getattr(raw_request, "_mvt_latest_cache", None)
+                cache_key = (view_model, z, x, y) if is_mvt else None
+                if mvt_cache is not None and cache_key in mvt_cache:
+                    latest_saved, count = mvt_cache[cache_key]
+                else:
+                    latest_saved, count = view_model.latest_updated_with_count(
+                        z=z, x=x, y=y
+                    )
 
                 if latest_saved:
                     # Add MVT-specific cache key with tile coordinates
@@ -237,5 +243,8 @@ def mvt_etag(request, *args, **kwargs):
     except Exception:
         return None
     max_updated, count = qs.model.latest_updated_with_count(z=z, x=x, y=y)
+    if not hasattr(request, "_mvt_latest_cache"):
+        request._mvt_latest_cache = {}
+    request._mvt_latest_cache[(qs.model, z, x, y)] = (max_updated, count)
     raw = f"{max_updated.timestamp() if max_updated else '0'}:{count}"
     return hashlib.md5(raw.encode()).hexdigest()

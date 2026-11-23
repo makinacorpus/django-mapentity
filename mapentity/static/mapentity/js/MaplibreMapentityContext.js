@@ -234,7 +234,9 @@ class MaplibreMapentityContext {
             console.warn("No context found.");
             // Mark as "restored" even without context so that saveContext can work
             this.layerManager.restoredContext = { empty: true };
-            map.fitBounds(this.bounds, { animate: false });
+            if (!kwargs.skipMapView) {
+                map.fitBounds(this.bounds, { animate: false });
+            }
             return;
         }
 
@@ -247,8 +249,10 @@ class MaplibreMapentityContext {
              await load_filter_form(() => this.restoreFilterContext(filter, formData));
          }
 
-        // restore the map view from the context.
-        this.restoreMapView(map, context, kwargs);
+        // restore the map view from the context unless explicitly skipped (e.g. detail view already fitted to object extent).
+        if (!kwargs.skipMapView) {
+            this.restoreMapView(map, context, kwargs);
+        }
 
         // Store and restore context in layerManager for async layers
         this.layerManager.restoredContext = context;
