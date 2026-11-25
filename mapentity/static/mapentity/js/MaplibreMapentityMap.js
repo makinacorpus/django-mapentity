@@ -850,7 +850,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        if (mapViewContext && mapViewContext.print) {
+        const isPrint = Boolean(mapViewContext && mapViewContext.print);
+
+        if (isPrint) {
             const specified = window.SETTINGS.map.styles.print[modelname];
             if (specified) {
                 objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
@@ -866,13 +868,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const mapInstance = map.getMap();
         const featureUrl = detailMapEl ? detailMapEl.getAttribute('data-feature-url') : null;
 
-        if (tilejsonUrl) {
-            // Pre-exclude current object before loadMVT so MapLibre builds the initial filter in one pass
-            if (featureUrl && pkVal) {
-                objectsLayer.excludedIds.add(pkVal);
+        // In print/capture mode on detail view, only display the current feature of the active layer
+        if (tilejsonUrl && !(isPrint && featureUrl && pkVal)) {
+            if (isPrint && pkVal) {
+                objectsLayer.loadMVT(tilejsonUrl);
+                objectsLayer.updateFromPks([pkVal]);
+            } else {
+                // Pre-exclude current object before loadMVT so MapLibre builds the initial filter in one pass
+                if (featureUrl && pkVal) {
+                    objectsLayer.excludedIds.add(pkVal);
+                }
+                // Load the layer via TileJSON (MVT) with other objects dimmed in detail view
+                objectsLayer.loadMVT(tilejsonUrl);
             }
-            // Load the layer via TileJSON (MVT) with other objects dimmed in detail view
-            objectsLayer.loadMVT(tilejsonUrl);
         }
 
         // Utility function to save extra/detail layers and markers in the current object's group
@@ -908,7 +916,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // If rendering dedicated foreground layers failed, restore the object in MVT and select it
                     if (detailObjectResult.layerIds.length === 0 && tilejsonUrl) {
-                        objectsLayer.includeFeatures([pkVal]);
+                        if (isPrint) {
+                            objectsLayer.loadMVT(tilejsonUrl);
+                            objectsLayer.updateFromPks([pkVal]);
+                        } else {
+                            objectsLayer.includeFeatures([pkVal]);
+                        }
                         objectsLayer.select(pkVal);
                     }
 
@@ -926,7 +939,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(err => {
                     console.warn('MaplibreMapentityMap: failed to fetch feature geojson', err);
                     if (tilejsonUrl) {
-                        objectsLayer.includeFeatures([pkVal]);
+                        if (isPrint) {
+                            objectsLayer.loadMVT(tilejsonUrl);
+                            objectsLayer.updateFromPks([pkVal]);
+                        } else {
+                            objectsLayer.includeFeatures([pkVal]);
+                        }
                         mapInstance.once('idle', () => objectsLayer.select(pkVal));
                     }
                     const extraResult = _renderExtraGeometries(mapInstance, parsedExtraGeometries);
