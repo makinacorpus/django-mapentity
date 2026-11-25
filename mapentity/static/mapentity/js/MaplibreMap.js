@@ -58,10 +58,15 @@ class MaplibreMap {
             locale: localeLanguage,
         });
 
-        // Ajouter les contrôles standards
+        // Add standard controls
         this.map.addControl(new maplibregl.NavigationControl(), 'top-left');
+        this._updateZoomOutButton();
+        this.map.on('zoom', () => this._updateZoomOutButton());
+        this.map.on('zoomend', () => this._updateZoomOutButton());
+        this.map.on('resize', () => this._updateZoomOutButton());
+        this.map.on('load', () => this._updateZoomOutButton());
         this.map.addControl(new maplibregl.FullscreenControl(), 'top-left');
-        // Contrôle de mesure
+        // Measure control
         this.map.addControl(new MaplibreMeasureControl(), 'top-left');
 
          const unit = this.scale;
@@ -74,16 +79,46 @@ class MaplibreMap {
     }
 
     /**
-     * Recupère l'instance de la carte MapLibre GL JS.
-     * @return {maplibregl.Map|null} - L'instance de la carte ou null si non initialisée.
+     * Compute the effective minimum zoom level taking maxBounds into account.
+     * MapLibre NavigationControl only compares getZoom() === getMinZoom(),
+     * without accounting for the constraint imposed by maxBounds.
+     * @private
+     * @return {number}
+     */
+    _getEffectiveMinZoom() {
+        const minZoom = this.map.getMinZoom();
+        if (this.map.transform && typeof this.map.transform.applyConstrain === 'function') {
+            return this.map.transform.applyConstrain(this.map.getCenter(), minZoom).zoom;
+        }
+        return minZoom;
+    }
+
+    /**
+     * Update the disabled state of the "-" zoom-out button using the effective minimum zoom.
+     * @private
+     */
+    _updateZoomOutButton() {
+        const zoomOutButton = this.container?.querySelector('.maplibregl-ctrl-zoom-out');
+        if (!zoomOutButton || !this.map) {
+            return;
+        }
+        const effectiveMinZoom = this._getEffectiveMinZoom();
+        const isMin = this.map.getZoom() <= effectiveMinZoom + 1e-4;
+        zoomOutButton.disabled = isMin;
+        zoomOutButton.setAttribute('aria-disabled', isMin.toString());
+    }
+
+    /**
+     * Get the MapLibre GL JS map instance.
+     * @return {maplibregl.Map|null} - The map instance or null if not initialized.
      */
     getMap() {
         return this.map;
     }
 
     /**
-     * Récupère le conteneur de la carte.
-     * @return {HTMLElement|null} - Le conteneur de la carte ou null si non initialisé.
+     * Get the map container element.
+     * @return {HTMLElement|null} - The map container or null if not initialized.
      */
     getContainer() {
         return this.container;
