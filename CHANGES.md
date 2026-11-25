@@ -1,12 +1,13 @@
 CHANGELOG
 =========
 
-9.0.5+dev      (XXXX-XX-X)
+9.0.6          (2026-11-25)
 ---------------------------
 
 **Improvements**
 
 - Map display on export exclude other features than the current one
+- Fix zoom control
 
 
 9.0.5          (2026-11-24)
