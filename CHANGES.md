@@ -4,6 +4,10 @@ CHANGELOG
 9.0.5+dev      (XXXX-XX-X)
 ---------------------------
 
+**Improvements**
+
+- Map display on export exclude other features than the current one
+
 
 9.0.5          (2026-11-24)
 ---------------------------
