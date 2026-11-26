@@ -17,8 +17,9 @@ coverage.xml
 .env
 .auto-claude/
 
-# Node / Cypress
+# Node / Cypress / Frontend build
 node_modules/
+mapentity/static/mapentity/dist/
 cypress/screenshots/
 cypress/videos/
 cypress/downloads/

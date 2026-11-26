@@ -308,3 +308,5 @@ class MaplibreLayerControl {
         elementsToRemove.forEach(el => el.remove());
     }
 }
+
+window.MaplibreLayerControl = MaplibreLayerControl;

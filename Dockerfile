@@ -1,3 +1,12 @@
+FROM node:22-bookworm-slim AS frontend
+
+WORKDIR /code/src
+COPY package.json package-lock.json ./
+RUN CYPRESS_INSTALL_BINARY=0 npm ci
+COPY frontend ./frontend
+COPY mapentity/static/mapentity ./mapentity/static/mapentity
+RUN npm run build
+
 FROM python:3.10-bookworm AS base
 
 RUN apt-get update -qq && apt-get install -y -qq \
@@ -12,6 +21,7 @@ RUN useradd -ms /bin/bash django
 RUN chown -R django:django /code
 
 COPY --chown=django:django . /code/src
+COPY --from=frontend --chown=django:django /code/src/mapentity/static/mapentity/dist /code/src/mapentity/static/mapentity/dist
 
 USER django
 RUN python3.10 -m venv /code/venv

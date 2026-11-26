@@ -177,3 +177,5 @@ class MaplibreFieldStore {
         return JSON.stringify(geoemtriesCollection);
     }
 }
+
+window.MaplibreFieldStore = MaplibreFieldStore;

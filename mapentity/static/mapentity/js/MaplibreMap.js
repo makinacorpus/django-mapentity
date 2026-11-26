@@ -125,3 +125,5 @@ class MaplibreMap {
     }
 
 }
+
+window.MaplibreMap = MaplibreMap;

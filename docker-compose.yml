@@ -5,6 +5,16 @@ services:
   screamshotter:
     image: makinacorpus/screamshotter:v2
 
+  frontend:
+    image: node:22-bookworm-slim
+    working_dir: /code/src
+    volumes:
+      - ./:/code/src
+    user: ${UID:-1000}:${GID:-1000}
+    environment:
+      - CYPRESS_INSTALL_BINARY=0
+    command: sh -c "[ -d node_modules/vite ] || npm ci; npm run watch"
+
   web:
     build:
       context: .

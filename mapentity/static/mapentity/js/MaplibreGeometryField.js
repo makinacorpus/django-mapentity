@@ -1545,3 +1545,5 @@ Called on each render frame to track real-time dragging.
         });
     }
 }
+
+window.MaplibreGeometryField = MaplibreGeometryField;

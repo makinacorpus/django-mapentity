@@ -271,3 +271,5 @@ class MaplibreMapListSync {
         });
     }
 }
+
+window.MaplibreMapListSync = MaplibreMapListSync;
