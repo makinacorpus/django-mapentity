@@ -38,6 +38,55 @@ jobs:
         run: |
           ruff format --check mapentity test_project
 
+  frontend-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install frontend dependencies
+        run: |
+          CYPRESS_INSTALL_BINARY=0 npm ci
+
+      - name: Check ESLint
+        run: |
+          npm run lint
+
+  frontend-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install frontend dependencies
+        run: |
+          CYPRESS_INSTALL_BINARY=0 npm ci
+
+      - name: Build frontend assets
+        run: |
+          npm run build
+
+      - name: Upload frontend bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-dist
+          path: mapentity/static/mapentity/dist
+          if-no-files-found: error
+
   test:
     runs-on: ubuntu-latest
     container:
@@ -90,6 +139,7 @@ jobs:
         fail_ci_if_error: true # optional (default = false)
 
   e2e-tests:
+    needs: [frontend-build]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -99,6 +149,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Download frontend bundle
+        uses: actions/download-artifact@v8
+        with:
+          name: frontend-dist
+          path: mapentity/static/mapentity/dist
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -142,10 +198,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
 
-      - name: Install frontend dependencies and build assets
+      - name: Install Cypress dependencies
         run: |
           npm ci
-          npm run build
 
       - name: Start Django server
         run: |
@@ -189,7 +244,7 @@ jobs:
           if-no-files-found: ignore
 
   publish:
-    needs: [quality, test, e2e-tests]
+    needs: [quality, frontend-lint, frontend-build, test, e2e-tests]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -201,6 +256,13 @@ jobs:
     if: ${{ github.event_name == 'release' && github.event.action == 'created' }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Download frontend bundle
+        uses: actions/download-artifact@v8
+        with:
+          name: frontend-dist
+          path: mapentity/static/mapentity/dist
+
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
@@ -212,18 +274,6 @@ jobs:
           sudo apt-get -qq update
           sudo apt-get -y install gettext
           django-admin compilemessages
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
-
-      - name: Build frontend assets
-        run: |
-          CYPRESS_INSTALL_BINARY=0 npm ci
-          npm run build
 
       - name: Build package
         run: |

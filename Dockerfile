@@ -1,12 +1,3 @@
-FROM node:22-bookworm-slim AS frontend
-
-WORKDIR /code/src
-COPY package.json package-lock.json ./
-RUN CYPRESS_INSTALL_BINARY=0 npm ci
-COPY frontend ./frontend
-COPY mapentity/static/mapentity ./mapentity/static/mapentity
-RUN npm run build
-
 FROM python:3.10-bookworm AS base
 
 RUN apt-get update -qq && apt-get install -y -qq \
@@ -16,19 +7,36 @@ RUN apt-get update -qq && apt-get install -y -qq \
     libldap2-dev libsasl2-dev gettext && \
     apt-get clean all && rm -rf /var/apt/lists/* && rm -rf /var/cache/apt/*
 
+# Install nvm and Node.js version from .nvmrc
+ENV NVM_DIR=/usr/local/nvm
+ENV NPM_CONFIG_CACHE=/tmp/.npm
+ARG NVM_VERSION=v0.40.3
+COPY .nvmrc /tmp/.nvmrc
+RUN mkdir -p "$NVM_DIR" && \
+    curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" | bash && \
+    . "$NVM_DIR/nvm.sh" && \
+    nvm install "$(cat /tmp/.nvmrc)" && \
+    nvm alias default "$(cat /tmp/.nvmrc)" && \
+    nvm use default && \
+    ln -s "$(dirname "$(nvm which default)")" "$NVM_DIR/current" && \
+    rm -f /tmp/.nvmrc && \
+    chmod -R a+rX "$NVM_DIR" && \
+    printf 'export NVM_DIR="%s"\n[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"\n' "$NVM_DIR" > /etc/profile.d/nvm.sh && \
+    cat /etc/profile.d/nvm.sh >> /etc/bash.bashrc
+ENV PATH="$NVM_DIR/current:$PATH"
+
 RUN mkdir -p /code
 RUN useradd -ms /bin/bash django
 RUN chown -R django:django /code
 
 COPY --chown=django:django . /code/src
-COPY --from=frontend --chown=django:django /code/src/mapentity/static/mapentity/dist /code/src/mapentity/static/mapentity/dist
 
 USER django
 RUN python3.10 -m venv /code/venv
 
 WORKDIR /code/src
 
-RUN  /code/venv/bin/pip install --no-cache-dir pip setuptools wheel -U
+RUN /code/venv/bin/pip install --no-cache-dir pip setuptools wheel -U
 # Install dev requirements
 RUN /code/venv/bin/pip3 install --no-cache-dir -e .[dev] -U
 
@@ -42,6 +50,7 @@ FROM base AS demo
 
 ENV DJANGO_SETTINGS_MODULE=test_project.settings.demo
 
+RUN CYPRESS_INSTALL_BINARY=0 npm ci && npm run build && rm -rf node_modules
 RUN /code/venv/bin/pip3 install gunicorn psycopg pymemcache
 RUN SECRET_KEY=temp /code/venv/bin/python ./manage.py compilemessages
 

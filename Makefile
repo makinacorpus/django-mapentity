@@ -68,15 +68,18 @@ messages: messages_python messages_js
 ###########################
 #        Frontend         #
 ###########################
-.PHONY: frontend_install frontend_build frontend_watch
+.PHONY: frontend_install frontend_build frontend_watch frontend_lint
 frontend_install:
-	npm ci
+	$(docker_compose) run --remove-orphans --no-deps --rm -e CYPRESS_INSTALL_BINARY=0 web npm ci
 
 frontend_build:
-	npm run build
+	$(docker_compose) run --remove-orphans --no-deps --rm web npm run build
 
 frontend_watch:
-	npm run watch
+	$(docker_compose) run --remove-orphans --no-deps --rm web npm run watch
+
+frontend_lint:
+	$(docker_compose) run --remove-orphans --no-deps --rm web npm run lint
 
 install_layers:
 	$(docker_compose) run --rm web ./manage.py install_layer osm --order=0
