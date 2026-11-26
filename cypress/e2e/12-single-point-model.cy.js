@@ -162,11 +162,9 @@ describe('SinglePointModel - Edit geometry', () => {
             if ($body.find('#id_edit_drag').length > 0) {
                 cy.get('#id_edit_drag').click();
 
-                // Try to drag the marker
-                cy.get('.maplibregl-marker').first()
-                    .trigger('mousedown', {button: 0, force: true});
-
+                // Try to drag the feature on the map canvas
                 cy.get('.maplibregl-canvas').first()
+                    .trigger('mousedown', {button: 0, force: true})
                     .trigger('mousemove', {clientX: 250, clientY: 250, force: true})
                     .trigger('mouseup', {force: true});
             }

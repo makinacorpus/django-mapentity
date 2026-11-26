@@ -173,14 +173,12 @@ describe('SinglePolygonModel - Edit geometry', () => {
 
         // Check if edit button exists and use it
         cy.get('body').then($body => {
-            if ($body.find('#id_edit_drag').length > 0) {
-                cy.get('#id_edit_drag').click();
+            if ($body.find('#id_edit_change').length > 0) {
+                cy.get('#id_edit_change').click();
 
-                // Try to drag a vertex
-                cy.get('.maplibregl-marker').first()
-                    .trigger('mousedown', {button: 0, force: true});
-
+                // Try to drag a vertex on the map canvas
                 cy.get('.maplibregl-canvas').first()
+                    .trigger('mousedown', {button: 0, force: true})
                     .trigger('mousemove', {clientX: 250, clientY: 250, force: true})
                     .trigger('mouseup', {force: true});
             }
