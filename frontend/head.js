@@ -13,9 +13,18 @@ import '../mapentity/static/mapentity/css/style.css';
 // Head JS libraries exposed globally before body / extrahead scripts run
 import 'jquery/jquery.js';
 import Popper from 'popper.js';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import * as turf from '@turf/turf';
 import * as Geoman from '@geoman-io/maplibre-geoman-free';
+
+const workerUrl =
+  document.currentScript?.dataset?.maplibreWorkerUrl ||
+  (document.currentScript?.src
+    ? new URL('./maplibre-gl-worker.mjs', document.currentScript.src).href
+    : null);
+if (workerUrl) {
+  maplibregl.setWorkerUrl(workerUrl);
+}
 
 window.Popper = Popper;
 window.maplibregl = maplibregl;

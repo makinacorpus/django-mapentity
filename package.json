@@ -13,7 +13,7 @@
     "test:e2e": "cypress run"
   },
   "dependencies": {
-    "@geoman-io/maplibre-geoman-free": "0.6.2",
+    "@geoman-io/maplibre-geoman-free": "0.10.10",
     "@mapbox/togeojson": "0.16.0",
     "@ttskch/select2-bootstrap4-theme": "1.5.2",
     "@turf/turf": "7.3.5",
@@ -27,7 +27,7 @@
     "jquery": "1.9.1",
     "jquery-hoverintent": "1.10.2",
     "jquery-resizable-dom": "0.35.0",
-    "maplibre-gl": "5.17.0",
+    "maplibre-gl": "6.19.0",
     "popper.js": "1.16.1"
   },
   "devDependencies": {

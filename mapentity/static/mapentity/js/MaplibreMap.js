@@ -86,11 +86,7 @@ class MaplibreMap {
      * @return {number}
      */
     _getEffectiveMinZoom() {
-        const minZoom = this.map.getMinZoom();
-        if (this.map.transform && typeof this.map.transform.applyConstrain === 'function') {
-            return this.map.transform.applyConstrain(this.map.getCenter(), minZoom).zoom;
-        }
-        return minZoom;
+        return this.map.getMinZoom(true);
     }
 
     /**

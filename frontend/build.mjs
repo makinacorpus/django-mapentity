@@ -16,6 +16,12 @@ function copyDatepickerLocales() {
   cpSync(src, dest, { recursive: true });
 }
 
+function copyMaplibreWorker() {
+  const src = resolve(rootDir, 'node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs');
+  const dest = resolve(outDir, 'maplibre-gl-worker.mjs');
+  cpSync(src, dest);
+}
+
 const headConfig = {
   root: rootDir,
   base: './',
@@ -88,6 +94,7 @@ const appConfig = {
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 copyDatepickerLocales();
+copyMaplibreWorker();
 
 if (isWatch) {
   console.log('[mapentity] Watching frontend assets in development mode...');
