@@ -419,6 +419,7 @@ class MaplibreObjectsLayer {
         const rgbaStr = isColorExpression ? style.color : (rgba ? `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})` : colorForParsing);
         const baseFillOpacity = style.fillOpacity ?? 0.7;
         const baseStrokeOpacity = style.opacity ?? 1.0;
+        const baseLineLayerOpacity = style['line-layer-opacity'] ?? baseStrokeOpacity;
         const strokeColor = style.color;
         const strokeWidth = style.weight ?? 5;
 
@@ -426,6 +427,7 @@ class MaplibreObjectsLayer {
         const dimFactor = this.options.isDetailView ? (detailStyle.othersOpacityFactor ?? 0.6) : 1.0;
         const fillOpacity = this._applyDimFactor(baseFillOpacity, dimFactor, 0.25);
         const strokeOpacity = this._applyDimFactor(baseStrokeOpacity, dimFactor, 0.45);
+        const lineLayerOpacity = this._applyDimFactor(baseLineLayerOpacity, dimFactor, 0.45);
 
         const isDetailColorExpression = Array.isArray(detailStyle.color);
         const detailColorForParsing = isDetailColorExpression ? (detailStyle.default_color || '#FF5E00') : (detailStyle.color || '#FF5E00');
@@ -437,14 +439,14 @@ class MaplibreObjectsLayer {
 
         // Add layers for all geometry types (we don't know the types in advance with MVT)
         layerIds.push(this._addPointLayer(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeOpacity, strokeWidth, detailRgbaStr, detailColor, sourceLayer, dimFactor));
-        layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor, sourceLayer, baseStrokeOpacity));
+        layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, lineLayerOpacity, detailColor, sourceLayer));
         layerIds.push(...this._addPolygonLayers(layerIdBase, sourceId, rgbaStr, strokeColor, fillOpacity, strokeWidth, strokeOpacity, detailRgbaStr, detailColor, sourceLayer, baseFillOpacity, baseStrokeOpacity));
 
         // Save layers
         this._current_objects[primaryKey] = layerIds;
 
         // Add highlight layers (keep un-dimmed opacity on hover)
-        this._addHighlightLayers(layerIdBase, sourceId, strokeWidth, baseFillOpacity, baseStrokeOpacity, sourceLayer);
+        this._addHighlightLayers(layerIdBase, sourceId, strokeWidth, baseFillOpacity, baseStrokeOpacity, sourceLayer, baseLineLayerOpacity);
 
         // Store basic geometric filters for each MVT layer
         // to be able to reuse them during filtering by PKs
@@ -535,6 +537,7 @@ class MaplibreObjectsLayer {
         const rgbaStr = isColorExpression ? style.color : (rgba ? `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})` : colorForParsing);
         const baseFillOpacity = style.fillOpacity ?? 0.7;
         const baseStrokeOpacity = style.opacity ?? 1.0;
+        const baseLineLayerOpacity = style['line-layer-opacity'] ?? baseStrokeOpacity;
         const strokeColor = style.color;
         const strokeWidth = style.weight ?? 5;
 
@@ -543,6 +546,7 @@ class MaplibreObjectsLayer {
         const dimFactor = (!detailStatus && this.options.isDetailView) ? (detailStyle.othersOpacityFactor ?? 0.6) : 1.0;
         const fillOpacity = this._applyDimFactor(baseFillOpacity, dimFactor, 0.25);
         const strokeOpacity = this._applyDimFactor(baseStrokeOpacity, dimFactor, 0.45);
+        const lineLayerOpacity = this._applyDimFactor(baseLineLayerOpacity, dimFactor, 0.45);
 
         const isDetailColorExpression = Array.isArray(detailStyle.color);
         const detailColorForParsing = isDetailColorExpression ? (detailStyle.default_color || '#FF5E00') : (detailStyle.color || '#FF5E00');
@@ -558,7 +562,7 @@ class MaplibreObjectsLayer {
         }
 
         if (foundTypes.has("LineString") || foundTypes.has("MultiLineString")) {
-            layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor, undefined, baseStrokeOpacity));
+            layerIds.push(this._addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, lineLayerOpacity, detailColor, undefined));
             // In detail mode, add green (start) and red (arrival) markers and arrows
             if (detailStatus) {
                 this._addLineEndpointMarkers(geojson);
@@ -574,7 +578,7 @@ class MaplibreObjectsLayer {
         this._current_objects[primaryKey] = layerIds;
 
         // Add highlight layers
-        this._addHighlightLayers(layerIdBase, sourceId, strokeWidth, baseFillOpacity, baseStrokeOpacity);
+        this._addHighlightLayers(layerIdBase, sourceId, strokeWidth, baseFillOpacity, baseStrokeOpacity, undefined, baseLineLayerOpacity);
 
         // Register with the layer manager (only if not already lazy)
         if(this.isLoaded && !this.isLazy) {
@@ -835,18 +839,17 @@ class MaplibreObjectsLayer {
      * @param sourceId {string} - Source ID
      * @param strokeColor {string} - Line color
      * @param strokeWidth {number} - Line width
-     * @param strokeOpacity {number} - Line opacity
+     * @param lineLayerOpacity {number} - Line layer opacity
      * @returns {string} - Created layer ID
      * @private
      */
-    _addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, strokeOpacity, detailColor, sourceLayer, baseStrokeOpacity = strokeOpacity) {
+    _addLineLayer(layerIdBase, sourceId, strokeColor, strokeWidth, lineLayerOpacity = 1.0, detailColor, sourceLayer) {
         const layerId = `${layerIdBase}-lines`;
         // Increase in width on hover (in pixels)
         const hoverExtra = 2;
         const hoveredWidth = strokeWidth + hoverExtra;
         const detailStyle = this.options.detailStyle || {};
         const detailWidth = detailStyle.weight ?? strokeWidth;
-        const detailOpacity = detailStyle.opacity ?? baseStrokeOpacity;
 
         const layerDef = {
             id: layerId,
@@ -880,14 +883,7 @@ class MaplibreObjectsLayer {
                     detailWidth,
                     strokeWidth
                 ],
-                'line-opacity': [
-                    'case',
-                    ['boolean', ['feature-state', 'hover'], false],
-                    baseStrokeOpacity,
-                    ['boolean', ['feature-state', 'selected'], false],
-                    detailOpacity,
-                    strokeOpacity
-                ]
+                'line-layer-opacity': lineLayerOpacity
             }
         });
         this._map.addLayer(layerDef);
@@ -1111,9 +1107,10 @@ class MaplibreObjectsLayer {
      * @param fillOpacity {number} - Default fill opacity
      * @param strokeOpacity {number} - Default stroke opacity
      * @param sourceLayer {string} - Source layer name (for vector tiles)
+     * @param lineLayerOpacity {number} - Default line layer opacity
      * @private
      */
-    _addHighlightLayers(layerIdBase, sourceId, strokeWidth = 5, fillOpacity = 0.7, strokeOpacity = 1.0, sourceLayer = undefined) {
+    _addHighlightLayers(layerIdBase, sourceId, strokeWidth = 5, fillOpacity = 0.7, strokeOpacity = 1.0, sourceLayer = undefined, lineLayerOpacity = strokeOpacity) {
         if (!this._highlightLayers) {
             this._highlightLayers = [];
         }
@@ -1185,7 +1182,7 @@ class MaplibreObjectsLayer {
                 paint: {
                     'line-color': '#FF0000',
                     'line-width': hoveredStrokeWidth,
-                    'line-opacity': strokeOpacity,
+                    'line-layer-opacity': lineLayerOpacity,
                 }
             };
             if (sourceLayer) def['source-layer'] = sourceLayer;

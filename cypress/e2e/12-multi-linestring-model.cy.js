@@ -201,4 +201,41 @@ describe('MultiLineStringModel - Edit geometry', () => {
 
         cy.contains(newName, {timeout: 10000}).should('exist');
     });
+
+    it('should apply default line-layer-opacity on list and detail line layers', {retries: 2}, () => {
+        cy.visit('/multilinestringmodel/list/');
+        cy.get('.maplibre-map, [id*="map"]', {timeout: 15000}).should('exist');
+
+        cy.window().should((win) => {
+            const map = win.MapEntity?.currentMap?.map?.getMap();
+            expect(map, 'currentMap').to.exist;
+            const style = map.getStyle();
+            const lineLayer = (style?.layers || []).find(
+                (l) => l.type === 'line' && l.id.endsWith('-lines') && !l.id.includes('-highlight-')
+            );
+            expect(lineLayer, 'object line layer').to.exist;
+            expect(map.getPaintProperty(lineLayer.id, 'line-layer-opacity')).to.be.closeTo(0.9, 0.001);
+            expect(lineLayer.paint?.['line-opacity']).to.be.undefined;
+        });
+
+        cy.visit(`/multilinestringmodel/${entityId}/`);
+        cy.get('#detailmap', {timeout: 15000}).should('exist');
+
+        cy.window().should((win) => {
+            const map = win.MapEntity?.currentMap?.map?.getMap();
+            expect(map, 'detail currentMap').to.exist;
+            const style = map.getStyle();
+            const bgLineLayer = (style?.layers || []).find(
+                (l) => l.type === 'line' && l.id.startsWith('layer-') && l.id.endsWith('-lines') && !l.id.includes('-highlight-')
+            );
+            expect(bgLineLayer, 'dimmed background line layer').to.exist;
+            expect(map.getPaintProperty(bgLineLayer.id, 'line-layer-opacity')).to.be.closeTo(0.54, 0.001);
+            const detailLineId = `detail-object-${entityId}-lines`;
+            const detailHaloId = `detail-object-${entityId}-line-halo`;
+            expect(map.getLayer(detailLineId), 'detail line layer').to.exist;
+            expect(map.getLayer(detailHaloId), 'detail halo layer').to.exist;
+            expect(map.getPaintProperty(detailLineId, 'line-layer-opacity')).to.equal(1);
+            expect(map.getPaintProperty(detailHaloId, 'line-layer-opacity')).to.be.closeTo(0.85, 0.001);
+        });
+    });
 });

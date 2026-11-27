@@ -12,6 +12,7 @@ _DEFAULT_MAP_STYLES = {
     "detail": {
         "weight": 5,
         "opacity": 1,
+        "line-layer-opacity": 1,
         "line-cap": "round",
         "color": "mediumpurple",
         "arrowColor": "#000000",
@@ -20,7 +21,12 @@ _DEFAULT_MAP_STYLES = {
         "arrowSpacing": 6,
         "othersOpacityFactor": 0.6,
     },
-    "others": {"opacity": 0.9, "fillOpacity": 0.5, "color": "yellow"},
+    "others": {
+        "opacity": 0.9,
+        "line-layer-opacity": 0.9,
+        "fillOpacity": 0.5,
+        "color": "yellow",
+    },
     "filelayer": {
         "color": "red",
         "opacity": 1.0,
@@ -137,6 +143,12 @@ app_settings["MAP_STYLES"] = _MAP_STYLES
 
 for name, override in getattr(settings, "MAP_STYLES", {}).items():
     merged = app_settings["MAP_STYLES"].get(name, {})
+    if (
+        "opacity" in override
+        and "line-layer-opacity" not in override
+        and "line-layer-opacity" in merged
+    ):
+        merged["line-layer-opacity"] = override["opacity"]
     merged.update(override)
     app_settings["MAP_STYLES"][name] = merged
 

@@ -635,12 +635,45 @@ class SettingsMapStylesTest(TestCase):
 
         detail = app_settings["MAP_STYLES"]["detail"]
         self.assertEqual(detail["weight"], 5)
+        self.assertEqual(detail["opacity"], 1)
+        self.assertEqual(detail["line-layer-opacity"], 1)
         self.assertEqual(detail["line-cap"], "round")
         self.assertEqual(detail["arrowColor"], "#000000")
         self.assertEqual(detail["arrowSize"], 0.3)
         self.assertEqual(detail["arrowOpacity"], 1)
         self.assertEqual(detail["arrowSpacing"], 6)
         self.assertEqual(detail["othersOpacityFactor"], 0.6)
+
+    def test_others_style_defaults(self):
+        from mapentity.settings import app_settings
+
+        others = app_settings["MAP_STYLES"]["others"]
+        self.assertEqual(others["opacity"], 0.9)
+        self.assertEqual(others["line-layer-opacity"], 0.9)
+
+    def test_map_styles_override_line_layer_opacity(self):
+        import importlib
+
+        from django.test import override_settings
+
+        import mapentity.settings as mapentity_settings
+
+        try:
+            with override_settings(MAP_STYLES={"others": {"opacity": 0.4}}):
+                importlib.reload(mapentity_settings)
+                others = mapentity_settings.app_settings["MAP_STYLES"]["others"]
+                self.assertEqual(others["opacity"], 0.4)
+                self.assertEqual(others["line-layer-opacity"], 0.4)
+
+            with override_settings(
+                MAP_STYLES={"others": {"opacity": 0.4, "line-layer-opacity": 0.7}}
+            ):
+                importlib.reload(mapentity_settings)
+                others = mapentity_settings.app_settings["MAP_STYLES"]["others"]
+                self.assertEqual(others["opacity"], 0.4)
+                self.assertEqual(others["line-layer-opacity"], 0.7)
+        finally:
+            importlib.reload(mapentity_settings)
 
     def test_draw_style_exists(self):
         from mapentity.settings import app_settings
