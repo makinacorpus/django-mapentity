@@ -208,14 +208,18 @@ describe('MultiLineStringModel - Edit geometry', () => {
 
         cy.window().should((win) => {
             const map = win.MapEntity?.currentMap?.map?.getMap();
+            const objectsLayer = win.MapEntity?.currentMap?.objectsLayer;
             expect(map, 'currentMap').to.exist;
-            const style = map.getStyle();
-            const lineLayer = (style?.layers || []).find(
-                (l) => l.type === 'line' && l.id.endsWith('-lines') && !l.id.includes('-highlight-')
-            );
+            expect(objectsLayer, 'objectsLayer').to.exist;
+            const lineLayerId = `layer-${objectsLayer.primaryKey}-lines`;
+            const highlightLineLayerId = `layer-${objectsLayer.primaryKey}-highlight-lines`;
+            const lineLayer = map.getLayer(lineLayerId);
             expect(lineLayer, 'object line layer').to.exist;
-            expect(map.getPaintProperty(lineLayer.id, 'line-layer-opacity')).to.be.closeTo(0.9, 0.001);
-            expect(lineLayer.paint?.['line-opacity']).to.be.undefined;
+            expect(map.getLayer(highlightLineLayerId), 'highlight line layer').to.exist;
+            expect(map.getPaintProperty(lineLayerId, 'line-layer-opacity')).to.be.closeTo(0.9, 0.001);
+            expect(map.getPaintProperty(highlightLineLayerId, 'line-layer-opacity')).to.be.closeTo(0.9, 0.001);
+            const rawLineLayer = map.getStyle().layers.find((l) => l.id === lineLayerId);
+            expect(rawLineLayer?.paint?.['line-opacity']).to.be.undefined;
         });
 
         cy.visit(`/multilinestringmodel/${entityId}/`);
@@ -223,13 +227,12 @@ describe('MultiLineStringModel - Edit geometry', () => {
 
         cy.window().should((win) => {
             const map = win.MapEntity?.currentMap?.map?.getMap();
+            const objectsLayer = win.MapEntity?.currentMap?.objectsLayer;
             expect(map, 'detail currentMap').to.exist;
-            const style = map.getStyle();
-            const bgLineLayer = (style?.layers || []).find(
-                (l) => l.type === 'line' && l.id.startsWith('layer-') && l.id.endsWith('-lines') && !l.id.includes('-highlight-')
-            );
-            expect(bgLineLayer, 'dimmed background line layer').to.exist;
-            expect(map.getPaintProperty(bgLineLayer.id, 'line-layer-opacity')).to.be.closeTo(0.54, 0.001);
+            expect(objectsLayer, 'detail objectsLayer').to.exist;
+            const bgLineLayerId = `layer-${objectsLayer.primaryKey}-lines`;
+            expect(map.getLayer(bgLineLayerId), 'dimmed background line layer').to.exist;
+            expect(map.getPaintProperty(bgLineLayerId, 'line-layer-opacity')).to.be.closeTo(0.54, 0.001);
             const detailLineId = `detail-object-${entityId}-lines`;
             const detailHaloId = `detail-object-${entityId}-line-halo`;
             expect(map.getLayer(detailLineId), 'detail line layer').to.exist;
