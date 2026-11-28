@@ -61,3 +61,5 @@ class MaplibreScreenshotController {
         return this.container;
     }
 }
+
+window.MaplibreScreenshotController = MaplibreScreenshotController;

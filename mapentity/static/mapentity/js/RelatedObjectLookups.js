@@ -195,8 +195,18 @@ function dismissDeleteRelatedObjectPopup(win, objId) {
 }
 
 // Kept for backward compatibility
-showAddAnotherPopup = showRelatedObjectPopup;
-dismissAddAnotherPopup = dismissAddRelatedObjectPopup;
+window.html_unescape = html_unescape;
+window.id_to_windowname = id_to_windowname;
+window.windowname_to_id = windowname_to_id;
+window.showAdminPopup = showAdminPopup;
+window.showRelatedObjectLookupPopup = showRelatedObjectLookupPopup;
+window.dismissRelatedLookupPopup = dismissRelatedLookupPopup;
+window.showRelatedObjectPopup = showRelatedObjectPopup;
+window.dismissAddRelatedObjectPopup = dismissAddRelatedObjectPopup;
+window.dismissChangeRelatedObjectPopup = dismissChangeRelatedObjectPopup;
+window.dismissDeleteRelatedObjectPopup = dismissDeleteRelatedObjectPopup;
+window.showAddAnotherPopup = showRelatedObjectPopup;
+window.dismissAddAnotherPopup = dismissAddRelatedObjectPopup;
 
 $(document).ready(function() {
     $('.related-lookup').click(function(e) {

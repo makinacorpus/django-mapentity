@@ -64,3 +64,5 @@ class MaplibreResetViewControl {
         return this.bounds;
     }
 }
+
+window.MaplibreResetViewControl = MaplibreResetViewControl;

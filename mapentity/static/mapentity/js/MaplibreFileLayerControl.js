@@ -260,3 +260,5 @@ class MaplibreFileLayerControl {
         return this._loadGeoJSON(geojson);
     }
 }
+
+window.MaplibreFileLayerControl = MaplibreFileLayerControl;

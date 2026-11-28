@@ -1581,3 +1581,5 @@ class MaplibreObjectsLayer {
         }
     }
 }
+
+window.MaplibreObjectsLayer = MaplibreObjectsLayer;

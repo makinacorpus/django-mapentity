@@ -61,9 +61,22 @@ messages_python:
 	$(docker_compose) run --rm web ./manage.py makemessages -a --no-location --no-obsolete --no-wrap
 
 messages_js:
-	$(docker_compose) run --rm web ./manage.py makemessages -a -d djangojs --no-location --no-obsolete --no-wrap --ignore=node_modules/** --ignore=mapentity/static/mapentity/vendor/**
+	$(docker_compose) run --rm web ./manage.py makemessages -a -d djangojs --no-location --no-obsolete --no-wrap --ignore=node_modules/** --ignore=mapentity/static/mapentity/dist/**
 
 messages: messages_python messages_js
+
+###########################
+#        Frontend         #
+###########################
+.PHONY: frontend_install frontend_build frontend_watch
+frontend_install:
+	npm ci
+
+frontend_build:
+	npm run build
+
+frontend_watch:
+	npm run watch
 
 install_layers:
 	$(docker_compose) run --rm web ./manage.py install_layer osm --order=0

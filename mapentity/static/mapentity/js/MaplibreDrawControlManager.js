@@ -472,3 +472,5 @@ class MaplibreDrawControlManager {
         });
     }
 }
+
+window.MaplibreDrawControlManager = MaplibreDrawControlManager;

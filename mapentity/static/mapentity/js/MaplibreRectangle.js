@@ -42,3 +42,5 @@ class MaplibreRectangle {
         })
     }
 }
+
+window.MaplibreRectangle = MaplibreRectangle;

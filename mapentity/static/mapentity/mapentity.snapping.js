@@ -172,3 +172,7 @@ function enableExternalLayerSnapping(map, geoman, densifiedCoordsSetter, options
         }
     };
 }
+
+window.densifySegment = densifySegment;
+window.extractAndDensifyCoords = extractAndDensifyCoords;
+window.enableExternalLayerSnapping = enableExternalLayerSnapping;

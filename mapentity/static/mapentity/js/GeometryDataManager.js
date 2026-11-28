@@ -223,3 +223,5 @@ class GeometryDataManager {
         };
     }
 }
+
+window.GeometryDataManager = GeometryDataManager;

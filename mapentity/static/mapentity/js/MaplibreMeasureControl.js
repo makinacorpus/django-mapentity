@@ -521,3 +521,5 @@ class MaplibreMeasureControl {
         this._livePopup.remove();
     }
 }
+
+window.MaplibreMeasureControl = MaplibreMeasureControl;

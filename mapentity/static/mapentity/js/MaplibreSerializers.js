@@ -20,3 +20,5 @@ function getWKT(geometry){
 
     return 'GEOMETRY()';
 }
+
+window.getWKT = getWKT;

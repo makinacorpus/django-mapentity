@@ -596,3 +596,5 @@ class MaplibreMapentityTogglableFilter {
         }
     }
 }
+
+window.MaplibreMapentityTogglableFilter = MaplibreMapentityTogglableFilter;

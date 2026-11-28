@@ -225,3 +225,5 @@ class MaplibreMapentityHistory {
         }
     }
 }
+
+window.MaplibreMapentityHistory = MaplibreMapentityHistory;

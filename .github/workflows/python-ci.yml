@@ -142,9 +142,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'package-lock.json'
 
-      - name: Install Cypress
+      - name: Install frontend dependencies and build assets
         run: |
           npm ci
+          npm run build
 
       - name: Start Django server
         run: |
@@ -211,6 +212,18 @@ jobs:
           sudo apt-get -qq update
           sudo apt-get -y install gettext
           django-admin compilemessages
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Build frontend assets
+        run: |
+          CYPRESS_INSTALL_BINARY=0 npm ci
+          npm run build
 
       - name: Build package
         run: |

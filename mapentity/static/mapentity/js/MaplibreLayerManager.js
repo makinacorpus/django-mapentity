@@ -401,3 +401,5 @@ class MaplibreLayerManager {
         return MaplibreLayerManager.instance;
     }
 }
+
+window.MaplibreLayerManager = MaplibreLayerManager;

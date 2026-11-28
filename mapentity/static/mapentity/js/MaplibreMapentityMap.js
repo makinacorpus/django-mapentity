@@ -1024,7 +1024,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 enableHighAccuracy: true
             },
             trackUserLocation: false,
-        }), position='bottom-right'
+        }), 'bottom-right'
         );
         window.map = map;
 

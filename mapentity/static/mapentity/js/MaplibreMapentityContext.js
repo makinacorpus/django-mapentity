@@ -291,3 +291,5 @@ class MaplibreMapentityContext {
 
     }
 }
+
+window.MaplibreMapentityContext = MaplibreMapentityContext;
