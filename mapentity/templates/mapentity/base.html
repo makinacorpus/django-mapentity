@@ -44,7 +44,8 @@
 
             {% endcompress %}
 
-            <script src="{% static 'mapentity/dist/mapentity-head.js' %}"></script>
+            <script src="{% static 'mapentity/dist/mapentity-head.js' %}"
+                    data-maplibre-worker-url="{% static 'mapentity/dist/maplibre-gl-worker.mjs' %}"></script>
         {% endblock head %}
 
         {% block extrahead %}
