@@ -687,6 +687,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const baseWeight = style.weight ?? 5;
         const detailWidth = Math.max(detailStyle.weight ?? 5, baseWeight + 2);
         const detailOpacity = detailStyle.opacity ?? 1.0;
+        const detailLineLayerOpacity = detailStyle['line-layer-opacity'] ?? detailOpacity;
         const detailFillOpacity = detailStyle.fillOpacity ?? Math.min((style.fillOpacity ?? 0.5) + 0.15, 0.75);
         const detailPointRadius = detailStyle.pointRadius ?? detailStyle.radius ?? ((style.pointRadius ?? style.radius ?? 8) + 4);
         const detailPointStrokeWidth = detailStyle.pointWeight ?? Math.max((style.pointWeight ?? 2) + 1, 3);
@@ -762,7 +763,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 paint: {
                     'line-color': haloColor,
                     'line-width': detailWidth + 4,
-                    'line-opacity': 0.85,
+                    'line-layer-opacity': 0.85,
                 }
             });
             addLayerIfMissing({
@@ -774,7 +775,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 paint: {
                     'line-color': detailColor,
                     'line-width': detailWidth,
-                    'line-opacity': detailOpacity,
+                    'line-layer-opacity': detailLineLayerOpacity,
                 }
             });
         }
@@ -855,7 +856,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isPrint) {
             const specified = window.SETTINGS.map.styles.print[modelname];
             if (specified) {
-                objectsLayer.options.detailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
+                const mergedDetailStyle = Object.assign({}, objectsLayer.options.detailStyle, specified);
+                if ('opacity' in specified && !('line-layer-opacity' in specified)) {
+                    mergedDetailStyle['line-layer-opacity'] = specified.opacity;
+                }
+                objectsLayer.options.detailStyle = mergedDetailStyle;
             }
         }
 
